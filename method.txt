@@ -1,6 +1,6 @@
 ════════════════════════════════════════════════════════════════════════
   Mathematica · 项目方法论 (Project Methodology)
-  版本: 1.0    日期: 2026-04-05
+  版本: 3.0    日期: 2026-04-05
 ════════════════════════════════════════════════════════════════════════
 
 本文件记录 Mathematica 数学教育网站从规划到交付的完整工作流。
@@ -209,6 +209,91 @@
      - .gitignore 排除 _dev/ 开发文件
 
 
+████████████████████████████████████████████████████████████████████████
+  阶段十 · SVG 图例注入 (10-Agent Pipeline)
+████████████████████████████████████████████████████████████████████████
+
+  1) 规则与任务清单制定:
+     - _dev/figure_generation_rules.txt (~400行): §1-§8 完整规范
+     - _dev/_fig_style_guide.md: SVG 模板与约定
+     - .github/rules/ 下存放规则文件供 Agent 引用
+     - 统一 SVG 规范: viewBox 400×220~480×260，CSS 类名 .fg/.fg2/.line，
+       颜色体系 #334155/#64748b/#6366f1, dark 模式 media query
+
+  2) 10 个 Agent 顺序执行，注入内联 SVG:
+     Agent 1: groups (12/12)
+     Agent 2: number-theory + linear-adv (15/15)
+     Agent 3: rings + representation (16/16)
+     Agent 4: real-analysis + functional (20/20)
+     Agent 5: complex + harmonic (20/20)
+     Agent 6: edo + pde (20/20)
+     Agent 7: topology + alg-topo (20/20)
+     Agent 8: diffgeo + riemannian (18/18)
+     Agent 9: probability (5 modules) (31/31)
+     Agent 10: applied + discrete (8 modules) (46/46)
+     合计: 218 个 SVG 图例，全部 100% 成功
+
+  3) 验证通过: 168 章节、672 KP、4,153 题、0 错误
+  4) 提交: f82a55d
+
+
+████████████████████████████████████████████████████████████████████████
+  阶段十一 · 移动端响应式适配
+████████████████████████████████████████████████████████████████████████
+
+  1) 跨 4 个文件添加综合响应式 CSS:
+     - theme.css: text-size-adjust:100%, tap-highlight-color:transparent,
+       overflow-x:hidden
+     - layout.css: 3 断点 (900/600/380px) — topbar 紧凑化、sidebar 隐藏、
+       chapter-grid 单列、44px 触控目标
+     - components.css: 2 断点 (600/380px) — step-card 紧凑、quiz 按钮
+       44px 最小高度、wrong-book 全宽面板、FAB 重定位、SVG 边到边
+     - index.html: 3 断点 (768/480/380px) — hero/roadmap/node/stats 缩放
+
+  2) 提交: fa8ed21
+
+
+████████████████████████████████████████████████████████████████████████
+  阶段十二 · Bug 修复与打磨
+████████████████████████████████████████████████████████████████████████
+
+  1) 错题本 MathJax 渲染修复 (14aa5c3):
+     - 问题: inline-quiz 用 prompt.textContent 记录题目，
+       MathJax 处理后 \(D_3\) 变为 <mjx-container>，textContent 返回
+       纯文本 "D₃" 丢失所有 LaTeX 标记
+     - 方案: 在 components.js 顶部 IIFE 缓存 .iq-prompt 原始 innerHTML
+       (MathJax 运行前同步执行)，记录错题时使用缓存的原始 HTML
+     - 追加: renderWrongBookList 中添加 MathJax.typesetClear + typesetPromise
+
+  2) 错题本正确答案显示为 "—" (114d8ac):
+     - 问题: checkInlineQuiz 中 correctAnswer 被硬编码为 '—'
+     - 方案: 遍历同组按钮 onclick 属性，找到 isCorrect=true 的按钮，
+       提取其首字母作为正确答案
+
+  3) SVG 图例排版规范化 (114d8ac):
+     - 移除 937 个冗余 inline font-family 属性 (CSS 统一管理)
+     - 最小字号从 9/10 提升至 11 SVG 单位 (841 处)
+     - 移除 218 个 SVG 内部 @media(prefers-color-scheme:dark) 块
+       (与 data-theme 属性不匹配)
+     - components.css 新增 dark/neon 主题下 SVG text/line/rect 覆盖规则
+
+  4) 浏览器回退白屏修复 (2c0b4d2 → fa1e0bb):
+     - 问题: 点击链接添加 page-exit 类 (opacity:0)，浏览器回退时
+       从 bfcache 恢复页面仍带有该类，显示纯色
+     - 方案 v1: pageshow + e.persisted 清除 (不够——file:// 下 e.persisted
+       可能始终 false)
+     - 方案 v2: 移除 e.persisted 检查，直接检测 page-exit 类；
+       强制重启 pageIn 动画 (style.animation none → reflow → clear)；
+       pageOut fill-mode 从 both 改为 forwards
+
+  5) 霓虹主题 WebGL 动画定格修复 (bfcac23):
+     - 问题: _toggleNeonCanvas(false) 调用 cancelAnimationFrame 但未清除
+       _neonRaf，切回 neon 时 !c._neonRaf 永远为 false，动画不重启
+     - 方案: cancelAnimationFrame 后 c._neonRaf = null；
+       添加 webglcontextlost/restored 事件处理；
+       渲染循环内增加 gl.isContextLost() 守卫
+
+
 ════════════════════════════════════════════════════════════════════════
   核心原则
 ════════════════════════════════════════════════════════════════════════
@@ -218,6 +303,8 @@
   • 双重质量保证 — Agent 自审 + 人工抽查/报告审核
   • 增量可追溯 — 每步产出有文件记录（outline、reports、method）
   • 统一格式 — 所有输出严格遵循预定义的结构和格式模板
+  • 防御性修复 — 每个 bug 修复均追溯根因并添加防御层
+    (bfcache、WebGL context loss、MathJax 渲染时序)
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -227,15 +314,33 @@
   页面总数        197 (168 章节 + 28 概览 + 1 首页)
   知识点          672 (每章 4 KP × 168 章)
   题目            4,153 (选择题 + 应用题)
+  SVG 图例        218 (内联 SVG，亮/暗/霓虹三主题适配)
   模块            28 (7 板块)
   学科域          7 (代数 / 分析 / 微方 / 几何 / 概率 / 应用 / 基离)
   主题模式        3 (亮色 / 暗色 / 霓虹 WebGL)
   搜索索引        197 条目、325 KB
-  构建脚本        20 个 (Node.js)
+  响应式断点      3 (900/600/380px)
+  构建脚本        20+ 个 (Node.js)
   Agent 指令      14 个 (.agent.md)
-  生产文件        221 个 (git tracked)
+  图例生成 Agent  10 个 (顺序执行)
+  Git 提交        11 次 (v1.0 → v3.0)
+  生产文件        221+ 个 (git tracked)
   开发文件        ~50 个 (_dev/ excluded)
 
 ════════════════════════════════════════════════════════════════════════
-  END · version 2.0 · 2026-04-05
+  Git 历史
+════════════════════════════════════════════════════════════════════════
+
+  a32fcc5  Mathematica v1.0: 168ch, 28mod, 4153Q, search, 3-theme
+  87b29ee  Update method.txt: phases 6-9
+  f82a55d  feat: inject 218 inline SVG figures (10-agent pipeline)
+  fa8ed21  feat: comprehensive mobile responsive adaptation
+  14aa5c3  fix: wrong-book MathJax rendering bug
+  114d8ac  fix: SVG typography + wrong-book correct answer
+  2c0b4d2  fix: blank page on browser back (bfcache)
+  fa1e0bb  fix: robust page transition recovery
+  bfcac23  fix: neon WebGL animation freeze on theme toggle
+
+════════════════════════════════════════════════════════════════════════
+  END · version 3.0 · 2026-04-05
 ════════════════════════════════════════════════════════════════════════
