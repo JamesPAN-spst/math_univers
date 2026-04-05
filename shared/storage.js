@@ -21,8 +21,11 @@ function toggleTheme() {
 
 function _toggleNeonCanvas(on) {
   var c = document.getElementById('neon-canvas');
-  if (on && !c) { _initNeonCanvas(); }
-  if (!on && c && c._neonRaf) { cancelAnimationFrame(c._neonRaf); }
+  if (on && !c) { _initNeonCanvas(); return; }
+  if (!on && c && c._neonRaf) {
+    cancelAnimationFrame(c._neonRaf);
+    c._neonRaf = null;
+  }
   if (on && c && !c._neonRaf) { _startNeonRender(c); }
 }
 
@@ -118,12 +121,24 @@ function _initNeonCanvas() {
   canvas._gl = gl;
   canvas._uR = gl.getUniformLocation(prog, 'R');
   canvas._uT = gl.getUniformLocation(prog, 'T');
+
+  // Handle WebGL context loss (can happen when canvas is display:none)
+  canvas.addEventListener('webglcontextlost', function (e) {
+    e.preventDefault();
+    if (canvas._neonRaf) { cancelAnimationFrame(canvas._neonRaf); canvas._neonRaf = null; }
+  });
+  canvas.addEventListener('webglcontextrestored', function () {
+    _initNeonCanvas();   // re-create shaders & restart
+  });
+
   _startNeonRender(canvas);
 }
 
 function _startNeonRender(canvas) {
-  var gl = canvas._gl; if (!gl) return;
+  var gl = canvas._gl;
+  if (!gl || gl.isContextLost()) return;
   function frame(t) {
+    if (gl.isContextLost()) { canvas._neonRaf = null; return; }
     var w = canvas.clientWidth, h = canvas.clientHeight;
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     gl.viewport(0, 0, w, h);
