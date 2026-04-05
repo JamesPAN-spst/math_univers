@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 有限域 — 环与域论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "rings-ch06-q1",
+        "question": "\\(|\\mathbb{F}_{2^3}| = \\) ？",
+        "options": [
+          "\\(6\\)",
+        "\\(8\\)",
+        "\\(3\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\mathbb{F}_{p^n}|=p^n\\)。\\(\\mathbb{F}_{2^3}\\) 有 \\(2^3=8\\) 个元素。有限域的阶必为素数的幂。\\(\\mathbb{F}_8\\neq\\mathbb{Z}/8\\mathbb{Z}\\)（后者不是域）。\\(\\mathbb{F}_8=\\mathbb{F}_2[x]/(f)\\)，\\(f\\) 为 \\(3\\) 次不可约多项式。"
+      },
+      {
+        "id": "rings-ch06-q2",
+        "question": "有 \\(6\\) 个元素的域是否存在？",
+        "options": [
+          "存在",
+        "不存在，\\(6\\) 不是素数的幂",
+        "存在，即 \\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "有限域的阶必为 \\(p^n\\)（\\(p\\) 素数，\\(n\\geq1\\)）。\\(6=2\\times3\\) 不是素数的幂，故不存在 \\(6\\) 阶域。C 错：\\(\\mathbb{Z}/6\\mathbb{Z}\\) 有零因子（\\(\\bar{2}\\cdot\\bar{3}=\\bar{0}\\)），不是域。有限域阶的完整列表：\\(2,3,4,5,7,8,9,11,13,16,\\ldots\\)"
+      },
+      {
+        "id": "rings-ch06-q3",
+        "question": "\\(|\\mathbb{F}_7^\\times| = \\) ？",
+        "options": [
+          "\\(6\\)",
+        "\\(7\\)",
+        "\\(8\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{F}_q^\\times\\) 是 \\(q-1\\) 阶循环群。\\(|\\mathbb{F}_7^\\times|=7-1=6\\)。\\(\\mathbb{F}_7^\\times=\\{1,2,3,4,5,6\\}\\)。原根（生成元）例如 \\(3\\)：\\(3^1=3,3^2=2,3^3=6,3^4=4,3^5=5,3^6=1\\)。"
+      },
+      {
+        "id": "rings-ch06-q4",
+        "question": "\\(\\mathbb{F}_{16}^\\times\\) 同构于什么群？",
+        "options": [
+          "\\(\\mathbb{Z}/16\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/15\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\times\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/8\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\mathbb{F}_{16}^\\times|=16-1=15\\)。有限域乘法群总是循环群，\\(\\mathbb{F}_{16}^\\times\\cong\\mathbb{Z}/15\\mathbb{Z}\\)。A 的阶 \\(16\\) 错误。C、D 的阶也不对。循环性是有限域的深刻性质，对无限域不一定成立。"
+      },
+      {
+        "id": "rings-ch06-q5",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{F}_8/\\mathbb{F}_2)\\) 的生成元 \\(\\phi\\) 满足 \\(\\phi(x) = \\) ？",
+        "options": [
+          "\\(x^2\\)",
+        "\\(x^8\\)",
+        "\\(x+1\\)",
+        "\\(2x\\)"
+        ],
+        "answer": 0,
+        "explanation": "Frobenius 自同态 \\(\\phi(x)=x^p=x^2\\)（\\(p=2\\)）。\\(\\mathrm{Gal}(\\mathbb{F}_{2^3}/\\mathbb{F}_2)=\\langle\\phi\\rangle=\\{\\mathrm{id},\\phi,\\phi^2\\}\\)，\\(\\phi^2(x)=x^4\\)，\\(\\phi^3(x)=x^8=x\\)（\\(\\mathbb{F}_8\\) 中）。\\(|\\mathrm{Gal}|=3\\)。"
+      },
+      {
+        "id": "rings-ch06-q6",
+        "question": "\\(|\\mathrm{Gal}(\\mathbb{F}_{3^4}/\\mathbb{F}_3)| = \\) ？",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(12\\)",
+        "\\(81\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{F}_{3^4}:\\mathbb{F}_3]=4\\)，\\(|\\mathrm{Gal}|=4\\)。\\(\\mathrm{Gal}=\\langle\\phi\\rangle\\cong\\mathbb{Z}/4\\mathbb{Z}\\)，\\(\\phi(x)=x^3\\)。有限域扩张总是 Galois 的（可分+正规），Galois 群由 Frobenius 生成。"
+      },
+      {
+        "id": "rings-ch06-q7",
+        "question": "\\(\\mathbb{F}_2[x]\\) 中 \\(x^3+x+1\\) 是否不可约？",
+        "options": [
+          "不可约（无根）",
+        "可约",
+        "不确定",
+        "可约，\\(=(x+1)(x^2+x+1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(0)=0+0+1=1\\neq0\\)，\\(f(1)=1+1+1=1\\neq0\\)（\\(\\mathbb{F}_2\\) 中）。无根，\\(\\deg f=3\\)，故不可约。D 可验证 \\((x+1)(x^2+x+1)=x^3+x^2+x+x^2+x+1=x^3+1\\neq x^3+x+1\\)。"
+      },
+      {
+        "id": "rings-ch06-q8",
+        "question": "构造 \\(\\mathbb{F}_4\\)。元素 \\(\\alpha\\) 满足 \\(\\alpha^2+\\alpha+1=0\\)，则 \\(\\alpha^3 = \\) ？",
+        "options": [
+          "\\(1\\)",
+        "\\(\\alpha\\)",
+        "\\(0\\)",
+        "\\(\\alpha+1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\alpha^2=\\alpha+1\\)（从 \\(\\alpha^2+\\alpha+1=0\\)）。\\(\\alpha^3=\\alpha\\cdot\\alpha^2=\\alpha(\\alpha+1)=\\alpha^2+\\alpha=(\\alpha+1)+\\alpha=1\\)（\\(\\mathbb{F}_2\\) 中 \\(2\\alpha=0\\)）。\\(\\mathrm{ord}(\\alpha)=3=|\\mathbb{F}_4^\\times|\\)，\\(\\alpha\\) 是原根。"
+      },
+      {
+        "id": "rings-ch06-q9",
+        "question": "\\(\\mathbb{F}_9 = \\mathbb{F}_3[x]/(x^2+1)\\) 中元素 \\(\\bar{x}\\) 的乘法阶是多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\bar{x}^2 = -\\bar{1} = \\bar{2}\\)，\\(\\bar{x}^4 = \\bar{4} = \\bar{1}\\)（\\(\\mathbb{F}_3\\) 中 \\(4\\equiv1\\)）。\\(\\bar{x}^2 = \\bar{2}\\neq\\bar{1}\\)，故 \\(\\mathrm{ord}(\\bar{x})=4\\)。\\(\\bar{x}\\) 不是 \\(\\mathbb{F}_9^\\times\\) 的原根（\\(4\\neq8=|\\mathbb{F}_9^\\times|\\)）。原根需找阶 \\(8\\) 的元素，如 \\(\\bar{x}+\\bar{1}\\)。"
+      },
+      {
+        "id": "rings-ch06-q10",
+        "question": "\\(\\mathbb{F}_7\\) 中 \\(3\\) 是原根（\\(\\mathrm{ord}(3)=6\\)）。\\(3^4 \\bmod 7 = \\) ？",
+        "options": [
+          "\\(4\\)",
+        "\\(2\\)",
+        "\\(5\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(3^1=3, 3^2=9\\equiv2, 3^3=6, 3^4=18\\equiv4\\)（mod \\(7\\)）。\\(3^4=81\\equiv81-11\\times7=81-77=4\\)。原根 \\(3\\) 的幂 \\(\\{3,2,6,4,5,1\\}\\) 遍历 \\(\\mathbb{F}_7^\\times\\)。"
+      },
+      {
+        "id": "rings-ch06-q11",
+        "question": "\\(\\mathbb{F}_{p^n}\\) 上 Frobenius \\(\\phi\\) 的固定域 \\(\\mathbb{F}_{p^n}^\\phi = \\) ？",
+        "options": [
+          "\\(\\mathbb{F}_p\\)",
+        "\\(\\mathbb{F}_{p^n}\\)",
+        "\\(\\{0\\}\\)",
+        "\\(\\mathbb{F}_{p^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\phi(x)=x^p\\)。\\(x^p=x\\) 的解集就是 \\(\\mathbb{F}_p\\)（\\(x^p-x\\) 恰好有 \\(p\\) 个根）。更一般地 \\(\\mathbb{F}_{p^n}^{\\phi^k}=\\mathbb{F}_{p^{\\gcd(k,n)}}\\)。Frobenius 的固定域恰是底域 \\(\\mathbb{F}_p\\)。"
+      },
+      {
+        "id": "rings-ch06-q12",
+        "question": "\\(\\mathbb{F}_2[x]\\) 中，\\(2\\) 次不可约多项式有多少个？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N_2(2)=\\frac{1}{2}(2^2-2)=1\\)。唯一的 \\(2\\) 次不可约多项式是 \\(x^2+x+1\\)（验证 \\(f(0)=1,f(1)=1\\)，无根）。\\(x^2,x^2+1=(x+1)^2,x^2+x=x(x+1)\\) 均可约。"
+      },
+      {
+        "id": "rings-ch06-q13",
+        "question": "\\(\\mathbb{F}_{11}^\\times\\) 中 \\(2\\) 的阶是多少？",
+        "options": [
+          "\\(5\\)",
+        "\\(10\\)",
+        "\\(11\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\mathbb{F}_{11}^\\times|=10\\)。\\(2^1=2,2^2=4,2^3=8,2^4=5,2^5=10,2^6=9,2^7=7,2^8=3,2^9=6,2^{10}=1\\)。\\(\\mathrm{ord}(2)=10\\)，\\(2\\) 是模 \\(11\\) 原根。原根个数 \\(=\\varphi(10)=4\\)。"
+      },
+      {
+        "id": "rings-ch06-q14",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{F}_{2^6}/\\mathbb{F}_{2^2})\\) 的阶和结构？",
+        "options": [
+          "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{F}_{2^6}:\\mathbb{F}_{2^2}]=6/2=3\\)。\\(\\mathrm{Gal}\\cong\\mathbb{Z}/3\\mathbb{Z}\\)，生成元 \\(\\phi^2:x\\mapsto x^{2^2}=x^4\\)。\\((\\phi^2)^3=\\phi^6:x\\mapsto x^{2^6}=x^{64}=x\\)（\\(\\mathbb{F}_{64}\\) 中）。"
+      },
+      {
+        "id": "rings-ch06-q15",
+        "question": "\\(\\mathbb{F}_3[x]\\) 中 \\(2\\) 次不可约多项式的个数？",
+        "options": [
+          "\\(3\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N_3(2)=\\frac{1}{2}(3^2-3)=3\\)。\\(2\\) 次首一多项式共 \\(9\\) 个。有根的（可约）\\(=\\) 有 \\((x-a)(x-b)\\) 形式，\\(\\binom{3}{2}+3=6\\) 个。不可约 \\(=9-6=3\\)。例如 \\(x^2+1,x^2+x+2,x^2+2x+2\\)。"
+      },
+      {
+        "id": "rings-ch06-q16",
+        "question": "\\(\\mathbb{F}_{p^2}\\subseteq\\mathbb{F}_{p^6}\\) 成立的原因是？",
+        "options": [
+          "\\(2\\mid6\\)",
+        "\\(p^2<p^6\\)",
+        "所有有限域互相包含",
+        "\\(2+6=8\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{F}_{p^m}\\subseteq\\mathbb{F}_{p^n}\\) \\(\\Leftrightarrow\\) \\(m\\mid n\\)。\\(2\\mid6\\) ✓。\\(\\mathbb{F}_{p^m}\\) 恰好是 \\(x^{p^m}-x\\) 的根集，而 \\(m\\mid n\\) 时 \\(x^{p^m}-x\\mid x^{p^n}-x\\)。C 错：\\(\\mathbb{F}_4\\not\\subseteq\\mathbb{F}_8\\)（\\(2\\nmid3\\)）。"
+      },
+      {
+        "id": "rings-ch06-q17",
+        "question": "\\(\\mathbb{F}_2\\) 上 \\(x^4+x+1\\) 是否不可约？",
+        "options": [
+          "不可约",
+        "可约，有根",
+        "可约，\\(=(x^2+x+1)^2\\)",
+        "可约，\\(=(x^2+x+1)(x^2+x+1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(0)=0+0+1=1\\neq0\\)，\\(f(1)=1+1+1=1\\neq0\\)，无根。\\(\\deg f=4\\)，需检查有无 \\(2\\) 次因子。\\(\\mathbb{F}_2\\) 上唯一 \\(2\\) 次不可约为 \\(x^2+x+1\\)。\\(x^4+x+1=(x^2+x+1)(x^2+x+1)?\\) \\(=(x^2+x+1)^2=x^4+x^2+1\\neq x^4+x+1\\)。无 \\(2\\) 次因子，故不可约。"
+      },
+      {
+        "id": "rings-ch06-q18",
+        "question": "\\(\\mathbb{F}_{p^n}\\) 中满足 \\(x^{p^d}=x\\) 的元素个数是多少？（\\(d\\mid n\\)）",
+        "options": [
+          "\\(p^d\\)",
+        "\\(p^n\\)",
+        "\\(d\\)",
+        "\\(p^{n-d}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^{p^d}-x\\) 的根集恰为 \\(\\mathbb{F}_{p^d}\\subseteq\\mathbb{F}_{p^n}\\)（\\(d\\mid n\\) 时）。\\(|\\mathbb{F}_{p^d}|=p^d\\)。域中多项式 \\(\\deg f\\) 最多 \\(f\\) 个根，\\(x^{p^d}-x\\) 恰好有 \\(p^d\\) 个根（互不相同，可分）。"
+      },
+      {
+        "id": "rings-ch06-q19",
+        "question": "\\(\\mathbb{F}_{25}^\\times\\) 中元素 \\(\\alpha\\) 的阶可能是以下哪个？",
+        "options": [
+          "\\(24\\)",
+        "\\(25\\)",
+        "\\(12\\)",
+        "A 和 C 都可能"
+        ],
+        "answer": 3,
+        "explanation": "\\(|\\mathbb{F}_{25}^\\times|=24\\)。元素的阶必整除 \\(24=2^3\\times3\\)。可能的阶：\\(1,2,3,4,6,8,12,24\\)。\\(24\\) 和 \\(12\\) 都是 \\(24\\) 的因子，故 A 和 C 都可能。B 错：阶不能超过群阶。"
+      },
+      {
+        "id": "rings-ch06-q20",
+        "question": "\\(\\mathbb{F}_{p^n}\\) 中 \\(\\mathrm{Tr}(x)=x+x^p+x^{p^2}+\\cdots+x^{p^{n-1}}\\) 是到哪个域的映射？",
+        "options": [
+          "\\(\\mathbb{F}_p\\)",
+        "\\(\\mathbb{F}_{p^n}\\)",
+        "\\(\\mathbb{Q}\\)",
+        "\\(\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "迹映射 \\(\\mathrm{Tr}:\\mathbb{F}_{p^n}\\to\\mathbb{F}_p\\) 是 \\(\\mathbb{F}_p\\)-线性满射。\\(\\mathrm{Tr}(x)=\\sum_{i=0}^{n-1}\\phi^i(x)\\)（\\(\\phi\\) 为 Frobenius），值在 \\(\\mathrm{Gal}\\) 的不动域 \\(\\mathbb{F}_p\\) 中。迹是 Galois 理论中「范数/迹」对的一半，在编码理论中广泛使用。"
+      },
+      {
+        "id": "rings-ch06-q21",
+        "question": "\\(\\mathbb{F}_2[x]\\) 中 \\(4\\) 次不可约多项式个数？",
+        "options": [
+          "\\(3\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N_2(4)=\\frac{1}{4}\\sum_{d|4}\\mu(4/d)2^d=\\frac{1}{4}(\\mu(1)\\cdot16+\\mu(2)\\cdot4+\\mu(4)\\cdot2)=\\frac{1}{4}(16-4+0)=3\\)。三个不可约多项式：\\(x^4+x+1,x^4+x^3+1,x^4+x^3+x^2+x+1\\)。"
+      },
+      {
+        "id": "rings-ch06-q22",
+        "question": "\\(\\mathbb{F}_{2^4}\\) 的子域有哪些？",
+        "options": [
+          "\\(\\mathbb{F}_2, \\mathbb{F}_4, \\mathbb{F}_{16}\\)",
+        "\\(\\mathbb{F}_2, \\mathbb{F}_8, \\mathbb{F}_{16}\\)",
+        "\\(\\mathbb{F}_2, \\mathbb{F}_{16}\\)",
+        "\\(\\mathbb{F}_2, \\mathbb{F}_4, \\mathbb{F}_8, \\mathbb{F}_{16}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{F}_{p^m}\\subseteq\\mathbb{F}_{p^n}\\Leftrightarrow m\\mid n\\)。\\(4\\) 的因子为 \\(1,2,4\\)，故子域为 \\(\\mathbb{F}_{2^1}=\\mathbb{F}_2\\)，\\(\\mathbb{F}_{2^2}=\\mathbb{F}_4\\)，\\(\\mathbb{F}_{2^4}=\\mathbb{F}_{16}\\)。B 错：\\(\\mathbb{F}_8=\\mathbb{F}_{2^3}\\)，\\(3\\nmid4\\)。"
+      },
+      {
+        "id": "rings-ch06-q23",
+        "question": "\\(\\mathbb{F}_4\\) 和 \\(\\mathbb{Z}/4\\mathbb{Z}\\) 有什么区别？",
+        "options": [
+          "同构",
+        "\\(\\mathbb{F}_4\\) 是域，\\(\\mathbb{Z}/4\\mathbb{Z}\\) 不是",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\) 是域",
+        "阶不同"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{F}_4\\) 有 \\(4\\) 个元素且是域（\\(4=2^2\\)，素数的幂），每个非零元可逆。\\(\\mathbb{Z}/4\\mathbb{Z}\\) 有零因子 \\(\\bar{2}\\cdot\\bar{2}=\\bar{0}\\)，不是域。\\(\\mathbb{F}_4=\\mathbb{F}_2[\\alpha]/(\\alpha^2+\\alpha+1)\\)，运算规则完全不同于模 \\(4\\) 算术。"
+      },
+      {
+        "id": "rings-ch06-q24",
+        "question": "Frobenius 的核心性质 \\((a+b)^p=a^p+b^p\\) 在特征 \\(p\\) 域成立。用它证明 \\(\\phi(x)=x^p\\) 是环同态的关键步骤是？",
+        "options": [
+          "需要 \\(\\binom{p}{k}\\equiv0\\pmod{p}\\)（\\(0<k<p\\)）",
+        "\\(p\\) 是偶数",
+        "需要域无穷",
+        "需要 \\(p\\leq5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((a+b)^p=\\sum_{k=0}^p\\binom{p}{k}a^kb^{p-k}\\)。当 \\(0<k<p\\) 时 \\(\\binom{p}{k}=\\frac{p!}{k!(p-k)!}\\)，分子含 \\(p\\) 但分母不含（\\(k<p\\)），故 \\(p\\mid\\binom{p}{k}\\)。特征 \\(p\\) 中这些项为零，只剩 \\(a^p+b^p\\)。这是特征 \\(p\\) 代数的核心技巧。"
+      },
+      {
+        "id": "rings-ch06-q25",
+        "question": "\\(\\mathbb{F}_{q}[x]\\) 中 \\(n\\) 次首一不可约多项式的个数渐近公式 \\(N_q(n)\\approx\\) ？",
+        "options": [
+          "\\(q^n/n\\)",
+        "\\(q^n\\)",
+        "\\(n\\)",
+        "\\(q/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "精确公式 \\(N_q(n)=\\frac{1}{n}\\sum_{d|n}\\mu(n/d)q^d\\)。主项 \\(q^n/n\\)，误差项 \\(O(q^{n/2}/n)\\)。\\(q,n\\) 大时 \\(N_q(n)\\approx q^n/n\\)。这保证了总能找到所需次数的不可约多项式来构造有限域。"
+      },
+      {
+        "id": "rings-ch06-q26",
+        "question": "AES 加密运算在 \\(\\mathbb{F}_{2^8}=\\mathbb{F}_2[x]/(x^8+x^4+x^3+x+1)\\) 中进行。一个字节对应 \\(\\mathbb{F}_{256}\\) 中的一个元素。\\(\\mathbb{F}_{256}^\\times\\) 的阶为？",
+        "options": [
+          "\\(255\\)",
+        "\\(256\\)",
+        "\\(128\\)",
+        "\\(254\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\mathbb{F}_{256}^\\times|=256-1=255=3\\times5\\times17\\)。AES 的 S-Box 使用 \\(\\mathbb{F}_{256}\\) 中的乘法逆元实现非线性变换。\\(\\mathbb{F}_{256}^\\times\\) 是 \\(255\\) 阶循环群，每个非零字节都有唯一乘法逆。"
+      },
+      {
+        "id": "rings-ch06-q27",
+        "question": "Diffie-Hellman 密钥交换中，Alice 和 Bob 在 \\(\\mathbb{F}_p^\\times\\) 中选原根 \\(g\\)，交换 \\(g^a,g^b\\)，共享密钥为 \\(g^{ab}\\)。若 \\(p=11,g=2,a=3\\)，则 Alice 发送？",
+        "options": [
+          "\\(8\\)",
+        "\\(6\\)",
+        "\\(3\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(g^a=2^3=8\\)。Alice 发送 \\(8\\) 给 Bob。安全性基于离散对数问题：已知 \\(g^a=8\\) 和 \\(g=2\\) in \\(\\mathbb{F}_{11}\\)，求 \\(a\\) 困难（大素数时计算上不可行）。\\(\\mathbb{F}_p^\\times\\) 循环群上离散对数是密码学基础。"
+      },
+      {
+        "id": "rings-ch06-q28",
+        "question": "QR 码使用 Reed-Solomon 编码，基于 \\(\\mathbb{F}_{2^8}\\) 上的多项式求值。纠错能力取决于校验符号数 \\(2t\\)。若 \\(t=8\\)，最多可纠正多少个错误符号？",
+        "options": [
+          "\\(8\\)",
+        "\\(16\\)",
+        "\\(4\\)",
+        "\\(256\\)"
+        ],
+        "answer": 0,
+        "explanation": "RS 码最多纠正 \\(t\\) 个错误（\\(2t\\) 个校验符号可检测 \\(2t\\) 个错误位置或纠正 \\(t\\) 个）。这是有限域上多项式插值理论的直接应用：\\(\\mathbb{F}_{256}\\) 上 \\(n\\) 次多项式由 \\(n+1\\) 个值唯一确定，多余的值提供冗余。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="rings"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/rings.html" class="module-name">环与域论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 有限域的存在性与唯一性</a></li>
+      <li><a href="#kp2">02 · 有限域的乘法群</a></li>
+      <li><a href="#kp3">03 · Frobenius 自同态</a></li>
+      <li><a href="#kp4">04 · 有限域上的多项式与应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>有限域</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>有限域的存在性与唯一性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限域 \(\mathbb{F}_q\) 是编码理论、密码学的数学基础。一个核心问题是: 有哪些大小的有限域？答案是: 恰好是素数的幂 \(q = p^n\)。 而且对每个 \(p^n\)，有限域在同构意义下唯一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>有限域的分类是域扩张理论的直接应用: \(\mathbb{F}_{p^n} = \mathbb{F}_p[x]/(f(x))\)，\(f\) 为 \(n\) 次不可约多项式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>存在性</strong>: 对任意素数 \(p\) 和 \(n \geq 1\)，存在 \(|\mathbb{F}| = p^n\) 的域。 构造: \(\mathbb{F}_{p^n}\) 是 \(x^{p^n} - x\) 在 \(\mathbb{F}_p\) 上的分裂域。 \(x^{p^n} - x\) 恰好有 \(p^n\) 个不同根，它们组成域。 <strong>唯一性</strong>: 任何 \(p^n\) 阶域都是 \(x^{p^n}-x\) 的分裂域， 分裂域同构唯一，故同构。 \[|\mathbb{F}| \text{ 有限} \Leftrightarrow |\mathbb{F}| = p^n \text{ 某 } p, n\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>AES 加密基于 \(\mathbb{F}_{2^8}\) 的运算。 Reed-Solomon 编码基于 \(\mathbb{F}_{2^m}\) 上的多项式求值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 构造 \(\mathbb{F}_4\)。 解答: \(\mathbb{F}_2[x]/(x^2+x+1)\)（\(x^2+x+1\) 在 \(\mathbb{F}_2\) 上不可约）。 元素: \(\{0, 1, \alpha, 1+\alpha\}\)，其中 \(\alpha^2 = \alpha + 1\)。 乘法表: \(\alpha \cdot \alpha = \alpha + 1\)，\(\alpha(1+\alpha) = \alpha + \alpha^2 = \alpha + \alpha + 1 = 1\)。 易错点: 以为 \(\mathbb{F}_4 = \mathbb{Z}/4\mathbb{Z}\)。 \(\mathbb{Z}/4\mathbb{Z}\) 不是域（\(\bar{2}\) 是零因子）。\(\mathbb{F}_4 \neq \mathbb{Z}/4\mathbb{Z}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">有 6 个元素的域存在吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(6 = 2 \\times 3\\)，不是素数的幂，故不存在。')">A. 存在</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(6 = 2 \\times 3\\)，不是素数的幂，故不存在。')">B. 不存在，6 不是素数的幂</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(6 = 2 \\times 3\\)，不是素数的幂，故不存在。')">C. 存在，\(\mathbb{F}_6 = \mathbb{Z}/6\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(6 = 2 \\times 3\\)，不是素数的幂，故不存在。')">D. 不确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>有限域的乘法群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限域的乘法群 \(\mathbb{F}_q^\times\) 的结构是什么？它总是循环群。 这意味着存在「原根」（生成元），类似于 \(\mathbb{Z}/p\mathbb{Z}\) 中的原根。 这在密码学（离散对数问题）中至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>有限域的乘法群是循环的——这是有限域的深刻性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>: \(\mathbb{F}_q^\times\) 是循环群，\(|\mathbb{F}_q^\times| = q - 1\)。 <strong>证明思路</strong>: \(\mathbb{F}_q^\times\) 是有限 Abel 群，故 \(\mathbb{F}_q^\times \cong \mathbb{Z}/d_1\mathbb{Z} \times \cdots \times \mathbb{Z}/d_k\mathbb{Z}\)。 若不循环，则存在指数 \(m < q-1\) 使所有元满足 \(x^m = 1\)。 但 \(x^m - 1\) 在域中最多 \(m < q-1\) 个根，矛盾。 \[\mathbb{F}_q^\times \cong \mathbb{Z}/(q-1)\mathbb{Z}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Diffie-Hellman 密钥交换基于有限域（或椭圆曲线）上的离散对数问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{F}_7^\times\) 的生成元是什么？ 解答: \(|\mathbb{F}_7^\times| = 6\)。需找阶为 6 的元素。 \(3^1 = 3, 3^2 = 2, 3^3 = 6, 3^4 = 4, 3^5 = 5, 3^6 = 1\)。 \(\mathrm{ord}(3) = 6\)，故 \(3\) 是原根。 易错点: 在 \(\mathbb{F}_{p^n}\)（\(n \geq 2\)）中直接写元素为整数。 \(\mathbb{F}_{p^n}\) 的元素是多项式（模不可约多项式），不是整数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{F}_{16}^\times\) 同构于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|\\mathbb{F}_{16}^\\times| = 15\\)，且有限域乘法群总是循环的。')">A. \(\mathbb{Z}/16\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(|\\mathbb{F}_{16}^\\times| = 15\\)，且有限域乘法群总是循环的。')">B. \(\mathbb{Z}/15\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|\\mathbb{F}_{16}^\\times| = 15\\)，且有限域乘法群总是循环的。')">C. \(\mathbb{Z}/4\mathbb{Z} \times \mathbb{Z}/4\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|\\mathbb{F}_{16}^\\times| = 15\\)，且有限域乘法群总是循环的。')">D. \(\mathbb{Z}/8\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Frobenius 自同态</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限域 \(\mathbb{F}_q\)（\(q = p^n\)）有一个独特的自同构 \(\phi: x \mapsto x^p\)（Frobenius）。 它是有限域的 Galois 理论的核心，类似于复共轭在 \(\mathbb{C}/\mathbb{R}\) 中的角色。 Frobenius 生成了整个 Galois 群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Frobenius 是特征 \(p\) 世界的「基本对称」，类似于复共轭。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Frobenius 自同态</strong>: \(\phi: \mathbb{F}_q \to \mathbb{F}_q\)，\(\phi(x) = x^p\)。 \(\phi\) 是环同态（特征 \(p\): \((a+b)^p = a^p + b^p\)）， 且是单射（域中单射 \(\Rightarrow\) 同构）。 <strong>Galois 群</strong>: \(\mathrm{Gal}(\mathbb{F}_{p^n}/\mathbb{F}_p) = \langle \phi \rangle \cong \mathbb{Z}/n\mathbb{Z}\)。 \[\phi^k(x) = x^{p^k}, \quad \mathrm{Gal} = \{\mathrm{id}, \phi, \phi^2, \ldots, \phi^{n-1}\}\] 固定域: \(\mathbb{F}_q^{\phi^k} = \mathbb{F}_{p^{\gcd(k,n)}}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathrm{Gal}(\mathbb{F}_{8}/\mathbb{F}_2)\) 的元素。 解答: \(8 = 2^3\)，\(n = 3\)。 \(\mathrm{Gal} = \{\mathrm{id}, \phi, \phi^2\}\)，其中 \(\phi(x) = x^2\)，\(\phi^2(x) = x^4\)。 \(\mathrm{Gal} \cong \mathbb{Z}/3\mathbb{Z}\)。 易错点: 将 \(\phi(x) = x^p\) 和 \(\phi(x) = x^q\) 混淆。 \(\phi(x) = x^p\)（底域素数），\(\phi^n = \mathrm{id}\)（因 \(x^{p^n} = x\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|\mathrm{Gal}(\mathbb{F}_{3^4}/\mathbb{F}_3)| = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\([\\mathbb{F}_{3^4}:\\mathbb{F}_3] = 4\\)，\\(|\\mathrm{Gal}| = 4\\)。')">A. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\([\\mathbb{F}_{3^4}:\\mathbb{F}_3] = 4\\)，\\(|\\mathrm{Gal}| = 4\\)。')">B. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\([\\mathbb{F}_{3^4}:\\mathbb{F}_3] = 4\\)，\\(|\\mathrm{Gal}| = 4\\)。')">C. 12</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\([\\mathbb{F}_{3^4}:\\mathbb{F}_3] = 4\\)，\\(|\\mathrm{Gal}| = 4\\)。')">D. 81</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>有限域上的多项式与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限域上的多项式行为与无限域不同——例如多项式函数与多项式可以 不同（\(\mathbb{F}_p\) 中 \(x^p - x\) 处处为零但不是零多项式）。 不可约多项式的计数和构造在编码理论中有直接应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>不可约多项式计数</strong>: \(\mathbb{F}_q[x]\) 中 \(n\) 次首一不可约多项式的个数: \[N_q(n) = \frac{1}{n} \sum_{d \mid n} \mu(n/d) q^d\] 其中 \(\mu\) 是 M\"obius 函数。 <strong>特别地</strong>: \(N_q(1) = q\)，\(N_q(2) = \frac{q^2-q}{2}\)。 当 \(q, n\) 较大时，\(N_q(n) \approx q^n/n\)。 <strong>多项式 vs 函数</strong>: \(\mathbb{F}_q\) 上多项式 \(f, g\) 可能处处取同值 但 \(f \neq g\)。故多项式 \neq 多项式函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>BCH 码和 Reed-Solomon 码使用 \(\mathbb{F}_q\) 上的多项式求值和不可约性。 当前二维码/QR 码均基于有限域编码。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{F}_2[x]\) 中有多少个 3 次不可约多项式？ 解答: \(N_2(3) = \frac{1}{3}(2^3 - 2) = \frac{6}{3} = 2\)。 即 \(x^3 + x + 1\) 和 \(x^3 + x^2 + 1\)。 易错点: 用实数域直觉判断 \(\mathbb{F}_2\) 上的不可约性。 应在 \(\mathbb{F}_2\) 中检查: \(f(0), f(1)\) 是否为 0（判 2 次因子）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{F}_3[x]\) 中 2 次不可约多项式的个数？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(N_3(2) = \\frac{3^2-3}{2} = \\frac{6}{2} = 3\\)。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(N_3(2) = \\frac{3^2-3}{2} = \\frac{6}{2} = 3\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(N_3(2) = \\frac{3^2-3}{2} = \\frac{6}{2} = 3\\)。')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(N_3(2) = \\frac{3^2-3}{2} = \\frac{6}{2} = 3\\)。')">D. 9</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/algebra/rings.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

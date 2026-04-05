@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 Lie 代数表示入门 — 表示论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "representation-ch06-q1",
+        "question": "\\(\\dim \\mathfrak{sl}(2, \\mathbb{C}) = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathfrak{sl}(2) = \\{A \\in M_2(\\mathbb{C}) : \\mathrm{tr}(A) = 0\\}\\)。\\(\\dim M_2 = 4\\)，\\(\\mathrm{tr} = 0\\) 是 1 个约束，\\(\\dim = 4-1 = 3\\)。标准基：\\(H = \\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}, E = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}, F = \\begin{pmatrix}0&0\\\\1&0\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "representation-ch06-q2",
+        "question": "\\([A, B] = AB - BA\\) 对 \\(A = B\\) 时 \\([A, A] = \\) ？",
+        "options": [
+          "\\(A^2\\)",
+        "\\(2A\\)",
+        "\\(0\\)",
+        "\\(I\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\([A, A] = AA - AA = 0\\)。反对称性：\\([X, Y] = -[Y, X]\\)，取 \\(X = Y\\) 得 \\([X, X] = -[X, X]\\)，故 \\(2[X, X] = 0\\)，\\([X, X] = 0\\)。这是 Lie 括号的基本性质。"
+      },
+      {
+        "id": "representation-ch06-q3",
+        "question": "\\(\\mathfrak{sl}(2)\\) 中 \\([H, E] = \\) ？",
+        "options": [
+          "\\(2E\\)",
+        "\\(-2E\\)",
+        "\\(H\\)",
+        "\\(F\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(HE = \\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix} = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)。\\(EH = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix} = \\begin{pmatrix}0&-1\\\\0&0\\end{pmatrix}\\)。\\([H,E] = HE - EH = \\begin{pmatrix}0&2\\\\0&0\\end{pmatrix} = 2E\\)。"
+      },
+      {
+        "id": "representation-ch06-q4",
+        "question": "\\(\\mathfrak{sl}(2)\\) 的 \\(n+1\\) 维不可约表示 \\(V_n\\) 的最高权是？",
+        "options": [
+          "\\(n+1\\)",
+        "\\(n\\)",
+        "\\(2n\\)",
+        "\\(n/2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(V_n\\) 的权为 \\(n, n-2, \\ldots, -n\\)（\\(H\\) 的特征值）。最高权 \\(= n\\)。\\(\\dim V_n = n+1\\)。\\(V_0\\) 是平凡表示（\\(\\dim 1\\), 最高权 \\(0\\)），\\(V_1\\) 是标准表示（\\(\\dim 2\\), 最高权 \\(1\\)）。"
+      },
+      {
+        "id": "representation-ch06-q5",
+        "question": "权空间分解 \\(V = \\bigoplus_\\mu V_\\mu\\) 中，\\(V_\\mu\\) 是什么？",
+        "options": [
+          "\\(\\{v \\in V : Hv = \\mu v\\}\\)（\\(H\\) 的特征空间）",
+        "不变子空间",
+        "核空间",
+        "零空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(V_\\mu = \\{v \\in V : Hv = \\mu(H)v, \\forall H \\in \\mathfrak{h}\\}\\)。对 \\(\\mathfrak{sl}(2)\\)，\\(\\mathfrak{h} = \\mathrm{span}\\{H\\}\\)，\\(\\mu\\) 是 \\(H\\) 的特征值。权空间分解将表示按\"量子数\"分类。"
+      },
+      {
+        "id": "representation-ch06-q6",
+        "question": "\\(V_2\\)（3 维不可约 \\(\\mathfrak{sl}(2)\\)-表示）的权有哪些？",
+        "options": [
+          "\\(\\{2, 0, -2\\}\\)",
+        "\\(\\{1, 0, -1\\}\\)",
+        "\\(\\{3, 1, -1\\}\\)",
+        "\\(\\{2, 1, 0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(V_n\\) 的权 \\(= n, n-2, \\ldots, -n\\)。\\(n = 2\\)：\\(2, 0, -2\\)。间距为 \\(2\\)。\\(Hv_k = (2-2k)v_k\\)：\\(v_0\\) 权 \\(2\\), \\(v_1\\) 权 \\(0\\), \\(v_2\\) 权 \\(-2\\)。"
+      },
+      {
+        "id": "representation-ch06-q7",
+        "question": "Jacobi 恒等式为 \\([X,[Y,Z]] + [Y,[Z,X]] + [Z,[X,Y]] = \\) ？",
+        "options": [
+          "\\([XYZ]\\)",
+        "\\(0\\)",
+        "\\(XYZ - ZYX\\)",
+        "\\(I\\)"
+        ],
+        "answer": 1,
+        "explanation": "Jacobi 恒等式是 Lie 代数的三条公理之一（双线性、反对称、Jacobi）。对矩阵 Lie 代数 \\([A,B] = AB-BA\\)，Jacobi 恒等式可直接展开验证：每个三项积 \\(XYZ\\) 的系数数组合相消为零。"
+      },
+      {
+        "id": "representation-ch06-q8",
+        "question": "\\(V_1\\)（2 维标准表示）中，\\(Ev_1 = \\) ？（\\(v_0\\)权 \\(1\\), \\(v_1\\)权 \\(-1\\)）",
+        "options": [
+          "\\(v_0\\)",
+        "\\(2v_0\\)",
+        "\\(0\\)",
+        "\\(v_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Ev_k = (n-k+1)v_{k-1}\\)。\\(n=1, k=1\\)：\\(Ev_1 = (1-1+1)v_0 = v_0\\)。\\(E\\) 是升算子（提高权 \\(2\\)）：权 \\(-1\\) 升到权 \\(1\\)。"
+      },
+      {
+        "id": "representation-ch06-q9",
+        "question": "\\(V_2\\) 中 \\(Fv_0 = \\) ？",
+        "options": [
+          "\\(v_1\\)",
+        "\\(2v_1\\)",
+        "\\(0\\)",
+        "\\(v_2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Fv_k = (k+1)v_{k+1}\\)。\\(k=0\\)：\\(Fv_0 = 1 \\cdot v_1 = v_1\\)。\\(F\\) 是降算子（降低权 \\(2\\)）。\\(Fv_1 = 2v_2\\)，\\(Fv_2 = 0\\)（到底了）。"
+      },
+      {
+        "id": "representation-ch06-q10",
+        "question": "\\(\\mathfrak{so}(3)\\) 的 Lie 括号关系 \\([L_x, L_y] = \\) ？（物理约定含 \\(i\\)）",
+        "options": [
+          "\\(iL_z\\)",
+        "\\(L_z\\)",
+        "\\(0\\)",
+        "\\(-iL_z\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_x, L_y, L_z\\) 满足 \\([L_i, L_j] = i\\epsilon_{ijk}L_k\\)（量子力学约定）。\\([L_x, L_y] = iL_z\\)。数学约定中 \\(\\mathfrak{so}(3) \\cong \\mathfrak{su}(2)\\)（实形不同但复化相同 \\(\\cong \\mathfrak{sl}(2,\\mathbb{C})\\)）。"
+      },
+      {
+        "id": "representation-ch06-q11",
+        "question": "\\(\\mathfrak{sl}(3)\\) 的秩（\\(\\mathrm{rank}\\)）为？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(8\\)",
+        "\\(9\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{rank}(\\mathfrak{sl}(n)) = n-1\\)。\\(n=3\\)：\\(\\mathrm{rank} = 2\\)。Cartan 子代数 \\(\\mathfrak{h} = \\{\\mathrm{diag}(a,b,c):a+b+c=0\\}\\)，\\(\\dim\\mathfrak{h} = 2\\)。根系统类型 \\(A_2\\)。"
+      },
+      {
+        "id": "representation-ch06-q12",
+        "question": "\\(\\mathfrak{sl}(2)\\) 的根系统包含多少个根？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathfrak{sl}(2) = \\mathfrak{h} \\oplus \\mathfrak{g}_\\alpha \\oplus \\mathfrak{g}_{-\\alpha}\\)。\\(\\alpha(H) = 2\\)（\\([H,E] = 2E\\)），\\(-\\alpha(H) = -2\\)（\\([H,F] = -2F\\)）。根：\\(\\{+\\alpha, -\\alpha\\}\\)，共 2 个。\\(\\mathrm{rank} = 1\\)，类型 \\(A_1\\)。"
+      },
+      {
+        "id": "representation-ch06-q13",
+        "question": "\\(\\dim \\mathfrak{gl}(n) = \\) ？",
+        "options": [
+          "\\(n\\)",
+        "\\(n^2\\)",
+        "\\(n^2 - 1\\)",
+        "\\(2n\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathfrak{gl}(n) = M_n(\\mathbb{C})\\)（全体 \\(n \\times n\\) 矩阵），\\(\\dim = n^2\\)。\\(\\mathfrak{sl}(n) = \\ker(\\mathrm{tr})\\)，\\(\\dim = n^2-1\\)。\\(\\mathfrak{gl}(n) = \\mathfrak{sl}(n) \\oplus \\mathbb{C}I\\)。"
+      },
+      {
+        "id": "representation-ch06-q14",
+        "question": "\\(V_3\\)（4 维不可约 \\(\\mathfrak{sl}(2)\\)-表示）中 \\(Ev_0 = \\) ？",
+        "options": [
+          "\\(0\\)",
+        "\\(v_{-1}\\)",
+        "\\(3v_0\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(Ev_k = (n-k+1)v_{k-1}\\)。\\(k=0\\)：\\(Ev_0 = (3-0+1)v_{-1}\\)。但 \\(v_{-1}\\) 不存在，约定 \\(Ev_0 = 0\\)。\\(v_0\\) 是最高权向量：\\(Ev_0 = 0\\)，\\(Hv_0 = nv_0\\)（\\(n=3\\), \\(Hv_0 = 3v_0\\)）。"
+      },
+      {
+        "id": "representation-ch06-q15",
+        "question": "等变神经网络中，\\(G\\)-等变线性层 \\(f\\) 满足？",
+        "options": [
+          "\\(f(\\rho_V(g)x) = \\rho_W(g)f(x)\\)",
+        "\\(f(x) = f(gx)\\)（\\(G\\)-不变）",
+        "\\(f(x) = 0\\)",
+        "A 和 B 相同"
+        ],
+        "answer": 0,
+        "explanation": "等变：\\(f(\\rho_V(g)x) = \\rho_W(g)f(x)\\)（输出也变换）。不变：\\(f(\\rho_V(g)x) = f(x)\\)（输出不变）。等变是更一般的概念，不变是等变的特例（\\(\\rho_W\\) 为平凡表示）。CNN 的卷积层是平移等变的。"
+      },
+      {
+        "id": "representation-ch06-q16",
+        "question": "\\(\\mathfrak{sl}(3)\\) 有多少个根？",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathfrak{sl}(3)\\) 的根系 \\(A_2\\)：正根 \\(\\alpha_1, \\alpha_2, \\alpha_1+\\alpha_2\\)，负根 \\(-\\alpha_1, -\\alpha_2, -(\\alpha_1+\\alpha_2)\\)，共 \\(6\\) 个。\\(\\dim\\mathfrak{sl}(3) = 8 = 2(\\text{rank}) + 6(\\text{根空间})\\)。"
+      },
+      {
+        "id": "representation-ch06-q17",
+        "question": "CNN 中卷积层的等变性是关于什么群的？",
+        "options": [
+          "旋转群 \\(SO(2)\\)",
+        "平移群 \\((\\mathbb{Z}^2, +)\\)",
+        "对称群 \\(S_n\\)",
+        "\\(GL(n)\\)"
+        ],
+        "answer": 1,
+        "explanation": "标准 CNN 的卷积层对输入的平移等变：\\((T_g f * k)(x) = (f * k)(x-g)\\)。\\(G = (\\mathbb{Z}^2, +)\\)（离散平移群）。旋转等变需要特殊的群等变 CNN（如 Steerable CNN、\\(SE(2)\\)-equivariant networks）。"
+      },
+      {
+        "id": "representation-ch06-q18",
+        "question": "\\(V_2\\) 的矩阵表示中 \\(E = \\begin{pmatrix}0&2&0\\\\0&0&1\\\\0&0&0\\end{pmatrix}\\)。验证 \\([E,F] = H\\)：\\(EF - FE = \\) ？（\\(F = \\begin{pmatrix}0&0&0\\\\1&0&0\\\\0&2&0\\end{pmatrix}\\)）",
+        "options": [
+          "\\(H = \\mathrm{diag}(2,0,-2)\\)",
+        "\\(I\\)",
+        "\\(0\\)",
+        "\\(\\mathrm{diag}(1,0,-1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(EF = \\begin{pmatrix}0&2&0\\\\0&0&1\\\\0&0&0\\end{pmatrix}\\begin{pmatrix}0&0&0\\\\1&0&0\\\\0&2&0\\end{pmatrix} = \\begin{pmatrix}2&0&0\\\\0&2&0\\\\0&0&0\\end{pmatrix}\\)。\\(FE = \\begin{pmatrix}0&0&0\\\\0&0&0\\\\0&0&0\\end{pmatrix}\\)...不对。\\(FE = \\begin{pmatrix}0&0&0\\\\1&0&0\\\\0&2&0\\end{pmatrix}\\begin{pmatrix}0&2&0\\\\0&0&1\\\\0&0&0\\end{pmatrix} = \\begin{pmatrix}0&0&0\\\\0&2&0\\\\0&0&2\\end{pmatrix}\\)。\\(EF-FE = \\mathrm{diag}(2,0,-2) = H\\) ✓。"
+      },
+      {
+        "id": "representation-ch06-q19",
+        "question": "\\(\\mathfrak{g}\\) 是 Lie 代数，\\(\\mathfrak{z}(\\mathfrak{g}) = \\{X \\in \\mathfrak{g} : [X,Y]=0, \\forall Y\\}\\) 是中心。\\(\\mathfrak{z}(\\mathfrak{sl}(2)) = \\) ？",
+        "options": [
+          "\\(\\{0\\}\\)",
+        "\\(\\mathrm{span}\\{H\\}\\)",
+        "\\(\\mathfrak{sl}(2)\\)",
+        "\\(\\mathrm{span}\\{E+F\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathfrak{sl}(2)\\) 是单纯 Lie 代数，中心为 \\(\\{0\\}\\)。验证：若 \\(X = aH+bE+cF\\) 在中心，\\([X,E] = 2aE-cH = 0\\) 要求 \\(a=c=0\\)。\\([X,F] = -2aF+bH = 0\\) 要求 \\(a=b=0\\)。\\(X = 0\\)。"
+      },
+      {
+        "id": "representation-ch06-q20",
+        "question": "\\(\\mathfrak{sl}(2)\\) 表示 \\(V = V_2 \\oplus V_0\\)（4 维）。\\(H\\) 的特征值有哪些？",
+        "options": [
+          "\\(\\{2, 0, -2, 0\\}\\)",
+        "\\(\\{2, 0, -2\\}\\)",
+        "\\(\\{3, 1, -1, -3\\}\\)",
+        "\\(\\{1, 0, -1, 0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(V_2\\) 的权：\\(2, 0, -2\\)。\\(V_0\\) 的权：\\(0\\)。\\(V = V_2 \\oplus V_0\\) 的权：\\(2, 0, -2, 0\\)。权 \\(0\\) 的重数为 \\(2\\)（\\(V_2\\) 和 \\(V_0\\) 各贡献一个）。"
+      },
+      {
+        "id": "representation-ch06-q21",
+        "question": "\\(\\mathfrak{sl}(n)\\) 的 Dynkin 图类型为？",
+        "options": [
+          "\\(A_{n-1}\\)",
+        "\\(B_n\\)",
+        "\\(D_n\\)",
+        "\\(A_n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathfrak{sl}(n)\\) 的根系是 \\(A_{n-1}\\) 型。\\(\\mathrm{rank} = n-1\\)，Dynkin 图是 \\(n-1\\) 个节点的链：\\(\\circ-\\circ-\\cdots-\\circ\\)。\\(\\mathfrak{sl}(2)\\) 是 \\(A_1\\)，\\(\\mathfrak{sl}(3)\\) 是 \\(A_2\\)，\\(\\mathfrak{sl}(4)\\) 是 \\(A_3\\)。"
+      },
+      {
+        "id": "representation-ch06-q22",
+        "question": "\\(\\mathfrak{so}(3)\\) 和 \\(\\mathfrak{su}(2)\\) 的关系？",
+        "options": [
+          "同构（作为实 Lie 代数）",
+        "复化后同构（\\(\\cong \\mathfrak{sl}(2,\\mathbb{C})\\)）",
+        "A 和 B 都对",
+        "完全无关"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathfrak{so}(3) \\cong \\mathfrak{su}(2)\\)（实 Lie 代数同构）。两者的复化 \\(\\cong \\mathfrak{sl}(2,\\mathbb{C})\\)。\\(\\dim = 3\\)。物理中角动量代数 \\(\\mathfrak{su}(2) \\cong \\mathfrak{so}(3)\\)，表示论完全相同。"
+      },
+      {
+        "id": "representation-ch06-q23",
+        "question": "Casimir 算子 \\(C = H^2 + 2EF + 2FE\\) 在 \\(V_n\\) 上取值？",
+        "options": [
+          "\\(n(n+2)\\)",
+        "\\(n^2\\)",
+        "\\(n+1\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(C = H^2 + 2H + 4FE\\)（化简）。在最高权向量 \\(v_0\\)：\\(Cv_0 = (n^2+2n)v_0 = n(n+2)v_0\\)。\\(C\\) 在不可约表示上是数量矩阵（Schur 引理）。物理中 \\(J^2 = j(j+1)\\)（\\(j = n/2\\)），\\(C = 4j(j+1) = n(n+2)\\)。"
+      },
+      {
+        "id": "representation-ch06-q24",
+        "question": "最高权理论：半单纯 Lie 代数的有限维不可约表示由什么唯一确定？",
+        "options": [
+          "最高权 \\(\\lambda\\)",
+        "维数",
+        "Casimir 值",
+        "A, B, C 均可"
+        ],
+        "answer": 0,
+        "explanation": "最高权定理：对半单纯 Lie 代数，每个有限维不可约表示由其最高权 \\(\\lambda \\in \\mathfrak{h}^*\\) 唯一确定（\\(\\lambda\\) 需是支配整权）。维数可由 Weyl 维数公式从 \\(\\lambda\\) 计算。不同 \\(\\lambda\\) 可能给出同维数的不同表示。"
+      },
+      {
+        "id": "representation-ch06-q25",
+        "question": "\\(G\\)-等变线性层的参数空间是 \\(\\mathrm{Hom}_G(\\rho_{\\mathrm{in}}, \\rho_{\\mathrm{out}})\\)。若 \\(\\rho_{\\mathrm{in}}, \\rho_{\\mathrm{out}}\\) 不可约且 \\(\\rho_{\\mathrm{in}} \\not\\cong \\rho_{\\mathrm{out}}\\)，可学习参数个数为？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\dim\\rho_{\\mathrm{in}} \\cdot \\dim\\rho_{\\mathrm{out}}\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "Schur 引理：\\(\\mathrm{Hom}_G(\\rho_{\\mathrm{in}}, \\rho_{\\mathrm{out}}) = 0\\)（\\(\\rho_{\\mathrm{in}} \\not\\cong \\rho_{\\mathrm{out}}\\)）。可学习参数 \\(= 0\\)。等变约束极大压缩了参数空间。若 \\(\\cong\\) 则参数 \\(= 1\\)（数量矩阵 \\(\\lambda I\\)）。"
+      },
+      {
+        "id": "representation-ch06-q26",
+        "question": "量子力学中自旋-\\(1\\) 粒子（如光子的偏振）对应 \\(\\mathfrak{sl}(2)\\) 的哪个表示？",
+        "options": [
+          "\\(V_2\\)（\\(\\dim = 3\\)）",
+        "\\(V_1\\)（\\(\\dim = 2\\)）",
+        "\\(V_0\\)（\\(\\dim = 1\\)）",
+        "\\(V_3\\)（\\(\\dim = 4\\)）"
+        ],
+        "answer": 0,
+        "explanation": "自旋 \\(j\\) 对应 \\(V_{2j}\\)（\\(\\dim = 2j+1\\)）。\\(j = 1\\)：\\(V_2\\)，\\(\\dim = 3\\)，权 \\(\\{2, 0, -2\\}\\)（物理中 \\(m = 1,0,-1\\)）。自旋-\\(\\frac{1}{2}\\)（电子）对应 \\(V_1\\)（\\(\\dim = 2\\)）。"
+      },
+      {
+        "id": "representation-ch06-q27",
+        "question": "AlphaFold 2 中使用的 SE(3)-等变网络。\\(SE(3)\\) 是什么群？",
+        "options": [
+          "3 维平移+旋转群（刚体运动）",
+        "3 维旋转群",
+        "对称群 \\(S_3\\)",
+        "一般线性群"
+        ],
+        "answer": 0,
+        "explanation": "\\(SE(3) = \\mathbb{R}^3 \\rtimes SO(3)\\)（3 维特殊欧氏群），包含平移和旋转。蛋白质结构预测要求对刚体运动等变——旋转/平移蛋白质不改变预测结果。\\(SE(3)\\)-等变网络将此对称性内建到架构中。"
+      },
+      {
+        "id": "representation-ch06-q28",
+        "question": "粒子物理标准模型中，强相互作用的规范对称性 \\(SU(3)\\) 对应的 Lie 代数 \\(\\mathfrak{su}(3)\\) 的维数为？",
+        "options": [
+          "\\(3\\)",
+        "\\(8\\)",
+        "\\(9\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathfrak{su}(n) = \\{A \\in M_n(\\mathbb{C}) : A + A^\\dagger = 0, \\mathrm{tr}(A) = 0\\}\\)。\\(\\dim\\mathfrak{su}(n) = n^2-1\\)。\\(n=3\\)：\\(\\dim = 8\\)。\\(8\\) 个生成元对应 Gell-Mann 矩阵（夸克模型中的\"八重道\"）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="representation"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/representation.html" class="module-name">表示论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Lie 代数的定义与例子</a></li>
+      <li><a href="#kp2">02 · \(\mathfrak{sl}(2)\) 的表示</a></li>
+      <li><a href="#kp3">03 · Lie 代数的权空间分解</a></li>
+      <li><a href="#kp4">04 · 展望——等变神经网络与对称性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>Lie 代数表示入门</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Lie 代数的定义与例子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限群表示处理的是离散对称性。连续对称性（旋转、Lorentz 变换）由 Lie 群描述。Lie 代数是 Lie 群的「线性近似」，它用满足 Jacobi 恒等式的 「括号」运算取代群乘法。Lie 代数是现代物理的数学语言。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lie 代数是向量空间 + 反对称双线性括号 + Jacobi 恒等式。 它是 Lie 群的切空间（无穷小元素的代数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Lie 代数</strong>: 向量空间 \(\mathfrak{g}\) + 括号 \([\cdot, \cdot]: \mathfrak{g} \times \mathfrak{g} \to \mathfrak{g}\)。 1) 双线性 2) 反对称: \([X, Y] = -[Y, X]\) 3) Jacobi 恒等式: \([X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0\) <strong>经典例子</strong>: - \(\mathfrak{gl}(n)\): \(n \times n\) 矩阵，\([A,B] = AB - BA\) - \(\mathfrak{sl}(n)\): 迹为 0 的矩阵 - \(\mathfrak{so}(n)\): 反对称矩阵 \[[X, Y] = XY - YX\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>粒子物理: 规范对称性由 \(\mathfrak{su}(3)\) 描述（强相互作用）。 量子力学: 角动量算子满足 \([L_x, L_y] = i\hbar L_z\)（\(\mathfrak{so}(3)\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证明 \([A, B] = AB - BA\) 满足 Jacobi 恒等式。 解答: \([A,[B,C]] = A(BC-CB) - (BC-CB)A = ABC - ACB - BCA + CBA\)。 循环求和: \([A,[B,C]] + [B,[C,A]] + [C,[A,B]]\)。 展开: 每个 \(XYZ\) 顺序出现 \(+1\) 和 \(-1\) 各一次，总和为 0。✓ 易错点: 以为 Lie 代数的括号满足结合律。 一般不满足: \([[A,B],C] \neq [A,[B,C]]\)。Jacobi 代替了结合律。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim \mathfrak{sl}(2, \mathbb{C}) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mathfrak{sl}(2) = \\{A \\in M_2 : \\mathrm{tr} A = 0\\}\\)，')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\mathfrak{sl}(2) = \\{A \\in M_2 : \\mathrm{tr} A = 0\\}\\)，')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mathfrak{sl}(2) = \\{A \\in M_2 : \\mathrm{tr} A = 0\\}\\)，')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mathfrak{sl}(2) = \\{A \\in M_2 : \\mathrm{tr} A = 0\\}\\)，')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>\(\mathfrak{sl}(2)\) 的表示</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\mathfrak{sl}(2, \mathbb{C})\) 是最小的非 Abel Lie 代数，它的表示论是所有 半单纯 Lie 代数表示论的基石。量子力学中角动量 \(j\) 的理论 恰好是 \(\mathfrak{sl}(2)\)（或 \(\mathfrak{su}(2)\)）的表示论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>通过权空间分解（特征值分解）将表示完全分类。 每个有限维不可约表示由一个非负整数参数化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(\mathfrak{sl}(2)\) 基</strong>: \(H = \begin{pmatrix}1&0\\0&-1\end{pmatrix}\)， \(E = \begin{pmatrix}0&1\\0&0\end{pmatrix}\)，\(F = \begin{pmatrix}0&0\\1&0\end{pmatrix}\)。 \([H, E] = 2E\)，\([H, F] = -2F\)，\([E, F] = H\)。 <strong>有限维不可约表示</strong>: 对每个 \(n \geq 0\)，存在唯一的 \(n+1\) 维 不可约表示 \(V_n\)。 基: \(\{v_0, v_1, \ldots, v_n\}\)，\(H v_k = (n - 2k)v_k\)。 \[H v_k = (n-2k)v_k, \quad E v_k = (n-k+1) v_{k-1}, \quad F v_k = (k+1) v_{k+1}\] 权（\(H\) 的特征值）: \(n, n-2, \ldots, -n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子角动量: \(j = n/2\)，\(m = -j, -j+1, \ldots, j\)。 \(J_+, J_-\) 是升降算子，\(J_z\) 是对角可观测量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 写出 \(V_2\)（3 维）的矩阵表示。 解答: \(H = \mathrm{diag}(2, 0, -2)\)。 \(E = \begin{pmatrix}0&2&0\\0&0&1\\0&0&0\end{pmatrix}\)， \(F = \begin{pmatrix}0&0&0\\1&0&0\\0&2&0\end{pmatrix}\)。 验证: \([E, F] = H\)。✓ 易错点: \(E, F\) 的系数不是全 1，而是 \(k+1\) 和 \(n-k+1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathfrak{sl}(2)\) 的 \(n+1\) 维不可约表示 \(V_n\) 的最高权是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最高权 = \\(H\\) 的最大特征值 = \\(n\\)。')">A. \(n+1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！最高权 = \\(H\\) 的最大特征值 = \\(n\\)。')">B. \(n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最高权 = \\(H\\) 的最大特征值 = \\(n\\)。')">C. \(2n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最高权 = \\(H\\) 的最大特征值 = \\(n\\)。')">D. \(n/2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Lie 代数的权空间分解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\mathfrak{sl}(2)\) 中 \(H\) 的特征值分解可以推广。对任意半单纯 Lie 代数， 选取最大交换子代数（Cartan 子代数 \(\mathfrak{h}\)）， 将表示空间按 \(\mathfrak{h}\) 的特征值（权）分解。 这是半单纯 Lie 代数表示论的核心框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>权空间分解推广了 \(\mathfrak{sl}(2)\) 的特征值理论。 根系统和 Dynkin 图对半单纯 Lie 代数给出完全分类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cartan 子代数</strong>: \(\mathfrak{h} \subseteq \mathfrak{g}\)，最大交换子代数。 \(\mathrm{rank}(\mathfrak{g}) = \dim \mathfrak{h}\)。 <strong>根分解</strong>: \[\mathfrak{g} = \mathfrak{h} \oplus \bigoplus_{\alpha \in \Phi} \mathfrak{g}_\alpha\] \(\mathfrak{g}_\alpha = \{X : [H, X] = \alpha(H)X, \forall H \in \mathfrak{h}\}\)， \(\alpha \in \mathfrak{h}^*\) 称为根。 <strong>表示的权分解</strong>: \(V = \bigoplus_{\mu \in \mathfrak{h}^*} V_\mu\)， \(V_\mu = \{v : Hv = \mu(H)v\}\)。 不可约表示由最高权 \(\lambda\) 唯一确定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathfrak{sl}(3)\) 的根系统。 解答: \(\mathrm{rank} = 2\)，\(\mathfrak{h} = \{\mathrm{diag}(a,b,c) : a+b+c=0\}\)。 根: \(\pm(e_1-e_2), \pm(e_2-e_3), \pm(e_1-e_3)\)，共 6 个。 正根: \(\alpha_1 = e_1-e_2, \alpha_2 = e_2-e_3\)。 Dynkin 图: \(A_2\)（两个节点连一条线）。 易错点: 将根和权混淆。根是 Lie 代数自身的特征值， 权是表示空间的特征值。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathfrak{sl}(n)\) 的秩是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{rank} = \\dim \\mathfrak{h} = n - 1\\)（对角矩阵的维数）。')">A. \(n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathrm{rank} = \\dim \\mathfrak{h} = n - 1\\)（对角矩阵的维数）。')">B. \(n - 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{rank} = \\dim \\mathfrak{h} = n - 1\\)（对角矩阵的维数）。')">C. \(n^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{rank} = \\dim \\mathfrak{h} = n - 1\\)（对角矩阵的维数）。')">D. \(n^2 - 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>展望——等变神经网络与对称性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>表示论在现代 AI 中复活: 等变神经网络将群对称性内建到神经网络架构中。 CNN 对平移等变，Graph NN 对置换等变，这些都是表示论的具体应用。 这是抽象代数与深度学习的前沿交叉。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>等变性 = 网络的输出与群作用「交换」: \(f(\rho(g)x) = \rho'(g)f(x)\)。 这正是表示论中 \(G\)-等变映射的概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>等变映射</strong>: \(f: V \to W\) 满足 \(f(\rho_V(g)v) = \rho_W(g)f(v)\)。 <strong>神经网络中的等变性</strong>: - CNN: \(G = (\mathbb{Z}^2, +)\)（平移群），卷积 = 等变线性层 - GNN: \(G = S_n\)（置换群），池化 = 不变层 <strong>一般框架</strong>: \(G\)-等变线性层的参数由 \(\mathrm{Hom}_G(\rho_{\mathrm{in}}, \rho_{\mathrm{out}})\) 描述。 Schur 引理限制了可学习的参数空间。 \[\text{等变线性层} \in \mathrm{Hom}_G(V_{\mathrm{in}}, V_{\mathrm{out}})\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>分子性质预测（SE(3)-等变）、粒子物理模拟（Lorentz 等变）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 为什么 CNN 的卷积层是平移等变的？ 解答: 卷积: \((f * k)(x) = \sum_y k(y) f(x - y)\)。 平移 \(g\): \(T_g f(x) = f(x - g)\)。 \((T_g f * k)(x) = \sum_y k(y) f(x - g - y) = (f * k)(x - g) = T_g(f*k)(x)\)。 即 \(T_g \circ (\cdot * k) = (\cdot * k) \circ T_g\)。等变。 易错点: 混淆等变和不变。 等变: \(f(gx) = g \cdot f(x)\)（输出也变换）。 不变: \(f(gx) = f(x)\)（输出不变）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">等变神经网络中，等变性条件 \(f(\rho(g)x) = \rho'(g)f(x)\) 对应表示论中的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f \\in \\mathrm{Hom}_G(V, W)\\)，即 \\(G\\)-等变映射。')">A. 特征标</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(f \\in \\mathrm{Hom}_G(V, W)\\)，即 \\(G\\)-等变映射。')">B. \(G\)-等变映射</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f \\in \\mathrm{Hom}_G(V, W)\\)，即 \\(G\\)-等变映射。')">C. 不可约性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f \\in \\mathrm{Hom}_G(V, W)\\)，即 \\(G\\)-等变映射。')">D. Schur 引理</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/algebra/representation.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

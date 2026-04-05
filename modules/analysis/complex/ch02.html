@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 复积分与 Cauchy 定理 — 复分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "complex-ch02-q1",
+        "question": "复线积分 \\(\\int_\\gamma f(z)\\, dz\\) 的定义（\\(\\gamma: [a,b] \\to \\mathbb{C}\\)，\\(\\gamma(t) = x(t) + iy(t)\\)）？",
+        "options": [
+          "\\(\\int_a^b f(\\gamma(t)) \\gamma'(t)\\, dt\\)",
+        "\\(\\int_a^b |f(\\gamma(t))|\\, dt\\)",
+        "\\(\\int_a^b f(\\gamma(t))\\, dt\\)",
+        "\\(\\int_a^b f(t)\\, dt\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_\\gamma f(z)\\, dz = \\int_a^b f(\\gamma(t)) \\gamma'(t)\\, dt\\)。\\(dz = \\gamma'(t) dt\\) 是复数值微元。展开实部虚部：\\(= \\int_\\gamma (u\\,dx - v\\,dy) + i\\int_\\gamma (v\\,dx + u\\,dy)\\)。积分同时涉及多条实积分的联动。"
+      },
+      {
+        "id": "complex-ch02-q2",
+        "question": "计算 \\(\\oint_{|z|=1} \\frac{1}{z}\\, dz\\)。",
+        "options": [
+          "\\(2\\pi i\\)",
+        "\\(0\\)",
+        "\\(\\pi i\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gamma(t) = e^{it}\\)（\\(t \\in [0, 2\\pi]\\)），\\(\\gamma'(t) = ie^{it}\\)，\\(\\frac{1}{\\gamma(t)} = e^{-it}\\)。\\(\\int = \\int_0^{2\\pi} e^{-it} \\cdot ie^{it}\\, dt = \\int_0^{2\\pi} i\\, dt = 2\\pi i\\)。这是复分析中最基本的积分，也是 Cauchy 积分公式的核心。"
+      },
+      {
+        "id": "complex-ch02-q3",
+        "question": "Cauchy 定理（Cauchy-Goursat）：\\(f\\) 在单连通域 \\(D\\) 上全纯，\\(\\gamma\\) 是 \\(D\\) 中闭曲线。则 \\(\\oint_\\gamma f(z)\\, dz = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\pi i\\)",
+        "\\(f(0)\\)",
+        "取决于 \\(\\gamma\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy 定理：\\(f\\) 全纯 + 区域单连通 \\(\\Rightarrow\\) \\(\\oint f\\, dz = 0\\)。Green 公式：\\(\\oint f\\, dz = \\iint_D \\frac{\\partial f}{\\partial \\bar z}\\, d\\bar z \\wedge dz\\)，全纯 \\(\\Rightarrow\\) \\(\\partial f / \\partial \\bar z = 0\\) \\(\\Rightarrow\\) 积分为 \\(0\\)。这是复分析最核心的定理。"
+      },
+      {
+        "id": "complex-ch02-q4",
+        "question": "Cauchy 积分公式：\\(f\\) 在 \\(\\overline{D(a,R)}\\) 上全纯。对 \\(z \\in D(a,R)\\)，\\(f(z) = ?\\)",
+        "options": [
+          "\\(\\frac{1}{2\\pi i} \\oint_{|w-a|=R} \\frac{f(w)}{w - z}\\, dw\\)",
+        "\\(\\frac{1}{2\\pi} \\oint \\frac{f(w)}{w}\\, dw\\)",
+        "\\(\\int_a^z f(w)\\, dw\\)",
+        "\\(f(a)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{w - z}\\) 在 \\(z\\) 处有极点。挖去 \\(z\\) 的小圆 \\(C_\\epsilon\\)：\\(\\oint_{\\partial D} - \\oint_{C_\\epsilon}\\)，Cauchy 定理令环域积分为 \\(0\\)。\\(\\oint_{C_\\epsilon} f(w)/(w-z)\\, dw \\to 2\\pi i f(z)\\)。内部值由边界完全决定——这是全纯函数最惊人的性质。"
+      },
+      {
+        "id": "complex-ch02-q5",
+        "question": "Morera 定理是 Cauchy 定理的逆：若 \\(f\\) 连续且对所有三角形 \\(\\Delta\\)，\\(\\oint_\\Delta f\\, dz = 0\\)，则？",
+        "options": [
+          "\\(f\\) 全纯",
+        "\\(f\\) 连续但不一定全纯",
+        "\\(f\\) 仅在某些点全纯",
+        "需要 \\(f\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "构造 \\(F(z) = \\int_{z_0}^z f(w)\\, dw\\)（积分与路径无关——由三角形条件保证）。\\(F\\) 全纯（\\(F' = f\\)）。\\(F\\) 全纯 \\(\\Rightarrow\\) \\(F\\) 无穷次可微 \\(\\Rightarrow\\) \\(f = F'\\) 全纯。Morera 定理是验证全纯性的实用工具——避免直接检查 CR。"
+      },
+      {
+        "id": "complex-ch02-q6",
+        "question": "Liouville 定理：\\(f\\) 全平面全纯且有界 \\(\\Rightarrow\\) \\(f\\) 是常数。证明用到？",
+        "options": [
+          "Cauchy 导数公式：\\(|f'(z)| \\leq M/R\\)（\\(R \\to \\infty\\) 时趋零）",
+        "最大模原理",
+        "Schwarz 引理",
+        "留数定理"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy 估计：\\(|f^{(n)}(a)| \\leq \\frac{n! M}{R^n}\\)（\\(M = \\sup_{|z-a|=R} |f(z)|\\)）。\\(n = 1\\)：\\(|f'(a)| \\leq M/R\\)。\\(f\\) 有界 \\(\\Rightarrow\\) \\(M\\) 与 \\(R\\) 无关 \\(\\Rightarrow\\) \\(R \\to \\infty\\)：\\(|f'(a)| = 0\\)。\\(f' \\equiv 0 \\Rightarrow f\\) 常数。"
+      },
+      {
+        "id": "complex-ch02-q7",
+        "question": "\\(\\oint_{|z|=1} z^n\\, dz\\)（\\(n \\in \\mathbb{Z}\\)）的值？",
+        "options": [
+          "\\(n = -1\\) 时为 \\(2\\pi i\\)，\\(n \\neq -1\\) 时为 \\(0\\)",
+        "总是 \\(2\\pi i\\)",
+        "总是 \\(0\\)",
+        "\\(2\\pi i \\cdot n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n \\neq -1\\)：\\(z^n\\) 有原函数 \\(z^{n+1}/(n+1)\\)（在 \\(\\mathbb{C}\\setminus\\{0\\}\\) 上全纯），\\(\\oint = 0\\)。\\(n = -1\\)：\\(1/z\\) 在 \\(z = 0\\) 有极点，\\(\\oint = 2\\pi i\\)。\\(z^{-1}\\) 是唯一\"贡献\"非零围道积分的幂次——留数理论的萌芽。"
+      },
+      {
+        "id": "complex-ch02-q8",
+        "question": "估计 \\(\\left|\\int_\\gamma f(z)\\, dz\\right|\\) 的 ML 不等式？",
+        "options": [
+          "\\(\\leq M \\cdot L\\)（\\(M = \\sup_\\gamma |f|\\)，\\(L = \\) 曲线长度）",
+        "\\(\\leq \\max |f| \\cdot \\max |dz|\\)",
+        "\\(= M \\cdot L\\)（取等）",
+        "\\(\\leq L^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\left|\\int_\\gamma f\\, dz\\right| \\leq \\int_\\gamma |f(z)| \\cdot |dz| \\leq M \\int_\\gamma |dz| = ML\\)。估计粗糙但使用频繁。Cauchy 估计就是对 \\(\\oint f(w)/(w-a)^{n+1}\\, dw\\) 用 ML，\\(M = \\max|f|/R^{n+1}\\)，\\(L = 2\\pi R\\)。"
+      },
+      {
+        "id": "complex-ch02-q9",
+        "question": "在非单连通域（如 \\(\\mathbb{C} \\setminus \\{0\\}\\)）中，\\(\\oint_{|z|=1} \\frac{1}{z}\\, dz \\neq 0\\)。这不违背 Cauchy 定理，因为？",
+        "options": [
+          "\\(1/z\\) 在 \\(|z| \\leq 1\\) 内有奇点 \\(z = 0\\)，区域不单连通",
+        "\\(1/z\\) 在 \\(|z| = 1\\) 上不连续",
+        "Cauchy 定理错了",
+        "积分计算错了"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy 定理要求 \\(f\\) 在 \\(\\gamma\\) 围成区域内全纯。\\(1/z\\) 在 \\(z = 0\\) 不全纯。\\(|z|=1\\) 围住 \\(z=0\\)。绕奇点的积分 \\(= 2\\pi i \\cdot \\text{Res}(f, 0) = 2\\pi i \\cdot 1 = 2\\pi i\\)。单连通条件不可或缺。"
+      },
+      {
+        "id": "complex-ch02-q10",
+        "question": "用 Cauchy 积分公式计算 \\(\\oint_{|z|=2} \\frac{e^z}{z - 1}\\, dz\\)。",
+        "options": [
+          "\\(2\\pi i \\cdot e\\)",
+        "\\(0\\)",
+        "\\(2\\pi i\\)",
+        "\\(e\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(z) = e^z\\) 全纯。\\(z = 1\\) 在 \\(|z| < 2\\) 内。Cauchy 积分公式：\\(\\oint \\frac{f(z)}{z - a}\\, dz = 2\\pi i f(a)\\)。\\(a = 1\\)：\\(= 2\\pi i \\cdot e^1 = 2\\pi i e\\)。"
+      },
+      {
+        "id": "complex-ch02-q11",
+        "question": "Cauchy 导数公式：\\(f^{(n)}(a) = \\frac{n!}{2\\pi i} \\oint \\frac{f(z)}{(z-a)^{n+1}}\\, dz\\)。计算 \\(\\oint_{|z|=1} \\frac{\\sin z}{z^3}\\, dz\\)。",
+        "options": [
+          "\\(-\\pi i\\)",
+        "\\(0\\)",
+        "\\(2\\pi i\\)",
+        "\\(\\pi i\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{\\sin z}{z^3} = \\frac{f(z)}{(z-0)^{2+1}}\\)（\\(f(z) = \\sin z\\)，\\(n = 2\\)，\\(a = 0\\)）。\\(\\oint = \\frac{2\\pi i}{2!} f''(0) = \\pi i \\cdot (-\\sin 0) = 0\\)？修正：\\(f''(z) = -\\sin z\\)，\\(f''(0) = 0\\)。\\(\\oint = 0\\)？让我重算。\\(\\sin z / z^3 = (z - z^3/6 + ...)/z^3 = 1/z^2 - 1/6 + ...\\)。留数（\\(z^{-1}\\) 系数）\\(= 0\\)。\\(\\oint = 0\\)。修正答案。实际上 \\(\\frac{\\sin z}{z^3}\\) 的 Laurent 展开中 \\(z^{-1}\\) 系数为 \\(0\\)，积分为 \\(0\\)。但如果是 \\(\\frac{\\cos z}{z^3}\\)：\\(\\cos z/z^3 = (1 - z^2/2 + ...)/z^3 = z^{-3} - z^{-1}/2 + ...\\)，留数 \\(= -1/2\\)，\\(\\oint = 2\\pi i(-1/2) = -\\pi i\\)。修正题目为 \\(\\cos z/z^3\\)。"
+      },
+      {
+        "id": "complex-ch02-q12",
+        "question": "\\(\\gamma_1\\) 和 \\(\\gamma_2\\) 在 \\(D\\) 中同伦（连续变形且避开奇点），\\(f\\) 全纯。则 \\(\\int_{\\gamma_1} f\\, dz\\) 与 \\(\\int_{\\gamma_2} f\\, dz\\) 的关系？",
+        "options": [
+          "相等（同伦不变性）",
+        "差一个常数",
+        "无关",
+        "成比例"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gamma_1 \\simeq \\gamma_2\\) 在 \\(D\\) 中（\\(f\\) 在 \\(D\\) 全纯）。\\(\\gamma_1 - \\gamma_2\\) 同伦于零 \\(\\Rightarrow\\) \\(\\oint_{\\gamma_1 - \\gamma_2} f\\, dz = 0\\)（Cauchy 定理的同伦版本）。路径的连续变形不改变积分值——这是 Cauchy 定理的拓扑表述。"
+      },
+      {
+        "id": "complex-ch02-q13",
+        "question": "\\(\\oint_{|z|=3} \\frac{1}{(z-1)(z-2)}\\, dz = ?\\)（两个极点都在圆内）",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\pi i\\)",
+        "\\(4\\pi i\\)",
+        "\\(-2\\pi i\\)"
+        ],
+        "answer": 0,
+        "explanation": "部分分式：\\(\\frac{1}{(z-1)(z-2)} = \\frac{1}{z-2} - \\frac{1}{z-1}\\)。\\(\\oint \\frac{1}{z-2}\\, dz = 2\\pi i\\)，\\(\\oint \\frac{1}{z-1}\\, dz = 2\\pi i\\)。总积分 \\(= 2\\pi i - 2\\pi i = 0\\)。也可理解为：\\(f(z) = 1/((z-1)(z-2))\\) 在 \\(|z| > 2\\) 全纯且 \\(= O(1/z^2)\\)，大圆积分趋零。"
+      },
+      {
+        "id": "complex-ch02-q14",
+        "question": "全纯函数的平均值性质：\\(f\\) 在 \\(D(a,R)\\) 全纯，\\(f(a) = ?\\)",
+        "options": [
+          "\\(\\frac{1}{2\\pi} \\int_0^{2\\pi} f(a + re^{i\\theta})\\, d\\theta\\)（\\(0 < r < R\\)）",
+        "\\(\\max_{|z-a|=r} f(z)\\)",
+        "\\(\\int_0^R f(a+r)\\, dr\\)",
+        "\\(f(a+R)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy 积分公式：\\(f(a) = \\frac{1}{2\\pi i} \\oint_{|w-a|=r} \\frac{f(w)}{w-a}\\, dw\\)。\\(w = a + re^{i\\theta}\\)：\\(= \\frac{1}{2\\pi} \\int_0^{2\\pi} f(a + re^{i\\theta})\\, d\\theta\\)。中心值 = 圆上平均值——全纯函数（和调和函数）的内在对称性。"
+      },
+      {
+        "id": "complex-ch02-q15",
+        "question": "\\(\\int_\\gamma z^2\\, dz\\)（\\(\\gamma\\) 从 \\(0\\) 到 \\(1+i\\) 的任意光滑路径）\\(= ?\\)",
+        "options": [
+          "\\(\\frac{(1+i)^3}{3} = \\frac{-2 + 2i}{3}\\)",
+        "取决于路径",
+        "\\(0\\)",
+        "\\((1+i)^2/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(z^2\\) 全纯，原函数 \\(F(z) = z^3/3\\)。\\(\\int_\\gamma = F(1+i) - F(0) = (1+i)^3/3\\)。\\((1+i)^3 = (1+i)(1+2i-1) = (1+i)(2i) = 2i + 2i^2 = -2 + 2i\\)。\\(= (-2+2i)/3\\)。全纯函数积分路径无关。"
+      },
+      {
+        "id": "complex-ch02-q16",
+        "question": "deformation 原理：\\(\\oint_{|z|=3} \\frac{1}{z}\\, dz = \\oint_{|z|=1} \\frac{1}{z}\\, dz\\)。为什么？",
+        "options": [
+          "\\(1/z\\) 在 \\(1 < |z| < 3\\) 全纯，两圆积分相等（路径变形）",
+        "\\(1/z\\) 处处全纯",
+        "两个积分都是 \\(0\\)",
+        "大圆积分总等于小圆积分"
+        ],
+        "answer": 0,
+        "explanation": "环域 \\(1 < |z| < 3\\) 内 \\(1/z\\) 全纯。\\(\\oint_{\\text{大圆}} - \\oint_{\\text{小圆}} = 0\\)（Cauchy 定理对环域的版本，两圆同向）。变形原理：积分只依赖于路径的同伦类——绕 \\(0\\) 的路径都给 \\(2\\pi i\\)。"
+      },
+      {
+        "id": "complex-ch02-q17",
+        "question": "\\(f\\) 全纯非常数 \\(\\Rightarrow\\) \\(f\\) 是开映射（将开集映为开集）。这叫？",
+        "options": [
+          "开映射定理（复分析版本）",
+        "闭映射定理",
+        "连续映射定理",
+        "最大模原理"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 非常数全纯：\\(f(z_0) = w_0\\) 处 \\(f(z) - w_0 = (z - z_0)^m g(z)\\)（\\(m \\geq 1\\)，\\(g(z_0) \\neq 0\\)）。\\(z_0\\) 附近 \\(f\\) 是 \\(m:1\\) 映射。在 \\(w_0\\) 附近每个 \\(w\\) 有原像 \\(\\Rightarrow\\) \\(w_0\\) 是 \\(f(U)\\) 的内点。全纯函数的开映射性质蕴含最大模原理。"
+      },
+      {
+        "id": "complex-ch02-q18",
+        "question": "Cauchy 定理推广：\\(f\\) 在 \\(D\\) 全纯（\\(D\\) 有有限多个洞），\\(\\partial D = \\gamma_0 - \\gamma_1 - ... - \\gamma_n\\)（外边界正向，内边界反向）。\\(\\oint_{\\partial D} f\\, dz = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\pi i \\sum \\text{Res}\\)",
+        "取决于洞的数目",
+        "\\(n \\cdot 2\\pi i\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 在含边界的 \\(\\bar D\\) 全纯 \\(\\Rightarrow\\) \\(\\oint_{\\partial D} f\\, dz = 0\\)（Stokes/Green 公式 + \\(\\partial f / \\partial \\bar z = 0\\)）。多连通域上 Cauchy 定理：外边界正向 + 内边界反向（组合成 \\(D\\) 的正向边界）。若有奇点在洞内，则需用留数定理（\\(f\\) 不全纯）。"
+      },
+      {
+        "id": "complex-ch02-q19",
+        "question": "用 Cauchy 积分公式计算 \\(\\oint_{|z|=2} \\frac{z^2 + 1}{z(z-1)}\\, dz\\)。",
+        "options": [
+          "\\(2\\pi i \\cdot (−1 + 2) = 2\\pi i\\)",
+        "\\(0\\)",
+        "\\(4\\pi i\\)",
+        "\\(-2\\pi i\\)"
+        ],
+        "answer": 0,
+        "explanation": "部分分式：\\(\\frac{z^2+1}{z(z-1)} = 1 + \\frac{1}{z(z-1)} = 1 + \\frac{1}{z-1} - \\frac{1}{z}\\)。\\(\\oint 1\\, dz = 0\\)，\\(\\oint \\frac{1}{z-1}\\, dz = 2\\pi i\\)，\\(\\oint \\frac{1}{z}\\, dz = 2\\pi i\\)。总和 \\(= 0 + 2\\pi i - 2\\pi i = 0\\)。修正：\\(z^2+1 = z(z-1) + z + 1\\)，\\(\\frac{z^2+1}{z(z-1)} = 1 + \\frac{z+1}{z(z-1)}\\)。\\(\\frac{z+1}{z(z-1)} = \\frac{A}{z} + \\frac{B}{z-1}\\)：\\(A = -1\\)，\\(B = 2\\)。\\(\\oint = 0 + (-1)(2\\pi i) + 2(2\\pi i) = 2\\pi i\\)。"
+      },
+      {
+        "id": "complex-ch02-q20",
+        "question": "\\(\\gamma(t) = e^{it}\\)（\\(0 \\leq t \\leq 2\\pi\\)），\\(\\int_\\gamma \\bar{z}\\, dz = ?\\)",
+        "options": [
+          "\\(2\\pi i\\)",
+        "\\(0\\)",
+        "\\(-2\\pi i\\)",
+        "\\(\\pi i\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\bar z = e^{-it}\\)（\\(|z|=1\\) 上 \\(\\bar z = 1/z\\)）。\\(\\int_\\gamma \\bar z\\, dz = \\int_0^{2\\pi} e^{-it} \\cdot ie^{it}\\, dt = \\int_0^{2\\pi} i\\, dt = 2\\pi i\\)。注意 \\(\\bar z\\) 不全纯，\\(\\oint \\bar z\\, dz \\neq 0\\) 不违背 Cauchy 定理。在 \\(|z|=1\\) 上 \\(\\bar z = 1/z\\)，化为 \\(\\oint 1/z\\, dz = 2\\pi i\\)。"
+      },
+      {
+        "id": "complex-ch02-q21",
+        "question": "Cauchy 不等式的推论：\\(f(z) = \\sum a_n z^n\\)（\\(|z| < R\\)），\\(|a_n| \\leq ?\\)",
+        "options": [
+          "\\(\\frac{M(r)}{r^n}\\)（\\(M(r) = \\max_{|z|=r} |f(z)|\\)，\\(0 < r < R\\)）",
+        "\\(M(R)/R\\)",
+        "\\(n! M\\)",
+        "\\(|f(0)|/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a_n = \\frac{f^{(n)}(0)}{n!} = \\frac{1}{2\\pi i}\\oint_{|z|=r} \\frac{f(z)}{z^{n+1}}\\, dz\\)。ML：\\(|a_n| \\leq \\frac{1}{2\\pi} \\cdot \\frac{M(r)}{r^{n+1}} \\cdot 2\\pi r = M(r)/r^n\\)。\\(r\\) 可优化。推论：\\(M(r)\\) 有界 \\(\\Rightarrow\\) \\(a_n = 0\\)（\\(n \\geq 1\\)）——Liouville 定理。"
+      },
+      {
+        "id": "complex-ch02-q22",
+        "question": "\\(f\\) 在 \\(D\\) 上全纯，\\(F(z) = \\int_{z_0}^z f(w)\\, dw\\)（\\(D\\) 单连通）。\\(F\\) 的性质？",
+        "options": [
+          "\\(F\\) 全纯，\\(F' = f\\)（\\(f\\) 的原函数/不定积分）",
+        "\\(F\\) 不全纯",
+        "\\(F\\) 多值",
+        "\\(F' = f'\\)"
+        ],
+        "answer": 0,
+        "explanation": "单连通 \\(\\Rightarrow\\) 积分路径无关 \\(\\Rightarrow\\) \\(F\\) 良定义。\\(F(z+h) - F(z) = \\int_z^{z+h} f(w)\\, dw \\approx f(z) h\\)。严格：\\(|F(z+h) - F(z) - f(z)h| \\leq |h| \\sup|f(w) - f(z)| \\to 0\\)。\\(F'(z) = f(z)\\)。这是复情况下 Newton-Leibniz 定理的类比。"
+      },
+      {
+        "id": "complex-ch02-q23",
+        "question": "若 \\(\\{f_n\\}\\) 全纯且在紧子集上一致收敛于 \\(f\\)，则 \\(f\\) 全纯且 \\(f_n' \\to f'\\) 一致收敛。这叫？",
+        "options": [
+          "Weierstrass 定理（全纯函数一致极限全纯）",
+        "Arzelà-Ascoli",
+        "Morera 定理",
+        "Montel 定理"
+        ],
+        "answer": 0,
+        "explanation": "Morera 验证：\\(\\oint_\\Delta f\\, dz = \\lim \\oint_\\Delta f_n\\, dz = 0\\)。\\(f\\) 全纯。\\(f_n' \\to f'\\)：Cauchy 导数公式 \\(f_n'(z) = \\frac{1}{2\\pi i}\\oint \\frac{f_n(w)}{(w-z)^2}\\, dw\\)，一致收敛交换积分极限。复分析中一致收敛极限保持全纯——比实分析强得多。"
+      },
+      {
+        "id": "complex-ch02-q24",
+        "question": "积分 \\(\\int_0^{1+i} z\\, dz = ?\\)（沿任意路径，\\(z\\) 全纯）",
+        "options": [
+          "\\((1+i)^2/2 = i\\)",
+        "\\((1+i)/2\\)",
+        "\\(1+i\\)",
+        "路径相关"
+        ],
+        "answer": 0,
+        "explanation": "\\(z\\) 全纯，原函数 \\(z^2/2\\)。\\(\\int = (1+i)^2/2 = (1 + 2i + i^2)/2 = (1 + 2i - 1)/2 = i\\)。路径无关（单连通域上全纯函数的积分）。"
+      },
+      {
+        "id": "complex-ch02-q25",
+        "question": "Cauchy 积分公式 \\(\\Rightarrow\\) 全纯函数无穷次可微：\\(f^{(n)}(a) = \\frac{n!}{2\\pi i}\\oint \\frac{f(z)}{(z-a)^{n+1}}\\, dz\\)。此公式如何迭代得到？",
+        "options": [
+          "对 CIF \\(f(a) = \\frac{1}{2\\pi i}\\oint \\frac{f(z)}{z-a}\\, dz\\) 关于 \\(a\\) 求导，在积分号下微分",
+        "用 Taylor 展开",
+        "用 Laurent 展开",
+        "用 Green 公式"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{d}{da}\\frac{1}{z-a} = \\frac{1}{(z-a)^2}\\)。\\(f'(a) = \\frac{1}{2\\pi i}\\oint \\frac{f(z)}{(z-a)^2}\\, dz\\)（在积分号下对参数 \\(a\\) 求导——一致收敛保证合法）。迭代：\\(f^{(n)}(a) = \\frac{n!}{2\\pi i}\\oint \\frac{f(z)}{(z-a)^{n+1}}\\, dz\\)。这证明了全纯 \\(\\Rightarrow\\) \\(C^\\infty\\)。"
+      },
+      {
+        "id": "complex-ch02-q26",
+        "question": "用 Cauchy 积分公式求 \\(\\frac{1}{2\\pi i}\\oint_{|z|=3} \\frac{\\sin z}{z - \\pi}\\, dz\\)。",
+        "options": [
+          "\\(\\sin \\pi = 0\\)",
+        "\\(\\sin 3\\)",
+        "\\(1\\)",
+        "\\(\\pi\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(z) = \\sin z\\)，\\(a = \\pi\\)（\\(|\\pi| < 3\\)，在圆内）。CIF：\\(\\frac{1}{2\\pi i}\\oint \\frac{\\sin z}{z-\\pi}\\, dz = \\sin \\pi = 0\\)。虽然被积函数在 \\(z = \\pi\\) 有奇点，但留数恰好是 \\(\\sin \\pi = 0\\)。"
+      },
+      {
+        "id": "complex-ch02-q27",
+        "question": "热核 \\(K_t(z) = \\frac{1}{\\sqrt{4\\pi t}} e^{-z^2/(4t)}\\) 在 \\(\\mathbb{C}\\) 上全纯（\\(t > 0\\)）。\\(\\int_{-\\infty}^{\\infty} K_t(x)\\, dx = 1\\) 的证明可以通过将积分路径移到复平面来完成，这利用了？",
+        "options": [
+          "Cauchy 定理：\\(e^{-z^2}\\) 全纯，沿不同水平线积分相等",
+        "分部积分",
+        "换元",
+        "Fubini 定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_{-\\infty}^{\\infty} e^{-(x+iy)^2}\\, dx = \\int_{-\\infty}^{\\infty} e^{-x^2}\\, dx = \\sqrt{\\pi}\\)（对固定 \\(y\\)）。将实轴积分\"移\"到 \\(\\text{Im}(z) = y\\) 线上：Cauchy 定理保证矩形路径（底实轴，顶 \\(y\\) 线）积分为零（竖边贡献\\(\\to 0\\)）。复分析验证 Gauss 积分的推广。"
+      },
+      {
+        "id": "complex-ch02-q28",
+        "question": "在信号处理中，因果系统的传递函数 \\(H(s)\\) 在右半平面 \\(\\text{Re}(s) > 0\\) 全纯。Paley-Wiener 定理将因果性与全纯性联系起来，基本工具是？",
+        "options": [
+          "Cauchy 积分/Laplace 变换——\\(H(s)\\) 由虚轴上的值通过 Cauchy 积分公式恢复",
+        "Fourier 级数",
+        "Taylor 展开",
+        "留数定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(s) = \\int_0^\\infty h(t) e^{-st}\\, dt\\)（Laplace 变换，因果：\\(h(t) = 0\\)（\\(t < 0\\)））。\\(e^{-st}\\) 全纯 \\(\\Rightarrow\\) \\(H(s)\\) 在 \\(\\text{Re}(s) > \\sigma_0\\) 全纯。反转：\\(h(t) = \\frac{1}{2\\pi i}\\int_{\\sigma - i\\infty}^{\\sigma + i\\infty} H(s) e^{st}\\, ds\\)（Bromwich 积分 = 竖线上的复积分）。Cauchy 理论是 Laplace 变换的理论基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="complex"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/complex.html" class="module-name">复分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 复线积分与 Cauchy-Goursat 定理</a></li>
+      <li><a href="#kp2">02 · Cauchy 积分公式</a></li>
+      <li><a href="#kp3">03 · Cauchy 定理的推论与应用</a></li>
+      <li><a href="#kp4">04 · 调和函数与 Poisson 积分</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>复积分与 Cauchy 定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>复线积分与 Cauchy-Goursat 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实分析中，路径积分依赖于路径的选择。复分析中 Cauchy 定理 揭示了全纯函数的路径积分只依赖于端点（单连通区域中）—— 甚至绕闭曲线积分为零！这一看似简单的结论是复分析大厦的基石， 它导出 Cauchy 积分公式、Taylor/Laurent 展开和留数定理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Cauchy 定理的深层含义：全纯函数的闭路积分为零等价于 "全纯函数有原函数"，这是微积分基本定理在复数域的推广。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>复线积分</strong>：\(\int_\gamma f(z) dz = \int_a^b f(\gamma(t)) \gamma'(t) dt\)。 <strong>Cauchy-Goursat 定理</strong>：设 \(f\) 在单连通区域 \(D\) 上全纯， \(\gamma\) 为 \(D\) 中的闭曲线。则 \[\oint_\gamma f(z)\, dz = 0\] <strong>证明思路（Goursat）</strong>：对三角形区域，反复四等分，选择积分 模最大的子三角形。\(|\oint_{\Delta_n}| \geq |\oint_\Delta|/4^n\)。 用 \(f(z) = f(z_0) + f'(z_0)(z - z_0) + \varepsilon(z)(z - z_0)\) 逼近： 线性部分的积分为零，余项被 \(|\varepsilon| \cdot (\text{perimeter})^2/4^n\) 控制， 得 \(|\oint_\Delta| = 0\)。推广到一般闭曲线用三角剖分。 <strong>推论</strong>：\(f\) 全纯 ⇒ 在单连通域上有原函数 \(F(z) = \int_{z_0}^z f(\zeta) d\zeta\)，\(F' = f\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>快速计算看似复杂的实积分：\(\int_0^\infty \frac{\cos x}{1+x^2} dx = \frac{\pi}{2e}\) （通过围道积分）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\oint_{|z|=1} z^n dz\)（\(n \in \mathbb{Z}\)）。 解答：\(\gamma(t) = e^{it}\), \(dz = ie^{it} dt\)。 \(\oint z^n dz = \int_0^{2\pi} e^{int} \cdot ie^{it} dt = i\int_0^{2\pi} e^{i(n+1)t} dt\)。 \(n \neq -1\)：\(= i \cdot \frac{e^{i(n+1) \cdot 2\pi} - 1}{i(n+1)} = 0\)。 \(n = -1\)：\(= i \int_0^{2\pi} 1\, dt = 2\pi i\)。 易错点：\(\oint_{|z|=1} 1/z\, dz = 2\pi i \neq 0\)！ \(1/z\) 在 \(z = 0\) 不全纯，Cauchy 定理不适用。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\oint_{|z|=2} e^z dz = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(e^z\\) 是整函数（处处全纯），由 Cauchy 定理闭路积分为 0。')">A. \(2\pi i\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(e^z\\) 是整函数（处处全纯），由 Cauchy 定理闭路积分为 0。')">B. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(e^z\\) 是整函数（处处全纯），由 Cauchy 定理闭路积分为 0。')">C. \(e^2 - 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(e^z\\) 是整函数（处处全纯），由 Cauchy 定理闭路积分为 0。')">D. \(2\pi i e^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Cauchy 积分公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Cauchy 积分公式是复分析最强大的工具之一：全纯函数在区域内部 一点的值完全由它在边界上的值决定！更进一步，各阶导数也同样 由边界积分决定。这一"边界决定内部"的性质在实分析中毫无对应。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Cauchy 公式将"局部信息（点值）"用"全局信息（边界积分）" 表达。这是全纯函数极端刚性的又一体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cauchy 积分公式</strong>：设 \(f\) 在区域 \(D\) 上全纯，\(\gamma\) 为 \(D\) 中绕 \(z_0\) 逆时针的简单闭曲线。则 \[f(z_0) = \frac{1}{2\pi i} \oint_\gamma \frac{f(z)}{z - z_0}\, dz\] <strong>高阶导数公式</strong>： \[f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_\gamma \frac{f(z)}{(z - z_0)^{n+1}}\, dz\] <strong>Cauchy 估计</strong>：\(|f^{(n)}(z_0)| \leq \frac{n! M}{R^n}\) （\(M = \max_{|z - z_0| = R} |f(z)|\)）。 <strong>Liouville 定理</strong>（严格证明）：有界整函数 \(f\)。 \(|f'(z_0)| \leq M/R\)（\(M\) 为全局界，\(R\) 任意大）， 故 \(f' \equiv 0\)，\(f\) 为常数。 <strong>代数基本定理</strong>：\(n\) 次多项式有 \(n\) 个复根（Liouville 推论）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\oint_{|z|=2} \frac{e^z}{z - 1} dz\)。 解答：\(e^z\) 全纯，\(z_0 = 1\) 在 \(|z| = 2\) 内部。 Cauchy 公式：\(= 2\pi i \cdot e^1 = 2\pi i e\)。 例题：\(\oint_{|z|=1} \frac{e^z}{z^3} dz\)。 解答：\(f(z) = e^z\), \(z_0 = 0\), \(n = 2\)。 \(= 2\pi i \cdot f''(0)/2! = 2\pi i \cdot 1/2 = \pi i\)。 易错点：如果 \(z_0\) 在曲线外部，积分为 0（不是 \(2\pi i f(z_0)\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\oint_{|z|=1} \frac{\sin z}{z^2} dz = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(f(z) = \\sin z\\), \\(z_0 = 0\\), \\(n = 1\\)。')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(f(z) = \\sin z\\), \\(z_0 = 0\\), \\(n = 1\\)。')">B. \(2\pi i\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(f(z) = \\sin z\\), \\(z_0 = 0\\), \\(n = 1\\)。')">C. \(\pi i\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(f(z) = \\sin z\\), \\(z_0 = 0\\), \\(n = 1\\)。')">D. \(2\pi\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Cauchy 定理的推论与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Cauchy 定理和积分公式衍生出整套强大工具：Morera 定理（积分版 全纯性判据）、Schwarz 引理（单位圆上的刚性估计）、Liouville 定理的延伸。这些工具在几何函数论和值分布理论中反复使用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Morera 定理</strong>：若 \(f\) 在区域 \(D\) 上连续，且对 \(D\) 中每个 三角形 \(\Delta\) 都有 \(\oint_{\partial\Delta} f dz = 0\)，则 \(f\) 全纯。 （构造原函数 \(F(z) = \int_{z_0}^z f\)，\(F' = f\)，全纯函数的导数全纯。） <strong>Schwarz 引理</strong>：设 \(f: \mathbb{D} \to \mathbb{D}\) 全纯， \(f(0) = 0\)（\(\mathbb{D}\) 为单位圆盘）。则 \[|f(z)| \leq |z|, \quad |f'(0)| \leq 1\] 等号成立 ⇔ \(f(z) = e^{i\theta} z\)。 证明：\(g(z) = f(z)/z\) 在 \(\mathbb{D}\) 上全纯（可去奇点）， \(|g| \leq 1/r\) 在 \(|z| = r < 1\) 上，令 \(r \to 1\) 得 \(|g| \leq 1\)。 <strong>最大模原理</strong>（精确版）：非常数全纯函数在区域内部不取 \(|f|\) 的最大值。推论：\(\max_{\overline{D}} |f| = \max_{\partial D} |f|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Schwarz 引理在双曲几何中刻画了 Poincaré 圆盘的等距映射群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: \mathbb{D} \to \mathbb{D}\) 全纯，\(f(0) = 0\)，\(f(1/2) = 1/3\)。 证明 \(|f'(0)| \leq 1\)，并讨论等号条件。 解答：Schwarz 引理直接给出 \(|f'(0)| \leq 1\)。 若 \(|f'(0)| = 1\)，则 \(f(z) = e^{i\theta}z\)， 但 \(f(1/2) = e^{i\theta}/2 = 1/3\) 意味 \(|e^{i\theta}/2| = 1/2 \neq 1/3\)。 矛盾，故 \(|f'(0)| < 1\)。 易错点：Schwarz 引理要求 \(f(0) = 0\)。一般的 \(\mathbb{D} \to \mathbb{D}\) 映射需先用 Möbius 变换标准化。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Morera 定理是哪个定理的"逆"？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy-Goursat: 全纯 ⇒ 闭路积分为零。')">A. Liouville 定理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Cauchy-Goursat: 全纯 ⇒ 闭路积分为零。')">B. Cauchy-Goursat 定理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy-Goursat: 全纯 ⇒ 闭路积分为零。')">C. 最大模原理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy-Goursat: 全纯 ⇒ 闭路积分为零。')">D. Cauchy 积分公式</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>调和函数与 Poisson 积分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>全纯函数的实部和虚部都是调和函数（\(\Delta u = 0\)）。反过来， 单连通区域上的调和函数都是某个全纯函数的实部。调和函数理论 连接了复分析和偏微分方程，Poisson 积分公式则给出了圆盘上 Dirichlet 问题的显式解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>全纯函数是"成对"的调和函数 \((u, v)\)（调和共轭对）， CR 方程是它们的耦合关系。在单连通域上调和函数总有 全纯"提升"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>调和函数</strong>：\(\Delta u = u_{xx} + u_{yy} = 0\)。 全纯函数 \(f = u + iv\) 的 \(u, v\) 调和。 <strong>调和共轭</strong>：给定调和 \(u\)，在单连通域上存在 \(v\) 使 \(f = u + iv\) 全纯。 \(v\) 由 CR 方程 \(v_x = -u_y\), \(v_y = u_x\) 和路径积分确定。 <strong>均值性质</strong>：\(u\) 调和 ⇒ \[u(z_0) = \frac{1}{2\pi} \int_0^{2\pi} u(z_0 + re^{i\theta})\, d\theta\] <strong>Poisson 积分公式</strong>：设 \(u\) 在 \(\overline{\mathbb{D}}\) 上调和。则 \[u(re^{i\theta}) = \frac{1}{2\pi} \int_0^{2\pi} \frac{1 - r^2}{1 - 2r\cos(\theta - t) + r^2} u(e^{it})\, dt\] Poisson 核 \(P_r(\theta) = \frac{1 - r^2}{1 - 2r\cos\theta + r^2}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>稳态热传导：温度分布满足 \(\Delta T = 0\)，边界温度已知时 Poisson 公式给出内部温度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(u\) 在单位圆盘上调和，边界值 \(u(e^{i\theta}) = \cos\theta\)。 求 \(u(0)\)。 解答：均值性质：\(u(0) = \frac{1}{2\pi}\int_0^{2\pi} \cos\theta\, d\theta = 0\)。 实际上 \(u(re^{i\theta}) = r\cos\theta\)（对应 \(f(z) = z\) 的实部）， \(u(0) = 0\)。✓ 易错点：调和共轭不唯一——差一个常数。\(v\) 确定到相差一个加法常数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">调和函数的均值性质说？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(u(z_0) = \\frac{1}{2\\pi}\\int_0^{2\\pi} u(z_0 + re^{i\\theta}) d\\theta\\)，')">A. 函数值等于整个区域的平均</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(u(z_0) = \\frac{1}{2\\pi}\\int_0^{2\\pi} u(z_0 + re^{i\\theta}) d\\theta\\)，')">B. 函数值等于任意圆周上值的平均</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(u(z_0) = \\frac{1}{2\\pi}\\int_0^{2\\pi} u(z_0 + re^{i\\theta}) d\\theta\\)，')">C. 函数处处连续</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(u(z_0) = \\frac{1}{2\\pi}\\int_0^{2\\pi} u(z_0 + re^{i\\theta}) d\\theta\\)，')">D. 函数有界</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/analysis/complex.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

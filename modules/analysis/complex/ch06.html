@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 解析延拓与整函数 — 复分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "complex-ch06-q1",
+        "question": "解析延拓的定义：\\(f\\) 在 \\(D_1\\) 全纯，\\(g\\) 在 \\(D_2\\) 全纯（\\(D_1 \\cap D_2 \\neq \\emptyset\\)），\\(f = g\\) on \\(D_1 \\cap D_2\\)。则 \\(g\\) 是 \\(f\\) 的？",
+        "options": [
+          "解析延拓到 \\(D_2\\)（且延拓唯一——恒等定理）",
+        "近似",
+        "Taylor 展开",
+        "调和共轭"
+        ],
+        "answer": 0,
+        "explanation": "\\(D_1 \\cap D_2\\) 开集上 \\(f = g\\) \\(\\Rightarrow\\) 恒等定理保证延拓唯一。可沿路径链式延拓（每步在重叠区域匹配）。\"一个函数在一处的 Taylor 展开'知道'整个函数\"——局部信息决定全局行为。"
+      },
+      {
+        "id": "complex-ch06-q2",
+        "question": "\\(\\sum_{n=0}^\\infty z^n = 1/(1-z)\\)（\\(|z| < 1\\)）。\\(1/(1-z)\\) 在 \\(\\mathbb{C} \\setminus \\{1\\}\\) 全纯。这是幂级数的？",
+        "options": [
+          "解析延拓——幂级数仅在 \\(|z| < 1\\) 收敛，但 \\(1/(1-z)\\) 将函数延拓到更大域",
+        "Taylor 展开",
+        "Laurent 展开",
+        "重新求和"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum z^n\\) 收敛域 \\(= \\{|z| < 1\\}\\)。\\(1/(1-z)\\) 在 \\(\\mathbb{C}\\setminus\\{1\\}\\) 全纯——远超原收敛域。最简单的解析延拓例子：闭式表达式自动提供延拓。不是所有幂级数都有超越收敛圆的延拓（自然边界例外）。"
+      },
+      {
+        "id": "complex-ch06-q3",
+        "question": "Gamma 函数 \\(\\Gamma(z) = \\int_0^\\infty t^{z-1} e^{-t}\\, dt\\)（\\(\\text{Re}(z) > 0\\)）。\\(\\Gamma\\) 可以解析延拓到？",
+        "options": [
+          "\\(\\mathbb{C} \\setminus \\{0, -1, -2, ...\\}\\)（在非正整数处有一阶极点）",
+        "全平面",
+        "仅右半平面",
+        "仅整数点"
+        ],
+        "answer": 0,
+        "explanation": "递推 \\(\\Gamma(z+1) = z\\Gamma(z) \\Rightarrow \\Gamma(z) = \\Gamma(z+1)/z\\)。\\(\\text{Re}(z) > -1\\)：\\(\\Gamma(z) = \\Gamma(z+1)/z\\)（\\(z = 0\\) 极点，\\(\\text{Res} = \\Gamma(1)/0^+ = 1\\)）。迭代延拓到所有负整数之间。\\(\\text{Res}(\\Gamma, -n) = (-1)^n/n!\\)。\\(\\Gamma\\) 是\"最自然的\"阶乘延拓。"
+      },
+      {
+        "id": "complex-ch06-q4",
+        "question": "Riemann Zeta 函数 \\(\\zeta(s) = \\sum_{n=1}^\\infty n^{-s}\\)（\\(\\text{Re}(s) > 1\\)）。\\(\\zeta\\) 可以延拓到？",
+        "options": [
+          "\\(\\mathbb{C} \\setminus \\{1\\}\\)（\\(s = 1\\) 是唯一极点，\\(\\text{Res} = 1\\)）",
+        "全平面",
+        "仅 \\(\\text{Re}(s) > 0\\)",
+        "仅整数点"
+        ],
+        "answer": 0,
+        "explanation": "通过函数方程 \\(\\zeta(s) = 2^s \\pi^{s-1} \\sin(\\pi s/2) \\Gamma(1-s) \\zeta(1-s)\\) 延拓到 \\(\\text{Re}(s) < 0\\)。临界带 \\(0 < \\text{Re}(s) < 1\\)：Riemann 猜想（非平凡零点在 \\(\\text{Re}(s) = 1/2\\) 上）。\\(\\zeta(-2n) = 0\\)（平凡零点——\\(\\sin\\) 的零点）。"
+      },
+      {
+        "id": "complex-ch06-q5",
+        "question": "整函数（entire function）的定义？",
+        "options": [
+          "在全复平面 \\(\\mathbb{C}\\) 上全纯的函数",
+        "在去掉有限点后全纯",
+        "多项式",
+        "有限阶的函数"
+        ],
+        "answer": 0,
+        "explanation": "整函数 \\(= \\) \\(\\mathbb{C}\\) 上的全纯函数。例：多项式、\\(e^z\\)、\\(\\sin z\\)、\\(\\cos z\\)。Taylor 展开 \\(\\sum a_n z^n\\) 收敛半径 \\(R = \\infty\\)。整函数 \\(\\neq\\) 多项式（\\(e^z\\) 非多项式但整函数）。Liouville：有界整函数 = 常数。"
+      },
+      {
+        "id": "complex-ch06-q6",
+        "question": "整函数 \\(f\\) 的增长阶（order）\\(\\rho\\) 的定义？",
+        "options": [
+          "\\(\\rho = \\limsup_{r \\to \\infty} \\frac{\\log\\log M(r)}{\\log r}\\)（\\(M(r) = \\max_{|z|=r} |f(z)|\\)）",
+        "\\(\\rho = \\lim M(r)/r\\)",
+        "\\(\\rho = \\) Taylor 系数数目",
+        "\\(\\rho = \\) 零点个数"
+        ],
+        "answer": 0,
+        "explanation": "\\(M(r) \\sim e^{r^\\rho}\\) 大致表达式。\\(e^z\\)：\\(M(r) = e^r\\)，\\(\\rho = 1\\)。\\(e^{z^2}\\)：\\(M(r) = e^{r^2}\\)，\\(\\rho = 2\\)。多项式：\\(M(r) \\sim r^n\\)，\\(\\log\\log M/\\log r \\to 0\\)，\\(\\rho = 0\\)。增长阶度量整函数在无穷远处的\"速度\"。"
+      },
+      {
+        "id": "complex-ch06-q7",
+        "question": "Picard 小定理：非常数整函数至多缺一个值（\\(f(\\mathbb{C})\\) 覆盖 \\(\\mathbb{C}\\) 或 \\(\\mathbb{C}\\) 减一点）。\\(e^z\\) 缺什么值？",
+        "options": [
+          "\\(0\\)（\\(e^z \\neq 0\\)，\\(\\forall z\\)）",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "不缺值"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^z\\) 取遍所有非零复数值（\\(e^z = w \\Rightarrow z = \\log w\\)，\\(w \\neq 0\\) 时存在）。\\(e^z \\neq 0\\)。唯一缺值 \\(= 0\\)。Picard 小定理：缺两个或以上值 \\(\\Rightarrow\\) 常数。例：\\(e^z + 1\\) 缺 \\(0\\)？不——\\(e^z + 1 = 0 \\Rightarrow e^z = -1 \\Rightarrow z = i\\pi\\)。\\(e^z + 1\\) 不缺任何值。"
+      },
+      {
+        "id": "complex-ch06-q8",
+        "question": "\\(f(z) = \\sum_{n=1}^\\infty z^{2^n}\\)（\\(|z| < 1\\)）。\\(|z| = 1\\) 是自然边界吗？",
+        "options": [
+          "是——Hadamard 间隙定理（\\(\\lambda_n = 2^n\\)，\\(\\lambda_{n+1}/\\lambda_n = 2 > 1\\)，间隙条件满足）",
+        "不是",
+        "可延拓到 \\(|z| < 2\\)",
+        "延拓到全平面"
+        ],
+        "answer": 0,
+        "explanation": "Hadamard 间隙（lacunary）定理：\\(\\sum a_n z^{\\lambda_n}\\)（\\(\\lambda_{n+1}/\\lambda_n \\geq q > 1\\)）\\(\\Rightarrow\\) 收敛圆是自然边界。\\(\\lambda_n = 2^n\\)：\\(q = 2\\)。\\(f\\) 无法越过 \\(|z| = 1\\) 解析延拓。在 \\(|z| = 1\\) 上处处发散——边界行为极端。"
+      },
+      {
+        "id": "complex-ch06-q9",
+        "question": "\\(\\Gamma(z)\\) 的 Weierstrass 乘积表示？",
+        "options": [
+          "\\(\\frac{1}{\\Gamma(z)} = ze^{\\gamma z} \\prod_{n=1}^\\infty \\left(1 + \\frac{z}{n}\\right) e^{-z/n}\\)（\\(\\gamma\\) = Euler-Mascheroni 常数）",
+        "\\(\\Gamma(z) = \\prod(1 - z/n)\\)",
+        "\\(\\Gamma(z) = z!\\)",
+        "\\(\\Gamma(z) = e^{z^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(1/\\Gamma(z)\\) 是整函数（\\(\\Gamma\\) 的零点 = \\(1/\\Gamma\\) 的零点 = \\(\\emptyset\\)；\\(\\Gamma\\) 的极点 \\(0, -1, -2, ...\\) = \\(1/\\Gamma\\) 的零点）。Weierstrass 乘积将 \\(1/\\Gamma\\) 展为无穷乘积。\\(\\gamma = \\lim(1 + 1/2 + ... + 1/n - \\ln n) \\approx 0.5772\\)。这是 \\(\\Gamma\\) 函数最基本的表示之一。"
+      },
+      {
+        "id": "complex-ch06-q10",
+        "question": "Weierstrass 因子分解定理：给定计重数的零点序列 \\(\\{a_n\\}\\)（\\(|a_n| \\to \\infty\\)），存在整函数 \\(f\\) 以此为零点集。\\(f = ?\\)",
+        "options": [
+          "\\(f(z) = z^m e^{g(z)} \\prod_{n=1}^\\infty E_{p_n}(z/a_n)\\)（\\(E_p\\) 是初等因子，\\(g\\) 整函数）",
+        "\\(f = \\prod(z - a_n)\\)（可能不收敛）",
+        "\\(f\\) 不存在",
+        "\\(f\\) 只是多项式"
+        ],
+        "answer": 0,
+        "explanation": "直接乘积 \\(\\prod(z - a_n)\\) 可能发散。初等因子 \\(E_p(z) = (1-z)\\exp(z + z^2/2 + ... + z^p/p)\\) 保证收敛。\\(p_n\\) 的选取使 \\(\\sum |a_n|^{-p_n-1} < \\infty\\)。阶 \\(\\rho\\) 整函数可取 \\(p_n = \\lfloor\\rho\\rfloor\\)。这是构造具有预定零点的整函数的基本工具。"
+      },
+      {
+        "id": "complex-ch06-q11",
+        "question": "Picard 小定理的推论：\\(f\\) 整函数，\\(f\\) 不取值 \\(a\\) 和 \\(b\\)（\\(a \\neq b\\)）。则？",
+        "options": [
+          "\\(f\\) 是常数",
+        "\\(f\\) 是多项式",
+        "\\(f\\) 取值 \\(a\\) 或 \\(b\\) 之一",
+        "不可能"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 缺 \\(a, b\\) 两个值：\\(g = (f - a)/(b - a)\\) 整函数，不取 \\(0\\) 和 \\(1\\)。\\(e^{h(z)}\\) 不取 \\(0\\)——但不取 \\(1\\) 意味着 \\(e^{h(z)} - 1\\) 无零点 \\(\\Rightarrow\\) \\(e^{h(z)} - 1 = e^{k(z)}\\)...链式论证最终导出矛盾（或 \\(h\\) 常数）。Picard：缺两值 \\(\\Rightarrow\\) 常数。"
+      },
+      {
+        "id": "complex-ch06-q12",
+        "question": "解析延拓的单值性问题：沿两条不同路径延拓可能得到不同值吗？",
+        "options": [
+          "可以——若区域非单连通（如绕 \\(0\\) 一圈后 \\(\\log z\\) 增加 \\(2\\pi i\\)）",
+        "不可能",
+        "总是相同",
+        "取决于初始函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log z = \\ln|z| + i\\arg z\\)：沿不绕原点的路径延拓——单值。绕原点：\\(\\arg z\\) 增 \\(2\\pi\\)，\\(\\log z\\) 增 \\(2\\pi i\\)——多值！单值性与区域的基本群有关。Riemann 面：\\(\\log z\\) 的\"自然定义域\"是无限层覆盖面。"
+      },
+      {
+        "id": "complex-ch06-q13",
+        "question": "\\(\\Gamma(1/2) = ?\\)",
+        "options": [
+          "\\(\\sqrt{\\pi}\\)",
+        "\\(\\pi\\)",
+        "\\(1/2\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Gamma(1/2) = \\int_0^\\infty t^{-1/2} e^{-t}\\, dt\\)。\\(t = u^2\\)：\\(= 2\\int_0^\\infty e^{-u^2}\\, du = 2 \\cdot \\sqrt{\\pi}/2 = \\sqrt{\\pi}\\)。Gauss 积分 \\(\\int e^{-u^2} = \\sqrt{\\pi}/2\\)。\\(\\Gamma\\) 函数在半整数处有封闭形式：\\(\\Gamma(n+1/2) = \\frac{(2n)!}{4^n n!}\\sqrt{\\pi}\\)。"
+      },
+      {
+        "id": "complex-ch06-q14",
+        "question": "\\(\\sin z\\) 的 Weierstrass 乘积表示？",
+        "options": [
+          "\\(\\sin(\\pi z) = \\pi z \\prod_{n=1}^\\infty \\left(1 - \\frac{z^2}{n^2}\\right)\\)",
+        "\\(\\sin z = z \\prod(1 - z/n)\\)",
+        "\\(\\sin z = \\sum z^n/n!\\)",
+        "\\(\\sin z = e^z - e^{-z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sin(\\pi z)\\) 零点 \\(= \\mathbb{Z}\\)。\\(\\sin(\\pi z)/(\\pi z)\\) 偶整函数零点 \\(\\pm n\\)（\\(n \\geq 1\\)）。Weierstrass：\\(\\sin(\\pi z) = \\pi z \\prod_{n=1}^\\infty (1 - z^2/n^2)\\)（无需指数因子——\\(\\sum 1/n^2 < \\infty\\)）。Euler 的伟大发现——由此推出 \\(\\zeta(2) = \\pi^2/6\\)。"
+      },
+      {
+        "id": "complex-ch06-q15",
+        "question": "\\(f(z) = e^{e^z}\\)。\\(f\\) 的增长阶 \\(\\rho = ?\\)",
+        "options": [
+          "\\(\\rho = \\infty\\)（超指数增长）",
+        "\\(\\rho = 1\\)",
+        "\\(\\rho = 2\\)",
+        "\\(\\rho = e\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M(r) = e^{e^r}\\)（\\(\\text{Re}(z) = r\\) 方向最大模）。\\(\\log\\log M(r) = r\\)。\\(\\frac{r}{\\log r} \\to \\infty\\)。\\(\\rho = \\infty\\)。\\(e^{e^z}\\) 增长太快——不属于有限阶整函数。Hadamard 因式分解仅对有限阶整函数成立。"
+      },
+      {
+        "id": "complex-ch06-q16",
+        "question": "Schwarz 反射原理：\\(f\\) 在上半圆盘全纯，在实轴段连续且取实值。\\(f\\) 可以延拓到？",
+        "options": [
+          "下半圆盘——\\(f(\\bar z) = \\overline{f(z)}\\)（关于实轴对称延拓）",
+        "全平面",
+        "无法延拓",
+        "仅延拓到虚轴"
+        ],
+        "answer": 0,
+        "explanation": "\\(g(z) = \\overline{f(\\bar z)}\\)（\\(\\text{Im}(z) < 0\\)）：\\(g\\) 反全纯 → 取共轭 → 全纯。\\(g\\) 和 \\(f\\) 在实轴上连续拼接（\\(f|_{\\mathbb{R}}\\) 实值 \\(\\Rightarrow\\) \\(g(x) = \\overline{f(x)} = f(x)\\)）。\\(F = f \\cup g\\) 在合并域上全纯（Morera 检验接缝处）。反射原理的推广：实轴段上 \\(f\\) 取圆弧值 \\(\\to\\) Möbius 反射。"
+      },
+      {
+        "id": "complex-ch06-q17",
+        "question": "Mittag-Leffler 定理：给定极点 \\(\\{a_n\\}\\) 和主要部分 \\(p_n(z) = \\sum_{k=1}^{m_n} c_k (z-a_n)^{-k}\\)，存在亚纯函数以此为极点。与 Weierstrass 的关系？",
+        "options": [
+          "Weierstrass 处理零点（乘积），Mittag-Leffler 处理极点（部分分式求和）——互补",
+        "相同定理",
+        "Mittag-Leffler 是 Weierstrass 的特例",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "Mittag-Leffler：\\(f(z) = g(z) + \\sum [p_n(z) - q_n(z)]\\)（\\(g\\) 整函数，\\(q_n\\) 修正多项式保证收敛）。Weierstrass：\\(f(z) = z^m e^{g(z)} \\prod E_p(z/a_n)\\)（参数化零点）。两者合用：任意预定零点和极点（无矛盾处）的亚纯函数都存在。"
+      },
+      {
+        "id": "complex-ch06-q18",
+        "question": "\\(\\zeta(s)\\) 在 \\(s = 1\\) 的 Laurent 展开：\\(\\zeta(s) = \\frac{1}{s-1} + \\gamma + O(s-1)\\)（\\(\\gamma\\) 是 Euler-Mascheroni 常数）。这说明？",
+        "options": [
+          "\\(s = 1\\) 是一阶极点，\\(\\text{Res}(\\zeta, 1) = 1\\)，\\(\\gamma \\approx 0.5772\\) 是常数项",
+        "\\(s = 1\\) 是二阶极点",
+        "\\(\\zeta\\) 在 \\(s = 1\\) 全纯",
+        "\\(\\text{Res} = \\gamma\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\zeta(s) \\sim 1/(s-1)\\)（\\(s \\to 1\\)）：一阶极点，留数 \\(= 1\\)。\\(\\lim_{s \\to 1}[\\zeta(s) - 1/(s-1)] = \\gamma\\)（Stieltjes 常数 \\(\\gamma_0 = \\gamma\\)）。这个展开连接了解析数论（\\(\\zeta\\) 的极点）与经典常数（\\(\\gamma\\)）。"
+      },
+      {
+        "id": "complex-ch06-q19",
+        "question": "Hadamard 因式分解定理：阶 \\(\\rho\\) 的整函数 \\(f\\)（零点 \\(\\{a_n\\}\\)）可写为？",
+        "options": [
+          "\\(f(z) = z^m e^{P(z)} \\prod_{n} E_p(z/a_n)\\)（\\(P\\) 是 \\(\\leq \\rho\\) 次多项式，\\(p = \\lfloor\\rho\\rfloor\\)）",
+        "\\(f = \\prod(z - a_n)\\)",
+        "\\(f = e^{P(z)}\\)",
+        "\\(f = \\) 多项式"
+        ],
+        "answer": 0,
+        "explanation": "\\(p = \\lfloor\\rho\\rfloor\\)（genus）。\\(E_p(u) = (1-u)e^{u + u^2/2 + ... + u^p/p}\\)——标准 Weierstrass 初等因子的特化。\\(P(z)\\) 的次数 \\(\\leq p\\) 或 \\(p+1\\)（由最小类型/最大类型决定）。\\(e^z\\)：\\(\\rho = 1\\)，无零点，\\(P(z) = z\\)。\\(\\sin(\\pi z)\\)：\\(\\rho = 1\\)，\\(P = 0\\)。"
+      },
+      {
+        "id": "complex-ch06-q20",
+        "question": "Picard 大定理（本性奇点版）：\\(f\\) 在 \\(z_0\\) 有本性奇点 \\(\\Rightarrow\\) 在任意删除邻域 \\(D^*(z_0, \\epsilon)\\) 中 \\(f\\) 取遍所有复数值无穷多次，至多？",
+        "options": [
+          "一个例外值",
+        "两个例外值",
+        "有限个例外值",
+        "无例外"
+        ],
+        "answer": 0,
+        "explanation": "Picard 大定理 \\(\\supsetneq\\) Casorati-Weierstrass（稠密 \\(\\to\\) 无穷次）。\\(e^{1/z}\\)（\\(z_0 = 0\\)）：取所有非零值无穷次，缺值 \\(0\\)。\\(\\sin(1/z)\\)：取所有值无穷次（无缺值）。证明需要正规族理论（Montel/Schottky）或模函数。"
+      },
+      {
+        "id": "complex-ch06-q21",
+        "question": "解析延拓可通过什么途径实现？列举三种方法？",
+        "options": [
+          "(i) 幂级数链（重叠圆盘）；(ii) 函数方程/递推（如 \\(\\Gamma(z) = \\Gamma(z+1)/z\\)）；(iii) 积分表示（如 Euler 积分延拓 \\(B\\) 函数）",
+        "仅幂级数",
+        "仅 Laurent 展开",
+        "仅数值方法"
+        ],
+        "answer": 0,
+        "explanation": "(i) 幂级数链：沿路径选 \\(z_1, z_2, ...\\)，每步 Taylor 展开的收敛域重叠——系统但慢。(ii) 函数方程：\\(\\Gamma(z+1) = z\\Gamma(z)\\) 自动推进到负半轴。(iii) 积分：\\(\\zeta(s) = \\frac{1}{\\Gamma(s)}\\int_0^\\infty \\frac{t^{s-1}}{e^t - 1}\\, dt\\) 在更大域收敛。实际上最常用 (ii) 和 (iii)。"
+      },
+      {
+        "id": "complex-ch06-q22",
+        "question": "Beta 函数 \\(B(a,b) = \\int_0^1 t^{a-1}(1-t)^{b-1}\\, dt\\) 和 \\(\\Gamma\\) 的关系？",
+        "options": [
+          "\\(B(a,b) = \\frac{\\Gamma(a)\\Gamma(b)}{\\Gamma(a+b)}\\)",
+        "\\(B(a,b) = \\Gamma(a) + \\Gamma(b)\\)",
+        "\\(B = \\Gamma^2\\)",
+        "\\(B = 1/\\Gamma\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Gamma(a)\\Gamma(b) = \\int_0^\\infty \\int_0^\\infty s^{a-1} t^{b-1} e^{-(s+t)}\\, ds\\, dt\\)。\\(s = uv\\)，\\(t = u(1-v)\\)：\\(= \\int_0^\\infty u^{a+b-1} e^{-u}\\, du \\int_0^1 v^{a-1}(1-v)^{b-1}\\, dv = \\Gamma(a+b) B(a,b)\\)。Beta 函数将卷积化为乘积——与 Fourier 变换精神相同。"
+      },
+      {
+        "id": "complex-ch06-q23",
+        "question": "Jensen 公式：\\(f\\) 在 \\(|z| \\leq R\\) 全纯无零点在 \\(|z| = R\\) 上，零点 \\(a_1, ..., a_n\\)（\\(|a_k| < R\\)），\\(f(0) \\neq 0\\)。则 \\(\\log|f(0)| = ?\\)",
+        "options": [
+          "\\(-\\sum \\log\\frac{R}{|a_k|} + \\frac{1}{2\\pi}\\int_0^{2\\pi}\\log|f(Re^{i\\theta})|\\, d\\theta\\)",
+        "\\(\\sum \\log|a_k|\\)",
+        "\\(\\log R\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Jensen 公式将零点分布与边界模联系起来：\\(\\sum \\log(R/|a_k|) = \\frac{1}{2\\pi}\\int_0^{2\\pi}\\log|f(Re^{i\\theta})|\\, d\\theta - \\log|f(0)|\\)。零点越多/越接近原点 \\(\\Rightarrow\\) 左边越大 \\(\\Rightarrow\\) \\(|f|\\) 在边界上越大。Jensen \\(\\Rightarrow\\) 零点计数函数 \\(n(r)\\) 与 \\(\\log M(r)\\) 的关系——推出 Nevanlinna 理论。"
+      },
+      {
+        "id": "complex-ch06-q24",
+        "question": "\\(\\sin z\\) 的增长阶？类型？",
+        "options": [
+          "阶 \\(\\rho = 1\\)，类型 \\(\\sigma = 1\\)（\\(M(r) \\sim e^r\\)：\\(|\\sin(ir)| = \\sinh r \\sim e^r/2\\)）",
+        "\\(\\rho = 2\\)",
+        "\\(\\rho = 1\\)，\\(\\sigma = 0\\)",
+        "\\(\\rho = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M(r) = \\max_{|z|=r} |\\sin z|\\)。\\(z = ir\\)：\\(|\\sin ir| = \\sinh r \\sim e^r/2\\)。\\(\\log M(r) \\sim r\\)。\\(\\rho = \\limsup \\frac{\\log\\log M}{\\log r} = \\limsup \\frac{\\log r}{\\log r} = 1\\)。类型 \\(\\sigma = \\limsup \\frac{\\log M}{r^\\rho} = \\limsup \\frac{r}{r} = 1\\)。\\(\\sin z\\) 是阶 \\(1\\) 类型 \\(1\\) 的整函数。"
+      },
+      {
+        "id": "complex-ch06-q25",
+        "question": "monodromy 定理：\\(f\\) 可沿 \\(D\\) 中任何路径解析延拓（\\(D\\) 单连通），则延拓到 \\(D\\) 上的单值全纯函数。\\(D\\) 单连通条件可否去掉？",
+        "options": [
+          "不能——非单连通域中绕洞路径可能产生多值（如 \\(\\log z\\) 在 \\(\\mathbb{C}^*\\) 中）",
+        "可以去掉",
+        "无关",
+        "仅对多项式"
+        ],
+        "answer": 0,
+        "explanation": "\\(D = \\mathbb{C}^*\\)：\\(\\log z\\) 沿不绕原点路径——增量 \\(0\\)。绕原点：增量 \\(\\pm 2\\pi i\\)——多值。monodromy 定理的单连通假设保证所有路径同伦，延拓唯一。非单连通：需 Riemann 面或指定支割线。"
+      },
+      {
+        "id": "complex-ch06-q26",
+        "question": "在概率论中，\\(\\Gamma\\) 分布的 PDF \\(f(x) = \\frac{x^{\\alpha-1} e^{-x/\\beta}}{\\beta^\\alpha \\Gamma(\\alpha)}\\)（\\(x > 0\\)）。\\(\\Gamma(\\alpha)\\) 在分母中的作用？",
+        "options": [
+          "归一化常数——保证 \\(\\int_0^\\infty f(x)\\, dx = 1\\)",
+        "决定均值",
+        "决定方差",
+        "无作用"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_0^\\infty x^{\\alpha-1} e^{-x/\\beta}\\, dx = \\beta^\\alpha \\Gamma(\\alpha)\\)（\\(t = x/\\beta\\) 换元）。\\(\\Gamma(\\alpha)\\) 是积分 \\(\\int t^{\\alpha-1}e^{-t}\\) 的值——恰好是归一化因子。\\(\\Gamma\\) 函数在统计中无处不在（\\(\\chi^2\\) 分布、\\(F\\) 分布、\\(t\\) 分布的归一化都涉及 \\(\\Gamma\\)）。"
+      },
+      {
+        "id": "complex-ch06-q27",
+        "question": "在信号处理中，有限 Blaschke 乘积 \\(B(z) = e^{i\\theta}\\prod_{k=1}^n \\frac{z - a_k}{1 - \\bar a_k z}\\)（\\(|a_k| < 1\\)）。\\(|B(z)| = ?\\)（\\(|z| = 1\\)）",
+        "options": [
+          "\\(1\\)（全通滤波器——单位圆上模恒为 \\(1\\)）",
+        "\\(< 1\\)",
+        "\\(> 1\\)",
+        "\\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "每个因子 \\(\\frac{z-a}{1-\\bar a z}\\)：\\(|z|=1\\) 时模 \\(= 1\\)（前面已证）。\\(|B| = 1\\) on \\(|z| = 1\\)。\\(B\\) 是 \\(n\\) 阶有理函数，\\(\\mathbb{D}\\) 到 \\(\\mathbb{D}\\) 的 \\(n:1\\) 映射。信号处理：全通滤波器修改相位而不改变幅度——用于相位均衡。"
+      },
+      {
+        "id": "complex-ch06-q28",
+        "question": "Nevanlinna 值分布理论将 Picard 定理推广为定量形式。第一基本定理 \\(T(r, f) = N(r, a) + m(r, a) + O(1)\\) 中各项的含义？",
+        "options": [
+          "\\(T\\) = 特征函数（增长度量），\\(N\\) = \\(a\\)-值点的计数函数，\\(m\\) = 接近函数（\\(f\\) 接近 \\(a\\) 但不等于 \\(a\\) 的度量）",
+        "\\(T\\) = Taylor 系数",
+        "\\(N\\) = 零点，\\(m\\) = 极点",
+        "无明确含义"
+        ],
+        "answer": 0,
+        "explanation": "\\(N(r, a) = \\int_0^r \\frac{n(t,a)}{t}\\, dt\\)（\\(n(t,a)\\) = \\(|z| \\leq t\\) 内 \\(f(z) = a\\) 的个数）。\\(m(r,a) = \\frac{1}{2\\pi}\\int_0^{2\\pi}\\log^+ |1/(f(re^{i\\theta})-a)|\\, d\\theta\\)。\\(T(r)\\) 与 \\(a\\) 无关——所有值\"平等地\"被 \\(f\\) 取到（大致）。亏值（deficient values）的亏量 \\(\\delta(a) = 1 - \\limsup N/T \\leq 1\\)，\\(\\sum \\delta(a) \\leq 2\\)——定量 Picard。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="complex"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/complex.html" class="module-name">复分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 解析延拓的概念与方法</a></li>
+      <li><a href="#kp2">02 · 整函数与增长阶</a></li>
+      <li><a href="#kp3">03 · Gamma 函数与 Zeta 函数初步</a></li>
+      <li><a href="#kp4">04 · Picard 定理与值分布</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>解析延拓与整函数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>解析延拓的概念与方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>全纯函数有惊人的刚性——在一个小区域上的值决定了它在更大区域 上的值。解析延拓正是利用这种刚性，将函数从小区域"延伸"到 大区域。最著名的例子是 Riemann zeta 函数：原始定义 \(\zeta(s) = \sum n^{-s}\) 仅在 \(\text{Re}(s) > 1\) 收敛，但可以 解析延拓到除 \(s = 1\) 外的全复平面。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>解析延拓的本质是唯一性定理的逆应用——如果两个区域的重叠部分 上函数一致，则功能上它们是"同一个函数"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(f_1: D_1 \to \mathbb{C}\) 全纯，\(f_2: D_2 \to \mathbb{C}\) 全纯， \(D_1 \cap D_2 \neq \emptyset\)，\(f_1 = f_2\) 在 \(D_1 \cap D_2\) 上。 则 \(f_2\) 是 \(f_1\) 到 \(D_2\) 的解析延拓。 <strong>唯一性</strong>：延拓（若存在）唯一。 <strong>幂级数方法</strong>：在 \(z_0\) 处 Taylor 展开 → 收敛圆盘扩大到边界奇点 → 在圆盘内新的点展开 → 沿路径链式延拓。 <strong>Schwarz 反射原理</strong>：\(f\) 在上半平面全纯，在实轴上连续且取实值。 则 \(f\) 可延拓到下半平面：\(f(\bar{z}) = \overline{f(z)}\)。 <strong>自然边界</strong>：延拓不总是可能的。 \(f(z) = \sum z^{2^n}\) 在 \(|z| = 1\) 上的每一点都是奇点—— 单位圆是自然边界，不能延拓到外面。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Riemann zeta 函数 \(\zeta(s) = \sum n^{-s}\)（\(\text{Re}\, s > 1\)） 解析延拓到 \(\mathbb{C} \setminus \{1\}\)，满足函数方程 \(\zeta(s) = 2^s\pi^{s-1}\sin(\pi s/2)\Gamma(1-s)\zeta(1-s)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = \sum_{n=0}^\infty z^n = 1/(1-z)\)（\(|z| < 1\)）。 \(g(z) = 1/(1-z)\) 定义在 \(\mathbb{C} \setminus \{1\}\) 上。 \(g\) 是 \(f\) 的解析延拓。 原级数在 \(|z| = 1\) 发散，但函数本身在 \(z \neq 1\) 处全纯。 易错点：解析延拓可能导致多值函数。例如 \(\log z\) 沿绕 原点的路径延拓后值变化 \(2\pi i\)——需引入 Riemann 面。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\sum z^{n!}\) 的自然边界是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。单位圆上的有理角点（\\(e^{2\\pi i p/q}\\)）是奇点')">A. 实轴</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。单位圆上的有理角点（\\(e^{2\\pi i p/q}\\)）是奇点')">B. 虚轴</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！单位圆上的有理角点（\\(e^{2\\pi i p/q}\\)）是奇点')">C. 单位圆</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。单位圆上的有理角点（\\(e^{2\\pi i p/q}\\)）是奇点')">D. 不存在自然边界</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>整函数与增长阶</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在全复平面上全纯的函数称为整函数。多项式是最简单的整函数， 但 \(e^z\)、\(\sin z\) 等超越整函数增长快得多。整函数的增长速度 由"阶"（order）量化，Hadamard 因式分解定理表明整函数完全 由其零点和增长阶决定——这是解析数论的关键工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>整函数 = 全局幂级数。其增长阶和类型刻画了函数在无穷远处 的行为，Hadamard 理论将零点分布与增长速度联系起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>整函数的阶</strong>：\(\rho = \limsup_{r \to \infty} \frac{\log\log M(r)}{\log r}\) （\(M(r) = \max_{|z|=r} |f(z)|\)）。 - \(e^z\)：\(M(r) = e^r\)，\(\rho = 1\) - 多项式：\(\rho = 0\) - \(e^{z^2}\)：\(\rho = 2\) <strong>Weierstrass 因式分解定理</strong>：给定零点序列 \(\{a_n\}\)（\(a_n \to \infty\)）， 存在整函数以 \(\{a_n\}\) 为零点集： \[f(z) = z^m e^{g(z)} \prod_{n=1}^{\infty} E_p\left(\frac{z}{a_n}\right)\] \(E_p(u) = (1-u)\exp(u + u^2/2 + \cdots + u^p/p)\)（初等因子）。 <strong>Hadamard 因式分解定理</strong>：阶 \(\rho\) 有限的整函数： \[f(z) = z^m e^{Q(z)} \prod E_p(z/a_n)\] 其中 \(Q\) 是次数 \(\leq \rho\) 的多项式，\(p \leq \rho\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\sin(\pi z)\) 的 Weierstrass 分解。 解答：零点 \(a_n = n\)（\(n \in \mathbb{Z}\)）。 \(\sin(\pi z) = \pi z \prod_{n=1}^{\infty}(1 - z^2/n^2)\)。 这给出 \(\zeta(2) = \pi^2/6\)（Euler 的证明）。 易错点：初等因子 \(E_p\) 的 \(p\) 不能太小——需要保证 无穷乘积收敛。\(p\) 由零点的增长速度决定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\cos z\) 的增长阶是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|\\cos z| \\leq e^{|z|}\\)，\\(\\cos(iy) = \\cosh y \\sim e^y/2\\)，')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|\\cos z| \\leq e^{|z|}\\)，\\(\\cos(iy) = \\cosh y \\sim e^y/2\\)，')">B. \(1/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(|\\cos z| \\leq e^{|z|}\\)，\\(\\cos(iy) = \\cosh y \\sim e^y/2\\)，')">C. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|\\cos z| \\leq e^{|z|}\\)，\\(\\cos(iy) = \\cosh y \\sim e^y/2\\)，')">D. \(2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Gamma 函数与 Zeta 函数初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Gamma 函数 \(\Gamma(s) = \int_0^\infty t^{s-1}e^{-t} dt\) 将阶乘 从整数推广到复数（\(\Gamma(n+1) = n!\)）。它是整个分析学、数论 和物理学中最重要的特殊函数。Zeta 函数 \(\zeta(s) = \sum n^{-s}\) 编码了素数分布的信息（Euler 积）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\Gamma\) 和 \(\zeta\) 是将离散对象（阶乘、素数计数） "连续化"的工具——它们通过解析延拓获得全局意义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Gamma 函数</strong>：\(\Gamma(s) = \int_0^\infty t^{s-1}e^{-t} dt\) （\(\text{Re}\, s > 0\)）。递推：\(\Gamma(s+1) = s\Gamma(s)\)。 极点：\(s = 0, -1, -2, \ldots\)（一阶极点）。 \(\Gamma\) 无零点。 <strong>反射公式</strong>：\(\Gamma(s)\Gamma(1-s) = \frac{\pi}{\sin(\pi s)}\)。 <strong>Stirling 近似</strong>：\(\Gamma(s) \sim \sqrt{2\pi} s^{s-1/2} e^{-s}\)（\(|s| \to \infty\)）。 <strong>Riemann Zeta 函数</strong>：\(\zeta(s) = \sum_{n=1}^\infty n^{-s}\)（\(\text{Re}\, s > 1\)）。 <strong>Euler 积</strong>：\(\zeta(s) = \prod_p (1 - p^{-s})^{-1}\)。 <strong>函数方程</strong>：\(\xi(s) = \xi(1-s)\)， 其中 \(\xi(s) = \pi^{-s/2}\Gamma(s/2)\zeta(s)\)。 解析延拓到 \(s = 1\) 处一阶极点，elsewhere 全纯。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>素数定理 \(\pi(x) \sim x/\ln x\) 的证明依赖于 \(\zeta(s)\) 在 \(\text{Re}\, s = 1\) 上无零点。Riemann 猜想断言所有非平凡零点 在 \(\text{Re}\, s = 1/2\) 上。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\Gamma(1/2) = ?\) 解答：\(\Gamma(1/2) = \int_0^\infty t^{-1/2} e^{-t} dt\)。 令 \(t = u^2\)：\(= 2\int_0^\infty e^{-u^2} du = \sqrt{\pi}\)（Gauss 积分）。 或用反射公式：\(\Gamma(1/2)^2 = \pi/\sin(\pi/2) = \pi\)， \(\Gamma(1/2) = \sqrt{\pi}\)。 易错点：\(\Gamma(0)\) 不存在（\(s = 0\) 是极点）。 \(\Gamma(n) = (n-1)!\)，不是 \(n!\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\zeta(s)\) 的 Euler 积公式涉及？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\zeta(s) = \\prod_p (1-p^{-s})^{-1}\\)，乘积取遍所有素数 \\(p\\)，')">A. 所有自然数的积</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\zeta(s) = \\prod_p (1-p^{-s})^{-1}\\)，乘积取遍所有素数 \\(p\\)，')">B. 所有素数的积</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\zeta(s) = \\prod_p (1-p^{-s})^{-1}\\)，乘积取遍所有素数 \\(p\\)，')">C. 所有偶数的积</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\zeta(s) = \\prod_p (1-p^{-s})^{-1}\\)，乘积取遍所有素数 \\(p\\)，')">D. 所有完全平方数的积</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Picard 定理与值分布</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Liouville 定理说有界整函数是常数。如果放宽到"缺少一个值"呢？ 小 Picard 定理给出更强的结论：非常数整函数最多缺少一个值。 大 Picard 定理将此推广到本性奇点附近。这些深层结果揭示了 全纯函数取值的"必然丰富性"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>小 Picard 定理</strong>：非常数整函数 \(f\) 的像至少包含 \(\mathbb{C}\) 中除至多一个点外的所有值。 即：若 \(f\) 不取两个不同的值 \(a, b\)，则 \(f\) 是常数。 例外的一个值可以发生：\(e^z\) 不取 0，但取所有其他复数值。 <strong>大 Picard 定理</strong>（陈述）：在本性奇点的任意邻域内， 全纯函数取到除至多一个值外的所有复数值——而且取无穷多次。 <strong>与 Casorati-Weierstrass 的比较</strong>： C-W: 本性奇点附近像稠密（弱结论）。 大 Picard: 像覆盖几乎全部（强得多）。 证明思路（小 Picard）：若 \(f\) 不取 \(0\) 和 \(1\)， 则 \(f\) 可提升到 \(\mathbb{H}\)（万有覆叠）， 得有界全纯函数，由 Liouville 为常数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(e^z\) 的像是 \(\mathbb{C} \setminus \{0\}\)。 确认只缺 \(0\) 这一个值。对任意 \(w \neq 0\)， \(e^z = w\) 有解 \(z = \log w\)。 例题：\(e^{1/z}\) 在 \(z = 0\)（本性奇点）的任意小邻域内 取到除 \(0\) 外的所有值。 易错点：小 Picard 说"至多缺一个值"是最优的——\(e^z\) 确实缺一个值。但不能缺两个。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个违反小 Picard 定理？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！不取两个不同值的整函数必为常数（矛盾于"非常数"）。')">A. 整函数不取 0 和 1</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。不取两个不同值的整函数必为常数（矛盾于"非常数"）。')">B. 整函数不取 0</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。不取两个不同值的整函数必为常数（矛盾于"非常数"）。')">C. 整函数取所有复数值</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。不取两个不同值的整函数必为常数（矛盾于"非常数"）。')">D. A 和 B 都可能</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/analysis/complex.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

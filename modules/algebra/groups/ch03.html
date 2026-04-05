@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 正规子群与商群 — 群论 Groupes — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "groups-ch03-q1",
+        "question": "\\(S_3\\) 中 \\(A_3 = \\{e, (1\\;2\\;3), (1\\;3\\;2)\\}\\) 是否为正规子群？判定依据是？",
+        "options": [
+          "是，因为 \\([S_3 : A_3] = 2\\)",
+        "否，因为 \\(A_3\\) 不是交换群",
+        "是，因为 \\(A_3\\) 包含单位元",
+        "否，因为 \\(S_3\\) 非交换"
+        ],
+        "answer": 0,
+        "explanation": "指数为 \\(2\\) 的子群一定正规：只有两个陪集 \\(A_3\\) 和 \\(S_3 \\setminus A_3\\)，左右陪集必须相同（它要么等于 \\(A_3\\) 要么等于补集）。\\([S_3 : A_3] = 6/3 = 2\\)，故 \\(A_3 \\trianglelefteq S_3\\)。"
+      },
+      {
+        "id": "groups-ch03-q2",
+        "question": "下列哪个是 \\(N \\trianglelefteq G\\) 的等价条件？",
+        "options": [
+          "\\(N\\) 是 \\(G\\) 的子群且 \\(|N| = 2\\)",
+        "\\(\\forall g \\in G,\\; gNg^{-1} = N\\)",
+        "\\(N\\) 是交换群",
+        "\\(N \\cap Z(G) \\neq \\{e\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(N \\trianglelefteq G\\) 的定义即 \\(\\forall g \\in G,\\; gNg^{-1} = N\\)（共轭不变性）。A 不充分：\\(S_3\\) 中 \\(\\{e,(1\\;2)\\}\\) 阶为 \\(2\\) 但非正规。C 和 D 均非充分条件。易错：以为阶为 \\(2\\) 的子群一定正规。"
+      },
+      {
+        "id": "groups-ch03-q3",
+        "question": "商群 \\(\\mathbb{Z}/12\\mathbb{Z} \\,/\\, \\langle \\overline{4} \\rangle\\) 的阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\langle \\overline{4} \\rangle = \\{\\overline{0}, \\overline{4}, \\overline{8}\\}\\)，阶为 \\(3\\)。商群阶 \\(= 12/3 = 4\\)。商群元素为 \\(\\{\\overline{0}+H, \\overline{1}+H, \\overline{2}+H, \\overline{3}+H\\}\\)，同构于 \\(\\mathbb{Z}/4\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "groups-ch03-q4",
+        "question": "设 \\(N = \\{e, r^2\\} \\trianglelefteq D_4\\)（\\(|D_4|=8\\)），商群 \\(D_4/N\\) 的阶为？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|D_4/N| = |D_4|/|N| = 8/2 = 4\\)。\\(D_4/N\\) 是一个 \\(4\\) 阶群，同构于 \\(\\mathbb{Z}/4\\mathbb{Z}\\) 或 Klein 四元群 \\(V_4\\)（取决于 \\(D_4\\) 的具体结构）。"
+      },
+      {
+        "id": "groups-ch03-q5",
+        "question": "在 \\(S_3\\) 中，\\((1\\;2)\\) 的共轭类 \\(\\mathrm{Cl}((1\\;2))\\) 包含多少个元素？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(S_3\\) 中共轭类由轮换类型决定。\\((1\\;2)\\) 是对换，\\(S_3\\) 中所有对换为 \\((1\\;2), (1\\;3), (2\\;3)\\)。故 \\(|\\mathrm{Cl}((1\\;2))| = 3\\)。验证：\\([S_3 : C_{S_3}((1\\;2))] = 6/2 = 3\\)。"
+      },
+      {
+        "id": "groups-ch03-q6",
+        "question": "\\(S_3\\) 的共轭类分解为哪些集合？",
+        "options": [
+          "\\(\\{e\\}\\), \\(\\{(1\\;2),(1\\;3),(2\\;3)\\}\\), \\(\\{(1\\;2\\;3),(1\\;3\\;2)\\}\\)",
+        "\\(\\{e, (1\\;2\\;3)\\}\\), \\(\\{(1\\;2), (1\\;3)\\}\\), \\(\\{(2\\;3), (1\\;3\\;2)\\}\\)",
+        "\\(\\{e\\}\\), \\(\\{(1\\;2)\\}\\), \\(\\{(1\\;3), (2\\;3), (1\\;2\\;3), (1\\;3\\;2)\\}\\)",
+        "\\(\\{e, (1\\;2), (1\\;3), (2\\;3)\\}\\), \\(\\{(1\\;2\\;3), (1\\;3\\;2)\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_n\\) 中共轭类由轮换类型决定。\\(S_3\\) 有三种轮换类型：恒等（\\(1\\) 个）、对换（\\(3\\) 个）、\\(3\\)-轮换（\\(2\\) 个）。类方程：\\(6 = 1 + 3 + 2\\)。✓"
+      },
+      {
+        "id": "groups-ch03-q7",
+        "question": "群 \\(G\\) 可解的定义是？",
+        "options": [
+          "\\(G\\) 有合成列且每个合成因子都是素阶循环群",
+        "\\(G\\) 是交换群",
+        "\\(G\\) 的中心非平凡",
+        "\\(G\\) 没有非平凡正规子群"
+        ],
+        "answer": 0,
+        "explanation": "\\(G\\) 可解指存在正规列 \\(\\{e\\} = G_0 \\trianglelefteq G_1 \\trianglelefteq \\cdots \\trianglelefteq G_n = G\\) 使每个商 \\(G_{i+1}/G_i\\) 是交换群（等价地，合成因子为素阶循环群）。B 太强（交换群可解但反过来不一定）；D 是单群的定义。"
+      },
+      {
+        "id": "groups-ch03-q8",
+        "question": "在 \\(S_4\\) 中，\\(V = \\{e, (1\\;2)(3\\;4), (1\\;3)(2\\;4), (1\\;4)(2\\;3)\\}\\) 是否为 \\(S_4\\) 的正规子群？",
+        "options": [
+          "是，因为 \\(V\\) 是 \\(S_4\\) 中所有双对换组成的集合，共轭不变",
+        "否，因为 \\(|V| = 4\\) 不整除 \\(24\\)",
+        "是，因为 \\(V\\) 是交换群",
+        "否，因为 \\(V\\) 不包含所有偶置换"
+        ],
+        "answer": 0,
+        "explanation": "\\(V\\) 恰好是 \\(S_4\\) 中全部轮换类型为 \\((2,2)\\) 的置换加上 \\(e\\)。在 \\(S_n\\) 中共轭保持轮换类型，故 \\(gVg^{-1} = V\\)。\\(V \\cong \\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)，\\(V \\trianglelefteq S_4\\)（也是 \\(A_4\\) 的正规子群）。"
+      },
+      {
+        "id": "groups-ch03-q9",
+        "question": "设 \\(G = GL_2(\\mathbb{R})\\)，\\(N = SL_2(\\mathbb{R})\\)。验证 \\(N \\trianglelefteq G\\) 的关键是？",
+        "options": [
+          "\\(N = \\ker(\\det)\\)，同态的核一定正规",
+        "\\(N\\) 是有限群",
+        "\\(N\\) 是交换群",
+        "\\(|N|\\) 整除 \\(|G|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\det: GL_2(\\mathbb{R}) \\to \\mathbb{R}^*\\) 是群同态，\\(SL_2(\\mathbb{R}) = \\ker(\\det)\\)。群同态的核一定是正规子群：\\(\\forall g \\in G, n \\in N,\\; \\det(gng^{-1}) = \\det(g)\\det(n)\\det(g)^{-1} = 1\\)，故 \\(gng^{-1} \\in N\\)。"
+      },
+      {
+        "id": "groups-ch03-q10",
+        "question": "商群 \\(\\mathbb{Z}/\\langle 6 \\rangle\\) 中，\\(\\overline{2} + \\langle 6 \\rangle\\) 和 \\(\\overline{8} + \\langle 6 \\rangle\\) 代表同一个陪集吗？",
+        "options": [
+          "是，因为 \\(8 - 2 = 6 \\in \\langle 6 \\rangle\\)",
+        "否，因为 \\(2 \\neq 8\\)",
+        "是，因为 \\(\\gcd(2,8) = 2\\)",
+        "否，因为 \\(8 > 6\\)"
+        ],
+        "answer": 0,
+        "explanation": "在 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 中，\\(\\overline{2}\\) 和 \\(\\overline{8}\\) 代表同一陪集当且仅当 \\(8 - 2 = 6 \\in 6\\mathbb{Z}\\)。\\(6 \\in 6\\mathbb{Z}\\)，故它们相同。商群中陪集相等的判据是差属于正规子群。"
+      },
+      {
+        "id": "groups-ch03-q11",
+        "question": "设 \\(G = S_3\\)，\\(N = A_3 \\trianglelefteq S_3\\)。商群 \\(S_3/A_3\\) 同构于什么？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(S_3\\)",
+        "\\(\\{e\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|S_3/A_3| = 6/3 = 2\\)。阶为 \\(2\\) 的群只有 \\(\\mathbb{Z}/2\\mathbb{Z}\\)（同构意义下唯一）。两个陪集为 \\(A_3\\)（偶置换）和 \\((1\\;2)A_3\\)（奇置换），乘法由符号映射 \\(\\mathrm{sgn}\\) 诱导。"
+      },
+      {
+        "id": "groups-ch03-q12",
+        "question": "在 \\(S_4\\) 中，\\(3\\)-轮换的共轭类有多少个元素？",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(12\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(S_4\\) 中 \\(3\\)-轮换个数 = \\(\\binom{4}{3} \\times (3-1)! = 4 \\times 2 = 8\\)。一个共轭类包含所有相同轮换类型的置换，故 \\(3\\)-轮换共轭类有 \\(8\\) 个元素。验证：\\(|S_4|/|C_{S_4}((1\\;2\\;3))| = 24/3 = 8\\)。"
+      },
+      {
+        "id": "groups-ch03-q13",
+        "question": "写出 \\(S_3\\) 的类方程。",
+        "options": [
+          "\\(6 = 1 + 3 + 2\\)",
+        "\\(6 = 1 + 2 + 3\\)",
+        "\\(6 = 2 + 2 + 2\\)",
+        "\\(6 = 1 + 1 + 4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|S_3| = |Z(S_3)| + \\sum [S_3:C_{S_3}(g_i)]\\)。\\(Z(S_3) = \\{e\\}\\)，贡献 \\(1\\)。对换的共轭类大小 \\(= 3\\)，\\(3\\)-轮换的共轭类大小 \\(= 2\\)。类方程：\\(6 = 1 + 3 + 2\\)。B 虽然数值相同但习惯上先写中心贡献再写非平凡共轭类。"
+      },
+      {
+        "id": "groups-ch03-q14",
+        "question": "\\(S_3\\) 是否可解？",
+        "options": [
+          "是，\\(\\{e\\} \\trianglelefteq A_3 \\trianglelefteq S_3\\)，其中 \\(A_3/\\{e\\} \\cong \\mathbb{Z}/3\\mathbb{Z}\\) 和 \\(S_3/A_3 \\cong \\mathbb{Z}/2\\mathbb{Z}\\) 都是交换群",
+        "否，因为 \\(S_3\\) 非交换",
+        "是，因为 \\(|S_3| < 60\\)",
+        "否，因为 \\(S_3\\) 包含非平凡正规子群"
+        ],
+        "answer": 0,
+        "explanation": "合成列 \\(\\{e\\} \\trianglelefteq A_3 \\trianglelefteq S_3\\) 的合成因子为 \\(\\mathbb{Z}/3\\mathbb{Z}\\) 和 \\(\\mathbb{Z}/2\\mathbb{Z}\\)，都是交换的（素阶循环群），故 \\(S_3\\) 可解。B 错：可解不要求交换。C 虽然结论正确但推理无效。"
+      },
+      {
+        "id": "groups-ch03-q15",
+        "question": "下列哪个群是单群？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(S_3\\)",
+        "\\(D_4\\)"
+        ],
+        "answer": 1,
+        "explanation": "单群没有非平凡正规子群。\\(\\mathbb{Z}/5\\mathbb{Z}\\)（\\(5\\) 是素数）的子群只有 \\(\\{0\\}\\) 和自身，是单群。\\(\\mathbb{Z}/4\\mathbb{Z}\\) 有正规子群 \\(\\{0,2\\}\\)；\\(S_3\\) 有正规子群 \\(A_3\\)；\\(D_4\\) 有正规子群 \\(\\{e, r^2\\}\\) 等。"
+      },
+      {
+        "id": "groups-ch03-q16",
+        "question": "在 \\(D_4\\) 中，\\(H = \\{e, s\\}\\)（\\(s\\) 为某一反射）是否为正规子群？已知 \\(rsr^{-1} = sr^2 \\neq s\\)。",
+        "options": [
+          "是，因为 \\(|H| = 2\\)",
+        "否，因为 \\(rHr^{-1} \\neq H\\)",
+        "是，因为 \\(H\\) 是交换的",
+        "否，因为 \\(D_4\\) 是非交换群"
+        ],
+        "answer": 1,
+        "explanation": "\\(rsr^{-1} = sr^2 \\notin H = \\{e, s\\}\\)（因 \\(sr^2 \\neq e\\) 且 \\(sr^2 \\neq s\\)）。因此 \\(rHr^{-1} \\neq H\\)，\\(H\\) 不是正规子群。易错：以为阶为 \\(2\\) 一定正规。指数为 \\(2\\) 一定正规，但阶为 \\(2\\) 不一定（取决于 \\([G:H]\\)）。"
+      },
+      {
+        "id": "groups-ch03-q17",
+        "question": "设 \\(\\varphi: \\mathbb{Z} \\to \\mathbb{Z}/7\\mathbb{Z}\\) 为自然投射。\\(\\ker\\varphi\\) 等于什么？",
+        "options": [
+          "\\(\\{0\\}\\)",
+        "\\(7\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\{0, 7\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker\\varphi = \\{n \\in \\mathbb{Z} : n \\equiv 0 \\pmod{7}\\} = 7\\mathbb{Z} = \\{\\ldots, -14, -7, 0, 7, 14, \\ldots\\}\\)。核是整个 \\(7\\) 的倍数集合，不仅仅是 \\(\\{0, 7\\}\\)。D 只包含两个元素，漏掉了其余 \\(7\\) 的倍数。"
+      },
+      {
+        "id": "groups-ch03-q18",
+        "question": "设 \\(H, K \\trianglelefteq G\\)。以下哪个也一定是 \\(G\\) 的正规子群？",
+        "options": [
+          "\\(H \\cup K\\)",
+        "\\(H \\cap K\\)",
+        "\\(HK\\) 不一定是子群",
+        "\\(H - K\\)（集合差）"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\forall g \\in G,\\; g(H \\cap K)g^{-1} = gHg^{-1} \\cap gKg^{-1} = H \\cap K\\)（因 \\(H, K\\) 正规）。故 \\(H \\cap K \\trianglelefteq G\\)。A 错：并不一定是子群；C 的说法不正确（\\(HK\\) 在两者都正规时实际是子群且正规）；D 可能不是子群。"
+      },
+      {
+        "id": "groups-ch03-q19",
+        "question": "在 \\(S_4\\) 中，以下哪个子群不是正规子群？",
+        "options": [
+          "\\(A_4\\)",
+        "\\(V = \\{e, (1\\;2)(3\\;4), (1\\;3)(2\\;4), (1\\;4)(2\\;3)\\}\\)",
+        "\\(\\{e, (1\\;2), (3\\;4), (1\\;2)(3\\;4)\\}\\)",
+        "\\(\\{e\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(A_4 \\trianglelefteq S_4\\)（指数 \\(2\\)）；\\(V \\trianglelefteq S_4\\)（共轭保持轮换类型）；\\(\\{e\\}\\) 平凡正规。选 C：\\((1\\;3)(1\\;2)(1\\;3) = (2\\;3) \\notin C\\) 中的 \\(\\{e, (1\\;2), (3\\;4), (1\\;2)(3\\;4)\\}\\)，故不正规。"
+      },
+      {
+        "id": "groups-ch03-q20",
+        "question": "\\(S_4 / V\\)（\\(V\\) 是 Klein 四元群正规子群）的阶和结构是？",
+        "options": [
+          "阶 \\(6\\)，\\(\\cong S_3\\)",
+        "阶 \\(4\\)，\\(\\cong \\mathbb{Z}/4\\mathbb{Z}\\)",
+        "阶 \\(3\\)，\\(\\cong \\mathbb{Z}/3\\mathbb{Z}\\)",
+        "阶 \\(6\\)，\\(\\cong \\mathbb{Z}/6\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|S_4/V| = 24/4 = 6\\)。\\(S_4/V\\) 同构于 \\(S_3\\)：\\(S_4\\) 作用于 \\(V\\) 的三个非平凡元素上（它们组成三对对换 \\(\\{(12)(34), (13)(24), (14)(23)\\}\\)），诱导同态 \\(S_4 \\to S_3\\)，核恰为 \\(V\\)。"
+      },
+      {
+        "id": "groups-ch03-q21",
+        "question": "设 \\(|G| = 24\\)，\\(G\\) 有 \\(4\\) 个大小为 \\(3\\) 的共轭类和若干大小为 \\(1\\) 的共轭类。\\(|Z(G)|\\) 为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 3,
+        "explanation": "类方程：\\(24 = |Z(G)| + \\sum_{i} |\\mathrm{Cl}(g_i)|\\)。4 个大小 \\(3\\) 的共轭类贡献 \\(4 \\times 3 = 12\\)。故 \\(|Z(G)| = 24 - 12 = 12\\)。"
+      },
+      {
+        "id": "groups-ch03-q22",
+        "question": "设 \\(|G| = p\\)（素数），\\(G\\) 是否为单群？",
+        "options": [
+          "是，素阶群没有非平凡真子群",
+        "否，每个群都有正规子群",
+        "取决于 \\(p\\) 的具体值",
+        "只有 \\(p = 2\\) 时是单群"
+        ],
+        "answer": 0,
+        "explanation": "Lagrange 定理：\\(G\\) 的子群阶整除 \\(p\\)，因子仅 \\(1\\) 和 \\(p\\)。故 \\(G\\) 的子群只有 \\(\\{e\\}\\) 和 \\(G\\) 本身，没有非平凡正规子群，\\(G\\) 是单群。注意：交换单群恰好就是素阶循环群。"
+      },
+      {
+        "id": "groups-ch03-q23",
+        "question": "\\(S_4\\) 的合成列是 \\(\\{e\\} \\trianglelefteq V \\trianglelefteq A_4 \\trianglelefteq S_4\\)（\\(V\\) 是 Klein 四元群）。合成因子分别是？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\), \\(\\mathbb{Z}/3\\mathbb{Z}\\), \\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\), \\(\\mathbb{Z}/3\\mathbb{Z}\\), \\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\), \\(\\mathbb{Z}/2\\mathbb{Z}\\), \\(\\mathbb{Z}/3\\mathbb{Z}\\), \\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\), \\(\\mathbb{Z}/2\\mathbb{Z}\\), \\(\\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 2,
+        "explanation": "此列不是合成列（\\(V/\\{e\\} \\cong V \\cong \\mathbb{Z}/2 \\times \\mathbb{Z}/2\\) 不是单群）。精炼为 \\(\\{e\\} \\trianglelefteq \\mathbb{Z}/2 \\trianglelefteq V \\trianglelefteq A_4 \\trianglelefteq S_4\\)，合成因子：\\(\\mathbb{Z}/2, \\mathbb{Z}/2, \\mathbb{Z}/3, \\mathbb{Z}/2\\)，全为素阶，\\(S_4\\) 可解。"
+      },
+      {
+        "id": "groups-ch03-q24",
+        "question": "\\(A_5\\)（\\(|A_5| = 60\\)）是否可解？",
+        "options": [
+          "是，因为 \\(60 < 100\\)",
+        "否，\\(A_5\\) 是单群所以不可解",
+        "是，因为 \\(A_5 \\leq S_5\\) 而 \\(S_5\\) 是可解的",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(A_5\\) 是单群（无非平凡正规子群），唯一合成列为 \\(\\{e\\} \\trianglelefteq A_5\\)，合成因子 \\(A_5\\) 非交换。因此 \\(A_5\\) 不可解。这正是五次以上方程无求根公式的群论根源（Galois 理论）。"
+      },
+      {
+        "id": "groups-ch03-q25",
+        "question": "设 \\(6\\mathbb{Z} \\subseteq 2\\mathbb{Z} \\subseteq \\mathbb{Z}\\)。由第三同构定理，\\((\\mathbb{Z}/6\\mathbb{Z}) / (2\\mathbb{Z}/6\\mathbb{Z})\\) 同构于什么？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(\\{0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "第三同构定理：\\((G/K)/(N/K) \\cong G/N\\)。取 \\(G = \\mathbb{Z}\\)，\\(K = 6\\mathbb{Z}\\)，\\(N = 2\\mathbb{Z}\\)：\\((\\mathbb{Z}/6\\mathbb{Z})/(2\\mathbb{Z}/6\\mathbb{Z}) \\cong \\mathbb{Z}/2\\mathbb{Z}\\)。\\(2\\mathbb{Z}/6\\mathbb{Z} = \\{\\overline{0}, \\overline{2}, \\overline{4}\\}\\) 阶 \\(3\\)，商群阶 \\(= 6/3 = 2\\)。"
+      },
+      {
+        "id": "groups-ch03-q26",
+        "question": "在密码学中，RSA 系统使用群 \\((\\mathbb{Z}/n\\mathbb{Z})^*\\)。若 \\(n = 15\\)，子群 \\(H = \\{1, 4, 11, 14\\}\\) 是否为正规子群？（提示：\\((\\mathbb{Z}/15\\mathbb{Z})^*\\) 是交换群。）",
+        "options": [
+          "是，因为交换群的所有子群都是正规子群",
+        "否，\\(H\\) 不是子群",
+        "是，但仅当 \\(|H|\\) 为素数时",
+        "否，因为 \\(|H| \\nmid |(\\mathbb{Z}/15\\mathbb{Z})^*|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\mathbb{Z}/15\\mathbb{Z})^*\\) 是交换群（\\(\\varphi(15) = 8\\)），交换群中 \\(gHg^{-1} = H\\) 对所有 \\(g\\) 自动成立。因此 \\(H\\) 的任何子群都是正规子群。在 RSA 中，这种群结构保证了加密和解密的可交换性。"
+      },
+      {
+        "id": "groups-ch03-q27",
+        "question": "在量子计算中，Pauli 群 \\(\\mathcal{P}_1 = \\{\\pm I, \\pm iI, \\pm X, \\pm iX, \\pm Y, \\pm iY, \\pm Z, \\pm iZ\\}\\)（\\(16\\) 元素）有中心 \\(Z(\\mathcal{P}_1) = \\{\\pm I, \\pm iI\\}\\)（\\(4\\) 元素）。商群 \\(\\mathcal{P}_1/Z(\\mathcal{P}_1)\\) 的阶为？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\mathcal{P}_1/Z(\\mathcal{P}_1)| = 16/4 = 4\\)。商群 \\(\\cong \\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)（Klein 四元群），四个陪集对应 \\(\\{I, X, Y, Z\\}\\) 的等价类。这在量子纠错码中用于分类错误类型。"
+      },
+      {
+        "id": "groups-ch03-q28",
+        "question": "在信号处理中，循环群 \\(\\mathbb{Z}/N\\mathbb{Z}\\) 的商群 \\(\\mathbb{Z}/N\\mathbb{Z} \\,/\\, \\langle \\overline{d} \\rangle\\)（\\(d \\mid N\\)）描述了 \\(d\\)-倍下采样后保留的频率分量。若 \\(N = 12\\)，\\(d = 4\\)，商群的阶为？",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle \\overline{4} \\rangle = \\{\\overline{0}, \\overline{4}, \\overline{8}\\}\\)，\\(|\\langle \\overline{4} \\rangle| = 12/\\gcd(4,12) = 12/4 = 3\\)。商群阶 \\(= 12/3 = 4\\)。下采样因子 \\(d=4\\) 将 \\(12\\) 个频率分量约化为 \\(4\\) 个等价类，对应降采样后的频谱。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="groups"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/groups.html" class="module-name">群论 Groupes</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 正规子群的定义与等价条件</a></li>
+      <li><a href="#kp2">02 · 商群 G/N 的构造与性质</a></li>
+      <li><a href="#kp3">03 · 共轭类与单群</a></li>
+      <li><a href="#kp4">04 · 合成列与可解群</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>正规子群与商群</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>正规子群的定义与等价条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在研究群的商结构时，我们需要一种特殊的子群，使得「陪集上的乘 法」能被良好定义。并非所有子群都允许这样做——只有当左陪集与右 陪集一致时，商集 G/H 才能继承群运算。这种特殊子群就是正规子 群。理解正规子群是打开同态基本定理和群分类理论的钥匙。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象: 共轭不变性。\(N \trianglelefteq G\) 当且仅当对任意 \(g \in G\)，有 \(gNg^{-1} = N\)。这意味着 \(N\) 作为集合在群的 「内部对称变换」下不变——这是一种对称性的对称性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义: \(N \trianglelefteq G\) iff \(\forall g \in G, gNg^{-1} = N\)。 等价条件: (a) \(\forall g \in G\), \(gN = Ng\)（左陪集 = 右陪集） (b) \(\forall g \in G, \forall n \in N\), \(gng^{-1} \in N\) (c) \(N\) 是某个群同态 \(\varphi: G \to H\) 的核 证明 (a)\(\Rightarrow\)(b): 若 \(gN = Ng\)，则对任意 \(n \in N\)， \(gn \in gN = Ng\)，故存在 \(n' \in N\) 使 \(gn = n'g\)， 即 \(gng^{-1} = n' \in N\)。 商群构造: 定义 \(G/N = \{gN : g \in G\}\)，运算 \((g_1 N)(g_2 N) = (g_1 g_2)N\)。 良定义性: 若 \(g_1 N = g_1' N\) 且 \(g_2 N = g_2' N\)， 则 \(g_1' = g_1 n_1\), \(g_2' = g_2 n_2\)， \(g_1' g_2' = g_1 n_1 g_2 n_2 = g_1 g_2 (g_2^{-1} n_1 g_2) n_2\)。 因为 \(N\) 正规，\(g_2^{-1} n_1 g_2 \in N\)，故 \(g_1'g_2' \in g_1 g_2 N\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>物理中正规子群对应「无法被外部破坏」的内禀对称性； 密码学中群的正规子群结构用于分析加密方案的代数安全性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证明 \(S_3\) 中 \(A_3 = \{e, (123), (132)\}\) 是正规子群。 解答: \([S_3 : A_3] = 2\)，指数为 2 的子群一定正规。 因为只有两个陪集 \(A_3\) 和 \(S_3 \setminus A_3\)， 左右陪集必须相同。 易错点: 误以为「所有子群都是正规子群」。 反例: \(S_3\) 中 \(H = \{e, (12)\}\) 不是正规子群， 因为 \((13)(12)(13)^{-1} = (23) \notin H\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个是判定 \(N \trianglelefteq G\) 的充分条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。指数为 2 的子群只有两个陪集，左右陪集自动相等。')">A. \(N\) 是 \(G\) 的子群且 \(|N| = 2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！指数为 2 的子群只有两个陪集，左右陪集自动相等。')">B. \([G : N] = 2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。指数为 2 的子群只有两个陪集，左右陪集自动相等。')">C. \(N\) 是交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。指数为 2 的子群只有两个陪集，左右陪集自动相等。')">D. \(N \cap Z(G) \neq \{e\}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>商群 G/N 的构造与性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>正规子群的意义在于它允许我们构造「更小的群」——商群 \(G/N\)。 商群是将正规子群 \(N\) 中的元素「压缩为一点」后得到的群，它保留了 \(G\) 中被 \(N\) 忽略的结构。理解商群是建立同态基本定理的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>商群是一种「粗粒化」——将群中关于 \(N\) 等价的元素归为一类。 这与实数中模运算 \(\mathbb{Z}/n\mathbb{Z}\) 的思想一致。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>商群 \(G/N\) 的元素是陪集 \(\{gN : g \in G\}\)，运算为 \((g_1 N)(g_2 N) = (g_1 g_2) N\)。 <strong>阶</strong>: \(|G/N| = [G:N] = |G|/|N|\)。 <strong>单位元</strong>: \(eN = N\)。<strong>逆元</strong>: \((gN)^{-1} = g^{-1}N\)。 <strong>自然投影</strong>: \(\pi: G \to G/N,\; g \mapsto gN\)， 是满射同态，\(\ker \pi = N\)。 关键性质: 交换群的子群都正规，故交换群的任何子群 都可构造商群。\(G/N\) 交换 \(\Leftrightarrow\) \([G,G] \subseteq N\)， 其中 \([G,G] = \langle ghg^{-1}h^{-1} \rangle\) 为换位子群。 \[|G/N| = [G : N]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 描述 \(\mathbb{Z}/6\mathbb{Z}\) 中子群 \(H = \{\overline{0}, \overline{3}\}\) 的商群 \((\mathbb{Z}/6\mathbb{Z})/H\)。 解答: 陪集为 \(\overline{0}+H = \{\overline{0},\overline{3}\}\)， \(\overline{1}+H = \{\overline{1},\overline{4}\}\)， \(\overline{2}+H = \{\overline{2},\overline{5}\}\)。 共 3 个陪集，商群同构于 \(\mathbb{Z}/3\mathbb{Z}\)。 易错点: 在商群中运算时代入陪集的具体代表元不同， 以为会得到不同结果。商群运算与代表元选取无关（正规性保证）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 \(|G| = 20\)，\(N \trianglelefteq G\)，\(|N| = 4\)，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|G/N| = |G|/|N| = 20/4 = 5\\)。')">A. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(|G/N| = |G|/|N| = 20/4 = 5\\)。')">B. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|G/N| = |G|/|N| = 20/4 = 5\\)。')">C. 16</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|G/N| = |G|/|N| = 20/4 = 5\\)。')">D. 80</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>共轭类与单群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>共轭是群中最重要的等价关系：\(a \sim b\) 当且仅当存在 \(g\) 使 \(gag^{-1} = b\)。共轭类反映了元素的「本质相似性」。当一个群除了 平凡情形没有正规子群时，称其为单群——这是群论中的「素数」， 是有限群分类的基本构件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>共轭是内自同构作用产生的等价关系。正规子群恰好是共轭类的并。 单群是指除 \(\{e\}\) 和 \(G\) 本身外没有正规子群的群——不可再 「分解」为更小的商群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>共轭关系</strong>: \(a \sim_c b \Leftrightarrow \exists g \in G,\; gag^{-1} = b\)。 共轭类: \(\mathrm{Cl}(a) = \{gag^{-1} : g \in G\}\)。 由轨道-稳定子定理: \(|\mathrm{Cl}(a)| = [G : C_G(a)]\)。 \(N \trianglelefteq G \Leftrightarrow N\) 是若干共轭类的并。 <strong>单群定义</strong>: \(G\) 是单群，若 \(|G| > 1\) 且 \(G\) 的正规子群 只有 \(\{e\}\) 和 \(G\)。 例: 素阶群 \(\mathbb{Z}/p\mathbb{Z}\) 是（交换）单群。 \(A_5\)（60阶）是最小的非交换单群。 交换群的子群都正规，故交换单群只有 \(\mathbb{Z}/p\mathbb{Z}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>有限单群分类是20世纪代数学最大的成就之一； \(A_5\) 的单性是五次方程不可根式求解的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(S_3\) 的所有共轭类。 解答: 按轮换类型分组: \(\{e\}\)（恒等）, \(\{(12),(13),(23)\}\)（对换）, \(\{(123),(132)\}\)（3-轮换）。共 3 个共轭类。 验证: \(A_3 = \{e,(123),(132)\}\) 恰好是两个共轭类之并， 故 \(A_3 \trianglelefteq S_3\)。✓ 易错点: 以为每个轮换类型只有一个共轭类。在 \(S_n\) 中确实如此， 但在 \(A_n\) 中可能分裂为两个类（如 \(A_5\) 中的 5-轮换）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个群是单群？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Z}/5\\mathbb{Z}\\) 是素阶循环群，只有平凡子群和自身。')">A. \(\mathbb{Z}/4\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Z}/5\\mathbb{Z}\\) 是素阶循环群，只有平凡子群和自身。')">B. \(\mathbb{Z}/6\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Z}/5\\mathbb{Z}\\) 是素阶循环群，只有平凡子群和自身。')">C. \(S_3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathbb{Z}/5\\mathbb{Z}\\) 是素阶循环群，只有平凡子群和自身。')">D. \(\mathbb{Z}/5\mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>合成列与可解群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何系统地将群「拆解」为单群？合成列 \(G = G_0 \supsetneq G_1 \supsetneq \cdots \supsetneq G_k = \{e\}\) 给出这样的分解链，其中每个 \(G_i/G_{i+1}\) 都是单群。当这些单群都是交换的（即循环 \(p\)-群）， 群就被称为可解群——正是 Galois 用来判定方程可否根式求解的概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>合成列是群结构的「素因子分解」——正如整数分解为素数之积， 群分解为单群之「塔」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>合成列</strong>: 子群链 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\)，其中每个 \(G_i / G_{i+1}\) 是单群（称为合成因子）。 <strong>Jordan-Hölder 定理</strong>（陈述）: 任何两个合成列的合成因子 （作为多重集）相同（不计顺序）。即合成因子唯一确定。 <strong>可解群</strong>: \(G\) 是可解群，若存在子群链 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\)，使得每个 \(G_i/G_{i+1}\) 是交换群。 等价地，合成因子全为素阶循环群 \(\mathbb{Z}/p\mathbb{Z}\)。 \[S_n \text{ 可解} \Leftrightarrow n \leq 4\] \(A_5\) 是单群 \(\Rightarrow\) \(S_5\) 不可解 \(\Rightarrow\) 五次一般方程不可根式求解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Galois 理论中，多项式可根式求解 \(\Leftrightarrow\) 其 Galois 群可解。 \(S_5\) 不可解是五次方程不可根式求解的直接原因。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 验证 \(S_3\) 是可解群。 解答: \(S_3 \triangleright A_3 \triangleright \{e\}\)。 \(S_3/A_3 \cong \mathbb{Z}/2\mathbb{Z}\)（交换）， \(A_3/\{e\} \cong \mathbb{Z}/3\mathbb{Z}\)（交换）。 每步商群均为交换群，故 \(S_3\) 可解。✓ 易错点: 试图展开 Jordan-Hölder 定理的完整证明—— 该证明需要 Schreier 细化定理及 Zassenhaus 引理， 超出本章范围，只需掌握陈述。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个群不可解？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A_5\\) 是非交换单群，无法构造渐降交换商群链。')">A. \(\mathbb{Z}/12\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A_5\\) 是非交换单群，无法构造渐降交换商群链。')">B. \(S_3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A_5\\) 是非交换单群，无法构造渐降交换商群链。')">C. \(S_4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(A_5\\) 是非交换单群，无法构造渐降交换商群链。')">D. \(A_5\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/algebra/groups.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

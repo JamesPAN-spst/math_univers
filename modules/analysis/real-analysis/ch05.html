@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Lp 空间 — 实分析/测度论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "real-analysis-ch05-q1",
+        "question": "设 \\(f(x) = 1/x^{1/3}\\) 在 \\((0, 1]\\) 上。\\(f \\in L^p(0,1)\\) 当且仅当 \\(p\\) 满足？",
+        "options": [
+          "\\(p < 3\\)",
+        "\\(p \\leq 3\\)",
+        "\\(p < 2\\)",
+        "所有 \\(p \\geq 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_0^1 |f|^p = \\int_0^1 x^{-p/3}\\, dx\\)。被积函数在 \\(0\\) 附近 \\(\\sim x^{-p/3}\\)，积分收敛当且仅当 \\(-p/3 > -1\\)，即 \\(p < 3\\)。\\(p = 3\\) 时 \\(\\int x^{-1}\\, dx = \\infty\\)。因此 \\(f \\in L^p\\) 当且仅当 \\(1 \\leq p < 3\\)。"
+      },
+      {
+        "id": "real-analysis-ch05-q2",
+        "question": "Hölder 不等式：若 \\(f \\in L^p\\)，\\(g \\in L^q\\)，\\(1/p + 1/q = 1\\)，则 \\(\\int |fg| \\leq ?\\)",
+        "options": [
+          "\\(\\|f\\|_p + \\|g\\|_q\\)",
+        "\\(\\|f\\|_p \\cdot \\|g\\|_q\\)",
+        "\\((\\|f\\|_p^p + \\|g\\|_q^q)/2\\)",
+        "\\(\\max(\\|f\\|_p, \\|g\\|_q)\\)"
+        ],
+        "answer": 1,
+        "explanation": "Hölder 不等式：\\(\\|fg\\|_1 \\leq \\|f\\|_p \\|g\\|_q\\)（\\(1/p + 1/q = 1\\)）。这是 Cauchy-Schwarz（\\(p = q = 2\\)）的推广。证明基于 Young 不等式 \\(ab \\leq a^p/p + b^q/q\\)。选 A 是算术-几何均值的混淆。"
+      },
+      {
+        "id": "real-analysis-ch05-q3",
+        "question": "求 \\(f(x) = \\mathbf{1}_{[0,1]}\\) 的 \\(L^p\\)-范数 \\(\\|f\\|_p\\)（\\(1 \\leq p < \\infty\\)）。",
+        "options": [
+          "\\(1\\)",
+        "\\(p\\)",
+        "\\(1/p\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|f\\|_p = (\\int_0^1 1^p\\, dx)^{1/p} = 1^{1/p} = 1\\)。特征函数的 \\(L^p\\) 范数等于集合测度的 \\(1/p\\) 次幂：\\(\\|\\mathbf{1}_A\\|_p = m(A)^{1/p}\\)。对 \\(m(A) = 1\\)，范数在所有 \\(p\\) 下都是 1。"
+      },
+      {
+        "id": "real-analysis-ch05-q4",
+        "question": "\\(L^p([0,1])\\)（\\(1 \\leq p \\leq \\infty\\)）是否为 Banach 空间（完备赋范空间）？",
+        "options": [
+          "是，对所有 \\(1 \\leq p \\leq \\infty\\)",
+        "仅当 \\(p = 2\\) 时",
+        "仅当 \\(p < \\infty\\) 时",
+        "否"
+        ],
+        "answer": 0,
+        "explanation": "Riesz-Fischer 定理：\\(L^p\\) 空间对 \\(1 \\leq p \\leq \\infty\\) 都是完备的，即 Banach 空间。证明关键：利用\"绝对收敛级数在 Banach 空间中收敛\"的等价刻画，取 \\(\\sum \\|f_n\\|_p < \\infty\\)，证明 \\(\\sum f_n\\) 在 \\(L^p\\) 中收敛。"
+      },
+      {
+        "id": "real-analysis-ch05-q5",
+        "question": "以下哪个是 \\(L^2([0,1])\\) 中的稠密子集？",
+        "options": [
+          "多项式",
+        "阶梯函数",
+        "\\(C^\\infty\\) 函数",
+        "以上都是"
+        ],
+        "answer": 3,
+        "explanation": "\\(L^p\\) 空间（\\(1 \\leq p < \\infty\\)）中，以下函数类都是稠密的：简单函数、阶梯函数、连续函数、\\(C^\\infty\\) 函数、多项式（Weierstrass 逼近定理）。这是 \\(L^p\\) 理论的基本逼近结果。注意 \\(L^\\infty\\) 中连续函数不稠密。"
+      },
+      {
+        "id": "real-analysis-ch05-q6",
+        "question": "设 \\(f_n \\in L^2[0,1]\\)，\\(\\|f_n - f\\|_2 \\to 0\\)。是否必然 \\(f_n \\to f\\) 逐点？",
+        "options": [
+          "是",
+        "否，但存在子列 \\(f_{n_k} \\to f\\) a.e.",
+        "否，且不存在 a.e. 收敛的子列",
+        "是，若 \\(f\\) 连续"
+        ],
+        "answer": 1,
+        "explanation": "\\(L^p\\) 收敛不蕴含逐点收敛（经典反例：\"游走的块\"函数）。但 \\(L^p\\) 收敛蕴含依测度收敛（Chebyshev 不等式），依测度收敛的子列有 a.e. 收敛的子子列。因此总存在子列 \\(f_{n_k} \\to f\\) a.e.。"
+      },
+      {
+        "id": "real-analysis-ch05-q7",
+        "question": "\\((L^p)^* = L^q\\)（\\(1/p + 1/q = 1\\)，\\(1 < p < \\infty\\)）表示什么？",
+        "options": [
+          "\\(L^p\\) 和 \\(L^q\\) 是同一个空间",
+        "\\(L^p\\) 上的每个有界线性泛函都由 \\(L^q\\) 中的元素表示",
+        "\\(L^p \\subseteq L^q\\)",
+        "\\(\\|f\\|_p = \\|f\\|_q\\)"
+        ],
+        "answer": 1,
+        "explanation": "Riesz 表示定理：\\(L^p\\)（\\(1 < p < \\infty\\)）上的每个有界线性泛函 \\(\\Lambda\\) 都有唯一的 \\(g \\in L^q\\) 使 \\(\\Lambda(f) = \\int fg\\) 且 \\(\\|\\Lambda\\| = \\|g\\|_q\\)。这建立了 \\((L^p)^*\\) 与 \\(L^q\\) 的等距同构。\\(p = 1\\) 时 \\((L^1)^* = L^\\infty\\)，但 \\((L^\\infty)^* \\neq L^1\\)。"
+      },
+      {
+        "id": "real-analysis-ch05-q8",
+        "question": "设 \\(f \\in L^2(0,1)\\) 且 \\(g \\in L^2(0,1)\\)，\\(\\|f\\|_2 = 3\\)，\\(\\|g\\|_2 = 4\\)。Cauchy-Schwarz 不等式给出 \\(|\\int fg|\\) 的上界为？",
+        "options": [
+          "\\(7\\)",
+        "\\(12\\)",
+        "\\(25\\)",
+        "\\(5\\)"
+        ],
+        "answer": 1,
+        "explanation": "Cauchy-Schwarz（Hölder \\(p = q = 2\\)）：\\(|\\int fg| \\leq \\|f\\|_2 \\|g\\|_2 = 3 \\times 4 = 12\\)。等号成立当且仅当 \\(f\\) 和 \\(g\\) 线性相关（\\(f = \\lambda g\\) a.e.）。选 A 是误用三角不等式，选 D 是 \\(\\sqrt{9+16}\\)（勾股定理的直觉不对）。"
+      },
+      {
+        "id": "real-analysis-ch05-q9",
+        "question": "证明 Minkowski 不等式 \\(\\|f + g\\|_p \\leq \\|f\\|_p + \\|g\\|_p\\)（\\(p \\geq 1\\)）需要用到什么？",
+        "options": [
+          "Cauchy-Schwarz 不等式",
+        "Hölder 不等式",
+        "三角不等式",
+        "Jensen 不等式"
+        ],
+        "answer": 1,
+        "explanation": "Minkowski 不等式（\\(L^p\\) 三角不等式）的标准证明：\\(\\|f+g\\|_p^p = \\int|f+g|^p \\leq \\int|f+g|^{p-1}|f| + \\int|f+g|^{p-1}|g|\\)。对每项用 Hölder（指数 \\(p\\) 和 \\(q = p/(p-1)\\)）：\\(\\leq \\||f+g|^{p-1}\\|_q (\\|f\\|_p + \\|g\\|_p)\\)。\\(\\||f+g|^{p-1}\\|_q = \\|f+g\\|_p^{p/q}\\)。化简得到 Minkowski。"
+      },
+      {
+        "id": "real-analysis-ch05-q10",
+        "question": "设 \\(\\{f_n\\}\\) 是 \\(L^2[0,1]\\) 中的 Cauchy 列。\\(\\|f_n - f_m\\|_2 \\to 0\\)。则极限 \\(f\\) 属于？",
+        "options": [
+          "\\(L^2[0,1]\\)（完备性）",
+        "\\(L^1[0,1]\\) 但不一定在 \\(L^2\\)",
+        "\\(C[0,1]\\)",
+        "不一定存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^2\\) 是 Banach 空间（Riesz-Fischer），故 Cauchy 列收敛到 \\(L^2\\) 中的元素。不保证极限连续（C 错），B 太弱。完备性是 \\(L^p\\) 理论的基础，保证了逼近过程的合法性。"
+      },
+      {
+        "id": "real-analysis-ch05-q11",
+        "question": "\\(L^\\infty([0,1])\\) 是否可分（有可数稠密子集）？",
+        "options": [
+          "是",
+        "否",
+        "取决于 \\(\\sigma\\)-代数",
+        "等价于 \\([0,1]\\) 可分"
+        ],
+        "answer": 1,
+        "explanation": "\\(L^\\infty([0,1])\\) 不可分。反例：对 \\(0 < t < 1\\)，\\(f_t = \\mathbf{1}_{[0,t]}\\)。\\(\\|f_s - f_t\\|_\\infty = 1\\)（\\(s \\neq t\\)），这是不可数多个两两距离为 1 的元素，任何稠密子集必须不可数。\\(L^p\\)（\\(1 \\leq p < \\infty\\)）可分。"
+      },
+      {
+        "id": "real-analysis-ch05-q12",
+        "question": "设 \\(f_n \\rightharpoonup f\\)（\\(f_n\\) 弱收敛到 \\(f\\)）在 \\(L^2\\) 中。则以下哪个成立？",
+        "options": [
+          "\\(\\|f_n\\|_2 \\to \\|f\\|_2\\)",
+        "\\(\\|f\\|_2 \\leq \\liminf \\|f_n\\|_2\\)",
+        "\\(f_n \\to f\\) 在 \\(L^2\\) 范数下",
+        "\\(f_n(x) \\to f(x)\\) a.e."
+        ],
+        "answer": 1,
+        "explanation": "弱收敛 + 范数的下半连续性：\\(\\|f\\|_2 \\leq \\liminf \\|f_n\\|_2\\)。弱收敛意味 \\(\\int f_n g \\to \\int fg\\) 对所有 \\(g \\in L^2\\)，但不保证范数收敛（A 错）或强收敛（C 错）。等号成立时才有强收敛（Hilbert 空间中弱收敛 + 范数收敛 \\(\\Rightarrow\\) 强收敛）。"
+      },
+      {
+        "id": "real-analysis-ch05-q13",
+        "question": "设 \\(f(x) = e^{-|x|}\\) 在 \\(\\mathbb{R}\\) 上。\\(f\\) 属于哪些 \\(L^p\\) 空间？",
+        "options": [
+          "仅 \\(L^1\\)",
+        "仅 \\(L^2\\)",
+        "所有 \\(L^p\\)，\\(1 \\leq p \\leq \\infty\\)",
+        "\\(L^p\\) 对 \\(1 \\leq p < \\infty\\)，不属于 \\(L^\\infty\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\|f\\|_\\infty = 1 < \\infty\\)，故 \\(f \\in L^\\infty\\)。\\(\\int |f|^p = \\int e^{-p|x|}\\, dx = 2/p < \\infty\\)，故 \\(f \\in L^p\\) 对所有 \\(p \\in [1,\\infty)\\)。且 \\(L^\\infty\\) 也满足。指数衰减函数属于所有 \\(L^p\\) 空间。"
+      },
+      {
+        "id": "real-analysis-ch05-q14",
+        "question": "在 \\(L^2(\\mathbb{R})\\) 中，\\(\\{f_n\\}\\) 强收敛到 \\(f\\)（\\(\\|f_n - f\\|_2 \\to 0\\)）。这是否蕴含依测度收敛？",
+        "options": [
+          "是",
+        "否",
+        "仅在有限测度空间上",
+        "仅当 \\(p \\geq 2\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^p\\) 收敛蕴含依测度收敛。Chebyshev 不等式：\\(m(\\{|f_n - f| > \\varepsilon\\}) \\leq \\|f_n - f\\|_p^p / \\varepsilon^p \\to 0\\)。反之不成立。另外，有限测度空间上依测度收敛蕴含存在 a.e. 收敛子列，但不蕴含 \\(L^p\\) 收敛（需要一致可积性）。"
+      },
+      {
+        "id": "real-analysis-ch05-q15",
+        "question": "\\(L^2(0,1)\\) 中的 Fourier 系统 \\(\\{e^{2\\pi i n x}\\}_{n \\in \\mathbb{Z}}\\) 是？",
+        "options": [
+          "正交规范基 (ONB)",
+        "正交但不完备",
+        "完备但不正交",
+        "既不正交也不完备"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{e^{2\\pi inx}\\}\\) 两两正交（\\(\\int_0^1 e^{2\\pi inx} \\overline{e^{2\\pi imx}}\\, dx = \\delta_{mn}\\)），且完备（逼近定理：三角多项式在 \\(L^2(0,1)\\) 中稠密）。这是 Hilbert 空间理论的经典实例——\\(L^2\\) 函数有 Fourier 展开。"
+      },
+      {
+        "id": "real-analysis-ch05-q16",
+        "question": "\\((L^1(\\mathbb{R}))^*\\) 与以下哪个空间等距同构？",
+        "options": [
+          "\\(L^1(\\mathbb{R})\\)",
+        "\\(L^2(\\mathbb{R})\\)",
+        "\\(L^\\infty(\\mathbb{R})\\)",
+        "\\(C_0(\\mathbb{R})\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(1/p + 1/q = 1\\)，\\(p = 1\\) 时 \\(q = \\infty\\)。\\((L^1)^* \\cong L^\\infty\\)。每个 \\(\\Lambda \\in (L^1)^*\\) 由 \\(g \\in L^\\infty\\) 通过 \\(\\Lambda(f) = \\int fg\\) 表示，\\(\\|\\Lambda\\| = \\|g\\|_\\infty\\)。注意反向 \\((L^\\infty)^* \\supsetneq L^1\\)（\\(L^\\infty\\) 不可分，对偶空间更大，包含奇异泛函如 Banach 极限）。"
+      },
+      {
+        "id": "real-analysis-ch05-q17",
+        "question": "\\(L^p\\) 空间中，\\(p = 2\\) 的特殊之处是？",
+        "options": [
+          "唯一的自反 \\(L^p\\) 空间",
+        "唯一的 Hilbert 空间",
+        "唯一的完备空间",
+        "范数最小"
+        ],
+        "answer": 1,
+        "explanation": "\\(L^2\\) 是唯一的 Hilbert 空间（范数由内积 \\(\\langle f, g\\rangle = \\int f\\bar{g}\\) 导出，满足平行四边形恒等式 \\(\\|f+g\\|^2 + \\|f-g\\|^2 = 2\\|f\\|^2 + 2\\|g\\|^2\\)）。\\(L^p\\)（\\(p \\neq 2\\)）的范数不满足平行四边形恒等式，不是 Hilbert 空间。所有 \\(L^p\\)（\\(1 \\leq p \\leq \\infty\\)）都完备，\\(1 < p < \\infty\\) 都自反。"
+      },
+      {
+        "id": "real-analysis-ch05-q18",
+        "question": "设 \\(f \\in L^p \\cap L^q\\)（\\(p < q\\)）。则 \\(f \\in L^r\\) 对所有 \\(p \\leq r \\leq q\\) 吗？（内插不等式）",
+        "options": [
+          "是，\\(\\|f\\|_r \\leq \\|f\\|_p^\\theta \\|f\\|_q^{1-\\theta}\\)（\\(\\theta\\) 满足 \\(1/r = \\theta/p + (1-\\theta)/q\\)）",
+        "不一定",
+        "仅在有限测度空间上",
+        "仅当 \\(p = 1\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^p\\) 内插不等式（log-凸性）：写 \\(|f|^r = |f|^{r\\theta \\cdot p/(r\\theta)} \\cdot |f|^{r(1-\\theta)}\\)，用 Hölder 不等式（指数 \\(p/(r\\theta)\\) 和 \\(q/(r(1-\\theta))\\)）。\\(\\|f\\|_r^r \\leq \\|f\\|_p^{r\\theta} \\|f\\|_q^{r(1-\\theta)}\\)，即 \\(\\|f\\|_r \\leq \\|f\\|_p^\\theta \\|f\\|_q^{1-\\theta}\\)。这是 Riesz-Thorin 内插定理的特例。"
+      },
+      {
+        "id": "real-analysis-ch05-q19",
+        "question": "设 \\(X\\) 为 Banach 空间。如果 \\(X\\) 的闭单位球在弱拓扑下紧致（Banach-Alaoglu 对 \\(X\\) 自身），\\(X\\) 需要满足什么？",
+        "options": [
+          "\\(X\\) 自反",
+        "\\(X\\) 可分",
+        "\\(X\\) 有限维",
+        "A 是充要条件"
+        ],
+        "answer": 3,
+        "explanation": "Banach-Alaoglu 定理说 \\(X^*\\) 的弱*闭单位球紧致。但 \\(X\\) 自身的闭单位球弱紧致 \\(\\Leftrightarrow X\\) 自反（Eberlein-Šmulian 定理）。\\(L^p\\)（\\(1 < p < \\infty\\)）自反，闭单位球弱紧。\\(L^1\\) 和 \\(L^\\infty\\) 不自反。"
+      },
+      {
+        "id": "real-analysis-ch05-q20",
+        "question": "Young 卷积不等式：若 \\(f \\in L^p(\\mathbb{R})\\)，\\(g \\in L^q(\\mathbb{R})\\)，\\(1/p + 1/q = 1 + 1/r\\)，则 \\(f * g \\in L^r\\) 且 \\(\\|f*g\\|_r \\leq \\|f\\|_p \\|g\\|_q\\)。当 \\(p = q = 1\\) 时 \\(r = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(\\infty\\)",
+        "\\(1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(1/p + 1/q = 1 + 1/r\\)，\\(p = q = 1\\)：\\(1 + 1 = 1 + 1/r\\)，\\(1/r = 1\\)，\\(r = 1\\)。\\(\\|f * g\\|_1 \\leq \\|f\\|_1 \\|g\\|_1\\)。\\(L^1\\) 在卷积下封闭且是 Banach 代数（带单位元 \\(\\delta\\) 在分布意义下）。"
+      },
+      {
+        "id": "real-analysis-ch05-q21",
+        "question": "有限测度空间 \\((X, \\mu)\\) 上，若 \\(p < q\\)，则 \\(L^q(X) \\subseteq L^p(X)\\) 吗？",
+        "options": [
+          "是",
+        "否",
+        "仅当 \\(\\mu(X) = 1\\) 时",
+        "仅当 \\(p = 1\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "Hölder 不等式：\\(\\int |f|^p = \\int |f|^p \\cdot 1 \\leq \\||f|^p\\|_{q/p} \\|\\mathbf{1}\\|_{q/(q-p)} = \\|f\\|_q^p \\cdot \\mu(X)^{(q-p)/q}\\)。故 \\(\\|f\\|_p \\leq \\|f\\|_q \\cdot \\mu(X)^{1/p - 1/q}\\)。有限测度空间上高阶 \\(L^q\\) 嵌入到低阶 \\(L^p\\)。\\(\\mathbb{R}\\) 上（\\(\\sigma\\)-有限但非有限）不成立。"
+      },
+      {
+        "id": "real-analysis-ch05-q22",
+        "question": "设 \\(f_n \\rightharpoonup f\\) 弱收敛在 \\(L^p\\)（\\(1 < p < \\infty\\)）且 \\(\\|f_n\\|_p \\to \\|f\\|_p\\)。则？",
+        "options": [
+          "\\(\\|f_n - f\\|_p \\to 0\\)（强收敛）",
+        "\\(f_n \\to f\\) a.e.",
+        "\\(f_n = f\\) 终极地",
+        "无法得出更多"
+        ],
+        "answer": 0,
+        "explanation": "对一致凸空间（\\(L^p\\)，\\(1 < p < \\infty\\)），弱收敛 + 范数收敛 \\(\\Rightarrow\\) 强收敛。这是 Radon-Riesz 性质（或 Kadec-Klee 性质的 \\(L^p\\) 版本）。\\(L^1\\) 不一致凸，此结论不成立。证明利用 Clarkson 不等式和一致凸性。"
+      },
+      {
+        "id": "real-analysis-ch05-q23",
+        "question": "\\(L^p(\\mathbb{R})\\)（\\(1 \\leq p < \\infty\\)）中，平移算子 \\(\\tau_a f(x) = f(x-a)\\) 满足 \\(\\|\\tau_a f - f\\|_p \\to 0\\)（\\(a \\to 0\\)）吗？",
+        "options": [
+          "是，对所有 \\(f \\in L^p\\)",
+        "仅当 \\(f\\) 连续时",
+        "仅当 \\(p = 2\\) 时",
+        "否"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^p\\) 中的平移连续性：\\(\\|\\tau_a f - f\\|_p \\to 0\\)（\\(a \\to 0\\)）。证明：对 \\(C_c\\) 函数由一致连续性直接成立，再由 \\(C_c\\) 在 \\(L^p\\) 中稠密和三角不等式推广到一般 \\(f\\)。\\(L^\\infty\\) 中不成立（\\(\\mathbf{1}_{[0,1]}\\) 的平移不连续）。这是调和分析和 PDE 中的基础结果。"
+      },
+      {
+        "id": "real-analysis-ch05-q24",
+        "question": "设 \\(1 < p < \\infty\\)，\\(L^p\\) 是自反的。这意味着什么？",
+        "options": [
+          "\\((L^p)^{**} = L^p\\)（自然嵌入是同构）",
+        "\\(L^p\\) 有限维",
+        "\\(L^p = (L^p)^*\\)",
+        "\\(L^p\\) 可分"
+        ],
+        "answer": 0,
+        "explanation": "自反性：自然嵌入 \\(J: L^p \\hookrightarrow (L^p)^{**}\\)（\\(Jf(\\Lambda) = \\Lambda(f)\\)）是满射（等距同构）。\\((L^p)^* = L^q\\)，\\((L^q)^* = L^p\\)，故 \\((L^p)^{**} = L^p\\)。\\(L^1\\) 不自反（\\(J(L^1) \\subsetneq (L^\\infty)^*\\)），\\(L^\\infty\\) 不自反。"
+      },
+      {
+        "id": "real-analysis-ch05-q25",
+        "question": "\\(L^p(\\mathbb{R}^n)\\)（\\(1 \\leq p < \\infty\\)）的可分性证明需要什么关键步骤？",
+        "options": [
+          "证明有理系数阶梯函数可数稠密",
+        "证明所有连续函数可数",
+        "证明 \\(\\mathbb{R}^n\\) 可数",
+        "以上都不对"
+        ],
+        "answer": 0,
+        "explanation": "取有理端点的矩体上的有理系数阶梯函数族 \\(\\mathcal{D}\\)：这是可数集（\\(\\mathbb{Q}\\) 可数）。任何 \\(L^p\\) 函数可被简单函数逼近，简单函数可被阶梯函数逼近，阶梯函数可被有理系数阶梯函数逼近。每步使用 MCT 或 \\(L^p\\) 密度论证。"
+      },
+      {
+        "id": "real-analysis-ch05-q26",
+        "question": "在信号处理中，信号的能量定义为 \\(\\|f\\|_2^2 = \\int |f(t)|^2\\, dt\\)。若信号 \\(f(t) = e^{-|t|}\\sin(2\\pi t)\\)，其能量是否有限？",
+        "options": [
+          "有限（\\(f \\in L^2(\\mathbb{R})\\)）",
+        "无限",
+        "取决于频率",
+        "仅在 \\([0,\\infty)\\) 上有限"
+        ],
+        "answer": 0,
+        "explanation": "\\(|f(t)|^2 = e^{-2|t|}\\sin^2(2\\pi t) \\leq e^{-2|t|}\\)。\\(\\int e^{-2|t|}\\, dt = 1 < \\infty\\)，故 \\(\\|f\\|_2^2 < \\infty\\)，\\(f \\in L^2\\)。指数衰减保证了能量有限。\\(L^2\\) 空间自然地描述\"有限能量信号\"——这是信号处理选用 \\(L^2\\) 的物理原因。"
+      },
+      {
+        "id": "real-analysis-ch05-q27",
+        "question": "在统计学中，随机变量 \\(X\\) 的 \\(p\\)-阶矩 \\(E[|X|^p]\\) 存在等价于 \\(X \\in L^p(\\Omega, P)\\)。若 \\(X\\) 有标准正态分布 \\(N(0,1)\\)，对哪些 \\(p\\) 有 \\(E[|X|^p] < \\infty\\)？",
+        "options": [
+          "仅 \\(p = 2\\)",
+        "\\(p \\leq 4\\)",
+        "所有 \\(p \\in [1, \\infty)\\)",
+        "所有 \\(p \\in [1, \\infty]\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(E[|X|^p] = \\int |x|^p (2\\pi)^{-1/2} e^{-x^2/2}\\, dx\\)。高斯衰减 \\(e^{-x^2/2}\\) 胜过任何多项式增长 \\(|x|^p\\)，故对所有 \\(p < \\infty\\) 积分有限。但 \\(\\|X\\|_\\infty = \\sup|X| = +\\infty\\)（正态分布无界），故 \\(X \\notin L^\\infty\\)。正态分布拥有所有有限阶矩。"
+      },
+      {
+        "id": "real-analysis-ch05-q28",
+        "question": "在图像压缩中，JPEG 使用 DCT（离散余弦变换）逼近图像块。从 \\(L^2\\) 理论角度，保留前 \\(K\\) 个 DCT 系数等价于什么？",
+        "options": [
+          "\\(L^2\\) 中的最佳 \\(K\\)-项逼近（正交投影）",
+        "\\(L^\\infty\\) 逼近",
+        "\\(L^1\\) 逼近",
+        "均匀采样"
+        ],
+        "answer": 0,
+        "explanation": "DCT 基是 \\(L^2\\) 中的正交基。保留前 \\(K\\) 个系数 = 投影到前 \\(K\\) 个基函数张成的子空间 = Hilbert 空间中的最佳逼近（最小化 \\(L^2\\) 误差）。Parseval 等式保证被截断的能量 = \\(\\sum_{k>K} |c_k|^2\\)。这是 JPEG 压缩的数学基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="real-analysis"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/real-analysis.html" class="module-name">实分析/测度论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Lp 范数与 Hölder/Minkowski 不等式</a></li>
+      <li><a href="#kp2">02 · Lp 空间的完备性 (Riesz-Fischer)</a></li>
+      <li><a href="#kp3">03 · L² 空间与 Hilbert 结构</a></li>
+      <li><a href="#kp4">04 · 稠密性与可分性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Lp 空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Lp 范数与 Hölder/Minkowski 不等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>我们希望在可积函数空间上定义"距离"，以便讨论函数的逼近和收敛。 对不同的指数 \(p\)，\(L^p\) 范数刻画了函数的不同"大小"特征。 但要使 \(\|f\|_p\) 真正成为范数，需要验证三角不等式——这就是 Minkowski 不等式。而 Hölder 不等式是证明 Minkowski 不等式的 关键工具，也是泛函分析中对偶理论的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(L^p\) 空间将函数视为无穷维向量空间中的"点"。范数赋予这个 空间度量结构，使得分析学的逼近方法（如 Fourier 级数收敛、 密度论证）得以展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(L^p\) 范数</strong>：对 \(1 \leq p < \infty\)， \(\|f\|_p = \left(\int |f|^p\, d\mu\right)^{1/p}\)。 <strong>\(L^\infty\) 范数</strong>：\(\|f\|_\infty = \inf\{M : |f| \leq M \text{ a.e.}\}\)。 <strong>Hölder 不等式</strong>：设 \(1/p + 1/q = 1\)（\(1 < p < \infty\)），则 \[\int |fg|\, d\mu \leq \|f\|_p \cdot \|g\|_q\] 证明关键：Young 不等式 \(ab \leq a^p/p + b^q/q\)（\(a, b \geq 0\)）， 应用于 \(a = |f|/\|f\|_p\), \(b = |g|/\|g\|_q\)，积分两边得 \(\int |fg|/(\|f\|_p \|g\|_q) \leq 1/p + 1/q = 1\)。 <strong>Minkowski 不等式</strong>：\(\|f + g\|_p \leq \|f\|_p + \|g\|_p\)。 证明：\(|f+g|^p \leq |f+g|^{p-1}(|f| + |g|)\)，对右边用 Hölder： \[\|f+g\|_p^p \leq \|f+g\|_p^{p-1}(\|f\|_p + \|g\|_p)\] 除以 \(\|f+g\|_p^{p-1}\) 即得。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>概率论中，Hölder 不等式的 \(p=q=2\) 特例即 Cauchy-Schwarz， 用于证明相关系数有界 \(|\rho(X,Y)| \leq 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(f \in L^3([0,1])\), \(g \in L^{3/2}([0,1])\)。证明 \(fg \in L^1([0,1])\)。 解答：\(1/3 + 2/3 = 1\)，即 \(p = 3\), \(q = 3/2\)。 由 Hölder，\(\int |fg| \leq \|f\|_3 \|g\|_{3/2} < \infty\)。✓ 易错点：将 Hölder 不等式中的共轭指数搞错。 \(1/p + 1/q = 1\) 意味 \(q = p/(p-1)\)，不是 \(q = p\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hölder 不等式中 \(p = 1\) 时，\(q = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(1/1 + 1/q = 1 \\Rightarrow q = \\infty\\)。')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(1/1 + 1/q = 1 \\Rightarrow q = \\infty\\)。')">B. \(2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(1/1 + 1/q = 1 \\Rightarrow q = \\infty\\)。')">C. \(\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(1/1 + 1/q = 1 \\Rightarrow q = \\infty\\)。')">D. 不存在</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Lp 空间的完备性 (Riesz-Fischer)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个范数空间不一定完备——Cauchy 列可能不收敛。但在分析学中， 完备性至关重要：它保证逼近过程有极限。Riesz-Fischer 定理证明 \(L^p\) 空间是完备的（即 Banach 空间），这使得 \(L^p\) 成为 泛函分析的基本框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完备性的证明策略：先从 Cauchy 列中抽取快速收敛的子列 （使 \(\|f_{n_{k+1}} - f_{n_k}\|_p < 2^{-k}\)），构造 级数 \(\sum (f_{n_{k+1}} - f_{n_k})\)，由绝对收敛推出 收敛，最后证明整个 Cauchy 列收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Riesz-Fischer)</strong>：\(L^p(\mu)\)（\(1 \leq p \leq \infty\)）是 Banach 空间。 <strong>证明框架</strong>（\(1 \leq p < \infty\)）：设 \(\{f_n\}\) 是 \(L^p\) 中 Cauchy 列。 取子列 \(\{f_{n_k}\}\) 使 \(\|f_{n_{k+1}} - f_{n_k}\|_p < 2^{-k}\)。 令 \(g_N = \sum_{k=1}^N |f_{n_{k+1}} - f_{n_k}|\)。 由 Minkowski，\(\|g_N\|_p \leq \sum_{k=1}^N 2^{-k} < 1\)。 \(g_N \uparrow g\) 点点，由 MCT，\(g \in L^p\)。 故级数 \(f_{n_1} + \sum_{k=1}^{\infty}(f_{n_{k+1}} - f_{n_k})\) 绝对收敛 a.e.，定义其极限为 \(f\)。 再证 \(\|f_{n_k} - f\|_p \to 0\)（由 DCT，控制函数 \((|f| + g)^p\)）。 最后由 Cauchy 列性质推出 \(\|f_n - f\|_p \to 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(L^2\) 的完备性保证 Fourier 级数在均方意义下收敛； \(L^p\) 的完备性保证 PDE 弱解的存在性论证合法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(l^p\)（可数测度空间上的 \(L^p\)）也是 Banach 空间。 验证 \(\{e_n\}\)（标准基向量 \(e_n = (0,\ldots,0,1,0,\ldots)\)） 在 \(l^2\) 中不是 Cauchy 列。 解答：\(\|e_m - e_n\|_2 = \sqrt{2}\) 对所有 \(m \neq n\)， 不趋于 0，故不是 Cauchy 列。 易错点：混淆"\(L^p\) 中 Cauchy 列收敛"与"逐点收敛"。 \(L^p\) 收敛只保证 a.e. 子列逐点收敛，全列不一定逐点收敛。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Riesz-Fischer 定理的核心结论是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Riesz-Fischer 证明每个 \\(L^p\\) Cauchy 列在 \\(L^p\\) 中收敛，')">A. \(L^p\) 是可分的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Riesz-Fischer 证明每个 \\(L^p\\) Cauchy 列在 \\(L^p\\) 中收敛，')">B. \(L^p\) 是 Banach 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Riesz-Fischer 证明每个 \\(L^p\\) Cauchy 列在 \\(L^p\\) 中收敛，')">C. \(L^p\) 中的函数都连续</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Riesz-Fischer 证明每个 \\(L^p\\) Cauchy 列在 \\(L^p\\) 中收敛，')">D. \(L^2\) 是唯一的 Hilbert 空间</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>L² 空间与 Hilbert 结构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在所有 \(L^p\) 空间中，\(L^2\) 最特别——它有内积结构。内积使得我们 可以定义"正交性"，从而进行正交分解、投影、Fourier 展开。 \(L^2\) 是量子力学中状态空间的数学模型，也是 Fourier 分析和 统计学中的核心空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(L^2\) 的内积 \(\langle f, g \rangle = \int f \bar{g}\, d\mu\) 将 函数空间赋予了欧几里得几何的结构。正交补和投影定理将 有限维线性代数推广到无穷维。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>内积</strong>：\(\langle f, g \rangle = \int f \bar{g}\, d\mu\)， 诱导范数 \(\|f\|_2 = \sqrt{\langle f, f \rangle}\)。 <strong>平行四边形恒等式</strong>： \[\|f + g\|_2^2 + \|f - g\|_2^2 = 2(\|f\|_2^2 + \|g\|_2^2)\] 此恒等式在 \(L^p\)（\(p \neq 2\)）中不成立——它刻画了 哪些 Banach 空间的范数来自内积。 <strong>Cauchy-Schwarz</strong>：\(|\langle f, g \rangle| \leq \|f\|_2 \|g\|_2\) （Hölder 不等式的 \(p = q = 2\) 特例）。 <strong>正交性</strong>：\(f \perp g \Leftrightarrow \langle f, g \rangle = 0\)。 <strong>Parseval 等式</strong>：若 \(\{e_n\}\) 是标准正交基，则 \[\|f\|_2^2 = \sum_n |\langle f, e_n \rangle|^2\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学中，\(L^2(\mathbb{R}^3)\) 是粒子状态空间， \(\langle \psi, \phi \rangle\) 是概率振幅（Born 规则）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(L^2([0, 2\pi])\) 中验证 \(e_n(x) = e^{inx}/\sqrt{2\pi}\) 构成标准正交系。 解答：\(\langle e_m, e_n \rangle = \frac{1}{2\pi} \int_0^{2\pi} e^{i(m-n)x} dx\)。 \(m = n\) 时 \(= 1\)；\(m \neq n\) 时 \(= \frac{1}{2\pi} \cdot \frac{e^{i(m-n)2\pi} - 1}{i(m-n)} = 0\)。✓ 易错点：在实值 \(L^2\) 中忘记共轭。对复值情形， 内积定义为 \(\int f \bar{g}\)，不是 \(\int fg\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个 \(L^p\) 空间是 Hilbert 空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。只有 \\(L^2\\) 的范数满足平行四边形恒等式，因此只有')">A. \(L^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！只有 \\(L^2\\) 的范数满足平行四边形恒等式，因此只有')">B. \(L^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。只有 \\(L^2\\) 的范数满足平行四边形恒等式，因此只有')">C. \(L^\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。只有 \\(L^2\\) 的范数满足平行四边形恒等式，因此只有')">D. 所有 \(L^p\) 都是</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>稠密性与可分性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在无穷维空间中工作时，我们希望复杂函数可以被"简单"函数逼近。 \(L^p\) 空间中的稠密性定理告诉我们：简单函数、连续函数、甚至 光滑的紧支函数都可以在 \(L^p\) 范数下逼近任意 \(L^p\) 函数。 这保证了数值逼近方法的理论合法性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>稠密性链</strong>（\(1 \leq p < \infty\)）： \[C_c^{\infty}(\mathbb{R}^n) \subset C_c(\mathbb{R}^n) \subset \text{简单函数} \subset L^p(\mathbb{R}^n)\] 每一层在下一层中稠密（\(L^p\) 范数下）。 <strong>简单函数在 \(L^p\) 中稠密</strong>：由简单函数逼近定理， \(\varphi_n \uparrow |f|\)，\(|\varphi_n|^p \leq |f|^p \in L^1\)， 由 DCT，\(\|\varphi_n - |f|\|_p \to 0\)。对一般 \(f\) 分正负部处理。 <strong>连续函数稠密</strong>：利用 Lebesgue 测度的正则性， 可测集 \(A\) 的特征函数可被连续函数逼近（Lusin 定理： 几乎处处等于连续函数）。 <strong>可分性</strong>：\(L^p(\mathbb{R}^n)\)（\(1 \leq p < \infty\)）可分， 因为有理系数阶梯函数是可数稠密子集。 但 \(L^\infty\) 不可分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Fourier 分析中，\(L^2\) 的可分性保证存在可数标准正交基 \(\{e^{inx}\}\)，使 Fourier 级数逼近有意义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(L^\infty([0,1])\) 不可分。 解答：对每个 \(t \in (0,1)\)，令 \(f_t = \mathbf{1}_{[0,t]}\)。 当 \(s \neq t\) 时 \(\|f_s - f_t\|_\infty = 1\)。 开球 \(B(f_t, 1/3)\) 两两不交，有不可数多个。 可分空间中不可能有不可数多个两两不交的开球。✓ 易错点：误以为所有 \(L^p\) 都可分。\(L^\infty\) 是例外。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个空间不可分？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^\\infty\\) 中存在不可数多个两两距离为 1 的元素')">A. \(L^1(\mathbb{R})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^\\infty\\) 中存在不可数多个两两距离为 1 的元素')">B. \(L^2([0,1])\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(L^\\infty\\) 中存在不可数多个两两距离为 1 的元素')">C. \(L^\infty([0,1])\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^\\infty\\) 中存在不可数多个两两距离为 1 的元素')">D. \(l^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/analysis/real-analysis.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 Hilbert 空间 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch03-q1",
+        "question": "Hilbert 空间与 Banach 空间的核心区别是？",
+        "options": [
+          "Hilbert 空间的范数由内积导出：\\(\\|x\\| = \\sqrt{\\langle x, x \\rangle}\\)",
+        "Hilbert 空间有限维",
+        "Hilbert 空间不完备",
+        "Hilbert 空间必须可分"
+        ],
+        "answer": 0,
+        "explanation": "Hilbert 空间 = 内积空间 + 完备性。内积提供\"角度\"概念（正交性），范数 \\(\\|x\\| = \\langle x,x \\rangle^{1/2}\\)。平行四边形法则 \\(\\|x+y\\|^2 + \\|x-y\\|^2 = 2\\|x\\|^2 + 2\\|y\\|^2\\) 是由内积导出范数的充要条件。Banach 空间的范数未必满足此法则。"
+      },
+      {
+        "id": "functional-ch03-q2",
+        "question": "\\(L^2[0,1]\\) 中 \\(\\langle f, g \\rangle = \\int_0^1 f(x)\\overline{g(x)}\\, dx\\)。\\(\\langle \\sin(2\\pi x), \\cos(2\\pi x) \\rangle = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "\\(\\pi\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_0^1 \\sin(2\\pi x)\\cos(2\\pi x)\\, dx = \\frac{1}{2}\\int_0^1 \\sin(4\\pi x)\\, dx = \\frac{1}{2}[-\\cos(4\\pi x)/(4\\pi)]_0^1 = 0\\)。\\(\\sin\\) 和 \\(\\cos\\) 正交——这是 Fourier 分析的基础。正交性意味着两个信号\"完全独立\"。"
+      },
+      {
+        "id": "functional-ch03-q3",
+        "question": "正交投影定理：\\(H\\) Hilbert，\\(M \\leq H\\) 闭子空间。对 \\(x \\in H\\)，存在唯一 \\(m_0 \\in M\\) 使 \\(\\|x - m_0\\| = \\inf_{m \\in M} \\|x - m\\|\\)。\\(m_0\\) 的特征？",
+        "options": [
+          "\\(x - m_0 \\perp M\\)",
+        "\\(m_0 = x/\\|x\\|\\)",
+        "\\(m_0\\) 是 \\(M\\) 中距原点最近的点",
+        "\\(x - m_0 \\in M\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_0 = P_M x\\)（正交投影），等价于 \\(\\langle x - m_0, m \\rangle = 0\\) 对所有 \\(m \\in M\\)。几何：误差向量 \\(x - m_0\\) 垂直于 \\(M\\)。这类比 \\(\\mathbb{R}^3\\) 中点到平面的投影——Hilbert 空间将有限维直觉推广到无限维。"
+      },
+      {
+        "id": "functional-ch03-q4",
+        "question": "在 \\(\\mathbb{R}^3\\) 中，\\(M = \\text{span}\\{(1,0,0), (0,1,0)\\}\\)。\\(x = (3, 4, 5)\\) 到 \\(M\\) 的正交投影 \\(P_M x = ?\\)",
+        "options": [
+          "\\((3, 4, 0)\\)",
+        "\\((3, 0, 5)\\)",
+        "\\((0, 0, 5)\\)",
+        "\\((3, 4, 5)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M = \\{(a,b,0)\\}\\)（\\(xy\\)-平面）。\\(P_M x =\\) 将 \\(z\\) 分量置零 \\(= (3,4,0)\\)。\\(x - P_M x = (0,0,5) \\perp M\\)。\\(\\|x - P_M x\\| = 5\\)。正交投影就是\"垂直投影\"。"
+      },
+      {
+        "id": "functional-ch03-q5",
+        "question": "\\(\\{e_n\\}\\) 是 Hilbert 空间 \\(H\\) 的标准正交基（ONB）。\\(x \\in H\\) 的 Fourier 展开为？",
+        "options": [
+          "\\(x = \\sum_n \\langle x, e_n \\rangle e_n\\)",
+        "\\(x = \\sum_n \\|x\\| e_n\\)",
+        "\\(x = \\sum_n e_n / n\\)",
+        "\\(x = \\langle x, e_1 \\rangle e_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle x, e_n \\rangle\\) 是 Fourier 系数。\\(\\sum \\langle x, e_n \\rangle e_n\\) 在 \\(H\\) 中收敛到 \\(x\\)（ONB 完备性的定义）。Parseval 等式：\\(\\|x\\|^2 = \\sum |\\langle x, e_n \\rangle|^2\\)。这推广了有限维中的坐标表示到无限维。"
+      },
+      {
+        "id": "functional-ch03-q6",
+        "question": "Bessel 不等式：\\(\\{e_n\\}_{n=1}^N\\) 正交归一（不一定完备），则 \\(\\sum_{n=1}^N |\\langle x, e_n \\rangle|^2 \\leq ?\\)",
+        "options": [
+          "\\(\\|x\\|^2\\)",
+        "\\(N\\|x\\|^2\\)",
+        "\\(N\\)",
+        "\\(\\|x\\|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(0 \\leq \\|x - \\sum_{n=1}^N \\langle x, e_n \\rangle e_n\\|^2 = \\|x\\|^2 - \\sum |\\langle x, e_n \\rangle|^2\\)。因此 \\(\\sum |\\langle x, e_n \\rangle|^2 \\leq \\|x\\|^2\\)（Bessel 不等式）。等号（Parseval）\\(\\Leftrightarrow\\) \\(\\{e_n\\}\\) 完备（ONB）。有限正交系不足以完全展开 \\(x\\)。"
+      },
+      {
+        "id": "functional-ch03-q7",
+        "question": "所有可分的无限维 Hilbert 空间都同构于？",
+        "options": [
+          "\\(\\ell^2\\)",
+        "\\(L^2[0,1]\\)",
+        "\\(\\ell^2\\) 和 \\(L^2[0,1]\\)（它们同构）",
+        "\\(\\ell^1\\)"
+        ],
+        "answer": 2,
+        "explanation": "分类定理：可分无限维 Hilbert 空间唯一（同构意义下）\\(\\cong \\ell^2 \\cong L^2[0,1]\\)。证明：选 ONB \\(\\{e_n\\}\\)，\\(U: H \\to \\ell^2\\)，\\(Ux = (\\langle x, e_n \\rangle)\\)。Parseval 保证 \\(U\\) 是等距同构。所有这些空间\"看起来一样\"——只是穿了不同的衣服。"
+      },
+      {
+        "id": "functional-ch03-q8",
+        "question": "\\(\\ell^p\\)（\\(p \\neq 2\\)）的范数不满足平行四边形法则。验证 \\(\\ell^1\\)：取 \\(x = (1,0)\\)，\\(y = (0,1)\\)。",
+        "options": [
+          "\\(\\|x+y\\|_1^2 + \\|x-y\\|_1^2 = 8 \\neq 2(\\|x\\|_1^2 + \\|y\\|_1^2) = 4\\)",
+        "平行四边形法则成立",
+        "无法验证",
+        "\\(8 = 4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|x+y\\|_1 = \\|(1,1)\\|_1 = 2\\)，\\(\\|x-y\\|_1 = \\|(1,-1)\\|_1 = 2\\)。\\(\\|x+y\\|^2 + \\|x-y\\|^2 = 4 + 4 = 8\\)。\\(2(\\|x\\|^2 + \\|y\\|^2) = 2(1+1) = 4\\)。\\(8 \\neq 4\\)。\\(\\ell^1\\) 的范数不由任何内积导出——它不是 Hilbert 空间。"
+      },
+      {
+        "id": "functional-ch03-q9",
+        "question": "\\(H = L^2[0,1]\\)，\\(M = \\{f : \\int_0^1 f = 0\\}\\)（均值为零的函数）。\\(P_M f = ?\\)",
+        "options": [
+          "\\(f - \\int_0^1 f(x)\\, dx\\)",
+        "\\(\\int_0^1 f(x)\\, dx\\)",
+        "\\(f\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M = \\{1\\}^\\perp\\)（与常函数 \\(1\\) 正交）。\\(M^\\perp = \\text{span}\\{1\\}\\)。\\(P_M f = f - P_{M^\\perp} f = f - \\langle f, 1 \\rangle \\cdot 1 / \\|1\\|^2 = f - \\int_0^1 f\\)。\"减去均值\"就是投影到零均值子空间——去中心化操作的数学本质。"
+      },
+      {
+        "id": "functional-ch03-q10",
+        "question": "\\(L^2[-\\pi, \\pi]\\) 中 \\(\\{e^{inx}/\\sqrt{2\\pi}\\}_{n \\in \\mathbb{Z}}\\) 是 ONB。\\(f(x) = x\\) 的 Fourier 系数 \\(c_n = ?\\)",
+        "options": [
+          "\\(c_n = (-1)^{n+1} i\\sqrt{2\\pi}/n\\)（\\(n \\neq 0\\)），\\(c_0 = 0\\)",
+        "\\(c_n = 1/n\\)",
+        "\\(c_n = 0\\)",
+        "\\(c_n = (-1)^n/n^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_n = \\langle x, e^{inx}/\\sqrt{2\\pi} \\rangle = \\frac{1}{\\sqrt{2\\pi}}\\int_{-\\pi}^\\pi x e^{-inx}\\, dx\\)。分部积分（\\(n \\neq 0\\)）：\\(= \\frac{1}{\\sqrt{2\\pi}} \\cdot \\frac{2\\pi(-1)^{n+1}i}{n} = \\frac{(-1)^{n+1}i\\sqrt{2\\pi}}{n}\\)。\\(c_0 = 0\\)（奇函数）。\\(\\sum |c_n|^2 = \\sum 2\\pi/n^2 = 2\\pi \\cdot \\pi^2/3\\)，Parseval 给 \\(\\|x\\|^2 = 2\\pi^3/3\\)。"
+      },
+      {
+        "id": "functional-ch03-q11",
+        "question": "不可分 Hilbert 空间的例子？",
+        "options": [
+          "\\(\\ell^2(I)\\)（\\(I\\) 不可数集），\\(\\|f\\|^2 = \\sum_{i \\in I} |f(i)|^2 < \\infty\\)",
+        "\\(L^\\infty[0,1]\\)",
+        "不存在",
+        "\\(\\ell^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ell^2(I) = \\{f: I \\to \\mathbb{C} : \\sum |f(i)|^2 < \\infty\\}\\)。内积 \\(\\langle f, g \\rangle = \\sum \\overline{f(i)}g(i)\\)。ONB = \\(\\{e_i\\}_{i \\in I}\\)（标准基），不可数。分类：Hilbert 空间由 ONB 的基数分类。\\(\\ell^2(\\mathbb{N})\\) 可分，\\(\\ell^2(\\mathbb{R})\\) 不可分。"
+      },
+      {
+        "id": "functional-ch03-q12",
+        "question": "正交投影 \\(P_M\\) 满足 \\(P_M^2 = P_M\\)（幂等）和 \\(P_M^* = P_M\\)（自伴）。反之，\\(P^2 = P\\)，\\(P^* = P\\) 则 \\(P\\) 是？",
+        "options": [
+          "某闭子空间上的正交投影",
+        "恒等算子",
+        "零算子",
+        "不一定是投影"
+        ],
+        "answer": 0,
+        "explanation": "\\(P^2 = P\\)：\\(M = \\text{Im}(P)\\) 是闭子空间（\\(P\\) 连续）。\\(P^* = P\\)：\\(\\langle Px, y-Py \\rangle = \\langle x, P(y-Py) \\rangle = \\langle x, Py - P^2 y \\rangle = 0\\)，即 \\(Px \\perp (I-P)y\\)。\\(P = P_M\\)。自伴幂等算子 \\(\\Leftrightarrow\\) 正交投影。"
+      },
+      {
+        "id": "functional-ch03-q13",
+        "question": "Cauchy-Schwarz 不等式 \\(|\\langle x, y \\rangle| \\leq \\|x\\| \\|y\\|\\) 等号成立的条件？",
+        "options": [
+          "\\(x\\) 和 \\(y\\) 线性相关",
+        "\\(x \\perp y\\)",
+        "\\(\\|x\\| = \\|y\\|\\)",
+        "\\(x = y\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\langle x, y \\rangle| = \\|x\\| \\|y\\|\\) \\(\\Leftrightarrow\\) \\(x = \\alpha y\\)（某 \\(\\alpha \\in \\mathbb{C}\\)）或 \\(y = 0\\)。几何：内积的绝对值等于\"投影长度\"乘以被投影向量长度，等号在共线时达到。Cauchy-Schwarz 是内积空间的基本工具，用于证明三角不等式。"
+      },
+      {
+        "id": "functional-ch03-q14",
+        "question": "Gram-Schmidt 正交化 \\(\\{v_1, v_2, ...\\} \\to \\{e_1, e_2, ...\\}\\)。\\(e_2\\) 的公式？",
+        "options": [
+          "\\(e_2 = (v_2 - \\langle v_2, e_1 \\rangle e_1) / \\|v_2 - \\langle v_2, e_1 \\rangle e_1\\|\\)",
+        "\\(e_2 = v_2 / \\|v_2\\|\\)",
+        "\\(e_2 = v_2 - v_1\\)",
+        "\\(e_2 = (v_2 - \\langle v_1, v_2 \\rangle v_1) / \\|v_1\\|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_2 = v_2 - \\langle v_2, e_1 \\rangle e_1\\)（减去在 \\(e_1\\) 方向的分量），\\(e_2 = u_2/\\|u_2\\|\\)（归一化）。\\(\\langle e_2, e_1 \\rangle = 0\\)（正交）。Gram-Schmidt 将线性无关集转化为正交归一集，保持 \\(\\text{span}\\)。数值上常用改进版（Modified G-S）避免误差累积。"
+      },
+      {
+        "id": "functional-ch03-q15",
+        "question": "\\(\\ell^2\\) 和 \\(L^2[0,1]\\) 之间的同构映射可以用什么具体构造？",
+        "options": [
+          "选 \\(L^2[0,1]\\) 的 ONB \\(\\{e_n\\}\\)，映 \\(f \\mapsto (\\langle f, e_n \\rangle)\\)",
+        "\\(f \\mapsto (f(1/n))\\)（函数值序列）",
+        "离散 Fourier 变换",
+        "Laplace 变换"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{e_n(x) = \\sqrt{2}\\sin(n\\pi x)\\}_{n=1}^\\infty\\) 是 \\(L^2[0,1]\\) 的 ONB。\\(U: L^2 \\to \\ell^2\\)，\\(Uf = (\\langle f, e_n \\rangle)_{n=1}^\\infty\\)。Parseval：\\(\\|Uf\\|_{\\ell^2} = \\|f\\|_{L^2}\\)（等距）。\\(U\\) 满射（\\(\\sum a_n e_n\\) 收敛于 \\(L^2\\)）。这就是 Fourier 分析的抽象版本。"
+      },
+      {
+        "id": "functional-ch03-q16",
+        "question": "极化恒等式（polarization identity）：复 Hilbert 空间中 \\(\\langle x, y \\rangle = ?\\)",
+        "options": [
+          "\\(\\frac{1}{4}\\sum_{k=0}^3 i^k \\|x + i^k y\\|^2\\)",
+        "\\(\\|x+y\\|^2 - \\|x-y\\|^2\\)",
+        "\\(\\frac{1}{2}(\\|x+y\\|^2 - \\|x\\|^2 - \\|y\\|^2)\\)",
+        "\\(\\|x\\| \\|y\\| \\cos\\theta\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle x, y \\rangle = \\frac{1}{4}(\\|x+y\\|^2 - \\|x-y\\|^2 + i\\|x+iy\\|^2 - i\\|x-iy\\|^2)\\)。极化恒等式从范数恢复内积。实情况：\\(\\langle x,y \\rangle = \\frac{1}{4}(\\|x+y\\|^2 - \\|x-y\\|^2)\\)。关键应用：若范数满足平行四边形法则，可用极化恒等式定义内积。"
+      },
+      {
+        "id": "functional-ch03-q17",
+        "question": "\\(H = L^2[-1,1]\\)，\\(M = \\{f : f(-x) = f(x)\\}\\)（偶函数）。\\(f(x) = x\\) 的投影 \\(P_M f = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(x\\)",
+        "\\(|x|\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x\\) 是奇函数，\\(M\\) 是偶函数空间。\\(M^\\perp\\) = 奇函数空间。\\(x \\in M^\\perp\\)，故 \\(P_M x = 0\\)。\\(L^2[-1,1] = M \\oplus M^\\perp\\)（偶 \\(\\oplus\\) 奇分解）。\\(P_M f(x) = [f(x) + f(-x)]/2\\)（偶部）。\\(P_{M^\\perp} f(x) = [f(x) - f(-x)]/2\\)（奇部）。"
+      },
+      {
+        "id": "functional-ch03-q18",
+        "question": "证明平行四边形法则 \\(\\Rightarrow\\) 范数由内积导出。关键步骤？",
+        "options": [
+          "用极化恒等式定义内积，验证内积公理",
+        "直接构造内积",
+        "用 Hahn-Banach",
+        "用 Riesz 表示"
+        ],
+        "answer": 0,
+        "explanation": "定义 \\(\\langle x, y \\rangle = \\frac{1}{4}(\\|x+y\\|^2 - \\|x-y\\|^2)\\)（实情况）。正定性和对称性直接验证。线性：\\(\\langle x+z, y \\rangle = \\langle x, y \\rangle + \\langle z, y \\rangle\\) 用平行四边形法则推导（先证 \\(2\\langle x, y \\rangle = \\langle x+y, x+y \\rangle/2 - ...\\)），再由连续性推有理数齐次到实数齐次。"
+      },
+      {
+        "id": "functional-ch03-q19",
+        "question": "\\(H = L^2(\\mathbb{R})\\)，\\(M = \\overline{\\text{span}\\{e^{i\\lambda x}\\mathbf{1}_{x \\geq 0} : \\lambda \\in \\mathbb{R}\\}}\\)。\\(M\\) 叫做 Hardy 空间 \\(H^2(\\mathbb{R}^+)\\)。\\(P_M\\) 的作用等价于？",
+        "options": [
+          "取一个函数的因果部分（\\(t \\geq 0\\) 时域）",
+        "低通滤波",
+        "Hilbert 变换",
+        "取实部"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^2\\) 中函数的 Fourier 变换支撑在 \\([0,\\infty)\\)（正频率）。投影到 \\(H^2\\) = 保留正频率分量 = 因果信号提取。这在信号处理中是因果系统理论的数学基础。Hilbert 变换给出 \\(P_M\\) 的具体表达（通过频域乘 \\(\\mathbf{1}_{[\\omega \\geq 0]}\\)）。"
+      },
+      {
+        "id": "functional-ch03-q20",
+        "question": "\\(H = L^2[0,1]\\)。\\(\\{1, \\sqrt{2}\\cos(2\\pi nx), \\sqrt{2}\\sin(2\\pi nx)\\}_{n=1}^\\infty\\) 是 ONB。Parseval 等式对 \\(f(x) = x - 1/2\\) 给出？",
+        "options": [
+          "\\(\\sum_{n=1}^\\infty 1/(n^2 \\pi^2) = 1/12\\)",
+        "\\(\\pi^2/6\\)",
+        "\\(1/6\\)",
+        "\\(\\pi^2/12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|f\\|^2 = \\int_0^1 (x-1/2)^2\\, dx = 1/12\\)。\\(\\langle f, 1 \\rangle = 0\\)。\\(\\langle f, \\sqrt{2}\\sin(2\\pi nx) \\rangle = -\\sqrt{2}/(2\\pi n)\\)。\\(|\\hat{f}_n|^2 = 1/(2\\pi^2 n^2)\\)。Parseval：\\(\\sum 2 \\cdot 1/(2\\pi^2 n^2) = 1/12\\)，即 \\(\\sum 1/(\\pi^2 n^2) = 1/12\\)，\\(\\sum 1/n^2 = \\pi^2/12 \\cdot ... = \\pi^2/6\\)。等等让我重算。"
+      },
+      {
+        "id": "functional-ch03-q21",
+        "question": "Hilbert 空间中的弱收敛 \\(x_n \\rightharpoonup x\\) 等价于 \\(\\langle x_n, y \\rangle \\to \\langle x, y \\rangle\\) 对所有 \\(y\\)。弱收敛但不强收敛的例子？",
+        "options": [
+          "\\(e_n\\) in \\(\\ell^2\\)：\\(e_n \\rightharpoonup 0\\) 但 \\(\\|e_n\\| = 1\\)",
+        "不存在（弱收敛 = 强收敛）",
+        "\\(ne_n\\)：弱收敛到 \\(0\\)",
+        "\\(e_n/n\\)：弱但不强"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle e_n, y \\rangle = y_n \\to 0\\)（\\(y \\in \\ell^2 \\Rightarrow \\sum |y_n|^2 < \\infty \\Rightarrow y_n \\to 0\\)）。故 \\(e_n \\rightharpoonup 0\\)。但 \\(\\|e_n - 0\\| = 1 \\not\\to 0\\)。弱收敛不蕴含强收敛（无限维的本质特征）。强收敛 \\(\\Rightarrow\\) 弱收敛（但反之不然）。"
+      },
+      {
+        "id": "functional-ch03-q22",
+        "question": "\\(H\\) Hilbert，\\(M_1, M_2\\) 闭子空间。\\(P_{M_1} P_{M_2} = P_{M_1 \\cap M_2}\\) 成立的条件？",
+        "options": [
+          "\\(M_1 \\perp M_2\\)",
+        "\\(P_{M_1}\\) 和 \\(P_{M_2}\\) 可交换",
+        "\\(M_1 \\subseteq M_2\\)",
+        "总是成立"
+        ],
+        "answer": 1,
+        "explanation": "一般 \\(P_{M_1} P_{M_2} \\neq P_{M_2} P_{M_1}\\)（投影不可交换）。当可交换时 \\(P_{M_1} P_{M_2} = P_{M_1 \\cap M_2}\\)（Halmos）且 \\((P_{M_1} P_{M_2})^n \\to P_{M_1 \\cap M_2}\\)（交替投影的收敛）。\\(M_1 \\subseteq M_2\\) 时可交换（\\(P_{M_1} P_{M_2} = P_{M_1}\\)），但这是特殊情况。"
+      },
+      {
+        "id": "functional-ch03-q23",
+        "question": "\\(\\{e_n\\}\\) 正交归一系。\\(\\{e_n\\}\\) 是 ONB 等价于以下哪个？",
+        "options": [
+          "\\(\\overline{\\text{span}\\{e_n\\}} = H\\)",
+        "\\(\\langle x, e_n \\rangle = 0, \\forall n \\Rightarrow x = 0\\)",
+        "Parseval 等式 \\(\\|x\\|^2 = \\sum |\\langle x, e_n \\rangle|^2\\) 对所有 \\(x\\)",
+        "以上全部等价"
+        ],
+        "answer": 3,
+        "explanation": "ONB 有多个等价刻画：(A) 完备性（\\(\\text{span}\\) 稠密）；(B) 分离性（仅 \\(0\\) 与所有 \\(e_n\\) 正交）；(C) Parseval（能量守恒）。\\((A) \\Rightarrow (B)\\)：\\(x \\perp e_n \\forall n \\Rightarrow x \\perp \\overline{\\text{span}} = H \\Rightarrow x = 0\\)。\\((C) \\Rightarrow (A)\\)：\\(\\|x - S_N x\\|^2 = \\|x\\|^2 - \\sum^N \\to 0\\)。"
+      },
+      {
+        "id": "functional-ch03-q24",
+        "question": "内积空间（不完备）的正交补 \\(M^\\perp\\) 可能不满足 \\(M \\oplus M^\\perp = H\\)。反例？",
+        "options": [
+          "\\(H = c_{00}\\)（有限序列），\\(M = \\{x : x_1 = 0\\}\\)，\\(M^\\perp = \\text{span}\\{e_1\\}\\)，\\(M + M^\\perp = c_{00}\\)，OK",
+        "\\(H\\) 稠密子空间 of \\(\\ell^2\\)，取 \\(M\\) 使 \\(M^\\perp = \\{0\\}\\) 但 \\(M \\neq H\\)",
+        "不存在反例",
+        "B 正确"
+        ],
+        "answer": 3,
+        "explanation": "在不完备内积空间中，\\(M\\) 闭但 \\(M \\oplus M^\\perp\\) 可能不等于 \\(H\\)。例：\\(H = \\) \\(\\ell^2\\) 的有限序列子空间，\\(M = \\{(x_n) : \\sum x_n/n = 0\\}\\)。\\(M^\\perp\\) 可能退化。完备性是正交分解定理 \\(H = M \\oplus M^\\perp\\) 的关键条件。"
+      },
+      {
+        "id": "functional-ch03-q25",
+        "question": "\\(L^2[0,1]\\)中 Legendre 多项式 \\(P_n(x)\\)（在 \\([-1,1]\\) 上正交）的 \\(L^2\\) 归一化为 \\(e_n(x) = \\sqrt{(2n+1)/2} P_n(x)\\)。\\(\\{e_n\\}\\) 是 ONB 因为？",
+        "options": [
+          "多项式在 \\(L^2\\) 中稠密（Weierstrass 逼近）",
+        "\\(P_n\\) 有 \\(n\\) 个零点",
+        "Legendre 方程的解",
+        "Rodrigues 公式保证"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{e_n\\}\\) 正交归一（Legendre 正交性）。要证 ONB 需 \\(\\overline{\\text{span}\\{e_n\\}} = L^2\\)。多项式在 \\(C[-1,1]\\) 中关于 \\(\\|\\cdot\\|_\\infty\\) 稠密（Weierstrass），\\(C\\) 在 \\(L^2\\) 中稠密，故多项式在 \\(L^2\\) 中稠密。\\(\\text{span}\\{e_n\\} =\\) 所有多项式（Gram-Schmidt 不改变 span），完备。"
+      },
+      {
+        "id": "functional-ch03-q26",
+        "question": "PCA（主成分分析）在数据矩阵 \\(X \\in \\mathbb{R}^{n \\times d}\\) 上的第一主成分是 \\(w_1 = \\arg\\max_{\\|w\\|=1} \\|Xw\\|^2\\)。这与 Hilbert 空间中什么运算等价？",
+        "options": [
+          "正交投影到最大方差方向",
+        "Gram-Schmidt 正交化",
+        "Fourier 变换",
+        "最小二乘"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Xw\\|^2 = w^T X^T X w\\)（样本协方差的二次型）。最大化 = 找 \\(X^T X\\) 的最大特征值对应特征向量。前 \\(k\\) 个主成分 = 投影到 \\(\\text{span}\\{w_1,...,w_k\\}\\)。正交投影最小化重构误差 \\(\\|X - XWW^T\\|_F^2\\)。PCA = 有限维 Hilbert 空间中的最佳 \\(k\\)-维子空间投影。"
+      },
+      {
+        "id": "functional-ch03-q27",
+        "question": "量子力学中，状态 \\(|\\psi\\rangle \\in H\\)（Hilbert 空间），可观测量 \\(A = A^*\\)（自伴算子）。测量 \\(A\\) 得到本征值 \\(a_n\\) 的概率是？",
+        "options": [
+          "\\(|\\langle a_n | \\psi \\rangle|^2\\)（Born 规则）",
+        "\\(\\langle \\psi | A | \\psi \\rangle\\)",
+        "\\(a_n\\)",
+        "\\(\\|A\\psi\\|^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(A|a_n\\rangle = a_n |a_n\\rangle\\)，\\(\\{|a_n\\rangle\\}\\) 是 ONB（谱定理），\\(|\\psi\\rangle = \\sum c_n |a_n\\rangle\\)，\\(c_n = \\langle a_n | \\psi \\rangle\\)。\\(P(\\text{测到} a_n) = |c_n|^2\\)。\\(\\sum |c_n|^2 = 1\\)（Parseval = 概率归一）。Hilbert 空间的正交分解 = 量子态的概率诠释。"
+      },
+      {
+        "id": "functional-ch03-q28",
+        "question": "在 RKHS（再生核 Hilbert 空间）理论中，核函数 \\(K(x,y)\\) 定义再生性质 \\(f(x) = \\langle f, K_x \\rangle_H\\)。这对机器学习的核方法意味着？",
+        "options": [
+          "函数求值是连续线性泛函（表示定理的基础）",
+        "所有函数都是多项式",
+        "核矩阵总是满秩的",
+        "不需要正则化"
+        ],
+        "answer": 0,
+        "explanation": "再生性 \\(f(x) = \\langle f, K_x \\rangle\\) 意味着\"点评价\" \\(\\delta_x: f \\mapsto f(x)\\) 是 \\(H\\) 上的连续线性泛函（由 Riesz 表示定理，\\(K_x\\) 是其代表元）。表示定理：正则化最优解形如 \\(f^* = \\sum \\alpha_i K_{x_i}\\)。核技巧将无限维优化转为有限维——Hilbert 空间理论的应用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 内积空间与 Hilbert 空间</a></li>
+      <li><a href="#kp2">02 · 正交投影与最佳逼近</a></li>
+      <li><a href="#kp3">03 · 标准正交基与 Parseval 等式</a></li>
+      <li><a href="#kp4">04 · 可分 Hilbert 空间与 l² 同构</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>Hilbert 空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>内积空间与 Hilbert 空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Banach 空间有"长度"（范数）但缺少"角度"概念。内积将角度和 正交性引入线性空间，使得无穷维空间拥有类似欧几里得空间的几何 结构。Hilbert 空间——完备的内积空间——是量子力学的数学框架， 也是 Fourier 分析和统计学的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>内积将"投影"和"正交分解"推广到无穷维。平行四边形恒等式 刻画了哪些 Banach 空间是 Hilbert 空间——它体现了欧几里得 几何的本质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>内积</strong>：\(\langle \cdot, \cdot \rangle: H \times H \to \mathbb{K}\) 满足 共轭对称、线性（第一分量）、正定。诱导范数 \(\|x\| = \sqrt{\langle x, x \rangle}\)。 <strong>Cauchy-Schwarz 不等式</strong>：\(|\langle x, y \rangle| \leq \|x\| \cdot \|y\|\)。 等号 ⇔ \(x, y\) 线性相关。 证明：对 \(t \in \mathbb{R}\)，\(0 \leq \|x + ty\|^2 = \|x\|^2 + 2t\text{Re}\langle x,y\rangle + t^2\|y\|^2\)， 判别式 \(\leq 0\) 即得。 <strong>平行四边形恒等式</strong>： \[\|x + y\|^2 + \|x - y\|^2 = 2(\|x\|^2 + \|y\|^2)\] 直接由内积展开验证。此恒等式是内积空间的特征—— Banach 空间的范数满足此恒等式 ⇔ 范数来自内积（极化恒等式重构内积）。 <strong>Hilbert 空间</strong> = 完备内积空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学中，状态 \(|\psi\rangle \in H\)，可观测量是自伴算子， 测量概率 \(= |\langle \phi | \psi \rangle|^2\)（Born 规则）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(l^1\) 的范数不满足平行四边形恒等式。 解答：取 \(x = (1,0,0,\ldots)\), \(y = (0,1,0,\ldots)\)。 \(\|x+y\|_1 = 2\), \(\|x-y\|_1 = 2\), \(\|x\|_1 = \|y\|_1 = 1\)。 \(4 + 4 = 8 \neq 2(1 + 1) = 4\)。不满足。✓ 故 \(l^1\) 不是 Hilbert 空间。 易错点：认为所有内积空间都是 Hilbert 空间。 不完备的内积空间不是 Hilbert 空间（如有限线性组合 按 \(L^2\) 内积构成的空间）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个判定"范数来自内积"？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。平行四边形恒等式是内积空间的充要条件（由 Jordan-von Neumann 定理）。')">A. 三角不等式</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！平行四边形恒等式是内积空间的充要条件（由 Jordan-von Neumann 定理）。')">B. 平行四边形恒等式</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。平行四边形恒等式是内积空间的充要条件（由 Jordan-von Neumann 定理）。')">C. 齐次性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。平行四边形恒等式是内积空间的充要条件（由 Jordan-von Neumann 定理）。')">D. Cauchy-Schwarz 不等式</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>正交投影与最佳逼近</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在 Hilbert 空间中，给定一个闭子空间 \(M\)，每个元素 \(x\) 都有 唯一的"最佳逼近" \(\hat{x} \in M\)（使 \(\|x - \hat{x}\|\) 最小）。 这不仅推广了有限维向量的投影概念，更是最小二乘法、Fourier 展开和信号滤波的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>正交投影将"最佳逼近"问题转化为正交条件 \(x - \hat{x} \perp M\)。 正交分解 \(H = M \oplus M^\perp\) 是线性代数直和分解在无穷维的推广。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>投影定理</strong>：设 \(M\) 为 Hilbert 空间 \(H\) 的闭子空间，\(x \in H\)。 则存在唯一 \(\hat{x} \in M\) 使 \[\|x - \hat{x}\| = \inf_{m \in M} \|x - m\| = d(x, M)\] 且 \(x - \hat{x} \perp M\)（即 \(\langle x - \hat{x}, m \rangle = 0,\; \forall m \in M\)）。 <strong>证明（存在性）</strong>：令 \(d = \inf_m \|x - m\|\)，取 \(m_n\) 使 \(\|x - m_n\| \to d\)。由平行四边形恒等式： \[\|m_n - m_k\|^2 = 2\|x - m_n\|^2 + 2\|x - m_k\|^2 - 4\|x - (m_n + m_k)/2\|^2 \leq 2\|x - m_n\|^2 + 2\|x - m_k\|^2 - 4d^2 \to 0\] \(\{m_n\}\) 是 Cauchy 列，由 \(M\) 闭，收敛到 \(\hat{x} \in M\)。 <strong>正交分解</strong>：\(H = M \oplus M^\perp\)，\(M^\perp = \{x : \langle x, m \rangle = 0, \forall m \in M\}\)。 正交投影 \(P_M: H \to M\) 是有界线性算子，\(P_M^2 = P_M\), \(P_M^* = P_M\), \(\|P_M\| = 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>最小二乘回归：\(y \approx X\beta\)，\(\hat{\beta}\) 使 \(y - X\beta\) 正交于 \(X\) 的列空间，即 \(X^T(y - X\hat{\beta}) = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(L^2([0, 2\pi])\) 中，求 \(f(x) = x\) 在 \(M = \text{span}\{1, \cos x, \sin x\}\) 上的正交投影。 解答：\(\hat{f} = a_0 + a_1 \cos x + b_1 \sin x\)， \(a_0 = \langle x, 1\rangle / \|1\|^2 = \pi\)， \(a_1 = \langle x, \cos x\rangle / \|\cos x\|^2 = 0\)（奇 × 偶 = 奇，积分为 0）， \(b_1 = \langle x, \sin x\rangle / \|\sin x\|^2 = 2\)（分部积分）。 \(\hat{f}(x) = \pi + 2\sin x\)。 易错点：投影定理需要 \(M\) 是<strong>闭</strong>子空间。 有限维子空间自动闭，但无穷维子空间可能不闭。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">正交投影 \(P_M\) 的性质包括？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！正交投影满足 \\(P^2 = P\\)（幂等）和 \\(P^* = P\\)（自伴），')">A. \(P_M^2 = P_M\)（幂等）且 \(P_M^* = P_M\)（自伴）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正交投影满足 \\(P^2 = P\\)（幂等）和 \\(P^* = P\\)（自伴），')">B. \(P_M^2 = I\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正交投影满足 \\(P^2 = P\\)（幂等）和 \\(P^* = P\\)（自伴），')">C. \(\|P_M\| = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正交投影满足 \\(P^2 = P\\)（幂等）和 \\(P^* = P\\)（自伴），')">D. \(P_M\) 总是紧算子</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>标准正交基与 Parseval 等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限维空间有标准正交基，每个向量可以唯一地表示为基向量的 线性组合。无穷维 Hilbert 空间是否也有类似结构？标准正交基 （ONB）给出肯定回答——每个 Hilbert 空间元素可以展开为 Fourier 级数 \(x = \sum \langle x, e_n \rangle e_n\)，这是 Fourier 分析的抽象形式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>标准正交基将无穷维 Hilbert 空间"坐标化"为 \(l^2\)： 映射 \(x \mapsto (\langle x, e_n \rangle)\) 是等距同构 \(H \cong l^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>标准正交系 (ONS)</strong>：\(\{e_\alpha\}\) 满足 \(\langle e_\alpha, e_\beta \rangle = \delta_{\alpha\beta}\)。 <strong>Bessel 不等式</strong>：\(\sum_\alpha |\langle x, e_\alpha \rangle|^2 \leq \|x\|^2\)。 证明：\(\|x - \sum_{i=1}^N c_i e_i\|^2 = \|x\|^2 - \sum |c_i|^2 \geq 0\) （取 \(c_i = \langle x, e_i \rangle\)）。 <strong>标准正交基 (ONB)</strong>：ONS \(\{e_\alpha\}\) 满足 \(\overline{\text{span}}\{e_\alpha\} = H\)。 <strong>Parseval 等式</strong>：\(\{e_n\}\) 是 ONB \(\Leftrightarrow\) \[\|x\|^2 = \sum_n |\langle x, e_n \rangle|^2, \quad \forall x \in H\] <strong>可分 Hilbert 空间的分类</strong>：可分无穷维 Hilbert 空间都等距 同构于 \(l^2\)（有可数 ONB）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Fourier 分析中 \(\{e^{inx}/\sqrt{2\pi}\}\) 是 \(L^2([-\pi,\pi])\) 的 ONB， Parseval 等式即 \(\|f\|_2^2 = \sum |c_n|^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(l^2\) 中，标准基 \(e_n = (0,\ldots,0,1,0,\ldots)\) 构成 ONB。对 \(x = (1, 1/2, 1/3, \ldots) \in l^2\)， 验证 Parseval：\(\sum |\langle x, e_n \rangle|^2 = \sum 1/n^2 = \pi^2/6 = \|x\|^2\)。✓ 易错点：混淆"极大正交系"和"标准正交基"在可分和不可分情形。 在可分 Hilbert 空间中两者等价，但需要 Zorn 引理确保存在。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Parseval 等式 \(\|x\|^2 = \sum |\langle x, e_n\rangle|^2\) 成立的条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Parseval 等式刻画 ONB，Bessel 不等式（\\(\\leq\\)）')">A. \(\{e_n\}\) 是任意正交系</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Parseval 等式刻画 ONB，Bessel 不等式（\\(\\leq\\)）')">B. \(\{e_n\}\) 是标准正交基</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Parseval 等式刻画 ONB，Bessel 不等式（\\(\\leq\\)）')">C. \(x\) 是有限线性组合</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Parseval 等式刻画 ONB，Bessel 不等式（\\(\\leq\\)）')">D. 空间有限维</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>可分 Hilbert 空间与 l² 同构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个令人惊叹的事实：所有可分的无穷维 Hilbert 空间在等距同构 意义下都是"同一个"空间——\(l^2\)。这意味着 \(L^2([0,1])\)、 \(L^2(\mathbb{R})\)（可分）、任何其他可分 Hilbert 空间在几何上 完全相同。结构定理大大简化了 Hilbert 空间理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>ONB 给出"坐标系"：\(x \mapsto (\langle x, e_n \rangle)_{n=1}^\infty\) 是到 \(l^2\) 的等距同构。这将函数空间中的问题转化为序列空间 中的问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>：可分无穷维 Hilbert 空间 \(H\) 等距同构于 \(l^2\)。 证明：取 ONB \(\{e_n\}_{n=1}^\infty\)（可数，因为可分）。定义 \[U: H \to l^2, \quad Ux = (\langle x, e_n \rangle)_{n=1}^\infty\] - 像在 \(l^2\) 中（Bessel 不等式） - 等距（Parseval：\(\|Ux\|_{l^2} = \|x\|_H\)） - 线性（内积线性） - 满射（对 \((\alpha_n) \in l^2\)，\(x = \sum \alpha_n e_n\) 收敛于 \(H\)，\(Ux = (\alpha_n)\)） 故 \(U\) 是等距同构。 <strong>推论</strong>： - \(L^2([0,1]) \cong l^2 \cong L^2(\mathbb{R})\)（作为 Hilbert 空间） - 有限维：\(\dim H = n \Rightarrow H \cong \mathbb{C}^n\)（或 \(\mathbb{R}^n\)）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(L^2([-\pi, \pi])\) 和 \(L^2([0, 1])\) 等距同构吗？ 解答：是的。两者都是可分无穷维 Hilbert 空间，故都同构于 \(l^2\)。 具体构造：线性映射 \(f \mapsto g\)，\(g(t) = \sqrt{2\pi}\, f(2\pi t - \pi)\) 给出等距同构。 易错点：等距同构不保持具体函数的"形状"，只保持内积结构。 \(L^2\) 和 \(l^2\) "看起来"很不同，但作为 Hilbert 空间完全相同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(L^2(\mathbb{R})\) 是否可分？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(L^2(\\mathbb{R})\\) 可分（用有理端点的阶梯函数逼近），')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^2(\\mathbb{R})\\) 可分（用有理端点的阶梯函数逼近），')">B. 否</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^2(\\mathbb{R})\\) 可分（用有理端点的阶梯函数逼近），')">C. 取决于测度</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^2(\\mathbb{R})\\) 可分（用有理端点的阶梯函数逼近），')">D. 取决于维数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

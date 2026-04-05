@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 什么是群？ — 群论 Groupes — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "groups-ch01-q1",
+        "question": "设集合 \\(G = \\{0, 1, 2, 3, 4, 5\\}\\)，运算为模 \\(6\\) 加法。计算 \\(4 \\oplus 5\\) 的值。",
+        "options": [
+          "\\(3\\)",
+        "\\(9\\)",
+        "\\(1\\)",
+        "\\(4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(4 \\oplus 5 = (4+5) \\bmod 6 = 9 \\bmod 6 = 3\\)。模运算将普通加法的结果对模数取余，\\(9 = 1 \\times 6 + 3\\)，余数为 \\(3\\)，结果仍属于 \\(G\\)。选 B 是忘记取模的常见错误。"
+      },
+      {
+        "id": "groups-ch01-q2",
+        "question": "以下哪个集合在给定运算下不构成群？",
+        "options": [
+          "\\((\\mathbb{Z}, +)\\)",
+        "\\((\\mathbb{Q} \\setminus \\{0\\}, \\times)\\)",
+        "\\((\\mathbb{N}, +)\\)",
+        "\\((\\mathbb{R} \\setminus \\{0\\}, \\times)\\)"
+        ],
+        "answer": 2,
+        "explanation": "自然数集 \\(\\mathbb{N}\\) 在加法下不满足逆元公理：正整数 \\(n\\) 的加法逆元 \\(-n \\notin \\mathbb{N}\\)。A、B、D 均满足封闭性、结合律、单位元和逆元。易错：误以为 \\(\\mathbb{N}\\) 缺少单位元，实际上 \\(0\\) 可作单位元。"
+      },
+      {
+        "id": "groups-ch01-q3",
+        "question": "在循环群 \\(\\mathbb{Z}/10\\mathbb{Z}\\) 中，元素 \\(\\overline{4}\\) 的阶 \\(\\mathrm{ord}(\\overline{4})\\) 等于多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(10\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathrm{ord}(\\overline{a}) = n/\\gcd(a,n)\\)，代入得 \\(10/\\gcd(4,10) = 10/2 = 5\\)。验证：\\(4 \\times 5 = 20 \\equiv 0 \\pmod{10}\\)，且 \\(4k \\not\\equiv 0\\) 对 \\(k=1,2,3,4\\)。易错：直接用 \\(a\\) 本身当阶。"
+      },
+      {
+        "id": "groups-ch01-q4",
+        "question": "循环群 \\(\\mathbb{Z}/8\\mathbb{Z}\\) 共有多少个生成元？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\overline{a}\\) 是生成元当且仅当 \\(\\gcd(a,8) = 1\\)。满足条件的 \\(a \\in \\{1,3,5,7\\}\\)，共 \\(\\varphi(8) = 8 \\cdot (1 - 1/2) = 4\\) 个。常见错误：以为所有非零元素都是生成元。"
+      },
+      {
+        "id": "groups-ch01-q5",
+        "question": "对称群 \\(S_4\\) 的阶（元素个数）是多少？",
+        "options": [
+          "\\(8\\)",
+        "\\(12\\)",
+        "\\(24\\)",
+        "\\(48\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|S_n| = n!\\)，因此 \\(|S_4| = 4! = 4 \\times 3 \\times 2 \\times 1 = 24\\)。\\(S_4\\) 包含 \\(1\\) 个恒等、\\(6\\) 个对换、\\(8\\) 个 \\(3\\)-轮换、\\(6\\) 个 \\(4\\)-轮换和 \\(3\\) 个双对换，合计 \\(24\\)。"
+      },
+      {
+        "id": "groups-ch01-q6",
+        "question": "二面体群 \\(D_5\\)（正五边形的对称群）的阶为多少？",
+        "options": [
+          "\\(5\\)",
+        "\\(8\\)",
+        "\\(10\\)",
+        "\\(20\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|D_n| = 2n\\)，因此 \\(|D_5| = 2 \\times 5 = 10\\)。\\(D_5\\) 包含 \\(5\\) 个旋转和 \\(5\\) 个反射。常见错误：把 \\(|D_n|\\) 记成 \\(n\\) 或 \\(n^2\\)。"
+      },
+      {
+        "id": "groups-ch01-q7",
+        "question": "群 \\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\) 的阶为多少？",
+        "options": [
+          "\\(3\\)",
+        "\\(5\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 2,
+        "explanation": "直积群的阶 \\(|G \\times H| = |G| \\cdot |H| = 2 \\times 3 = 6\\)。且 \\(\\gcd(2,3)=1\\) 时 \\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z} \\cong \\mathbb{Z}/6\\mathbb{Z}\\)。选 B 是误用加法。"
+      },
+      {
+        "id": "groups-ch01-q8",
+        "question": "在群 \\((\\mathbb{Z}/11\\mathbb{Z})^*\\) 中，求 \\(\\overline{3}\\) 的乘法逆元。",
+        "options": [
+          "\\(\\overline{3}\\)",
+        "\\(\\overline{4}\\)",
+        "\\(\\overline{7}\\)",
+        "\\(\\overline{8}\\)"
+        ],
+        "answer": 1,
+        "explanation": "需找 \\(x\\) 使 \\(3x \\equiv 1 \\pmod{11}\\)。计算 \\(3 \\times 4 = 12 = 11 + 1 \\equiv 1 \\pmod{11}\\)，故 \\(\\overline{3}^{-1} = \\overline{4}\\)。选 D 给的是加法逆元 \\(11-3=8\\)，这是乘法/加法逆元混淆的常见错误。"
+      },
+      {
+        "id": "groups-ch01-q9",
+        "question": "在群 \\((\\mathbb{Z}/7\\mathbb{Z})^*\\) 中，计算 \\(\\overline{3}^{-1} \\cdot \\overline{5}^{-1}\\) 的值。",
+        "options": [
+          "\\(\\overline{1}\\)",
+        "\\(\\overline{2}\\)",
+        "\\(\\overline{4}\\)",
+        "\\(\\overline{6}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(3 \\times 5 = 15 \\equiv 1 \\pmod{7}\\)，故 \\(\\overline{3}^{-1} = \\overline{5}\\)，\\(\\overline{5}^{-1} = \\overline{3}\\)。因此 \\(\\overline{3}^{-1} \\cdot \\overline{5}^{-1} = \\overline{5} \\cdot \\overline{3} = \\overline{15} \\equiv \\overline{1}\\)。等价地 \\((3 \\cdot 5)^{-1} = 1^{-1} = 1\\)。"
+      },
+      {
+        "id": "groups-ch01-q10",
+        "question": "在 \\(\\mathbb{Z}/20\\mathbb{Z}\\) 中，由 \\(\\overline{8}\\) 生成的子群 \\(\\langle \\overline{8} \\rangle\\) 包含多少个元素？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(10\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|\\langle \\overline{8} \\rangle| = \\mathrm{ord}(\\overline{8}) = 20/\\gcd(8,20) = 20/4 = 5\\)。元素为 \\(\\{\\overline{0}, \\overline{8}, \\overline{16}, \\overline{4}, \\overline{12}\\}\\)。易错：误算 \\(\\gcd(8,20)=2\\) 而非 \\(4\\)。"
+      },
+      {
+        "id": "groups-ch01-q11",
+        "question": "设 \\(G = \\langle g \\rangle\\) 是 \\(12\\) 阶循环群。元素 \\(g^8\\) 的阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{ord}(g^k) = n/\\gcd(k,n)\\)，代入 \\(n=12, k=8\\)：\\(12/\\gcd(8,12) = 12/4 = 3\\)。易错：混淆 \\(g^k = e\\) 与 \\(\\mathrm{ord}(g^k)=k\\)。阶是使 \\((g^k)^m = e\\) 的最小正整数 \\(m\\)。"
+      },
+      {
+        "id": "groups-ch01-q12",
+        "question": "在 \\(S_5\\) 中，置换 \\(\\sigma = (1\\;3\\;5)(2\\;4)\\) 的符号 \\(\\mathrm{sgn}(\\sigma)\\) 为多少？",
+        "options": [
+          "\\(+1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "\\((1\\;3\\;5)\\) 是 \\(3\\)-轮换，可分解为 \\(2\\) 个对换；\\((2\\;4)\\) 是 \\(1\\) 个对换。总对换数 \\(= 2+1 = 3\\)（奇数），故 \\(\\mathrm{sgn}(\\sigma) = (-1)^3 = -1\\)。公式：\\(\\mathrm{sgn} = (-1)^{n-c}\\)，其中 \\(c\\) 为轮换个数。"
+      },
+      {
+        "id": "groups-ch01-q13",
+        "question": "在 \\(S_4\\) 中，计算 \\((1\\;2\\;4) \\circ (2\\;3)\\) 的不相交轮换分解（约定从右向左复合）。",
+        "options": [
+          "\\((1\\;2\\;3\\;4)\\)",
+        "\\((1\\;3\\;4\\;2)\\)",
+        "\\((1\\;4\\;3\\;2)\\)",
+        "\\((1\\;2)(3\\;4)\\)"
+        ],
+        "answer": 0,
+        "explanation": "从右向左：先施 \\((2\\;3)\\) 再施 \\((1\\;2\\;4)\\)。\\(1 \\to 1 \\to 2\\)；\\(2 \\to 3 \\to 3\\)；\\(3 \\to 2 \\to 4\\)；\\(4 \\to 4 \\to 1\\)。故结果为 \\((1\\;2\\;3\\;4)\\)。易错：从左向右复合会得到不同结果。"
+      },
+      {
+        "id": "groups-ch01-q14",
+        "question": "群 \\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\) 中元素 \\((\\overline{1}, \\overline{2})\\) 的阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(5\\)",
+        "\\(6\\)"
+        ],
+        "answer": 3,
+        "explanation": "直积中 \\(\\mathrm{ord}(a,b) = \\mathrm{lcm}(\\mathrm{ord}(a), \\mathrm{ord}(b))\\)。\\(\\mathrm{ord}(\\overline{1})=2\\)（在 \\(\\mathbb{Z}/2\\mathbb{Z}\\) 中），\\(\\mathrm{ord}(\\overline{2})=3\\)（在 \\(\\mathbb{Z}/3\\mathbb{Z}\\) 中）。\\(\\mathrm{lcm}(2,3)=6\\)。选 C 是误用加法。"
+      },
+      {
+        "id": "groups-ch01-q15",
+        "question": "下列哪对群同构？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\) 与 \\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\) 与 \\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(S_3\\) 与 \\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(D_3\\) 与 \\(\\mathbb{Z}/3\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\gcd(2,3)=1\\) 时 \\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z} \\cong \\mathbb{Z}/6\\mathbb{Z}\\)。A 不同构：\\(\\mathbb{Z}/4\\mathbb{Z}\\) 有 \\(4\\) 阶元素，Klein 四元群所有非零元素阶为 \\(2\\)。C、D 不同构：\\(S_3 \\cong D_3\\) 是非交换群，而 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 是交换群。"
+      },
+      {
+        "id": "groups-ch01-q16",
+        "question": "设 \\(A = \\begin{pmatrix} 1 & 2 \\\\ 0 & 1 \\end{pmatrix} \\in GL_2(\\mathbb{R})\\)，计算 \\(A^3\\)。",
+        "options": [
+          "\\(\\begin{pmatrix} 1 & 6 \\\\ 0 & 1 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 1 & 8 \\\\ 0 & 1 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 3 & 6 \\\\ 0 & 3 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 1 & 2 \\\\ 0 & 3 \\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "对上三角矩阵 \\(\\begin{pmatrix} 1 & a \\\\ 0 & 1 \\end{pmatrix}^n = \\begin{pmatrix} 1 & na \\\\ 0 & 1 \\end{pmatrix}\\)。代入 \\(a=2,n=3\\) 得 \\(A^3 = \\begin{pmatrix} 1 & 6 \\\\ 0 & 1 \\end{pmatrix}\\)。C 错在对角线上乘了 \\(3\\)。"
+      },
+      {
+        "id": "groups-ch01-q17",
+        "question": "集合 \\(S = \\{1,2,3,4,5\\}\\)，定义运算 \\(a \\star b = \\max(a,b)\\)。该代数系统不满足群的哪条公理？",
+        "options": [
+          "封闭性",
+        "结合律",
+        "单位元存在性",
+        "逆元存在性"
+        ],
+        "answer": 3,
+        "explanation": "封闭性 ✓（\\(\\max\\) 值仍在 \\(S\\) 中）；结合律 ✓；单位元 \\(e=1\\)（\\(\\max(1,a)=a\\)）✓。但逆元不存在：对 \\(a=5\\) 需 \\(b\\) 使 \\(\\max(5,b)=1\\)，不可能（\\(\\max(5,b) \\geq 5\\)）。易错：误认为单位元不存在。"
+      },
+      {
+        "id": "groups-ch01-q18",
+        "question": "设 \\((G, \\cdot)\\) 是群，\\(a,b \\in G\\) 满足 \\(a^2 = e\\)，\\(b^2 = e\\)。关于 \\(\\mathrm{ord}(ab)\\) 的正确结论是？",
+        "options": [
+          "\\(\\mathrm{ord}(ab) = 2\\)",
+        "\\(\\mathrm{ord}(ab)\\) 一定为偶数",
+        "\\(\\mathrm{ord}(ab)\\) 可以是任意正整数",
+        "\\(\\mathrm{ord}(ab) \\leq 4\\)"
+        ],
+        "answer": 2,
+        "explanation": "在 \\(D_n\\) 中取 \\(a = s\\)（反射，\\(s^2=e\\)），\\(b = sr^{-1}\\)（也满足 \\(b^2=e\\)），则 \\(ab = r^{-1}\\)，\\(\\mathrm{ord}(r^{-1}) = n\\)。\\(n\\) 可取任意正整数，故 \\(\\mathrm{ord}(ab)\\) 无上界。A、B、D 均可被反例推翻。"
+      },
+      {
+        "id": "groups-ch01-q19",
+        "question": "设 \\(G\\) 是交换群，\\(a,b \\in G\\)，\\(\\mathrm{ord}(a)=12\\)，\\(\\mathrm{ord}(b)=18\\)，且 \\(\\langle a \\rangle \\cap \\langle b \\rangle = \\{e\\}\\)。则 \\(\\mathrm{ord}(ab)\\) 为多少？",
+        "options": [
+          "\\(30\\)",
+        "\\(36\\)",
+        "\\(72\\)",
+        "\\(216\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(G\\) 交换且 \\(\\langle a \\rangle \\cap \\langle b \\rangle = \\{e\\}\\) 时，\\(\\mathrm{ord}(ab) = \\mathrm{lcm}(\\mathrm{ord}(a), \\mathrm{ord}(b)) = \\mathrm{lcm}(12,18) = 36\\)。A 错在用加法；C、D 是乘积或更高值。关键条件是子群交为平凡。"
+      },
+      {
+        "id": "groups-ch01-q20",
+        "question": "循环群 \\(\\mathbb{Z}/36\\mathbb{Z}\\) 中有多少个阶恰为 \\(12\\) 的元素？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{ord}(\\overline{a}) = 12 \\Leftrightarrow 36/\\gcd(a,36) = 12 \\Leftrightarrow \\gcd(a,36)=3\\)。令 \\(a=3k\\)，则 \\(\\gcd(3k,36) = 3\\gcd(k,12)=3\\) 需 \\(\\gcd(k,12)=1\\)。\\(1 \\leq k \\leq 12\\) 中满足者有 \\(\\varphi(12) = 4\\) 个。"
+      },
+      {
+        "id": "groups-ch01-q21",
+        "question": "设 \\(G\\) 是有限群，\\(g \\in G\\) 满足 \\(g^{28}=e\\) 且 \\(g^{42}=e\\)。则 \\(\\mathrm{ord}(g)\\) 必定整除以下哪个数？",
+        "options": [
+          "\\(7\\)",
+        "\\(14\\)",
+        "\\(42\\)",
+        "\\(84\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{ord}(g) \\mid k \\Leftrightarrow g^k=e\\)。故 \\(\\mathrm{ord}(g) \\mid 28\\) 且 \\(\\mathrm{ord}(g) \\mid 42\\)，因此 \\(\\mathrm{ord}(g) \\mid \\gcd(28,42)=14\\)。选 A 错：\\(\\mathrm{ord}(g)\\) 可为 \\(14\\)，\\(14 \\nmid 7\\)。易错：只取一个条件或用 \\(\\mathrm{lcm}\\) 而非 \\(\\gcd\\)。"
+      },
+      {
+        "id": "groups-ch01-q22",
+        "question": "在 \\(S_7\\) 中，轮换类型为 \\((4,2,1)\\) 的置换（一个 \\(4\\)-轮换、一个 \\(2\\)-轮换、一个不动点）的阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "不相交轮换之阶为各长度的最小公倍数：\\(\\mathrm{lcm}(4,2,1) = 4\\)。常见错误：将各长度相加 \\(4+2+1=7\\) 或相乘 \\(4 \\times 2=8\\)，这些都不是阶的正确计算法则。"
+      },
+      {
+        "id": "groups-ch01-q23",
+        "question": "在 \\(S_4\\) 中，写出 \\((1\\;2)(2\\;3\\;4)\\) 后（从右向左作用），元素 \\(2\\) 的像是什么？",
+        "options": [
+          "\\(1\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "先施右边 \\((2\\;3\\;4)\\)：\\(2 \\to 3\\)；再施左边 \\((1\\;2)\\)：\\(3 \\to 3\\)（\\(3\\) 不在 \\((1\\;2)\\) 中）。故 \\(2 \\to 3\\)。易错：从左向右计算得 \\(2 \\to 1 \\to 1\\)，结果为 \\(1\\)（选 A），这是置换复合方向搞反的典型错误。"
+      },
+      {
+        "id": "groups-ch01-q24",
+        "question": "设 \\(\\varphi: G \\times H \\to G\\) 是投影同态 \\(\\varphi(g,h) = g\\)。若 \\(|G|=5\\)，\\(|H|=7\\)，则 \\(|\\ker\\varphi|\\) 为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(5\\)",
+        "\\(7\\)",
+        "\\(35\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\ker\\varphi = \\{(g,h) : \\varphi(g,h) = e_G\\} = \\{(e_G, h) : h \\in H\\} \\cong H\\)。因此 \\(|\\ker\\varphi| = |H| = 7\\)。验证：\\(|G \\times H|/|\\ker\\varphi| = 35/7 = 5 = |\\mathrm{Im}(\\varphi)| = |G|\\)。✓"
+      },
+      {
+        "id": "groups-ch01-q25",
+        "question": "群 \\(\\mathbb{Z}/4\\mathbb{Z} \\times \\mathbb{Z}/6\\mathbb{Z}\\) 中有多少个阶为 \\(12\\) 的元素？",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(12\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathrm{ord}(a,b) = \\mathrm{lcm}(\\mathrm{ord}(a), \\mathrm{ord}(b)) = 12\\) 需 \\(\\mathrm{ord}(a)=4\\) 且 \\(\\mathrm{ord}(b) \\in \\{3,6\\}\\)。\\(\\mathbb{Z}/4\\mathbb{Z}\\) 中阶 \\(4\\) 的元素：\\(\\{1,3\\}\\)（\\(2\\) 个）。\\(\\mathbb{Z}/6\\mathbb{Z}\\) 中阶 \\(3\\) 有 \\(\\{2,4\\}\\)（\\(2\\) 个），阶 \\(6\\) 有 \\(\\{1,5\\}\\)（\\(2\\) 个）。总数 \\(2 \\times (2+2) = 8\\)。"
+      },
+      {
+        "id": "groups-ch01-q26",
+        "question": "凯撒加密使用群 \\((\\mathbb{Z}/26\\mathbb{Z}, +)\\) 对字母编号加密：\\(c = (m+k) \\bmod 26\\)。若密钥 \\(k=17\\)，明文字母 'H'（编号 \\(7\\)）的密文编号为多少？",
+        "options": [
+          "\\(22\\)",
+        "\\(24\\)",
+        "\\(10\\)",
+        "\\(15\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(c = (7 + 17) \\bmod 26 = 24 \\bmod 26 = 24\\)。对应字母 'Y'。解密时用逆元 \\(k^{-1} = 26-17 = 9\\)：\\((24+9) \\bmod 26 = 33 \\bmod 26 = 7\\)，恢复 'H'。群的逆元保证加密可逆。"
+      },
+      {
+        "id": "groups-ch01-q27",
+        "question": "氨分子 \\(\\text{NH}_3\\) 的对称操作群含恒等、两个 \\(120°\\) 旋转和三个反射，共 \\(6\\) 个元素。该分子对称群同构于？",
+        "options": [
+          "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(S_3\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(D_2\\)"
+        ],
+        "answer": 1,
+        "explanation": "该对称群有 \\(6\\) 个元素且非交换（旋转后反射 \\(\\neq\\) 反射后旋转），与 \\(S_3 \\cong D_3\\) 同构。A、C 都是 \\(6\\) 阶交换群，不可能同构于非交换群。D 只有 \\(4\\) 个元素。物理中的分子点群 \\(C_{3v}\\) 即 \\(D_3\\)。"
+      },
+      {
+        "id": "groups-ch01-q28",
+        "question": "在计算机科学中，\\(n\\) 位二进制串在逐位异或运算下构成群 \\((\\mathbb{Z}/2\\mathbb{Z})^n\\)。对 \\(n=4\\)，该群的阶和每个非零元素的阶分别是？",
+        "options": [
+          "阶 \\(16\\)，非零元素阶 \\(2\\)",
+        "阶 \\(8\\)，非零元素阶 \\(2\\)",
+        "阶 \\(16\\)，非零元素阶 \\(4\\)",
+        "阶 \\(16\\)，非零元素阶不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\mathbb{Z}/2\\mathbb{Z})^4\\) 有 \\(2^4 = 16\\) 个元素。在 \\(\\mathbb{Z}/2\\mathbb{Z}\\) 中 \\(\\overline{1} + \\overline{1} = \\overline{0}\\)，故任何非零向量 \\(v\\) 满足 \\(v \\oplus v = \\mathbf{0}\\)，阶为 \\(2\\)。网络校验码利用此性质实现错误检测。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="groups"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/groups.html" class="module-name">群论 Groupes</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 群的公理与基本性质</a></li>
+      <li><a href="#kp2">02 · 群的阶与循环群</a></li>
+      <li><a href="#kp3">03 · 对称群与二面体群</a></li>
+      <li><a href="#kp4">04 · 一般线性群与直积</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>什么是群？</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>群的公理与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在代数学的发展中，人们发现方程的对称变换、几何图形的旋转与反射、 矩阵乘法等看似迥异的数学对象服从相同的运算规律。19世纪 Galois 和 Cayley 提出了群的概念，将这些规律统一为四条公理。掌握群公理 是进入抽象代数、对称理论和现代物理的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>群的核心抽象是「可逆操作的组合」。将具体变换（旋转、翻转、置换） 提升为满足封闭性、结合律、单位元、逆元四条公理的运算，使我们能 在不同领域识别相同的代数结构。交换群进一步要求运算顺序无关。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>群 \((G, \cdot)\) 满足四条公理： (G1) 封闭性：\(\forall a,b \in G,\; a \cdot b \in G\) (G2) 结合律：\((a \cdot b) \cdot c = a \cdot (b \cdot c)\) (G3) 单位元：\(\exists e \in G,\; ea = ae = a\) (G4) 逆元：\(\forall a \in G,\; \exists a^{-1},\; aa^{-1} = a^{-1}a = e\) <strong>单位元唯一</strong>：若 \(e, e'\) 均为单位元，则 \(e = ee' = e'\)。 <strong>逆元唯一</strong>：若 \(b, c\) 均为 \(a\) 的逆元， 则 \(b = b(ac) = (ba)c = c\)。 <strong>消去律</strong>：\(ab = ac \Rightarrow a^{-1}(ab) = a^{-1}(ac) \Rightarrow b = c\)。 当运算还满足 \(ab = ba\) 时，称 \((G, \cdot)\) 为阿贝尔群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>密码学中 Diffie-Hellman 密钥交换利用群运算的单向性； 化学中分子对称群用于判定红外/拉曼活性谱线。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(\{1, -1, i, -i\}\) 关于复数乘法构成群。 解答：封闭性——穷举 \(4 \times 4 = 16\) 种乘积均在集合中。 结合律继承自 \(\mathbb{C}\)。单位元为 \(1\)。 逆元：\(1^{-1}=1,\;(-1)^{-1}=-1,\;i^{-1}=-i,\;(-i)^{-1}=i\)。 故构成 4 阶交换群。 易错点：验证封闭性时仅抽查几个乘积就断言成立。 正确做法：使用子群判定法或列出完整乘法表。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在群 \((G, \cdot)\) 中，若 \(ab = ac\)，能否推出 \(b = c\)？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！群中每个元素自动可逆，左乘 \\(a^{-1}\\) 即得 \\(b=c\\)。')">A. 能，因为群满足消去律</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。群中每个元素自动可逆，左乘 \\(a^{-1}\\) 即得 \\(b=c\\)。')">B. 不能，除非群是交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。群中每个元素自动可逆，左乘 \\(a^{-1}\\) 即得 \\(b=c\\)。')">C. 能，但只在有限群中成立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。群中每个元素自动可逆，左乘 \\(a^{-1}\\) 即得 \\(b=c\\)。')">D. 不能，需要额外条件</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>群的阶与循环群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个群有多大？一个元素经过多少次运算会「回到」单位元？ 这两个自然的问题引出群的阶和元素阶的概念。循环群是最简单的类型 ——由单个元素生成，其分类定理表明结构完全由阶决定：要么同构于 \(\mathbb{Z}\)，要么同构于 \(\mathbb{Z}/n\mathbb{Z}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>将「重复操作」抽象为幂运算 \(g^n\)，将「操作的周期」抽象为阶 \(\mathrm{ord}(g)\)。循环群的分类体现了代数学的核心方法： 通过同构对结构进行完全分类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>群的阶 \(|G|\) 为元素个数。元素 \(g\) 的阶 \(\mathrm{ord}(g)\) 是 满足 \(g^k = e\) 的最小正整数 \(k\)（不存在则为 \(\infty\)）。 <strong>循环群</strong>：\(\langle g \rangle = \{g^n : n \in \mathbb{Z}\}\)。 <strong>分类定理</strong>：设 \(G = \langle g \rangle\)，定义满同态 \(\varphi: \mathbb{Z} \to G,\; \varphi(k) = g^k\)。 若 \(\ker\varphi = \{0\}\)，则 \(G \cong \mathbb{Z}\)； 若 \(\ker\varphi = n\mathbb{Z}\)，由第一同构定理 \[G \cong \mathbb{Z}/n\mathbb{Z}\] <strong>阶的性质</strong>：\(g^k = e \Leftrightarrow \mathrm{ord}(g) \mid k\)。 若 \(|G| = n\)，则 \(\mathrm{ord}(g) \mid n\)。 \(\mathbb{Z}/n\mathbb{Z}\) 中 \(\overline{a}\) 的阶为 \(n / \gcd(a, n)\)，生成元个数为 \(\varphi(n)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>循环群 \(\mathbb{Z}/12\mathbb{Z}\) 在时钟运算（模 12 加法）和 音乐理论（12 平均律音程的循环结构）中自然出现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{Z}/12\mathbb{Z}\) 中求 \(\overline{4}\) 的阶。 解答：\(\mathrm{ord}(\overline{4}) = 12/\gcd(4,12) = 12/4 = 3\)。 验证：\(4 \times 3 = 12 \equiv 0 \pmod{12}\)。✓ 易错点：混淆「\(g^k=e\)」与「\(\mathrm{ord}(g)=k\)」。 阶是满足 \(g^k=e\) 的<strong>最小</strong>正整数。如 \(\overline{4}\) 满足 \(4 \times 6 \equiv 0\)，但 \(\mathrm{ord}(\overline{4})=3\neq 6\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">循环群 \(\mathbb{Z}/8\mathbb{Z}\) 有几个生成元？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\langle \\overline{a} \\rangle = \\mathbb{Z}/8\\mathbb{Z}\\)')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\langle \\overline{a} \\rangle = \\mathbb{Z}/8\\mathbb{Z}\\)')">B. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\langle \\overline{a} \\rangle = \\mathbb{Z}/8\\mathbb{Z}\\)')">C. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\langle \\overline{a} \\rangle = \\mathbb{Z}/8\\mathbb{Z}\\)')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>对称群与二面体群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>对称群 \(S_n\) 是「所有可能的重排」构成的群，在组合学和 Galois 理论中不可或缺。二面体群 \(D_n\) 描述正 \(n\) 边形的刚性运动。 这两类群提供了最重要的非交换群例子，也是检验群论定理的试金石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>置换是双射 \(\sigma: \{1,\ldots,n\} \to \{1,\ldots,n\}\)。 轮换分解将任意置换表示为不相交轮换之积——这是一种「标准形」 思维，将复杂对象化归为简单构件的组合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>对称群</strong> \(S_n\)：\(\{1,\ldots,n\}\) 上全部双射，运算为复合， \(|S_n| = n!\)。 <strong>轮换分解</strong>：每个 \(\sigma \in S_n\) 可唯一写为不相交轮换之积。 <strong>奇偶性</strong>：置换表为对换之积时，所需对换数的奇偶性固定： \[\mathrm{sgn}(\sigma) = (-1)^{n - c}\] 其中 \(c\) 为轮换个数（含不动点作为 1-轮换）。 交错群 \(A_n = \ker(\mathrm{sgn})\)，\(|A_n| = n!/2\)。 <strong>二面体群</strong> \(D_n\)：正 \(n\) 边形的对称群，\(|D_n| = 2n\)， 由旋转 \(r\)（\(\mathrm{ord}(r)=n\)）和反射 \(s\)（\(\mathrm{ord}(s)=2\)） 生成，满足关系 \(srs^{-1} = r^{-1}\)（即 \(sr = r^{-1}s\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(S_n\) 出现在 Galois 理论中—— \(n\) 次一般多项式的 Galois 群 为 \(S_n\)；\(D_n\) 用于晶体学中平面对称性的分类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(S_4\) 中求 \(\sigma = (1\;2\;3)(1\;4)\) 的不相交轮换 分解和阶。 解答：从右向左复合（先 \((1\;4)\) 后 \((1\;2\;3)\)）： \(1 \to 4 \to 4\)，\(4 \to 1 \to 2\)，\(2 \to 2 \to 3\)， \(3 \to 3 \to 1\)。故 \(\sigma = (1\;4\;2\;3)\)， \(\mathrm{ord}(\sigma) = 4\)。 易错点：复合顺序搞反。\((1\;2\;3)(1\;4)\) 约定从右向左作用， 若从左向右计算会得到完全不同的结果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(D_3\)（正三角形的对称群）与以下哪个群同构？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(D_3\\) 和 \\(S_3\\) 都有 6 个元素且均为非交换群。')">A. \(\mathbb{Z}/6\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(D_3\\) 和 \\(S_3\\) 都有 6 个元素且均为非交换群。')">B. \(S_3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(D_3\\) 和 \\(S_3\\) 都有 6 个元素且均为非交换群。')">C. \(\mathbb{Z}/3\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(D_3\\) 和 \\(S_3\\) 都有 6 个元素且均为非交换群。')">D. \(A_3\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>一般线性群与直积</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>矩阵群是群论最重要的来源之一。一般线性群 \(GL_n(K)\) 是所有 可逆 \(n \times n\) 矩阵构成的群，在表示论中扮演核心角色。 直积 \(G \times H\) 是从已知群构造新群的基本方法，对应于两个 独立对称性系统的组合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一般线性群</strong> \(GL_n(K) = \{A \in M_n(K) : \det(A) \neq 0\}\)， 运算为矩阵乘法。 封闭性：\(\det(AB) = \det(A)\det(B) \neq 0\)。 结合律继承自矩阵乘法。单位元 \(I_n\)。逆元即逆矩阵。 <strong>特殊线性群</strong>：\(SL_n(K) = \ker(\det) \trianglelefteq GL_n(K)\)， 其中 \(\det: GL_n(K) \to K^*\) 是群同态。 <strong>直积</strong>：\(G \times H = \{(g,h) : g \in G, h \in H\}\)， 运算 \((g_1,h_1)(g_2,h_2) = (g_1 g_2, h_1 h_2)\)。 \(|G \times H| = |G| \cdot |H|\)。 关键同构：\(\mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z} \cong \mathbb{Z}/mn\mathbb{Z}\) 当且仅当 \(\gcd(m,n)=1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(GL_n(\mathbb{R})\) 在计算机图形学中描述 3D 仿射变换； 直积描述独立子系统的组合对称性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z} \not\cong \mathbb{Z}/4\mathbb{Z}\)。 解答：\(\mathbb{Z}/4\mathbb{Z}\) 含 4 阶元素 \(\overline{1}\)， 而 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\) 中每个非零元素阶为 2（\((a,b)+(a,b)=(0,0)\)），无 4 阶元素。 同构保持元素阶，故不同构。 易错点：误以为「阶相同的群一定同构」。 反例：上述两个 4 阶群结构不同（Klein 四元群 vs 循环群）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列关于 \(GL_2(\mathbb{R})\) 的说法哪个正确？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。矩阵乘法一般不可交换，故 C 正确。')">A. \(GL_2(\mathbb{R})\) 是交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。矩阵乘法一般不可交换，故 C 正确。')">B. \(GL_2(\mathbb{R})\) 是有限群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！矩阵乘法一般不可交换，故 C 正确。')">C. \(GL_2(\mathbb{R})\) 是非交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。矩阵乘法一般不可交换，故 C 正确。')">D. \(GL_2(\mathbb{R})\) 的单位元是零矩阵</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/algebra/groups.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

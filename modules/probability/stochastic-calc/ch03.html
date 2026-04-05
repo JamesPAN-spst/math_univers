@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 Itô 公式 — 随机微积分 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-calc-ch03-q1",
+        "question": "一维 Itô 公式：\\(f(B_t)\\) 的微分？",
+        "options": [
+          "\\(df=f'(B_t)dB_t+\\frac{1}{2}f''(B_t)dt\\)（多出 \\(\\frac{1}{2}f'' dt\\) 修正项）",
+        "\\(df=f'(B_t)dB_t\\)",
+        "\\(df=f'(B_t)dt\\)",
+        "\\(df=f(B_t)dB_t\\)"
+        ],
+        "answer": 0,
+        "explanation": "经典链式法则 \\(df=f'dx\\) 只在一阶变差有限时成立。Brown 运动二次变差 \\(dB^2=dt \\neq 0\\) ⟹ Taylor 展开需保留二阶项。这个 \\(\\frac{1}{2}f''dt\\) 是 Itô 微积分的标志。金融中产生\"凸性调整\"。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q2",
+        "question": "\\(f(x)=e^x\\), \\(X_t=\\sigma B_t\\)。Itô 公式给 \\(d(e^{\\sigma B_t})=\\)？",
+        "options": [
+          "\\(\\sigma e^{\\sigma B_t}dB_t+\\frac{\\sigma^2}{2}e^{\\sigma B_t}dt\\)",
+        "\\(\\sigma e^{\\sigma B_t}dB_t\\)",
+        "\\(e^{\\sigma B_t}dt\\)",
+        "\\(\\sigma^2 e^{\\sigma B_t}dB_t\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'=f''=e^{\\sigma B_t}\\cdot \\sigma^{(\\cdot)}\\)。\\(df=\\sigma e^{\\sigma B_t}dB_t+\\frac{1}{2}\\sigma^2 e^{\\sigma B_t}dt\\)。因此 \\(E[e^{\\sigma B_t}]=e^{\\sigma^2 t/2}\\)（指数鞅的期望不是 \\(1\\) 除非调整）。GBM 公式从这里推导。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q3",
+        "question": "Black-Scholes 模型中 \\(S_t=S_0 e^{(\\mu-\\sigma^2/2)t+\\sigma B_t}\\)。用 Itô 公式验证 \\(dS_t=\\)？",
+        "options": [
+          "\\(dS_t=\\mu S_t dt+\\sigma S_t dB_t\\)（GBM 的 SDE 形式）",
+        "\\(dS_t=S_t dt\\)",
+        "\\(dS_t=\\sigma dB_t\\)",
+        "\\(dS_t=(\\mu-\\sigma^2/2)S_t dt+\\sigma S_t dB_t\\)"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(Y_t=(\\mu-\\sigma^2/2)t+\\sigma B_t\\), \\(S=S_0 e^Y\\)。Itô: \\(dS=S_0 e^Y dY+\\frac{1}{2}S_0 e^Y (dY)^2\\)。\\(dY=(\\mu-\\sigma^2/2)dt+\\sigma dB\\), \\((dY)^2=\\sigma^2 dt\\)。代入 → \\(dS=\\mu S dt+\\sigma S dB\\)。\\(-\\sigma^2/2\\) 被 Itô 修正抵消。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q4",
+        "question": "多维 Itô 公式：\\(V(t,S_t)\\)（期权价格）的微分？",
+        "options": [
+          "\\(dV=\\frac{\\partial V}{\\partial t}dt+\\frac{\\partial V}{\\partial S}dS+\\frac{1}{2}\\frac{\\partial^2 V}{\\partial S^2}(dS)^2\\)，其中 \\((dS)^2=\\sigma^2 S^2 dt\\)",
+        "\\(dV=\\frac{\\partial V}{\\partial t}dt+\\frac{\\partial V}{\\partial S}dS\\)",
+        "\\(dV=V dS\\)",
+        "\\(dV=\\sigma V dB\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((dS)^2=(\\sigma S dB)^2=\\sigma^2 S^2 dt\\)（漂移项是高阶小量）。因此 \\(dV=\\left(\\frac{\\partial V}{\\partial t}+\\frac{1}{2}\\sigma^2 S^2\\frac{\\partial^2 V}{\\partial S^2}\\right)dt+\\frac{\\partial V}{\\partial S}\\sigma S dB\\)。令随机项 \\(=0\\) → Black-Scholes PDE。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q5",
+        "question": "Black-Scholes PDE \\(\\frac{\\partial V}{\\partial t}+rS\\frac{\\partial V}{\\partial S}+\\frac{1}{2}\\sigma^2 S^2\\frac{\\partial^2 V}{\\partial S^2}=rV\\) 是如何从 Itô 公式推导的？",
+        "options": [
+          "构造 \\(\\Pi=V-\\Delta S\\)（Delta 对冲），Itô 展开 \\(d\\Pi\\) 消去 \\(dB\\) 项，无套利 ⟹ \\(d\\Pi=r\\Pi dt\\)",
+        "直接假设",
+        "热方程类比",
+        "数值拟合"
+        ],
+        "answer": 0,
+        "explanation": "\\(d\\Pi=dV-\\Delta dS=(\\partial_t V+\\frac{1}{2}\\sigma^2 S^2\\partial_{SS}V)dt+(\\partial_S V-\\Delta)\\sigma S dB\\)。令 \\(\\Delta=\\partial_S V\\) ⟹ \\(dB\\) 消去。无套利 ⟹ \\(d\\Pi=r\\Pi dt\\)。代入得 BS-PDE。Itô 公式是推导的关键步骤。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q6",
+        "question": "Itô 公式应用：对数收益率 \\(d\\ln S_t=\\)？",
+        "options": [
+          "\\((\\mu-\\frac{\\sigma^2}{2})dt+\\sigma dB_t\\)（\\(-\\sigma^2/2\\) 是 Itô 修正）",
+        "\\(\\mu dt+\\sigma dB_t\\)",
+        "\\(\\frac{dS}{S}\\)",
+        "\\(\\mu dt\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(S)=\\ln S\\), \\(f'=1/S\\), \\(f''=-1/S^2\\)。Itô: \\(d\\ln S=\\frac{dS}{S}-\\frac{1}{2}\\frac{(dS)^2}{S^2}=(\\mu-\\sigma^2/2)dt+\\sigma dB\\)。对数收益累积正态。B 选项 \\(\\mu dt+\\sigma dB\\) 忽略了 Itô 修正，是常见错误。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q7",
+        "question": "期权 Vega（\\(\\partial V/\\partial \\sigma\\)）为何总是正数（看涨和看跌皆然）？",
+        "options": [
+          "Itô 公式层面：\\(\\Gamma>0\\)（凸性）⟹ 波动率增大 → 期权在凸区域获益更多 → 价值上升",
+        "Vega 可正可负",
+        "Vega 只对看涨为正",
+        "与波动率无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(V \\approx V_0+\\frac{1}{2}\\Gamma S^2(\\sigma_{new}^2-\\sigma_{old}^2)T\\)（Vega 近似）。\\(\\Gamma>0\\)（买入期权凸性为正）⟹ Vega \\(>0\\)。这是\"买波动率\"策略有效的数学基础。Itô 公式的二阶项揭示了凸性效应。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q8",
+        "question": "指数鞅 \\(\\mathcal{E}_t=\\exp(\\sigma B_t-\\frac{\\sigma^2}{2}t)\\) 满足 \\(E[\\mathcal{E}_t]=1\\) 的证明思路？",
+        "options": [
+          "Itô 公式：\\(d\\mathcal{E}=\\sigma\\mathcal{E} dB\\) ⟹ \\(\\mathcal{E}\\) 是鞅，\\(E[\\mathcal{E}_t]=\\mathcal{E}_0=1\\)",
+        "直接展开级数",
+        "Fourier 变换",
+        "无法证明"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ln\\mathcal{E}=\\sigma B_t-\\sigma^2 t/2\\)。Itô: \\(d\\mathcal{E}=\\mathcal{E}(\\sigma dB-\\sigma^2/2 dt+\\sigma^2/2 dt)=\\sigma\\mathcal{E} dB\\)（修正项恰好抵消 \\(dt\\) 项）。纯 Itô 积分 ⟹ 鞅（在 Novikov 条件下）。这是 Girsanov 换测度的密度过程。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q9",
+        "question": "Heston 模型 \\(dS=\\mu S dt+\\sqrt{v}S dB^1\\), \\(dv=\\kappa(\\theta-v)dt+\\xi\\sqrt{v}dB^2\\)（\\(\\rho=\\text{corr}(B^1,B^2)\\)）中 Itô 公式对 \\(V(t,S,v)\\) 的展开有几个二阶项？",
+        "options": [
+          "三个：\\(\\frac{1}{2}vS^2 V_{SS}\\), \\(\\frac{1}{2}\\xi^2 v V_{vv}\\), \\(\\rho\\xi v S V_{Sv}\\)（交叉项）",
+        "一个",
+        "两个",
+        "零个"
+        ],
+        "answer": 0,
+        "explanation": "\\((dS)^2=vS^2 dt\\), \\((dv)^2=\\xi^2 v dt\\), \\(dS \\cdot dv=\\rho\\xi v S dt\\)。多维 Itô 公式有 \\(\\frac{n(n+1)}{2}\\) 个二阶项。交叉项 \\(\\rho \\neq 0\\) ⟹ \"杠杆效应\"（波动率与价格负相关产生波动率微笑）。"
+      },
+      {
+        "id": "stochastic-calc-ch03-q10",
+        "question": "可转债定价中 Itô 公式的应用？",
+        "options": [
+          "可转债 \\(V(S,t)\\) 满足含边界条件的 PDE（转换边界 \\(V=nS\\)），Itô 展开 + 对冲 → 自由边界问题",
+        "只需折现现金流",
+        "Black-Scholes 公式直接用",
+        "不需要 Itô 公式"
+        ],
+        "answer": 0,
+        "explanation": "可转债 = 债券 + 看涨期权（转换权）。\\(V(S,t)\\) 满足 BS-PDE 在 \\(S<S^*(t)\\)（未转换区），\\(V=nS\\) 在 \\(S \\geq S^*\\)（转换区）。光滑粘合条件 \\(V_S=n\\) 确定最优转换边界。美式期权/可转债都是自由边界问题。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic-calc"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic-calc.html" class="module-name">随机微积分</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 一维 Itô 公式</a></li>
+      <li><a href="#kp2">02 · 多维 Itô 公式</a></li>
+      <li><a href="#kp3">03 · 几何 Brown 运动 (GBM)</a></li>
+      <li><a href="#kp4">04 · Itô 公式与 Lévy 刻画</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>Itô 公式</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>一维 Itô 公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>经典微积分的链式法则在随机微积分中失效。Itô 公式是它的替代品， 多了一个“二阶修正项”。这是随机微积分中最重要的公式， 没有之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(dB_t^2 = dt\) 而不是 0（经典中 \(dx^2 = 0\)）。这一修正产生了 整个随机微积分的差异。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \(X_t\) 满足 \(dX_t = \mu_t \, dt + \sigma_t \, dB_t\)。 对 \(f \in C^2\)，Itô 公式： \[df(X_t) = f'(X_t) \, dX_t + \frac{1}{2} f''(X_t) \sigma_t^2 \, dt\] 展开： \[f(X_T) = f(X_0) + \int_0^T f'(X_t)\mu_t \, dt + \int_0^T f'(X_t)\sigma_t \, dB_t + \frac{1}{2}\int_0^T f''(X_t)\sigma_t^2 \, dt\] 证明要点：Taylor 展开到二阶，然后用 \(dB_t dB_t = dt\)， \(dt \cdot dB_t = 0\)，\(dt \cdot dt = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Black-Scholes 公式的推导、SDE 的求解、期权对冲。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_t = B_t\)，\(f(x) = x^2\)。用 Itô 公式求 \(d(B_t^2)\)。 解答：\(dX = dB_t\)（\(\mu=0, \sigma=1\)）。\(f'=2x, f''=2\)。 \(d(B_t^2) = 2B_t dB_t + \frac{1}{2} \cdot 2 \cdot 1 dt = 2B_t dB_t + dt\)。 积分：\(B_T^2 = 2\int_0^T B_t dB_t + T\)。 即 \(\int_0^T B_t dB_t = \frac{1}{2}(B_T^2 - T)\) ✓ 易错点：忘记二阶项 \(\frac{1}{2}f'' \sigma^2 dt\)。这是最常见错误。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Itô 公式比经典链式法则多的项是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。经典链式法则只有 \\(f\\'dX\\)，Itô 公式多了二阶修正项。')">A. \(f'(X_t) dX_t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！经典链式法则只有 \\(f\\'dX\\)，Itô 公式多了二阶修正项。')">B. \(\frac{1}{2}f''(X_t)\sigma^2 dt\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。经典链式法则只有 \\(f\\'dX\\)，Itô 公式多了二阶修正项。')">C. \(f(X_0)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>多维 Itô 公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际问题往往涉及多个随机过程（如多加股票、多维扩散）。 多维 Itô 公式是高维随机分析的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \(\mathbf{X}_t = (X_t^1, \ldots, X_t^d)\)，\(f: \mathbb{R}^d \to \mathbb{R}\)，\(f \in C^2\)。 多维 Itô 公式： \[df = \sum_i \frac{\partial f}{\partial x_i} dX_t^i + \frac{1}{2}\sum_{i,j} \frac{\partial^2 f}{\partial x_i \partial x_j} d[X^i, X^j]_t\] 二次变差规则： \(dB_t^i \cdot dB_t^j = \rho_{ij} dt\)，\(dB_t \cdot dt = 0\)，\(dt \cdot dt = 0\)。 乘积公式（特例）： \[d(X_t Y_t) = X_t dY_t + Y_t dX_t + d[X,Y]_t\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>多资产组合的动态、多维扩散模型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_t = e^{B_t^1}\)，\(Y_t = B_t^2\)，\(B^1 \perp B^2\)。求 \(d(X_tY_t)\)。 解答：\(dX_t = X_t dB_t^1 + \frac{1}{2}X_t dt\)（由 Itô 公式）。\(dY_t = dB_t^2\)。 \(d[X,Y] = 0\)（因为 \(dB^1 \cdot dB^2 = 0\)）。 \(d(XY) = X dY + Y dX = e^{B^1} dB^2 + B^2 e^{B^1}(dB^1 + dt/2)\)。 易错点：\(d[X,Y]\) 只在 \(X, Y\) 的波动部分相关时非零。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(d(X_tY_t)\) 相比经典乘法则 \(XdY + YdX\) 多了</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！乘积公式 \\(d(XY) = XdY + YdX + d[X,Y]\\)。')">A. \(d[X,Y]_t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。乘积公式 \\(d(XY) = XdY + YdX + d[X,Y]\\)。')">B. \(\frac{1}{2}d[X,Y]_t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。乘积公式 \\(d(XY) = XdY + YdX + d[X,Y]\\)。')">C. \(X_t Y_t dt\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>几何 Brown 运动 (GBM)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>股价不能为负，所以要用乘性模型。GBM 是金融建模的默认模型， 也是 Itô 公式的最重要应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>GBM = 「指数转换后的 BM」，对数收益率是正态的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>SDE：\(dS_t = \mu S_t \, dt + \sigma S_t \, dB_t\)。 求解：令 \(f(x) = \ln x\)，\(f' = 1/x\)，\(f'' = -1/x^2\)。 Itô 公式： \[d(\ln S_t) = \frac{1}{S_t} dS_t + \frac{1}{2} \cdot \left(-\frac{1}{S_t^2}\right) \sigma^2 S_t^2 \, dt = (\mu - \frac{\sigma^2}{2}) dt + \sigma \, dB_t\] 积分：\(\ln S_T - \ln S_0 = (\mu - \sigma^2/2)T + \sigma B_T\)。 \[S_T = S_0 \exp\!\left((\mu - \frac{\sigma^2}{2})T + \sigma B_T\right)\] 即 \(\ln(S_T/S_0) \sim N((\mu - \sigma^2/2)T, \sigma^2 T)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Black-Scholes 模型、期权定价、Monte Carlo 模拟。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S_0 = 100\)，\(\mu = 0.1\)，\(\sigma = 0.2\)，\(T = 1\)。 求 \(E[S_1]\) 和 \(P(S_1 > 120)\)。 解答：\(E[S_1] = S_0 e^{\mu T} = 100 e^{0.1} \approx 110.5\)。 \(\ln(S_1/100) \sim N(0.08, 0.04)\)。\(P(S_1 > 120) = P(Z > (\ln 1.2 - 0.08)/0.2)\) \(= P(Z > (0.182 - 0.08)/0.2) = P(Z > 0.51) \approx 0.305\)。 易错点：\(E[S_T] = S_0 e^{\mu T}\)（不是 \(S_0 e^{(\mu-\sigma^2/2)T}\)）。 期望和中位数不同！</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">GBM 的对数收益 \(\ln(S_T/S_0)\) 的漂移是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。多的 \\(-\\sigma^2/2\\) 是 Itô 修正。这正是 Itô 公式的经典')">A. \(\mu T\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！多的 \\(-\\sigma^2/2\\) 是 Itô 修正。这正是 Itô 公式的经典')">B. \((\mu - \sigma^2/2)T\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。多的 \\(-\\sigma^2/2\\) 是 Itô 修正。这正是 Itô 公式的经典')">C. \((\mu + \sigma^2/2)T\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Itô 公式与 Lévy 刻画</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Itô 过程的一般形式 \(dX = \mu dt + \sigma dB\) 的性质可以从 Lévy 刻画的角度理解：任何连续鞅可分解为 BM 变换 + 漂移。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lévy 刻画：连续局部鞅 \(\Leftrightarrow\) 时间变换的 BM。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Itô 过程（一般形式）： \[X_t = X_0 + \int_0^t \mu_s \, ds + \int_0^t \sigma_s \, dB_s\] 其中 \(\mu, \sigma\) 适应。\(X\) 的二次变差 \([X]_t = \int_0^t \sigma_s^2 \, ds\)。 Lévy 刻画：若 \(M_t\) 是连续局部鞅，\([M]_t = \langle M\rangle_t\) a.s. 连续递增，则存在 BM \(W\) 使得 \[M_t = W_{\langle M \rangle_t}\] 这说明任何连续鞅只是“变速播放”的 BM。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>证明随机过程的分布性质（如证明 GBM 是对数正态）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(M_t = \int_0^t 2 \, dB_s = 2B_t\)。用 Lévy 刻画描述。 解答：\(\langle M \rangle_t = 4t\)。故 \(M_t = W_{4t}\)，其中 \(W\) 是 BM。 验证：\(M_t \sim N(0, 4t)\)，\(W_{4t} \sim N(0, 4t)\) ✓ 易错点：Lévy 刻画仅对连续局部鞅成立。带跳跃的鞅不适用。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Lévy 刻画说明连续局部鞅本质上是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。任何连续局部鞅都可写成 \\(W_{\\langle M\\rangle_t}\\)，即"变速播放"的 BM。')">A. 泊松过程</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！任何连续局部鞅都可写成 \\(W_{\\langle M\\rangle_t}\\)，即"变速播放"的 BM。')">B. 时间变换的 Brown 运动</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。任何连续局部鞅都可写成 \\(W_{\\langle M\\rangle_t}\\)，即"变速播放"的 BM。')">C. Markov 链</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/probability/stochastic-calc.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 PDE 分类与经典方程 — 偏微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "pde-ch01-q1",
+        "question": "二阶线性 PDE \\(Au_{xx}+2Bu_{xy}+Cu_{yy}+\\cdots=0\\) 的判别式 \\(\\Delta=B^2-AC>0\\) 对应什么类型？",
+        "options": [
+          "椭圆型",
+        "抛物型",
+        "双曲型",
+        "超双曲型"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\Delta>0\\) → 双曲型（如波方程 \\(u_{tt}-c^2u_{xx}=0\\)，\\(A=1,B=0,C=-c^2\\)，\\(\\Delta=c^2>0\\)）。\\(\\Delta<0\\) → 椭圆型（如 Laplace 方程），\\(\\Delta=0\\) → 抛物型（如热方程）。分类决定方程的定性性质和适当边界条件。"
+      },
+      {
+        "id": "pde-ch01-q2",
+        "question": "Laplace 方程 \\(u_{xx}+u_{yy}=0\\) 属于什么类型？",
+        "options": [
+          "椭圆型",
+        "双曲型",
+        "抛物型",
+        "混合型"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=1,B=0,C=1\\)，\\(\\Delta=0-1=-1<0\\) → 椭圆型。椭圆型方程无实特征线，解具有即时正则化效应和均值性质。典型物理模型：稳态温度分布、静电势。"
+      },
+      {
+        "id": "pde-ch01-q3",
+        "question": "Hadamard 适定性的三个条件是？",
+        "options": [
+          "存在性、唯一性、连续依赖于数据",
+        "存在性、有界性、正则性",
+        "唯一性、守恒性、稳定性",
+        "存在性、唯一性、有界性"
+        ],
+        "answer": 0,
+        "explanation": "适定问题要求解存在、唯一、且连续依赖于初始/边界数据（微小数据变化 → 微小解变化）。不满足第三条就是不适定——如反向热传导，高频噪声被指数放大。适定性是数值计算的理论基础。"
+      },
+      {
+        "id": "pde-ch01-q4",
+        "question": "一阶 PDE \\(u_t+cu_x=0\\) 的特征线方程和解？",
+        "options": [
+          "\\(dx/dt=c\\)，\\(u(x,t)=f(x-ct)\\)",
+        "\\(dx/dt=u\\)，\\(u\\) 变化",
+        "\\(dx/dt=-c\\)",
+        "\\(dx/dt=1/c\\)"
+        ],
+        "answer": 0,
+        "explanation": "沿 \\(dx/dt=c\\) 的直线 \\(u\\) 为常数：\\(\\frac{du}{dt}=u_t+cu_x=0\\)。特征线 \\(x=ct+x_0\\)，信息以速度 \\(c\\) 传播。初值 \\(u(x,0)=f(x)\\) 被搬运：\\(u(x,t)=f(x-ct)\\)（行波）。"
+      },
+      {
+        "id": "pde-ch01-q5",
+        "question": "\\(u_t+xu_x=0\\)，\\(u(x,0)=e^x\\)。特征线法求解。",
+        "options": [
+          "\\(u=e^{xe^{-t}}\\)",
+        "\\(u=e^{x-t}\\)",
+        "\\(u=e^{x/(1+t)}\\)",
+        "\\(u=e^x\\cdot e^{-t}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(dx/dt=x\\)，\\(x=x_0 e^t\\)，\\(x_0=xe^{-t}\\)。沿特征线 \\(u\\) 常数 \\(=u(x_0,0)=e^{x_0}=e^{xe^{-t}}\\)。注意特征线不是直线（\\(x\\) 依赖于 \\(x\\) 本身）。"
+      },
+      {
+        "id": "pde-ch01-q6",
+        "question": "热方程 \\(u_t=ku_{xx}\\) 的判别式 \\(\\Delta\\) 和类型？",
+        "options": [
+          "\\(\\Delta=0\\)，抛物型",
+        "\\(\\Delta>0\\)，双曲型",
+        "\\(\\Delta<0\\)，椭圆型",
+        "无法分类"
+        ],
+        "answer": 0,
+        "explanation": "以 \\((x,t)\\) 为变量：\\(ku_{xx}-u_t=0\\) 中二阶项为 \\(ku_{xx}\\)，混合和 \\(t^2\\) 项为零。\\(A=k,B=0,C=0\\)，\\(\\Delta=0\\) → 抛物型。特征线 \\(t=\\text{const}\\)（一族退化特征）。"
+      },
+      {
+        "id": "pde-ch01-q7",
+        "question": "椭圆方程（如 \\(-\\Delta u=f\\)）需要什么类型的条件？",
+        "options": [
+          "边值条件（Dirichlet/Neumann/Robin）",
+        "初值条件",
+        "初边值条件",
+        "不需要"
+        ],
+        "answer": 0,
+        "explanation": "椭圆型方程描述稳态现象（无时间变量），只需在空间边界给定条件。Dirichlet 给定函数值，Neumann 给定法向导数。双曲/抛物型还需初值条件。"
+      },
+      {
+        "id": "pde-ch01-q8",
+        "question": "\\(u_t+uu_x=0\\)（Burgers），\\(u(x,0)=1-x\\)（\\(0\\leq x\\leq 1\\)）。激波形成时间？",
+        "options": [
+          "\\(t=1\\)",
+        "\\(t=2\\)",
+        "\\(t=1/2\\)",
+        "不形成激波"
+        ],
+        "answer": 0,
+        "explanation": "特征线 \\(dx/dt=u_0=1-x_0\\)，速度随 \\(x_0\\) 递减。激波时间 \\(t_s=\\min(-1/f'(x_0))\\)。\\(f(x)=1-x\\)，\\(f'=-1\\)，\\(t_s=-1/(-1)=1\\)。在 \\(t=1\\) 处特征线首次交叉形成间断。"
+      },
+      {
+        "id": "pde-ch01-q9",
+        "question": "Rankine-Hugoniot 条件：守恒律 \\(u_t+(u^2/2)_x=0\\) 的激波速度 \\(s\\) 等于？",
+        "options": [
+          "\\((u_L+u_R)/2\\)",
+        "\\(u_L\\)",
+        "\\(u_R\\)",
+        "\\(\\sqrt{u_L u_R}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(s[u]=[f]\\)：\\(s(u_L-u_R)=u_L^2/2-u_R^2/2=(u_L-u_R)(u_L+u_R)/2\\)。\\(s=(u_L+u_R)/2\\)。Burgers 方程激波速度等于两侧值的算术平均。"
+      },
+      {
+        "id": "pde-ch01-q10",
+        "question": "稀疏波出现的条件（一维标量守恒律 \\(u_t+f(u)_x=0\\)）？",
+        "options": [
+          "特征速度 \\(f'(u_L)<f'(u_R)\\)，特征线发散",
+        "\\(f'(u_L)>f'(u_R)\\)",
+        "\\(f''=0\\)",
+        "\\(u_L=u_R\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(u_L)<f'(u_R)\\) → 左侧慢、右侧快 → 特征线向外发散 → 真空区由自相似稀疏波填充。反之 \\(f'(u_L)>f'(u_R)\\) → 特征线交叉 → 激波。"
+      },
+      {
+        "id": "pde-ch01-q11",
+        "question": "\\(2u_x+3u_y=u\\)，特征线和沿特征线 \\(u\\) 的行为？",
+        "options": [
+          "\\(dy/dx=3/2\\)，\\(du/dx=u/2\\)（指数增长）",
+        "\\(dy/dx=2/3\\)，\\(du/dx=u\\)",
+        "无特征线",
+        "\\(du/dx=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(dx/2=dy/3=du/u\\)。\\(dy/dx=3/2\\)（直线 \\(y=3x/2+C\\)）。\\(du/dx=u/2\\)，\\(u=u_0 e^{x/2}\\)。沿特征线 \\(u\\) 指数增长。"
+      },
+      {
+        "id": "pde-ch01-q12",
+        "question": "\\(u_{xx}+xu_{yy}=0\\)。\\(x>0\\) 和 \\(x<0\\) 分别是什么类型？",
+        "options": [
+          "\\(x>0\\) 椭圆，\\(x<0\\) 双曲",
+        "\\(x>0\\) 双曲，\\(x<0\\) 椭圆",
+        "处处抛物",
+        "处处椭圆"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=1,B=0,C=x\\)。\\(\\Delta=-x\\)。\\(x>0\\)：\\(\\Delta<0\\) → 椭圆；\\(x<0\\)：\\(\\Delta>0\\) → 双曲。这是 Tricomi 方程的结构——模拟跨音速流动。"
+      },
+      {
+        "id": "pde-ch01-q13",
+        "question": "反向热方程 \\(u_t=-ku_{xx}\\) 为什么不适定？",
+        "options": [
+          "Fourier 模 \\(\\hat u(\\xi,t)=\\hat u_0 e^{k\\xi^2 t}\\) 高频指数放大",
+        "解不存在",
+        "解不唯一",
+        "方程无意义"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat u_t=k\\xi^2\\hat u\\)，\\(\\hat u=\\hat u_0 e^{k\\xi^2 t}\\)。高频 \\(|\\xi|\\to\\infty\\) 指数增长 → 初始数据微小扰动在高频上被无限放大。连续依赖性破坏 → Hadamard 不适定。正向热方程 \\(e^{-k\\xi^2 t}\\) 则衰减（适定）。"
+      },
+      {
+        "id": "pde-ch01-q14",
+        "question": "波方程 \\(u_{tt}-c^2u_{xx}=0\\) 有几族特征线？",
+        "options": [
+          "两族：\\(x-ct=C_1\\) 和 \\(x+ct=C_2\\)",
+        "一族",
+        "无实特征线",
+        "三族"
+        ],
+        "answer": 0,
+        "explanation": "双曲型（\\(\\Delta=c^2>0\\)），\\(dx/dt=\\pm c\\)。两族直线代表左行波和右行波。d'Alembert 解 \\(u=F(x-ct)+G(x+ct)\\)。信息沿两个方向以有限速度 \\(c\\) 传播。"
+      },
+      {
+        "id": "pde-ch01-q15",
+        "question": "交通流模型 \\(\\rho_t+(\\rho v(\\rho))_x=0\\)，\\(v=v_m(1-\\rho/\\rho_m)\\)。最大通行量在 \\(\\rho=?\\) 处取得。",
+        "options": [
+          "\\(\\rho_m/2\\)",
+        "\\(0\\)",
+        "\\(\\rho_m\\)",
+        "\\(\\rho_m/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f=\\rho v_m(1-\\rho/\\rho_m)\\)。\\(f'=v_m(1-2\\rho/\\rho_m)=0\\) → \\(\\rho=\\rho_m/2\\)。\\(f_{max}=v_m\\rho_m/4\\)。这是道路通行能力。\\(\\rho>\\rho_m/2\\) 时 \\(f'<0\\)，特征速度为负（信息向后传播，交通波回溯）。"
+      },
+      {
+        "id": "pde-ch01-q16",
+        "question": "波方程 \\(u_{tt}=c^2u_{xx}\\)，\\(u(x,0)=f\\)，\\(u_t(x,0)=g\\)，\\(u(0,t)=u(L,t)=0\\)。问题适定吗？",
+        "options": [
+          "适定",
+        "不适定",
+        "过定",
+        "欠定"
+        ],
+        "answer": 0,
+        "explanation": "双曲方程需要两个初始条件（\\(u,u_t\\)）和边界条件。能量方法证明唯一性：\\(E(t)=\\frac{1}{2}\\int(u_t^2+c^2 u_x^2)dx\\)，\\(dE/dt=0\\)（守恒）。初始数据为零 → \\(E=0\\) → \\(u\\equiv 0\\)。"
+      },
+      {
+        "id": "pde-ch01-q17",
+        "question": "\\(u_t+uu_x+u=0\\)，特征线方程和沿线的 \\(u\\) 变化？",
+        "options": [
+          "\\(dx/dt=u\\)，\\(du/dt=-u\\)，\\(u=u_0 e^{-t}\\)",
+        "\\(dx/dt=1\\)，\\(du/dt=-u\\)",
+        "\\(du/dt=0\\)",
+        "无特征线"
+        ],
+        "answer": 0,
+        "explanation": "\\(du/dt=u_t+uu_x=-u\\)。沿 \\(dx/dt=u\\) 的特征线 \\(u\\) 指数衰减。\\(x=x_0+u_0(1-e^{-t})\\)（积分 \\(dx/dt=u_0 e^{-t}\\)）。松弛项使振幅衰减，可能阻止激波形成。"
+      },
+      {
+        "id": "pde-ch01-q18",
+        "question": "\\(u_{xx}+2u_{xy}-3u_{yy}=0\\) 化标准形的特征变量？",
+        "options": [
+          "\\(\\xi=y-3x\\)，\\(\\eta=y+x\\)",
+        "\\(\\xi=x+y\\)，\\(\\eta=x-y\\)",
+        "\\(\\xi=3x+y\\)，\\(\\eta=x-y\\)",
+        "\\(\\xi=x\\)，\\(\\eta=y\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=1,B=1,C=-3\\)，\\(\\Delta=1+3=4>0\\)（双曲）。\\(dy/dx=(B\\pm\\sqrt\\Delta)/A=(1\\pm 2)\\)。\\(dy/dx=3\\) → \\(y-3x=C_1\\)；\\(dy/dx=-1\\) → \\(y+x=C_2\\)。\\(\\xi=y-3x\\)，\\(\\eta=y+x\\)，标准形 \\(u_{\\xi\\eta}=0\\)。"
+      },
+      {
+        "id": "pde-ch01-q19",
+        "question": "Lax 熵条件 \\(f'(u_L)>s>f'(u_R)\\) 的物理意义？",
+        "options": [
+          "特征线从两侧汇聚到激波上（信息被吸收）",
+        "特征线从激波发出",
+        "激波速度等于声速",
+        "不增熵"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(u_L)>s\\)：左侧信息追上激波。\\(f'(u_R)<s\\)：右侧信息被激波追上。特征线汇聚 → 信息在激波消散 → 熵增。违反此条件的间断是非物理的（对应稀疏波）。"
+      },
+      {
+        "id": "pde-ch01-q20",
+        "question": "热核 \\(G(x,t)=\\frac{1}{\\sqrt{4\\pi kt}}e^{-x^2/(4kt)}\\) 在 \\(t>0\\) 时是 \\(C^\\infty\\) 的。这说明热方程有什么性质？",
+        "options": [
+          "即时正则化——即使初始数据不光滑，\\(t>0\\) 时解无穷光滑",
+        "解保持初始数据的光滑度",
+        "只在 \\(t>1\\) 时光滑",
+        "需要边界条件才光滑"
+        ],
+        "answer": 0,
+        "explanation": "\\(u(x,t)=G*u_0\\)。\\(G\\in C^\\infty\\)（\\(t>0\\)）→ 卷积也是 \\(C^\\infty\\)。初始数据可以是 \\(\\delta\\) 函数（极不光滑），但 \\(t=0^+\\) 时解立即光滑。这是抛物型方程与双曲型的主要区别——双曲方程传播奇点。"
+      },
+      {
+        "id": "pde-ch01-q21",
+        "question": "PDE 的主符号 \\(\\sigma(\\xi,\\eta)=A\\xi^2+2B\\xi\\eta+C\\eta^2\\) 正定时方程是？",
+        "options": [
+          "椭圆型",
+        "双曲型",
+        "抛物型",
+        "超双曲"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma\\) 正定 ↔ \\(\\Delta=B^2-AC<0\\) 且 \\(A>0\\) ↔ 椭圆型。\\(\\sigma\\) 不定 ↔ 双曲型。\\(\\sigma\\) 退化（\\(\\Delta=0\\)）↔ 抛物型。这与二次形式分类完全一致——\"椭圆/双曲/抛物\"名称来源于锥截线。"
+      },
+      {
+        "id": "pde-ch01-q22",
+        "question": "为什么双曲方程有有限传播速度而抛物方程有无限传播速度？",
+        "options": [
+          "双曲方程有实特征线，信号限于特征锥；抛物方程的热核处处正",
+        "两者都有有限速度",
+        "取决于维数",
+        "抛物方程更简单"
+        ],
+        "answer": 0,
+        "explanation": "波方程依赖域 \\(|x-x_0|\\leq c(t-t_0)\\)（有限速度 \\(c\\)）。热方程 \\(G\\propto e^{-x^2/(4kt)}>0\\)（\\(\\forall x,t>0\\)）→ 瞬间传到无穷远。类型决定了信号传播速度——这影响数值方法的 CFL 条件设计。"
+      },
+      {
+        "id": "pde-ch01-q23",
+        "question": "弱解不唯一时如何选取物理解？",
+        "options": [
+          "施加熵条件（Lax/Oleinik/Kružkov）",
+        "选最小解",
+        "选最光滑解",
+        "无标准方法"
+        ],
+        "answer": 0,
+        "explanation": "弱解允许间断，但同一初始数据可对应多个弱解。熵条件选出 \\(\\varepsilon\\to 0\\) 粘性极限 \\(u_t+f(u)_x=\\varepsilon u_{xx}\\) 的唯一解——这是热力学第二定律的数学表达。Kružkov 不等式适用于一般凸 \\(f\\)。"
+      },
+      {
+        "id": "pde-ch01-q24",
+        "question": "Cauchy-Kovalevskaya 定理的适用条件？",
+        "options": [
+          "数据和系数解析，初始面非特征",
+        "数据 \\(C^\\infty\\) 即可",
+        "任何 PDE 都适用",
+        "仅线性方程"
+        ],
+        "answer": 0,
+        "explanation": "CK 定理保证局部解析解存在。要求 (1) 系数和数据解析，(2) 初始面非特征。对非解析数据不适用（Lewy 反例：\\(C^\\infty\\) 系数的线性 PDE 无 \\(C^\\infty\\) 解）。"
+      },
+      {
+        "id": "pde-ch01-q25",
+        "question": "PDE 分类与锥截线分类的类比基础是？",
+        "options": [
+          "二者都由二次形式 \\(B^2-AC\\) 的符号决定",
+        "二者无关",
+        "仅在二维成立",
+        "仅对常系数成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(ax^2+2bxy+cy^2=1\\)：\\(b^2-ac<0\\) → 椭圆，\\(>0\\) → 双曲线，\\(=0\\) → 抛物线。PDE 主部 \\(Au_{xx}+2Bu_{xy}+Cu_{yy}\\)：\\(B^2-AC\\) 的符号决定类型。名称来源于这一数学上的同构结构。"
+      },
+      {
+        "id": "pde-ch01-q26",
+        "question": "红灯导致交通流密度从 \\(\\rho_L\\)（低）跳至 \\(\\rho_m\\)（满）。激波传播方向？",
+        "options": [
+          "向后（堵车波向上游蔓延）",
+        "向前",
+        "静止",
+        "取决于车速"
+        ],
+        "answer": 0,
+        "explanation": "\\(s=(f(\\rho_L)-f(\\rho_m))/(\\rho_L-\\rho_m)\\)。\\(f(\\rho_m)=0\\)，\\(s=f(\\rho_L)/(\\rho_L-\\rho_m)<0\\)（分母 \\(<0\\)，分子 \\(>0\\)）。负速度 → 向后传播。这解释了高速公路尾端刹车导致远处堵车。"
+      },
+      {
+        "id": "pde-ch01-q27",
+        "question": "超音速飞行的 Mach 锥半角 \\(\\sin\\alpha=1/M\\)。从 PDE 看 Mach 锥是？",
+        "options": [
+          "特征锥——线性化 Euler 方程的特征面",
+        "等势面",
+        "流线",
+        "等温面"
+        ],
+        "answer": 0,
+        "explanation": "\\(M>1\\) 时扰动被限于 Mach 锥内（特征锥）。方程从椭圆 → 双曲过渡（跨音速），特征面即声波前沿。\\(M=1\\) → \\(\\alpha=90°\\)（Mach 波退化为平面），\\(M\\to\\infty\\) → \\(\\alpha\\to 0\\)。"
+      },
+      {
+        "id": "pde-ch01-q28",
+        "question": "CT 重建的逆 Radon 变换为什么是不适定问题？",
+        "options": [
+          "高频噪声被放大，需正则化",
+        "完全适定",
+        "仅在三维不适定",
+        "因为 Radon 变换不可逆"
+        ],
+        "answer": 0,
+        "explanation": "逆 Radon 变换含滤波算子 \\(|\\xi|\\)（频域乘法），高频噪声被放大 \\(\\propto|\\xi|\\)。微小测量误差 → 重建图像剧烈振荡。需过滤反投影（FBP，加窗截断）或迭代正则化（Tikhonov 等）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="pde"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/pde.html" class="module-name">偏微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 二阶线性 PDE 的分类</a></li>
+      <li><a href="#kp2">02 · 一阶线性 PDE 与特征线法</a></li>
+      <li><a href="#kp3">03 · 拟线性方程与激波形成</a></li>
+      <li><a href="#kp4">04 · 边值条件与适定性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>PDE 分类与经典方程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>二阶线性 PDE 的分类</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不同物理现象——热传导、波传播、静电场——对应的偏微分方程有着 根本不同的数学性质。1830 年代，人们意识到二阶线性 PDE 可以像 二次曲线一样按「椭圆/抛物/双曲」分类，每类有独特的解的行为、 边值条件要求和求解策略。这个分类是学习 PDE 的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>分类的核心思想是对主符号（最高阶项系数矩阵）做特征值分析。 这与二次型的分类（正定/半正定/不定）完全类比，是线性代数 在 PDE 理论中的应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一般二阶线性 PDE</strong> (二元)： \[Au_{xx} + 2Bu_{xy} + Cu_{yy} + \text{低阶项} = 0\] 主符号矩阵 \(\begin{pmatrix} A & B \\ B & C \end{pmatrix}\)，判别式 \(\Delta = B^2 - AC\)。 <strong>分类</strong>： - <strong>椭圆型</strong> (\(\Delta < 0\))：二特征值同号。典型：Laplace 方程 \(\Delta u = 0\) - <strong>抛物型</strong> (\(\Delta = 0\))：一个特征值为零。典型：热方程 \(u_t = u_{xx}\) - <strong>双曲型</strong> (\(\Delta > 0\))：二特征值异号。典型：波动方程 \(u_{tt} = c^2 u_{xx}\) <strong>物理对应</strong>： 椭圆型 → 稳态/平衡问题（边值问题 BVP） 抛物型 → 扩散/耗散过程（初边值问题 IBVP） 双曲型 → 波传播（初值问题 IVP） <strong>变系数情况</strong>：分类可能随点 \((x,y)\) 变化。 如 Tricomi 方程 \(u_{xx} + yu_{yy} = 0\)：\(y>0\) 椭圆，\(y=0\) 抛物，\(y<0\) 双曲。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 航空动力学中跨声速流的 Tricomi 方程 - 选择正确的数值方法（分类决定了离散格式和稳定性条件）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：分类 \(u_{xx} + 4u_{xy} + 3u_{yy} = 0\)。 解答：\(A=1\)，\(B=2\)，\(C=3\)。\(\Delta = B^2 - AC = 4 - 3 = 1 > 0\)。 双曲型。特征方向由 \(A\,dy^2 - 2B\,dx\,dy + C\,dx^2 = 0\) 给出。 \(dy/dx = (B \pm \sqrt{\Delta})/A = (2 \pm 1)/1 = 1\) 或 \(3\)。 易错点：混淆判别式的符号约定。有的教材定义 \(\Delta = AC - B^2\) （取负号），此时椭圆型对应 \(\Delta > 0\)。需注意教材约定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程 \(u_t = ku_{xx}\) 属于哪一类 PDE？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。将 \\(t\\) 视为 \\(y\\)，写成 \\(-ku_{xx} + u_y = 0\\)（或等价地 \\(A=-k, B=0, C=0\\)），')">A. 椭圆型</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！将 \\(t\\) 视为 \\(y\\)，写成 \\(-ku_{xx} + u_y = 0\\)（或等价地 \\(A=-k, B=0, C=0\\)），')">B. 抛物型</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。将 \\(t\\) 视为 \\(y\\)，写成 \\(-ku_{xx} + u_y = 0\\)（或等价地 \\(A=-k, B=0, C=0\\)），')">C. 双曲型</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。将 \\(t\\) 视为 \\(y\\)，写成 \\(-ku_{xx} + u_y = 0\\)（或等价地 \\(A=-k, B=0, C=0\\)），')">D. 取决于 \(k\) 的值</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>一阶线性 PDE 与特征线法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一阶线性 PDE 是最简单的偏微分方程，其求解有一个优美的几何方法 ——特征线法。沿特征线，PDE 化为 ODE，可以用常微分方程的工具求解。 特征线法不仅给出解析解，还揭示了信息如何在空间中传播， 是理解高阶 PDE（尤其是双曲型方程）的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特征线法将 PDE 的求解转化为沿特征曲线的 ODE 求解。这体现了 「降维」思想：偏微分（多变量）→ 常微分（单变量），是 PDE 理论 中最基本的策略之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一阶线性 PDE</strong>：\(a(x,y)u_x + b(x,y)u_y = c(x,y,u)\)。 <strong>特征线方程</strong>（Cauchy 版）： \[\frac{dx}{a} = \frac{dy}{b} = \frac{du}{c}\] 沿特征线 \((x(s), y(s), u(s))\) 满足 ODE 系统： \[\frac{dx}{ds} = a,\quad \frac{dy}{ds} = b,\quad \frac{du}{ds} = c\] <strong>传输方程</strong> \(u_t + cu_x = 0\)（\(a=c, b=1\)）： 特征线 \(dx/dt = c\)，即 \(x - ct = \text{const}\)。 沿特征线 \(du/dt = 0\)，故 \(u = f(x-ct)\)（右行波）。 初值 \(u(x,0) = \phi(x)\) ⇒ \(u(x,t) = \phi(x-ct)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 传输方程描述了以速度 \(c\) 传播的信号（如声波的简化模型） - 交通流中车辆密度的传播</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用特征线法求解 \(u_t + 2u_x = 0\)，\(u(x,0) = e^{-x^2}\)。 解答：特征线 \(dx/dt = 2\)，\(x = 2t + x_0\)。沿特征线 \(u = \text{const}\)。 \(u(x,t) = u(x_0, 0) = e^{-x_0^2} = e^{-(x-2t)^2}\)。 解是初始高斯脉冲以速度 2 向右平移。 易错点：对拟线性方程（\(c\) 依赖 \(u\)），特征线不再平行， 可能交叉形成激波。此时经典解不存在，需引入弱解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">传输方程 \(u_t + 3u_x = 0\) 的特征线是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(dx/dt = 3\\)，积分得 \\(x = 3t + C\\)。信息沿这些直线传播。')">A. \(x = 3t + C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(dx/dt = 3\\)，积分得 \\(x = 3t + C\\)。信息沿这些直线传播。')">B. \(x = -3t + C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(dx/dt = 3\\)，积分得 \\(x = 3t + C\\)。信息沿这些直线传播。')">C. \(t = 3x + C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(dx/dt = 3\\)，积分得 \\(x = 3t + C\\)。信息沿这些直线传播。')">D. \(x^2 + t^2 = C\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>拟线性方程与激波形成</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当特征线的速度依赖于解本身（拟线性方程），不同点上的信息 传播速度不同，特征线可能「交叉」——这就是激波(shock)。 激波出现在超声速飞行、爆炸波、交通堵塞等现象中。 激波的形成标志着经典解的崩溃，需要引入弱解的概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>拟线性方程的特征线方程本身变为非线性 ODE，特征线的曲率和 交叉行为编码了解的非线性结构。激波的本质是特征线族的包络， 这与 ODE 中「奇解」的概念有深层联系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>拟线性方程</strong>：\(u_t + c(u)u_x = 0\)（\(c\) 依赖 \(u\)）。 特征线：\(dx/dt = c(u)\)，沿特征线 \(u = \text{const}\)。 但不同特征线上 \(u\) 不同 → \(c(u)\) 不同 → 斜率不同 → 可能相交。 <strong>Burgers 方程</strong>（无粘性）：\(u_t + uu_x = 0\)。 特征线 \(x = u_0 t + x_0\)（直线，斜率 \(1/u_0\)）。 初值 \(u(x,0) = \phi(x)\)：隐式解 \(u = \phi(x - ut)\)。 <strong>激波形成时间</strong>：\(t_s = -1/\min_x \phi'(x)\)（当 \(\phi' < 0\) 时）。 \(t > t_s\) 后特征线交叉，经典解不存在。 <strong>Rankine-Hugoniot 条件</strong>：激波速度 \[s = \frac{f(u_R) - f(u_L)}{u_R - u_L}\] 其中 \(f(u) = u^2/2\)（Burgers 情况），\(u_L, u_R\) 为激波左右值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 交通流模型：交通密度满足守恒律 \(\rho_t + f(\rho)_x = 0\)，堵车 = 激波 - 气体动力学中的 Euler 方程和激波管问题</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(u_t + uu_x = 0\)，\(u(x,0) = \begin{cases} 1, & x<0 \\ 0, & x>0 \end{cases}\)。 解答：\(x < 0\) 的特征线：\(x = t + x_0\)（斜率 1）。 \(x > 0\) 的特征线：\(x = x_0\)（斜率 \(\infty\)/竖直）。 特征线在 \(t=0\) 处立即交叉（初值不连续）。 Rankine-Hugoniot：\(s = (0+1)/2 = 1/2\)。 激波解：\(u = \begin{cases} 1, & x < t/2 \\ 0, & x > t/2 \end{cases}\)。 易错点：不是所有间断都是激波，还需满足熵条件（Lax 条件： \(c(u_L) > s > c(u_R)\)）来排除非物理的稀疏激波。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Burgers 方程 \(u_t + uu_x = 0\) 的特征线是什么形状？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。沿特征线 \\(u = \\text{const}\\)，故 \\(dx/dt = u = \\text{const}\\)，')">A. 曲线</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！沿特征线 \\(u = \\text{const}\\)，故 \\(dx/dt = u = \\text{const}\\)，')">B. 直线，但斜率因初值不同而不同</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。沿特征线 \\(u = \\text{const}\\)，故 \\(dx/dt = u = \\text{const}\\)，')">C. 始终平行的直线</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。沿特征线 \\(u = \\text{const}\\)，故 \\(dx/dt = u = \\text{const}\\)，')">D. 圆弧</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>边值条件与适定性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个 PDE 本身不足以确定唯一解——还需要恰当的边值/初值条件。 不同类型的 PDE 需要不同类型的条件：椭圆型需要边值条件， 抛物型需要初值+边值，双曲型需要初值。给错条件（过多或过少、 错误类型）会导致解不存在或不唯一。Hadamard 的「适定性」概念 将这些要求统一为三个条件：存在、唯一、连续依赖。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Hadamard 适定性(Well-posedness)</strong>：PDE 问题是适定的，如果： 1. <strong>存在性</strong>：解存在 2. <strong>唯一性</strong>：解唯一 3. <strong>连续依赖</strong>：解连续依赖于数据（小扰动→ 小偏差） <strong>边值条件类型</strong>： - <strong>Dirichlet 条件</strong>：\(u|_{\partial\Omega} = g\)（规定函数值） - <strong>Neumann 条件</strong>：\(\partial u/\partial n|_{\partial\Omega} = h\)（规定法向导数） - <strong>Robin/混合条件</strong>：\(\alpha u + \beta \partial u/\partial n = g\) <strong>各类型 PDE 的典型问题</strong>： \[\text{椭圆型 (Laplace): BVP} \quad \Delta u = 0 \text{ in } \Omega,\; u|_{\partial\Omega} = g\] \[\text{抛物型 (热方程): IBVP} \quad u_t = \Delta u,\; u(x,0) = \phi(x),\; u|_{\partial\Omega} = g\] \[\text{双曲型 (波方程): IVP} \quad u_{tt} = c^2\Delta u,\; u(x,0) = \phi,\; u_t(x,0) = \psi\] <strong>不适定的例子</strong>（Hadamard 例）：Laplace 方程配 Cauchy 数据 \(u(x,0) = 0\)，\(u_y(x,0) = n^{-1}\sin nx\)。解 \(u = n^{-2}\sinh(ny)\sin(nx)\) 随 \(n \to \infty\) 对任意 \(y > 0\) 发散，不连续依赖初值→ 不适定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 工程有限元分析中，正确的边界条件设置是得到有意义结果的前提 - 逆问题（从测量反推参数）通常是不适定的，需正则化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：为什么 Laplace 方程 \(\Delta u = 0\) 不能配初值条件 \(u(x,0)\) 和 \(u_y(x,0)\)？ 解答：这是 Hadamard 不适定例子。直觉：椭圆型方程的解在整个域上 同时决定（无信息传播方向），不存在「初始时刻」的概念。 Cauchy-Kowalewski 定理虽保证解析解存在，但解不连续依赖于数据。 易错点：「解存在」不等于「问题适定」。Hadamard 例中解存在且唯一， 但不连续依赖数据，仍不适定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程的适定问题需要什么类型的条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。热方程（抛物型）需要初始温度分布 \\(u(x,0) = \\phi(x)\\)')">A. 仅初值条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。热方程（抛物型）需要初始温度分布 \\(u(x,0) = \\phi(x)\\)')">B. 仅边值条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！热方程（抛物型）需要初始温度分布 \\(u(x,0) = \\phi(x)\\)')">C. 初值条件 + 边值条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。热方程（抛物型）需要初始温度分布 \\(u(x,0) = \\phi(x)\\)')">D. 两个初值条件（\(u\) 和 \(u_t\)）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/analysis/pde.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

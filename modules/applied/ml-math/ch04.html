@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 信息几何初步 — 机器学习数学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "ml-math-ch04-q1",
+        "question": "Fisher 信息矩阵 \\(I(\\theta)_{ij}=\\mathbb{E}[\\frac{\\partial\\log p}{\\partial\\theta_i}\\frac{\\partial\\log p}{\\partial\\theta_j}]\\) 度量什么？",
+        "options": [
+          "参数 \\(\\theta\\) 附近统计模型的\"可区分性\"——\\(I\\) 大意味着微小参数变化更容易从数据中检测到",
+        "参数的大小",
+        "数据量",
+        "模型复杂度"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(\\theta)\\) 是 score 函数的协方差。Cramér-Rao 下界: \\(\\text{Var}(\\hat\\theta)\\geq I(\\theta)^{-1}/n\\)。\\(I\\) 大→参数估计方差小→\"信息量大\"。几何视角: \\(I\\) 定义了参数空间上的 Riemannian 度量（Fisher 度量），使得 KL 散度在局部表现为测地距离的平方。"
+      },
+      {
+        "id": "ml-math-ch04-q2",
+        "question": "自然梯度(Natural Gradient) \\(\\tilde{\\nabla}L=I(\\theta)^{-1}\\nabla L\\) 与普通梯度的区别？",
+        "options": [
+          "自然梯度在 Fisher 度量下的最速下降方向——参数空间的弯曲会扭曲普通梯度方向",
+        "两者完全相同",
+        "自然梯度更慢",
+        "自然梯度不需要梯度计算"
+        ],
+        "answer": 0,
+        "explanation": "普通梯度在欧氏度量下最速下降；但参数空间不是欧氏的——\\(\\theta\\) 和 \\(\\theta+\\delta\\) 的\"统计距离\"由 Fisher 度量决定。\\(\\tilde\\nabla=I^{-1}\\nabla\\) 是 Riemannian 梯度——考虑了流形弯曲。对高斯分布：均值方向自然梯度=普通梯度，方差方向被放大——更有效更新。代价：\\(I^{-1}\\) 的 \\(O(d^3)\\) 计算。近似：KFAC, Adam (\\(\\text{diag}(I)^{-1}\\))。"
+      },
+      {
+        "id": "ml-math-ch04-q3",
+        "question": "KL 散度 \\(D_{KL}(p\\|q)=\\int p\\log(p/q)\\) 在 \\(q\\to p\\) 附近的 Taylor 展开与 Fisher 信息的关系？",
+        "options": [
+          "\\(D_{KL}(p_\\theta\\|p_{\\theta+\\delta})\\approx\\frac{1}{2}\\delta^TI(\\theta)\\delta\\) —— KL 散度的 Hessian 就是 Fisher 信息矩阵",
+        "KL 与 Fisher 无关",
+        "\\(D_{KL}\\approx\\|\\delta\\|^2\\)",
+        "KL 展开没有二阶项"
+        ],
+        "answer": 0,
+        "explanation": "\\(D_{KL}(p_\\theta\\|p_{\\theta+\\delta})=0+0\\cdot\\delta+\\frac{1}{2}\\delta^TI\\delta+O(\\|\\delta\\|^3)\\)。零阶为零（\\(D_{KL}(p\\|p)=0\\)），一阶为零（\\(\\nabla D_{KL}|_{\\delta=0}=0\\)），二阶恰好是 Fisher 矩阵。因此 Fisher 度量使 KL 散度成为\"局部欧氏\"——信息几何的核心观察。\\(ds^2=\\sum I_{ij}d\\theta_id\\theta_j\\) 定义 Riemannian 度量。"
+      },
+      {
+        "id": "ml-math-ch04-q4",
+        "question": "高斯分布 \\(\\mathcal{N}(\\mu,\\sigma^2)\\) 的 Fisher 信息矩阵？参数 \\((\\mu,\\sigma)\\) 空间的几何结构？",
+        "options": [
+          "\\(I=\\begin{pmatrix}1/\\sigma^2&0\\\\0&2/\\sigma^2\\end{pmatrix}\\)——上半平面配 Poincaré 度量（双曲几何）",
+        "\\(I\\) 是单位矩阵",
+        "\\(I\\) 与 \\(\\sigma\\) 无关",
+        "Fisher 度量是欧氏的"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log p=-\\log\\sigma-\\frac{(x-\\mu)^2}{2\\sigma^2}+C\\)。\\(\\partial_\\mu\\log p=(x-\\mu)/\\sigma^2\\), \\(\\partial_\\sigma\\log p=-1/\\sigma+(x-\\mu)^2/\\sigma^3\\)。\\(I_{11}=1/\\sigma^2, I_{22}=2/\\sigma^2, I_{12}=0\\)。度量 \\(ds^2=(d\\mu^2+2d\\sigma^2)/\\sigma^2\\)。换坐标 \\((\\mu,\\sigma)\\)→上半平面 \\(\\{(x,y):y>0\\}\\), 曲率 \\(K=-1/2\\)——双曲几何！统计距离在 \\(\\sigma\\) 小时膨胀（\\(\\sigma\\) 小的高斯更\"尖锐\"、对参数更敏感）。"
+      },
+      {
+        "id": "ml-math-ch04-q5",
+        "question": "TRPO (Trust Region Policy Optimization) 在强化学习中使用 Fisher 矩阵。其约束 \\(D_{KL}(\\pi_{old}\\|\\pi_\\theta)\\leq\\delta\\) 的作用？",
+        "options": [
+          "Fisher 度量下的信赖域——限制策略更新幅度（统计距离而非参数距离），保证策略单调改善",
+        "Fisher 矩阵不相关",
+        "只限制参数大小",
+        "TRPO 不涉及 KL 散度"
+        ],
+        "answer": 0,
+        "explanation": "策略梯度 \\(\\theta_{new}=\\theta+\\alpha\\nabla J\\) 可能使策略剧变（参数空间小变化可能导致概率分布大变化）。TRPO: \\(\\max_\\theta J(\\theta)\\) s.t. \\(D_{KL}(\\pi_{old}\\|\\pi_\\theta)\\leq\\delta\\)。\\(D_{KL}\\approx\\frac{1}{2}\\Delta\\theta^TF\\Delta\\theta\\), 解 \\(\\Delta\\theta=\\alpha F^{-1}\\nabla J\\)——自然梯度！共轭梯度法近似 \\(F^{-1}v\\)。PPO 用裁剪替代 KL 约束——更简单但原理相同。"
+      },
+      {
+        "id": "ml-math-ch04-q6",
+        "question": "指数族分布 \\(p(x|\\theta)=h(x)\\exp(\\theta^Tx-A(\\theta))\\) 的自然参数 \\(\\theta\\) 与期望参数 \\(\\mu=\\mathbb{E}[x]=\\nabla A(\\theta)\\) 之间的关系？",
+        "options": [
+          "\\(A\\) 是凸函数; \\(\\theta\\leftrightarrow\\mu\\) 通过 Legendre 变换对偶; \\(A^*(\\mu)=-H(p_\\mu)\\)（负熵）",
+        "\\(\\theta=\\mu\\) 总是",
+        "无关系",
+        "\\(A\\) 是线性的"
+        ],
+        "answer": 0,
+        "explanation": "\\(A(\\theta)=\\log\\int h(x)e^{\\theta^Tx}dx\\)（对数配分函数，凸）。\\(\\mu=\\nabla A(\\theta)\\)（矩/期望参数）。Legendre 变换: \\(A^*(\\mu)=\\sup_\\theta[\\theta^T\\mu-A(\\theta)]\\)。\\(A^*\\) 是负熵 \\(-H(p_\\mu)\\)。Fisher 信息 \\(I=\\nabla^2 A\\)。这建立了信息几何的\"对偶坐标系\"——\\(\\theta\\)-坐标与 \\(\\mu\\)-坐标对偶，类似拉格朗日与哈密顿力学。"
+      },
+      {
+        "id": "ml-math-ch04-q7",
+        "question": "K-Means 算法可以从信息几何的角度理解为什么？",
+        "options": [
+          "用 KL 散度作为\"距离\"，K-Means 等价于指数族的 EM 算法——在 Bregman 散度下的最近邻分配+质心更新",
+        "K-Means 与信息几何无关",
+        "K-Means 只用欧氏距离",
+        "信息几何不涉及聚类"
+        ],
+        "answer": 0,
+        "explanation": "Banerjee et al.: 任何 Bregman 散度 \\(D_\\phi(x,y)=\\phi(x)-\\phi(y)-\\nabla\\phi(y)^T(x-y)\\) 都有对应的聚类算法。欧氏距离=\\(\\phi(x)=\\|x\\|^2\\) 的 Bregman → K-Means。KL 散度=\\(\\phi(x)=\\sum x_i\\log x_i\\) 的 Bregman → 概率分布的聚类。每种都保证收敛到局部最优。信息几何统一了距离/损失/聚类的选择。"
+      },
+      {
+        "id": "ml-math-ch04-q8",
+        "question": "Fisher 信息矩阵作为\"局部曲率\"可以解释为什么神经网络优化中 loss 景观的尺度在不同方向不同？",
+        "options": [
+          "Fisher \\(I=\\mathbb{E}[\\nabla\\log p\\nabla\\log p^T]\\) 的特征值分谱决定了不同参数方向的灵敏度——大特征值=sharp方向, 小特征值=flat方向",
+        "所有方向灵敏度相同",
+        "Fisher 矩阵是标量",
+        "只有 Hessian 才能描述"
+        ],
+        "answer": 0,
+        "explanation": "对分类网络 \\(p(y|x,\\theta)\\), Fisher \\(I=\\mathbb{E}_{x,y}[\\nabla_\\theta\\log p\\,\\nabla_\\theta\\log p^T]\\approx\\text{Gauss-Newton}\\) 近似 Hessian。\\(I\\) 的大特征值对应\"敏感参数组合\"（改变这些方向loss剧变），小特征值对应\"平坦方向\"（可以较大幅度改变而不影响loss）。这解释了为什么 Adam/自然梯度比 SGD 更好——自动适配不同方向的灵敏度。"
+      },
+      {
+        "id": "ml-math-ch04-q9",
+        "question": "在变分推断(VI)中，ELBO 最大化 \\(\\max_q \\mathbb{E}_q[\\log p(x,z)]-\\mathbb{E}_q[\\log q(z)]\\) 等价于最小化什么？与 Fisher 信息的联系？",
+        "options": [
+          "最小化 \\(D_{KL}(q\\|p(z|x))\\); 自然梯度VI在参数化指数族\\(q\\)上用Fisher度量加速优化",
+        "最大化 KL 散度",
+        "与 Fisher 无关",
+        "ELBO 不涉及 KL"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log p(x)=ELBO+D_{KL}(q\\|p(z|x))\\)。\\(\\log p(x)\\) 常数 → 最大化 ELBO \\(\\Leftrightarrow\\) 最小化 \\(D_{KL}(q\\|p)\\)。当 \\(q\\) 属指数族时，自然梯度更新 \\(\\theta_{q}\\leftarrow\\theta_q+\\eta I_q^{-1}\\nabla ELBO\\)。Khan-Lin (2017): 自然梯度VI在指数族参数扰动框架下统一了 Bayesian learning rules——包括 Kalman filter, SGD, Adam 都是特例。"
+      },
+      {
+        "id": "ml-math-ch04-q10",
+        "question": "α-散度 \\(D_\\alpha(p\\|q)=\\frac{1}{\\alpha(1-\\alpha)}(1-\\int p^\\alpha q^{1-\\alpha})\\) 在 \\(\\alpha\\to 0,1\\) 时分别趋向什么？在信息几何中的角色？",
+        "options": [
+          "\\(\\alpha\\to 1\\): \\(D_{KL}(p\\|q)\\); \\(\\alpha\\to 0\\): \\(D_{KL}(q\\|p)\\); α-散度是统计流形上的\"对偶平坦度量\"",
+        "都趋向零",
+        "趋向欧氏距离",
+        "\\(\\alpha\\)-散度不包含KL"
+        ],
+        "answer": 0,
+        "explanation": "Rényi/Tsallis 散度族的特例。\\(\\alpha=1\\): forward KL（均值寻找/mode covering）。\\(\\alpha=0\\): reverse KL（mode seeking）。\\(\\alpha=1/2\\): Hellinger 距离（对称）。信息几何：\\(\\alpha\\)-connection \\(\\nabla^{(\\alpha)}\\) 和 \\(\\nabla^{(-\\alpha)}\\) 是对偶连接。\\(\\alpha=1\\): 指数连接+混合连接对偶。统一了 MLE(\\(\\alpha=1\\))和矩匹配(\\(\\alpha=-1\\))的几何解释。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="ml-math"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/ml-math.html" class="module-name">机器学习数学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 统计流形与 Fisher 信息矩阵</a></li>
+      <li><a href="#kp2">02 · 自然梯度下降</a></li>
+      <li><a href="#kp3">03 · KL 散度与 Fisher 度量的关系</a></li>
+      <li><a href="#kp4">04 · 统计流形上的测地线与指数族</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>信息几何初步</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>统计流形与 Fisher 信息矩阵</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>概率分布族 \(\{p_\theta\}\) 可以看作一个"流形"，参数 \(\theta\) 是局部坐标。 不同的参数化给出不同的梯度——欧几里得梯度在统计问题上不是自然 的。Fisher 信息矩阵作为流形的黎曼度量，定义了参数空间上的"自 然距离"，使得优化在统计意义上是最优的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>关键抽象：参数化分布族 \(=\) 统计流形，Fisher 信息 \(=\) 黎曼度量。 这将微分几何的工具引入统计学和机器学习。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>统计流形：\(\mathcal{M} = \{p_\theta \mid \theta \in \Theta \subseteq \mathbb{R}^d\}\)。 Fisher 信息矩阵： \[[F(\theta)]_{ij} = \mathbb{E}_{p_\theta}\left[\frac{\partial \log p_\theta}{\partial \theta_i} \cdot \frac{\partial \log p_\theta}{\partial \theta_j}\right]\] \(F\) 是半正定的（\(F = \mathrm{Cov}[\nabla_\theta \log p_\theta]\)）， 作为黎曼度量定义了切空间上的内积：\(\langle u, v\rangle_\theta = u^T F(\theta) v\)。 参数无关性：Fisher 度量在重参数化 \(\theta \to \eta(\theta)\) 下自然变换 （协变），而欧几里得度量不是。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Cramér-Rao 下界：无偏估计的方差 \(\geq F^{-1}\)，Fisher 信息刻画 了参数可估性的根本极限。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(p_\theta(x) = \theta e^{-\theta x}\)（指数分布，\(x>0\)）。求 Fisher 信息。 解答：\(\log p_\theta = \log\theta - \theta x\)。\(\partial/\partial\theta = 1/\theta - x\)。 \(F(\theta) = \mathbb{E}[(1/\theta-x)^2] = \mathrm{Var}(x) = 1/\theta^2\)。 易错点：Fisher 信息依赖于参数化方式。\(\eta = \log\theta\) 时 \(F_\eta = 1\)（常数）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fisher 信息矩阵在信息几何中的角色是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Fisher 信息作为统计流形上的黎曼度量，定义了分布间的自然距离。')">A. 损失函数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Fisher 信息作为统计流形上的黎曼度量，定义了分布间的自然距离。')">B. 黎曼度量</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Fisher 信息作为统计流形上的黎曼度量，定义了分布间的自然距离。')">C. 激活函数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Fisher 信息作为统计流形上的黎曼度量，定义了分布间的自然距离。')">D. 正则化项</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>自然梯度下降</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>欧几里得空间中的梯度在参数重参数化下不保持不变——换个参数化梯 度方向就变了。自然梯度(Amari, 1998)用 Fisher 度量替代欧几里得度 量，得到的更新方向与参数化无关，在统计意义上是最陡下降方向。 Adam 优化器可视为自然梯度的廉价近似。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>欧几里得梯度：\(\nabla_\theta \ell\) 是在 \(\|d\theta\|_2^2\) 度量下的最陡方向。 自然梯度：在 Fisher 度量 \(\|d\theta\|_F^2 = d\theta^T F d\theta\) 下的最陡方向： \[\tilde{\nabla}_\theta \ell = F(\theta)^{-1} \nabla_\theta \ell\] 自然梯度下降：\(\theta_{t+1} = \theta_t - \alpha F(\theta_t)^{-1} \nabla \ell(\theta_t)\)。 与 KL 散度的联系：\(D_{\mathrm{KL}}(p_\theta \| p_{\theta+d\theta}) \approx \frac{1}{2} d\theta^T F(\theta) d\theta\)。 自然梯度在 KL 散度意义上做等步长更新。 连接 Adam：对角近似 \(F \approx \mathrm{diag}(\mathbb{E}[g^2])\)， \(F^{-1}g \approx g/\sqrt{\mathbb{E}[g^2]}\)——与 Adam 的自适应步长形式类似。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>TRPO/PPO 强化学习算法使用 Fisher 矩阵约束策略更新步长在 KL 球内。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：1D 指数分布 \(\theta e^{-\theta x}\), \(F=1/\theta^2\)。 损失 \(\ell(\theta)=-\log p_\theta(x_0)=-\log\theta+\theta x_0\)。 欧梯度：\(\nabla=-1/\theta+x_0\)。自然梯度：\(F^{-1}\nabla=\theta^2(-1/\theta+x_0) = -\theta+\theta^2 x_0\)。 易错点：\(F^{-1}\) 的计算/存储是 \(O(d^2)\)/\(O(d^3)\)，实际中需近似（K-FAC 等）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">自然梯度相比欧梯度的核心优势是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。自然梯度在重参数化 \\(\\theta \\to \\eta(\\theta)\\) 下方向不变。')">A. 计算更快</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！自然梯度在重参数化 \\(\\theta \\to \\eta(\\theta)\\) 下方向不变。')">B. 对参数化不变</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。自然梯度在重参数化 \\(\\theta \\to \\eta(\\theta)\\) 下方向不变。')">C. 保证全局最优</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。自然梯度在重参数化 \\(\\theta \\to \\eta(\\theta)\\) 下方向不变。')">D. 不需要学习率</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>KL 散度与 Fisher 度量的关系</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>KL 散度是信息论和 ML 中最常用的分布距离度量，但它不是真正的 度量（不对称、不满足三角不等式）。信息几何揭示了 KL 散度的局 部结构：在参数微小变化时，KL 散度的二阶展开恰好给出 Fisher 度量。这统一了信息论、统计学和微分几何。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>KL 散度是统计流形上的"伪距离"，Fisher 度量是其无穷小版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>KL 散度定义： \[D_{\mathrm{KL}}(p_\theta \| p_{\theta'}) = \int p_\theta \log\frac{p_\theta}{p_{\theta'}} dx\] 局部展开（\(\theta' = \theta + \delta\)，\(\delta\) 小）： \(D_{\mathrm{KL}}(p_\theta \| p_{\theta+\delta}) = 0 + 0 + \frac{1}{2}\delta^T F(\theta)\delta + O(\|\delta\|^3)\)。 一阶项为零（因为 KL 在 \(\theta'=\theta\) 处取极小值 \(0\)）， 二阶项 \(= \frac{1}{2}\delta^T F(\theta)\delta\)。 即 Fisher 矩阵是 KL 散度的 Hessian： \[F(\theta) = \nabla^2_{\theta'} D_{\mathrm{KL}}(p_\theta \| p_{\theta'}) \big|_{\theta'=\theta}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>变分推断(VI)中最小化 KL 散度 \(D_{\mathrm{KL}}(q_\phi\|p)\)，其梯度计算 涉及 Fisher 信息，连接了推断与信息几何。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：两个高斯 \(N(\mu,1)\) 和 \(N(\mu+\delta,1)\)。 \(D_{\mathrm{KL}} = \frac{\delta^2}{2}\)。Fisher 信息 \(F=1\)。 验证：\(D_{\mathrm{KL}} = \frac{1}{2}\delta^T F \delta = \frac{\delta^2}{2}\) \(\checkmark\)。 易错点：KL 散度不对称：\(D_{\mathrm{KL}}(p\|q) \neq D_{\mathrm{KL}}(q\|p)\)。 两者对应不同的变分推断目标（mode-seeking vs mode-covering）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fisher 矩阵是 KL 散度在 \(\theta'=\theta\) 处的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(F(\\theta) = \\nabla^2_{\\theta\\'} D_{\\mathrm{KL}}\\big|_{\\theta\\'=\\theta}\\)。')">A. 一阶导数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(F(\\theta) = \\nabla^2_{\\theta\\'} D_{\\mathrm{KL}}\\big|_{\\theta\\'=\\theta}\\)。')">B. 二阶导数（Hessian）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(F(\\theta) = \\nabla^2_{\\theta\\'} D_{\\mathrm{KL}}\\big|_{\\theta\\'=\\theta}\\)。')">C. 梯度</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(F(\\theta) = \\nabla^2_{\\theta\\'} D_{\\mathrm{KL}}\\big|_{\\theta\\'=\\theta}\\)。')">D. 散度</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>统计流形上的测地线与指数族</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>信息几何的强大之处在于它揭示了指数族分布的特殊结构：指数族上 的 Fisher 流形是平坦的（"对偶平坦"），KL 散度可以分解为 Bregman 散度。这不仅美观，还使得 EM 算法的收敛性分析变得自然。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>指数族 \(\leftrightarrow\) 对偶平坦流形 \(\leftrightarrow\) Bregman 散度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>指数族：\(p_\theta(x) = h(x) \exp(\theta^T T(x) - A(\theta))\)， \(A(\theta) = \log \int h(x) e^{\theta^T T(x)} dx\)（对数配分函数）。 性质：\(\nabla_\theta A = \mathbb{E}[T(x)] = \mu\)（均值参数）， \(\nabla^2_\theta A = \mathrm{Cov}[T(x)] = F(\theta)\)（Fisher 信息 \(=\) Hessian of \(A\)）。 对偶坐标：\(\theta\)（自然参数）↔ \(\mu = \nabla A(\theta)\)（均值参数）。 对偶平坦：在 \(\theta\) 坐标下"e-平坦"，在 \(\mu\) 坐标下"m-平坦"。 KL 散度 \(=\) Bregman 散度： \[D_{\mathrm{KL}}(p_\mu \| p_{\mu'}) = B_A(\theta' \| \theta) = A(\theta') - A(\theta) - \nabla A(\theta)^T(\theta'-\theta)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>EM 算法的每步可解释为在 m-平坦子流形和 e-平坦子流形之间的 交替投影，保证收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：伯努利分布 \(p_\theta(x) = \theta^x(1-\theta)^{1-x}\)，\(x \in \{0,1\}\)。 写成指数族形式。解答：\(p = \exp(x\log\theta+(1-x)\log(1-\theta)) = \exp(x\log(\theta/(1-\theta)) + \log(1-\theta))\)。 自然参数 \(\eta = \log(\theta/(1-\theta))\)（logit），\(A(\eta) = \log(1+e^\eta)\)。 易错点：混淆自然参数与均值参数。伯努利的均值参数 \(\mu=\theta\)， 自然参数 \(\eta = \mathrm{logit}(\theta)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">指数族的 Fisher 信息矩阵等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(F = \\nabla^2 A = \\mathrm{Cov}[T(x)]\\)，两个等式同时成立。')">A. 对数似然的一阶导</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(F = \\nabla^2 A = \\mathrm{Cov}[T(x)]\\)，两个等式同时成立。')">B. 对数配分函数 \(A(\theta)\) 的 Hessian</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(F = \\nabla^2 A = \\mathrm{Cov}[T(x)]\\)，两个等式同时成立。')">C. 均值参数的方差</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(F = \\nabla^2 A = \\mathrm{Cov}[T(x)]\\)，两个等式同时成立。')">D. B 和 C 都对</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/applied/ml-math.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

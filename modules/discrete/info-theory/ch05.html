@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 网络信息论 — 信息论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "info-theory-ch05-q1",
+        "question": "多址接入信道（MAC）的模型：\\(K\\) 个发送方各有独立消息，共享同一信道发往 1 个接收方。两用户 MAC 的容量域是什么形状？",
+        "options": [
+          "五角形（pentagon）——由 \\(R_1\\leq I(X_1;Y|X_2)\\), \\(R_2\\leq I(X_2;Y|X_1)\\), \\(R_1+R_2\\leq I(X_1,X_2;Y)\\) 围成  B) 正方形  C) 三角形  D) 单点"
+        ],
+        "answer": 0,
+        "explanation": "两用户 MAC 容量域由三个不等式围成：\\(R_1\\leq I(X_1;Y|X_2)\\)（给定 \\(X_2\\) 后 \\(X_1\\) 的解码极限），\\(R_2\\leq I(X_2;Y|X_1)\\)，\\(R_1+R_2\\leq I(X_1,X_2;Y)\\)（联合极限）。对所有输入分布 \\(P(x_1)P(x_2)\\) 取凸包。几何上是五角形（一般情况）或三角形（退化情况）。时分复用（TDMA）仅达到和速率边界上的两个端点，不如联合编码。"
+      },
+      {
+        "id": "info-theory-ch05-q2",
+        "question": "两用户加性高斯 MAC：\\(Y=X_1+X_2+Z\\)，\\(Z\\sim\\mathcal{N}(0,1)\\)，功率 \\(P_1=P_2=P\\)。和速率上界 \\(R_1+R_2\\leq?\\)",
+        "options": [
+          "\\(\\frac{1}{2}\\log_2(1+2P)\\)  B) \\(\\frac{1}{2}\\log_2(1+P)\\)  C) \\(\\log_2(1+P)\\)  D) \\(P\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(X_1,X_2;Y)=h(Y)-h(Z)\\)。\\(X_1,X_2\\) 独立高斯时 \\(Y\\sim\\mathcal{N}(0,P_1+P_2+1)\\)。\\(h(Y)=\\frac{1}{2}\\log(2\\pi e(2P+1))\\)，\\(h(Z)=\\frac{1}{2}\\log(2\\pi e)\\)。\\(I=\\frac{1}{2}\\log_2(1+2P)\\)。两人共享信道的和速率 \\(<\\) 单人独占 \\(2P\\) 功率的速率 \\(\\frac{1}{2}\\log_2(1+2P)\\)——但不到两倍单人速率，因为存在干扰。"
+      },
+      {
+        "id": "info-theory-ch05-q3",
+        "question": "广播信道（BC）的模型：1 个发送方发消息给 \\(K\\) 个接收方（信道质量不同）。Marton 编码的核心思想是什么？",
+        "options": [
+          "用辅助随机变量 \\(U_1,U_2\\) 分别编码两个接收者的消息，利用联合典型性  B) 时分复用  C) 频分复用  D) 简单重复"
+        ],
+        "answer": 0,
+        "explanation": "退化广播信道：\\(X\\to Y_1\\to Y_2\\)（\\(Y_1\\) 质量好于 \\(Y_2\\)）。叠加编码已达容量。一般（非退化）BC：Marton 编码使用辅助 \\(U_1,U_2\\)，\\(R_1\\leq I(U_1;Y_1)\\)，\\(R_2\\leq I(U_2;Y_2)\\)，\\(R_1+R_2\\leq I(U_1;Y_1)+I(U_2;Y_2)-I(U_1;U_2)\\)。一般 BC 容量至今未完全解决（信息论大开问题之一）。"
+      },
+      {
+        "id": "info-theory-ch05-q4",
+        "question": "高斯退化广播信道：\\(Y_1=X+Z_1\\)，\\(Y_2=X+Z_2\\)，\\(\\sigma_1^2<\\sigma_2^2\\)（\\(Y_1\\) 更好），功率 \\(P\\)。叠加编码的容量域角点 \\((R_1^*,R_2^*)\\) 中 \\(R_2=?\\)（弱用户速率）",
+        "options": [
+          "\\(R_2=\\frac{1}{2}\\log_2(1+\\frac{\\alpha P}{\\bar{\\alpha}P+\\sigma_2^2})\\)，\\(\\alpha\\in[0,1]\\) 为功率分配比  B) \\(R_2=\\frac{1}{2}\\log_2(1+P/\\sigma_2^2)\\)  C) \\(R_2=0\\)  D) \\(R_2=\\frac{1}{2}\\log_2(1+P/\\sigma_1^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "叠加编码：\\(X=X_c+X_p\\)。公共层 \\(X_c\\) 功率 \\(\\alpha P\\)（两个用户都解），私有层 \\(X_p\\) 功率 \\((1-\\alpha)P\\)（仅好用户解）。弱用户将 \\(X_p\\) 视为噪声：\\(R_2=\\frac{1}{2}\\log_2\\bigl(1+\\frac{\\alpha P}{(1-\\alpha)P+\\sigma_2^2}\\bigr)\\)。好用户先解公共层（SIC），再解私有层：\\(R_1=\\frac{1}{2}\\log_2\\bigl(1+\\frac{(1-\\alpha)P}{\\sigma_1^2}\\bigr)\\)。\\(\\alpha\\) 控制两用户间的速率分配。"
+      },
+      {
+        "id": "info-theory-ch05-q5",
+        "question": "叠加编码（superposition coding）用于广播信道。\"强用户先解弱用户消息再消除干扰\"这一操作称为什么？",
+        "options": [
+          "逐次干扰消除（SIC, Successive Interference Cancellation）  B) 匹配滤波  C) 功率控制  D) OFDM"
+        ],
+        "answer": 0,
+        "explanation": "SIC：强用户（好信道）先将弱用户的信号视为需解码的消息，成功解码后从接收信号中减去。剩余信号仅含自己的消息+噪声——相当于独享信道。SIC 是叠加编码的配对解码策略。实际系统（5G NOMA）中 SIC 面临错误传播问题：若第一步解码错误，减去的信号不正确，后续解码也会失败。"
+      },
+      {
+        "id": "info-theory-ch05-q6",
+        "question": "网络编码的蝶形网络（butterfly network）经典例子。两源 \\(s_1,s_2\\) 各有 1 bit，要分别传到 \\(t_1,t_2\\)。不用网络编码的吞吐量上限和使用网络编码后的吞吐量分别是？",
+        "options": [
+          "不用：各 \\(1\\) bit 但共瓶颈链路只能传 \\(1\\) bit（一个源被阻塞）；用：中间节点发 \\(s_1\\oplus s_2\\)，两源各 \\(1\\) bit 同时达到  B) 均为 2 bit  C) 均为 0.5 bit  D) 不适用"
+        ],
+        "answer": 0,
+        "explanation": "蝶形网络瓶颈：中间链路容量 1 bit。无网络编码时该链路只能转发 \\(s_1\\) 或 \\(s_2\\)——不能同时满足两目的地。网络编码：中间节点计算 \\(s_1\\oplus s_2\\) 并广播。\\(t_1\\) 已知 \\(s_1\\)（通过其他路径）→ \\(s_2=s_1\\oplus(s_1\\oplus s_2)\\)。\\(t_2\\) 类似。吞吐量从 \\(1.5\\) bit/slot 提升到 \\(2\\) bit/slot。Ahlswede-Cai-Li-Yeung (2000) 奠基性成果。"
+      },
+      {
+        "id": "info-theory-ch05-q7",
+        "question": "脏纸编码（DPC, Dirty Paper Coding）定理（Costa 1983）的结论是什么？",
+        "options": [
+          "若发送方已知加性干扰 \\(S\\)，可在不增加功率的前提下完全消除 \\(S\\) 对容量的影响  B) 容量减半  C) 需要双倍功率  D) 仅适用于二进制信道"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y=X+S+Z\\)，\\(S\\) 已知于发送方（但不是接收方），\\(Z\\sim\\mathcal{N}(0,N)\\)。Costa 证明：\\(C=\\frac{1}{2}\\log(1+P/N)\\)——与无干扰 \\(S\\) 时完全相同！编码策略：不直接消除 \\(S\\)（会浪费功率），而是 Gel'fand-Pinsker 编码——利用已知 \\(S\\) 调整码字，让 \\(S\\) 的影响\"隐形\"。DPC 是 MIMO 下行链路（多用户 MIMO）容量达到的理论基础。"
+      },
+      {
+        "id": "info-theory-ch05-q8",
+        "question": "MAC 信道中的连续干扰消除。两用户高斯 MAC，\\(P_1=3,P_2=1,N=1\\)。先解用户 2 再解用户 1 的速率对 \\((R_1,R_2)=?\\)",
+        "options": [
+          "\\((R_1=\\frac{1}{2}\\log_2 4, R_2=\\frac{1}{2}\\log_2\\frac{5}{4})\\)  B) \\((1,1)\\)  C) \\((2,2)\\)  D) \\((\\frac{1}{2}\\log_2 2,\\frac{1}{2}\\log_2 5)\\)"
+        ],
+        "answer": 0,
+        "explanation": "SIC 先解用户 2（弱用户），将用户 1 视为噪声：\\(R_2=\\frac{1}{2}\\log_2(1+P_2/(P_1+N))=\\frac{1}{2}\\log_2(1+1/4)=\\frac{1}{2}\\log_2(5/4)\\approx0.161\\) bit。消除用户 2 后解用户 1：\\(R_1=\\frac{1}{2}\\log_2(1+P_1/N)=\\frac{1}{2}\\log_2 4=1\\) bit。和速率 \\(=1+0.161=1.161\\approx\\frac{1}{2}\\log_2 5\\)。若反过来先解强用户，\\(R_1=\\frac{1}{2}\\log_2(1+3/2)=\\frac{1}{2}\\log_2 2.5\\)，\\(R_2=\\frac{1}{2}\\log_2 2\\)。"
+      },
+      {
+        "id": "info-theory-ch05-q9",
+        "question": "OFDMA（正交频分多址）在广播信道中的作用。\\(N\\) 个子载波分配给 \\(K\\) 个用户，最优分配准则是什么？",
+        "options": [
+          "每个子载波分配给在该子载波上信道增益最好的用户（多用户分集增益）  B) 平均分配  C) 全部给最强用户  D) 随机分配"
+        ],
+        "answer": 0,
+        "explanation": "OFDMA 可视为频域时分——每个子载波是独立子信道。最优策略（max-sum-rate）：子载波 \\(n\\) 分配给 \\(\\arg\\max_k C_{n,k}\\)（信道容量最大的用户）。这利用了不同用户在不同频率上的衰落独立性——即使平均 SNR 相同，在各子载波上各用户信道增益有起伏。用户数 \\(K\\) 越多→多用户分集增益越大。4G LTE 和 5G NR 的下行链路使用 OFDMA。"
+      },
+      {
+        "id": "info-theory-ch05-q10",
+        "question": "线性网络编码中，中间节点对输入做 \\(\\mathbb{F}_q\\) 上的线性组合。多播容量定理（Li-Yeung-Cai 2003）的结论是什么？",
+        "options": [
+          "线性网络编码足以达到多播容量（= 最小割）  B) 需要非线性编码  C) 仅适用于二元域  D) 线性编码严格次优"
+        ],
+        "answer": 0,
+        "explanation": "定理：对多播问题（一个源到 \\(K\\) 个目的地），线性网络编码在有限域 \\(\\mathbb{F}_q\\)（\\(q\\) 充分大）上足以达到最大流-最小割。具体：\\(q>K\\) 即足够。随机线性网络编码（RLNC）：每个节点随机选取线性组合系数——以高概率达到容量，且不需要全局协调。复杂度 \\(O(n^3)\\)（高斯消元解码）。实际应用：P2P 文件分发（Microsoft Avalanche）、卫星通信。"
+      },
+      {
+        "id": "info-theory-ch05-q11",
+        "question": "中继信道（relay channel）中 Decode-and-Forward（DF）策略的可达速率是什么？",
+        "options": [
+          "\\(R_{\\text{DF}}=\\max_{P(x,x_r)}\\min\\{I(X;Y_r|X_r),I(X,X_r;Y)\\}\\)  B) \\(R=I(X;Y)\\)  C) \\(R=H(Y)\\)  D) \\(R=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "中继完全解码源消息后与源协作传输。\\(I(X;Y_r|X_r)\\) = 源到中继链路容量（中继解码瓶颈）。\\(I(X,X_r;Y)\\) = 源+中继到目的地的协作容量。\\(R_{\\text{DF}}=\\min\\) 取两者瓶颈。当中继信道好于直连信道时 DF 接近容量。替代策略：Compress-and-Forward（CF）——中继不解码，量化后转发，当源-中继信道差时更好。"
+      },
+      {
+        "id": "info-theory-ch05-q12",
+        "question": "CDMA（码分多址）系统中 \\(K\\) 个用户使用扩频码。当 \\(K\\) 远大于扩频因子 \\(N\\) 时（过载系统），多用户检测器性能由什么决定？",
+        "options": [
+          "多用户信息论——MAC 容量域；实际中迫零（ZF）或 MMSE 检测器的性能  B) 单用户 Shannon 极限  C) 扩频码长度  D) 调制阶数"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\) 用户同时传输。最优多用户检测 = 联合 ML 解码（NP-hard 复杂度 \\(O(2^K)\\)）。线性检测器：匹配滤波\\(\\to\\)迫零\\(\\to\\)MMSE，复杂度 \\(O(K^2)\\)。Verdú 的多用户信息论给出 MMSE 检测在大系统极限下的谱效率：\\(C_{\\text{MMSE}}=\\frac{1}{N}\\sum_{k=1}^K\\frac{1}{2}\\log(1+\\text{SINR}_k)\\)，其中 \\(\\text{SINR}_k\\) 由 Tse-Hanly 公式给出。5G massive MIMO 通过大量天线（\\(M\\gg K\\)）使信道正交化，避免多用户干扰。"
+      },
+      {
+        "id": "info-theory-ch05-q13",
+        "question": "MIMO 广播信道（下行多用户 MIMO）的容量域可通过什么方法达到？",
+        "options": [
+          "脏纸编码（DPC）——基站已知所有用户的消息，利用 Costa DPC 逐用户消除干扰  B) 波束成形  C) TDMA  D) CDMA"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\) 用户 MIMO BC 容量域 = MAC 容量域的对偶（BC-MAC 对偶，Vishwanath-Jindal-Goldsmith 2003）。DPC 按某顺序编码用户：编码用户 \\(k\\) 时已知用户 \\(1,...,k-1\\) 的消息→视为已知干扰可用 DPC 消除。容量 = \\(\\max\\log\\det(I+\\sum H_k Q_k H_k^H)\\) 的适当分解。实际系统（5G）使用零迫预编码（ZF precoding）近似 DPC——性能损失有限但复杂度大幅降低。"
+      },
+      {
+        "id": "info-theory-ch05-q14",
+        "question": "随机线性网络编码（RLNC）在有限域 \\(\\mathbb{F}_q\\) 上，\\(K\\) 个目的地全部成功解码的概率下界是什么？",
+        "options": [
+          "\\((1-K/q)^n\\geq(1-1/q)^n\\)（\\(n\\) 为边数），\\(q\\) 足够大时趋近 \\(1\\)  B) 恰好 \\(1/2\\)  C) \\(0\\)  D) 仅 \\(q=2\\) 时可用"
+        ],
+        "answer": 0,
+        "explanation": "RLNC 中每个中间节点在 \\(\\mathbb{F}_q\\) 上随机选取线性组合系数。Schwartz-Zippel 引理：\\(K\\) 个目的地的传输矩阵行列式是系数的多项式——随机选取系数时不为零的概率 \\(\\geq(1-K/q)^{|E|}\\)。\\(q\\geq2^8=256\\) 时几乎确定成功。优势：无需全局拓扑知识，每个节点独立随机选系数。"
+      },
+      {
+        "id": "info-theory-ch05-q15",
+        "question": "干扰信道（2用户）的容量问题至今未完全解决。Han-Kobayashi 方案的核心思想是什么？",
+        "options": [
+          "每个用户将消息分为公共部分和私有部分——公共部分被两个接收方解码  B) 完全TDMA  C) 忽略干扰  D) 功率控制"
+        ],
+        "answer": 0,
+        "explanation": "HK 方案：用户 \\(k\\) 分消息为 \\((W_{k,c},W_{k,p})\\)（公共/私有）。接收方 1 解码 \\((W_{1,c},W_{1,p},W_{2,c})\\)——解出干扰者的公共部分以部分消除干扰。在强干扰区域可完全消除干扰达到容量。在弱干扰区域，Etkin-Tse-Wang (2008) 证明 HK 方案在 1 bit 以内达到容量——这是干扰信道最重要的近似结果。"
+      },
+      {
+        "id": "info-theory-ch05-q16",
+        "question": "实际网络编码应用：批量文件传输。接收方收到 \\(n\\) 个编码包（\\(n\\times n\\) 系数矩阵），解码需要什么操作？",
+        "options": [
+          "高斯消元——求解 \\(\\mathbf{c}=G\\mathbf{m}\\)（\\(G\\) 为系数矩阵，\\(\\mathbf{m}\\) 为原始包向量）  B) 逐包异或  C) 排序  D) 压缩"
+        ],
+        "answer": 0,
+        "explanation": "接收到的编码包 \\(c_i=\\sum_{j}g_{ij}m_j\\)（\\(\\mathbb{F}_q\\) 上线性组合）。组成方程组 \\(\\mathbf{c}=G\\mathbf{m}\\)。高斯消元 \\(O(n^3)\\) 解出 \\(\\mathbf{m}\\)（前提：\\(G\\) 满秩——RLNC 中以高概率满足）。实际优化：渐进解码（收到一个包就做一步消元）→ 减少延迟。GF(256) 上的编解码可用查表加速乘法。"
+      },
+      {
+        "id": "info-theory-ch05-q17",
+        "question": "协作通信（cooperative communication）的分集增益。两用户互为中继时可获得什么阶数的分集？",
+        "options": [
+          "2 阶分集（等效 \\(2\\times1\\) MISO）——即使每个用户只有 1 根天线  B) 1 阶  C) 无增益  D) 4 阶"
+        ],
+        "answer": 0,
+        "explanation": "用户 A 发信号，用户 B 监听后在下一时隙转发（DF 或 AF）。目的地合并两条路径。BER \\(\\propto\\text{SNR}^{-2}\\)（2 阶分集）——单天线用户通过协作获得虚拟 MIMO 增益。代价：半双工损失（每帧分两个阶段）→ 频谱效率降一半。Laneman-Tse-Wornell (2004) 分析了 DF/AF/CF 的 DMT（分集-复用折衷）。"
+      },
+      {
+        "id": "info-theory-ch05-q18",
+        "question": "MAC 和速率在功率约束 \\(\\sum P_k\\leq P\\) 下的最大值。\\(K\\) 用户对称高斯 MAC（等功率 \\(P/K\\)），\\(K\\to\\infty\\) 时和速率趋向什么？",
+        "options": [
+          "\\(\\frac{1}{2}\\log_2(1+P/N)\\)——等于单用户独占总功率的容量  B) \\(\\infty\\)  C) \\(0\\)  D) \\(K\\cdot\\frac{1}{2}\\log_2(1+P/(KN))\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\) 用户等功率 \\(P/K\\)：和速率 \\(=\\frac{1}{2}\\log_2(1+KP/(KN))=\\frac{1}{2}\\log_2(1+P/N)\\)，与 \\(K\\) 无关！因为总功率固定为 \\(P\\)。但单用户速率 \\(R_k=\\frac{1}{K}\\cdot\\frac{1}{2}\\log_2(1+P/N)\\to0\\)。MAC 的和速率由总功率决定——CDMA 系统中用户数增加不影响系统吞吐（理想 SIC 下），但每用户速率降低。"
+      },
+      {
+        "id": "info-theory-ch05-q19",
+        "question": "广播信道的退化（degraded）条件。高斯 BC 是退化的证明关键步骤是什么？",
+        "options": [
+          "\\(Y_2=Y_1+Z'\\)（\\(Z'\\) 独立高斯）——弱用户输出可由强用户输出加独立噪声得到  B) 两用户信道相同  C) 需要 Marton 编码  D) 非退化"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y_1=X+Z_1,\\sigma_1^2<\\sigma_2^2\\)。\\(Z_2=Z_1+Z'\\)，\\(Z'\\sim\\mathcal{N}(0,\\sigma_2^2-\\sigma_1^2)\\)。\\(Y_2=X+Z_2=Y_1+Z'\\) → \\(X\\to Y_1\\to Y_2\\) 形成 Markov 链。退化 BC 容量完全已知（Bergmans 1973/Gallager 1974）：叠加编码 + SIC 达到。关键不等式：\\(I(U;Y_2)\\leq I(U;Y_1)\\)（数据处理不等式）\\(\\forall U\\to X\\to Y_1\\to Y_2\\)。"
+      },
+      {
+        "id": "info-theory-ch05-q20",
+        "question": "DPC 的编码复杂度极高。实际系统中用什么替代方案来近似 DPC？",
+        "options": [
+          "Tomlinson-Harashima 预编码（THP）——在发送端做模运算预减干扰，牺牲少量功率  B) 不做预编码  C) 时分  D) 完整 DPC"
+        ],
+        "answer": 0,
+        "explanation": "THP：\\(X=[(M-\\alpha S)\\mod\\Lambda]-dither\\)。模 lattice \\(\\Lambda\\) 操作将功率约束为 \\(\\text{Var}(\\Lambda)/12\\)（类似量化噪声），信号仍在功率限制内。接收方做相同模运算恢复。功率损失约 1.53 dB（shaping loss）。更先进：Lattice-based DPC（Erez-Zamir 2004）接近理论极限。5G 中波束成形 \\(+\\) 功率分配是更实际的低复杂度方案。"
+      },
+      {
+        "id": "info-theory-ch05-q21",
+        "question": "分布式信源编码（Slepian-Wolf）：两个相关源 \\(X,Y\\)（\\(H(X|Y)=0.5\\) bit, \\(H(Y|X)=0.3\\) bit, \\(H(X,Y)=1.5\\) bit），可达速率域的约束条件是什么？",
+        "options": [
+          "\\(R_X\\geq0.5,R_Y\\geq0.3,R_X+R_Y\\geq1.5\\)  B) \\(R_X\\geq1,R_Y\\geq1\\)  C) \\(R_X+R_Y\\geq2\\)  D) \\(R_X=R_Y=0.75\\)"
+        ],
+        "answer": 0,
+        "explanation": "Slepian-Wolf：\\(R_X\\geq H(X|Y)=0.5\\)，\\(R_Y\\geq H(Y|X)=0.3\\)，\\(R_X+R_Y\\geq H(X,Y)=1.5\\)。\\(H(X)=H(X,Y)-H(Y|X)=1.2\\)，\\(H(Y)=1.0\\)。无侧信息需 \\(R_X+R_Y\\geq2.2\\)。分布式编码节省 \\(0.7\\) bit——利用相关性但不需要编码器之间通信！DISCUS（syndrome-based）和 LDPC 实际实现可接近 Slepian-Wolf 界。"
+      },
+      {
+        "id": "info-theory-ch05-q22",
+        "question": "NOMA（非正交多址）在 5G 中的应用。两用户功率域 NOMA 与 OMA（正交多址）在和速率上的比较？",
+        "options": [
+          "NOMA 和速率 \\(\\geq\\) OMA，当用户信道条件差异大时增益显著  B) OMA 更优  C) 完全相同  D) NOMA 仅适用于 MIMO"
+        ],
+        "answer": 0,
+        "explanation": "NOMA = 叠加编码 + SIC。OMA（如 OFDMA 或 TDMA）将资源正交分割——每用户独享部分资源。信息论证明：MAC 容量域（NOMA）包含 OMA 速率域（是其子集）。当用户 SNR 差异大时（如近用户 20dB，远用户 5dB），NOMA 对弱用户的增益尤其显著——弱用户在 OMA 中被公平分配到一半资源，但 NOMA 中通过功率分配获得更多。"
+      },
+      {
+        "id": "info-theory-ch05-q23",
+        "question": "BC-MAC 对偶（Duality）：MIMO 广播信道容量域和对偶 MAC 容量域的关系。",
+        "options": [
+          "总功率相同时，MIMO BC 容量域 = 对偶 MIMO MAC 容量域（通过协方差矩阵变换）  B) BC 总是更大  C) MAC 总是更大  D) 无关系"
+        ],
+        "answer": 0,
+        "explanation": "Vishwanath-Jindal-Goldsmith 对偶：将 BC \\((\\mathbf{H}_k,\\mathbf{Q}_k)\\) 映射到 MAC \\((\\mathbf{H}_k^H,\\tilde{\\mathbf{Q}}_k)\\)，使总功率守恒 \\(\\sum\\text{tr}(\\mathbf{Q}_k)=\\sum\\text{tr}(\\tilde{\\mathbf{Q}}_k)\\leq P\\)。BC 中 DPC 达到的速率 = MAC 中 SIC 达到的速率（对偶互信息相等）。这大大简化了 MIMO BC 容量的计算——转化为凸优化的 MAC 问题。"
+      },
+      {
+        "id": "info-theory-ch05-q24",
+        "question": "物理层网络编码（PNC）与传统网络编码的区别是什么？",
+        "options": [
+          "PNC 利用无线信号的自然叠加——两个信号同时到达时直接从叠加信号中解码 XOR  B) PNC 在 OSI 应用层  C) PNC 不用编码  D) PNC 与 NC 相同"
+        ],
+        "answer": 0,
+        "explanation": "传统中继：3 个时隙（A→R, B→R, R→两方）。PNC（Zhang-Liew-Lam 2006）：2 个时隙（A+B→R 同时发, R→两方发 XOR）。\\(R\\) 接收 \\(Y=h_a X_a+h_b X_b+Z\\)，直接解码 \\(X_a\\oplus X_b\\)。Key insight：解码 XOR 比分别解码两个消息更简单。吞吐提升 \\(50\\%\\)。挑战：信道估计和同步要求高，实际部署有限。"
+      },
+      {
+        "id": "info-theory-ch05-q25",
+        "question": "年龄信息（Age of Information, AoI）是网络信息论的新度量。AoI 与吞吐量的关系是什么？",
+        "options": [
+          "最大化吞吐量不一定最小化 AoI——AoI 最优需要适当的更新频率而非持续传输  B) 吞吐量越大 AoI 越小  C) AoI 与吞吐量无关  D) AoI = 1/吞吐量"
+        ],
+        "answer": 0,
+        "explanation": "AoI \\(=t-U(t)\\)（当前时刻 \\(-\\) 最新已接收更新的生成时刻）。如果持续高速发包（最大吞吐），队列积压→排队延迟增大→AoI 反而增大。最优策略：根据系统状态（队列长度、信道条件）自适应选择更新时机。M/M/1 队列：AoI 在 \\(\\rho\\approx0.53\\)（利用率 53%）时最小，而非 \\(\\rho\\to1\\)。运用于 IoT 状态监测、自动驾驶传感数据等场景。"
+      },
+      {
+        "id": "info-theory-ch05-q26",
+        "question": "5G 基站同时服务多个用户（xMBB 场景）。下行链路使用 massive MIMO（64 天线），16 个用户。从网络信息论角度，massive MIMO 的核心优势是什么？",
+        "options": [
+          "天线数远大于用户数时信道向量近似正交，简单的线性预编码（MRT/ZF）接近 DPC 容量  B) 减少天线数量  C) 降低带宽  D) 仅增加覆盖"
+        ],
+        "answer": 0,
+        "explanation": "\\(M=64\\) 天线服务 \\(K=16\\) 用户。信道硬化（channel hardening）：\\(M\\to\\infty\\) 时 \\(\\frac{1}{M}\\mathbf{h}_i^H\\mathbf{h}_j\\to0\\)（\\(i\\neq j\\)）且 \\(\\frac{1}{M}\\|\\mathbf{h}_i\\|^2\\to\\text{const}\\)。ZF 预编码消除用户间干扰：\\(\\mathbf{W}=\\mathbf{H}^H(\\mathbf{H}\\mathbf{H}^H)^{-1}\\)。每用户速率 \\(\\approx\\frac{1}{2}\\log_2(1+\\frac{MP}{K\\sigma^2})\\)——线性随 \\(M/K\\) 增长。不需要复杂的 DPC 或 SIC。"
+      },
+      {
+        "id": "info-theory-ch05-q27",
+        "question": "卫星 IoT 网络（如 Starlink 直连手机）中，上行链路是经典 MAC 场景。大量设备（\\(10^4\\)）低速率（\\(<1\\) kbps）共享有限频谱。适合什么多址方案？",
+        "options": [
+          "非协调随机接入 + 编码叠加——大量设备偶发传输，接收方用 SIC 分离  B) TDMA  C) 每个设备专用频段  D) 不传输"
+        ],
+        "answer": 0,
+        "explanation": "海量 IoT 设备稀疏活跃（每时刻仅 \\(\\sim1\\%\\) 发送）。传统 TDMA/FDMA 为 \\(10^4\\) 设备预分配资源浪费严重。Grant-free NOMA 方案：设备选择随机扩频码发送，基站用压缩感知（CS）检测活跃设备 + SIC 解码。多用户信息论保证：MAC 和速率可支持总流量。Polyanskiy（2017）的不协调 MAC 理论给出理论极限。"
+      },
+      {
+        "id": "info-theory-ch05-q28",
+        "question": "内容分发网络（CDN）缓存问题可以用网络信息论建模。Maddah-Ali & Niesen 编码缓存（coded caching）的创新是什么？",
+        "options": [
+          "在缓存阶段预存编码内容，传输阶段用多播编码同时满足多个用户——实现全局缓存增益  B) 每个用户独立缓存  C) 不使用缓存  D) 仅本地缓存"
+        ],
+        "answer": 0,
+        "explanation": "传统缓存：用户缓存热门内容，命中则不传输。编码缓存（2014）：精心设计缓存内容使不同用户缓存互补。传输阶段发 \\(A\\oplus B\\)（A 是用户 1 缺少的但用户 2 有缓存的，反之）——一次多播同时满足多用户。\\(K\\) 用户每人缓存 \\(M/N\\)（\\(N\\) 个文件），速率从非编码 \\(K(1-M/N)\\) 降到 \\(K(1-M/N)/(1+KM/N)\\)——约 \\(KM/N\\) 倍增益。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="info-theory"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/info-theory.html" class="module-name">信息论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 多用户信息论基础</a></li>
+      <li><a href="#kp2">02 · 多接入信道与容量域</a></li>
+      <li><a href="#kp3">03 · 广播信道与叠加编码</a></li>
+      <li><a href="#kp4">04 · 中继信道与网络编码</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>网络信息论</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>多用户信息论基础</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>现实网络中多个用户共享信道（WiFi、5G）——单用户 Shannon 理论 不再充分。网络信息论研究多用户场景下的容量域，即所有用户 可同时可靠传输的速率组合。这是 5G/6G 资源分配的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从单一数值 \(C\) 推广为容量域（多维速率空间的可达区域）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>多接入信道(MAC)</strong>：\(n\) 个发送者 → 1 个接收者。 \(Y = X_1 + X_2 + Z\)（加性模型）。 <strong>两用户 MAC 容量域</strong>：所有 \((R_1, R_2)\) 满足 \[R_1 \leq I(X_1; Y | X_2), \quad R_2 \leq I(X_2; Y | X_1)\] \[R_1 + R_2 \leq I(X_1, X_2; Y)\] 这是一个五边形区域。角点对应逾次解码(SIC)。 <strong>广播信道(BC)</strong>：1 个发送者 → \(n\) 个接收者。 退化广播信道：弱用户的信号是强用户信号的退化版本。 叠加编码（Superposition coding）达到容量域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 5G 中 NOMA（非正交多址）基于叠加编码思想 - WiFi 中 OFDMA 的资源分配基于 MAC 容量域</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：两用户高斯 MAC，\(P_1=P_2=P\)，噪声方差 \(N\)。 求总速率上界。 解答：\(R_1+R_2 \leq \frac{1}{2}\log(1+\frac{2P}{N})\)， 单用户上界 \(R_i \leq \frac{1}{2}\log(1+\frac{P}{N})\)。 易错点：容量域不是矩形——总速率约束切去角点。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">多接入信道(MAC)中达到容量域角点的方法是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。SIC 先解码强用户，从接收信号中减去，再解码弱用户。')">A. 时分多址</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！SIC 先解码强用户，从接收信号中减去，再解码弱用户。')">B. 逾次干扰消除(SIC)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。SIC 先解码强用户，从接收信号中减去，再解码弱用户。')">C. OFDMA</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。SIC 先解码强用户，从接收信号中减去，再解码弱用户。')">D. 扩频</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>多接入信道与容量域</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>高斯 MAC 的容量域有闭式解，是多用户信息论中最完整的结果。 理解其几何结构——五边形区域与角点的运算意义——是掌握 多用户资源分配的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>高斯 MAC</strong>：\(Y = X_1 + X_2 + Z\)，\(Z \sim \mathcal{N}(0,N)\)， 功率约束 \(\mathbb{E}[X_i^2] \leq P_i\)。 容量域： \[R_1 \leq \frac{1}{2}\log\left(1+\frac{P_1}{N}\right)\] \[R_2 \leq \frac{1}{2}\log\left(1+\frac{P_2}{N}\right)\] \[R_1+R_2 \leq \frac{1}{2}\log\left(1+\frac{P_1+P_2}{N}\right)\] <strong>角点 A</strong>（先解码 2 再解 1）： \(R_2 = \frac{1}{2}\log(1+\frac{P_2}{P_1+N})\)， \(R_1 = \frac{1}{2}\log(1+\frac{P_1}{N})\)。 角点 B 对称。两角点及连线上的点均可通过时间共享 SIC 实现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- CDMA 系统中的多用户检测与 SIC - 5G 上行 NOMA 的容量分析</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(P_1=1, P_2=3, N=1\)。画出 MAC 容量域并标注角点。 解答：\(R_1 \leq \frac{1}{2}\log 2 = 0.5\)，\(R_2 \leq \frac{1}{2}\log 4 = 1\)， \(R_1+R_2 \leq \frac{1}{2}\log 5 \approx 1.16\)。 角点 A: \((0.5, 0.66)\)，B: \((0.16, 1)\)。 易错点：SIC 解码顺序影响每个用户的可达速率，但不影响总速率。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">两用户高斯 MAC 的容量域是什么形状？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。两个单用户约束 + 一个总速率约束 + 非负约束，')">A. 矩形</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！两个单用户约束 + 一个总速率约束 + 非负约束，')">B. 五边形</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。两个单用户约束 + 一个总速率约束 + 非负约束，')">C. 三角形</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。两个单用户约束 + 一个总速率约束 + 非负约束，')">D. 圆形</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>广播信道与叠加编码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>广播信道是 MAC 的对偶：一个发送者向多个接收者发送不同消息。 5G 下行链路就是广播信道。叠加编码（Superposition coding）是 达到退化广播信道容量域的关键技术。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>退化广播信道</strong>：\(Y_1 = X + Z_1\)，\(Y_2 = X + Z_2\)， \(Z_1 \sim \mathcal{N}(0, N_1)\)，\(Z_2 \sim \mathcal{N}(0, N_2)\)，\(N_1 < N_2\)。 用户 1 信道质量更好。 <strong>叠加编码</strong>：将功率分配为 \(X = X_1 + X_2\)， \(X_2\)（强用户的信息）功率 \(\alpha P\)， \(X_1\)（弱用户的信息）功率 \((1-\alpha)P\)。 弱用户直接解码 \(X_1\)（将 \(X_2\) 视为噪声）： \[R_2 \leq \frac{1}{2}\log\left(1+\frac{(1-\alpha)P}{\alpha P+N_2}\right)\] 强用户先解码 \(X_1\)（SIC），再解 \(X_2\)： \[R_1 \leq \frac{1}{2}\log\left(1+\frac{\alpha P}{N_1}\right)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 卫星广播中向不同地区发送不同质量的视频流 - 5G 下行 NOMA 基于叠加编码 + SIC</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(P=10, N_1=1, N_2=5, \alpha=0.8\)。求两用户速率。 解答：\(R_1 = \frac{1}{2}\log(1+8/1) = \frac{1}{2}\log 9 \approx 1.585\) bit。 \(R_2 = \frac{1}{2}\log(1+2/(8+5)) = \frac{1}{2}\log(15/13) \approx 0.103\) bit。 易错点：\(\alpha\) 的选择决定了两用户的速率权衡，不是固定的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">叠加编码中强用户需要先做什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。强用户信噪比高，可成功解码弱用户信息并从接收信号')">A. 直接解码自己的信息</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！强用户信噪比高，可成功解码弱用户信息并从接收信号')">B. 先解码弱用户信息并消除，再解自己的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。强用户信噪比高，可成功解码弱用户信息并从接收信号')">C. 等待弱用户完成</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。强用户信噪比高，可成功解码弱用户信息并从接收信号')">D. 使用不同频率</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>中继信道与网络编码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>中继信道中一个中间节点帮助源与目的地通信。网络编码则突破了 「中间节点只能存储转发」的传统思维，允许对数据做代数操作， 提升网络吐吐量。这些是网络信息论中最富有挑战性的方向。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>中继信道</strong> (\(S \to R \to D\))：中继 \(R\) 的策略包括： - 解码转发(DF)：\(R\) 完全解码再重新编码 - 压缩转发(CF)：\(R\) 量化接收信号后转发 - 放大转发(AF)：\(R\) 直接放大转发接收信号 DF 上界：\(R \leq \min(C_{SR}, C_{RD})\)， 其中 \(C_{SR}, C_{RD}\) 是各段容量。 <strong>网络编码</strong>（Ahlswede-Cai-Li-Yeung, 2000）： 在网络中中间节点对接收到的包做 XOR 等线性组合： \[\text{max-flow min-cut} = \text{多播容量}\] 经典例子：蝴蝶网络中编码将吐吐量从 1.5 提升到 2。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- D2D（设备到设备）通信中的中继协作 - P2P 网络中的网络编码加速分发</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：蝴蝶网络中节点 \(S_1\) 发 \(a\)，\(S_2\) 发 \(b\)。 中间节点发送 \(a \oplus b\)。为什么两用户都能恢复？ 解答：\(D_1\) 已知 \(a\)，受到 \(a \oplus b\) 后计算 \(b = a \oplus (a \oplus b)\)。 \(D_2\) 类似。仅用 1 次传输代替了 2 次，效率提升 33%。 易错点：网络编码不等于信道编码。信道编码抗噪声， 网络编码提升网络吞吐量。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">网络编码的核心思想是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。网络编码允许中间节点混合数据流（如 XOR），')">A. 增加网络带宽</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！网络编码允许中间节点混合数据流（如 XOR），')">B. 中间节点对数据做代数操作而非简单转发</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。网络编码允许中间节点混合数据流（如 XOR），')">C. 压缩数据包</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。网络编码允许中间节点混合数据流（如 XOR），')">D. 加密数据传输</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/discrete/info-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 机制设计 — 博弈论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "game-theory-ch06-q1",
+        "question": "机制设计（mechanism design）的核心问题是什么？",
+        "options": [
+          "设计规则（博弈形式）使得理性自利的参与者在均衡中实现设计者想要的社会目标（如效率/公平/收入最大化）  B) 求解给定博弈  C) 预测行为  D) 仅分配物品"
+        ],
+        "answer": 0,
+        "explanation": "机制设计 = \"逆向博弈论\"（Hurwicz 2007 诺贝尔奖词）——不是分析给定规则下的均衡行为，而是设计规则使得均衡行为满足目标。社会选择函数 \\(f:\\Theta\\to X\\)（类型空间→结果空间）。机制 \\(\\Gamma=(M,g)\\)：消息空间 \\(M\\) + 结果函数 \\(g:M\\to X\\)。激励相容（IC）：\\(\\forall\\theta_i,\\ f(\\theta)\\) 在均衡中被实现。Hurwicz-Maskin-Myerson 2007 年共同获奖。"
+      },
+      {
+        "id": "game-theory-ch06-q2",
+        "question": "显示原理（Revelation Principle）的核心结论？",
+        "options": [
+          "任何可被某机制实现的社会选择函数，都可以用一个直接机制（参与者直接报告类型）来实现，且诚实报告是均衡  B) 仅适用于拍卖  C) 需要复杂机制  D) 参与者必须说谎"
+        ],
+        "answer": 0,
+        "explanation": "直接机制（Direct Mechanism）：参与者报告类型 \\(\\hat{\\theta}_i\\)，设计者根据报告向量计算结果 \\(g(\\hat{\\theta})\\)。显示原理：如果社会选择函数 \\(f\\) 可由任意机制 \\(\\Gamma\\) 在 BNE 中实现，则 \\(f\\) 也可由直接机制实现（诚实报告 \\(\\hat{\\theta}_i=\\theta_i\\) 是 BNE）。证明思路：将原机制中的均衡策略\"嵌入\"到直接机制中——\\(g(\\theta):=g'(\\sigma^*(\\theta))\\)。大大简化了机制设计的分析——只需检查直接机制的 IC 约束。"
+      },
+      {
+        "id": "game-theory-ch06-q3",
+        "question": "VCG（Vickrey-Clarke-Groves）机制的核心特征？",
+        "options": [
+          "分配最大化社会福利 \\(\\sum_i v_i(x_i,\\theta_i)\\)，支付使每个参与者的激励相容（诚实报告是占优策略）  B) 最大化收入  C) 随机分配  D) 仅适用于单物品"
+        ],
+        "answer": 0,
+        "explanation": "VCG 支付：\\(t_i(\\theta)=-\\sum_{j\\neq i}v_j(x^*(\\theta),\\theta_j)+h_i(\\theta_{-i})\\)（\\(h_i\\) 是不依赖 \\(\\theta_i\\) 的函数）。Clarke pivot rule（最常用选择）：\\(h_i=\\max_x\\sum_{j\\neq i}v_j(x,\\theta_j)\\)→\\(t_i=\\) 玩家 \\(i\\) 对他人造成的\"外部性\"（社会福利损失）。VCG 是 DSIC（Dominant Strategy IC）+ 分配有效 + 个体理性（在不需要预算平衡时）。局限：可能收入为负（需要补贴），不一定满足预算平衡。"
+      },
+      {
+        "id": "game-theory-ch06-q4",
+        "question": "Vickrey 拍卖（第二价格密封拍卖）是 VCG 的特例。单物品拍卖中 VCG 支付等于什么？",
+        "options": [
+          "赢者支付第二高出价（= 他人的最优福利变化 \\(=\\) 没有他时第二名获得物品的价值）  B) 自己出价  C) 第三价格  D) 0"
+        ],
+        "answer": 0,
+        "explanation": "单物品，\\(n\\) 个竞标者，估值 \\(v_i\\)。VCG：分配给 \\(i^*=\\arg\\max v_i\\)（效率）。支付：\\(t_{i^*}=\\max_{x\\text{ w/o }i^*}\\sum_{j\\neq i^*}v_j x_j-\\sum_{j\\neq i^*}v_j x_j^*\\)。没有 \\(i^*\\) 时：分配给 \\(v_{(2)}\\)→福利 \\(=v_{(2)}\\)。有 \\(i^*\\) 时：\\(j\\neq i^*\\) 的得到 \\(0\\)→\\(t_{i^*}=v_{(2)}-0=v_{(2)}\\)。与第二价格拍卖完全一致！Vickrey 1961 年的论文实际上是 VCG 思想的先驱。"
+      },
+      {
+        "id": "game-theory-ch06-q5",
+        "question": "Myerson 最优拍卖理论（1981）的标志性结论？",
+        "options": [
+          "收入最大化拍卖等价于\"虚拟估值\"\\(\\psi(v)=v-\\frac{1-F(v)}{f(v)}\\) 最大化的分配，且可能包含保留价格  B) 第一价格最优  C) 无关估值分布  D) 第二价格最优"
+        ],
+        "answer": 0,
+        "explanation": "Myerson 框架：单物品，\\(n\\) 个竞标者，IPV（独立私有价值），\\(v_i\\sim F_i\\)。IC + IR 约束→期望支付 \\(=\\) 虚拟估值加权。\\[E[\\text{Revenue}]=E\\left[\\sum_i\\psi_i(v_i)\\cdot x_i(v)\\right]\\]其中 \\(\\psi_i(v)=v-\\frac{1-F_i(v)}{f_i(v)}\\)。收入最大化→最大化虚拟剩余→分配给虚拟估值最高的竞标者（若 \\(\\psi>0\\)）。正则条件（\\(\\psi\\) 递增）→虚拟估值排序 = 真实估值排序→最优拍卖 = 带保留价的第二价格拍卖。"
+      },
+      {
+        "id": "game-theory-ch06-q6",
+        "question": "\\(v\\sim U[0,1]\\) 时 Myerson 虚拟估值 \\(\\psi(v)=?\\)",
+        "options": [
+          "\\(\\psi(v)=2v-1\\)  B) \\(\\psi(v)=v\\)  C) \\(\\psi(v)=v-1\\)  D) \\(\\psi(v)=1-v\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(F(v)=v,f(v)=1\\)→\\(\\psi(v)=v-\\frac{1-v}{1}=2v-1\\)。最优保留价：\\(\\psi(r)=0\\)→\\(r=1/2\\)。直觉：虚拟估值 \\(<0\\) 的竞标者不分配→保留价 \\(=1/2\\)。收入 = 第二价格 + 保留价的效果。\\(n=1\\)：以 \\(r=1/2\\) 发布 take-it-or-leave-it 要约→期望收入 \\(=\\frac{1}{2}\\cdot\\frac{3/4}{1}=1/4\\)（卖出概率 \\(\\times\\) 条件价格期望 \\(E[v|v\\geq1/2]=3/4\\)）。\\(n=2\\)：无保留价时 \\(E[v_{(2)}]=1/3\\)；有保留价 \\(1/2\\) 时收入 \\(>1/3\\)。"
+      },
+      {
+        "id": "game-theory-ch06-q7",
+        "question": "Gibbard-Satterthwaite 定理说了什么？",
+        "options": [
+          "在 \\(\\geq3\\) 个备选方案的投票中，唯一策略无操纵（strategy-proof）且满足全域（unrestricted domain）和满射（onto）的投票规则是独裁制  B) 任何规则都行  C) 多数票最优  D) 仅适用于 2 个方案"
+        ],
+        "answer": 0,
+        "explanation": "Gibbard (1973) / Satterthwaite (1975)：与 Arrow 不可能定理密切相关——Arrow 的\"独立无关选项\"条件 ↔ 策略无操纵（DSIC）。直觉：如果投票规则不是独裁的，总存在某些偏好分布使得某个投票者通过虚报偏好获益。例：在多数投票 + 三候选人中→策略性投票（如\"vote for lesser evil\"而非真正首选）。实际选举中策略投票很普遍（2000 美国大选 Nader/Gore 分票）。"
+      },
+      {
+        "id": "game-theory-ch06-q8",
+        "question": "Arrow 不可能定理（1951）的条件和结论？",
+        "options": [
+          "\\(\\geq3\\) 备选方案时，不存在满足全域、帕累托效率、IIA（独立无关选项）的非独裁社会福利函数  B) 仅2个方案  C) 存在完美规则  D) 独裁是帕累托的"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\geq3\\) 个备选方案 \\(A\\)，\\(n\\) 个投票者。社会福利函数 \\(F:(\\text{偏好排序})^n\\to\\text{排序}\\)。要求：(1) 全域：任何偏好组合都在定义域内；(2) 帕累托：若所有人 \\(a\\succ_i b\\) 则社会 \\(a\\succ b\\)；(3) IIA：\\(a\\) vs \\(b\\) 的社会排序仅取决于个人对 \\(a\\) vs \\(b\\) 的排序。Arrow：满足 1-3 的唯一函数 = 独裁者。逃逸路线：放弃全域（单峰偏好→中位选民定理）、放弃 IIA（Borda 计数）、放宽为\"概率/期望\"（Harsanyi 效用主义定理）。"
+      },
+      {
+        "id": "game-theory-ch06-q9",
+        "question": "公共品博弈中的 Clarke-Groves（Pivotal）机制。3 人决定是否建公园（成本 \\(C=60\\)），估值 \\(v_1=40,v_2=30,v_3=5\\)。建不建？各人 VCG 支付？",
+        "options": [
+          "\\(v_1+v_2+v_3=75>60\\)→建。VCG：玩家 \\(i\\) 支付 = 他的加入使决策改变导致的他人净损失。\\(t_1=0,t_2=0,t_3=0\\)（因为即使没有 3，\\(40+30>60\\)→仍建→3 不是关键→\\(t_3=0\\)。类似其他人）  B) 不建  C) 每人付 \\(20\\)  D) 只有 1 付"
+        ],
+        "answer": 0,
+        "explanation": "VCG 决策：\\(\\sum v_i=75>C=60\\)→建。各人支付：\\(t_i=h_i(\\theta_{-i})-\\sum_{j\\neq i}v_j+C\\)（Clarke pivot）。\\(i=1\\)：没有 1→\\(v_2+v_3=35<60\\)→不建→他人福利 \\(=0\\)。有 1→建→他人福利 \\(=30+5-0=35\\)（不含建设 cost 分摊的简化模型中）。实际 Clarke pivot：\\(t_1=\\max(0, C-\\sum_{j\\neq1}v_j)=\\max(0,60-35)=25\\)。类似 \\(t_2=\\max(0,60-45)=15\\)。\\(t_3=0\\)（非关键）。总收 \\(=40<60\\)→预算不平衡！VCG 的已知缺陷。"
+      },
+      {
+        "id": "game-theory-ch06-q10",
+        "question": "全付拍卖（All-pay auction）中两人对称 BNE 出价策略？估值 \\(v_i\\sim U[0,1]\\)。",
+        "options": [
+          "\\(b(v)=v^2/2\\)——出价是估值平方的一半  B) \\(b(v)=v\\)  C) \\(b(v)=v/2\\)  D) \\(b(v)=v^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "全付拍卖：所有人都付自己出价（不仅赢者）。赢的概率 = \\(P(b_j<b_i)\\)。BNE：\\(b(v)=v\\cdot b^{-1}(b_i)\\) 的逆问题。令 \\(b(v)=\\alpha v^k\\)。赢的利润 \\(=(v-b_i)\\cdot P(\\alpha v_j^k<b_i)=(v-b_i)(b_i/\\alpha)^{1/k}\\)。\\(n=2,k=2,\\alpha=1/2\\)：\\(\\pi=(v-b)\\sqrt{2b}\\)。FOC：\\(\\sqrt{2b}-\\frac{v-b}{\\sqrt{2b}}=0\\)→\\(2b=v-b\\)→\\(b=v^2/2\\)（代入对称性条件）。期望收入 = 两人期望出价之和 \\(=2E[v^2/2]=2\\cdot1/6=1/3\\)（与第二价格/第一价格拍卖相同→收入等价定理！）"
+      },
+      {
+        "id": "game-theory-ch06-q11",
+        "question": "社会选择中的\"中位选民定理\"（Median Voter Theorem）。单峰偏好 + 多数投票→结果？",
+        "options": [
+          "中位选民的峰值位置获胜——多数票下无其他选项能以多数击败它（Condorcet 赢家）  B) 均值获胜  C) 最左获胜  D) 不确定"
+        ],
+        "answer": 0,
+        "explanation": "单峰偏好（single-peaked）：每个选民有最偏好的点（峰），远离峰则满意度单调下降。Black (1948)：单峰 + 简单多数→中位选民的峰是 Condorcet 赢家（在任何两两对决中胜出）。Downs (1957) 模型：两个候选人→都向中位选民靠拢（\"中位选民定理\"在政治学中的应用→两党制趋同化）。突破单峰：多维偏好空间→一般不存在 Condorcet 赢家（McKelvey 混乱定理——议程设置者可以达到任何结果）。"
+      },
+      {
+        "id": "game-theory-ch06-q12",
+        "question": "最优拍卖的收入等价定理（Revenue Equivalence Theorem）。条件和结论？",
+        "options": [
+          "IPV、对称、风险中性→任何满足（1）分配给估值最高者和（2）最低类型期望支付为 0 的拍卖产出相同的期望收入  B) 所有拍卖收入相同  C) 仅对称  D) 风险厌恶也成立"
+        ],
+        "answer": 0,
+        "explanation": "条件：(1) IPV（独立私有价值）；(2) 对称（\\(F_i=F\\)）；(3) 风险中性；(4) 分配有效（最高估值者获得物品）；(5) 最低类型 \\(\\underline{v}\\) 的期望支付 \\(=0\\)。在这些条件下：\\(E[\\text{payment}_i(v_i)]=v_i\\cdot G(v_i)-\\int_0^{v_i}G(s)ds\\)（\\(G=F^{n-1}\\) = 赢的概率）。一价/二价/英式/荷式/全付拍卖→都满足条件→期望收入 \\(=E[v_{(n-1:n)}]\\)（第 \\(n-1\\) 个顺序统计量）。打破等价：风险厌恶→一价>二价；非对称→不同拍卖不同；共同价值→英式>密封。"
+      },
+      {
+        "id": "game-theory-ch06-q13",
+        "question": "AGV（Arrow-d'Aspremont-Gérard-Varet）机制与 VCG 的区别？",
+        "options": [
+          "AGV 实现 BNE-IC（而非 DSIC），但可以实现预算平衡（\\(\\sum t_i=0\\)）——VCG 做不到（不能同时 DSIC + efficient + budget balanced）  B) 相同  C) AGV 是 DSIC  D) VCG 预算平衡"
+        ],
+        "answer": 0,
+        "explanation": "Myerson-Satterthwaite (1983)：在双边交易中，不能同时实现 DSIC + 效率 + IR + 预算平衡（不可能定理）。AGV 放松 DSIC 到 BNE-IC→可以预算平衡。AGV 支付：\\(t_i(\\theta)=-\\sum_{j\\neq i}v_j(x^*(\\theta))+\\frac{1}{n-1}\\sum_{j\\neq i}E_{\\theta_j}[\\sum_{k\\neq j}v_k(x^*(\\theta_j,\\theta_{-j}))]\\)。预算平衡 \\(\\sum t_i=0\\) by construction。代价：仅 BNE（非 DSIC）——需要参与者对他人类型分布有正确信念。"
+      },
+      {
+        "id": "game-theory-ch06-q14",
+        "question": "Myerson-Satterthwaite 不可能定理。买家估值 \\(v_B\\sim U[0,1]\\)，卖家成本 \\(c_S\\sim U[0,1]\\)。为什么不能设计完美（efficient + DSIC + IR + BB）的交易机制？",
+        "options": [
+          "效率要求 \\(v_B>c_S\\) 时交易。但 IC + IR + BB 要求的信息租金超过可用剩余→不可能同时满足  B) 可以  C) 仅对连续分布  D) 与分布无关"
+        ],
+        "answer": 0,
+        "explanation": "Myerson-Satterthwaite (1983)：当买卖双方的支持集有交叉（\\([\\underline{v}_B,\\bar{v}_B]\\cap[\\underline{c}_S,\\bar{c}_S]\\neq\\emptyset\\)）→不存在 DSIC + efficient + IR + BB 的机制。直觉：\\(v_B\\) 接近 \\(c_S\\) 时交易剩余很小→信息租金（让 IC 成立所需的\"补贴\"）\\(>\\) 可用剩余→预算不平衡。最优的\"次优\"机制（Chatterjee-Samuelson 的 split-the-difference→\\(p=(v_B+c_S)/2\\)，交易当 \\(v_B>c_S+1/4\\)→丢失效率但满足 BB+IR+BNE-IC）。"
+      },
+      {
+        "id": "game-theory-ch06-q15",
+        "question": "\\(n=2\\)，\\(v\\sim U[0,1]\\)。Myerson 最优拍卖的保留价 \\(r^*=?\\)，期望收入 \\(=?\\)",
+        "options": [
+          "\\(r^*=1/2\\)，期望收入 \\(=5/12\\)  B) \\(r^*=0\\)，收入 \\(=1/3\\)  C) \\(r^*=1\\)  D) \\(r^*=1/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "虚拟估值 \\(\\psi(v)=2v-1\\)。\\(\\psi(r^*)=0\\)→\\(r^*=1/2\\)。期望收入计算：\\(P(\\text{两人}≥r^*)v_{(1)}\\)... 更直接：\\(E[R]=2E[t(v)]\\)（对称）。\\(t(v)=v\\cdot G(v)-\\int_0^v G(s)ds\\)（\\(G(v)=\\max(0,(v-r)\\cdot 1_{v\\geq r})\\)... ）。精确计算：\\(E[R]=\\int_0^1\\int_0^1 p(v_1,v_2)dv_1dv_2\\)，其中 \\(p=\\) 支付。结果 \\(=5/12\\approx0.417\\)，高于无保留价的 \\(1/3\\approx0.333\\)。保留价引入的效率损失（\\(v_1,v_2\\in[r^*,v_{(2)}]\\) 区间不交易）被更高的支付补偿。"
+      },
+      {
+        "id": "game-theory-ch06-q16",
+        "question": "IC 约束（激励相容）和 IR 约束（个体理性）的直觉含义？",
+        "options": [
+          "IC：诚实报告类型比撒谎更好（不想说谎）。IR：参与机制比不参与更好（不想退出）  B) IC = 公平, IR = 效率  C) 两者相同  D) 仅对拍卖"
+        ],
+        "answer": 0,
+        "explanation": "IC（或 DSIC / BNE-IC）：\\(u_i(\\theta_i,\\theta_i)\\geq u_i(\\hat\\theta_i,\\theta_i)\\)——诚实报告自己的类型给至少和任何虚报一样好的效用。IR（个人理性/参与约束）：\\(u_i(\\theta_i)\\geq\\underline{u}_i\\)（参与的效用 \\(\\geq\\) 外部选择）。两者的张力：IC 需要给高类型\"信息租金\"（高估值者获利更多→激励不虚报低），IR 需要低类型也不亏。设计者需在 IC 的\"租金成本\"和目标（效率/收入）之间权衡。"
+      },
+      {
+        "id": "game-theory-ch06-q17",
+        "question": "组合拍卖（Combinatorial Auction）中\"赢者确定问题\"（Winner Determination Problem, WDP）的计算复杂度？",
+        "options": [
+          "NP-hard——等价于加权集合覆盖问题。需要整数规划或近似算法  B) \\(O(n)\\)  C) \\(O(n\\log n)\\)  D) 多项式时间"
+        ],
+        "answer": 0,
+        "explanation": "WDP：\\(m\\) 个物品，\\(n\\) 个竞标者，每人对物品子集 \\(S\\) 出价 \\(b_i(S)\\)。\\(\\max\\sum_i b_i(S_i)\\) s.t. \\(S_i\\cap S_j=\\emptyset\\)。NP-hard（可归约到加权独立集/集合打包）。实际求解：分支定界（CPLEX/Gurobi）+ CABOB 算法（Sandholm 2006）→FCC 频谱拍卖实际使用。近似：贪心 \\(O(\\sqrt{m})\\) 近似比；LP 松弛+随机舍入。物品间互补/替代→竞标的表达语言很重要（XOR bids, OR bids, OR-of-XOR 等）。"
+      },
+      {
+        "id": "game-theory-ch06-q18",
+        "question": "Maskin 纳什实现定理（1977/1999）。社会选择函数 \\(f\\) 可被某机制在 NE 中实现的充分条件？",
+        "options": [
+          "单调性（Maskin monotonicity）+ 无否决权（no veto power，\\(\\geq3\\) 人时）  B) 任何 \\(f\\) 都可实现  C) 仅占优策略  D) 仅拍卖"
+        ],
+        "answer": 0,
+        "explanation": "Maskin 单调性：若 \\(f(\\theta)=a\\) 且 \\(a\\) 在 \\(\\theta'\\) 下的相对偏好不下降（\\(\\forall i:\\{b:a\\succsim_i b\\text{ under }\\theta\\}\\subseteq\\{b:a\\succsim_i b\\text{ under }\\theta'\\}\\)）→\\(f(\\theta')=a\\)。无否决权：若 \\(n-1\\) 人都最偏好 \\(a\\)→\\(f(\\theta)=a\\)。Maskin (1977，发表 1999)：单调+无否决→NE-实现。必要条件：Maskin 单调性是 NE 实现的必要条件。获 2007 年诺贝尔奖（与 Hurwicz、Myerson 共享）。"
+      },
+      {
+        "id": "game-theory-ch06-q19",
+        "question": "荷式拍卖（Dutch auction / descending price auction）与第一价格密封拍卖的策略等价性？",
+        "options": [
+          "策略等价——荷式拍卖中选择何时按按钮（\\(=\\) 出价）等同于密封出价  B) 不等价  C) 荷式更复杂  D) 仅零和"
+        ],
+        "answer": 0,
+        "explanation": "荷式拍卖：价格从高逐步降低，第一个喊停的人获得物品并付当前价。决策 = \"在价格 \\(p\\) 时停止\"——且在停止前不知他人是否已停止。信息结构与密封一价完全一致：你只决定一个数（出价），不知他人的数。BNE 策略相同：\\(b(v)=E[v_{(1:n-1)}|v_{(1:n-1)}<v]\\)。实际中可能有行为差异（时间压力/锚定效应），但理论上等价。荷兰花卉拍卖至今使用荷式机制——效率高（快速确定赢者）。"
+      },
+      {
+        "id": "game-theory-ch06-q20",
+        "question": "双边匹配（Two-sided matching）中的 Gale-Shapley 延迟接受算法（1962）。稳定匹配是否总存在？",
+        "options": [
+          "是——Gale-Shapley 证明对任何偏好排列，延迟接受算法总产出稳定匹配（无阻塞对——没有配对想互相\"私奔\"）  B) 不总是  C) 仅特殊偏好  D) NP-hard"
+        ],
+        "answer": 0,
+        "explanation": "算法：男方（或一方）依次向最偏好的女方求婚→女方暂时接受最好的，拒绝其他→被拒绝的男方向下一个偏好求婚→直到无人被拒绝。收敛：\\(O(n^2)\\) 步。产出男方最优稳定配。女方最优：翻转角色。Roth-Shapley 2012 年诺贝尔奖。应用：NRMP（美国住院医师匹配）、学校择校（NYC/Boston 学区分配）。策略操纵：求婚方诚实报告是占优策略（Dubins-Freedman 1981），但接受方可以通过虚报偏好获益。"
+      },
+      {
+        "id": "game-theory-ch06-q21",
+        "question": "Myerson 引理 (Myerson's Lemma)。DSIC 机制中分配规则和支付的关系？",
+        "options": [
+          "分配规则 \\(x_i(v_i)\\) 必须是 \\(v_i\\) 的非递减函数，且支付由分配规则唯一确定（到常数差）：\\(t_i(v_i)=v_i x_i(v_i)-\\int_0^{v_i}x_i(s)ds\\)  B) 无约束  C) 非递减不必要  D) 支付任意"
+        ],
+        "answer": 0,
+        "explanation": "DSIC 的 IC 约束→\\(v_i x_i(v_i)-t_i(v_i)\\geq v_i x_i(v_i')-t_i(v_i')\\) \\(\\forall v_i,v_i'\\)。这意味 \\(U_i(v_i)=v_i x_i(v_i)-t_i(v_i)\\) 是 \\(v_i\\) 的凸函数→导数 \\(=x_i(v_i)\\)（a.e.）→\\(x_i\\) 非递减。支付：\\(t_i(v_i)=v_i x_i(v_i)-\\int_0^{v_i}x_i(s)ds-U_i(0)\\)。若 \\(U_i(0)=0\\)（IR binds at \\(\\underline{v}\\)），支付唯一确定。这是所有最优拍卖理论的核心引理——一旦固定分配规则，支付\"免费\"获得。"
+      },
+      {
+        "id": "game-theory-ch06-q22",
+        "question": "Impossibility of efficient bilateral trade (Myerson-Satterthwaite 1983) 在实际市场中的含义？",
+        "options": [
+          "任何满足 IC+IR+BB 的双边交易机制都有效率损失——某些有利交易不会发生。中介或平台可以减轻但不能消除此损失  B) 完美交易可能  C) 仅理论结果  D) 平台完美解决"
+        ],
+        "answer": 0,
+        "explanation": "实际例子：房地产交易——买卖双方估值有重叠区间→经纪人（中介）收取佣金（\\(\\sim6\\%\\)）但仍有交易失败（讨价还价破裂）的情况。Myerson-Satterthwaite 说这是根本性的——不是因为中介不够好，而是 IC+IR+BB 的数学约束。大交易所/电子匹配引擎（如 NYSE 的限价订单簿）通过聚合大量参与者→单笔交易的效率损失 \\(\\to0\\)（大数定律）但总损失仍存在。区块链的 AMM（自动做市商）是另一种解决方案——但仍有\"无常损失\"等效率代价。"
+      },
+      {
+        "id": "game-theory-ch06-q23",
+        "question": "Cremer-McLean (1988) 全剩余提取定理。什么条件下卖家可以提取全部买家剩余？",
+        "options": [
+          "竞标者的类型相关（affiliated/correlated values）且类型分布矩阵满秩——可以设计\"彩票式\"支付提取全部信息租金  B) 总是可以  C) 仅 IPV  D) 不可能"
+        ],
+        "answer": 0,
+        "explanation": "IPV（独立类型）：信息租金 \\(>0\\)（买家保留部分剩余）。但类型相关时：\\(\\theta_i\\) 和 \\(\\theta_{-i}\\) 有关→可以用他人的报告验证 \\(i\\) 的报告。Cremer-McLean：联合分布矩阵满秩→可构造\"side bet\"机制，使得说谎的期望惩罚无限大→全部租金被提取。但此机制要求：(1) 无限惩罚→需要无限财富（不现实）；(2) 风险中性（风险厌恶会改变结果）；(3) 完美分布知识。实际中此定理更多是理论基准。"
+      },
+      {
+        "id": "game-theory-ch06-q24",
+        "question": "FCC 频谱拍卖使用的同时上升价格拍卖（Simultaneous Ascending Auction, SAA）为什么不用 VCG？",
+        "options": [
+          "VCG 在大规模组合拍卖中有严重缺陷：(1) 收入可能很低（甚至 \\(0\\)）；(2) 不满足 core 条件（落选者集体出价 \\(>\\) 收入→不稳定）；(3) 共谋脆弱  B) VCG 最优  C) SAA 不方便  D) 无原因"
+        ],
+        "answer": 0,
+        "explanation": "VCG 缺陷（Ausubel & Milgrom 2006）：(1) 收入单调性失败——增加竞标者可能降低收入（！）。(2) Core 违反——落选竞标者联盟的总出价 \\(>\\) 赢者支付→政治上不可接受。(3) 共谋：两个竞标者可以策略性地分配物品→VCG 收入 \\(\\to0\\)。实践：FCC 从 1994 年起使用 SAA（Milgrom-Wilson 设计）→2016 年 Incentive Auction 使用逆向+正向两阶段拍卖。2020 年诺贝尔奖颁给 Milgrom & Wilson。CCA（组合时钟拍卖）在英国/欧洲频谱拍卖中使用。"
+      },
+      {
+        "id": "game-theory-ch06-q25",
+        "question": "Groves 定理的一般形式。分配决策 \\(k^*(\\theta)=\\arg\\max_k\\sum_i v_i(k,\\theta_i)\\)，什么支付规则使诚实报告是占优策略？",
+        "options": [
+          "\\(t_i(\\theta)=\\sum_{j\\neq i}v_j(k^*(\\theta),\\theta_j)+h_i(\\theta_{-i})\\)——任何只依赖他人类型的函数 \\(h_i\\) 都可以  B) 仅 \\(h_i=0\\)  C) \\(t_i=v_i\\)  D) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "Groves (1973)：\\(i\\) 的净效用 \\(=v_i(k,\\theta_i)+t_i=v_i+\\sum_{j\\neq i}v_j+h_i=\\sum_j v_j+h_i\\)。最大化 \\(i\\) 的效用 \\(=\\) 最大化 \\(\\sum_j v_j\\)（因为 \\(h_i\\) 不依赖 \\(\\theta_i\\)）\\(=\\) 设计者的目标→诚实报告是占优策略 ✓。Clarke pivot (\\(h_i=-\\max_{k'}\\sum_{j\\neq i}v_j(k',\\theta_j)\\)) 保证 \\(t_i\\leq0\\)→参与者不补贴。VCG = Vickrey 的特例 (单物品) + Clarke 的 pivot 选择 + Groves 的一般框架。"
+      },
+      {
+        "id": "game-theory-ch06-q26",
+        "question": "学校择校机制（School Choice）中 Boston 机制 vs 延迟接受（DA）的区别？",
+        "options": [
+          "Boston 机制不是策略安全的——家长有动机不报真实首选（怕被拒后失去优先权）。DA 中诚实报告是占优策略  B) 相同  C) Boston 更好  D) DA 不策略安全"
+        ],
+        "answer": 0,
+        "explanation": "Boston 机制（即时接受/IA）：第 1 轮：所有人的第 1 志愿被考虑→超额→按优先权录取→被拒者进入第 2 轮（用第 2 志愿但该校已用掉部分名额）。问题：如果你的真第 1 志愿很热门→报它可能被拒→第 2 志愿名额也被别人占→\"浪费\"。策略：报一个\"稳当\"的学校为第 1 志愿→不诚实但安全。DA 机制：被拒后重新申请→不会丢失优先权→诚实是占优策略。2005 年 Boston 后来改用 DA（Abdulkadiroglu & Sönmez 设计）。"
+      },
+      {
+        "id": "game-theory-ch06-q27",
+        "question": "碳排放权交易（cap-and-trade）中的拍卖设计问题？",
+        "options": [
+          "欧盟 ETS 从免费分配（grandfathering）转向拍卖分配——使用统一价格拍卖（uniform price auction）出售排放配额  B) 固定价格  C) 彩票  D) 无设计"
+        ],
+        "answer": 0,
+        "explanation": "Cap-and-trade：政府设总排放上限→分配/拍卖排放许可。拍卖优于免费分配（Cramton & Kerr 2002）：(1) 收入可用于减税/研发——\"双重红利\"；(2) 避免寻租——免费分配奖励历史高排放者。机制选择：歧视价格 vs 统一价格。EU ETS Phase III 使用升价拍卖→统一价格→收入 \\(>100B\\) 欧元/年。VCG 不适合（规模太大、多轮、动态市场）。Hahn-Stavins (2011)：碳市场设计的关键是可信度+流动性+监管覆盖度。"
+      },
+      {
+        "id": "game-theory-ch06-q28",
+        "question": "在线广告拍卖（如 Google AdWords）使用的 GSP（Generalized Second Price）机制和 VCG 的关系？",
+        "options": [
+          "GSP 不是 VCG（不是策略安全的），但实际中近似均衡收入和效率接近 VCG。GSP：每个广告位的赢者支付下一位置出价者的出价  B) GSP = VCG  C) GSP 策略安全  D) 完全不同"
+        ],
+        "answer": 0,
+        "explanation": "GSP（Edelman-Ostrovsky-Schwarz 2007 / Varian 2007）：\\(k\\) 个广告位（点击率 \\(\\alpha_1>\\alpha_2>...\\)），\\(n\\) 个广告主（估值 \\(v_i\\) per click）。GSP：第 \\(j\\) 位支付 = 第 \\(j+1\\) 位的出价。不是 DSIC！（出价 \\(\\neq\\) 真实估值可能更好→需博弈分析）。但\"对称 NE\"（locally envy-free equilibrium）的收入在 VCG 和 GSP 之间——VCG \\(\\leq\\) GSP-NE。Google 2002 年从 FPSB 切换到 GSP→数十亿美元收入。Facebook 使用 VCG。GSP 的优势：更简单、更\"直觉\"、收入可能更高。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="game-theory"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/game-theory.html" class="module-name">博弈论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 社会选择与显示原理</a></li>
+      <li><a href="#kp2">02 · VCG 机制与激励相容</a></li>
+      <li><a href="#kp3">03 · Vickrey 拍卖与收益等价定理</a></li>
+      <li><a href="#kp4">04 · 机制设计的现代应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>机制设计</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>社会选择与显示原理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>博弈论通常分析「给定规则下的策略」，机制设计反过来： 如何设计规则使参与者的自私行为导向理想结果？ 这是“逆向博弈论”，应用于拍卖、投票、公共品等场景。 Arrow 不可能定理和 Gibbard-Satterthwaite 定理揭示了基本限制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>机制 = 从参与者报告到结果的映射。 显示原理：只需考虑诚实报告的机制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>社会选择函数</strong>：\(f: \Theta^n \to X\)，\(\Theta\) 为类型空间，\(X\) 为结果空间。 <strong>机制</strong>：\(\mathcal{M} = (M_1, \ldots, M_n, g)\)，\(M_i\) 为消息空间， \(g: M_1 \times \cdots \times M_n \to X\) 为结果函数。 <strong>激励相容</strong>：机制 \(\mathcal{M}\) 实现 \(f\) iff 存在均衡策略使得结果 = \(f(\theta)\) 对所有类型 \(\theta\)。 <strong>显示原理(Revelation Principle)</strong>：若 \(f\) 可由机制 \(\mathcal{M}\) 实现， 则它可由直接机制（\(M_i = \Theta_i\)，即报告类型）实现。 \[\forall i,\; \forall \theta_i,\; \forall \theta_i':\quad E[u_i(f(\theta_i, \theta_{-i}), \theta_i)] \geq E[u_i(f(\theta_i', \theta_{-i}), \theta_i)]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 政府采购机制设计 - 分布式系统中的激励相容协议</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：解释为什么显示原理简化了机制设计问题。 解答：原先需要在所有可能的机制中搜索（无穷多）， 显示原理说只需考虑直接机制（从 \(\Theta^n\) 到 \(X\)）， 搜索空间大大缩小。 易错点：显示原理不说诚实报告总是最优的， 它说的是如果有任何机制能实现 \(f\)，那么直接机制也能。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">显示原理的意义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。显示原理把机制设计问题简化为只需检查直接机制是否激励相容。')">A. 所有机制都激励相容</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！显示原理把机制设计问题简化为只需检查直接机制是否激励相容。')">B. 只需考虑直接机制即可</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。显示原理把机制设计问题简化为只需检查直接机制是否激励相容。')">C. 拍卖总是有效的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。显示原理把机制设计问题简化为只需检查直接机制是否激励相容。')">D. 社会选择函数总存在</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>VCG 机制与激励相容</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何设计一个机制使得诚实报告是占优策略？Vickrey-Clarke-Groves(VCG) 机制是拟线性框架下唯一实现诚实报告的机制，广泛应用于 拍卖、公共品供给、资源分配等场景。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>VCG 的核心思想：让每个参与者「内化」他对他人的外部性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>VCG 机制</strong>： (1) 结果规则：最大化社会总价值 \[x^*(\hat{\theta}) = \arg\max_x \sum_i v_i(x, \hat{\theta}_i)\] (2) 支付规则（Clarke Pivot）： \[t_i = \sum_{j \neq i} v_j(x^*(\hat{\theta}), \hat{\theta}_j) - \sum_{j \neq i} v_j(x^*_{-i}(\hat{\theta}_{-i}), \hat{\theta}_j)\] 其中 \(x^*_{-i}\) 是没有 \(i\) 时的最优结果。 <strong>占优激励相容的证明思路</strong>： \(i\) 的净收益 = \(v_i(x^*) + t_i = v_i(x^*) + [\sum_{j\neq i} v_j(x^*)] - C\) \(= \sum_j v_j(x^*) - C\)，正是社会总价值减去与 \(i\) 报告无关的常数。 因此最大化自己收益 = 最大化社会总价值，诚实报告占优。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Google 广告拍卖（GSP 的 VCG 变体） - 频谱竞购交易中的组合拍卖</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：3 人竞标 1 个物品，估值 \(v_1=10, v_2=7, v_3=5\)。VCG 价格？ 解答：\(x^*\): 分配给玩家1（价值最高）。 \(t_1\): \(\sum_{j\neq 1} v_j(x^*) - \sum_{j\neq 1} v_j(x^*_{-1})\) \(= (0+0) - (7+0) = -7\)。玩家1 支付 7（第二高估值）。 这正是二价拍卖！VCG 一般化了 Vickrey 拍卖。 易错点：VCG 价格不是自己的报价，而是自己参与对他人造成的外部性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">VCG 机制中参与者的支付等于什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。VCG 支付 = 他人因你参与而减少的总价值，这让你内化外部性。')">A. 自己的报价</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。VCG 支付 = 他人因你参与而减少的总价值，这让你内化外部性。')">B. 最高报价</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！VCG 支付 = 他人因你参与而减少的总价值，这让你内化外部性。')">C. 自己参与对他人造成的外部性</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。VCG 支付 = 他人因你参与而减少的总价值，这让你内化外部性。')">D. 社会总价值</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Vickrey 拍卖与收益等价定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>拍卖是机制设计最自然的应用场景。英式/荷式/密封一价/二价拍卖 各有优劣。惊人的收益等价定理表明：在标准假设下，这些拍卖 格式给卖家带来相同的期望收入。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>拍卖设计 = 机制设计的特例，\(X\) = {分配 + 支付}。 收益等价定理将不同拍卖格式统一起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>四种标准拍卖</strong>： - 英式（English）：公开加价，最后竞价者胜 - 荷式（Dutch）：从高价开始降价，第一个叫停的胜 - 密封一价：最高报价者以自己报价支付 - Vickrey（密封二价）：最高报价者以第二高报价支付 <strong>收益等价定理</strong>：若各竞价者独立私有估值，风险中性，对称，则 \[E[\text{Revenue}_{\text{English}}] = E[\text{Revenue}_{\text{Dutch}}] = E[\text{Revenue}_{\text{First-price}}] = E[\text{Revenue}_{\text{Vickrey}}]\] Vickrey 拍卖中诚实报价是占优策略，这与 KP2 的分析一致。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 电信频谱拍卖的设计 - eBay 的代理竞价机制 ≈ Vickrey 拍卖</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：2 人拍卖，\(v_i \sim U[0,1]\)。求一价拍卖的均衡竞价策略。 解答：对称均衡中 \(b(v) = \beta v\)。 竞价者最大化 \((v-b) \cdot P(\text{win}) = (v-b) \cdot F(b/\beta)\)。 \(U[0,1]\) 时 \(F(x)=x\)，最大化 \((v-b)(b/\beta)\)。 FOC: \(-b/\beta + (v-b)/\beta = 0\)，\(b = v/2\)。 期望收入 \(= E[v_{(2)}] = 1/3\)（与 Vickrey 等价！）。 易错点：一价拍卖中竞价 \(\neq\) 估值，而 Vickrey 中 \(b = v\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">收益等价定理的标准假设不包括？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。标准假设为独立私有估值 + 风险中性 + 对称 + 有限竞价者。')">A. 独立私有估值</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。标准假设为独立私有估值 + 风险中性 + 对称 + 有限竞价者。')">B. 风险中性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。标准假设为独立私有估值 + 风险中性 + 对称 + 有限竞价者。')">C. 对称竞价者</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！标准假设为独立私有估值 + 风险中性 + 对称 + 有限竞价者。')">D. 无限个竞价者</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>机制设计的现代应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>机制设计不仅是理论，它深刻影响了现代经济：从联邦通信委员会 的频谱拍卖（创造数百亿美元收入）到平台经济的匹配机制， Myerson-Satterthwaite 不可能定理揭示了双边交易的基本限制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Myerson 最优拍卖</strong>：卖家最大化期望收入的拍卖为 \[\max \sum_i E[\phi_i(v_i) x_i(v)]\] 其中 \(\phi_i(v) = v - \frac{1-F(v)}{f(v)}\) 为虚拟估值(virtual valuation)。 分配给虚拟估值最高且非负的竞价者。 <strong>Myerson-Satterthwaite 不可能定理</strong>： 双边交易（卖家估值 \(v_s\)，买家估值 \(v_b\)，均私有）中， 不存在同时满足激励相容、个体理性、预算平衡和事后有效率的机制。 即「充分高效的双边谈判」不可能。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 平台经济中的匹配机制（肾脏交换、学校录取） - Roth 的市场设计工作（也获得了诺贝尔奖）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：解释 Myerson 最优拍卖中为什么要设保留价。 解答：当 \(\phi_i(v_i) < 0\) 时，分配会降低期望收入， 应不分配（设保留价）。对 \(U[0,1]\)，\(\phi(v) = 2v-1\)， 保留价 = \(1/2\)。这解释了现实中拍卖为什么设底价。 易错点：最优拍卖可能不分配物品（当所有人虚拟估值都负时）， 这在社会效率上是有损失的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Myerson-Satterthwaite 定理说明了什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是机制设计的基本不可能结果：私有信息下的双边交易')">A. 拍卖总有效率</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！这是机制设计的基本不可能结果：私有信息下的双边交易')">B. 双边交易不可能同时激励相容且充分有效率</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是机制设计的基本不可能结果：私有信息下的双边交易')">C. 所有机制都激励相容</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是机制设计的基本不可能结果：私有信息下的双边交易')">D. 只有二价拍卖有效</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/probability/game-theory.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

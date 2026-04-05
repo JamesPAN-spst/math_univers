@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 环的基本概念 — 环与域论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "rings-ch01-q1",
+        "question": "在环 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 中，计算 \\(\\bar{4} \\cdot \\bar{5}\\)。",
+        "options": [
+          "\\(\\bar{2}\\)",
+        "\\(\\bar{3}\\)",
+        "\\(\\bar{20}\\)",
+        "\\(\\bar{0}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(4 \\times 5 = 20\\)，\\(20 \\bmod 6 = 2\\)，故 \\(\\bar{4} \\cdot \\bar{5} = \\bar{2}\\)。模 \\(6\\) 乘法将普通乘积取模。选 C 忘记取模，选 D 是计算错误。模运算要求结果属于 \\(\\{0,1,2,3,4,5\\}\\)。"
+      },
+      {
+        "id": "rings-ch01-q2",
+        "question": "以下哪个是整环？",
+        "options": [
+          "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(M_2(\\mathbb{R})\\)",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\)"
+        ],
+        "answer": 1,
+        "explanation": "整环要求交换含幺且无零因子。\\(\\mathbb{Z}/5\\mathbb{Z}\\) 是域（\\(5\\) 素数），域必是整环。A 有零因子 \\(\\bar{2}\\cdot\\bar{3}=\\bar{0}\\)；C 矩阵乘法不交换且有零因子；D 有零因子 \\(\\bar{2}^2 = \\bar{0}\\)。易错：混淆整环和域——域要求非零元都可逆，比整环更强。"
+      },
+      {
+        "id": "rings-ch01-q3",
+        "question": "自然同态 \\(\\varphi: \\mathbb{Z} \\to \\mathbb{Z}/5\\mathbb{Z}\\)，\\(\\varphi(a) = \\bar{a}\\)。求 \\(\\ker\\varphi\\)。",
+        "options": [
+          "\\(\\{0\\}\\)",
+        "\\(5\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\{0, 5\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker\\varphi = \\{a \\in \\mathbb{Z} : \\bar{a} = \\bar{0}\\} = \\{a : 5 \\mid a\\} = 5\\mathbb{Z}\\)。核是所有 \\(5\\) 的倍数组成的无穷集合。选 D 只列了两个元素而忽略了 \\(10, 15, -5\\) 等。核作为理想由 \\(5\\) 生成。"
+      },
+      {
+        "id": "rings-ch01-q4",
+        "question": "在 \\(\\mathbb{Z}/7\\mathbb{Z}\\) 中，求 \\(\\bar{3}\\) 的乘法逆元。",
+        "options": [
+          "\\(\\bar{3}\\)",
+        "\\(\\bar{5}\\)",
+        "\\(\\bar{4}\\)",
+        "不存在"
+        ],
+        "answer": 1,
+        "explanation": "需找 \\(\\bar{x}\\) 使 \\(\\bar{3}\\bar{x} = \\bar{1}\\)。\\(3 \\times 5 = 15 \\equiv 1 \\pmod{7}\\)，故 \\(\\bar{3}^{-1} = \\bar{5}\\)。\\(\\gcd(3,7) = 1\\) 保证逆元存在。用扩展欧几里得：\\(7 = 2 \\times 3 + 1\\)，故 \\(1 = 7 - 2 \\times 3\\)，\\(\\bar{3}^{-1} = \\overline{-2} = \\bar{5}\\)。"
+      },
+      {
+        "id": "rings-ch01-q5",
+        "question": "\\(\\mathbb{Z}/10\\mathbb{Z}\\) 中有多少个可逆元？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\bar{a}\\) 可逆当且仅当 \\(\\gcd(a,10)=1\\)，即 \\(a \\in \\{1,3,7,9\\}\\)，共 \\(\\varphi(10)=10(1-1/2)(1-1/5)=4\\) 个。其余 \\(6\\) 个非可逆元均为零因子（含 \\(\\bar{0}\\)）。易错：以为除 \\(\\bar{0}\\) 外都可逆——\\(\\bar{2}, \\bar{4}, \\bar{5}, \\bar{6}, \\bar{8}\\) 均不可逆。"
+      },
+      {
+        "id": "rings-ch01-q6",
+        "question": "用中国剩余定理求解：\\(x \\equiv 1 \\pmod{3}\\)，\\(x \\equiv 2 \\pmod{5}\\)，\\(0 \\leq x < 15\\)。",
+        "options": [
+          "\\(x = 7\\)",
+        "\\(x = 4\\)",
+        "\\(x = 11\\)",
+        "\\(x = 2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x = 3k+1\\)，代入 \\(3k+1 \\equiv 2 \\pmod{5}\\)，\\(3k \\equiv 1 \\pmod{5}\\)。\\(3 \\times 2 = 6 \\equiv 1\\)，故 \\(k \\equiv 2 \\pmod{5}\\)，\\(x = 3 \\times 2 + 1 = 7\\)。验证：\\(7 \\bmod 3 = 1\\) ✓，\\(7 \\bmod 5 = 2\\) ✓。"
+      },
+      {
+        "id": "rings-ch01-q7",
+        "question": "\\(\\mathbb{Z}/15\\mathbb{Z}\\) 同构于以下哪个积环？",
+        "options": [
+          "\\(\\mathbb{Z}/3\\mathbb{Z} \\times \\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/5\\mathbb{Z} \\times \\mathbb{Z}/5\\mathbb{Z}\\)",
+        "不可分解",
+        "\\(\\mathbb{Z}/1\\mathbb{Z} \\times \\mathbb{Z}/15\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(15 = 3 \\times 5\\)，\\(\\gcd(3,5) = 1\\)，由 CRT \\(\\mathbb{Z}/15\\mathbb{Z} \\cong \\mathbb{Z}/3\\mathbb{Z} \\times \\mathbb{Z}/5\\mathbb{Z}\\)。B 的阶为 \\(25 \\neq 15\\)。C 错，互素分解总成立。D 中 \\(\\mathbb{Z}/1\\mathbb{Z} = \\{0\\}\\) 无意义。"
+      },
+      {
+        "id": "rings-ch01-q8",
+        "question": "环 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 中有多少个幂等元（\\(e^2 = e\\)）？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}/12\\mathbb{Z} \\cong \\mathbb{Z}/4\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\)。\\(\\mathbb{Z}/4\\mathbb{Z}\\) 幂等元 \\(\\bar{0}, \\bar{1}\\)（\\(2\\) 个），\\(\\mathbb{Z}/3\\mathbb{Z}\\) 幂等元 \\(\\bar{0}, \\bar{1}\\)（\\(2\\) 个），总计 \\(2 \\times 2 = 4\\) 个。即 \\(\\bar{0}, \\bar{1}, \\bar{4}, \\bar{9}\\)。验证 \\(4^2=16\\equiv4\\)，\\(9^2=81\\equiv9\\)（mod 12）。"
+      },
+      {
+        "id": "rings-ch01-q9",
+        "question": "从 \\(\\mathbb{Z}\\) 到 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 的含幺环同态有多少个？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(6\\)",
+        "无穷多"
+        ],
+        "answer": 0,
+        "explanation": "含幺环同态 \\(\\varphi\\) 满足 \\(\\varphi(1)=\\bar{1}\\)，由此 \\(\\varphi(n)=n\\cdot\\bar{1}=\\bar{n}\\) 完全确定，只有自然商映射一个。易错：以为可定义 \\(\\varphi(1)=\\bar{2}\\) 等，但那不保持乘法单位元。\\(\\mathbb{Z}\\) 作为初始对象到任何含幺环只有唯一含幺同态。"
+      },
+      {
+        "id": "rings-ch01-q10",
+        "question": "\\(\\mathbb{Z}/8\\mathbb{Z}\\) 中幂零元（\\(\\exists n: a^n = 0\\)）有多少个？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(8 = 2^3\\)，幂零元恰为 \\(2\\) 的倍数：\\(\\bar{0}, \\bar{2}, \\bar{4}, \\bar{6}\\)。\\(\\bar{2}^3 = \\bar{8} = \\bar{0}\\)，\\(\\bar{4}^2 = \\bar{16} = \\bar{0}\\)，\\(\\bar{6}^3 = \\bar{216} = \\bar{0}\\)。一般地 \\(\\mathbb{Z}/p^k\\mathbb{Z}\\) 的幂零元为 \\(p\\) 的倍数，共 \\(p^{k-1}\\) 个。奇数与 \\(8\\) 互素，不可能幂零。"
+      },
+      {
+        "id": "rings-ch01-q11",
+        "question": "解同余方程组 \\(x \\equiv 2\\pmod{3}\\)，\\(x \\equiv 3\\pmod{5}\\)，\\(x \\equiv 2\\pmod{7}\\)，\\(0 \\leq x < 105\\)。",
+        "options": [
+          "\\(23\\)",
+        "\\(101\\)",
+        "\\(8\\)",
+        "\\(53\\)"
+        ],
+        "answer": 0,
+        "explanation": "先解前两个：\\(x=3k+2\\)，\\(3k+2\\equiv3\\pmod{5}\\)，\\(3k\\equiv1\\pmod{5}\\)，\\(k\\equiv2\\pmod{5}\\)，\\(x\\equiv8\\pmod{15}\\)。再 \\(8+15t\\equiv2\\pmod{7}\\)，\\(15t\\equiv-6\\equiv1\\pmod{7}\\)，\\(t\\equiv1\\pmod{7}\\)，\\(x=8+15=23\\)。验证：\\(23=7\\times3+2\\) ✓，\\(23=4\\times5+3\\) ✓。"
+      },
+      {
+        "id": "rings-ch01-q12",
+        "question": "\\(\\varphi(30) = ?\\)（欧拉函数）",
+        "options": [
+          "\\(8\\)",
+        "\\(10\\)",
+        "\\(12\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(30 = 2 \\times 3 \\times 5\\)，\\(\\varphi(30) = 30(1-1/2)(1-1/3)(1-1/5) = 30 \\times 1/2 \\times 2/3 \\times 4/5 = 8\\)。也可用 CRT 分解：\\(\\varphi(30) = \\varphi(2)\\varphi(3)\\varphi(5) = 1\\times2\\times4 = 8\\)。即 \\(\\mathbb{Z}/30\\mathbb{Z}\\) 有 \\(8\\) 个可逆元。"
+      },
+      {
+        "id": "rings-ch01-q13",
+        "question": "\\(M_2(\\mathbb{Z}/2\\mathbb{Z})\\)（\\(2\\times2\\) 矩阵环）共有多少个元素？",
+        "options": [
+          "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)",
+        "\\(32\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(2\\times2\\) 矩阵有 \\(4\\) 个元素位，每个取自 \\(\\mathbb{Z}/2\\mathbb{Z}=\\{0,1\\}\\)，共 \\(2^4=16\\) 个矩阵。这是含幺非交换环（有单位矩阵，矩阵乘法不交换），含零因子。其可逆元个数为 \\(|GL_2(\\mathbb{F}_2)| = 6\\)。"
+      },
+      {
+        "id": "rings-ch01-q14",
+        "question": "赋值同态 \\(\\psi: \\mathbb{Z}[x] \\to \\mathbb{Z}\\)，\\(\\psi(f) = f(2)\\)。\\(\\ker\\psi\\) 由什么生成？",
+        "options": [
+          "\\((x-2)\\)",
+        "\\((x+2)\\)",
+        "\\((2x)\\)",
+        "\\((x^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(2)=0\\) 等价于 \\((x-2) \\mid f(x)\\)。对首一线性因子 \\((x-a)\\)，因子定理在 \\(\\mathbb{Z}[x]\\) 中成立。故 \\(\\ker\\psi=(x-2)\\)。由同态基本定理 \\(\\mathbb{Z}[x]/(x-2)\\cong\\mathbb{Z}\\)。易错：将赋值同态与系数提取混淆。"
+      },
+      {
+        "id": "rings-ch01-q15",
+        "question": "以下关于可逆元和零因子的陈述，哪个正确？",
+        "options": [
+          "零因子之积仍为零因子",
+        "可逆元不可能是零因子",
+        "幂零元不是零因子",
+        "环中所有非零元要么可逆要么是零因子"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(u\\) 可逆且 \\(ua=0\\)，则 \\(a=u^{-1}(ua)=0\\)，故可逆元不是零因子。A 不一定（\\(\\bar{2}\\cdot\\bar{3}=\\bar{0}\\) 在 \\(\\mathbb{Z}/6\\mathbb{Z}\\)，但 \\(\\bar{2}\\cdot\\bar{2}=\\bar{4}\\neq\\bar{0}\\)）。C 错：幂零元是零因子（\\(a^n=0\\Rightarrow a\\cdot a^{n-1}=0\\)）。D 对有限环成立但一般不成立。"
+      },
+      {
+        "id": "rings-ch01-q16",
+        "question": "\\(|(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z})^\\times|\\) 等于多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((\\mathbb{Z}/2\\mathbb{Z})^\\times = \\{\\bar{1}\\}\\)，阶 \\(1\\)。\\((\\mathbb{Z}/3\\mathbb{Z})^\\times = \\{\\bar{1}, \\bar{2}\\}\\)，阶 \\(2\\)。直积的单位群 \\(= \\) 各分量单位群的直积，阶 \\(1\\times2=2\\)。等价于 \\(\\varphi(6)=2\\)（因 \\(\\mathbb{Z}/6\\mathbb{Z}\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/3\\mathbb{Z}\\)）。"
+      },
+      {
+        "id": "rings-ch01-q17",
+        "question": "判断 \\(S=\\{a+bi : a,b\\in\\mathbb{Z}\\}\\) 是否为 \\(\\mathbb{C}\\) 的子环。",
+        "options": [
+          "是，即高斯整数环 \\(\\mathbb{Z}[i]\\)",
+        "不是，缺乘法封闭性",
+        "不是，缺加法逆元",
+        "不是，无乘法单位元"
+        ],
+        "answer": 0,
+        "explanation": "\\((a+bi)+(c+di)=(a+c)+(b+d)i\\in S\\)，加法封闭。\\(-(a+bi)=(-a)+(-b)i\\in S\\)。\\((a+bi)(c+di)=(ac-bd)+(ad+bc)i\\in S\\)，乘法封闭。\\(1=1+0i\\in S\\)，有单位元。满足子环所有条件，\\(S=\\mathbb{Z}[i]\\)。"
+      },
+      {
+        "id": "rings-ch01-q18",
+        "question": "环 \\(\\mathbb{Z}[\\sqrt{-5}]\\) 的特征（characteristic）是多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\)",
+        "\\(5\\)",
+        "\\(\\sqrt{5}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}[\\sqrt{-5}]\\subset\\mathbb{C}\\)，包含 \\(\\mathbb{Z}\\) 作为子环。\\(n\\cdot1=n\\neq0\\) 对所有正整数 \\(n\\) 成立（\\(\\mathbb{C}\\) 特征 \\(0\\)）。故特征为 \\(0\\)。任何含 \\(\\mathbb{Z}\\) 的环特征为 \\(0\\)。易错：以为特征与 \\(\\sqrt{-5}\\) 中的 \\(5\\) 相关。"
+      },
+      {
+        "id": "rings-ch01-q19",
+        "question": "环同态 \\(\\varphi: \\mathbb{Z}[x] \\to \\mathbb{C}\\)，\\(\\varphi(x) = i\\)。则 \\(\\mathrm{im}(\\varphi) \\cong\\) ？",
+        "options": [
+          "\\(\\mathbb{Z}[i]\\)",
+        "\\(\\mathbb{C}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Q}(i)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(f(x))=f(i)\\)，像为 \\(\\{f(i):f\\in\\mathbb{Z}[x]\\}=\\{a+bi:a,b\\in\\mathbb{Z}\\}=\\mathbb{Z}[i]\\)。\\(\\ker\\varphi=(x^2+1)\\)，由同态基本定理 \\(\\mathbb{Z}[x]/(x^2+1)\\cong\\mathbb{Z}[i]\\)。注意像不是 \\(\\mathbb{Q}(i)\\)（需分数）也不是 \\(\\mathbb{C}\\)（需所有实数）。"
+      },
+      {
+        "id": "rings-ch01-q20",
+        "question": "\\(\\mathbb{Z}/36\\mathbb{Z}\\) 中幂零元的个数是多少？",
+        "options": [
+          "\\(6\\)",
+        "\\(12\\)",
+        "\\(18\\)",
+        "\\(36\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(36=2^2\\cdot3^2\\)。\\(\\bar{a}\\) 幂零当且仅当 \\(a\\) 被 \\(36\\) 的每个素因子整除，即 \\(6\\mid a\\)。满足条件的 \\(a\\in\\{0,6,12,18,24,30\\}\\)，共 \\(36/6=6\\) 个。验证：\\(\\bar{6}^2=\\bar{36}=\\bar{0}\\)，\\(\\bar{12}^2=\\bar{144}=\\bar{0}\\)（\\(144=4\\times36\\)）。一般地：幂零元个数 \\(=n/\\mathrm{rad}(n)\\)。"
+      },
+      {
+        "id": "rings-ch01-q21",
+        "question": "\\(\\varphi(60) = ?\\)（欧拉函数）",
+        "options": [
+          "\\(16\\)",
+        "\\(20\\)",
+        "\\(24\\)",
+        "\\(12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(60=2^2\\cdot3\\cdot5\\)。\\(\\varphi(60)=60(1-1/2)(1-1/3)(1-1/5)=60\\times1/2\\times2/3\\times4/5=16\\)。分解法：\\(\\varphi(4)\\varphi(3)\\varphi(5)=2\\times2\\times4=16\\)。也可用 CRT：\\(|(\\mathbb{Z}/60\\mathbb{Z})^\\times|=|(\\mathbb{Z}/4\\mathbb{Z})^\\times\\times(\\mathbb{Z}/3\\mathbb{Z})^\\times\\times(\\mathbb{Z}/5\\mathbb{Z})^\\times|=2\\times2\\times4=16\\)。"
+      },
+      {
+        "id": "rings-ch01-q22",
+        "question": "\\((\\mathbb{Z}/5\\mathbb{Z})^\\times\\) 的群结构是什么？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|(\\mathbb{Z}/5\\mathbb{Z})^\\times|=4\\)。验证 \\(\\bar{2}\\) 的阶：\\(2^1=2,2^2=4,2^3=3,2^4=1\\)（mod \\(5\\)），\\(\\mathrm{ord}(\\bar{2})=4=|(\\mathbb{Z}/5\\mathbb{Z})^\\times|\\)，故为循环群 \\(\\mathbb{Z}/4\\mathbb{Z}\\)。\\(p\\) 素数时 \\((\\mathbb{Z}/p\\mathbb{Z})^\\times\\) 总是循环群。"
+      },
+      {
+        "id": "rings-ch01-q23",
+        "question": "有限整环必定是域。若 \\(R\\) 是 \\(9\\) 个元素的整环，则 \\(R \\cong\\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/9\\mathbb{Z}\\)",
+        "\\(\\mathbb{F}_9\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{F}_3[x]/(x^2)\\)"
+        ],
+        "answer": 1,
+        "explanation": "有限整环是域（\\(a\\neq0\\) 时左乘 \\(\\mu_a\\) 是单射，有限 \\(\\Rightarrow\\) 满射 \\(\\Rightarrow\\) 可逆）。\\(|R|=9=3^2\\)，故 \\(R\\cong\\mathbb{F}_9\\)。A 有零因子（\\(\\bar{3}\\cdot\\bar{3}=\\bar{0}\\)），C 有零因子（\\((\\bar{1},\\bar{0})\\cdot(\\bar{0},\\bar{1})=(\\bar{0},\\bar{0})\\)），D 有幂零元（\\(\\bar{x}^2=\\bar{0}\\)）。"
+      },
+      {
+        "id": "rings-ch01-q24",
+        "question": "在同构 \\(\\mathbb{Z}/30\\mathbb{Z}\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/3\\mathbb{Z}\\times\\mathbb{Z}/5\\mathbb{Z}\\) 中，\\((1,2,3)\\) 对应 \\(\\mathbb{Z}/30\\mathbb{Z}\\) 中哪个元素？",
+        "options": [
+          "\\(\\bar{23}\\)",
+        "\\(\\bar{13}\\)",
+        "\\(\\bar{7}\\)",
+        "\\(\\bar{17}\\)"
+        ],
+        "answer": 0,
+        "explanation": "求 \\(x\\)：\\(x\\equiv1\\pmod{2}\\)，\\(x\\equiv2\\pmod{3}\\)，\\(x\\equiv3\\pmod{5}\\)。\\(x=2k+1\\)，\\(2k+1\\equiv2\\pmod{3}\\)，\\(k\\equiv2\\pmod{3}\\)。\\(x=6j+5\\)，\\(6j+5\\equiv3\\pmod{5}\\)，\\(j\\equiv3\\pmod{5}\\)。\\(x=30m+23\\)。验证：\\(23\\bmod2=1\\)，\\(23\\bmod3=2\\)，\\(23\\bmod5=3\\)。✓"
+      },
+      {
+        "id": "rings-ch01-q25",
+        "question": "\\(\\mathbb{Z}/6\\mathbb{Z}\\) 的（不要求保持幺元的）环自同态有多少个？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "环自同态 \\(\\varphi\\) 由 \\(\\varphi(\\bar{1})\\) 决定，需 \\(\\varphi(\\bar{1})^2=\\varphi(\\bar{1})\\)。\\(\\mathbb{Z}/6\\mathbb{Z}\\) 的幂等元：\\(\\bar{0},\\bar{1},\\bar{3},\\bar{4}\\)（验证 \\(3^2=9\\equiv3\\)，\\(4^2=16\\equiv4\\) mod \\(6\\)）。每个幂等元 \\(e\\) 定义 \\(\\varphi(\\bar{n})=n\\cdot e\\) 均为合法环自同态。共 \\(4\\) 个。"
+      },
+      {
+        "id": "rings-ch01-q26",
+        "question": "RSA 中 \\(n = pq\\)，解密时用 CRT 加速：分别计算 \\(m_p = c^{d_p} \\bmod p\\)，\\(m_q = c^{d_q} \\bmod q\\)。若 \\(p=3, q=5, m_p=2, m_q=4\\)，则 \\(m \\bmod 15 = \\) ？",
+        "options": [
+          "\\(14\\)",
+        "\\(2\\)",
+        "\\(9\\)",
+        "\\(7\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(m\\equiv2\\pmod{3}\\)，\\(m\\equiv4\\pmod{5}\\)。\\(m=3k+2\\)，\\(3k+2\\equiv4\\pmod{5}\\)，\\(3k\\equiv2\\pmod{5}\\)，\\(k\\equiv4\\pmod{5}\\)。\\(m=3\\times4+2=14\\)。验证：\\(14\\bmod3=2\\) ✓，\\(14\\bmod5=4\\) ✓。CRT 将模 \\(n\\) 运算分解为模 \\(p\\) 和 \\(q\\) 两半，速度提升约 \\(4\\) 倍。"
+      },
+      {
+        "id": "rings-ch01-q27",
+        "question": "ISBN-13 校验码使用模 \\(10\\) 运算。若前 \\(12\\) 位加权和为 \\(S = 73\\)，校验码 \\(c\\) 满足 \\(S + c \\equiv 0 \\pmod{10}\\)，则 \\(c = \\) ？",
+        "options": [
+          "\\(7\\)",
+        "\\(3\\)",
+        "\\(0\\)",
+        "\\(10\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(73 + c \\equiv 0 \\pmod{10}\\)，\\(c \\equiv -73 \\equiv -3 \\equiv 7 \\pmod{10}\\)。故 \\(c = 7\\)。这是环 \\(\\mathbb{Z}/10\\mathbb{Z}\\) 的直接应用。D 不合法（\\(c\\) 必须为单个数字 \\(0\\)-\\(9\\)）。校验码检测输入错误利用了模运算的代数结构。"
+      },
+      {
+        "id": "rings-ch01-q28",
+        "question": "时钟系统用环 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 建模。现在 \\(9\\) 点，经过 \\(17\\) 小时后是几点？",
+        "options": [
+          "\\(2\\) 点",
+        "\\(1\\) 点",
+        "\\(3\\) 点",
+        "\\(14\\) 点"
+        ],
+        "answer": 0,
+        "explanation": "\\(9 + 17 = 26\\)，\\(26 \\bmod 12 = 2\\)。时钟算术是 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 的直接应用。选 D 忘记取模（\\(12\\) 小时制无 \\(14\\) 点）。模 \\(12\\) 加法满足环的公理：封闭性、结合律、分配律等。这说明抽象的环结构渗透在日常生活中。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="rings"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/rings.html" class="module-name">环与域论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 环的定义与基本性质</a></li>
+      <li><a href="#kp2">02 · 子环与环同态</a></li>
+      <li><a href="#kp3">03 · 特殊元素与零因子</a></li>
+      <li><a href="#kp4">04 · 中国剩余定理与积环</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>环的基本概念</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>环的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>整数和多项式有两种运算（加法和乘法）且行为相似。环的概念将这种共性 抽象化: 一个带有加法（Abel 群）和乘法（半群）且满足分配律的结构。 环论统一了数论、多项式论、矩阵论的共同框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>环抽象了「可加可乘的代数结构」。不同于群只有一种运算， 环需要两种运算之间的兼容性（分配律）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>环</strong> \((R, +, \cdot)\): 1) \((R, +)\) 是 Abel 群（单位元 \(0\)） 2) \((R, \cdot)\) 是半群（结合律） 3) 分配律: \(a(b+c) = ab + ac\)，\((a+b)c = ac + bc\) <strong>常见变体</strong>: - 含幺环: 存在乘法单位元 \(1\) - 交换环: \(ab = ba\) - 整环: 交换含幺无零因子 \[a \cdot 0 = 0 \cdot a = 0, \quad (-a)b = -(ab) = a(-b)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 判断 \(\mathbb{Z}/6\mathbb{Z}\) 是否为整环。 解答: \(\bar{2} \cdot \bar{3} = \bar{6} = \bar{0}\)，但 \(\bar{2} \neq 0, \bar{3} \neq 0\)。 存在零因子，故不是整环。 易错点: 混淆「环」和「域」。 域是每个非零元都有逆的交换环，整环不要求逆元。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(M_2(\mathbb{R})\)（\(2\times2\) 实矩阵环）是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。矩阵乘法不交换，有单位矩阵，且有零因子。')">A. 交换环</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。矩阵乘法不交换，有单位矩阵，且有零因子。')">B. 整环</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！矩阵乘法不交换，有单位矩阵，且有零因子。')">C. 非交换含幺环</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。矩阵乘法不交换，有单位矩阵，且有零因子。')">D. 域</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>子环与环同态</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>像群论有子群和群同态一样，环论也需要研究环之间的关系。 环同态是保持加法和乘法结构的映射，环同态基本定理是研究商环的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>子环</strong>: \(S \subseteq R\) 关于 \(R\) 的加法和乘法封闭。 <strong>环同态</strong>: \(\varphi: R \to S\) 满足 \(\varphi(a+b) = \varphi(a) + \varphi(b)\)， \(\varphi(ab) = \varphi(a)\varphi(b)\)。 <strong>同态基本定理</strong>: \(R/\ker\varphi \cong \mathrm{im}\varphi\)。 \[R/\ker\varphi \cong \mathrm{im}\varphi\] \(\ker\varphi\) 是 \(R\) 的理想（不仅是子群/子环）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\varphi: \mathbb{Z} \to \mathbb{Z}/n\mathbb{Z}\)，\(\varphi(a) = \bar{a}\)。 验证是环同态并确定核。 解答: \(\varphi(a+b) = \overline{a+b} = \bar{a} + \bar{b}\)， \(\varphi(ab) = \overline{ab} = \bar{a}\bar{b}\)。是环同态。 \(\ker\varphi = n\mathbb{Z}\)。\(\mathbb{Z}/n\mathbb{Z} \cong \mathrm{im}\varphi\)。 易错点: 环同态的核是<strong>理想</strong>，不是子环。 \(n\mathbb{Z}\) 是理想也是子环，但一般理想不一定是子环 （含幺环中理想不一定含 \(1\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">环同态的核是什么结构？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。核是理想（不仅对加法封闭，还对乘法「吸收」）。')">A. 子环</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。核是理想（不仅对加法封闭，还对乘法「吸收」）。')">B. 子群</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！核是理想（不仅对加法封闭，还对乘法「吸收」）。')">C. 理想</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。核是理想（不仅对加法封闭，还对乘法「吸收」）。')">D. 域</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>特殊元素与零因子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>环中元素的「好坏」很不一样。单位（可逆元）赌似「健康」元素， 零因子挐制了消去律，幂等元和幂零元反映「退化」行为。理解这些 特殊元素是掌握环结构的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>单位/可逆元</strong>: \(u \in R\) 可逆 \(\Leftrightarrow\) \(\exists v: uv = vu = 1\)。 可逆元组成群 \(R^\times\)。 <strong>零因子</strong>: \(a \neq 0, b \neq 0\) 但 \(ab = 0\)。 零因子存在 \(\Rightarrow\) 消去律失效。 <strong>幂等元</strong>: \(e^2 = e\)。例: \(0, 1\)。 <strong>幂零元</strong>: \(\exists n, a^n = 0\)。 <strong>关系</strong>: 可逆元不能是零因子。 若 \(ua = 0\) 且 \(u\) 可逆，则 \(a = u^{-1}(ua) = 0\)。 \[u \text{ 可逆} \Rightarrow u \text{ 不是零因子}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{Z}/12\mathbb{Z}\) 中找出所有可逆元、零因子、幂零元。 解答: 可逆元: \(\gcd(a, 12) = 1\)，即 \(\{1, 5, 7, 11\}\)。 零因子: \(\bar{2} \cdot \bar{6} = \bar{0}\)，\(\bar{3} \cdot \bar{4} = \bar{0}\) 等。 幂零元: 无（\(\mathbb{Z}/12\mathbb{Z}\) 无幂零元，因 \(12 = 4 \times 3\)， 无素数幂因子幂次 ≥ 2）。 修正: \(12 = 2^2 \cdot 3\)，\(\bar{6}^2 = \overline{36} = \bar{0}\)！故 \(\bar{6}\) 是幂零元。 易错点: 认为零因子和幂零元是同一概念。 幂零元一定是零因子（\(a^n=0 \Rightarrow a \cdot a^{n-1}=0\)）， 但零因子不一定是幂零元。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{Z}/p\mathbb{Z}\)（\(p\) 素数）有零因子吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Z}/p\\mathbb{Z}\\) 是域（\\(p\\) 为素数），域无零因子。')">A. 有</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathbb{Z}/p\\mathbb{Z}\\) 是域（\\(p\\) 为素数），域无零因子。')">B. 没有</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Z}/p\\mathbb{Z}\\) 是域（\\(p\\) 为素数），域无零因子。')">C. 用 \(p\) 的奇偶性判断</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Z}/p\\mathbb{Z}\\) 是域（\\(p\\) 为素数），域无零因子。')">D. 无法确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>中国剩余定理与积环</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\mathbb{Z}/6\mathbb{Z} \cong \mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/3\mathbb{Z}\)—— 这种「分解」能力是中国剩余定理的环论推广。它将复杂环分解为简单环的直积， 是环论和数论的重要桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>环的直积分解类似于整数的素因数分解——将大结构拆为小结构的乘积。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>产环 / 直积</strong>: \(R_1 \times R_2\) 定义逐分量运算: \((a_1, a_2) + (b_1, b_2) = (a_1+b_1, a_2+b_2)\)， \((a_1, a_2)(b_1, b_2) = (a_1 b_1, a_2 b_2)\)。 <strong>环版 CRT</strong>: 若 \(I, J\) 为 \(R\) 的理想且 \(I + J = R\)，则 \[R/(I \cap J) \cong R/I \times R/J\] 特别地，\(\gcd(m, n) = 1 \Rightarrow \mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RSA 加密: 计算 \(\mathbb{Z}/n\mathbb{Z}\) 中的幂运算用 CRT 加速 （\(n = pq\)，分解为模 \(p\) 和模 \(q\) 的计算）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(x\) 使 \(x \equiv 2 \pmod{3}\)，\(x \equiv 3 \pmod{5}\)。 解答: \(x = 3k + 2\)。\(3k + 2 \equiv 3 \pmod{5}\)， \(3k \equiv 1 \pmod{5}\)，\(k \equiv 2 \pmod{5}\)。 \(k = 5j + 2\)，\(x = 15j + 8\)。解: \(x \equiv 8 \pmod{15}\)。 易错点: CRT 要求模数互素。 \(\mathbb{Z}/4\mathbb{Z}\) 与 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\) 不同构！</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{Z}/15\mathbb{Z} \cong\) ?</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\gcd(3,5) = 1\\)，由CRT。（A 和 D 本质相同，但 A 更标准。）')">A. \(\mathbb{Z}/3\mathbb{Z} \times \mathbb{Z}/5\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\gcd(3,5) = 1\\)，由CRT。（A 和 D 本质相同，但 A 更标准。）')">B. \(\mathbb{Z}/5\mathbb{Z} \times \mathbb{Z}/3\mathbb{Z} \times \mathbb{Z}/1\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\gcd(3,5) = 1\\)，由CRT。（A 和 D 本质相同，但 A 更标准。）')">C. \(\mathbb{Z}/15\mathbb{Z}\) 不可分解</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\gcd(3,5) = 1\\)，由CRT。（A 和 D 本质相同，但 A 更标准。）')">D. \(\mathbb{Z}/3\mathbb{Z} \oplus \mathbb{Z}/5\mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/algebra/rings.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

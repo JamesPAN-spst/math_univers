@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 熵与信息量 — 信息论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "info-theory-ch01-q1",
+        "question": "离散随机变量 \\(X\\) 取值 \\(\\{a,b\\}\\)，\\(P(a)=1/4,P(b)=3/4\\)。\\(H(X)=?\\)（以 bit 为单位）",
+        "options": [
+          "\\(\\approx0.811\\) bit  B) \\(1\\) bit  C) \\(0.5\\) bit  D) \\(2\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(X)=-\\frac{1}{4}\\log_2\\frac{1}{4}-\\frac{3}{4}\\log_2\\frac{3}{4}=\\frac{1}{4}\\times2+\\frac{3}{4}\\times0.415=0.5+0.311=0.811\\) bit。注意 \\(H(X)<1\\)（均匀分布时 \\(H=1\\)），因为分布不均匀，不确定性较低。\\(P(b)=3/4\\) 使得结果大概率是 \\(b\\)，信息量较少。"
+      },
+      {
+        "id": "info-theory-ch01-q2",
+        "question": "均匀分布在 8 个等概率事件上。Shannon 熵 \\(H(X)=?\\)",
+        "options": [
+          "\\(3\\) bit  B) \\(8\\) bit  C) \\(\\log_2 8=3\\) bit  D) A 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(H(X)=-\\sum_{i=1}^{8}\\frac{1}{8}\\log_2\\frac{1}{8}=8\\times\\frac{1}{8}\\times3=3\\) bit。均匀分布时熵最大 \\(H_{\\max}=\\log_2|\\mathcal{X}|\\)。直觉：需要恰好 3 个二进制问题确定结果（如三次\"是/否\"二分法）。"
+      },
+      {
+        "id": "info-theory-ch01-q3",
+        "question": "联合分布 \\((X,Y)\\)：\\(P(0,0)=1/2,P(0,1)=1/4,P(1,0)=1/8,P(1,1)=1/8\\)。\\(H(X,Y)=?\\)",
+        "options": [
+          "\\(\\frac{7}{4}=1.75\\) bit  B) \\(2\\) bit  C) \\(1\\) bit  D) \\(3\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(X,Y)=-\\frac{1}{2}\\log\\frac{1}{2}-\\frac{1}{4}\\log\\frac{1}{4}-\\frac{1}{8}\\log\\frac{1}{8}-\\frac{1}{8}\\log\\frac{1}{8}=\\frac{1}{2}+\\frac{2}{4}+\\frac{3}{8}+\\frac{3}{8}=0.5+0.5+0.375+0.375=1.75\\) bit。联合熵 \\(H(X,Y)\\leq H(X)+H(Y)\\)，等号当且仅当 \\(X,Y\\) 独立。"
+      },
+      {
+        "id": "info-theory-ch01-q4",
+        "question": "KL 散度 \\(D_{\\text{KL}}(P\\|Q)\\) 的哪个性质使它不是严格的距离度量？",
+        "options": [
+          "不满足对称性：\\(D_{\\text{KL}}(P\\|Q)\\neq D_{\\text{KL}}(Q\\|P)\\) 一般  B) 可以为负  C) 不满足三角不等式  D) A 和 C 都是"
+        ],
+        "answer": 3,
+        "explanation": "\\(D_{\\text{KL}}(P\\|Q)=\\sum p_i\\log(p_i/q_i)\\geq0\\)（Gibbs 不等式），但：(1)不对称——\\(P\\) 和 \\(Q\\) 地位不同；(2)不满足三角不等式。因此 KL 散度不是度量（metric），而是\"散度\"（divergence）。它度量从 \\(Q\\) 出发编码 \\(P\\) 的额外比特数。对称版本 \\(\\frac{1}{2}D(P\\|Q)+\\frac{1}{2}D(Q\\|P)\\) 是 Jensen-Shannon 散度。"
+      },
+      {
+        "id": "info-theory-ch01-q5",
+        "question": "\\(X\\) 和 \\(Y\\) 独立时，互信息 \\(I(X;Y)=?\\)",
+        "options": [
+          "\\(0\\)  B) \\(H(X)\\)  C) \\(H(Y)\\)  D) \\(H(X)+H(Y)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(X;Y)=H(X)-H(X|Y)\\)。独立时 \\(H(X|Y)=H(X)\\)（\\(Y\\) 不提供关于 \\(X\\) 的信息），\\(I(X;Y)=0\\)。等价定义 \\(I(X;Y)=D_{\\text{KL}}(P_{XY}\\|P_X P_Y)\\)，独立时联合等于边际乘积，KL \\(=0\\)。互信息衡量两个变量的统计相关性——\\(I=0\\) 等价于独立。"
+      },
+      {
+        "id": "info-theory-ch01-q6",
+        "question": "条件熵的链式法则：\\(H(X,Y)=?\\)",
+        "options": [
+          "\\(H(X)+H(Y|X)\\)  B) \\(H(X)\\cdot H(Y)\\)  C) \\(H(X)-H(Y)\\)  D) \\(H(X|Y)+H(Y|X)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(X,Y)=H(X)+H(Y|X)=H(Y)+H(X|Y)\\)。直觉：先描述 \\(X\\)（\\(H(X)\\) bit），再在已知 \\(X\\) 的条件下描述 \\(Y\\)（\\(H(Y|X)\\) bit）。总信息量等于联合熵。推信息论中最根本的恒等式之一。推广到 \\(n\\) 变量：\\(H(X_1,...,X_n)=\\sum_{i=1}^n H(X_i|X_1,...,X_{i-1})\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q7",
+        "question": "KL 散度 \\(D_{\\text{KL}}(P\\|Q)\\) 中若某 \\(i\\) 满足 \\(P(i)>0\\) 但 \\(Q(i)=0\\)，则 \\(D_{\\text{KL}}=?\\)",
+        "options": [
+          "\\(+\\infty\\)  B) \\(0\\)  C) \\(1\\)  D) 未定义"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log(p_i/q_i)\\to+\\infty\\) 当 \\(q_i\\to0\\)，权重 \\(p_i>0\\)，贡献 \\(+\\infty\\)。这直观正确：若 \\(Q\\) 认为事件 \\(i\\) 不可能发生但 \\(P\\) 下可能发生，用 \\(Q\\) 编码 \\(P\\) 需要无穷多额外比特。反之 \\(P(i)=0,Q(i)>0\\) 时贡献为 0（约定 \\(0\\log 0=0\\)）。设计损失函数时需注意 \\(Q\\) 的支撑必须覆盖 \\(P\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q8",
+        "question": "二元熵函数 \\(h(p)=-p\\log_2 p-(1-p)\\log_2(1-p)\\)。\\(h(0.1)=?\\)（取两位小数）",
+        "options": [
+          "\\(\\approx0.47\\)  B) \\(\\approx0.81\\)  C) \\(\\approx1.00\\)  D) \\(\\approx0.33\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(h(0.1)=-0.1\\log_2 0.1-0.9\\log_2 0.9\\)。\\(\\log_2 0.1=-3.322\\)，\\(\\log_2 0.9=-0.152\\)。\\(h=0.332+0.137=0.469\\approx0.47\\)。\\(h(p)\\) 在 \\(p=1/2\\) 时达最大值 1，在 \\(p=0,1\\) 处为 0。\\(h\\) 对称于 \\(p=1/2\\)：\\(h(p)=h(1-p)\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q9",
+        "question": "\\(I(X;Y)=H(X)+H(Y)-H(X,Y)\\)。已知 \\(H(X)=2,H(Y)=3,H(X,Y)=4\\)。\\(I(X;Y)=?\\)",
+        "options": [
+          "\\(1\\) bit  B) \\(5\\) bit  C) \\(0\\) bit  D) \\(-1\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(X;Y)=2+3-4=1\\) bit。直觉：\\(X\\) 和 \\(Y\\) 各自不确定性的\"重叠\"部分为 1 bit。\\(I\\geq0\\) 恒成立（独立时 \\(H(X,Y)=H(X)+H(Y)\\)，\\(I=0\\)）。\\(I(X;Y)\\) 还等于 \\(D_{\\text{KL}}(P_{XY}\\|P_X P_Y)\\)。Venn 图：两圆交集面积为 \\(I\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q10",
+        "question": "\\(H(Y|X)=0\\) 意味着什么？",
+        "options": [
+          "\\(Y\\) 是 \\(X\\) 的确定性函数  B) \\(X\\) 和 \\(Y\\) 独立  C) \\(Y\\) 是常数  D) \\(X\\) 是 \\(Y\\) 的函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(Y|X)=0\\Leftrightarrow\\) 对每个 \\(x\\)，\\(P(Y|X=x)\\) 集中在一个值上。即知道 \\(X\\) 后 \\(Y\\) 完全确定。例如 \\(Y=f(X)\\)。注意反之不然：\\(Y=f(X)\\) 不意味 \\(X=g(Y)\\)（\\(f\\) 不一定可逆）。\\(H(Y|X)=0\\Rightarrow I(X;Y)=H(Y)\\)，\\(X\\) 携带了关于 \\(Y\\) 的全部信息。"
+      },
+      {
+        "id": "info-theory-ch01-q11",
+        "question": "\\(P=(1/2,1/4,1/8,1/8)\\)，\\(Q=(1/4,1/4,1/4,1/4)\\)。\\(D_{\\text{KL}}(P\\|Q)=?\\)",
+        "options": [
+          "\\(\\frac{1}{4}\\) bit  B) \\(0\\) bit  C) \\(\\frac{1}{2}\\) bit  D) \\(1\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(D=\\sum p_i\\log_2(p_i/q_i)=\\frac{1}{2}\\log_2 2+\\frac{1}{4}\\log_2 1+\\frac{1}{8}\\log_2\\frac{1}{2}+\\frac{1}{8}\\log_2\\frac{1}{2}=\\frac{1}{2}-0-\\frac{1}{8}-\\frac{1}{8}=\\frac{1}{4}\\) bit。KL 散度 \\(=H_{\\text{cross}}(P,Q)-H(P)=2-1.75=0.25\\)✓。交叉熵 \\(H_{\\text{cross}}=\\sum p_i\\log(1/q_i)=\\sum p_i\\times2=2\\)，\\(H(P)=1.75\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q12",
+        "question": "\\(X\\to Y\\to Z\\) 为马尔科夫链。数据处理不等式（DPI）说什么？",
+        "options": [
+          "\\(I(X;Z)\\leq I(X;Y)\\)  B) \\(I(X;Z)\\geq I(X;Y)\\)  C) \\(I(X;Z)=0\\)  D) \\(I(X;Z)=I(X;Y)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\to Y\\to Z\\) 意味 \\(P(Z|X,Y)=P(Z|Y)\\)。\\(I(X;Z)\\leq I(X;Y)\\)：对 \\(X\\) 做处理（通过 \\(Y\\to Z\\) 的信道）只能损失信息，不能增加。等号当且仅当 \\(X\\to Z\\to Y\\) 也是马尔科夫链（\\(Z\\) 是 \\(X\\) 的充分统计量）。DPI 是信息论中最深刻的不等式之一——信息不能被创造。"
+      },
+      {
+        "id": "info-theory-ch01-q13",
+        "question": "英语文本中字母的一阶熵约为 \\(H_1\\approx4.07\\) bit/字母。若考虑字母间相关性（高阶熵），实际熵率 \\(h\\approx1.0-1.5\\) bit/字母。这说明什么？",
+        "options": [
+          "英语文本有大量冗余，理论上可压缩到约 1/4 到 1/3  B) 英语无法压缩  C) 一阶熵不准确  D) 需要更多字母"
+        ],
+        "answer": 0,
+        "explanation": "\\(H_1/h_{\\text{实际}}\\approx4.07/1.25\\approx3.3\\) 倍冗余。即英语文本理论上可压缩至约 \\(1.25/8\\approx15.6\\%\\)（\\(8\\) bit/ASCII 字符）。Shannon 的\"猜字游戏\"实验估算 \\(h\\approx1.0-1.5\\) bit/字母。冗余源：字母频率不均（\\(H_1<\\log_2 26\\approx4.7\\)）、连续字母相关性（bigram、trigram 等）。"
+      },
+      {
+        "id": "info-theory-ch01-q14",
+        "question": "\\(P=(0.5,0.5),Q=(0.9,0.1)\\)。\\(D_{\\text{KL}}(P\\|Q)\\) 与 \\(D_{\\text{KL}}(Q\\|P)\\) 哪个更大？",
+        "options": [
+          "\\(D_{\\text{KL}}(Q\\|P)<D_{\\text{KL}}(P\\|Q)\\)  B) \\(D_{\\text{KL}}(P\\|Q)<D_{\\text{KL}}(Q\\|P)\\)  C) 相等  D) 取决于具体值"
+        ],
+        "answer": 0,
+        "explanation": "\\(D(P\\|Q)=0.5\\log\\frac{0.5}{0.9}+0.5\\log\\frac{0.5}{0.1}=0.5(-0.848)+0.5(2.322)=0.737\\) bit。\\(D(Q\\|P)=0.9\\log\\frac{0.9}{0.5}+0.1\\log\\frac{0.1}{0.5}=0.9(0.848)+0.1(-2.322)=0.763-0.232=0.531\\) bit。\\(D(Q\\|P)=0.531<0.737=D(P\\|Q)\\)。不对称性的来源：\\(D(P\\|Q)\\) 中 \\(P\\) 赋予高权重的地方 \\(P/Q\\) 偏离大时惩罚更重。"
+      },
+      {
+        "id": "info-theory-ch01-q15",
+        "question": "三个随机变量的互信息关系：\\(I(X;Y,Z)=I(X;Y)+I(X;Z|Y)\\)。这称为什么？",
+        "options": [
+          "互信息的链式法则  B) 贝叶斯定理  C) 熵的可加性  D) 数据处理不等式"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(X;Y,Z)=H(X)-H(X|Y,Z)=[H(X)-H(X|Y)]+[H(X|Y)-H(X|Y,Z)]=I(X;Y)+I(X;Z|Y)\\)。先从 \\(Y\\) 获取信息，再从 \\(Z\\)（已知 \\(Y\\)）获取剩余信息。这是构建信息论\"Venn 图\"的基础。推广：\\(I(X;Y_1,...,Y_n)=\\sum_{i=1}^n I(X;Y_i|Y_1,...,Y_{i-1})\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q16",
+        "question": "连续随机变量 \\(X\\sim\\mathcal{N}(\\mu,\\sigma^2)\\) 的微分熵 \\(h(X)=?\\)",
+        "options": [
+          "\\(\\frac{1}{2}\\log_2(2\\pi e\\sigma^2)\\)  B) \\(\\log_2\\sigma\\)  C) \\(\\sigma^2\\)  D) \\(\\mu+\\sigma\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(h(X)=-\\int f(x)\\log_2 f(x)dx=\\frac{1}{2}\\log_2(2\\pi e\\sigma^2)\\) bit。高斯分布在给定方差下微分熵最大（最大熵原理）。\\(\\sigma=1\\) 时 \\(h\\approx\\frac{1}{2}\\log_2(17.08)\\approx2.05\\) bit。微分熵可以为负（如 \\(\\sigma<1/\\sqrt{2\\pi e}\\) 时），但互信息 \\(I\\) 始终非负。"
+      },
+      {
+        "id": "info-theory-ch01-q17",
+        "question": "条件互信息 \\(I(X;Y|Z)\\) 可以大于 \\(I(X;Y)\\) 吗？",
+        "options": [
+          "可以——\\(Z\\) 可以\"解释\"掉某些混淆因素从而增加 \\(X,Y\\) 的相关性  B) 不可以  C) 恒等  D) 仅在独立时"
+        ],
+        "answer": 0,
+        "explanation": "经典例子：\\(X,Y\\) 独立 Bernoulli，\\(Z=X\\oplus Y\\)。\\(I(X;Y)=0\\)（独立），但 \\(I(X;Y|Z)=1\\)（知道 \\(Z\\) 和 \\(X\\) 后 \\(Y\\) 完全确定）。这与 DPI 不矛盾——DPI 要求马尔科夫链结构，此处 \\(Z\\) 是 \\((X,Y)\\) 的函数，没有马尔科夫关系。条件化可以增加或减少互信息。"
+      },
+      {
+        "id": "info-theory-ch01-q18",
+        "question": "\\(P=(p,1-p),Q=(q,1-q)\\)，\\(D_{\\text{KL}}(P\\|Q)\\) 在 \\(p=q\\) 时取最小值 0。证明 \\(D\\geq0\\) 的关键不等式是什么？",
+        "options": [
+          "\\(\\ln x\\leq x-1\\)（Jensen 不等式的推论）  B) \\(x^2\\geq0\\)  C) 三角不等式  D) 柯西不等式"
+        ],
+        "answer": 0,
+        "explanation": "\\(D(P\\|Q)=\\sum p_i\\log\\frac{p_i}{q_i}=-\\sum p_i\\log\\frac{q_i}{p_i}\\geq-\\log\\sum p_i\\frac{q_i}{p_i}=-\\log\\sum q_i=-\\log 1=0\\)。用 Jensen 不等式（\\(\\log\\) 是凹函数）。或者用 \\(\\ln x\\leq x-1\\)：\\(-D=\\sum p_i\\ln(q_i/p_i)\\leq\\sum p_i(q_i/p_i-1)=\\sum q_i-\\sum p_i=0\\)，故 \\(D\\geq0\\)。等号当且仅当 \\(P=Q\\)。这就是 Gibbs 不等式。"
+      },
+      {
+        "id": "info-theory-ch01-q19",
+        "question": "\\(X,Y,Z\\) 构成马尔科夫链 \\(X\\to Y\\to Z\\)。\\(I(X;Y)=5\\) bit，\\(I(Y;Z)=3\\) bit。\\(I(X;Z)\\) 的上界是？",
+        "options": [
+          "\\(3\\) bit  B) \\(5\\) bit  C) \\(8\\) bit  D) \\(15\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "DPI：\\(I(X;Z)\\leq\\min(I(X;Y),I(Y;Z))=\\min(5,3)=3\\) bit。证明：\\(I(X;Z)\\leq I(X;Y)\\)（DPI，\\(X\\to Y\\to Z\\)）和 \\(I(X;Z)\\leq I(Y;Z)\\)（DPI，\\(X\\to Y\\to Z\\) 对 \\(Z\\) 也成立：\\(I(X;Z)\\leq I(Y;Z)\\)）。第二个 DPI 的验证：\\(I(X;Z)\\leq I(X;Y,Z)=I(X;Y)+I(X;Z|Y)=I(X;Y)+0=5\\)。但更紧的界需 \\(I(X;Z)\\leq I(Y;Z)\\)（由 DPI 的另一个方向）。"
+      },
+      {
+        "id": "info-theory-ch01-q20",
+        "question": "Rényi 熵 \\(H_\\alpha(X)=\\frac{1}{1-\\alpha}\\log_2\\sum p_i^\\alpha\\)。当 \\(\\alpha\\to1\\) 时 \\(H_\\alpha\\) 趋向什么？",
+        "options": [
+          "Shannon 熵 \\(H(X)=-\\sum p_i\\log p_i\\)  B) \\(0\\)  C) \\(\\infty\\)  D) \\(\\log|\\mathcal{X}|\\)"
+        ],
+        "answer": 0,
+        "explanation": "L'Hôpital 法则：\\(\\lim_{\\alpha\\to1}\\frac{\\log\\sum p_i^\\alpha}{1-\\alpha}\\)。\\(f(\\alpha)=\\sum p_i^\\alpha\\)，\\(f(1)=1\\)，\\(f'(\\alpha)=\\sum p_i^\\alpha\\ln p_i\\)，\\(f'(1)=\\sum p_i\\ln p_i\\)。\\(\\lim=\\frac{f'(1)/f(1)}{-1}\\cdot\\frac{1}{\\ln 2}=-\\sum p_i\\log_2 p_i=H(X)\\)。Rényi 熵族包含 \\(H_0=\\log|\\text{support}|\\)（Hartley 熵）、\\(H_\\infty=-\\log\\max p_i\\)（min-entropy）。"
+      },
+      {
+        "id": "info-theory-ch01-q21",
+        "question": "已知 \\(H(X|Y)\\leq H(X)\\)（条件化不增加熵）。但 \\(H(X|Y=y)\\) 可以大于 \\(H(X)\\) 吗？（对特定值 \\(y\\)）",
+        "options": [
+          "可以——条件化减少熵是期望意义上的，个别条件值可以增加  B) 不可以  C) 仅当 \\(X,Y\\) 独立  D) 取决于分布族"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(X|Y)=\\sum_y P(y)H(X|Y=y)\\leq H(X)\\)。但某些 \\(y\\) 可使 \\(H(X|Y=y)>H(X)\\)。例：\\(X\\in\\{1,2,3\\}\\)，\\(P(X=1)=0.9\\)，\\(P(X=2)=P(X=3)=0.05\\)。\\(H(X)\\approx0.57\\)。若 \\(Y=0\\) 时 \\(X\\) 均匀分布在 \\(\\{1,2,3\\}\\)，\\(H(X|Y=0)=\\log 3\\approx1.58>0.57\\)。只要 \\(P(Y=0)\\) 足够小，期望条件熵仍 \\(\\leq H(X)\\)。"
+      },
+      {
+        "id": "info-theory-ch01-q22",
+        "question": "Jensen-Shannon 散度 \\(\\text{JSD}(P\\|Q)=\\frac{1}{2}D(P\\|M)+\\frac{1}{2}D(Q\\|M)\\)（\\(M=\\frac{P+Q}{2}\\)）。JSD 的值域是什么？",
+        "options": [
+          "\\([0,1]\\)（以 bit 为单位，\\(\\log_2\\)）  B) \\([0,\\infty)\\)  C) \\((-\\infty,\\infty)\\)  D) \\([0,2]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{JSD}\\geq0\\)（KL 非负），\\(\\text{JSD}\\leq\\frac{1}{2}\\log_2 2+\\frac{1}{2}\\log_2 2=1\\) bit（当 \\(P,Q\\) 支撑不重叠时取上界）。\\(\\sqrt{\\text{JSD}}\\) 是真正的度量（Jensen-Shannon distance），满足三角不等式。GAN 训练中判别器的损失函数与 JSD 直接相关——这就是 GAN 训练不稳定的信息论解释。"
+      },
+      {
+        "id": "info-theory-ch01-q23",
+        "question": "证明互信息对称性 \\(I(X;Y)=I(Y;X)\\) 的关键步骤。",
+        "options": [
+          "\\(I(X;Y)=H(X)-H(X|Y)=H(X)+H(Y)-H(X,Y)=H(Y)-H(Y|X)=I(Y;X)\\)  B) 利用贝叶斯定理  C) 利用大数定律  D) 直接计算"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(X;Y)=H(X)+H(Y)-H(X,Y)\\)（对称式——\\(X,Y\\) 可交换），故 \\(I(X;Y)=I(Y;X)\\)。另一证明：\\(I(X;Y)=\\sum_{x,y}p(x,y)\\log\\frac{p(x,y)}{p(x)p(y)}\\)，联合分布 \\(p(x,y)=p(y,x)\\)，交换 \\(x,y\\) 不变。互信息的对称性很直觉：\\(X\\) 告诉你关于 \\(Y\\) 的信息量 \\(=\\) \\(Y\\) 告诉你关于 \\(X\\) 的信息量。"
+      },
+      {
+        "id": "info-theory-ch01-q24",
+        "question": "最大熵原理：已知 \\(E[X]=\\mu,\\text{Var}(X)=\\sigma^2\\) 时，最大化微分熵 \\(h(X)\\) 的分布是什么？",
+        "options": [
+          "高斯分布 \\(\\mathcal{N}(\\mu,\\sigma^2)\\)  B) 均匀分布  C) 指数分布  D) 拉普拉斯分布"
+        ],
+        "answer": 0,
+        "explanation": "约束 \\(E[X]=\\mu,E[(X-\\mu)^2]=\\sigma^2\\) 下最大熵分布是高斯——可用 Lagrange 乘数法证明。拉格朗日函数 \\(\\mathcal{L}=h(f)+\\lambda_1(\\int xf-\\mu)+\\lambda_2(\\int(x-\\mu)^2 f-\\sigma^2)\\)。变分求解得 \\(f(x)\\propto\\exp(-\\lambda_2(x-\\mu)^2)\\)，即高斯密度。这为统计建模中\"高斯假设\"提供了信息论正当性。"
+      },
+      {
+        "id": "info-theory-ch01-q25",
+        "question": "Fano 不等式：若从 \\(Y\\) 估计 \\(X\\) 的错误率 \\(P_e=P(\\hat{X}(Y)\\neq X)\\)，则 \\(H(X|Y)\\leq h(P_e)+P_e\\log(|\\mathcal{X}|-1)\\)。当 \\(|\\mathcal{X}|=2\\) 时简化为什么？",
+        "options": [
+          "\\(H(X|Y)\\leq h(P_e)\\)  B) \\(H(X|Y)\\leq P_e\\)  C) \\(H(X|Y)=0\\)  D) \\(H(X|Y)\\leq1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\mathcal{X}|=2\\) 时 \\(\\log(|\\mathcal{X}|-1)=\\log 1=0\\)，故 \\(H(X|Y)\\leq h(P_e)\\)。反用：\\(h(P_e)\\geq H(X|Y)\\)，\\(P_e\\geq h^{-1}(H(X|Y))\\)。Fano 不等式给出最优估计的错误率下界——不管用什么算法，\\(P_e\\) 都不能低于此界。这是通信系统容量定理和统计决策论的基础工具。"
+      },
+      {
+        "id": "info-theory-ch01-q26",
+        "question": "机器学习中交叉熵损失 \\(L=-\\sum y_i\\log\\hat{y}_i\\) 的信息论含义是什么？",
+        "options": [
+          "用模型分布 \\(\\hat{Y}\\) 编码真实分布 \\(Y\\) 的平均比特数  B) 模型参数的大小  C) 训练速度  D) 数据集大小"
+        ],
+        "answer": 0,
+        "explanation": "\\(H_{\\text{cross}}(P,Q)=-\\sum p_i\\log q_i=H(P)+D_{\\text{KL}}(P\\|Q)\\)。最小化交叉熵等价于最小化 KL 散度 \\(D(P\\|\\hat{P})\\)（\\(H(P)\\) 固定）。即让模型分布尽量接近数据真实分布。CNN/Transformer 分类中 softmax + 交叉熵是标准配置。\\(L=0\\) 当且仅当 \\(\\hat{y}=y\\)（完美预测）。"
+      },
+      {
+        "id": "info-theory-ch01-q27",
+        "question": "决策树算法（如 ID3）选择信息增益最大的特征进行分裂。信息增益 \\(IG(Y;X)\\) 就是什么？",
+        "options": [
+          "互信息 \\(I(Y;X)=H(Y)-H(Y|X)\\)  B) 条件熵 \\(H(Y|X)\\)  C) 联合熵 \\(H(X,Y)\\)  D) KL 散度"
+        ],
+        "answer": 0,
+        "explanation": "\\(IG=H(Y)-H(Y|X)=I(Y;X)\\)：用 \\(X\\) 分裂后 \\(Y\\) 的不确定性减少量。选择使 \\(IG\\) 最大的特征，即最能区分类别的特征。ID3/C4.5 的核心。缺点：\\(IG\\) 偏好高基数特征（取值多的特征天然 \\(H(Y|X)\\) 低），C4.5 用 \\(IG/H(X)\\)（增益率）修正。"
+      },
+      {
+        "id": "info-theory-ch01-q28",
+        "question": "DNA 序列中 4 种碱基 A、T、C、G 若等概率出现，每个碱基的信息量为 \\(2\\) bit。实际 GC 含量因物种而异（如嗜热菌 GC \\(\\approx70\\%\\)）。此时每碱基熵比 \\(2\\) bit 多还是少？",
+        "options": [
+          "少——分布不均匀降低了熵  B) 多  C) 不变  D) 取决于序列长度"
+        ],
+        "answer": 0,
+        "explanation": "均匀时 \\(H=\\log_2 4=2\\) bit（最大）。GC=70% 意味 \\(P(G)=P(C)\\approx0.35,P(A)=P(T)\\approx0.15\\)。\\(H=-2(0.35\\log_2 0.35)-2(0.15\\log_2 0.15)\\approx1.86\\) bit < 2 bit。低于理论最大值 \\(\\to\\) 有冗余 \\(\\to\\) 可以比 \\(2\\) bit/碱基更高效地编码。实际基因组压缩算法（如 gzip 对 FASTA）利用这种偏差和长程相关性。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="info-theory"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/info-theory.html" class="module-name">信息论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 自信息与 Shannon 熵</a></li>
+      <li><a href="#kp2">02 · 联合熵、条件熵与链式法则</a></li>
+      <li><a href="#kp3">03 · KL 散度与 Gibbs 不等式</a></li>
+      <li><a href="#kp4">04 · 互信息与数据处理不等式</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>熵与信息量</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>自信息与 Shannon 熵</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>「信息」是日常概念，但 Shannon 在 1948 年将其精确定量化—— 不确定性越大，信息量越多。熵度量了随机变量的平均不确定性， 它不仅是信息论的基石，也是数据压缩、通信理论、机器学习的 核心概念。理解熵是打开信息论所有结果的钥匙。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象：用对数度量惊讶度。小概率事件携带更多信息， 正如「狗咬人」不是新闻而「人咬狗」才是。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>自信息</strong>：事件 \(x\) 的信息量 \(I(x) = -\log_2 P(x)\)（单位：bit）。 性质：\(I(x) \geq 0\)；\(P(x)=1 \Rightarrow I(x)=0\)； 独立事件：\(I(xy)=I(x)+I(y)\)。 <strong>Shannon 熵</strong>： \[H(X) = -\sum_{x \in \mathcal{X}} p(x) \log_2 p(x) = \mathbb{E}[I(X)]\] 性质： (1) \(H(X) \geq 0\)，\(H(X)=0\) iff \(X\) 确定 (2) \(H(X) \leq \log_2|\mathcal{X}|\)，等号当且仅当均匀分布 (3) 二元熵：\(H(p) = -p\log p - (1-p)\log(1-p)\)，\(H(1/2)=1\) bit <strong>最大熵原理</strong>：在给定约束下，选择熵最大的分布。 无约束：均匀分布；给定均值+方差：正态分布。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 数据压缩：熵 = 平均最短编码长度的下界 - 机器学习：信息增益 = 决策树分裂的标准</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：弹琴每节钢琴课有 4 个可能等级 A/B/C/D，概率分别为 \(1/2, 1/4, 1/8, 1/8\)。求熵。 解答：\(H = -\frac{1}{2}\log\frac{1}{2} - \frac{1}{4}\log\frac{1}{4} - 2 \times \frac{1}{8}\log\frac{1}{8}\) \(= \frac{1}{2} + \frac{2}{4} + \frac{6}{8} = \frac{1}{2}+\frac{1}{2}+\frac{3}{4} = \frac{7}{4} = 1.75\) bit。 易错点：\(0 \log 0\) 约定为 0（由极限 \(\lim_{p\to 0} p\log p = 0\)）， 不是未定义。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">抛一枚均匀硬币的熵为多少 bit？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H = -2 \\times \\frac{1}{2}\\log_2\\frac{1}{2} = 1\\) bit。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H = -2 \\times \\frac{1}{2}\\log_2\\frac{1}{2} = 1\\) bit。')">B. 0.5</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(H = -2 \\times \\frac{1}{2}\\log_2\\frac{1}{2} = 1\\) bit。')">C. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H = -2 \\times \\frac{1}{2}\\log_2\\frac{1}{2} = 1\\) bit。')">D. 2</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>联合熵、条件熵与链式法则</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当两个随机变量一起考虑时，它们的不确定性如何叠加？联合熵、 条件熵和链式法则提供了答案。条件熵度量「知道 \(Y\) 后 \(X\) 的剩余不确定性」，链式法则将联合熵分解为边际熵与条件熵 之和——这些工具是分析多变量信息结构的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>联合熵</strong>： \[H(X,Y) = -\sum_{x,y} p(x,y) \log p(x,y)\] <strong>条件熵</strong>： \[H(X|Y) = -\sum_{x,y} p(x,y) \log p(x|y) = \sum_y p(y) H(X|Y=y)\] <strong>链式法则</strong>： \[H(X,Y) = H(X) + H(Y|X) = H(Y) + H(X|Y)\] 推广：\(H(X_1,\ldots,X_n) = \sum_{i=1}^n H(X_i | X_1,\ldots,X_{i-1})\)。 <strong>条件降低熵</strong>：\(H(X|Y) \leq H(X)\)，等号当 \(X, Y\) 独立。 「知道更多不会增加不确定性」。 <strong>独立时</strong>：\(H(X,Y) = H(X)+H(Y)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 条件熵用于度量特征选择中的信息增益 - 链式法则是数据压缩中预测编码的理论基础</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\((X,Y)\) 的联合分布为：\(P(0,0)=1/4, P(0,1)=1/4, P(1,0)=1/4, P(1,1)=1/4\)。求 \(H(X), H(Y|X), H(X,Y)\)。 解答：\(X, Y\) 均等分布，\(H(X)=1\)。 \(X,Y\) 独立，\(H(Y|X) = H(Y) = 1\)。 \(H(X,Y) = H(X)+H(Y|X) = 2\) bit。 验证：\(H(X,Y) = -4 \times \frac{1}{4}\log\frac{1}{4} = 2\)。✓ 易错点：\(H(X|Y)\) 是对 \(Y\) 的平均，不是对某个特定 \(y\) 值的熵。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(X\) 完全决定 \(Y\)（即 \(Y=f(X)\)），则 \(H(Y|X) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。知道 \\(X\\) 后 \\(Y\\) 完全确定，无剩余不确定性。')">A. \(H(Y)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。知道 \\(X\\) 后 \\(Y\\) 完全确定，无剩余不确定性。')">B. \(H(X)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！知道 \\(X\\) 后 \\(Y\\) 完全确定，无剩余不确定性。')">C. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。知道 \\(X\\) 后 \\(Y\\) 完全确定，无剩余不确定性。')">D. \(H(X,Y)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>KL 散度与 Gibbs 不等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>两个分布有多「不同」？KL 散度提供了一种自然的度量，它度量用 分布 \(Q\) 近似 \(P\) 时的额外编码代价。尽管 KL 散度不是真正的 距离（不对称），它在机器学习、统计推断、信息几何中无处不在。 Gibbs 不等式 (\(D_{KL} \geq 0\)) 是信息论最基本的不等式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>KL 散度度量「用错误模型编码的额外代价」——它是信息论与 统计学的桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>KL 散度</strong>： \[D_{KL}(P \| Q) = \sum_x p(x) \log \frac{p(x)}{q(x)}\] <strong>Gibbs 不等式</strong>：\(D_{KL}(P \| Q) \geq 0\)，等号当 \(P = Q\)。 证明：由 \(\ln x \leq x - 1\)（等号 \(x=1\)）， \[-D_{KL} = \sum p \ln\frac{q}{p} \leq \sum p\left(\frac{q}{p}-1\right) = \sum q - \sum p = 0\] <strong>性质</strong>：\(D_{KL}(P\|Q) \neq D_{KL}(Q\|P)\)（非对称）， 不满足三角不等式，因此不是距离。 <strong>与交叉熵的关系</strong>： \[D_{KL}(P\|Q) = H(P, Q) - H(P)\] 其中交叉熵 \(H(P,Q) = -\sum p(x) \log q(x)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 机器学习：最小化交叉熵损失 = 最小化 \(D_{KL}(P_{\text{data}} \| P_\theta)\) - 变分推断：ELBO 中 \(D_{KL}(q(z|x) \| p(z))\) 作为正则项</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(P = (1/2, 1/2)\)，\(Q = (1/4, 3/4)\)。求 \(D_{KL}(P\|Q)\)。 解答：\(D_{KL} = \frac{1}{2}\log\frac{1/2}{1/4} + \frac{1}{2}\log\frac{1/2}{3/4} = \frac{1}{2}\log 2 + \frac{1}{2}\log\frac{2}{3} = \frac{1}{2} + \frac{1}{2}(-0.585) = 0.2075\) bit。 易错点：\(D_{KL}(P\|Q) \neq D_{KL}(Q\|P)\)。确认方向： \(D_{KL}(P\|Q)\) 中 \(P\) 在对数内，\(Q\) 在对数外。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">KL 散度不是距离的主要原因是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。正式地，KL 散度既不对称也不满足三角不等式，')">A. 可以为负</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！正式地，KL 散度既不对称也不满足三角不等式，')">B. 不满足对称性 \(D(P\|Q) \neq D(Q\|P)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。正式地，KL 散度既不对称也不满足三角不等式，')">C. 不能定义于连续分布</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。正式地，KL 散度既不对称也不满足三角不等式，')">D. 值域无界</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>互信息与数据处理不等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(X\) 和 \(Y\) 之间共享了多少信息？互信息 \(I(X;Y)\) 度量了这一量。 它是对称的、非负的，且等于零当且仅当 \(X, Y\) 独立。 数据处理不等式则说明信息只会在处理过程中丢失，不会被创造。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>互信息统一了熵、条件熵、联合熵之间的关系， 类似于集合论中的交集 \(|A \cap B| = |A|+|B|-|A\cup B|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>互信息</strong>： \[I(X;Y) = H(X) - H(X|Y) = H(Y) - H(Y|X) = H(X)+H(Y)-H(X,Y)\] 等价定义：\(I(X;Y) = D_{KL}(P_{XY} \| P_X P_Y)\)， 度量联合分布与独立分布的偏离程度。 <strong>性质</strong>：\(I(X;Y) \geq 0\)（由 Gibbs 不等式）， \(I(X;Y) = 0\) iff \(X \perp Y\)。 \(I(X;Y) = I(Y;X)\)（对称）。 <strong>数据处理不等式</strong>：若 \(X \to Y \to Z\) 构成 Markov 链，则 \[I(X; Z) \leq I(X; Y)\] 「处理数据不会增加信息」。证明：链式法则 + \(I(X; Z | Y) = 0\)（Markov 性）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 特征选择：选择 \(I(X_i; Y)\) 最大的特征 - VAE: ELBO = \(\mathbb{E}[\log p(x|z)] - D_{KL}(q(z|x) \| p(z))\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X \sim \text{Bernoulli}(1/2)\)，\(Y = X \oplus N\)，\(N \sim \text{Bernoulli}(p)\) 独立于 \(X\)。 求 \(I(X; Y)\)。 解答：\(H(Y) = 1\)（\(Y\) 也是均匀的）。 \(H(Y|X) = H(N) = H(p)\)。 \(I(X;Y) = 1 - H(p)\)。\(p=0\)：\(I=1\)（无噪声），\(p=1/2\)：\(I=0\)（完全噪声）。 易错点：混淆 \(I(X;Y)\) 与 \(H(X|Y)\)。\(I\) 是「知道 \(Y\) 后减少的 不确定性」，\(H(X|Y)\) 是「剩余不确定性」。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">数据处理不等式说明了什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(X \\to Y \\to Z\\) 得 \\(I(X;Z) \\leq I(X;Y)\\)：通过')">A. 加密不增加信息</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(X \\to Y \\to Z\\) 得 \\(I(X;Z) \\leq I(X;Y)\\)：通过')">B. 处理数据只会丢失信息，不会创造信息</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(X \\to Y \\to Z\\) 得 \\(I(X;Z) \\leq I(X;Y)\\)：通过')">C. 互信息总是递增的</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(X \\to Y \\to Z\\) 得 \\(I(X;Z) \\leq I(X;Y)\\)：通过')">D. 熵总是增加的</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/discrete/info-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

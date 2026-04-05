@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 重复博弈 — 博弈论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "game-theory-ch05-q1",
+        "question": "有限重复博弈（finitely repeated game）中，唯一 NE 的阶段博弈重复 \\(T\\) 次，SPNE 的结果？",
+        "options": [
+          "每轮都打阶段博弈的 NE（逆向归纳：第 \\(T\\) 轮打 NE → 第 \\(T-1\\) 轮也打 NE → ...）  B) 可以合作  C) 不确定  D) 仅第一轮打 NE"
+        ],
+        "answer": 0,
+        "explanation": "逆向归纳\"展开\"（unraveling）：最后一轮无未来惩罚→打 NE；倒数第二轮也无法承诺→NE；...→每轮 NE。前提：阶段博弈有唯一 NE。若阶段博弈有多个 NE，则可利用均衡选择作为\"胡萝卜和大棒\"在前面几轮实现合作。Benoit-Krishna (1985)：多 NE 的有限重复博弈可维持合作（只要 \\(T\\) 足够大）。"
+      },
+      {
+        "id": "game-theory-ch05-q2",
+        "question": "为什么有限重复囚徒困境（唯一 NE = 互相背叛）不能维持合作？",
+        "options": [
+          "逆向归纳——最后一轮一定背叛→倒数第二轮也背叛→...→每轮背叛  B) 信息不充分  C) 玩家不理性  D) 合作是均衡"
+        ],
+        "answer": 0,
+        "explanation": "单阶段 PD：\\((C,C)=(3,3)\\)，\\((D,D)=(1,1)\\)，\\((D,C)=(4,0)\\)。唯一 NE = \\((D,D)\\)。重复 \\(T\\) 次：第 \\(T\\) 轮无未来→\\(D\\)。第 \\(T-1\\) 轮知道第 \\(T\\) 轮都是 \\(D\\)→无法用合作奖励→\\(D\\)。逐步展开→每轮 \\(D\\)。但实验中人类在有限重复 PD 中合作率 \\(\\sim 40\\)-\\(60\\%\\)（直到接近最后几轮才下降）——有限理性/不确定终止解释此差异。"
+      },
+      {
+        "id": "game-theory-ch05-q3",
+        "question": "无限重复博弈中折扣因子 \\(\\delta\\) 的角色。总收益 = \\(\\sum_{t=0}^{\\infty}\\delta^t u_t\\)。\\(\\delta\\) 代表什么？",
+        "options": [
+          "\\(\\delta\\in(0,1)\\) 是折扣因子——未来收益的相对权重。\\(\\delta\\) 大 = 更有耐心 = 更看重未来  B) 惩罚因子  C) 概率  D) 利率倒数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\delta=\\frac{1}{1+r}\\)（\\(r\\) = 利率/贴现率）。也可解释为\"每轮博弈继续下去的概率\"（如果 \\(\\delta\\) = 继续概率，则有限期望轮数但无确定终止→仍可维持合作）。\\(\\delta\\) 大→未来重要→合作（维持长期关系）有价值；\\(\\delta\\) 小→\"活在当下\"→背叛。临界 \\(\\delta^*\\)：使合作可维持的最小 \\(\\delta\\)。"
+      },
+      {
+        "id": "game-theory-ch05-q4",
+        "question": "进化博弈论中的 ESS（进化稳定策略）定义？",
+        "options": [
+          "策略 \\(\\sigma^*\\) 是 ESS 当且仅当：对每个突变策略 \\(\\sigma\\neq\\sigma^*\\)，(1) \\(u(\\sigma^*,\\sigma^*)\\geq u(\\sigma,\\sigma^*)\\)，且 (2) 若等号成立则 \\(u(\\sigma^*,\\sigma)>u(\\sigma,\\sigma)\\)  B) 仅为纯策略  C) 总是存在  D) 等于 NE"
+        ],
+        "answer": 0,
+        "explanation": "Maynard Smith & Price (1973)：ESS 是能抵抗小规模突变入侵的策略。条件 (1)：\\(\\sigma^*\\) 是自身的 BR（NE 条件）。条件 (2)（稳定性）：若突变者与居民打平（\\(u(\\sigma,\\sigma^*)=u(\\sigma^*,\\sigma^*)\\)），则在突变者之间的互动中居民更优。每个 ESS 是 NE，但不是每个 NE 是 ESS。ESS 可能不存在（如石头剪刀布——没有纯策略 ESS，混合 NE 也不是 ESS）。"
+      },
+      {
+        "id": "game-theory-ch05-q5",
+        "question": "鸽鹰博弈（Hawk-Dove）：\\(V=4\\)（资源价值），\\(C=6\\)（打斗代价）。纯策略 NE？ESS？",
+        "options": [
+          "纯策略 NE：\\((H,D)\\) 和 \\((D,H)\\)。对称混合 ESS：\\(p^*=V/C=2/3\\) 打鹰  B) \\((H,H)\\)  C) \\((D,D)\\)  D) 无 ESS"
+        ],
+        "answer": 0,
+        "explanation": "收益矩阵：\\(u(H,H)=(V-C)/2=-1\\)，\\(u(H,D)=V=4\\)，\\(u(D,H)=0\\)，\\(u(D,D)=V/2=2\\)。纯 NE：\\((H,D),(D,H)\\)——非对称。对称混合 NE：\\(p\\cdot(-1)+(1-p)\\cdot 4=p\\cdot 0+(1-p)\\cdot 2\\) → \\(-p+4-4p=2-2p\\) → \\(-3p=−2\\) → \\(p=2/3\\)。ESS 检验：\\(u(\\sigma^*,\\sigma^*)=p\\cdot(-1+4)/2+(1-p)\\cdot(4+2)/2\\)... 混合策略满足 ESS 的二阶条件→\\(p^*=V/C\\) 是 ESS。"
+      },
+      {
+        "id": "game-theory-ch05-q6",
+        "question": "复制者动力学（replicator dynamics）的基本方程是什么？",
+        "options": [
+          "\\(\\dot{x}_i=x_i[f_i(x)-\\bar{f}(x)]\\)——策略 \\(i\\) 的增长率 \\(=\\) 该策略适应度 \\(-\\) 群体平均适应度  B) \\(\\dot{x}_i=x_i\\)  C) \\(\\dot{x}_i=\\bar{f}\\)  D) 随机游走"
+        ],
+        "answer": 0,
+        "explanation": "\\(x_i=\\) 策略 \\(i\\) 在种群中的比例，\\(f_i(x)=\\sum_j x_j u(i,j)\\) 是策略 \\(i\\) 的期望适应度（收益），\\(\\bar{f}=\\sum_i x_i f_i\\) 是群体平均。\\(\\dot{x}_i=x_i(f_i-\\bar{f})\\)：高于平均适应度→比例增加。性质：(1) \\(\\sum x_i=1\\) 守恒；(2) NE 是不动点（但不是所有不动点都是 NE）；(3) ESS 是渐近稳定不动点。该方程等价于 Lotka-Volterra 方程（生态学中的竞争模型）。"
+      },
+      {
+        "id": "game-theory-ch05-q7",
+        "question": "无限重复囚徒困境中，Tit-for-Tat（TFT）策略是什么？",
+        "options": [
+          "第一轮合作，之后每轮模仿对手上一轮的行动  B) 总是合作  C) 总是背叛  D) 随机"
+        ],
+        "answer": 0,
+        "explanation": "Axelrod (1984) 的计算机锦标赛中 TFT 赢得冠军——简单、友好（先合作）、报复（被背叛后惩罚一轮）、宽容（对手回到合作后立即恢复合作）。TFT 在 \\(\\delta\\geq\\frac{T-R}{T-P}\\) 时可维持合作（\\(T>R>P>S\\) 为 PD 收益参数）。TFT 不是 ESS（两个 TFT 从不惩罚→\"always cooperate\"与 TFT 表现相同→违反 ESS 二阶条件）。TFT 的变体（如 Generous TFT、Tit-for-Two-Tats）在有噪声时表现更好。"
+      },
+      {
+        "id": "game-theory-ch05-q8",
+        "question": "有限期博弈（\\(T=2\\)）中阶段博弈有 2 个 NE：\\((A,A)=(3,3),(B,B)=(1,1)\\)，以及 \\((C,C)=(2,2)\\) 为帕累托优化但非 NE。玩家能否在第 1 轮实现 \\((C,C)\\)？",
+        "options": [
+          "可以——第 1 轮打 \\((C,C)\\)，若对手偏离则第 2 轮用 \\((B,B)\\) 惩罚（否则奖励 \\((A,A)\\)）  B) 不可能  C) 仅在无限重复  D) 需要通信"
+        ],
+        "answer": 0,
+        "explanation": "策略：若两人第 1 轮都选 \\(C\\)→第 2 轮选 \\((A,A)\\)；若有人偏离→第 2 轮选 \\((B,B)\\)。偏离第 1 轮的收益变化：\\(u(偏离,C)≤u(C,C)+\\epsilon\\)（取决于具体数字），但第 2 轮惩罚损失 \\(3-1=2\\)。若 \\(\\epsilon<2\\)（不贴现），则不偏离。关键：阶段博弈有多个 NE→可用\"均衡选择\"作为惩罚/奖励→在有限期实现短期合作！这就是 Benoit-Krishna 结果的直觉。"
+      },
+      {
+        "id": "game-theory-ch05-q9",
+        "question": "冷酷触发策略（Grim Trigger）：合作直到有人背叛，之后永远背叛。在无限重复 PD 中 Grim Trigger 构成 SPNE 的条件？收益 \\(R=3,T=4,P=1,S=0\\)。",
+        "options": [
+          "\\(\\delta\\geq\\frac{T-R}{T-P}=\\frac{4-3}{4-1}=\\frac{1}{3}\\)  B) \\(\\delta\\geq1/2\\)  C) \\(\\delta\\geq2/3\\)  D) 任意 \\(\\delta\\)"
+        ],
+        "answer": 0,
+        "explanation": "合作路径收益：\\(\\frac{R}{1-\\delta}=\\frac{3}{1-\\delta}\\)。偏离（第一轮背叛，之后双方 D）：\\(T+\\frac{\\delta P}{1-\\delta}=4+\\frac{\\delta}{1-\\delta}\\)。不偏离条件：\\(\\frac{3}{1-\\delta}\\geq4+\\frac{\\delta}{1-\\delta}\\)→\\(3\\geq4(1-\\delta)+\\delta\\)→\\(3\\geq4-3\\delta\\)→\\(\\delta\\geq1/3\\)。注意：Grim Trigger 过于严厉——一次错误永久惩罚→对噪声不健壮（偶然的失误触发永久\"战争\"）。Tit-for-Tat 更\"宽容\"但也更脆弱。"
+      },
+      {
+        "id": "game-theory-ch05-q10",
+        "question": "无限重复 Cournot 双寡头博弈。用 Grim Trigger 维持垄断产量（各生产 \\(q_M/2\\)），市场需求 \\(P=a-Q\\)，边际成本 \\(c=0\\)。临界 \\(\\delta^*\\)？",
+        "options": [
+          "\\(\\delta^*=9/17\\)  B) \\(\\delta^*=1/2\\)  C) \\(\\delta^*=1/3\\)  D) \\(\\delta^*=2/3\\)"
+        ],
+        "answer": 0,
+        "explanation": "垄断各产 \\(q_M/2=a/4\\)，利润 \\(=a^2/8\\) 每人。偏离：\\(\\max_q q(a-a/4-q)=\\max_q q(3a/4-q)\\)→\\(q^*=3a/8\\)，利润 \\(=9a^2/64\\)。NE（Cournot）：各产 \\(a/3\\)，利润 \\(=a^2/9\\)。不偏离：\\(\\frac{a^2/8}{1-\\delta}\\geq\\frac{9a^2}{64}+\\frac{\\delta a^2/9}{1-\\delta}\\)。简化：\\(\\frac{1/8}{1-\\delta}\\geq\\frac{9}{64}+\\frac{\\delta/9}{1-\\delta}\\)。\\((1/8-\\delta/9)/(1-\\delta)\\geq9/64\\)→\\((9-8\\delta)/72\\geq9(1-\\delta)/64\\)→\\(64(9-8\\delta)\\geq648(1-\\delta)\\)→\\(576-512\\delta\\geq648-648\\delta\\)→\\(136\\delta\\geq72\\)→\\(\\delta\\geq9/17\\approx0.529\\)。"
+      },
+      {
+        "id": "game-theory-ch05-q11",
+        "question": "石头剪刀布（RPS）的唯一 NE 是 \\((1/3,1/3,1/3)\\)。它是 ESS 吗？",
+        "options": [
+          "不是——突变策略在与居民互动中和居民表现相同（都打平），但突变者之间也可能表现一样→不满足 ESS 严格二阶条件  B) 是 ESS  C) 不是 NE  D) 纯策略 ESS"
+        ],
+        "answer": 0,
+        "explanation": "NE 检查：对称混合 \\((1/3,1/3,1/3)\\) 使对手对三种选择无差异→NE ✓。ESS 检查：任意替代策略 \\(\\sigma\\) 满足 \\(u(\\sigma,(1/3,1/3,1/3))=u(\\sigma^*,(1/3,1/3,1/3))=0\\)（打平）。需检查 \\(u(\\sigma^*,\\sigma)>u(\\sigma,\\sigma)\\)。但 \\(u(\\sigma^*,\\sigma)=0\\)（均匀混合对任何策略期望 \\(=0\\)），\\(u(\\sigma,\\sigma)\\) 也可 \\(=0\\)→不满足严格不等式。RPS 无 ESS！复制者动力学中 \\((1/3,1/3,1/3)\\) 是中性稳定的（轨道是封闭曲线而非收敛到不动点）。"
+      },
+      {
+        "id": "game-theory-ch05-q12",
+        "question": "两种策略（A 和 B）的复制者动力学：\\(u(A,A)=3,u(A,B)=0,u(B,A)=0,u(B,B)=2\\)。内部不动点？",
+        "options": [
+          "\\(x^*=2/5\\)（A 的比例），是不稳定不动点——轨道向两个边界 \\(x=0\\) 或 \\(x=1\\) 收敛  B) \\(x^*=1/2\\)  C) \\(x^*=3/5\\)  D) 无内部不动点"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_A=3x+0(1-x)=3x\\)，\\(f_B=0\\cdot x+2(1-x)=2-2x\\)。\\(\\bar{f}=xf_A+(1-x)f_B=3x^2+2(1-x)^2\\)。\\(\\dot{x}=x(f_A-\\bar{f})\\)。内部不动点：\\(f_A=f_B\\)→\\(3x=2-2x\\)→\\(x^*=2/5\\)。稳定性：\\(df_A/dx-df_B/dx=3-(-2)=5>0\\)→不稳定（协调博弈：两个边界是稳定的）。直觉：若 \\(A\\) 过半则 \\(A\\) 的收益更高→\\(A\\) 比例继续增加→\\(x\\to1\\)。反之 \\(x\\to0\\)。\\(x^*=2/5\\) 是分水岭。"
+      },
+      {
+        "id": "game-theory-ch05-q13",
+        "question": "民间定理（Folk Theorem）的核心结论？",
+        "options": [
+          "无限重复博弈中，当 \\(\\delta\\) 足够大时，任何可行且个体理性的收益向量都可以在 SPNE 中实现  B) 只有 NE 可以  C) 合作不可能  D) 仅对特定博弈"
+        ],
+        "answer": 0,
+        "explanation": "可行（feasible）：收益在凸包 \\(\\text{conv}\\{u(a):a\\in A\\}\\) 中。个体理性（individually rational）：\\(u_i\\geq\\underline{v}_i\\)（\\(\\underline{v}_i\\) = 玩家 \\(i\\) 的 minimax 值——他人惩罚 \\(i\\) 时 \\(i\\) 能保证的最低收益）。Aumann-Shapley (1976) / Fudenberg-Maskin (1986)：\\(\\delta\\to1\\) 时，上述收益集合中的每个点都可由 SPNE 支持。问题：均衡太多——\"万物皆均衡\"→预测力弱。需要均衡选择理论（focal point, renegotiation-proofness 等）。"
+      },
+      {
+        "id": "game-theory-ch05-q14",
+        "question": "性别之战（Battle of the Sexes）的 ESS 分析。\\(u(O,O)=(3,1),u(F,F)=(1,3),u(O,F)=u(F,O)=(0,0)\\)。对称混合 NE \\(p^*=?\\)",
+        "options": [
+          "\\(p^*=3/4\\)（各自去自己偏好的概率 \\(3/4\\)）。不是 ESS（因为非对称收益在对称博弈中的混合 NE 不稳定）  B) \\(p^*=1/2\\)  C) 是 ESS  D) \\(p^*=1/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "玩家 1 混合使玩家 2 无差异：\\(q\\cdot 1+(1-q)\\cdot 0=q\\cdot 0+(1-q)\\cdot 3\\)→\\(q=3/4\\)。对称分析 \\(p=3/4\\)。但期望收益 \\(=3/4\\)（低于两个纯 NE 的最低值 1!）。ESS 检查：混合 NE 对称但收益矩阵不满足 ESS 的稳定条件——突变可以入侵。实际中\"惯例\"（convention）很重要：一旦社会协调到某个纯 NE，偶然突变不会推翻。Young (1993) 的随机稳定理论预测风险占优的均衡更可能被选中。"
+      },
+      {
+        "id": "game-theory-ch05-q15",
+        "question": "随机稳定性（stochastic stability, Young 1993）如何选择\"长跑\"均衡？",
+        "options": [
+          "风险占优（risk-dominant）均衡更可能被选中——需要更少的突变才能从另一个均衡跳到此均衡  B) 帕累托占优总被选  C) 随机  D) 不可预测"
+        ],
+        "answer": 0,
+        "explanation": "\\(2\\times2\\) 协调博弈：\\((A,A)=(a,a)\\)，\\((B,B)=(b,b)\\)，off-diagonal \\(=0\\)。风险占优：\\(a>b\\) 则 A 占优的条件是 \\(a/(a+b)>1/2\\)→\\(a>b\\) 时 A 是风险占优。Young：在随机最优响应动力学（每人以 \\(\\epsilon\\) 概率随机行动）下，\\(\\epsilon\\to0\\) 时的稳态分布集中在风险占优均衡上。关键：需要更少的\"突变\"从 B 跳到 A（分水岭更近）→A 的吸引域更大。Kandori-Mailath-Rob (1993) 得出类似结论。"
+      },
+      {
+        "id": "game-theory-ch05-q16",
+        "question": "Kreps-Milgrom-Roberts-Wilson (1982) 的不完全信息有限 PD：\"声誉效应\"如何使合作在有限重复中出现？",
+        "options": [
+          "若有极小概率某玩家是\"承诺型\"（如 TFT），则理性玩家在前期也模仿 TFT 以建立声誉→合作在大部分回合出现  B) 与标准分析相同  C) 完全合作  D) 无差异"
+        ],
+        "answer": 0,
+        "explanation": "标准有限 PD（完全信息）：逆向归纳→每轮背叛。但引入不完全信息（如 \\(P(\\text{对手是\"TFT型\"})=\\epsilon>0\\)）→理性玩家在前 \\(T-k\\) 轮模仿 TFT（伪装为承诺型以获得对手合作）。只在最后 \\(k\\ll T\\) 轮才暴露并背叛。\\(\\epsilon\\) 越大→合作持续越久。即使 \\(\\epsilon\\to0\\)→合作在绝大多数轮次出现（\\(k=O(\\log(1/\\epsilon))\\)）。这极大地削弱了\"逆向归纳→完全背叛\"的预测，使理论更符合实验。"
+      },
+      {
+        "id": "game-theory-ch05-q17",
+        "question": "最优惩罚机制（stick-and-carrot，Abreu 1986）。相比 Grim Trigger，为什么对称惩罚（如惩罚 \\(L\\) 轮后恢复合作）更优？",
+        "options": [
+          "短期严惩 + 恢复合作可用更低的 \\(\\delta\\) 维持合作——因为直接回到合作比永久 NE 更高效  B) 相同  C) 更差  D) Grim Trigger 总是最优"
+        ],
+        "answer": 0,
+        "explanation": "Grim Trigger：惩罚 = 永远 NE。收益损失大→\\(\\delta^*\\) 已经不高。但\"最优惩罚\"可更低：惩罚期产出 \\(<\\) NE（用更激烈的短期惩罚），然后回到合作。Abreu 的\"最优简单惩罚\"结构：偏离→一轮产出 \\(q_p\\)（惩罚产量，高于 NE→利润更低），然后恢复。\\(q_p\\) 非常高→一轮惩罚够痛→\\(\\delta^*\\) 更低。关键：可信的严苛惩罚允许更多的合作空间。实际卡特尔（如 OPEC）的价格战就是短暂严惩 + 恢复合作的模式。"
+      },
+      {
+        "id": "game-theory-ch05-q18",
+        "question": "不完美监测（imperfect monitoring）下的重复博弈。Green-Porter (1984) 模型：寡头合作但只能观察市场价格（不能观察对手产量），价格下降可能是需求低而非有人背叛。效率损失来源？",
+        "options": [
+          "必须在需求低时也发动价格战（即使没人背叛）——\"信号提取\"成本→合作不如完美监测高效  B) 无损失  C) 信息完美  D) 价格战不发生"
+        ],
+        "answer": 0,
+        "explanation": "Green-Porter：价格 \\(P_t\\) 是需求（随机）和总产量的函数。观察到低 \\(P_t\\)→可能是有人偷偷增产，也可能是需求冲击。最优策略（Abreu-Pearce-Stacchetti 1990 的公共完美均衡 PPE）：当 \\(P_t<\\bar{P}\\) 时转入惩罚期（\\(L\\) 轮）。效率损失：有时惩罚是\"无辜的\"（需求低但无人偏离）→期望收益 \\(<\\) 完美监测的合作收益。\\(\\delta\\) 越大→惩罚越可信→可提高 \\(\\bar{P}\\) → 更少误触发 → 更高效率。"
+      },
+      {
+        "id": "game-theory-ch05-q19",
+        "question": "在二倍数的鸽鹰博弈中，\\(V<C\\)（打斗代价高于资源）。ESS 混合概率 \\(p^*=V/C\\)。若引入突变策略 Bully（\\(B\\)）：遇鸽打鹰，遇鹰打鸽。Bully 能入侵 ESS 吗？",
+        "options": [
+          "不能——ESS 定义保证任何小比例突变在当前居民策略下的适应度 \\(\\leq\\) 居民；Bully 对 \\(p^*\\)-居民的适应度 \\(=\\) 居民适应度→检查二阶条件  B) 能  C) 总是入侵  D) 与 \\(V/C\\) 无关"
+        ],
+        "answer": 0,
+        "explanation": "居民策略 \\(\\sigma^*=p^*H+(1-p^*)D\\)。\\(u(\\sigma^*,\\sigma^*)=p^*\\cdot\\frac{V-C}{2}\\cdot p^*+p^*(1-p^*)V+(1-p^*)p^*\\cdot0+(1-p^*)^2\\cdot\\frac{V}{2}\\)。Bully 的对 \\(\\sigma^*\\) 的适应度需具体计算。关键：ESS 的二阶条件检查 \\(u(\\sigma^*,B)>u(B,B)\\) 还是 \\(=\\)。若 Bully 的\"条件反射\"在混合居民中没有信息优势（无法观察对手当前策略），实际 Bully 的适应度等于选与 \\(p^*\\) 相同比例的 \\(H/D\\)→相同→需启动二阶条件。"
+      },
+      {
+        "id": "game-theory-ch05-q20",
+        "question": "复制者动力学中 Lyapunov 函数的构造。对内部 ESS \\(x^*\\)，\\(V(x)=-\\sum_i x_i^*\\ln(x_i/x_i^*)\\) 是 Lyapunov 函数。为什么？",
+        "options": [
+          "\\(V(x)\\geq0\\)（信息不等式），\\(\\dot{V}\\leq0\\)（ESS 条件保证）→\\(x\\to x^*\\) 渐近稳定  B) 不是 Lyapunov  C) 仅对线性  D) 不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(V(x)=\\sum_i x_i^*\\ln(x_i^*/x_i)\\geq0\\)（KL 散度 \\(D_{KL}(x^*\\|x)\\geq0\\)，等号当 \\(x=x^*\\)）。\\(\\dot{V}=-\\sum_i x_i^*(f_i-\\bar{f})=-[x^*\\cdot f-\\bar{f}]\\)。利用 ESS 条件：\\(x^*\\cdot f(x^*)>x\\cdot f(x^*)\\) 对 \\(x\\neq x^*\\)，推导 \\(\\dot{V}<0\\)（在 \\(x^*\\) 邻域内）。这是 Hofbauer (1979) 的经典结果。注意此 Lyapunov 函数的形式与信息论中 KL 散度完全一致——进化动力学与信息论的深层联系。"
+      },
+      {
+        "id": "game-theory-ch05-q21",
+        "question": "声誉模型中的\"阶梯升级\"（reputational cascade）。为什么国际冲突中双方可能面对有限博弈？",
+        "options": [
+          "每步升级的撤退成本增加——领导人的声誉投资使退出代价递增→可能升级到低效结果  B) 无关  C) 总是降级  D) 声誉不重要"
+        ],
+        "answer": 0,
+        "explanation": "有限博弈框架中的声誉：每轮的\"让步\"被视为\"软弱\"信号→对未来博弈中的议价地位有长期影响。形式化：多阶段博弈 + 声誉收益（类型推断）。偏离合作（让步）→被推断为\"弱类型\"→未来对手更强硬。Cuban Missile Crisis (1962)：肯尼迪和赫鲁晓夫都不愿先\"退缩\"（声誉代价）→差点核战争。最终双方私下交易（撤走导弹 + 撤走土耳其导弹）→\"face-saving\" 让双方都保留声誉。"
+      },
+      {
+        "id": "game-theory-ch05-q22",
+        "question": "反垄断法中如何利用民间定理识别卡特尔（tacit collusion）？",
+        "options": [
+          "如果行业利润长期高于竞争水平且对市场冲击有\"协调式\"的价格调整（如同步提价/价格战后恢复），则可能存在隐性合作——但证明困难（行为与单独最优化不一定可区分）  B) 容易证明  C) 不可能存在  D) 法律不管"
+        ],
+        "answer": 0,
+        "explanation": "美国反垄断法（Sherman Act §1）禁止\"共谋\"——但需区分\"明示共谋\"（illegal per se）和\"隐性共谋\"（tacit collusion，互相理解但无直接沟通）。民间定理说隐性合作在 \\(\\delta\\) 大时是自我执行的——不需要合同/书面协议。Plus factors：市场集中度高、产品同质、信息透明、历史有价格协调→可能存在隐性合作。但经济学家证明：在某些情况下\"价格平行\"也可以由竞争性最优化解释→证明困难。"
+      },
+      {
+        "id": "game-theory-ch05-q23",
+        "question": "双群体复制者动力学：不对称博弈中两个种群分别演化。\\(\\dot{x}=x(1-x)[u_1(A,y)-u_1(B,y)]\\)，\\(\\dot{y}=y(1-y)[u_2(x,C)-u_2(x,D)]\\)。匹配硬币博弈的轨道？",
+        "options": [
+          "封闭轨道——围绕内部不动点旋转但不收敛（类似 Lotka-Volterra 猎食者-被猎物模型）  B) 收敛到不动点  C) 发散  D) 无不动点"
+        ],
+        "answer": 0,
+        "explanation": "匹配硬币：\\(u_1(H,H)=1,u_1(H,T)=-1,u_1(T,H)=-1,u_1(T,T)=1\\)。\\(u_2=-u_1\\)（零和）。\\(\\dot{x}=x(1-x)[2y-1]\\)，\\(\\dot{y}=y(1-y)[1-2x]\\)。不动点 \\((x^*,y^*)=(1/2,1/2)\\)。线性化：Jacobian 在 \\((1/2,1/2)\\) 处有纯虚特征值→中心（center），轨道是封闭曲线。守恒量 \\(H(x,y)=x\\ln x+(1-x)\\ln(1-x)+y\\ln y+(1-y)\\ln(1-y)\\)。这是 Hamiltonian 系统——无阻尼→不收敛。"
+      },
+      {
+        "id": "game-theory-ch05-q24",
+        "question": "进化稳定集（evolutionarily stable set）与 Thomas (1985) 的推广。什么时候 ESS 不存在但 ES set 存在？",
+        "options": [
+          "石头剪刀布型博弈——无 ESS（内部 NE 不是 ESS），但 \\(\\{(1/3,1/3,1/3)\\}\\) 可以是进化稳定集（Thomas 定义的闭集使任何相邻扰动回到集合中）  B) 不存在进化稳定概念  C) 总有 ESS  D) 集合和单点相同"
+        ],
+        "answer": 0,
+        "explanation": "ESS 要求单点稳定。但某些博弈（如 RPS 变体）无单点 ESS，但存在\"稳定面\"——一组策略使扰动后的动力学回到该面（而非单点）。Thomas (1985) 的 ES set：闭集 \\(E\\) 使得 (1) \\(E\\) 中每个策略对 \\(E\\) 中所有策略是 BR；(2) \"外部稳定\"——小扰动到 \\(E^c\\) 后动力学回到 \\(E\\)。\\(\\{(1/3,1/3,1/3)\\}\\) 在 RPS 中是中性稳定但不是严格 ES set——需看具体收益参数。Bomze (1986) 系统研究了 \\(3\\times3\\) 博弈的所有动力学分类。"
+      },
+      {
+        "id": "game-theory-ch05-q25",
+        "question": "折扣因子 \\(\\delta\\) 的异质性——如果两个玩家有不同的 \\(\\delta_1\\neq\\delta_2\\)，在重复博弈的合作中谁获得更多？",
+        "options": [
+          "更有耐心的玩家（\\(\\delta\\) 更大的）获得更多——类似 Rubinstein 讨价还价中的耐心优势  B) 更不耐心的  C) 无差异  D) 不能合作"
+        ],
+        "answer": 0,
+        "explanation": "直觉（Lehrer-Palfrey 1999）：\\(\\delta_i\\) 大的玩家可以承受更长的惩罚期→议价力量更大→在合作分配中获得更多。极端情况：\\(\\delta_1\\to1,\\delta_2\\to0\\)→玩家 1 几乎可获得全部合作剩余（玩家 2 太急躁→接受任何正收益）。与 Rubinstein 讨价还价的分析完全一致：\\(x_1=\\frac{1-\\delta_2}{1-\\delta_1\\delta_2}\\to1\\)。"
+      },
+      {
+        "id": "game-theory-ch05-q26",
+        "question": "OPEC（石油输出国组织）的产量协调可以用什么理论框架分析？",
+        "options": [
+          "无限重复 Cournot 博弈 + Grim Trigger 变体——OPEC 成员国承诺减产（合作），违约者被其他成员增产惩罚  B) 完全竞争  C) 垄断  D) 一次博弈"
+        ],
+        "answer": 0,
+        "explanation": "OPEC 作为卡特尔：成员国有减产（合作）和增产（偏离）的激励冲突。2014-2016 油价暴跌可视为\"触发策略执行阶段\"——面对 Iran/US shale 的\"偏离\"，Saudi Arabia 增产惩罚。2016 OPEC+ 协议 = 恢复合作。Green-Porter 模型适用：需求冲击使油价波动→有时惩罚是对需求低迷的反应而非实际偏离。\\(\\delta\\) 大（长期石油储量→有耐心）支持合作；\\(\\delta\\) 小（短期财政压力→委内瑞拉等）→倾向偏离。"
+      },
+      {
+        "id": "game-theory-ch05-q27",
+        "question": "在线评价系统（如 eBay、Uber）如何利用重复博弈理论设计信誉机制？",
+        "options": [
+          "差评是\"触发策略\"——卖家/司机的不良行为导致声誉下降→未来交易减少（惩罚）→激励诚实行为  B) 与博弈论无关  C) 仅靠法律  D) 评价无效"
+        ],
+        "answer": 0,
+        "explanation": "eBay 的反馈系统：每次交易后买卖双方互评。\"声誉\"= 过去交易评分的累积。形式化：每个交易 = 阶段博弈（可选高质量/低质量），评价 = 公开历史的记录。声誉效应（Kreps 等 1982）：卖家维护高评分以获得未来交易→长期收益 \\(>\\) 短期偷工减料的获利。\\(\\delta\\) = 卖家对未来交易的折扣因子。\\(\\delta\\) 大（长期卖家）→诚信；\\(\\delta\\) 小（临时卖家）→可能欺诈。Uber 的低于 \\(4.6\\) 分就被停用 = \"grim trigger\"式惩罚。"
+      },
+      {
+        "id": "game-theory-ch05-q28",
+        "question": "进化博弈论在流行病学中的应用：疫苗接种策略如何建模为进化博弈？",
+        "options": [
+          "个体选择\"接种\"（成本 \\(c\\)）或\"不接种\"（搭便车于群体免疫），当接种比例 \\(x>x^*=1-1/R_0\\) 时群体免疫→不接种者获益  B) 总是接种  C) 无博弈  D) 随机选择"
+        ],
+        "answer": 0,
+        "explanation": "疫苗接种博弈（Bauch & Earn 2004）：接种成本 \\(c\\)（副作用风险），不接种被感染的预期成本 = \\(C\\cdot P(\\text{infection}|x)\\)。\\(P\\) 随接种比例 \\(x\\) 增加而下降。ESS：\\(x^*\\) 使得接种和不接种的适应度相等→\\(c=C\\cdot P(\\text{infection}|x^*)\\)。但 \\(x^*<1-1/R_0\\)（群体免疫阈值）→ESS 不足以消灭疾病！这是\"搭便车者困境\"的公共品博弈版本。政策含义：需要补贴/强制接种来补偿个体的免费搭车激励。COVID-19 期间的疫苗犹豫正是此模型的现实案例。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="game-theory"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/game-theory.html" class="module-name">博弈论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 有限次重复博弈</a></li>
+      <li><a href="#kp2">02 · 无限次重复博弈与民间定理</a></li>
+      <li><a href="#kp3">03 · 进化博弈与进化稳定策略</a></li>
+      <li><a href="#kp4">04 · 复制动力学方程</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>重复博弈</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>有限次重复博弈</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>很多现实互动不是一次性的：企业反复竞争、商业伙伴长期合作、 国际关系的反复博弈。直觉上，反复互动应该促进合作， 但有限次重复的结果令人失望：逆向归纳将合作完全瓦解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>有限重复博弈是动态博弈的一种，SPE 量化了「末日效应」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>有限次重复囚徒困境</strong>：重复 \(T\) 次。 逆向归纳：第 \(T\) 轮是单次囚徒困境，占优策略为背叛。 第 \(T-1\) 轮：第 \(T\) 轮不受影响（占优背叛），故第 \(T-1\) 轮等价于单次博弈， 仍然背叛。以此类推… <strong>定理</strong>：有限次重复囚徒困境的唯一 SPE 是每轮都背叛。 \[\sigma_i^*(t) = D \quad \forall t = 1, \ldots, T \quad \forall i\] <strong>末日效应</strong>：固定的终点导致合作无法维持， 因为末轮无惩罚可能，递归地毛到每一轮。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- “最后一天”问题：离职前员工可能消极工作</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：两人囚徒困境重复 100 次。找 SPE。 解答：第 100 轮占优背叛，第 99 轮无法用第 100 轮威胁， 仍占优背叛…递归到第 1 轮。SPE = 每轮背叛。 易错点：实验中人类常在有限重复博弈中合作， 这与 SPE 预测矛盾，说明人类行为与完全理性有偏差。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">有限次重复囚徒困境的 SPE 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。逆向归纳从末轮一直到第一轮，每轮都占优背叛。')">A. 前期合作、后期背叛</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！逆向归纳从末轮一直到第一轮，每轮都占优背叛。')">B. 双方始终背叛</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。逆向归纳从末轮一直到第一轮，每轮都占优背叛。')">C. 双方始终合作</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。逆向归纳从末轮一直到第一轮，每轮都占优背叛。')">D. 随机交替</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>无限次重复博弈与民间定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>无确定终点时末日效应消失，合作变得可能。民间定理(Folk Theorem) 表明，在无限重复博弈中，只要玩家足够耐心（贴现因子足够大）， 几乎任何合理的支付都可以通过 NE 实现，包括合作。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>无限重复 + 贴现因子 \(\delta < 1\) → 未来的威胁变得可信。 民间定理刻画了均衡支付的可行域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>无限重复博弈</strong>：每轮玩同一个阶段博弈 \(G\)， 总支付为贴现和： \[U_i = (1-\delta) \sum_{t=0}^{\infty} \delta^t u_i^{(t)}\] <strong>針锋触发策略(Grim Trigger)</strong>： 始于合作，一旦对方背叛则永久背叛。 合作的 NE 条件（囚徒困境中“背叛”不划算）： \[\frac{-1}{1-\delta} \geq 0 + \frac{\delta(-2)}{1-\delta} \implies \delta \geq \frac{1}{2}\] <strong>民间定理</strong>：对于任何个体理性支付向量 \((v_1, \ldots, v_n)\)， 若 \(v_i > \bar{v}_i\)（各人收益超过安全值）， 则当 \(\delta\) 足够大时存在 SPE 实现该支付。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 贸易伙伴之间的长期合作与信任建立 - 密码学中反复互动协议的安全性分析</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：无限重复囚徒困境中用針锋触发实现合作的最低 \(\delta\)。 囚徒困境支付：CC=(-1,-1), CD=(-3,0), DC=(0,-3), DD=(-2,-2)。 解答：背叛的临时收益为 \(0-(-1)=1\)，未来惩罚为每轮 \(-2-(-1)=-1\)。 不背叛条件：\(1 \leq \frac{\delta}{1-\delta} \cdot 1\)，\(\delta \geq 1/2\)。 易错点：民间定理说的是「存在」均衡支持合作，不说合作是唯一 NE。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">无限重复囚徒困境中合作可以维持的条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\delta\\) 大意味着玩家耐心，重视未来收益，所以惩罚威胁有效。')">A. 玩家数足够少</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\delta\\) 大意味着玩家耐心，重视未来收益，所以惩罚威胁有效。')">B. 贴现因子 \(\delta\) 足够大</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\delta\\) 大意味着玩家耐心，重视未来收益，所以惩罚威胁有效。')">C. 策略集足够小</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\delta\\) 大意味着玩家耐心，重视未来收益，所以惩罚威胁有效。')">D. 支付矩阵对称</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>进化博弈与进化稳定策略</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>传统博弈论假设玩家完全理性，但生物/社会中的策略选择 往往通过模仿学习而非深思熟虑。进化博弈论用自然选择的 逻辑替代理性假设：收益高的策略被更多“采纳”。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从「理性选择」到「种群动力学」：策略的优劣由其在种群中的 性能决定，而非个体的理性推理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>进化稳定策略(ESS)</strong>：\(s^*\) 是 ESS iff 对所有变异策略 \(s \neq s^*\)： \[u(s^*, s^*) > u(s, s^*) \quad \text{(严格占优)}\] 或 \[u(s^*, s^*) = u(s, s^*) \text{ 且 } u(s^*, s) > u(s, s) \quad \text{(二级条件)}\] 直觉：\(s^*\) 的种群中没有变异可以入侵。 <strong>ESS 与 NE 的关系</strong>：每个 ESS 都是对称 NE， 但反之不然。ESS 比 NE 更强。 \[\text{ESS} \subset \text{symmetric NE}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 动物行为学中的鹰鸽博弈（Hawk-Dove） - 社会规范的演化解释</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：鹰鸽博弈矩阵：\(\begin{pmatrix}(-1,-1)&(2,0)\\(0,2)&(1,1)\end{pmatrix}\)。 找 ESS。 解答：纯策略检查： 鹰(H): \(u(H,H)=-1 < u(D,H)=0\)，不满足严格占优→非 ESS。 鸿(D): \(u(D,D)=1 > u(H,D)=0? \;\) \(2>1\)... \(u(H,D)=2>u(D,D)=1\)， 不满足第一条件→非 ESS。 无纯策略 ESS，混合 ESS 为混合 NE（可证 \(p^*=1/2\) 是 ESS）。 易错点：ESS 比 NE 更强，不是每个 NE 都是 ESS。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">ESS 与 NE 的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。ESS 要求不仅是 NE，还要求变异不能成功入侵（二级条件）。')">A. 完全相同</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！ESS 要求不仅是 NE，还要求变异不能成功入侵（二级条件）。')">B. ESS 是对称 NE 的加强</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。ESS 要求不仅是 NE，还要求变异不能成功入侵（二级条件）。')">C. NE 是 ESS 的加强</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。ESS 要求不仅是 NE，还要求变异不能成功入侵（二级条件）。')">D. 两者无关</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>复制动力学方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>ESS 描述「均衡状态」，但没说怎么到达。复制动力学(Replicator Dynamics)用微分方程描述策略分布的演化过程： 成功的策略其复制量增加，与生物演化完美对应。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>策略比例为动态系统的状态，收益驱动进化。 与微分方程建立桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>复制动力学</strong>：设 \(x_k\) 为策略 \(k\) 的种群比例， \[\dot{x}_k = x_k [f_k(x) - \bar{f}(x)]\] 其中 \(f_k(x)\) 是策略 \(k\) 的适应度（期望支付），\(\bar{f}(x) = \sum x_k f_k(x)\) 是种群平均。 <strong>性质</strong>： - \(\sum \dot{x}_k = 0\)，策略分布始终在单纯形上 - NE 是复制动力学的不动点 - ESS 是复制动力学的渐近稳定点 \[\text{ESS} \Rightarrow \text{渐近稳定} \Rightarrow \text{Lyapunov 稳定}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 传染病学中的行为动力学（接种/不接种的演化） - 多智能体系统中策略学习的收敛性分析</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：2×2 对称博弈 \(A = \begin{pmatrix}3&0\\5&1\end{pmatrix}\)。 写出复制动力学方程并分析稳定性。 解答：设 \(x\) 为选策略 1 的比例。 \(f_1 = 3x + 0(1-x) = 3x\), \(f_2 = 5x + 1(1-x) = 4x+1\)。 \(\bar{f} = xf_1 + (1-x)f_2\)。 \(\dot{x} = x(f_1 - \bar{f}) = x(1-x)(f_1 - f_2) = x(1-x)(3x - 4x - 1) = x(1-x)(-x-1)\)。 因为 \(-x-1 < 0\) 恒成立，故 \(\dot{x} < 0\)（当 \(x \in (0,1)\)）。 所以 \(x \to 0\)，策略 2 是唯一稳定均衡。 易错点：\(f_1 - f_2\) 的符号决定演化方向，不是 \(f_1\) 本身。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">复制动力学中 ESS 对应什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。ESS 保证渐近稳定性：少量变异会被筛选压力消除，')">A. 不动点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。ESS 保证渐近稳定性：少量变异会被筛选压力消除，')">B. 源点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！ESS 保证渐近稳定性：少量变异会被筛选压力消除，')">C. 渐近稳定点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。ESS 保证渐近稳定性：少量变异会被筛选压力消除，')">D. 鞍点</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/probability/game-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

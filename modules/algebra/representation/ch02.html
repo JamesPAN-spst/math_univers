@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 不可约表示与 Schur 引理 — 表示论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "representation-ch02-q1",
+        "question": "\\(S_3\\) 有多少个不可约复表示？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(S_3\\) 有 3 个共轭类：\\(\\{e\\}\\)，\\(\\{(12),(13),(23)\\}\\)，\\(\\{(123),(132)\\}\\)。不可约复表示个数 \\(=\\) 共轭类个数 \\(= 3\\)。维数为 \\(1,1,2\\)（\\(1+1+4=6\\)）。"
+      },
+      {
+        "id": "representation-ch02-q2",
+        "question": "群 \\(\\mathbb{Z}/4\\mathbb{Z}\\) 有多少个不可约复表示？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(1\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}/4\\mathbb{Z}\\) 是 Abel 群，每个元素自成一个共轭类。共轭类个数 \\(= |G| = 4\\)。不可约表示全部 1 维，\\(\\rho_k(1) = i^k\\)（\\(k=0,1,2,3\\)）。\\(\\sum 1^2 = 4 = |G|\\) ✓。"
+      },
+      {
+        "id": "representation-ch02-q3",
+        "question": "Schur 引理：若 \\(V, W\\) 不可约且 \\(T: V \\to W\\) 是 \\(G\\)-等变映射，\\(V \\not\\cong W\\)，则 \\(T = \\) ？",
+        "options": [
+          "\\(I\\)",
+        "\\(0\\)",
+        "\\(\\lambda I\\)（某常数 \\(\\lambda\\)）",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker T\\) 是 \\(V\\) 的 \\(G\\)-不变子空间。\\(V\\) 不可约，\\(\\ker T = 0\\) 或 \\(V\\)。若 \\(\\ker T = 0\\)，\\(T\\) 是单射，\\(\\mathrm{im}\\,T\\) 是 \\(W\\) 的非零不变子空间，故 \\(\\mathrm{im}\\,T = W\\)，\\(T\\) 是同构，矛盾。故 \\(T = 0\\)。"
+      },
+      {
+        "id": "representation-ch02-q4",
+        "question": "\\(\\dim \\mathrm{Hom}_G(V, V) = \\) ？（\\(V\\) 不可约，\\(K = \\mathbb{C}\\)）",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\dim V\\)",
+        "\\((\\dim V)^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "Schur 引理：\\(K = \\mathbb{C}\\) 时，\\(\\mathrm{Hom}_G(V, V) = \\mathbb{C} \\cdot I\\)，维数 \\(= 1\\)。每个 \\(G\\)-等变自映射 \\(T: V \\to V\\) 都是数量矩阵 \\(T = \\lambda I\\)。C, D 对应普通 Hom（不要求等变），非 \\(\\mathrm{Hom}_G\\)。"
+      },
+      {
+        "id": "representation-ch02-q5",
+        "question": "重数公式 \\(n_i = \\langle \\chi_V, \\chi_i \\rangle\\) 中 \\(n_i\\) 必须是？",
+        "options": [
+          "正实数",
+        "非负整数",
+        "复数",
+        "素数"
+        ],
+        "answer": 1,
+        "explanation": "\\(n_i\\) 是不可约表示 \\(V_i\\) 在 \\(V\\) 中出现的重数，是非负整数。\\(n_i = \\dim \\mathrm{Hom}_G(V_i, V) \\geq 0\\)。内积公式 \\(n_i = \\frac{1}{|G|}\\sum_g \\chi_V(g)\\overline{\\chi_i(g)}\\) 恰好算出这个整数。"
+      },
+      {
+        "id": "representation-ch02-q6",
+        "question": "\\(G = \\mathbb{Z}/2\\mathbb{Z}\\)，中心幂等元 \\(e_1 = \\frac{1}{2}(e+g)\\)。\\(e_1^2 = \\) ？",
+        "options": [
+          "\\(e_1\\)",
+        "\\(e + g\\)",
+        "\\(0\\)",
+        "\\(\\frac{1}{4}(e+g)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_1^2 = \\frac{1}{4}(e+g)^2 = \\frac{1}{4}(e^2+2eg+g^2) = \\frac{1}{4}(e+2g+e) = \\frac{1}{4}(2e+2g) = \\frac{1}{2}(e+g) = e_1\\)。\\(e_1\\) 是幂等元。"
+      },
+      {
+        "id": "representation-ch02-q7",
+        "question": "\\(|G| = 12\\) 且有 4 个共轭类。不可约表示维数可能为？",
+        "options": [
+          "\\((1,1,1,3)\\)，\\(\\sum d_i^2 = 12\\)",
+        "\\((1,1,2,2)\\)，\\(\\sum d_i^2 = 10\\)",
+        "\\((2,2,2,2)\\)，\\(\\sum d_i^2 = 16\\)",
+        "\\((1,2,3,4)\\)，\\(\\sum d_i^2 = 30\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A_4\\) 的共轭类个数 \\(= 4\\)，\\(|A_4| = 12\\)。\\(1^2+1^2+1^2+3^2 = 12\\) ✓。其他选项不满足 \\(\\sum d_i^2 = |G|\\)。\\(d_i \\mid |G|\\) 也需要检查。"
+      },
+      {
+        "id": "representation-ch02-q8",
+        "question": "\\(Q_8 = \\{\\pm1, \\pm i, \\pm j, \\pm k\\}\\)（四元数群，阶 8）有 5 个共轭类。不可约表示维数为？",
+        "options": [
+          "\\((1,1,1,1,2)\\)",
+        "\\((1,1,2,2)\\)",
+        "\\((2,2,2)\\)",
+        "\\((1,1,1,1,1,1,1,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "共轭类 5 个：\\(\\{1\\},\\{-1\\},\\{\\pm i\\},\\{\\pm j\\},\\{\\pm k\\}\\)。\\(\\sum d_i^2 = 8\\)，有 5 个表示。\\(1+1+1+1+4 = 8\\) ✓。4 个 1 维表示对应 \\(Q_8/[Q_8,Q_8] \\cong (\\mathbb{Z}/2\\mathbb{Z})^2\\)。"
+      },
+      {
+        "id": "representation-ch02-q9",
+        "question": "\\(T: V \\to V\\) 是不可约表示 \\(V\\)（\\(K = \\mathbb{C}\\)）的 \\(G\\)-等变映射。若 \\(T\\) 有特征值 \\(\\lambda_0\\)，则 \\(T - \\lambda_0 I\\) 满足？",
+        "options": [
+          "也是 \\(G\\)-等变",
+        "\\(T - \\lambda_0 I = 0\\)",
+        "A 和 B 都对",
+        "\\(T - \\lambda_0 I\\) 可逆"
+        ],
+        "answer": 2,
+        "explanation": "\\(T - \\lambda_0 I\\) 也是 \\(G\\)-等变（\\(\\mathrm{Hom}_G\\) 是线性空间）。\\(\\ker(T-\\lambda_0 I) \\neq 0\\)（\\(\\lambda_0\\) 是特征值），故 \\(T - \\lambda_0 I\\) 不可逆。Schur 引理说非可逆等变映射必为零，故 \\(T = \\lambda_0 I\\)。"
+      },
+      {
+        "id": "representation-ch02-q10",
+        "question": "\\(S_3\\) 正则表示 \\(\\mathbb{C}[S_3]\\) 中标准 2 维表示 \\(\\rho_3\\) 的重数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "正则表示中 \\(\\rho_i\\) 的重数 \\(= d_i =\\) 不可约表示维数。\\(\\rho_3\\) 维数 \\(= 2\\)，重数 \\(= 2\\)。\\(\\mathbb{C}[S_3] \\cong \\rho_1^{\\oplus1} \\oplus \\rho_2^{\\oplus1} \\oplus \\rho_3^{\\oplus2}\\)。\\(\\dim = 1+1+4 = 6\\) ✓。"
+      },
+      {
+        "id": "representation-ch02-q11",
+        "question": "\\(G = \\mathbb{Z}/3\\mathbb{Z}\\)，\\(\\chi_1(g) = 1, \\chi_2(g) = \\omega, \\chi_3(g) = \\omega^2\\)（\\(g\\) 生成元，\\(\\omega = e^{2\\pi i/3}\\)）。幂等元 \\(e_2 = \\) ？",
+        "options": [
+          "\\(\\frac{1}{3}(1 + \\overline{\\omega}g + \\overline{\\omega^2}g^2)\\)",
+        "\\(\\frac{1}{3}(1 + \\omega g + \\omega^2 g^2)\\)",
+        "\\(\\frac{1}{3}(1 + g + g^2)\\)",
+        "\\(g\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_i = \\frac{d_i}{|G|}\\sum_{g \\in G}\\overline{\\chi_i(g)} \\cdot g\\)。\\(d_2 = 1\\)，\\(|G| = 3\\)。\\(e_2 = \\frac{1}{3}(1 \\cdot e + \\overline{\\omega} \\cdot g + \\overline{\\omega^2} \\cdot g^2) = \\frac{1}{3}(e + \\omega^2 g + \\omega g^2)\\)。B 错：忽略了取共轭。"
+      },
+      {
+        "id": "representation-ch02-q12",
+        "question": "Abel 群 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 的不可约复表示中，维数 \\(> 1\\) 的有几个？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "Abel 群的所有不可约复表示均为 1 维。\\(\\mathbb{Z}/6\\mathbb{Z}\\) 有 6 个 1 维不可约表示，\\(\\rho_k(1) = e^{2\\pi ik/6}\\)（\\(k=0,\\ldots,5\\)）。没有维数 \\(> 1\\) 的不可约表示。"
+      },
+      {
+        "id": "representation-ch02-q13",
+        "question": "\\(V\\) 不可约（\\(K = \\mathbb{R}\\)），\\(T \\in \\mathrm{Hom}_G(V,V)\\)。\\(T\\) 是否一定是 \\(\\lambda I\\)？",
+        "options": [
+          "是",
+        "否，\\(\\mathbb{R}\\) 不代数闭",
+        "是，但仅当 \\(\\dim V = 1\\)",
+        "否，仅当 \\(G\\) Abel"
+        ],
+        "answer": 1,
+        "explanation": "Schur 引理的 \\(T = \\lambda I\\) 结论要求 \\(K\\) 代数闭。\\(\\mathbb{R}\\) 上 \\(T\\) 的特征多项式可能无实根。例如 \\(SO(2)\\) 的实 2 维不可约表示中，旋转矩阵是等变自映射但非数量矩阵。\\(\\mathrm{Hom}_G(V,V)\\) 可能是 \\(\\mathbb{C}\\) 或 \\(\\mathbb{H}\\)。"
+      },
+      {
+        "id": "representation-ch02-q14",
+        "question": "\\(V \\cong V_1^{\\oplus 2} \\oplus V_2^{\\oplus 3}\\)，\\(\\dim V_1 = 1, \\dim V_2 = 2\\)。\\(\\dim V = \\) ？",
+        "options": [
+          "\\(5\\)",
+        "\\(8\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\dim V = 2 \\cdot \\dim V_1 + 3 \\cdot \\dim V_2 = 2 \\times 1 + 3 \\times 2 = 2 + 6 = 8\\)。\\(\\langle\\chi_V,\\chi_V\\rangle = 2^2 + 3^2 = 4+9 = 13\\)（非 1，故 \\(V\\) 可约）。"
+      },
+      {
+        "id": "representation-ch02-q15",
+        "question": "\\(G = S_3\\)，中心幂等元 \\(e_3\\)（对应 2 维不可约表示 \\(\\rho_3\\)）。\\(e_3\\) 作用于正则表示中的效果是？",
+        "options": [
+          "投影到 \\(\\rho_3^{\\oplus2}\\) 分量",
+        "投影到 \\(\\rho_1\\) 分量",
+        "投影到 \\(\\rho_2\\) 分量",
+        "恒等映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_i\\) 是中心幂等元，作用于任何 \\(\\mathbb{C}[G]\\)-模 \\(V\\) 上投影到 \\(V_i\\)-同型分量。正则表示中 \\(\\rho_3\\) 出现 2 次（重数 \\(= d_3 = 2\\)），\\(e_3\\) 投影到 \\(\\rho_3^{\\oplus2}\\)。"
+      },
+      {
+        "id": "representation-ch02-q16",
+        "question": "\\(V = \\mathbb{C}^3\\)，\\(S_3\\) 通过置换坐标作用。\\(V\\) 的不可约分解为？",
+        "options": [
+          "\\(\\rho_1 \\oplus \\rho_3\\)",
+        "\\(\\rho_1 \\oplus \\rho_2 \\oplus \\rho_3\\)",
+        "\\(\\rho_3 \\oplus \\rho_1\\)",
+        "A 和 C 相同"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathbb{C}^3 = \\mathrm{span}\\{(1,1,1)\\} \\oplus \\{x+y+z=0\\}\\)。前者是平凡表示 \\(\\rho_1\\)，后者是标准表示 \\(\\rho_3\\)（2 维不可约）。\\(3 = 1+2\\)。A 和 C 是同一分解。"
+      },
+      {
+        "id": "representation-ch02-q17",
+        "question": "\\(V_1, V_2\\) 不可约，\\(\\dim \\mathrm{Hom}_G(V_1, V_2) = \\) ？（\\(V_1 \\cong V_2\\)，\\(K = \\mathbb{C}\\)）",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\dim V_1\\)",
+        "无穷"
+        ],
+        "answer": 1,
+        "explanation": "\\(V_1 \\cong V_2\\) 时 \\(\\mathrm{Hom}_G(V_1, V_2) \\cong \\mathrm{Hom}_G(V_1, V_1) = \\mathbb{C} \\cdot I\\)（Schur），维数 \\(= 1\\)。若 \\(V_1 \\not\\cong V_2\\) 则 \\(\\mathrm{Hom}_G = 0\\)。"
+      },
+      {
+        "id": "representation-ch02-q18",
+        "question": "非 Abel 群的最小可能阶为 \\(6\\)（\\(S_3\\)）。\\(S_3\\) 必有维数 \\(> 1\\) 的不可约表示。为什么？",
+        "options": [
+          "\\(\\sum d_i^2 = 6\\) 且全为 1 则 \\(d_i\\) 有 6 个，但 \\(S_3\\) 只有 3 个共轭类",
+        "非 Abel 群没有 1 维表示",
+        "\\(|S_3| = 6\\) 是偶数",
+        "A 和 B 都对"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(S_3\\) 的所有不可约表示都是 1 维（\\(d_i = 1\\)），则需 \\(r\\) 个不可约表示使 \\(r = |G| = 6\\)。但不可约表示个数 \\(= \\) 共轭类个数 \\(= 3 \\neq 6\\)，矛盾。故至少一个 \\(d_i > 1\\)。B 错：\\(S_3\\) 有 1 维表示（平凡和符号）。"
+      },
+      {
+        "id": "representation-ch02-q19",
+        "question": "\\(V \\cong V_1^{\\oplus n_1} \\oplus V_2^{\\oplus n_2}\\)（\\(V_1, V_2\\) 不可约）。\\(\\langle\\chi_V, \\chi_V\\rangle = \\) ？",
+        "options": [
+          "\\(n_1 + n_2\\)",
+        "\\(n_1^2 + n_2^2\\)",
+        "\\((n_1 + n_2)^2\\)",
+        "\\(n_1 n_2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\chi_V = n_1\\chi_1 + n_2\\chi_2\\)。\\(\\langle\\chi_V,\\chi_V\\rangle = n_1^2\\langle\\chi_1,\\chi_1\\rangle + n_2^2\\langle\\chi_2,\\chi_2\\rangle + 2n_1 n_2\\langle\\chi_1,\\chi_2\\rangle = n_1^2 + n_2^2\\)（正交关系 \\(\\langle\\chi_i,\\chi_j\\rangle = \\delta_{ij}\\)）。一般 \\(\\langle\\chi_V,\\chi_V\\rangle = \\sum n_i^2\\)。"
+      },
+      {
+        "id": "representation-ch02-q20",
+        "question": "Schur 引理的推论：\\(\\mathrm{Hom}_G(V_i, V_j) \\cong \\delta_{ij}\\mathbb{C}\\)。这在 Artin-Wedderburn 分解中的作用是？",
+        "options": [
+          "保证了不同矩阵块之间没有同态",
+        "保证了 \\(\\mathbb{C}[G]\\) 可交换",
+        "保证了所有表示一维",
+        "无直接联系"
+        ],
+        "answer": 0,
+        "explanation": "Artin-Wedderburn 分解 \\(\\mathbb{C}[G] \\cong \\bigoplus M_{d_i}(\\mathbb{C})\\) 中，不同直和分量之间的 \\(G\\)-等变映射为零（Schur），保证了分解的不可约性和\"正交性\"。Schur 引理是 Artin-Wedderburn 的核心依赖。"
+      },
+      {
+        "id": "representation-ch02-q21",
+        "question": "\\(G = S_3\\)，\\(e_1 + e_2 + e_3 = \\) ？（\\(e_i\\) 为中心幂等元）",
+        "options": [
+          "\\(e\\)（群代数单位元）",
+        "\\(0\\)",
+        "\\(e_1\\)",
+        "\\(|G| \\cdot e\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum_i e_i = 1\\)（群代数的单位元 \\(e\\)）。中心幂等元给出完备正交分解：\\(V = \\bigoplus e_i V\\)，\\(\\sum e_i v = v\\) 对所有 \\(v\\)。\\(e_i e_j = \\delta_{ij} e_i\\)，\\(\\sum e_i = 1\\)。"
+      },
+      {
+        "id": "representation-ch02-q22",
+        "question": "\\(G\\) 有 \\(r\\) 个共轭类，\\(r\\) 个不可约表示维数 \\(d_1, \\ldots, d_r\\)。已知 \\(|G| = 24, r = 5\\)。\\((d_1,\\ldots,d_5)\\) 的可能值？",
+        "options": [
+          "\\((1,1,2,3,3)\\)",
+        "\\((1,1,1,3,3)\\)",
+        "A 和 B 都满足 \\(\\sum d_i^2 = 24\\)",
+        "只有 A"
+        ],
+        "answer": 3,
+        "explanation": "A: \\(1+1+4+9+9=24\\) ✓。B: \\(1+1+1+9+9=21 \\neq 24\\) ✗。（注意 \\(S_4\\) 恰好是 A 的情况）。还需检查 \\(d_i \\mid 24\\)：\\(1,2,3\\) 都整除 \\(24\\) ✓。"
+      },
+      {
+        "id": "representation-ch02-q23",
+        "question": "\\(V\\) 是不可约表示，\\(\\langle\\chi_V, \\chi_V\\rangle = 1\\)。若 \\(W = V \\oplus V\\)，\\(\\langle\\chi_W, \\chi_W\\rangle = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(1\\)",
+        "\\(\\sqrt{2}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\chi_W = 2\\chi_V\\)。\\(\\langle\\chi_W,\\chi_W\\rangle = \\langle 2\\chi_V, 2\\chi_V\\rangle = 4\\langle\\chi_V,\\chi_V\\rangle = 4 \\times 1 = 4\\)。\\(V\\) 在 \\(W\\) 中重数 \\(n = 2\\)，\\(\\sum n_i^2 = 2^2 = 4\\)。"
+      },
+      {
+        "id": "representation-ch02-q24",
+        "question": "\\(\\mathbb{R}\\) 上 \\(SO(2)\\) 的 2 维不可约实表示 \\(\\rho_\\theta\\)（旋转角 \\(\\theta\\)）中，\\(\\mathrm{Hom}_{SO(2)}(\\rho_\\theta, \\rho_\\theta)\\) 的维数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\rho_\\theta\\) 的等变自映射 \\(T\\) 需与所有旋转矩阵交换。\\(T = \\begin{pmatrix}a&-b\\\\b&a\\end{pmatrix}\\)（与旋转交换的实 \\(2\\times2\\) 矩阵），参数 \\((a,b) \\in \\mathbb{R}^2\\)。\\(\\mathrm{Hom} \\cong \\mathbb{C}\\)（作为实向量空间维数 \\(= 2\\)）。Schur 引理 \\(T = \\lambda I\\) 对 \\(\\mathbb{R}\\) 失效。"
+      },
+      {
+        "id": "representation-ch02-q25",
+        "question": "\\(e_i = \\frac{d_i}{|G|}\\sum_g \\overline{\\chi_i(g)} g\\)。\\(e_i\\) 属于 \\(\\mathbb{C}[G]\\) 的中心吗？",
+        "options": [
+          "是，\\(e_i\\) 与所有群元素交换",
+        "否",
+        "仅当 \\(G\\) Abel",
+        "仅当 \\(d_i = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_i\\) 是 \\(\\mathbb{C}[G]\\) 的**中心**幂等元。\\(\\chi_i\\) 是类函数（\\(\\chi_i(hgh^{-1}) = \\chi_i(g)\\)），故 \\(e_i\\) 是类函数的线性组合，属于 \\(Z(\\mathbb{C}[G])\\)。对所有 \\(h \\in G\\)：\\(he_i h^{-1} = e_i\\)。"
+      },
+      {
+        "id": "representation-ch02-q26",
+        "question": "化学中苯 \\(C_6H_6\\) 的对称群为 \\(D_6\\)（阶 12）。苯的分子轨道分类需要 \\(D_6\\) 的不可约表示。\\(D_6\\) 至少有几个不可约表示？",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(D_6\\) 有 6 个共轭类（\\(D_n\\) 的共轭类数：\\(n\\) 奇时 \\((n+3)/2\\)，\\(n\\) 偶时 \\(n/2+3\\)，\\(n=6\\) 时 \\(6/2+3=6\\)）。不可约表示个数 \\(= 6\\)。维数 \\((1,1,1,1,2,2)\\)，\\(4+4+4=12\\)。"
+      },
+      {
+        "id": "representation-ch02-q27",
+        "question": "量子力学中 \\(H\\) 的能级简并度与不可约表示维数的关系？",
+        "options": [
+          "简并度 \\(\\geq\\) 不可约表示的维数",
+        "简并度 \\(=\\) 不可约表示的维数",
+        "简并度为不可约表示维数的整数倍",
+        "无关系"
+        ],
+        "answer": 2,
+        "explanation": "\\(H\\) 的每个本征空间是 \\(G\\)-表示，分解为不可约 \\(V_i^{\\oplus n_i}\\)。若该空间恰好是一个不可约 \\(V_i\\)（\\(n_i=1\\)），简并度 \\(= d_i\\)。一般简并度 \\(= \\sum n_i d_i\\)，是 \\(d_i\\) 的倍数（当仅含一种不可约时）。"
+      },
+      {
+        "id": "representation-ch02-q28",
+        "question": "信号处理中傅里叶变换将 \\(\\mathbb{Z}/N\\mathbb{Z}\\) 的正则表示分解为不可约表示。这本质上是？",
+        "options": [
+          "Artin-Wedderburn 分解",
+        "Schur 正交性",
+        "A 和 B 在 Abel 群上的特例",
+        "与表示论无关"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathbb{Z}/N\\mathbb{Z}\\) Abel，\\(N\\) 个 1 维不可约表示 \\(\\rho_k(m) = e^{2\\pi ikm/N}\\)。正则表示 \\(= \\bigoplus_{k=0}^{N-1}\\rho_k\\)。DFT 矩阵 \\(F_{km} = \\frac{1}{\\sqrt{N}}e^{2\\pi ikm/N}\\) 恰好是变基矩阵。正交性 \\(= \\langle\\chi_k,\\chi_l\\rangle = \\delta_{kl}\\)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="representation"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/representation.html" class="module-name">表示论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 不可约表示</a></li>
+      <li><a href="#kp2">02 · Schur 引理</a></li>
+      <li><a href="#kp3">03 · 正交关系与分解重数</a></li>
+      <li><a href="#kp4">04 · 幂等元与投影公式</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>不可约表示与 Schur 引理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>不可约表示</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>就像素数是整数的基本构件，不可约表示是表示论的「原子」。 Maschke 定理保证每个表示可分解为不可约表示的直和，所以问题 归结为: 每个群有哪些不可约表示？</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不可约表示是「不可再分解」的表示，即无非平凡 \(G\)-不变子空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>不可约</strong>: \(V\) 无非平凡 \(G\)-不变子空间。 等价: \(V \neq 0\) 且唯一的 \(G\)-不变子空间是 \(0\) 和 \(V\)。 <strong>不可约表示个数</strong>: \(|G|\) 有限时，\(\mathbb{C}\) 上不可约表示的个数 = \(G\) 的共轭类个数。 <strong>分解唯一性</strong>: \[V \cong V_1^{\oplus n_1} \oplus \cdots \oplus V_r^{\oplus n_r}\] 其中 \(V_i\) 不可约，\(n_i\) 是重数，均唯一确定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 列出 \(S_3\) 的所有不可约复表示。 解答: \(S_3\) 有 3 个共轭类: \(\{e\}\)，\(\{(12),(13),(23)\}\)，\(\{(123),(132)\}\)。 故有 3 个不可约表示，维数 \(1, 1, 2\)（\(1+1+4=6\)）。 \(\rho_1\): 平凡。\(\rho_2\): 符号。\(\rho_3\): 2维标准。 易错点: 将共轭类个数和表示维数混淆。 共轭类个数 = 不可约表示个数，不是维数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|G| = 12\) 且 \(G\) 有 4 个共轭类。可能的不可约表示维数为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(1^2 + 1^2 + 1^2 + 3^2 = 12\\)。只有 A 满足 \\(\\sum d_i^2 = |G|\\)。')">A. \(1, 1, 1, 3\)（\(\sum = 12\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(1^2 + 1^2 + 1^2 + 3^2 = 12\\)。只有 A 满足 \\(\\sum d_i^2 = |G|\\)。')">B. \(1, 1, 2, 2\)（\(\sum = 10 \neq 12\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(1^2 + 1^2 + 1^2 + 3^2 = 12\\)。只有 A 满足 \\(\\sum d_i^2 = |G|\\)。')">C. \(1, 1, 1, 1\)（\(\sum = 4 \neq 12\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(1^2 + 1^2 + 1^2 + 3^2 = 12\\)。只有 A 满足 \\(\\sum d_i^2 = |G|\\)。')">D. \(2, 2, 2, 2\)（\(\sum = 16 \neq 12\)）</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Schur 引理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不可约表示之间的关系是什么？Schur 引理说: 不同不可约表示之间 的等变映射必为零，同一不可约表示的等变映射必为数量矩阵。 这是表示论中最基本也最强大的工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Schur 引理是「不可约表示之间最大程度正交」的体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Schur 引理</strong>: 设 \(\rho_1, \rho_2\) 不可约，\(T: V_1 \to V_2\) 为 \(G\)-等变映射。 则: - \(\rho_1 \not\cong \rho_2 \Rightarrow T = 0\) - \(\rho_1 = \rho_2\)，\(K = \mathbb{C} \Rightarrow T = \lambda I\) <strong>证明</strong>: \(\ker T\) 和 \(\mathrm{im} T\) 都是 \(G\)-不变子空间。 不可约性 \(\Rightarrow\) \(\ker T = 0\) 或 \(V_1\)，\(\mathrm{im} T = 0\) 或 \(V_2\)。 若 \(\rho_1 \not\cong \rho_2\)，\(T\) 不可能是同构，故 \(T = 0\)。 若 \(V_1 = V_2\)，\(T - \lambda I\) 也是 \(G\)-等变，取特征值得 \(T = \lambda I\)。 \[T \in \mathrm{Hom}_G(V_i, V_j) \Rightarrow T = \begin{cases} 0 & i \neq j \\ \lambda I & i = j \end{cases}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{C}[S_3]\) 中，平凡表示 \(\rho_1\) 和符号表示 \(\rho_2\) 之间 的 \(G\)-等变映射是什么？ 解答: \(\rho_1 \not\cong \rho_2\)，由 Schur 引理，\(\mathrm{Hom}_G(\rho_1, \rho_2) = 0\)。 易错点: Schur 引理中 \(T = \lambda I\) 要求 \(K\) 代数闭。 \(\mathbb{R}\) 上可能有 \(T\) 不是数量矩阵（如旋转）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim \mathrm{Hom}_G(V, V) = ?\)（\(V\) 不可约，\(K = \mathbb{C}\)）</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Schur 引理: \\(\\mathrm{Hom}_G(V,V) = \\mathbb{C} \\cdot I\\)，1 维。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Schur 引理: \\(\\mathrm{Hom}_G(V,V) = \\mathbb{C} \\cdot I\\)，1 维。')">B. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Schur 引理: \\(\\mathrm{Hom}_G(V,V) = \\mathbb{C} \\cdot I\\)，1 维。')">C. \(\dim V\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Schur 引理: \\(\\mathrm{Hom}_G(V,V) = \\mathbb{C} \\cdot I\\)，1 维。')">D. \((\dim V)^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>正交关系与分解重数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定一个表示 \(V\)，它分解为 \(V \cong \bigoplus n_i V_i\)。如何计算重数 \(n_i\)？ Schur 引理 + 内积给出: \(n_i = \dim \mathrm{Hom}_G(V_i, V)\)。 后续用特征标的内积可以直接计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>重数公式</strong>: \(V \cong \bigoplus n_i V_i\)，则 \[n_i = \dim \mathrm{Hom}_G(V_i, V)\] 证明: \(\mathrm{Hom}_G(V_i, V) \cong \mathrm{Hom}_G(V_i, \bigoplus n_j V_j) = \bigoplus n_j \mathrm{Hom}_G(V_i, V_j)\)。 由 Schur: \(\mathrm{Hom}_G(V_i, V_j) = \delta_{ij} \mathbb{C}\)。 故 \(\dim \mathrm{Hom}_G(V_i, V) = n_i\)。 等价地（用特征标）: \[n_i = \langle \chi_V, \chi_{V_i} \rangle = \frac{1}{|G|} \sum_{g \in G} \chi_V(g) \overline{\chi_{V_i}(g)}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(S_3\) 的正则表示 \(\mathbb{C}[S_3]\) 中各不可约表示的重数。 解答: \(\mathbb{C}[S_3] \cong \rho_1^{\oplus 1} \oplus \rho_2^{\oplus 1} \oplus \rho_3^{\oplus 2}\)。 重数 = 维数: \(n_i = d_i\)（正则表示的特殊性质）。 易错点: 重数与维数混淆。 一般表示中 \(n_i\) 和 \(d_i = \dim V_i\) 的关系无规律。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(n_i = \langle \chi_V, \chi_{V_i} \rangle\) 中 \(n_i\) 必为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。重数是结构常数，必为非负整数。')">A. 正实数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！重数是结构常数，必为非负整数。')">B. 非负整数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。重数是结构常数，必为非负整数。')">C. 复数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。重数是结构常数，必为非负整数。')">D. 素数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>幂等元与投影公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群代数 \(\mathbb{C}[G]\) 中存在特殊元素 \(e_i\)，它们是幂等元（\(e_i^2 = e_i\)）， 对应于各不可约表示的投影。这给出了分解的明确公式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>中心幂等元</strong>: 定义 \[e_i = \frac{d_i}{|G|} \sum_{g \in G} \overline{\chi_i(g)} \cdot g \in \mathbb{C}[G]\] 性质: \(e_i^2 = e_i\)，\(e_i e_j = 0\)（\(i \neq j\)），\(\sum e_i = 1\)。 \(e_i\) 作用于任何 \(\mathbb{C}[G]\)-模 \(V\) 上给出 \(V_i\)-同型分量的投影。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(G = \mathbb{Z}/2\mathbb{Z} = \{e, g\}\)。求中心幂等元。 解答: 两个不可约表示: \(\chi_1(g) = 1\)，\(\chi_2(g) = -1\)。 \(e_1 = \frac{1}{2}(e + g)\)，\(e_2 = \frac{1}{2}(e - g)\)。 验证: \(e_1^2 = \frac{1}{4}(e + 2g + g^2) = \frac{1}{4}(e + 2g + e) = \frac{1}{2}(e + g) = e_1\)。✓ 易错点: 忘记取共轭（复表示时）。 \(e_i\) 中是 \(\overline{\chi_i(g)}\)，不是 \(\chi_i(g)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">中心幂等元 \(e_i, e_j\)（\(i \neq j\)）的乘积是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(e_i e_j = 0\\)，不同分量的投影正交。')">A. \(e_i\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(e_i e_j = 0\\)，不同分量的投影正交。')">B. \(e_j\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(e_i e_j = 0\\)，不同分量的投影正交。')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(e_i e_j = 0\\)，不同分量的投影正交。')">D. \(e_i + e_j\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/algebra/representation.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

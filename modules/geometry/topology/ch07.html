@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.7 完备度量空间 — 点集拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "topology-ch07-q1",
+        "question": "度量空间 \\((X, d)\\) 中 Cauchy 序列的定义是什么？",
+        "options": [
+          "序列有界",
+        "对任意 \\(\\varepsilon > 0\\)，存在 \\(N\\) 使 \\(m, n > N \\Rightarrow d(x_m, x_n) < \\varepsilon\\)",
+        "序列收敛",
+        "序列单调"
+        ],
+        "answer": 1,
+        "explanation": "Cauchy 序列：元素之间的距离最终任意小。收敛序列一定是 Cauchy 的（\\(d(x_m, x_n) \\leq d(x_m, L) + d(L, x_n)\\)），但 Cauchy 不一定收敛（如 \\(\\mathbb{Q}\\) 中 \\(\\sqrt{2}\\) 的有理逼近）。有界（A）是 Cauchy 的必要条件但不充分。单调（D）只在 \\(\\mathbb{R}\\) 中有意义。"
+      },
+      {
+        "id": "topology-ch07-q2",
+        "question": "\\(\\mathbb{R}\\)（标准度量）是否完备？",
+        "options": [
+          "是",
+        "否",
+        "取决于子集",
+        "只有 \\([0,1]\\) 完备"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{R}\\) 完备：每个 Cauchy 序列收敛。这由 \\(\\mathbb{R}\\) 的最小上界性质保证。Cauchy 序列有界 \\(\\Rightarrow\\) Bolzano-Weierstrass 给出收敛子列 \\(\\Rightarrow\\) 有收敛子列的 Cauchy 序列收敛。\\(\\mathbb{R}^n\\) 也完备（各坐标分别收敛）。"
+      },
+      {
+        "id": "topology-ch07-q3",
+        "question": "\\(\\mathbb{Q}\\)（标准度量）是否完备？",
+        "options": [
+          "是",
+        "否",
+        "在余有限拓扑下完备",
+        "取决于所选的度量"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Q}\\) 不完备。反例：\\(x_1 = 1, x_{n+1} = x_n/2 + 1/x_n\\)（牛顿法逼近 \\(\\sqrt{2}\\)）。这是 \\(\\mathbb{Q}\\) 中 Cauchy 序列但极限 \\(\\sqrt{2} \\notin \\mathbb{Q}\\)。完成 \\(\\mathbb{Q}\\) 得到 \\(\\mathbb{R}\\)——这正是 Dedekind 切割或 Cauchy 列构造实数的方法。"
+      },
+      {
+        "id": "topology-ch07-q4",
+        "question": "Banach 不动点定理要求什么条件？",
+        "options": [
+          "\\(f: X \\to X\\) 连续且 \\(X\\) 紧致",
+        "\\(f: X \\to X\\) 是压缩映射且 \\(X\\) 是完备度量空间",
+        "\\(f: X \\to X\\) 是同胚且 \\(X\\) 连通",
+        "\\(f: X \\to X\\) 是线性且 \\(X\\) 是 Hilbert 空间"
+        ],
+        "answer": 1,
+        "explanation": "Banach 不动点定理：\\((X, d)\\) 完备度量空间，\\(f: X \\to X\\) 压缩（\\(\\exists k \\in [0,1)\\)，\\(d(f(x), f(y)) \\leq k \\cdot d(x,y)\\)）。则 \\(f\\) 有唯一不动点 \\(x^* = f(x^*)\\)。构造：\\(x_0\\) 任意，\\(x_{n+1} = f(x_n)\\)，\\((x_n)\\) 是 Cauchy 列（几何级数估计），完备性保证收敛。"
+      },
+      {
+        "id": "topology-ch07-q5",
+        "question": "Baire 范畴定理的陈述（完备度量空间版本）是什么？",
+        "options": [
+          "完备度量空间是可分的",
+        "完备度量空间中可数个稠密开集的交是稠密的",
+        "完备度量空间是紧致的",
+        "完备度量空间是连通的"
+        ],
+        "answer": 1,
+        "explanation": "Baire 定理：\\((X, d)\\) 完备，\\(\\{G_n\\}_{n=1}^{\\infty}\\) 是可数个稠密开集，则 \\(\\bigcap_{n=1}^{\\infty} G_n\\) 在 \\(X\\) 中稠密。等价表述：完备度量空间不是可数个无处稠密闭集的并（\"不是第一范畴集\"）。这是泛函分析中一致有界原理、开映射定理、闭图像定理的基础。"
+      },
+      {
+        "id": "topology-ch07-q6",
+        "question": "\\((X, d)\\) 度量空间的完备化 \\((\\hat{X}, \\hat{d})\\) 满足什么？",
+        "options": [
+          "\\(\\hat{X}\\) 紧致",
+        "\\(X\\) 等距嵌入 \\(\\hat{X}\\) 且 \\(X\\) 在 \\(\\hat{X}\\) 中稠密",
+        "\\(\\hat{X} = \\overline{X}\\)",
+        "\\(\\hat{X}\\) 唯一确定且 \\(\\hat{X} = X\\)"
+        ],
+        "answer": 1,
+        "explanation": "完备化：\\((\\hat{X}, \\hat{d})\\) 完备，存在等距嵌入 \\(\\iota: X \\to \\hat{X}\\) 使 \\(\\iota(X)\\) 在 \\(\\hat{X}\\) 中稠密。保距保证 \\(\\hat{d}(\\iota(x), \\iota(y)) = d(x,y)\\)。完备化在等距意义下唯一。经典例子：\\(\\mathbb{Q}\\) 的完备化是 \\(\\mathbb{R}\\)。构造方法：Cauchy 列的等价类。"
+      },
+      {
+        "id": "topology-ch07-q7",
+        "question": "设 \\(f(x) = x/2 + 1\\) 在 \\([1, 3]\\) 上是否为压缩映射？不动点是什么？",
+        "options": [
+          "是，不动点 \\(x^* = 2\\)",
+        "否，\\(f([1,3]) \\not\\subseteq [1,3]\\)",
+        "是，不动点 \\(x^* = 1\\)",
+        "不是压缩映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(1) = 3/2\\), \\(f(3) = 5/2\\)。\\(f([1,3]) = [3/2, 5/2] \\subseteq [1,3]\\)。\\(|f(x)-f(y)| = |x-y|/2\\)，\\(k = 1/2 < 1\\)，压缩。\\([1,3]\\) 是 \\(\\mathbb{R}\\) 的完备（闭）子空间。不动点 \\(x = x/2 + 1 \\Rightarrow x = 2\\)。迭代：\\(x_0 = 1, x_1 = 3/2, x_2 = 7/4, \\ldots \\to 2\\)。"
+      },
+      {
+        "id": "topology-ch07-q8",
+        "question": "完备度量空间的闭子空间是否完备？",
+        "options": [
+          "是",
+        "否",
+        "只在有界时",
+        "只在紧致时"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 完备，\\(F \\subseteq X\\) 闭。\\(F\\) 中 Cauchy 列在 \\(X\\) 中收敛（\\(X\\) 完备），极限在 \\(\\overline{F} = F\\) 中（\\(F\\) 闭）。反之：\\(X\\) 度量空间中完备子空间是闭的（完备 \\(\\Rightarrow\\) 极限在子空间中 \\(\\Rightarrow\\) 闭）。所以在度量空间中：子空间完备 \\(\\iff\\) 子空间闭。"
+      },
+      {
+        "id": "topology-ch07-q9",
+        "question": "\\(f(x) = \\cos x\\) 在 \\([0, 1]\\) 上是否为压缩映射？",
+        "options": [
+          "是，\\(k = \\sin 1 \\approx 0.841\\)",
+        "否",
+        "是，\\(k = 1\\)",
+        "不能确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(|f(x) - f(y)| = |\\cos x - \\cos y|\\)。中值定理：\\(= |\\sin c| \\cdot |x-y|\\)（\\(c \\in [0,1]\\)）。\\(\\sup_{c \\in [0,1]} |\\sin c| = \\sin 1 \\approx 0.841 < 1\\)。所以 \\(f\\) 以 \\(k = \\sin 1\\) 为压缩常数。\\([0,1]\\) 完备（\\(\\mathbb{R}\\) 闭子集），\\(f([0,1]) = [\\cos 1, 1] \\subseteq [0,1]\\)（\\(\\cos 1 \\approx 0.54\\)）。不动点 \\(x = \\cos x \\approx 0.739\\)。"
+      },
+      {
+        "id": "topology-ch07-q10",
+        "question": "Baire 定理的推论：\\(\\mathbb{R}\\) 不能表示为可数个无处稠密闭集的并。\\(\\mathbb{Q}\\) 是否是 \\(\\mathbb{R}\\) 中的第一范畴集？",
+        "options": [
+          "是",
+        "否",
+        "\\(\\mathbb{Q}\\) 不是可数集",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Q} = \\bigcup_{q \\in \\mathbb{Q}} \\{q\\}\\) 是可数个单点集的并。每个 \\(\\{q\\}\\) 在 \\(\\mathbb{R}\\) 中无处稠密（\\(\\overline{\\{q\\}} = \\{q\\}\\) 内部为空）。所以 \\(\\mathbb{Q}\\) 是可数个无处稠密集的并 = 第一范畴集（meager）。Baire 定理告诉我们 \\(\\mathbb{R}\\) 本身不是第一范畴的，所以 \\(\\mathbb{R} \\setminus \\mathbb{Q}\\) 不是第一范畴的（否则 \\(\\mathbb{R} = \\mathbb{Q} \\cup (\\mathbb{R} \\setminus \\mathbb{Q})\\) 都是第一范畴，矛盾）。"
+      },
+      {
+        "id": "topology-ch07-q11",
+        "question": "\\(\\mathbb{Q}\\) 的完备化是什么？",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{R}\\)",
+        "\\(\\mathbb{Q}\\)",
+        "\\(\\overline{\\mathbb{Q}} \\setminus \\mathbb{Q}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{R}\\) 是 \\(\\mathbb{Q}\\) 的完备化。\\(\\mathbb{Q} \\subseteq \\mathbb{R}\\) 等距嵌入，\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密，\\(\\mathbb{R}\\) 完备。完备化唯一（等距意义下），所以 \\(\\hat{\\mathbb{Q}} = \\mathbb{R}\\)。历史上 Cantor 正是用 \\(\\mathbb{Q}\\) 的 Cauchy 列等价类构造 \\(\\mathbb{R}\\)，与完备化构造完全一致。"
+      },
+      {
+        "id": "topology-ch07-q12",
+        "question": "\\((0,1)\\)（标准度量）是否完备？",
+        "options": [
+          "是",
+        "否",
+        "取决于度量",
+        "在等价度量下可以变完备"
+        ],
+        "answer": 1,
+        "explanation": "\\((0,1)\\) 不完备：\\(x_n = 1/n\\) 是 Cauchy 列，\\(\\lim x_n = 0 \\notin (0,1)\\)。但 \\((0,1)\\) 同胚于 \\(\\mathbb{R}\\)（如 \\(\\phi(x) = \\tan(\\pi(x - 1/2))\\)），\\(\\mathbb{R}\\) 完备。这说明完备性不是拓扑不变量——它依赖于度量，不仅仅是拓扑。D 在某种意义上正确：\\((0,1)\\) 上可以定义等价度量使其完备（如拉回 \\(\\mathbb{R}\\) 的度量），但标准度量不完备。"
+      },
+      {
+        "id": "topology-ch07-q13",
+        "question": "Banach 不动点定理中，迭代 \\(x_{n+1} = f(x_n)\\) 的误差估计是什么？",
+        "options": [
+          "\\(d(x_n, x^*) \\leq k^n \\cdot d(x_0, x^*)\\)",
+        "\\(d(x_n, x^*) \\leq \\frac{k^n}{1-k} d(x_0, x_1)\\)",
+        "\\(d(x_n, x^*) \\leq n \\cdot k\\)",
+        "\\(d(x_n, x^*) \\leq 1/n\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(d(x_n, x^*) \\leq d(x_n, x_{n+1}) + d(x_{n+1}, x_{n+2}) + \\cdots \\leq k^n d(x_0, x_1)(1 + k + k^2 + \\cdots) = \\frac{k^n}{1-k} d(x_0, x_1)\\)。几何收敛，收敛速率由 \\(k\\) 决定。\\(k\\) 越小收敛越快。A 形式上缺少 \\(d(x_0, x^*)\\) 计算（通常不知道 \\(x^*\\)，所以 B 更实用）。"
+      },
+      {
+        "id": "topology-ch07-q14",
+        "question": "\\(C([0,1])\\)（\\([0,1]\\) 上连续函数，supremum 范数）是否完备？",
+        "options": [
+          "是",
+        "否",
+        "只有紧支撑函数完备",
+        "取决于范数"
+        ],
+        "answer": 0,
+        "explanation": "\\(C([0,1])\\) 在 \\(\\|f\\|_\\infty = \\sup_{x \\in [0,1]} |f(x)|\\) 范数下完备（Banach 空间）。一致收敛到的极限函数仍然连续：\\(f_n \\to f\\) 一致，\\(f_n\\) 连续，则 \\(f\\) 连续。这是分析学中基本的完备性结果。在 \\(L^1\\) 或 \\(L^2\\) 范数下 \\(C([0,1])\\) 不完备。"
+      },
+      {
+        "id": "topology-ch07-q15",
+        "question": "完备化的构造中，两个 Cauchy 列 \\((x_n)\\) 和 \\((y_n)\\) 等价的条件是什么？",
+        "options": [
+          "\\(\\lim d(x_n, y_n) = 0\\)",
+        "存在公共子列",
+        "\\(x_n = y_n\\) 对所有 \\(n\\)",
+        "\\(d(x_n, y_n)\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "\\((x_n) \\sim (y_n) \\iff \\lim_{n \\to \\infty} d(x_n, y_n) = 0\\)。两个 Cauchy 列\"最终无穷接近\"则等价。\\(\\hat{X}\\) 的点是 Cauchy 列的等价类 \\([(x_n)]\\)。距离 \\(\\hat{d}([(x_n)], [(y_n)]) = \\lim d(x_n, y_n)\\)（极限存在因为 \\(d(x_n, y_n)\\) 是 \\(\\mathbb{R}\\) 中 Cauchy 列）。"
+      },
+      {
+        "id": "topology-ch07-q16",
+        "question": "在离散度量空间 \\(d(x,y) = 1\\) (\\(x \\neq y\\)) 中，Cauchy 列有什么特征？",
+        "options": [
+          "总是收敛的",
+        "最终常数列（存在 \\(N\\) 使 \\(n > N \\Rightarrow x_n = x_N\\)）",
+        "每个序列都是 Cauchy 列",
+        "B 蕴含 A，两者都正确"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\varepsilon = 1/2\\)：\\(d(x_m, x_n) < 1/2\\) 当 \\(m, n > N\\)，但 \\(d(x_m, x_n)\\) 只能取 \\(0\\) 或 \\(1\\)，所以 \\(d(x_m, x_n) = 0\\)，即 \\(x_m = x_n\\)。Cauchy 列最终常数。常数列显然收敛。所以离散度量空间总是完备的（包括不可数集！）。"
+      },
+      {
+        "id": "topology-ch07-q17",
+        "question": "Baire 定理能用来证明什么经典结论？",
+        "options": [
+          "一致有界原理（Banach-Steinhaus）",
+        "Heine-Borel 定理",
+        "Stone-Weierstrass 定理",
+        "Arzelà-Ascoli 定理"
+        ],
+        "answer": 0,
+        "explanation": "一致有界原理：\\(X\\) Banach, \\(Y\\) 赋范空间，\\(\\{T_\\alpha\\} \\subseteq B(X, Y)\\) 逐点有界 \\(\\Rightarrow\\) 一致有界。证明核心用 Baire 定理：\\(X = \\bigcup_n \\{x : \\sup_\\alpha \\|T_\\alpha x\\| \\leq n\\}\\)（闭集），\\(X\\) 完备 \\(\\Rightarrow\\) 某个 \\(\\{x : \\sup_\\alpha \\|T_\\alpha x\\| \\leq n\\}\\) 有非空内部。Heine-Borel（B）用紧致性，Stone-Weierstrass（C）和 Arzelà-Ascoli（D）用其他技术。"
+      },
+      {
+        "id": "topology-ch07-q18",
+        "question": "完备度量空间中，可数个稠密 \\(G_\\delta\\) 集的交是否稠密？",
+        "options": [
+          "是（Baire 定理推论）",
+        "否",
+        "只在可分空间中",
+        "只在紧致空间中"
+        ],
+        "answer": 0,
+        "explanation": "\\(G_\\delta\\) 集 = 可数个开集之交。稠密 \\(G_\\delta\\) 集可以写成 \\(\\bigcap_m G_m\\)（\\(G_m\\) 开稠密）。可数个稠密 \\(G_\\delta\\) 集之交 \\(= \\bigcap_n \\bigcap_m G_{n,m}\\) 仍然是可数个开稠密集的交（可数个可数交 = 可数交）。Baire 定理保证其稠密。推论：\\(\\mathbb{R}\\) 上处处不可微但处处连续的函数\"很多\"（残缺集/comeager 集）。"
+      },
+      {
+        "id": "topology-ch07-q19",
+        "question": "Picard-Lindelöf 定理使用 Banach 不动点定理证明 ODE 的存在和唯一。\\(y' = f(t,y)\\) 的解对应什么算子的不动点？",
+        "options": [
+          "\\(Ty(t) = y_0 + \\int_0^t f(s, y(s)) ds\\)",
+        "\\(Ty(t) = y'(t)\\)",
+        "\\(Ty(t) = f(t, y(t))\\)",
+        "\\(Ty(t) = y(t) - y_0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(y' = f(t,y)\\), \\(y(0) = y_0\\) 等价于积分方程 \\(y(t) = y_0 + \\int_0^t f(s, y(s)) ds\\)。定义 Picard 算子 \\(T: C([0,\\delta]) \\to C([0,\\delta])\\)，\\((Ty)(t) = y_0 + \\int_0^t f(s, y(s)) ds\\)。\\(y\\) 是解 \\(\\iff y = Ty\\)（不动点）。在足够小的 \\(\\delta\\) 上，\\(T\\) 是压缩映射（Lipschitz 条件 + 小区间），Banach 定理给出唯一不动点。"
+      },
+      {
+        "id": "topology-ch07-q20",
+        "question": "\\(\\mathbb{R}\\) 是否可以写成可数个无处稠密集的并？",
+        "options": [
+          "是",
+        "否（Baire 范畴定理）",
+        "可以，\\(\\mathbb{R} = \\mathbb{Q} \\cup (\\mathbb{R} \\setminus \\mathbb{Q})\\)",
+        "取决于选择公理"
+        ],
+        "answer": 1,
+        "explanation": "Baire 定理：完备度量空间不是第一范畴的。\\(\\mathbb{R}\\) 完备 \\(\\Rightarrow\\) 不可写为可数个无处稠密集的并。C 虽然正确（\\(\\mathbb{Q}\\) 可数个无处稠密集之并），但 \\(\\mathbb{R} \\setminus \\mathbb{Q}\\) 不是无处稠密的（它稠密！），所以 C 不是反例。若 \\(\\mathbb{R} = \\bigcup_n F_n\\)（\\(F_n\\) 无处稠密），\\(G_n = \\mathbb{R} \\setminus \\overline{F_n}\\) 开稠密，\\(\\bigcap G_n\\) 应稠密但 \\(= \\emptyset\\)，矛盾。"
+      },
+      {
+        "id": "topology-ch07-q21",
+        "question": "\\(p\\)-adic 数 \\(\\mathbb{Q}_p\\) 是 \\(\\mathbb{Q}\\) 在 \\(p\\)-adic 度量 \\(d_p(x,y) = |x-y|_p\\) 下的完备化。\\(\\mathbb{Q}_p\\) 有什么拓扑性质（与 \\(\\mathbb{R}\\) 不同）？",
+        "options": [
+          "\\(\\mathbb{Q}_p\\) 连通",
+        "\\(\\mathbb{Q}_p\\) 完全不连通",
+        "\\(\\mathbb{Q}_p\\) 紧致",
+        "\\(\\mathbb{Q}_p\\) 不完备"
+        ],
+        "answer": 1,
+        "explanation": "\\(p\\)-adic 度量是超度量（\\(d(x,z) \\leq \\max(d(x,y), d(y,z))\\)），超度量空间中球既开又闭。有非平凡 clopen 集 \\(\\Rightarrow\\) 完全不连通（每个连通分量是单点）。\\(\\mathbb{Q}_p\\) 完备（定义如此）且不紧致（无界）。但 \\(\\mathbb{Z}_p\\)（\\(p\\)-adic 整数，\\(|x|_p \\leq 1\\)）是紧致、完全不连通的。"
+      },
+      {
+        "id": "topology-ch07-q22",
+        "question": "Banach 不动点定理中，压缩常数 \\(k < 1\\) 的条件能否放宽为 \\(d(f(x), f(y)) < d(x,y)\\)（严格缩短但不一定有 \\(k < 1\\)）？",
+        "options": [
+          "可以，结论不变",
+        "不可以，可能没有不动点",
+        "可以但需要 \\(X\\) 紧致",
+        "B 和 C 都正确"
+        ],
+        "answer": 3,
+        "explanation": "\\(d(f(x),f(y)) < d(x,y)\\)（严格非膨胀，非一致压缩）不够保证不动点存在。反例：\\(f: [1,\\infty) \\to [1,\\infty)\\)，\\(f(x) = x + 1/x\\)。\\(|f(x)-f(y)| = |x-y| \\cdot |1 - 1/(xy)| < |x-y|\\)（\\(xy > 1\\)），但 \\(f(x) > x\\) 无不动点。但在紧致度量空间中，严格非膨胀映射有不动点：\\(g(x) = d(x, f(x))\\) 连续，紧致上取最小值 \\(g(x_0) = 0\\)。"
+      },
+      {
+        "id": "topology-ch07-q23",
+        "question": "处处连续但处处不可微的函数存在吗？Baire 定理在其中扮演什么角色？",
+        "options": [
+          "不存在",
+        "存在（如 Weierstrass 函数），且这类函数\"很多\"（comeager）",
+        "存在但极其稀少",
+        "Baire 定理说这类函数不存在"
+        ],
+        "answer": 1,
+        "explanation": "Weierstrass 1872 年构造了处处连续处处不可微的函数。Baire 范畴定理证明更强结果：在 \\(C([0,1])\\)（supremum 范数）中，处处不可微函数集是 comeager 的（稠密 \\(G_\\delta\\)），即\"典型\"的连续函数处处不可微！可微函数反而是 meager 的（第一范畴）。"
+      },
+      {
+        "id": "topology-ch07-q24",
+        "question": "完备化的万有性质：\\(X\\) 度量空间，\\(Y\\) 完备度量空间，\\(f: X \\to Y\\) 一致连续。则 \\(f\\) 可以唯一延拓为什么？",
+        "options": [
+          "\\(\\hat{f}: \\hat{X} \\to Y\\) 连续",
+        "\\(\\hat{f}: \\hat{X} \\to Y\\) 一致连续",
+        "\\(\\hat{f}: \\hat{X} \\to \\hat{Y}\\)",
+        "不一定可延拓"
+        ],
+        "answer": 1,
+        "explanation": "万有性质：一致连续 \\(f: X \\to Y\\)（\\(Y\\) 完备）唯一延拓为一致连续 \\(\\hat{f}: \\hat{X} \\to Y\\)，\\(\\hat{f}|_X = f\\)。构造：\\(x \\in \\hat{X}\\)，取 \\(X\\) 中 Cauchy 列 \\((x_n) \\to x\\)，\\(f(x_n)\\) 在 \\(Y\\) 中 Cauchy（\\(f\\) 一致连续），\\(Y\\) 完备 \\(\\Rightarrow \\hat{f}(x) = \\lim f(x_n)\\)。与等价类选取无关。"
+      },
+      {
+        "id": "topology-ch07-q25",
+        "question": "等价度量 \\(d_1, d_2\\)（生成相同拓扑）是否保持完备性？",
+        "options": [
+          "是",
+        "否，\\((0,1)\\) 上标准度量不完备但存在等价完备度量",
+        "只在有界度量时",
+        "只在紧致空间时"
+        ],
+        "answer": 1,
+        "explanation": "完备性不是拓扑不变量。\\((0,1) \\cong \\mathbb{R}\\)（同胚），\\(\\mathbb{R}\\) 完备。通过同胚拉回 \\(\\mathbb{R}\\) 的度量到 \\((0,1)\\)：\\(d'(x,y) = |\\tan(\\pi x - \\pi/2) - \\tan(\\pi y - \\pi/2)|\\)，\\(d'\\) 与标准度量 \\(|x-y|\\) 生成相同拓扑但 \\(d'\\) 完备。更一般地，\\(G_\\delta\\) 子集（完备空间中可数个开集之交）总能赋予等价完备度量。"
+      },
+      {
+        "id": "topology-ch07-q26",
+        "question": "在数值分析中，Newton 迭代法 \\(x_{n+1} = x_n - f(x_n)/f'(x_n)\\) 可以视为什么定理的应用？",
+        "options": [
+          "Baire 范畴定理",
+        "Banach 不动点定理",
+        "Bolzano-Weierstrass 定理",
+        "Heine-Borel 定理"
+        ],
+        "answer": 1,
+        "explanation": "Newton 法可以写成 \\(x_{n+1} = g(x_n)\\)，\\(g(x) = x - f(x)/f'(x)\\)。在单根附近，\\(g'(x^*) = 0\\)（超线性收敛），因此在 \\(x^*\\) 的邻域内 \\(|g'| \\leq k < 1\\)，\\(g\\) 是压缩映射。Banach 定理保证迭代收敛到不动点 \\(x^* = g(x^*)\\)，即 \\(f(x^*) = 0\\)。收敛速率实际上是二次（\\(k \\approx |x_n - x^*|\\)）。"
+      },
+      {
+        "id": "topology-ch07-q27",
+        "question": "在博弈论中，Nash 均衡的存在性证明（有限博弈）使用的核心定理是？",
+        "options": [
+          "Banach 不动点定理",
+        "Brouwer 不动点定理",
+        "Baire 范畴定理",
+        "Tychonoff 定理"
+        ],
+        "answer": 1,
+        "explanation": "Nash 1950年用 Brouwer 不动点定理证明有限博弈的混合策略 Nash 均衡存在。策略集是有界闭凸集（单纯形），最优反应映射 \\(r: \\Delta \\to \\Delta\\) 连续。Brouwer：紧凸集上的连续自映射有不动点。不动点 = 均衡。Banach 不动点定理（A）需要压缩条件，博弈中通常不满足。"
+      },
+      {
+        "id": "topology-ch07-q28",
+        "question": "在信号处理中，迭代去噪算法（如投影着地法 POCS）的收敛性基于什么数学理论？",
+        "options": [
+          "完备空间上交替投影的收敛定理",
+        "离散 Fourier 变换",
+        "Baire 范畴定理",
+        "紧致性"
+        ],
+        "answer": 0,
+        "explanation": "POCS（Projection Onto Convex Sets）：在 Hilbert 空间（完备内积空间）中，交替向闭凸集投影收敛到交集中的点。收敛性依赖于完备性（保证 Cauchy 列收敛）和凸集投影的非膨胀性。这是 Banach 不动点定理在 Hilbert 空间中的推广。迭代去噪、图像恢复、压缩感知中广泛使用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="topology"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/topology.html" class="module-name">点集拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.7 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Cauchy 序列与完备空间</a></li>
+      <li><a href="#kp2">02 · Banach 不动点定理</a></li>
+      <li><a href="#kp3">03 · Baire 范畴定理</a></li>
+      <li><a href="#kp4">04 · 完备化构造</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 7</p>
+      <h1>完备度量空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Cauchy 序列与完备空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在 \(\mathbb{Q}\) 中，序列 \(1, 1.4, 1.41, 1.414, \ldots\) 的项越来越 接近，但极限 \(\sqrt{2}\) 不在 \(\mathbb{Q}\) 中。完备性正是弥补这个 "缺口"的性质：每个 Cauchy 列（项之间距离趋于零的列）都收敛。 完备性是分析学的基石——不动点定理、Baire 范畴定理、函数空间的 完备化都依赖于它。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完备性将"内在的收敛趋势"（Cauchy 条件）与"实际收敛"等同起来。 这是度量空间理论中特有的概念（一般拓扑空间无法定义 Cauchy 列）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cauchy 序列</strong>：\((x_n)\) 在度量空间 \((X, d)\) 中是 Cauchy 列 \(\iff\) \[\forall \varepsilon > 0,\; \exists N,\; \forall m, n \geq N,\; d(x_m, x_n) < \varepsilon\] <strong>完备空间</strong>：\((X, d)\) 完备 \(\iff\) 每个 Cauchy 列在 \(X\) 中收敛。 <strong>基本事实</strong>： - 收敛序列 \(\Rightarrow\) Cauchy 列（反之需完备性）。 - \(\mathbb{R}\) 完备（由确界原理证明）。 - \(\mathbb{R}^n\) 完备（分量逐个收敛）。 - 完备空间的闭子集完备；完备子空间在更大空间中是闭的。 - \(\mathbb{Q}\) 不完备：\(\sqrt{2}\) 的十进制逼近是 Cauchy 列但不收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Banach 空间（完备赋范空间）是泛函分析的基础框架 - 完备性保证迭代算法（如 Newton 法）的收敛</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \((C[0,1], d_\infty)\)（连续函数空间，\(d_\infty(f,g) = \sup|f-g|\)）完备。 解答：设 \((f_n)\) 为 Cauchy 列。对每个 \(x\)，\((f_n(x))\) 是 \(\mathbb{R}\) 中 Cauchy 列 \(\Rightarrow f_n(x) \to f(x)\)。 Cauchy 条件保证一致收敛：\(\forall \varepsilon,\; \exists N,\; \sup|f_m - f_n| < \varepsilon\)，令 \(m \to \infty\) 得 \(\sup|f - f_n| \leq \varepsilon\)。 一致极限保连续：\(f \in C[0,1]\)。故 \(f_n \to f\) 在 \(d_\infty\) 下。 易错点：逐点收敛不保证极限连续（需一致收敛）。 \(d_\infty\) 的完备性关键在于一致收敛。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个度量空间不完备？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((0,1)\\) 不完备：\\(x_n = 1/n\\) 是 Cauchy 列但极限 \\(0 \\notin (0,1)\\)。')">A. \((\mathbb{R}, |\cdot|)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((0,1)\\) 不完备：\\(x_n = 1/n\\) 是 Cauchy 列但极限 \\(0 \\notin (0,1)\\)。')">B. \(([0,1], |\cdot|)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\((0,1)\\) 不完备：\\(x_n = 1/n\\) 是 Cauchy 列但极限 \\(0 \\notin (0,1)\\)。')">C. \(((0,1), |\cdot|)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((0,1)\\) 不完备：\\(x_n = 1/n\\) 是 Cauchy 列但极限 \\(0 \\notin (0,1)\\)。')">D. \((C[0,1], d_\infty)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Banach 不动点定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>方程 \(f(x) = x\)（不动点方程）在数学中无处不在：迭代算法、微分 方程的解、博弈的 Nash 均衡。Banach 不动点定理（压缩映射原理） 给出了最简洁的不动点存在唯一性条件：在完备度量空间中，压缩映射 有且只有一个不动点，且迭代总收敛到它。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>压缩映射原理的核心是"迭代缩小距离"：\(d(f(x), f(y)) \leq q \cdot d(x,y)\) （\(q < 1\)），几何级数式收敛保证极限存在（完备性）和唯一性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Banach)</strong>：设 \((X, d)\) 完备，\(f: X \to X\) 满足 \(d(f(x), f(y)) \leq q \cdot d(x, y)\)（\(0 \leq q < 1\)）。 则 \(f\) 有唯一不动点 \(x^*\)，且 \(\forall x_0 \in X\)， \(x_n = f(x_{n-1}) \to x^*\)。 <strong>证明框架</strong>： 取任意 \(x_0\)，令 \(x_n = f^n(x_0)\)。 \(d(x_{n+1}, x_n) \leq q^n d(x_1, x_0)\)。 \[d(x_m, x_n) \leq \sum_{k=n}^{m-1} q^k d(x_1, x_0) \leq \frac{q^n}{1-q} d(x_1, x_0) \to 0\] 故 \((x_n)\) 是 Cauchy 列，完备性 \(\Rightarrow x_n \to x^*\)。 连续性：\(f(x^*) = f(\lim x_n) = \lim f(x_n) = \lim x_{n+1} = x^*\)。 唯一性：若 \(f(y^*) = y^*\)，\(d(x^*, y^*) = d(f(x^*), f(y^*)) \leq q \cdot d(x^*, y^*)\)， \((1-q)d(x^*, y^*) \leq 0\)，故 \(x^* = y^*\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Picard-Lindelöf 定理：\(y' = f(t,y)\) 在 Lipschitz 条件下 有唯一局部解（通过将 ODE 转化为积分方程，在 \(C\) 空间中应用压缩映射） - 隐函数定理的一种证明方法</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: [0,1] \to [0,1]\)，\(f(x) = (x + 1/x)/3\)... 不对， 修改：\(f: [0,1] \to [0,1]\)，\(f(x) = x/2 + 1/4\)。 证明 \(f\) 有唯一不动点并求之。 解答：\(|f(x) - f(y)| = |x-y|/2\)，\(q = 1/2 < 1\)。\([0,1]\) 完备。 Banach 定理保证唯一不动点。解 \(x = x/2 + 1/4\)：\(x/2 = 1/4\)，\(x^* = 1/2\)。 从 \(x_0 = 0\) 迭代：\(x_1 = 1/4, x_2 = 3/8, x_3 = 7/16 \to 1/2\)。 易错点：压缩常数 \(q\) 必须严格小于 \(1\)。 \(d(f(x),f(y)) \leq d(x,y)\)（\(q = 1\)，非扩张映射）不保证不动点存在。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x/2\)。以下哪个正确？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(|f(x)-f(y)| = |x-y|/2\\)，\\(q=1/2<1\\)，是压缩映射。')">A. \(f\) 是压缩映射，不动点为 \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|f(x)-f(y)| = |x-y|/2\\)，\\(q=1/2<1\\)，是压缩映射。')">B. \(f\) 不是压缩映射</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|f(x)-f(y)| = |x-y|/2\\)，\\(q=1/2<1\\)，是压缩映射。')">C. \(f\) 是压缩映射但没有不动点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|f(x)-f(y)| = |x-y|/2\\)，\\(q=1/2<1\\)，是压缩映射。')">D. \(f\) 有多个不动点</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Baire 范畴定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>"大多数连续函数处处不可微"——这种违反直觉的语句如何严格化？Baire 范畴定理提供了工具：在完备度量空间中，可数个"稠密开集"的交仍然 稠密——即"稠密"的集合"足够多"。反过来，可数个"无处稠密"集合 的并不能铺满整个空间。这是证明存在性的非构造性方法的典范。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Baire 范畴引入"第一纲集"（meagre，可数个无处稠密集之并）与 "第二纲集"（非第一纲），为"大"/"小"提供了拓扑意义上的度量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Baire 范畴定理</strong>：设 \((X, d)\) 为完备度量空间（或局部紧 Hausdorff 空间）。 若 \(\{G_n\}_{n=1}^{\infty}\) 是可数个稠密开集，则 \[\bigcap_{n=1}^{\infty} G_n \text{ 在 } X \text{ 中稠密}\] <strong>证明框架</strong>：设 \(B_0\) 为任意非空开球。 \(G_1\) 稠密 \(\Rightarrow G_1 \cap B_0 \neq \emptyset\)，取闭球 \(\overline{B_1} \subseteq G_1 \cap B_0\)，\(\mathrm{diam}(B_1) < 1\)。 递归：\(\overline{B_{n+1}} \subseteq G_{n+1} \cap B_n\)， \(\mathrm{diam}(B_n) < 1/n\)。 \(\{\overline{B_n}\}\) 是嵌套闭集列，直径趋于 \(0\)。 完备性（Cantor 交集定理）\(\Rightarrow \bigcap \overline{B_n} = \{x^*\}\)。 \(x^* \in \bigcap G_n \cap B_0\)。故 \(\bigcap G_n\) 与任何开球相交，即稠密。 <strong>推论</strong>：完备度量空间不是第一纲集（不能写成可数个无处稠密集之并）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 证明 \(C[0,1]\) 中"大多数"函数处处不可微（\(C^1\) 函数是第一纲集） - 一致有界原理（Banach-Steinhaus）的证明基于 Baire 定理</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：利用 Baire 定理证明 \(\mathbb{R}\) 不可数。 解答：假设 \(\mathbb{R} = \{r_1, r_2, \ldots\}\) 可数。 \(\{r_n\}\) 是闭集，\(\mathbb{R} \setminus \{r_n\}\) 是稠密开集。 Baire 定理：\(\bigcap_n (\mathbb{R} \setminus \{r_n\}) = \mathbb{R} \setminus \{r_1, r_2, \ldots\} = \emptyset\) 应该稠密（非空），但 \(= \emptyset\)，矛盾。 易错点：Baire 定理要求完备性。\(\mathbb{Q}\) 可以写成可数个 单点集之并（第一纲集），不矛盾（\(\mathbb{Q}\) 不完备）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在完备度量空间中，以下哪个是第一纲集？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Q} = \\bigcup_n \\{r_n\\}\\)，每个 \\(\\{r_n\\}\\) 无处稠密，')">A. 整个空间 \(X\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Q} = \\bigcup_n \\{r_n\\}\\)，每个 \\(\\{r_n\\}\\) 无处稠密，')">B. 可数个稠密开集的交</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathbb{Q} = \\bigcup_n \\{r_n\\}\\)，每个 \\(\\{r_n\\}\\) 无处稠密，')">C. \(\mathbb{Q}\)（作为 \(\mathbb{R}\) 的子集）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathbb{Q} = \\bigcup_n \\{r_n\\}\\)，每个 \\(\\{r_n\\}\\) 无处稠密，')">D. 任何闭集</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>完备化构造</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不完备的度量空间总可以"补全"为完备空间——正如 \(\mathbb{Q}\) 补全 为 \(\mathbb{R}\)。完备化不仅是理论上的存在性结果，更是实数构造 （Cauchy 列方法）的普遍化。这个构造在泛函分析中广泛使用： 赋范空间的完备化给出 Banach 空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完备化 = 等距嵌入到完备空间中使像稠密。唯一性由万有性质保证。 这类似于群的完备化（profinte completion）或域的完备化（\(p\)-adic 数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>构造</strong>：设 \((X, d)\) 为度量空间。 定义 Cauchy 列的等价关系：\((x_n) \sim (y_n) \iff d(x_n, y_n) \to 0\)。 令 \(\hat{X} = \{\text{Cauchy 列}\} / {\sim}\)。 度量：\(\hat{d}([(x_n)], [(y_n)]) = \lim_{n \to \infty} d(x_n, y_n)\)。 （极限存在：\(|d(x_m, y_m) - d(x_n, y_n)| \leq d(x_m, x_n) + d(y_m, y_n) \to 0\)。） <strong>性质</strong>： (1) \((\hat{X}, \hat{d})\) 完备。 (2) \(\iota: X \to \hat{X}\)，\(\iota(x) = [(x, x, x, \ldots)]\) 是等距嵌入。 (3) \(\iota(X)\) 在 \(\hat{X}\) 中稠密。 <strong>万有性质</strong>：若 \(f: X \to Y\) 一致连续，\(Y\) 完备， 则 \(f\) 唯一延拓为 \(\hat{f}: \hat{X} \to Y\) 一致连续。 \[\hat{\mathbb{Q}} = \mathbb{R}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- \(\mathbb{R}\) 的 Cauchy 构造：\(\hat{\mathbb{Q}} = \mathbb{R}\) - \(L^p\) 空间是可积函数空间在 \(\|\cdot\|_p\) 下的完备化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：描述 \(((0,1), |\cdot|)\) 的完备化。 解答：\((0,1)\) 与 \(\mathbb{R}\) 同胚但不等距。等距地看，\((0,1)\) 中的 Cauchy 列要么收敛到 \((0,1)\) 中的点，要么"收敛"到 \(0\) 或 \(1\)。 完备化 \(= [0,1]\)：添加两个端点。\(\iota: (0,1) \hookrightarrow [0,1]\) 是等距嵌入，像在 \([0,1]\) 中稠密。 易错点：完备化依赖于度量，不仅依赖于拓扑。 \((0,1)\) 在标准度量下完备化为 \([0,1]\)，但存在与 \(\mathbb{R}\) 等距的度量使完备化为 \(\mathbb{R}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{Q}\) 的 Cauchy 完备化是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\hat{\\mathbb{Q}} = \\mathbb{R}\\)。这正是实数的 Cauchy 构造：')">A. \(\mathbb{Q}\) 本身</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\hat{\\mathbb{Q}} = \\mathbb{R}\\)。这正是实数的 Cauchy 构造：')">B. \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\hat{\\mathbb{Q}} = \\mathbb{R}\\)。这正是实数的 Cauchy 构造：')">C. \(\mathbb{C}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\hat{\\mathbb{Q}} = \\mathbb{R}\\)。这正是实数的 Cauchy 构造：')">D. \(\overline{\mathbb{Q}}\)（代数闭包）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch06.html" class="nav-prev">← Ch.6</a>
+      <a href="../../../modules/geometry/topology.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

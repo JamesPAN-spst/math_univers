@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 谱定理与矩阵分解 — 线代进阶 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-adv-ch06-q1",
+        "question": "下列哪类矩阵必定可酉对角化（存在标准正交特征基）？",
+        "options": [
+          "正规矩阵（\\(AA^*=A^*A\\)）",
+        "所有方阵",
+        "所有可逆矩阵",
+        "所有上三角矩阵"
+        ],
+        "answer": 0,
+        "explanation": "谱定理: \\(A\\) 正规 \\(\\Leftrightarrow\\) \\(A\\) 酉可对角化。正规矩阵包括: 实对称（\\(A=A^T\\)）、酉/正交（\\(A^*A=I\\)）、反对称（\\(A=-A^T\\)）等。非正规矩阵（如 \\(\\begin{pmatrix}1&1\\\\0&2\\end{pmatrix}\\)）一般没有正交特征基。"
+      },
+      {
+        "id": "linear-adv-ch06-q2",
+        "question": "以下哪个是正规矩阵？① \\(A=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}\\)（对角） ② \\(B=\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\)（旋转） ③ \\(C=\\begin{pmatrix}1&1\\\\0&2\\end{pmatrix}\\)（上三角）",
+        "options": [
+          "① 和 ② 是正规的，③ 不是",
+        "三个都是",
+        "只有 ①",
+        "只有 ②"
+        ],
+        "answer": 0,
+        "explanation": "① 对角→\\(AA^T=A^TA\\) ✓。② \\(BB^T=B^TB=I\\) ✓（正交矩阵）。③ \\(CC^T=\\begin{pmatrix}2&2\\\\2&4\\end{pmatrix}\\neq\\begin{pmatrix}1&1\\\\1&5\\end{pmatrix}=C^TC\\)→不正规。"
+      },
+      {
+        "id": "linear-adv-ch06-q3",
+        "question": "\\(A=\\mathrm{diag}(3,-2)\\)。奇异值为？",
+        "options": [
+          "\\(3\\) 和 \\(2\\)",
+        "\\(3\\) 和 \\(-2\\)",
+        "\\(9\\) 和 \\(4\\)",
+        "\\(\\sqrt{3}\\) 和 \\(\\sqrt{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=\\mathrm{diag}(9,4)\\)，特征值 \\(9,4\\)。\\(\\sigma_i=\\sqrt{\\lambda_i(A^TA)}\\)→\\(\\sigma_1=3,\\sigma_2=2\\)。奇异值永远 \\(\\geq0\\)，即使特征值为负。\\(\\sigma_i=|\\lambda_i|\\) 对对角矩阵成立。"
+      },
+      {
+        "id": "linear-adv-ch06-q4",
+        "question": "\\(A\\) 和 \\(A^T\\) 的奇异值关系是？",
+        "options": [
+          "相同",
+        "互为倒数",
+        "\\(A^T\\) 的奇异值是 \\(A\\) 的平方",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma_i(A)=\\sqrt{\\lambda_i(A^TA)}\\)，\\(\\sigma_i(A^T)=\\sqrt{\\lambda_i(AA^T)}\\)。\\(A^TA\\) 和 \\(AA^T\\) 有相同的非零特征值→奇异值相同。易错: 以为转置改变奇异值。SVD: \\(A=U\\Sigma V^T\\Rightarrow A^T=V\\Sigma^T U^T\\)，\\(\\Sigma\\) 中的对角元不变。"
+      },
+      {
+        "id": "linear-adv-ch06-q5",
+        "question": "矩阵 \\(A\\) 的最优秩-\\(k\\) 逼近（Frobenius/谱范数下）由什么给出？",
+        "options": [
+          "截断 SVD: \\(A_k=\\sum_{i=1}^k\\sigma_i u_i v_i^T\\)",
+        "特征值前 \\(k\\) 项",
+        "随意选 \\(k\\) 列",
+        "QR 分解前 \\(k\\) 列"
+        ],
+        "answer": 0,
+        "explanation": "Eckart-Young 定理: 在 Frobenius 范数和谱范数下，截断 SVD \\(A_k\\) 是所有秩≤\\(k\\) 矩阵中距 \\(A\\) 最近的。\\(\\|A-A_k\\|_F=\\sqrt{\\sigma_{k+1}^2+\\cdots+\\sigma_r^2}\\)，\\(\\|A-A_k\\|_2=\\sigma_{k+1}\\)。"
+      },
+      {
+        "id": "linear-adv-ch06-q6",
+        "question": "可逆方阵 \\(A\\) 的 Moore-Penrose 伪逆 \\(A^+\\) 等于？",
+        "options": [
+          "\\(A^{-1}\\)",
+        "\\(A^T\\)",
+        "\\((A^TA)^{-1}\\)",
+        "\\(A^T(AA^T)^{-1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "可逆时 SVD: \\(A=U\\Sigma V^T\\)→\\(A^+=V\\Sigma^{-1}U^T=(V^T)^{-1}\\Sigma^{-1}U^{-1}=(U\\Sigma V^T)^{-1}=A^{-1}\\)。伪逆推广了逆的概念——当 \\(A\\) 可逆时退化为普通逆。"
+      },
+      {
+        "id": "linear-adv-ch06-q7",
+        "question": "\\(\\sigma_1=5,\\sigma_2=3,\\sigma_3=1\\)。\\(\\|A-A_1\\|_2=?\\)（秩-1 逼近的谱范数误差）",
+        "options": [
+          "\\(3\\)（\\(=\\sigma_2\\)）",
+        "\\(5\\)",
+        "\\(1\\)",
+        "\\(\\sqrt{10}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Eckart-Young: \\(\\|A-A_k\\|_2=\\sigma_{k+1}\\)。\\(k=1\\)→\\(\\sigma_2=3\\)。谱范数误差等于第一个被丢弃的奇异值。Frobenius 误差更大: \\(\\sqrt{9+1}=\\sqrt{10}\\approx3.16\\)。"
+      },
+      {
+        "id": "linear-adv-ch06-q8",
+        "question": "\\(A=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}\\)（实对称）。特征值为？正交对角化为？",
+        "options": [
+          "\\(\\lambda=3,1\\)。\\(A=P\\mathrm{diag}(3,1)P^T\\)，\\(P=\\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&-1\\\\1&1\\end{pmatrix}\\)",
+        "\\(\\lambda=2,2\\)",
+        "\\(\\lambda=3,-1\\)",
+        "\\(\\lambda=\\sqrt{5},-\\sqrt{5}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_A=x^2-4x+3=(x-3)(x-1)\\)。\\(\\lambda_1=3\\): \\(v_1=\\frac{1}{\\sqrt{2}}(1,1)^T\\)。\\(\\lambda_2=1\\): \\(v_2=\\frac{1}{\\sqrt{2}}(-1,1)^T\\)。\\(P=[v_1|v_2]\\)，\\(A=P\\mathrm{diag}(3,1)P^T\\)。验证: \\(\\langle v_1,v_2\\rangle=0\\) ✓（谱定理保证不同特征值的特征向量正交）。"
+      },
+      {
+        "id": "linear-adv-ch06-q9",
+        "question": "实对称矩阵的特征值是？不同特征值的特征向量是？",
+        "options": [
+          "特征值全为实数，不同特征值对应的特征向量相互正交",
+        "特征值可以是复数",
+        "特征值全为实数，但特征向量未必正交",
+        "与一般矩阵相同"
+        ],
+        "answer": 0,
+        "explanation": "实对称矩阵的谱性质: ①特征值全实（\\(Av=\\lambda v\\)→\\(\\lambda=\\overline{\\lambda}\\)）。②不同特征值的特征向量正交: \\(\\lambda_1\\neq\\lambda_2\\)→\\(\\langle v_1,v_2\\rangle=0\\)。易错: 对同一特征值的特征空间内部，向量未必正交——需用 Gram-Schmidt 正交化。但不同特征值之间是自动正交的。"
+      },
+      {
+        "id": "linear-adv-ch06-q10",
+        "question": "\\(A=\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}\\)。SVD: \\(A=U\\Sigma V^T\\) 中 \\(\\Sigma=?\\)",
+        "options": [
+          "\\(\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&0\\end{pmatrix}\\)",
+        "\\(I_2\\)",
+        "\\(\\begin{pmatrix}0&0\\\\0&1\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=A\\)，特征值 \\(1,0\\)→\\(\\sigma_1=1,\\sigma_2=0\\)。\\(U=V=I_2\\)。\\(\\Sigma=\\mathrm{diag}(1,0)=A\\) 本身。这是最简单的 SVD: \\(A\\) 已经是对角且非负→\\(A=I\\cdot A\\cdot I^T\\)。"
+      },
+      {
+        "id": "linear-adv-ch06-q11",
+        "question": "\\(A=\\begin{pmatrix}3&0\\\\0&2\\\\0&0\\end{pmatrix}\\)（\\(3\\times2\\)）。奇异值为？\\(\\mathrm{rank}(A)=?\\)",
+        "options": [
+          "\\(\\sigma_1=3,\\sigma_2=2\\)。\\(\\mathrm{rank}=2\\)",
+        "\\(\\sigma_1=9,\\sigma_2=4\\)",
+        "\\(\\sigma_1=3,\\sigma_2=0\\)",
+        "\\(\\sigma_1=\\sqrt{3},\\sigma_2=\\sqrt{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=\\begin{pmatrix}9&0\\\\0&4\\end{pmatrix}\\)→\\(\\sigma_1=3,\\sigma_2=2\\)（均>0）。\\(\\mathrm{rank}(A)=\\)非零奇异值个数=2。\\(A\\) 的紧SVD: \\(A=3u_1 v_1^T+2u_2 v_2^T\\)，\\(u_1=e_1,u_2=e_2,v_1=e_1,v_2=e_2\\)。"
+      },
+      {
+        "id": "linear-adv-ch06-q12",
+        "question": "\\(\\sigma_1=10,\\sigma_2=3,\\sigma_3=0.5\\)。秩-1 逼近的 Frobenius 误差 \\(\\|A-A_1\\|_F=?\\)",
+        "options": [
+          "\\(\\sqrt{9.25}\\approx3.04\\)",
+        "\\(3\\)",
+        "\\(10\\)",
+        "\\(\\sqrt{109.25}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|A-A_1\\|_F=\\sqrt{\\sigma_2^2+\\sigma_3^2}=\\sqrt{9+0.25}=\\sqrt{9.25}\\approx3.04\\)。总 Frobenius 范数: \\(\\|A\\|_F=\\sqrt{100+9+0.25}=\\sqrt{109.25}\\approx10.45\\)。相对误差: \\(3.04/10.45\\approx29\\%\\)。"
+      },
+      {
+        "id": "linear-adv-ch06-q13",
+        "question": "上题中，秩-1 逼近保留了总方差的百分比（信息保留率）约为？",
+        "options": [
+          "\\(91.5\\%\\)",
+        "\\(70\\%\\)",
+        "\\(50\\%\\)",
+        "\\(100\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "保留率 \\(=\\frac{\\sigma_1^2}{\\sigma_1^2+\\sigma_2^2+\\sigma_3^2}=\\frac{100}{109.25}\\approx91.5\\%\\)。仅保留最大奇异值就捕捉了超过 90% 的信息。这是 PCA/SVD 在数据降维中如此有效的原因。"
+      },
+      {
+        "id": "linear-adv-ch06-q14",
+        "question": "\\(A=\\mathrm{diag}(5,3,0)\\)。\\(A^+=?\\)",
+        "options": [
+          "\\(\\mathrm{diag}(1/5,1/3,0)\\)",
+        "\\(\\mathrm{diag}(5,3,0)\\)",
+        "\\(\\mathrm{diag}(1/5,1/3,\\infty)\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "对角矩阵的伪逆: 非零对角元取倒数，零保持零。\\(A^+=\\mathrm{diag}(1/5,1/3,0)\\)。验证: \\(AA^+A=\\mathrm{diag}(5,3,0)\\mathrm{diag}(1/5,1/3,0)\\mathrm{diag}(5,3,0)=\\mathrm{diag}(5,3,0)=A\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch06-q15",
+        "question": "公式 \\(A^+=(A^TA)^{-1}A^T\\) 何时成立？",
+        "options": [
+          "\\(A\\) 列满秩（\\(A^TA\\) 可逆）",
+        "对任何矩阵 \\(A\\)",
+        "\\(A\\) 行满秩",
+        "\\(A\\) 可逆"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA\\) 可逆 \\(\\Leftrightarrow\\) \\(\\ker A=\\{0\\}\\) \\(\\Leftrightarrow\\) \\(A\\) 列满秩。此时 \\((A^TA)^{-1}A^T\\) 就是左逆，也是伪逆。行满秩时: \\(A^+=A^T(AA^T)^{-1}\\)（右逆）。一般情况需用 SVD 公式。易错: 不加条件直接使用 \\((A^TA)^{-1}A^T\\)，当 \\(A\\) 不是列满秩时 \\(A^TA\\) 奇异。"
+      },
+      {
+        "id": "linear-adv-ch06-q16",
+        "question": "\\(A\\) 正规（\\(AA^*=A^*A\\)）。以下哪个成立？",
+        "options": [
+          "\\(\\|Av\\|=\\|A^*v\\|\\) 对所有 \\(v\\)",
+        "\\(A=A^*\\)",
+        "\\(A\\) 可逆",
+        "\\(A\\) 的特征值全为实数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Av\\|^2=\\langle Av,Av\\rangle=\\langle v,A^*Av\\rangle=\\langle v,AA^*v\\rangle=\\langle A^*v,A^*v\\rangle=\\|A^*v\\|^2\\)。这是正规算子的一个等价刻画。选项B是自伴随（特殊正规）；选项C不一定（如 \\(A=0\\) 正规但不可逆）；选项D只对自伴随成立。"
+      },
+      {
+        "id": "linear-adv-ch06-q17",
+        "question": "\\(m\\times n\\) 矩阵 \\(A\\) 的非零奇异值个数等于？",
+        "options": [
+          "\\(\\mathrm{rank}(A)\\)",
+        "\\(n\\)",
+        "\\(m\\)",
+        "\\(\\min(m,n)\\)"
+        ],
+        "answer": 0,
+        "explanation": "非零奇异值个数 \\(=\\) \\(A^TA\\) 的非零特征值个数 \\(=\\) \\(\\mathrm{rank}(A^TA)=\\mathrm{rank}(A)\\)。\\(\\Sigma\\) 的对角线上有 \\(r=\\mathrm{rank}(A)\\) 个正值，其余为 0。易错: 以为奇异值个数=列数 \\(n\\) 或 \\(\\min(m,n)\\)——那只是 \\(\\Sigma\\) 的尺寸上限。"
+      },
+      {
+        "id": "linear-adv-ch06-q18",
+        "question": "\\(A=\\begin{pmatrix}1&2\\\\2&4\\end{pmatrix}\\)。正交对角化。特征值为？\\(P=?\\)",
+        "options": [
+          "\\(\\lambda=0,5\\)。\\(P=\\frac{1}{\\sqrt{5}}\\begin{pmatrix}-2&1\\\\1&2\\end{pmatrix}\\)",
+        "\\(\\lambda=1,4\\)",
+        "\\(\\lambda=2,3\\)",
+        "不可正交对角化"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_A=x^2-5x=x(x-5)\\)。\\(\\lambda_1=0\\): \\((A)v=0\\)→\\(v_1=\\frac{1}{\\sqrt{5}}(-2,1)^T\\)。\\(\\lambda_2=5\\): \\((A-5I)v=0\\)→\\(v_2=\\frac{1}{\\sqrt{5}}(1,2)^T\\)。\\(\\langle v_1,v_2\\rangle=\\frac{-2+2}{5}=0\\) ✓。\\(A=P\\mathrm{diag}(0,5)P^T\\)。\\(A\\) 半正定（特征值≥0）且秩=1。"
+      },
+      {
+        "id": "linear-adv-ch06-q19",
+        "question": "\\(A=\\begin{pmatrix}4&0\\\\3&0\\end{pmatrix}\\)。SVD: \\(u_1,\\sigma_1,v_1=?\\)",
+        "options": [
+          "\\(\\sigma_1=5\\)，\\(v_1=(1,0)^T\\)，\\(u_1=\\frac{1}{5}(4,3)^T\\)",
+        "\\(\\sigma_1=4\\)，\\(v_1=(1,0)^T\\)",
+        "\\(\\sigma_1=7\\)",
+        "\\(\\sigma_1=\\sqrt{25}=5\\)，\\(v_1=(0,1)^T\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=\\begin{pmatrix}25&0\\\\0&0\\end{pmatrix}\\)→\\(\\sigma_1=5,\\sigma_2=0\\)。\\(\\mathrm{rank}=1\\)。\\(v_1=(1,0)^T\\)（\\(A^TA\\) 的特征向量）。\\(u_1=Av_1/\\sigma_1=(4,3)^T/5\\)。紧 SVD: \\(A=5\\cdot\\frac{1}{5}\\begin{pmatrix}4\\\\3\\end{pmatrix}\\cdot(1,0)=\\begin{pmatrix}4&0\\\\3&0\\end{pmatrix}\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch06-q20",
+        "question": "\\(A=\\mathrm{diag}(2,-3)\\)。极分解 \\(A=UP\\)，\\(U\\) 正交，\\(P\\) 正半定。\\(U\\) 和 \\(P\\) 分别是？",
+        "options": [
+          "\\(U=\\mathrm{diag}(1,-1)\\)，\\(P=\\mathrm{diag}(2,3)\\)",
+        "\\(U=I\\)，\\(P=A\\)",
+        "\\(U=A\\)，\\(P=I\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(P=\\sqrt{A^TA}=\\sqrt{\\mathrm{diag}(4,9)}=\\mathrm{diag}(2,3)\\)（正半定）。\\(U=AP^{-1}=\\mathrm{diag}(2,-3)\\cdot\\mathrm{diag}(1/2,1/3)=\\mathrm{diag}(1,-1)\\)。\\(U\\) 正交（\\(\\det=-1\\)）✓。验证: \\(UP=\\mathrm{diag}(1,-1)\\mathrm{diag}(2,3)=\\mathrm{diag}(2,-3)=A\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch06-q21",
+        "question": "\\(A=\\begin{pmatrix}1\\\\0\\end{pmatrix}\\)（\\(2\\times1\\)）。\\(A^+=?\\)（\\(1\\times2\\) 矩阵）",
+        "options": [
+          "\\(A^+=(1,0)\\)",
+        "\\(A^+=\\begin{pmatrix}1\\\\0\\end{pmatrix}\\)",
+        "\\(A^+=(0,1)\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=(1)\\)→\\(A^+=(A^TA)^{-1}A^T=1\\cdot(1,0)=(1,0)\\)（\\(A\\) 列满秩）。验证: \\(AA^+A=\\begin{pmatrix}1\\\\0\\end{pmatrix}(1,0)\\begin{pmatrix}1\\\\0\\end{pmatrix}=\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix}\\begin{pmatrix}1\\\\0\\end{pmatrix}=\\begin{pmatrix}1\\\\0\\end{pmatrix}=A\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch06-q22",
+        "question": "\\(1000\\times1000\\) 图像矩阵，SVD 后保留前 \\(k=50\\) 个奇异值。存储量从多少降到多少？",
+        "options": [
+          "从 \\(10^6\\) 降到约 \\(10^5\\)（\\(50\\times(1000+1000+1)\\approx100050\\)）",
+        "从 \\(10^6\\) 降到 \\(50\\)",
+        "不变",
+        "从 \\(10^6\\) 降到 \\(50^2=2500\\)"
+        ],
+        "answer": 0,
+        "explanation": "原矩阵: \\(1000\\times1000=10^6\\) 个数。截断 SVD: \\(A_k=\\sum_{i=1}^{50}\\sigma_i u_i v_i^T\\)。存储: \\(50\\) 个 \\(\\sigma_i\\) + \\(50\\) 个 \\(u_i\\)（各 \\(1000\\) 维）+ \\(50\\) 个 \\(v_i\\)（各 \\(1000\\) 维）\\(=50(1+1000+1000)=100050\\approx10^5\\)。压缩率 \\(\\approx10:1\\)。"
+      },
+      {
+        "id": "linear-adv-ch06-q23",
+        "question": "\\(\\sigma_1=5,\\sigma_2=4,\\sigma_3=3,\\sigma_4=1\\)。秩-2 逼近的信息保留率约为？",
+        "options": [
+          "\\(80.4\\%\\)",
+        "\\(49\\%\\)",
+        "\\(100\\%\\)",
+        "\\(90\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{\\sigma_1^2+\\sigma_2^2}{\\sum\\sigma_i^2}=\\frac{25+16}{25+16+9+1}=\\frac{41}{51}\\approx80.4\\%\\)。保留前 2 个奇异值已覆盖 80% 以上的方差。\\(\\sigma_3=3\\) 和 \\(\\sigma_4=1\\) 贡献的 \\(9+1=10\\) 被丢弃。"
+      },
+      {
+        "id": "linear-adv-ch06-q24",
+        "question": "\\(A=\\begin{pmatrix}1&1\\\\0&2\\end{pmatrix}\\)。验证 \\(A\\) 不是正规矩阵。",
+        "options": [
+          "\\(AA^T=\\begin{pmatrix}2&2\\\\2&4\\end{pmatrix}\\neq\\begin{pmatrix}1&1\\\\1&5\\end{pmatrix}=A^TA\\)",
+        "\\(AA^T=A^TA\\)",
+        "\\(A\\) 正规",
+        "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(AA^T=\\begin{pmatrix}1&1\\\\0&2\\end{pmatrix}\\begin{pmatrix}1&0\\\\1&2\\end{pmatrix}=\\begin{pmatrix}2&2\\\\2&4\\end{pmatrix}\\)。\\(A^TA=\\begin{pmatrix}1&0\\\\1&2\\end{pmatrix}\\begin{pmatrix}1&1\\\\0&2\\end{pmatrix}=\\begin{pmatrix}1&1\\\\1&5\\end{pmatrix}\\)。\\(AA^T\\neq A^TA\\)→不正规→不可酉对角化。\\(A\\) 可对角化（特征值 \\(1,2\\) 不同）但特征向量不正交。"
+      },
+      {
+        "id": "linear-adv-ch06-q25",
+        "question": "SVD \\(A=U\\Sigma V^T\\) 和 \\(A^TA\\) 特征分解的关系: \\(V\\) 的列是什么？",
+        "options": [
+          "\\(A^TA\\) 的特征向量（按特征值降序排列）",
+        "\\(A\\) 的特征向量",
+        "\\(AA^T\\) 的特征向量",
+        "随意选取的正交基"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=(U\\Sigma V^T)^T(U\\Sigma V^T)=V\\Sigma^T\\Sigma V^T=V\\mathrm{diag}(\\sigma_i^2)V^T\\)。故 \\(V\\) 的列是 \\(A^TA\\) 的特征向量，\\(\\sigma_i^2\\) 是对应特征值。同理 \\(U\\) 的列是 \\(AA^T\\) 的特征向量。SVD 将谱定理从对称矩阵推广到一般矩阵。"
+      },
+      {
+        "id": "linear-adv-ch06-q26",
+        "question": "PCA（主成分分析）: 数据协方差矩阵 \\(\\Sigma\\)（实对称正半定）的谱分解 \\(\\Sigma=P\\Lambda P^T\\)。\\(P\\) 的列代表？",
+        "options": [
+          "主成分方向（方差最大的正交方向）",
+        "数据均值",
+        "噪声方向",
+        "随机方向"
+        ],
+        "answer": 0,
+        "explanation": "第 \\(i\\) 列 \\(p_i\\) 是方差 \\(\\lambda_i\\) 对应的主成分方向。\\(\\lambda_1\\geq\\lambda_2\\geq\\cdots\\)→第一主成分捕捉最多方差。PCA 降维: 投影到前 \\(k\\) 个主成分→保留 \\(\\sum_{i=1}^k\\lambda_i/\\sum\\lambda_i\\) 的方差。谱定理保证了主成分正交和完整性。"
+      },
+      {
+        "id": "linear-adv-ch06-q27",
+        "question": "图像压缩: \\(500\\times500\\) 灰度图的 SVD 前 20 个奇异值之和占总和的 95%。保留前 20 个奇异值后的图像质量？",
+        "options": [
+          "保留 95% 以上信息（按奇异值能量），视觉上接近原图",
+        "只保留 4% 信息",
+        "完全失真",
+        "无压缩效果"
+        ],
+        "answer": 0,
+        "explanation": "信息保留率 \\(\\approx95\\%\\)（按 \\(\\sigma_i^2\\) 度量更精确，但按 \\(\\sigma_i\\) 也有意义）。存储: 从 \\(250000\\) 降到 \\(20\\times(500+500+1)=20020\\)→压缩 \\(\\approx12.5\\) 倍。SVD 图像压缩是有损的，但保留最重要的奇异值方向使视觉损失最小。"
+      },
+      {
+        "id": "linear-adv-ch06-q28",
+        "question": "最小二乘: \\(A\\mathbf{x}\\approx\\mathbf{b}\\) 的最小范数解为 \\(\\hat{\\mathbf{x}}=A^+\\mathbf{b}\\)。当 \\(A\\) 欠定（行少于列）时，\\(A^+\\mathbf{b}\\) 给出的是？",
+        "options": [
+          "满足 \\(A\\mathbf{x}=\\mathbf{b}\\) 的所有解中范数最小的",
+        "任意一个解",
+        "范数最大的解",
+        "不存在解"
+        ],
+        "answer": 0,
+        "explanation": "欠定系统有无穷多解。\\(A^+b\\) 选择其中 \\(\\|\\mathbf{x}\\|\\) 最小的——对应正交投影到行空间 \\(\\mathrm{Row}(A)\\)。这最小化了\"能量\"，在信号重建和压缩感知中很重要。SVD 公式: \\(A^+b=V\\Sigma^+U^Tb\\) 直接计算最小范数解。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="linear-adv"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/linear-adv.html" class="module-name">线代进阶</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 正规算子与谱定理</a></li>
+      <li><a href="#kp2">02 · 奇异值分解 (SVD)</a></li>
+      <li><a href="#kp3">03 · 低秩逼近与 Eckart-Young 定理</a></li>
+      <li><a href="#kp4">04 · 极分解与 Moore-Penrose 伪逆</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>谱定理与矩阵分解</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>正规算子与谱定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不是所有矩阵都可对角化，但实对称矩阵和复正规矩阵总可以正交/酉对角化。 谱定理精确刻画了哪些矩阵可以由特征值「完全理解」， 是量子力学（可观测量）、统计（协方差矩阵）的数学基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>正规算子 = 与伴随算子可交换 (\(AA^* = A^*A\))。 谱定理: 正规 \(\Leftrightarrow\) 酉可对角化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>正规算子</strong>: \(A \in M_n(\mathbb{C})\)，\(AA^* = A^*A\)。 包括: 自伴随（\(A = A^*\)）、酉（\(A^*A = I\)）、反自伴随等。 <strong>谱定理</strong>（有限维）: \(A\) 正规 \(\Leftrightarrow\) 存在酉矩阵 \(U\) 使 \[A = U \mathrm{diag}(\lambda_1, \ldots, \lambda_n) U^*\] 即 \(A\) 有一组标准正交特征基。 <strong>实对称情形</strong>: \(A = A^T\) 实矩阵 \(\Rightarrow\) 特征值全实， 存在正交矩阵 \(P\) 使 \(A = P D P^T\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>主成分分析（PCA）: 对协方差矩阵 \(\Sigma\)（实对称正半定）做谱分解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}1&2\\2&4\end{pmatrix}\)。做正交对角化。 解答: \(\chi_A = x^2 - 5x = x(x-5)\)。特征值 0, 5。 \(\lambda=0\): \(v_1 = \frac{1}{\sqrt{5}}(-2, 1)^T\)。 \(\lambda=5\): \(v_2 = \frac{1}{\sqrt{5}}(1, 2)^T\)。 \(P = \frac{1}{\sqrt{5}}\begin{pmatrix}-2&1\\1&2\end{pmatrix}\)， \(A = P \mathrm{diag}(0, 5) P^T\)。 易错点: 特征向量<strong>不一定</strong>正交（除非矩阵是正规的）。 一般矩阵需用 Gram-Schmidt 正交化特征空间内的基。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪类矩阵必定可酉对角化？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。谱定理: 正规 \\(\\Leftrightarrow\\) 酉可对角化。')">A. 所有方阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。谱定理: 正规 \\(\\Leftrightarrow\\) 酉可对角化。')">B. 所有可逆矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！谱定理: 正规 \\(\\Leftrightarrow\\) 酉可对角化。')">C. 所有正规矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。谱定理: 正规 \\(\\Leftrightarrow\\) 酉可对角化。')">D. 所有上三角矩阵</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>奇异值分解 (SVD)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>谱定理只适用于正规矩阵（方阵且 \(AA^* = A^*A\)）。但任意矩阵（包括非方阵） 也有一种类似对角化的分解——奇异值分解 (SVD)。它是数据科学和数值计算中 最重要的矩阵分解，没有之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>SVD 揭示任意线性映射都可以分解为「旋转→缩放→旋转」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>SVD 定理</strong>: 任意 \(A \in M_{m \times n}(\mathbb{R})\)，存在正交矩阵 \(U \in O(m)\)，\(V \in O(n)\) 和对角矩阵 \(\Sigma\) 使 \[A = U \Sigma V^T\] \(\Sigma\) 的对角元 \(\sigma_1 \geq \sigma_2 \geq \cdots \geq 0\) 是奇异值。 <strong>与谱的关系</strong>: \(\sigma_i = \sqrt{\lambda_i(A^T A)}\)。 \(V\) 的列是 \(A^T A\) 的特征向量，\(U\) 的列是 \(AA^T\) 的特征向量。 <strong>紧 SVD</strong>: \(A = \sum_{i=1}^r \sigma_i u_i v_i^T\)（\(r = \mathrm{rank} A\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>推荐系统: Netflix 用 SVD 分解用户-电影评分矩阵做协同过滤。 图像压缩: 保留最大的 \(k\) 个奇异值近似矩阵。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}3&0\\0&2\\0&0\end{pmatrix}\)。求 SVD。 解答: \(A^T A = \mathrm{diag}(9, 4)\)，特征值 9, 4。 \(\sigma_1 = 3, \sigma_2 = 2\)。\(V = I_2\)。 \(u_1 = Av_1/3 = e_1, u_2 = Av_2/2 = e_2\)。取 \(u_3 = e_3\)。 \(U = I_3\)，\(\Sigma = \begin{pmatrix}3&0\\0&2\\0&0\end{pmatrix}\)。 \(A = I_3 \cdot \Sigma \cdot I_2^T\)。 易错点: 混淆特征值和奇异值。奇异值 ≥ 0（永远非负）， 特征值可以是负数或复数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(A\) 的奇异值和 \(A^T A\) 的特征值的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\sigma_i = \\sqrt{\\lambda_i(A^T A)}\\)。')">A. 相等</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\sigma_i = \\sqrt{\\lambda_i(A^T A)}\\)。')">B. 奇异值是特征值的平方</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\sigma_i = \\sqrt{\\lambda_i(A^T A)}\\)。')">C. 奇异值是特征值的平方根</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\sigma_i = \\sqrt{\\lambda_i(A^T A)}\\)。')">D. 无关</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>低秩逼近与 Eckart-Young 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在数据科学中，高维矩阵常有「大部分信息集中在少数几个方向」的特性。 Eckart-Young 定理给出了截断 SVD 是最优低秩逼近的严格证明—— 它是 PCA、降维、数据压缩的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>在 Frobenius 范数或谱范数下，截断 SVD 给出最优秩-\(k\) 逼近， 这是凸优化中的 elegant 结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Eckart-Young 定理</strong>: 设 \(A = \sum_{i=1}^r \sigma_i u_i v_i^T\)， 则 \(A\) 的最优秩-\(k\) 逼近（\(k < r\)）为 \[A_k = \sum_{i=1}^k \sigma_i u_i v_i^T\] 即截断 SVD。误差: \[\|A - A_k\|_F = \sqrt{\sigma_{k+1}^2 + \cdots + \sigma_r^2}\] \[\|A - A_k\|_2 = \sigma_{k+1}\] <strong>信息保留率</strong>: \(\frac{\sum_{i=1}^k \sigma_i^2}{\sum_{i=1}^r \sigma_i^2}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>图像压缩: \(1000 \times 1000\) 图像保留前 50 个奇异值， 存储量从 \(10^6\) 降到 \(50 \times (1000 + 1000 + 1) \approx 10^5\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\sigma_1 = 10, \sigma_2 = 3, \sigma_3 = 0.5\)。 秩-1 逼近的 Frobenius 误差和信息保留率？ 解答: 误差 \(= \sqrt{9 + 0.25} = \sqrt{9.25} \approx 3.04\)。 保留率 \(= 100 / (100 + 9 + 0.25) = 100/109.25 \approx 91.5\%\)。 易错点: 以为低秩逼近可以用任意 \(k\) 列选取。 Eckart-Young 说<strong>只有截断 SVD</strong> 是最优的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">秩-\(k\) 最优逼近在谱范数下的误差是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\|A - A_k\\|_2 = \\sigma_{k+1}\\)，下一个未保留的奇异值。')">A. \(\sigma_1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\|A - A_k\\|_2 = \\sigma_{k+1}\\)，下一个未保留的奇异值。')">B. \(\sigma_k\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\|A - A_k\\|_2 = \\sigma_{k+1}\\)，下一个未保留的奇异值。')">C. \(\sigma_{k+1}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\|A - A_k\\|_2 = \\sigma_{k+1}\\)，下一个未保留的奇异值。')">D. \(\sum \sigma_i\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>极分解与 Moore-Penrose 伪逆</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>复数 \(z = r e^{i\theta}\) 分解为模和旋转。矩阵也有类似的 「极分解」\(A = UP\)：正交（旋转）× 正半定（缩放）。 当 \(A\) 不可逆或非方阵时，伪逆 \(A^+\) 给出「最好的逆」—— 最小二乘解 \(x = A^+ b\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>极分解推广了复数的极坐标表示到矩阵。 Moore-Penrose 伪逆推广了逆矩阵到非方阵/奇异矩阵。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>极分解</strong>: \(A = UP\)，其中 \(U\) 酉（正交），\(P = \sqrt{A^*A}\) 正半定。 用 SVD: \(A = U_0 \Sigma V^T\)，则 \(P = V \Sigma V^T\)，\(U = U_0 V^T\)。 <strong>Moore-Penrose 伪逆</strong>: \(A^+\) 是满足四个条件的唯一矩阵: \(AA^+A = A\)，\(A^+AA^+ = A^+\)，\((AA^+)^* = AA^+\)，\((A^+A)^* = A^+A\)。 用 SVD: \(A = U \Sigma V^T\)，则 \[A^+ = V \Sigma^+ U^T, \quad \Sigma^+ = \mathrm{diag}(\sigma_1^{-1}, \ldots, \sigma_r^{-1}, 0, \ldots)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>最小二乘: \(\hat{x} = A^+ b\) 是 \(\|Ax - b\|^2\) 的最小范数解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}1&0\\0&0\end{pmatrix}\)。求 \(A^+\)。 解答: SVD: \(A = I \cdot \mathrm{diag}(1,0) \cdot I\)。 \(\Sigma^+ = \mathrm{diag}(1, 0)\)。 \(A^+ = \mathrm{diag}(1, 0) = A\)。 易错点: 以为 \(A^+ = (A^T A)^{-1} A^T\) 总成立。 这只在 \(A\) 列满秩时成立。一般需用 SVD 公式。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Moore-Penrose 伪逆 \(A^+\) 对可逆方阵 \(A\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。可逆时 \\(A^+ = A^{-1}\\)，伪逆退化为普通逆。')">A. \(A^T\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！可逆时 \\(A^+ = A^{-1}\\)，伪逆退化为普通逆。')">B. \(A^{-1}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。可逆时 \\(A^+ = A^{-1}\\)，伪逆退化为普通逆。')">C. \(A^* A\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。可逆时 \\(A^+ = A^{-1}\\)，伪逆退化为普通逆。')">D. \((A^T A)^{-1}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/algebra/linear-adv.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

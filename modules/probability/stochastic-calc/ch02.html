@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 Itô 积分 — 随机微积分 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-calc-ch02-q1",
+        "question": "Itô 积分 \\(\\int_0^T f(t) dB_t\\) 的期望值？",
+        "options": [
+          "\\(E[\\int_0^T f(t) dB_t]=0\\)（对适应可积被积函数）",
+        "\\(\\int_0^T f(t) dt\\)",
+        "\\(f(T) B_T\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "Itô 积分是鞅 ⟹ \\(E[I_t]=I_0=0\\)。金融意义：公平赌博——持有风险资产的期望累积收益（风险中性测度下扣除无风险收益后）为零。这是鞅定价的核心。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q2",
+        "question": "Itô 等距 (isometry) \\(E[(\\int_0^T f(t) dB_t)^2]=\\)？",
+        "options": [
+          "\\(\\int_0^T E[f(t)^2] dt\\)",
+        "\\((\\int_0^T f(t) dt)^2\\)",
+        "\\(T \\cdot E[f^2]\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Itô 等距将随机积分的 \\(L^2\\) 范数化为普通 Lebesgue 积分。期权定价中计算对冲组合方差：\\(\\text{Var}[\\int \\Delta_t \\sigma S_t dB_t]=\\int E[\\Delta_t^2 \\sigma^2 S_t^2]dt\\)。对冲是\"方差最小化\"。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q3",
+        "question": "Itô 积分为何要求被积函数 \\(f(t)\\) 是适应 (adapted) 过程？",
+        "options": [
+          "金融中交易策略只能基于当前和过去的信息（非前瞻性），即 \\(f(t) \\in \\mathcal{F}_t\\)",
+        "数学上不需要",
+        "可以使用未来信息",
+        "仅为计算方便"
+        ],
+        "answer": 0,
+        "explanation": "适应性 = 不使用未来信息 = 交易无\"内幕\"。如果 \\(f\\) 依赖未来 \\(B_s\\)（\\(s>t\\)），积分可能不是鞅且定义不一致。Stratonovich 积分不要求严格适应但有不同性质（非鞅）。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q4",
+        "question": "计算 \\(\\int_0^T B_t dB_t=\\)？",
+        "options": [
+          "\\(\\frac{1}{2}B_T^2-\\frac{1}{2}T\\)（Itô 积分，多出 \\(-T/2\\) 修正项）",
+        "\\(\\frac{1}{2}B_T^2\\)",
+        "\\(B_T^2\\)",
+        "\\(T B_T\\)"
+        ],
+        "answer": 0,
+        "explanation": "与经典微积分 \\(\\int x dx=x^2/2\\) 对比，Itô 多了 \\(-[B]_T/2=-T/2\\) 的修正。源于 \\(dB^2=dt\\)（二次变差非零）。金融：持有 \\(B_t\\) 份风险资产的累积收益 \\(\\neq B_T^2/2\\)（多了\"凸性调整\"）。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q5",
+        "question": "Itô 积分过程 \\(M_t=\\int_0^t f(s) dB_s\\) 在期权定价中扮演什么角色？",
+        "options": [
+          "局部鞅——复制组合的风险部分；若有界则为鞅，确保无套利",
+        "漂移项",
+        "折现因子",
+        "利率"
+        ],
+        "answer": 0,
+        "explanation": "Black-Scholes PDE 推导：组合收益 = \\(r V dt\\)（无风险）当且仅当随机项（Itô 积分部分）被完全对冲。鞅性保证定价的唯一性和一致性。\\(E^Q[M_T|\\mathcal{F}_t]=M_t\\)（风险中性鞅）。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q6",
+        "question": "风控中 VaR 模型用几何 Brown 运动 \\(S_T=S_0 e^{(\\mu-\\sigma^2/2)T+\\sigma B_T}\\)，\\(\\ln(S_T/S_0)\\) 的分布？",
+        "options": [
+          "\\(N((\\mu-\\sigma^2/2)T, \\sigma^2 T)\\)（对数正态收益）",
+        "\\(N(\\mu T, \\sigma^2)\\)",
+        "均匀分布",
+        "指数分布"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ln(S_T/S_0)=(\\mu-\\sigma^2/2)T+\\sigma B_T\\)。\\(-\\sigma^2/2\\) 是 Itô 修正（Jensen 效应）。VaR(99%): \\(S_0 e^{(\\mu-\\sigma^2/2)T-2.326\\sigma\\sqrt{T}}\\)。忽略 \\(-\\sigma^2/2\\) 会高估短期风险敞口。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q7",
+        "question": "Itô 积分 \\(\\int_0^T \\sigma S_t dB_t\\) 在 \\(S_t\\) 为 GBM 时，\\(\\int_0^T \\sigma S_t dB_t\\) 的方差？",
+        "options": [
+          "\\(\\sigma^2 \\int_0^T E[S_t^2] dt=\\sigma^2 S_0^2 \\int_0^T e^{(2\\mu+\\sigma^2)t} dt\\)（Itô 等距）",
+        "\\(\\sigma^2 T\\)",
+        "\\(\\sigma^2 S_0^2 T\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[S_t^2]=S_0^2 e^{(2\\mu+\\sigma^2)t}\\)（GBM 二阶矩）。代入等距公式。波动率 \\(\\sigma\\) 放大随时间增长的方差。对冲组合的风险量化需要此类计算。长期限期权方差指数增长。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q8",
+        "question": "Stratonovich 积分 \\(\\int_0^T B_t \\circ dB_t\\) 与 Itô 积分的关系？",
+        "options": [
+          "\\(\\int_0^T B_t \\circ dB_t=\\int_0^T B_t dB_t+\\frac{1}{2}[B,B]_T=\\frac{1}{2}B_T^2\\)（经典链式规则）",
+        "两者相同",
+        "Stratonovich 结果为 \\(0\\)",
+        "\\(B_T^2+T\\)"
+        ],
+        "answer": 0,
+        "explanation": "Stratonovich 用中点 \\((B_{t_i}+B_{t_{i+1}})/2\\)。修正项 \\(=\\frac{1}{2}[f(B),B]_T\\)。Stratonovich 保持经典微积分链式规则（\\(\\int x \\circ dx=x^2/2\\)）。物理学常用 Stratonovich，金融用 Itô（适应性/鞅性）。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q9",
+        "question": "量化基金中\"Delta-neutral\"策略的 P&L 近似？",
+        "options": [
+          "\\(\\text{P\\&L} \\approx \\frac{1}{2}\\Gamma S^2 \\sigma^2 dt-\\theta dt\\)（Gamma 收益 vs 时间衰减，源于 Itô 展开）",
+        "\\(\\Delta \\cdot dS\\)",
+        "\\(rV dt\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Itô 展开期权 \\(V(S,t)\\)：\\(dV=\\Delta dS+(\\theta+\\frac{1}{2}\\Gamma\\sigma^2 S^2)dt\\)。Delta 对冲后 \\(dV-\\Delta dS=(\\theta+\\frac{1}{2}\\Gamma\\sigma^2 S^2)dt\\)。\\(\\theta<0\\)（时间衰减）与 \\(\\Gamma>0\\)（凸性收益）的拉锯是 Gamma trading 的核心。"
+      },
+      {
+        "id": "stochastic-calc-ch02-q10",
+        "question": "利率建模中 Vasicek 模型 \\(dr_t=\\kappa(\\theta-r_t)dt+\\sigma dB_t\\) 的 \\(\\int_0^t r_s ds\\) 为什么重要？",
+        "options": [
+          "零息债券价格 \\(P(0,T)=E^Q[e^{-\\int_0^T r_s ds}]\\)——需计算 \\(\\int r_s ds\\) 的分布（正态）",
+        "仅用于模拟",
+        "无经济意义",
+        "\\(\\int r_s ds=r_0 T\\)"
+        ],
+        "answer": 0,
+        "explanation": "Vasicek: \\(r_t\\) 为 Ornstein-Uhlenbeck 过程（正态）。\\(\\int_0^T r_s ds\\) 也是正态（正态过程的积分仍正态）。\\(P(0,T)=e^{A(T)-B(T)r_0}\\)（仿射结构）。但 \\(r_t\\) 可为负（缺陷），CIR 模型改进为非负。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic-calc"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic-calc.html" class="module-name">随机微积分</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Itô 积分的严格定义</a></li>
+      <li><a href="#kp2">02 · Itô 积分的计算技巧</a></li>
+      <li><a href="#kp3">03 · Itô vs Stratonovich</a></li>
+      <li><a href="#kp4">04 · 随机积分的高级性质</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>Itô 积分</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Itô 积分的严格定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>第 1 章给出了构造思路，现在精确定义 Itô 积分并探讨它的性质。 \(\int_0^T H_t \, dB_t\) 的“左端点”选择使得积分是鞅，这对金融建模 至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Itô 积分 = 某种“随机的 Lebesgue 积分”，定义域是 \(\mathcal{L}^2\) 适应过程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：对 \(H \in \mathcal{L}^2 := \{H \text{ 适应}: E[\int_0^T H_t^2 dt] < \infty\}\)， \[I(H) = \int_0^T H_t \, dB_t\] 由简单过程近似 + Itô 等距定义。 核心性质： 1. 线性：\(I(aH + bG) = aI(H) + bI(G)\) 2. 等距：\(E[I(H)^2] = E[\int_0^T H_t^2 dt]\) 3. 鞅性：\(M_t = \int_0^t H_s \, dB_s\) 是鞅 4. 均值为零：\(E[I(H)] = 0\) 证明鞅性（对简单过程）： \[E[M_t | \mathcal{F}_s] = M_s + E\!\left[\sum_{t_i \geq s} c_i(B_{t_{i+1}\wedge t}-B_{t_i\wedge t})\bigg|\mathcal{F}_s\right] = M_s\] 因为 \(c_i\) 是 \(\mathcal{F}_{t_i}\)-可测的，且 \(B\) 有独立增量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Itô 积分的鞅性是无套利定价的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(E[\int_0^1 t \, dB_t]\) 和 \(E[(\int_0^1 t \, dB_t)^2]\)。 解答：\(E[\int_0^1 t \, dB_t] = 0\)（鞅性）。 \(E[(\int_0^1 t \, dB_t)^2] = \int_0^1 t^2 \, dt = 1/3\)（等距）。 易错点：均值为零不意味着积分等于零，方差一般不为零。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Itô 积分 \(M_t = \int_0^t H_s \, dB_s\) 是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。这是 Itô 积分最重要的性质。左端点选取保证了鞅性。')">A. 一般不是鞅</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！这是 Itô 积分最重要的性质。左端点选取保证了鞅性。')">B. 总是鞅（当 \(H \in \mathcal{L}^2\) 时）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。这是 Itô 积分最重要的性质。左端点选取保证了鞅性。')">C. 只在特殊情形下是鞅</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Itô 积分的计算技巧</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际计算 Itô 积分时，不能直接用求原函数的方法（因为链式法则 已失效）。需要新的计算工具，主要是 Itô 公式（下一章）。 本节先练习基本计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>常用计算： \[\int_0^T dB_t = B_T\] \[\int_0^T B_t \, dB_t = \frac{1}{2}B_T^2 - \frac{1}{2}T\] \[\int_0^T B_t^2 \, dB_t = \frac{1}{3}B_T^3 - \int_0^T B_t \, dt\] （最后一个由 Itô 公式得到） Itô 等距的应用：\(\text{Var}(\int_0^T f(t) dB_t) = \int_0^T f(t)^2 dt\)（确定 \(f\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>期权定价中常需计算此类积分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(\text{Var}(\int_0^T e^t \, dB_t)\)。 解答：\(e^t\) 是确定函数（适应）。 \(\text{Var} = E[(\int e^t dB_t)^2] = \int_0^T e^{2t} dt = \frac{1}{2}(e^{2T}-1)\)。 易错点：请区分 \(\int f(t) \, dB_t\)（随机积分）和 \(\int f(t) \, dt\)（普通积分）。前者是随机变量，后者是确定数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\int_0^T c \, dB_t\)（\(c\) 为常数）服从</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\int c \\, dB = cB_T \\sim N(0, c^2T)\\)。均值 0（鞅），')">A. \(N(0, c^2T)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\int c \\, dB = cB_T \\sim N(0, c^2T)\\)。均值 0（鞅），')">B. \(N(cT, T)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\int c \\, dB = cB_T \\sim N(0, c^2T)\\)。均值 0（鞅），')">C. \(N(0, cT)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Itô vs Stratonovich</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>两种随机积分都广泛使用。Itô 在金融中占主导（保持鞅性）， Stratonovich 在物理中常用（保持经典链式法则）。理解两者关系是 必要的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Itô = 左端点（非预知），Stratonovich = 中点（对称）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Stratonovich 积分定义： \[\int_0^T H_t \circ dB_t := \lim \sum H_{(t_i+t_{i+1})/2}(B_{t_{i+1}}-B_{t_i})\] 转换关系： \[\int_0^T H_t \circ dB_t = \int_0^T H_t \, dB_t + \frac{1}{2}[H, B]_T\] 当 \(H_t = f(B_t)\) 时，\([H,B]_T = \int_0^T f'(B_t) dt\)。故 \[\int f(B_t) \circ dB_t = \int f(B_t) \, dB_t + \frac{1}{2}\int f'(B_t) \, dt\] Stratonovich 保持经典链式法则：\(\int B_t \circ dB_t = \frac{1}{2}B_T^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>物理建模（如朗之万方程的物理解释）适合 Stratonovich。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\int_0^T B_t^2 \circ dB_t\)。 解答：用转换关系，\(f(x)=x^2\)，\(f'(x)=2x\)。 \(= \int B_t^2 dB_t + \frac{1}{2}\int 2B_t dt = \frac{1}{3}B_T^3 - \int B_t dt + \int B_t dt = \frac{1}{3}B_T^3\)。 即 Stratonovich 意义下，\(\int x^2 dx = x^3/3\) —— 经典公式。 易错点：不要在两种积分之间混淆。理论计算时先确定用哪种。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Stratonovich 积分的主要优势是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Str. 保经典微积分规则，但失去鞅性 ❌。')">A. 保持鞅性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Str. 保经典微积分规则，但失去鞅性 ❌。')">B. 保持经典链式法则</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Str. 保经典微积分规则，但失去鞅性 ❌。')">C. 计算更简单</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>随机积分的高级性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Itô 积分不仅有等距和鞅性，还有 Burkholder-Davis-Gundy 不等式、 指数鞅等重要性质，这些是后续定理的关键工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>指数鞅 = “随机的指数函数”，在测度变换和金融模型中无处不在。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>BDG 不等式：对连续鞅 \(M\)， \[c_p E\!\left[[M]_T^{p/2}\right] \leq E\!\left[\sup_{t \leq T} |M_t|^p\right] \leq C_p E\!\left[[M]_T^{p/2}\right]\] 指数鞅：对 \(H \in \mathcal{L}^2\)， \[\mathcal{E}_t(H) = \exp\!\left(\int_0^t H_s \, dB_s - \frac{1}{2}\int_0^t H_s^2 \, ds\right)\] \(\mathcal{E}(H)\) 是鞅（当满足 Novikov 条件）。 Novikov 条件：\(E[\exp(\frac{1}{2}\int_0^T H_t^2 dt)] < \infty\) \(\Rightarrow \mathcal{E}(H)\) 是真鞅（而不仅是局部鞅）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>指数鞅是 Girsanov 定理中测度变换的 Radon-Nikodym 导数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathcal{E}_t := \exp(B_t - t/2)\) 是鞅。 解答：\(H_t = 1\)。Novikov: \(E[e^{T/2}] < \infty\) ✓。 直接验证：\(E[\mathcal{E}_t | \mathcal{F}_s] = \mathcal{E}_s \cdot E[e^{B_t-B_s-(t-s)/2}|\mathcal{F}_s]\) \(= \mathcal{E}_s \cdot e^{(t-s)/2-(t-s)/2} = \mathcal{E}_s\) ✓ 易错点：\(e^{B_t}\) 不是鞅（缺少 \(-t/2\) 修正）。必须有修正项。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">指数鞅 \(\mathcal{E}_t(H)\) 成为真鞅的充分条件是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Novikov 条件是充分条件。\\(H\\) 有界可以推出 Novikov，')">A. \(H\) 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Novikov 条件是充分条件。\\(H\\) 有界可以推出 Novikov，')">B. Novikov 条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Novikov 条件是充分条件。\\(H\\) 有界可以推出 Novikov，')">C. \(H\) 连续</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/probability/stochastic-calc.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 PDE 数值方法 — 数值分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "numerical-ch06-q1",
+        "question": "FTCS（Forward Time Central Space）格式解热方程 \\(u_t=\\alpha u_{xx}\\) 的公式？",
+        "options": [
+          "\\(u_j^{n+1}=u_j^n+r(u_{j+1}^n-2u_j^n+u_{j-1}^n)\\)（\\(r=\\alpha\\Delta t/\\Delta x^2\\)）",
+        "\\(u^{n+1}=u^n+\\Delta t f\\)",
+        "\\(u^{n+1}=(1+r)u^n\\)",
+        "隐式方程"
+        ],
+        "answer": 0,
+        "explanation": "时间前向差分 \\(u_t\\approx(u^{n+1}-u^n)/\\Delta t\\)，空间中心差分 \\(u_{xx}\\approx(u_{j+1}-2u_j+u_{j-1})/\\Delta x^2\\)。显式 → 不需解方程。稳定条件 \\(r\\leq 1/2\\)（von Neumann 分析）。\\(O(\\Delta t)+O(\\Delta x^2)\\)。"
+      },
+      {
+        "id": "numerical-ch06-q2",
+        "question": "CFL 条件（Courant-Friedrichs-Lewy）的物理意义？",
+        "options": [
+          "数值域必须包含物理依赖域——信息传播速度不能超过网格速度 \\(\\Delta x/\\Delta t\\)",
+        "精度条件",
+        "收敛条件",
+        "仅适用于椭圆方程"
+        ],
+        "answer": 0,
+        "explanation": "波方程 \\(u_t+cu_x=0\\)：特征线斜率 \\(c\\)。CFL：\\(c\\Delta t/\\Delta x\\leq 1\\)（Courant 数 \\(\\leq 1\\)）。违反 → 方案不稳定（数值域\"追不上\"信息）。CFL 是稳定性的必要条件——不一定充分。"
+      },
+      {
+        "id": "numerical-ch06-q3",
+        "question": "有限元法 Galerkin 方法的核心步骤：PDE 弱形式 → 选基 \\(\\{\\phi_i\\}\\) → 得到线性系统 \\(KU=F\\)。\\(K_{ij}=\\)？",
+        "options": [
+          "\\(\\int_\\Omega\\nabla\\phi_i\\cdot\\nabla\\phi_j\\,dx\\)（刚度矩阵元素）",
+        "\\(\\phi_i(x_j)\\)",
+        "\\(\\delta_{ij}\\)",
+        "\\(\\int\\phi_i\\phi_j\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(-\\Delta u=f\\) 弱形式 \\(\\int\\nabla u\\nabla v=\\int fv\\)。\\(u_h=\\sum U_j\\phi_j\\)，取 \\(v=\\phi_i\\)：\\(\\sum K_{ij}U_j=F_i\\)。\\(K_{ij}=\\int\\nabla\\phi_i\\cdot\\nabla\\phi_j\\)（对称正定）。\\(F_i=\\int f\\phi_i\\)。基函数紧支 → \\(K\\) 稀疏。"
+      },
+      {
+        "id": "numerical-ch06-q4",
+        "question": "有限体积法的核心原则？",
+        "options": [
+          "在每个控制体积上对守恒律积分 → 通量平衡（精确守恒）",
+        "逐点差分",
+        "基函数展开",
+        "谱方法"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{d}{dt}\\int_{V_i}u\\,dx+\\oint_{\\partial V_i}\\mathbf{F}\\cdot\\mathbf{n}\\,dS=0\\)（积分形式）。离散：\\(\\bar u_i^{n+1}=\\bar u_i^n-\\frac{\\Delta t}{|V_i|}\\sum_{\\text{faces}}F^*\\cdot|S|\\)。\\(F^*\\) = 数值通量（Riemann 求解器）。守恒性自动保证（通量进出抵消）。CFD 主流方法。"
+      },
+      {
+        "id": "numerical-ch06-q5",
+        "question": "谱方法对光滑函数的收敛速率？",
+        "options": [
+          "指数收敛（误差 \\(\\sim e^{-cN}\\)，\\(N\\) 为模式数）",
+        "\\(O(N^{-2})\\)",
+        "\\(O(N^{-1})\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "光滑函数的 Fourier 系数 \\(|a_n|\\sim e^{-cn}\\) → 截断 \\(N\\) 项后误差 \\(\\sim e^{-cN}\\)（几何/指数收敛）。比有限差分 \\(O(\\Delta x^p)=O(N^{-p})\\)（代数收敛）快无穷阶。条件：周期且 \\(C^\\infty\\)。非周期 → Chebyshev 谱方法。"
+      },
+      {
+        "id": "numerical-ch06-q6",
+        "question": "BTCS（Backward Time Central Space）格式解热方程的稳定性？",
+        "options": [
+          "无条件稳定（\\(r\\) 任意大都稳定）",
+        "\\(r\\leq 1/2\\)",
+        "\\(r\\leq 1\\)",
+        "不稳定"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_j^{n+1}-r(u_{j+1}^{n+1}-2u_j^{n+1}+u_{j-1}^{n+1})=u_j^n\\)。隐式 → 每步解三对角系统。von Neumann：\\(G=1/(1+4r\\sin^2(\\xi/2))\\)，\\(|G|\\leq 1\\) 恒成立。代价高于 FTCS 但可用大时间步。"
+      },
+      {
+        "id": "numerical-ch06-q7",
+        "question": "Céa 引理给出有限元误差准最优界：\\(\\|u-u_h\\|_{H^1}\\leq\\frac{M}{\\alpha}\\inf_{v_h}\\|u-v_h\\|_{H^1}\\)。\\(M/\\alpha\\) 是？",
+        "options": [
+          "双线性形式的连续常数 \\(M\\) 除以强制常数 \\(\\alpha\\)",
+        "网格大小",
+        "1",
+        "维数"
+        ],
+        "answer": 0,
+        "explanation": "逼近误差 \\(\\inf\\|u-v_h\\|\\) 由插值理论给出（\\(O(h^k)\\)，\\(k\\) = 多项式阶）。\\(M/\\alpha\\) = 条件数型因子。\\(a\\) 对称时 \\(M/\\alpha=\\sqrt{\\kappa}\\)。Céa 说：有限元不比最佳逼近差太多。"
+      },
+      {
+        "id": "numerical-ch06-q8",
+        "question": "Crank-Nicolson 格式（\\(\\theta=1/2\\)）解热方程的精度？",
+        "options": [
+          "\\(O(\\Delta t^2)+O(\\Delta x^2)\\)（时间空间均二阶）",
+        "\\(O(\\Delta t)\\)",
+        "\\(O(\\Delta t^2+\\Delta x^4)\\)",
+        "\\(O(\\Delta x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{u^{n+1}-u^n}{\\Delta t}=\\frac{\\alpha}{2}(\\delta_x^2 u^{n+1}+\\delta_x^2 u^n)\\)。时间取 \\(n+1/2\\) 处的平均 → 以 \\(t_{n+1/2}\\) 为中心的二阶差分。无条件稳定 + 二阶 → 热方程最常用格式之一。"
+      },
+      {
+        "id": "numerical-ch06-q9",
+        "question": "Lax 等价定理（线性问题）：一致格式收敛 ↔ ？",
+        "options": [
+          "稳定",
+        "高阶",
+        "显式",
+        "对称"
+        ],
+        "answer": 0,
+        "explanation": "一致性（截断误差 → 0 as \\(h\\to 0\\)）+ 稳定性 ↔ 收敛性。对线性问题，稳定性是一致格式收敛的充要条件。非线性问题更复杂（Lax-Wendroff 定理：收敛的守恒格式收敛到弱解）。"
+      },
+      {
+        "id": "numerical-ch06-q10",
+        "question": "\\(p\\) 次有限元在网格大小 \\(h\\) 下的 \\(H^1\\) 误差阶？",
+        "options": [
+          "\\(O(h^p)\\)（\\(u\\in H^{p+1}\\) 时）",
+        "\\(O(h^{2p})\\)",
+        "\\(O(h)\\)",
+        "\\(O(h^{p+1})\\)"
+        ],
+        "answer": 0,
+        "explanation": "插值误差 \\(\\inf\\|u-v_h\\|_{H^1}\\leq Ch^p|u|_{H^{p+1}}\\)。Céa → \\(\\|u-u_h\\|_{H^1}\\leq Ch^p\\)。\\(L^2\\) 误差（Aubin-Nitsche trick）：\\(O(h^{p+1})\\)（多一阶）。线性元（\\(p=1\\)）：\\(H^1\\) 误差 \\(O(h)\\)，\\(L^2\\) 误差 \\(O(h^2)\\)。"
+      },
+      {
+        "id": "numerical-ch06-q11",
+        "question": "有限体积法中 Godunov 通量的定义？",
+        "options": [
+          "在单元界面处精确或近似求解 Riemann 问题，取接口处的物理通量",
+        "中心差分",
+        "上风格式",
+        "算术平均"
+        ],
+        "answer": 0,
+        "explanation": "Riemann 问题：\\(u_t+f(u)_x=0\\)，左态 \\(u_L\\)，右态 \\(u_R\\)。精确解给出 \\(u(0,t)\\) → \\(F^*=f(u(0))\\)。计算代价高 → 近似 Riemann 求解器（Roe, HLL, HLLC）。Godunov 定理：线性单调格式至多一阶 → 高阶需限制器。"
+      },
+      {
+        "id": "numerical-ch06-q12",
+        "question": "Fourier 谱方法解 \\(u_t=u_{xx}\\)：空间 FFT → \\(\\hat u_k' = -k^2\\hat u_k\\) → 时间积分。整体格式？",
+        "options": [
+          "空间无误差（截断到 \\(N\\) 模式），时间误差由 ODE 方法决定（如 RK4 → \\(O(\\Delta t^4)\\)）",
+        "\\(O(\\Delta x^2)\\)",
+        "\\(O(\\Delta x)\\)",
+        "误差为零"
+        ],
+        "answer": 0,
+        "explanation": "FFT 精确处理空间导数（光滑函数 → 指数精度）。\\(\\hat u_k(t)\\) 的模态 ODE 独立 → 时间步进选择灵活。刚性（\\(k^2\\) 大）→ 需隐式或指数积分器。半隐式：线性项精确（指数因子），非线性显式。"
+      },
+      {
+        "id": "numerical-ch06-q13",
+        "question": "von Neumann 稳定性分析的步骤？",
+        "options": [
+          "假设 \\(u_j^n=G^n e^{ij\\xi}\\)，代入差分格式得放大因子 \\(G(\\xi)\\)，稳定条件 \\(|G|\\leq 1\\)（\\(\\forall\\xi\\)）",
+        "直接求解",
+        "比较精确解",
+        "仅看截断误差"
+        ],
+        "answer": 0,
+        "explanation": "Fourier 模 \\(e^{ij\\xi}\\) 每步乘以 \\(G\\) → \\(n\\) 步后 \\(G^n\\) → \\(|G|>1\\) 则指数增长。FTCS 热方程：\\(G=1-4r\\sin^2(\\xi/2)\\)，\\(|G|\\leq 1\\) → \\(r\\leq 1/2\\)。方法仅适用于线性常系数——非线性需其他分析（能量估计等）。"
+      },
+      {
+        "id": "numerical-ch06-q14",
+        "question": "flux limiter 在有限体积法中的作用？",
+        "options": [
+          "在光滑区域用高阶通量，在间断附近切换到一阶（避免振荡）→ TVD 格式",
+        "限制时间步",
+        "限制网格大小",
+        "无作用"
+        ],
+        "answer": 0,
+        "explanation": "Godunov 定理：线性单调格式 \\(\\leq\\) 1 阶。TVD（Total Variation Diminishing）：\\(TV(u^{n+1})\\leq TV(u^n)\\) → 无虚假振荡。限制器（minmod, van Leer, superbee）在跳跃附近自动降阶。MUSCL/WENO 是现代高分辨率格式。"
+      },
+      {
+        "id": "numerical-ch06-q15",
+        "question": "有限元中的质量矩阵 \\(M_{ij}=\\int\\phi_i\\phi_j\\)。为什么有时用质量集中（mass lumping）\\(\\tilde M=\\text{diag}\\)？",
+        "options": [
+          "使显式时间步进中不需解线性系统（\\(\\tilde M u^{n+1}=...\\)→ 逐点更新）",
+        "增加精度",
+        "减少存储",
+        "无意义"
+        ],
+        "answer": 0,
+        "explanation": "\\(Mu^{n+1}=...\\)：\\(M\\) 稀疏但非对角 → 需解方程。\\(\\tilde M\\) 对角 → \\(u_i^{n+1}=.../\\tilde m_i\\)（逐点）。线性元：\\(\\tilde M\\) 精度仍 \\(O(h^2)\\)。波方程显式有限元 + mass lumping → 高效的显式谱元法（SEM）。"
+      },
+      {
+        "id": "numerical-ch06-q16",
+        "question": "伪谱方法（pseudospectral / collocation spectral）和 Galerkin 谱方法的区别？",
+        "options": [
+          "伪谱在物理空间配点（不做积分），非线性项在物理空间计算后 FFT 回频域",
+        "完全相同",
+        "伪谱只用有限差分",
+        "Galerkin 无 FFT"
+        ],
+        "answer": 0,
+        "explanation": "Galerkin：弱形式 + 积分（正交权）。伪谱：强形式，在 \\(N\\) 个配点精确满足 PDE。非线性 \\(u^2\\)：频域卷积 \\(O(N^2)\\) → 物理空间逐点乘 + FFT \\(O(N\\log N)\\)（\"3/2 去混叠\"规则防 aliasing）。气象/湍流计算标准。"
+      },
+      {
+        "id": "numerical-ch06-q17",
+        "question": "Lax-Wendroff 格式解 \\(u_t+au_x=0\\)：\\(u_j^{n+1}=u_j^n-\\frac{\\nu}{2}(u_{j+1}^n-u_{j-1}^n)+\\frac{\\nu^2}{2}(u_{j+1}^n-2u_j^n+u_{j-1}^n)\\)（\\(\\nu=a\\Delta t/\\Delta x\\)）。精度和色散？",
+        "options": [
+          "二阶精度但有色散误差（高频波传播速度不正确 → 波后振荡）",
+        "一阶",
+        "无色散",
+        "三阶"
+        ],
+        "answer": 0,
+        "explanation": "\\(O(\\Delta t^2+\\Delta x^2)\\)。修正方程 \\(u_t+au_x=-\\frac{a\\Delta x^2}{6}(1-\\nu^2)u_{xxx}+\\cdots\\)（色散项，非耗散）。色散 → 间断附近的\"涟漪\"（Gibbs 现象型）。一阶上风有耗散但无色散振荡。"
+      },
+      {
+        "id": "numerical-ch06-q18",
+        "question": "hp-有限元中的 \\(p\\)-方法（增加多项式阶 \\(p\\)，固定网格）的收敛率？",
+        "options": [
+          "光滑解：指数收敛 \\(O(e^{-cp})\\)（类似谱方法）；角点奇点：代数收敛",
+        "\\(O(h^p)\\)",
+        "\\(O(p^{-1})\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(p\\)-方法（\\(h\\) 固定，\\(p\\to\\infty\\)）：光滑解上指数收敛。奇点处需 \\(h\\)-方法（局部网格加密）。\\(hp\\)-FEM 组合两者：奇点附近用小 \\(h\\)（几何级网格），光滑区用高 \\(p\\) → 对带角点的椭圆问题也能指数收敛。"
+      },
+      {
+        "id": "numerical-ch06-q19",
+        "question": "WENO（Weighted Essentially Non-Oscillatory）格式的核心思想？",
+        "options": [
+          "在多个候选模板上构造高阶重构，用非线性权重自动避开含间断的模板",
+        "线性组合",
+        "仅用一阶",
+        "ENO + 固定权"
+        ],
+        "answer": 0,
+        "explanation": "ENO：从多个候选模板中选最光滑的（\\(r\\) 个候选 → \\(r\\)-th 阶）。WENO：凸组合所有模板，权重 \\(\\omega_k\\propto 1/(\\varepsilon+\\text{IS}_k)^p\\)（光滑指示器 IS 小 → 权大）。光滑区：权趋于线性最优 → 高阶（\\(2r-1\\) 阶）。间断处：自动降阶 → 无振荡。"
+      },
+      {
+        "id": "numerical-ch06-q20",
+        "question": "Chebyshev 谱方法解非周期问题：在配点 \\(x_j=\\cos(j\\pi/N)\\) 上。微分矩阵 \\(D_{ij}\\) 如何计算？",
+        "options": [
+          "\\(D_{ij}=\\frac{c_i}{c_j}\\frac{(-1)^{i+j}}{x_i-x_j}\\)（\\(i\\neq j\\)），对角元由行和为零确定",
+        "\\(D=\\text{diag}\\)",
+        "FFT 直接给出",
+        "有限差分"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_0=c_N=2\\)，其余 \\(c_j=1\\)。\\(D\\) 稠密（\\(N\\times N\\)）→ 矩阵-向量乘 \\(O(N^2)\\)，或用 FFT + 递推 \\(O(N\\log N)\\)。\\(D^2=D\\cdot D\\) → 二阶导数。Trefethen 的 `cheb.m` 是经典参考实现。条件数 \\(\\sim N^4\\) → 需注意数值稳定性。"
+      },
+      {
+        "id": "numerical-ch06-q21",
+        "question": "ADI（交替方向隐式）方法解多维热方程的优势？",
+        "options": [
+          "每步只需解三对角系统（沿每个方向隐式切分）→ 成本 \\(O(N)\\) 而非二维隐式的 \\(O(N^{3/2})\\)",
+        "显式",
+        "仅一维",
+        "精度更高"
+        ],
+        "answer": 0,
+        "explanation": "Peaceman-Rachford ADI：\\(x\\) 方向隐式 → \\(y\\) 方向隐式（半步交替）。每半步三对角 Thomas 算法 \\(O(N)\\)。二阶精度 + 无条件稳定（2D 热方程）。三维推广需注意（Douglas-Gunn）。"
+      },
+      {
+        "id": "numerical-ch06-q22",
+        "question": "后验误差估计（a posteriori error estimate）在自适应 FEM 中的角色？",
+        "options": [
+          "从已计算的 \\(u_h\\) 估计每个单元的局部误差 → 标记误差大的单元 → 加密 → 重新计算",
+        "预测误差",
+        "仅用于理论",
+        "不需要"
+        ],
+        "answer": 0,
+        "explanation": "残差型估计：\\(\\eta_K^2\\sim\\int_K|f+\\Delta u_h|^2+\\int_{\\partial K}|[\\nabla u_h\\cdot n]|^2\\)。Dörfler 标记策略：标记贡献最大的 \\(\\theta\\%\\) 单元。自适应循环：SOLVE → ESTIMATE → MARK → REFINE（SEMR）。最优复杂度（Binev-Dahmen-DeVore 2004）。"
+      },
+      {
+        "id": "numerical-ch06-q23",
+        "question": "Lax-Wendroff 定理：如果守恒格式 \\(u^{n+1}_j=H(u^n_{j-p},...,u^n_{j+q})\\) 收敛，则极限是守恒律的弱解。为什么\"守恒格式\"是关键？",
+        "options": [
+          "守恒形式保证通量望远镜求和（telescoping）成立 → 离散积分守恒 → 极限满足 Rankine-Hugoniot 跳跃条件",
+        "非守恒也行",
+        "仅精度问题",
+        "无所谓"
+        ],
+        "answer": 0,
+        "explanation": "守恒格式 \\(u_j^{n+1}=u_j^n-\\frac{\\Delta t}{\\Delta x}(F_{j+1/2}-F_{j-1/2})\\) → 对 \\(j\\) 求和 → 仅边界通量（望远镜抵消）。非守恒格式可能收敛到错误的弱解（激波位置/速度不正确）。Hou-Le Floch (1994) 给出了反例。"
+      },
+      {
+        "id": "numerical-ch06-q24",
+        "question": "谱元法（Spectral Element Method, SEM）的优势？",
+        "options": [
+          "结合谱方法的高阶精度和有限元的几何灵活性——每个单元内用高阶多项式（GLL 节点）",
+        "与低阶 FEM 相同",
+        "仅适用于简单几何",
+        "不能并行"
+        ],
+        "answer": 0,
+        "explanation": "Gauss-Lobatto-Legendre（GLL）节点上的 Lagrange 插值 → 对角质量矩阵（mass lumping 精确）→ 显式时步高效。\\(hp\\) 收敛：光滑区指数，加密区代数。高度并行（单元独立计算）。Nek5000, SPECFEM3D 用于 DNS 湍流和地震波模拟。"
+      },
+      {
+        "id": "numerical-ch06-q25",
+        "question": "隐式-显式（IMEX）方法解对流-扩散方程 \\(u_t+cu_x=\\nu u_{xx}\\) 的策略？",
+        "options": [
+          "对流项显式（CFL 限制温和），扩散项隐式（消除刚性限制 \\(\\Delta t\\sim\\Delta x^2\\)）",
+        "全显式",
+        "全隐式",
+        "仅处理对流"
+        ],
+        "answer": 0,
+        "explanation": "显式扩散稳定条件 \\(\\Delta t\\leq\\Delta x^2/(2\\nu)\\)（\\(\\nu\\) 大时极限）。IMEX：\\(\\Delta t\\) 仅受对流 CFL \\(\\Delta t\\leq\\Delta x/c\\) 限制 → 快得多。IMEX-RK（如 ARK 方法）：显式 Butcher 表 + 隐式 Butcher 表组合。"
+      },
+      {
+        "id": "numerical-ch06-q26",
+        "question": "桥梁结构分析用有限元，网格划分的关键考虑？",
+        "options": [
+          "应力集中区域（如连接处、孔洞附近）需网格加密；光滑区域可用粗网格",
+        "均匀网格",
+        "仅用粗网格",
+        "不需要网格"
+        ],
+        "answer": 0,
+        "explanation": "自适应网格：后验误差估计 → 标记高误差单元 → 局部加密。\\(h\\)-方法（子分单元），\\(p\\)-方法（增加多项式阶），\\(hp\\)-组合。工程软件（ANSYS, Abaqus）内置自适应。网格质量（长宽比、扭曲度）影响精度和收敛。"
+      },
+      {
+        "id": "numerical-ch06-q27",
+        "question": "天气预报中的有限体积法如何处理球面上的浅水方程？",
+        "options": [
+          "在非结构化网格（如 icosahedral）上用守恒格式，避免极点奇异性",
+        "等经纬度网格",
+        "谱方法",
+        "有限差分"
+        ],
+        "answer": 0,
+        "explanation": "等经纬度 → 极点处经线密集（CFL 极限）。正二十面体（icosahedral）网格 → 准均匀覆盖球面。MPAS（Model for Prediction Across Scales）用 Voronoi 六边形网格 + 有限体积。守恒性对质量/能量守恒至关重要。"
+      },
+      {
+        "id": "numerical-ch06-q28",
+        "question": "量子色动力学（Lattice QCD）的格点计算本质上是什么数值 PDE 问题？",
+        "options": [
+          "四维欧氏时空格点上的路径积分（Monte Carlo 采样非线性场论）→ 极大规模并行谱/差分混合方法",
+        "一维 ODE",
+        "简单 Laplace",
+        "无需数值方法"
+        ],
+        "answer": 0,
+        "explanation": "基本变量是 \\(SU(3)\\) 规范场（link variables）和费米子场。\\(\\int\\mathcal{D}U\\mathcal{D}\\psi e^{-S[U,\\psi]}\\) 用 Markov Chain MC 采样。费米子部分需求解巨型稀疏线性系统（\\(D^{-1}\\)，\\(D\\) 是 Dirac 算子）→ 多重网格预条件 CG/BiCGSTAB。\\(32^4\\sim 10^6\\) 格点 × \\(12\\) 自由度/点。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="numerical"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/numerical.html" class="module-name">数值分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 有限差分法</a></li>
+      <li><a href="#kp2">02 · 有限元方法基础</a></li>
+      <li><a href="#kp3">03 · 有限体积法与守恒律</a></li>
+      <li><a href="#kp4">04 · 谱方法与有限元高级话题</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>PDE 数值方法</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>有限差分法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>将 PDE 中的微分算子用差分近似，在网格上将 PDE 转化为 代数方程组——这是最直观的 PDE 数值方法。五点差分格式 解 Laplace 方程、FTCS/BTCS 解热方程、Lax-Wendroff 解波方程 都是经典模板。有限差分法的理论框架（一致性+稳定性→收敛） 是理解所有网格方法的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>有限差分在均匀网格上用 Taylor 展开推导差分格式。 Lax 等价定理是核心：对线性问题，一致性 + 稳定性 \(\iff\) 收敛。 von Neumann 稳定性分析用 Fourier 模式检测格式稳定性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>空间差分</strong>（二阶中心差分）： \[u_{xx} \approx \frac{u_{j+1}-2u_j+u_{j-1}}{(\Delta x)^2} + O(\Delta x^2)\] <strong>热方程 FTCS</strong>（前向时间中心空间）：\(u_t = \kappa u_{xx}\)。 \[u_j^{n+1} = u_j^n + r(u_{j+1}^n - 2u_j^n + u_{j-1}^n), \quad r = \kappa\Delta t/\Delta x^2\] <strong>von Neumann 分析</strong>：令 \(u_j^n = g^n e^{ij\xi}\)，代入得 \(g = 1 - 4r\sin^2(\xi/2)\)。\(|g| \leq 1\) 要求 \(r \leq 1/2\)。 即 \(\Delta t \leq \Delta x^2/(2\kappa)\)（CFL 条件）。 <strong>隐式 BTCS</strong>（后向时间中心空间）： \(u_j^{n+1} - r(u_{j+1}^{n+1}-2u_j^{n+1}+u_{j-1}^{n+1}) = u_j^n\)。 \(|g| = 1/(1+4r\sin^2(\xi/2)) \leq 1\)（对所有 \(r > 0\) 成立）→ <strong>无条件稳定</strong>。 <strong>Crank-Nicolson</strong>（\(\theta = 1/2\)）：梯形法时间积分，\(O(\Delta t^2 + \Delta x^2)\)，无条件稳定。 <strong>Lax 等价定理</strong>：线性初值问题中，一致 + 稳定 \(\iff\) 收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 天气预报中的有限差分模型 - 地球物理中的波动方程正演模拟</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证热方程 FTCS 格式在 \(r = 1\)（\(\Delta t = \Delta x^2/\kappa\)）时不稳定。 解答：\(g = 1 - 4\sin^2(\xi/2)\)。当 \(\xi = \pi\) 时，\(g = 1 - 4 = -3\)，\(|g| = 3 > 1\)。 数值解将以因子 3 逐步振荡放大。实际计算中看到交替正负且幅度指数增长。 易错点：CFL 条件 \(r \leq 1/2\) 关系到 \(\Delta t\) 和 \(\Delta x^2\)（不是 \(\Delta x\)！）。 网格加密 \(\Delta x/2\) 时，\(\Delta t\) 要除以 4，计算量增大 8 倍。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程 FTCS 格式稳定的 CFL 条件是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(r \\leq 1/2\\) 保证所有 Fourier 模式的放大因子 \\(|g| \\leq 1\\)。')">A. \(r = \kappa\Delta t/\Delta x^2 \leq 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(r \\leq 1/2\\) 保证所有 Fourier 模式的放大因子 \\(|g| \\leq 1\\)。')">B. \(r \leq 1/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(r \\leq 1/2\\) 保证所有 Fourier 模式的放大因子 \\(|g| \\leq 1\\)。')">C. \(r \leq 1/4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(r \\leq 1/2\\) 保证所有 Fourier 模式的放大因子 \\(|g| \\leq 1\\)。')">D. 无条件稳定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>有限元方法基础</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限差分法在规则网格上简单高效，但难以处理复杂几何域和 自然边界条件。有限元方法（FEM）基于弱形式，使用不规则的 三角形/四面体网格逼近复杂域，是工程结构分析的标准工具。 FEM 有坚实的数学理论（Céa 引理、先验误差估计）保证收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>FEM = Galerkin 方法 + 分段多项式试函数空间。弱形式 \(a(u,v) = L(v)\) 在有限维子空间 \(V_h \subset V\) 上求解， Céa 引理保证 \(\|u-u_h\| \leq C\inf_{v_h\in V_h}\|u-v_h\|\)（准最优逼近）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Galerkin 方法</strong>：弱形式 \(a(u,v) = L(v)\)（\(\forall v \in V\)）， 在有限维子空间 \(V_h\) 上：找 \(u_h \in V_h\) 使 \(a(u_h, v_h) = L(v_h)\)，\(\forall v_h \in V_h\)。 选基 \(\{\phi_1,\ldots,\phi_N\}\)，\(u_h = \sum c_j\phi_j\)，得线性系统 \[Kc = F, \quad K_{ij} = a(\phi_j, \phi_i), \; F_i = L(\phi_i)\] \(K\) 是刚度矩阵（对称正定当 \(a\) 对称强制时）。 <strong>分段线性有限元</strong>（\(P_1\) 元）：三角形网格上，每个基函数 \(\phi_i\) 在节点 \(i\) 取值 1，其余节点取值 0，各三角形内线性。\(K\) 稀疏。 <strong>Céa 引理</strong>：\(\|u-u_h\|_V \leq \frac{M}{\alpha}\inf_{v_h\in V_h}\|u-v_h\|_V\)。 结合插值估计 \(\inf\|u-v_h\| \leq Ch^k\|u\|_{H^{k+1}}\)（\(k\)=多项式次数）， 得<strong>先验误差估计</strong>： \[\|u-u_h\|_{H^1} \leq Ch^k\|u\|_{H^{k+1}}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 结构力学中的应力分析（桥梁、飞机、汽车） - 半导体器件模拟（drift-diffusion 方程）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：一维 \(-u'' = 1\)（\(u(0)=u(1)=0\)）用 2 个等距 \(P_1\) 元求解。 解答：节点 \(x_0=0, x_1=0.5, x_2=1\)，内部自由度仅 \(x_1\)。 \(\phi_1(x)\) 是以 \(x_1=0.5\) 为顶点的帽函数。 \(K_{11} = \int_0^1|\phi_1'|^2 = 2\int_0^{0.5}(2)^2 = 4\)，\(F_1 = \int_0^1\phi_1 = 0.5\)。 \(u_h(0.5) = F_1/K_{11} = 0.5/4 = 0.125\)。精确解 \(u(0.5) = 0.5\times0.5/2 = 0.125\)。精确！ 易错点：\(P_1\) 元对二次解可以精确还原（因为 \(u = x(1-x)/2\) 在每个单元内是二次， 但节点上恰好精确）。一般情况下不会如此巧合。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Céa 引理说 FEM 解 \(u_h\) 和精确解 \(u\) 的误差满足什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Céa 引理说 FEM 解是子空间 \\(V_h\\) 中（准）最佳逼近。')">A. \(\|u-u_h\| = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Céa 引理说 FEM 解是子空间 \\(V_h\\) 中（准）最佳逼近。')">B. \(\|u-u_h\| \leq C \cdot \inf_{v_h}\|u-v_h\|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Céa 引理说 FEM 解是子空间 \\(V_h\\) 中（准）最佳逼近。')">C. \(\|u-u_h\| \leq C \cdot h\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Céa 引理说 FEM 解是子空间 \\(V_h\\) 中（准）最佳逼近。')">D. \(\|u-u_h\| \leq C \cdot \|f\|\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>有限体积法与守恒律</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>守恒律（如 Euler 方程、浅水方程）的解可能产生激波（间断面）。 有限差分法在间断处失效（Gibbs 振荡），有限元法需要特殊处理。 有限体积法（FVM）直接离散积分形式的守恒律，天然保证通量守恒， 是计算流体力学（CFD）的标准方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>FVM 在每个控制体 \(C_j\) 上积分守恒律 \(u_t + \text{div}(F) = 0\)， 将体积分化为面通量。关键是<strong>数值通量</strong> \(\hat{F}_{j+1/2}\) 的设计： 它要满足一致性、守恒性和某种耗散（避免非物理振荡）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一维守恒律</strong>：\(u_t + f(u)_x = 0\)。 在 \([x_{j-1/2}, x_{j+1/2}]\) 上积分： \[\frac{d\bar{u}_j}{dt} = -\frac{f(u(x_{j+1/2})) - f(u(x_{j-1/2}))}{\Delta x}\] \(\bar{u}_j = \frac{1}{\Delta x}\int_{x_{j-1/2}}^{x_{j+1/2}}u\,dx\)（单元平均值）。 <strong>Godunov 格式</strong>：\(\hat{f}_{j+1/2} = f(u^*_{j+1/2})\)，\(u^*\) 是 Riemann 问题 \(u_L = u_j\)，\(u_R = u_{j+1}\) 的精确解在 \(x/t = 0\) 处的值。 精确但昂贵 → 用近似 Riemann 求解器（如 Roe、HLL）。 <strong>Lax-Friedrichs 格式</strong>：\(\hat{f}_{j+1/2} = \frac{1}{2}[f(u_j)+f(u_{j+1})] - \frac{\Delta x}{2\Delta t}(u_{j+1}-u_j)\)。 简单但耗散大（1 阶）。 <strong>TVD/WENO 高阶重构</strong>：用限制器或加权基本无振荡（WENO） 插值实现高阶精度同时抑制间断处振荡。 <strong>CFL 条件</strong>（双曲型）：\(\Delta t \leq \Delta x/\max|f'(u)|\)（信息传播速度限制）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 航空航天中的可压缩流动模拟（跨音速绕流、激波管） - 天体物理中的磁流体力学（MHD）模拟</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 Burgers 方程 \(u_t + (u^2/2)_x = 0\) 用 Lax-Friedrichs 格式。 初值 \(u(x,0) = \sin(\pi x)\)，\(\Delta x = 0.1\)，\(\Delta t = 0.05\)。 解答：\(\hat{f}_{j+1/2} = \frac{1}{2}(u_j^2/2+u_{j+1}^2/2)-\frac{0.1}{0.1}(u_{j+1}-u_j)/2\) \(= \frac{u_j^2+u_{j+1}^2}{4} - (u_{j+1}-u_j)\)。 然后 \(u_j^{n+1} = u_j^n - (\Delta t/\Delta x)(\hat{f}_{j+1/2}-\hat{f}_{j-1/2})\)。 CFL 数 \(\nu = \max|u|\cdot\Delta t/\Delta x = 1\times0.05/0.1 = 0.5 \leq 1\)。✓ 易错点：守恒格式（\(\hat{f}_{j+1/2}\) 形式）保证 Rankine-Hugoniot 条件 在离散层面自动满足。非守恒格式可能收敛到错误的弱解（Hou-LeFloch 定理）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">有限体积法中数值通量 \(\hat{f}_{j+1/2}\) 需要满足什么关键性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。守恒性保证全局守恒量精确（Lax-Wendroff 定理），')">A. 它必须是 \(u_j\) 和 \(u_{j+1}\) 的线性函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！守恒性保证全局守恒量精确（Lax-Wendroff 定理），')">B. 守恒性（望远镜求和）和一致性（\(\hat{f}(u,u)=f(u)\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。守恒性保证全局守恒量精确（Lax-Wendroff 定理），')">C. 它必须使格式具有最高代数精度</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。守恒性保证全局守恒量精确（Lax-Wendroff 定理），')">D. 它必须是光滑函数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>谱方法与有限元高级话题</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限差分和低阶有限元的精度受限于多项式次数（\(O(h^k)\)）。 当解光滑时，谱方法使用全局高阶多项式（Fourier 或 Chebyshev）， 达到指数收敛（谱精度）——每增加一个自由度，误差下降一个数量级。 这是高精度科学计算的首选方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>谱方法 = Galerkin/配置方法 + 全局基函数。收敛速率由解的 光滑性决定：解析函数 → 指数收敛，\(C^k\) 函数 → \(O(N^{-k})\) 代数收敛。 hp-FEM 则结合网格细化（\(h\)）和多项式升阶（\(p\)），兼顾灵活性和精度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Fourier 谱方法</strong>（周期问题）：展开 \(u_N = \sum_{|k|\leq N/2}\hat{u}_k e^{ikx}\)。 对热方程 \(u_t = \kappa u_{xx}\)：\(\hat{u}_k' = -\kappa k^2\hat{u}_k\)（精确的模态方程！）。 空间误差由截断 Fourier 级数的尾部决定： \[\|u - u_N\| \leq C_s N^{-s}\|u\|_{H^s} \quad (\forall s, \text{if } u \in C^\infty)\] 即对 \(C^\infty\) 函数，收敛比任何 \(N^{-s}\) 都快（= 指数收敛）。 <strong>Chebyshev 谱方法</strong>（非周期问题）：在 Chebyshev-Gauss-Lobatto 点上配置。 微分矩阵 \(D_N\)：\((D_N u)_j = \sum_k D_{jk}u_k\) 离散化 \(d/dx\)。 稠密矩阵但可用 FFT 加速为 \(O(N\log N)\)。 <strong>hp-有限元</strong>：在解光滑区域用高阶多项式（\(p\) 方法）， 在奇异/间断附近加密网格（\(h\) 方法）。理论预测对角点奇异性 也能达到指数收敛（Babuška-Guo 定理）。 <strong>误差类型对比</strong>： - 有限差分 \(O(h^p)\)（固定 \(p\)，代数收敛） - 有限元 \(P_k\)：\(O(h^k)\) - 谱方法：\(O(e^{-cN})\)（指数收敛，\(c\) 取决于解的解析性）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 全球气候模型中的球谐谱方法 - DNS（直接数值模拟）湍流使用 Fourier 谱方法</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Fourier 谱方法求解 \(-u'' = f(x)\)（周期 \(2\pi\)），\(f = \sin 3x\)。 解答：\(\hat{f}_k = \delta_{k,3}/(2i)\)，\(\hat{u}_k = \hat{f}_k/k^2\)。 \(\hat{u}_3 = 1/(9\cdot2i)\)，\(u = \sin(3x)/9\)。 谱方法对这类问题可以给出精确解（有限个 Fourier 模式的源项）。 更一般地，\(f\) 有无穷多个 Fourier 模式时，谱方法截取 \(|k| \leq N/2\)， 高频尾部是误差。若 \(|\hat{f}_k|\) 指数衰减，则 \(N\) 稍大即可高精度。 易错点：谱方法对非光滑解（激波、间断）会产生 Gibbs 现象 （与高次插值的 Runge 现象类似），需要滤波或去混叠处理。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">谱方法对光滑周期函数的收敛速率是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(C^\\infty\\) 周期函数的 Fourier 系数 \\(|\\hat{u}_k|\\) 超代数衰减，')">A. \(O(h^2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(C^\\infty\\) 周期函数的 Fourier 系数 \\(|\\hat{u}_k|\\) 超代数衰减，')">B. \(O(N^{-2})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(C^\\infty\\) 周期函数的 Fourier 系数 \\(|\\hat{u}_k|\\) 超代数衰减，')">C. 指数收敛 \(O(e^{-cN})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(C^\\infty\\) 周期函数的 Fourier 系数 \\(|\\hat{u}_k|\\) 超代数衰减，')">D. \(O(1/N)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/applied/numerical.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

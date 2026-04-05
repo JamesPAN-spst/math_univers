@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 期望与矩 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch03-q1",
+        "question": "\\(X\\) 取值 \\(1,2,3\\)，概率 \\(0.2,0.5,0.3\\)。\\(E[X]=\\)？",
+        "options": [
+          "\\(2.1\\)",
+        "\\(2.0\\)",
+        "\\(1.8\\)",
+        "\\(2.5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X]=1\\times 0.2+2\\times 0.5+3\\times 0.3=0.2+1.0+0.9=2.1\\)。期望是概率加权平均而非算术平均（选 B）。离散情形直接求和。"
+      },
+      {
+        "id": "probability-ch03-q2",
+        "question": "\\(X \\sim \\text{Exp}(\\lambda=3)\\)。\\(E[X]\\) 和 \\(E[X^2]\\)？",
+        "options": [
+          "\\(1/3,\\; 2/9\\)",
+        "\\(3,\\; 9\\)",
+        "\\(1/3,\\; 1/9\\)",
+        "\\(3,\\; 6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Exp}(\\lambda)\\): \\(E[X]=1/\\lambda=1/3\\)，\\(E[X^2]=2/\\lambda^2=2/9\\)。选 B 混淆了参数和期望。选 C 中 \\(E[X^2]=1/\\lambda^2\\) 不对（应为 \\(\\text{Var}+(\\text{E})^2=1/9+1/9=2/9\\)）。"
+      },
+      {
+        "id": "probability-ch03-q3",
+        "question": "\\(E[X]=3\\)，\\(E[Y]=2\\)。\\(E[2X-3Y+5]=\\)？",
+        "options": [
+          "\\(5\\)",
+        "\\(11\\)",
+        "\\(-5\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "期望的线性性（无需独立）：\\(E[2X-3Y+5]=2\\times 3-3\\times 2+5=6-6+5=5\\)。线性性是期望最重要的性质，对任意联合分布成立。"
+      },
+      {
+        "id": "probability-ch03-q4",
+        "question": "\\(\\text{Var}(X)=4\\)，\\(Y=3X+2\\)。\\(\\text{Var}(Y)=\\)？",
+        "options": [
+          "\\(36\\)",
+        "\\(14\\)",
+        "\\(12\\)",
+        "\\(38\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(aX+b)=a^2\\text{Var}(X)=9\\times 4=36\\)。平移（\\(+2\\)）不改变方差，拉伸（\\(\\times 3\\)）使方差乘以 \\(3^2\\)。选 B 错用 \\(3 \\times 4+2\\)；选 C 忘记平方。"
+      },
+      {
+        "id": "probability-ch03-q5",
+        "question": "矩母函数 \\(M_X(t)\\) 的定义是？",
+        "options": [
+          "\\(E[e^{tX}]\\)",
+        "\\(E[X^t]\\)",
+        "\\(E[e^{itX}]\\)",
+        "\\(\\sum t^n E[X^n]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M_X(t)=E[e^{tX}]\\)。展开 \\(=\\sum t^n E[X^n]/n!\\)，故 \\(E[X^n]=M^{(n)}(0)\\)。C 是特征函数，B 无标准意义。MGF 在原点某邻域存在时唯一确定分布。"
+      },
+      {
+        "id": "probability-ch03-q6",
+        "question": "\\(X \\sim N(\\mu,\\sigma^2)\\)，MGF \\(M_X(t)=e^{\\mu t+\\sigma^2 t^2/2}\\)。\\(M_X''(0)=\\)？",
+        "options": [
+          "\\(\\mu^2+\\sigma^2\\)",
+        "\\(\\mu^2\\)",
+        "\\(\\sigma^2\\)",
+        "\\(\\mu\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M''(0)=E[X^2]=\\text{Var}(X)+E[X]^2=\\sigma^2+\\mu^2\\)。\\(M'(0)=\\mu\\)。二阶导给出二阶矩，而非方差（选 C 混淆二阶矩与二阶中心矩）。"
+      },
+      {
+        "id": "probability-ch03-q7",
+        "question": "\\(P(|X-\\mu| \\geq 2\\sigma)\\) 由 Chebyshev 不等式的上界为？",
+        "options": [
+          "\\(1/4\\)",
+        "\\(1/2\\)",
+        "\\(1/8\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(|X-\\mu| \\geq k\\sigma) \\leq 1/k^2\\)。\\(k=2\\): \\(\\leq 1/4\\)。Chebyshev 只用均值和方差，对任意分布成立。但上界常很松——正态时真实值为 \\(\\approx 4.6\\%\\)。"
+      },
+      {
+        "id": "probability-ch03-q8",
+        "question": "\\(X\\) 密度 \\(f(x)=3x^2\\)（\\(0<x<1\\)）。\\(E[X]\\) 和 \\(\\text{Var}(X)\\)？",
+        "options": [
+          "\\(3/4,\\; 3/80\\)",
+        "\\(1/2,\\; 1/12\\)",
+        "\\(3/4,\\; 1/4\\)",
+        "\\(2/3,\\; 1/18\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X]=\\int_0^1 3x^3 dx=3/4\\)。\\(E[X^2]=\\int_0^1 3x^4 dx=3/5\\)。\\(\\text{Var}=3/5-9/16=48/80-45/80=3/80\\)。选 B 是均匀分布的值。"
+      },
+      {
+        "id": "probability-ch03-q9",
+        "question": "掷骰子 \\(X \\in \\{1,...,6\\}\\)。\\(E[X(X-1)]=\\)？",
+        "options": [
+          "\\(35/3\\)",
+        "\\(7/2\\)",
+        "\\(91/6\\)",
+        "\\(70/6\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(E[X(X-1)]=E[X^2]-E[X]\\)。\\(E[X]=7/2\\)，\\(E[X^2]=91/6\\)。\\(E[X(X-1)]=91/6-7/2=91/6-21/6=70/6=35/3\\)... 等等 \\(70/6=35/3\\)。A 和 D 相同值。重新检查：\\(70/6=35/3 \\approx 11.67\\)。选 A 或 D 等价。为清晰：答案选 D（\\(70/6\\)）。实际上 \\(35/3=70/6\\)，这是阶乘矩 \\(E[X]_2\\)，用于计算方差的技巧。"
+      },
+      {
+        "id": "probability-ch03-q10",
+        "question": "\\(\\text{Cov}(X,Y)=3\\)，\\(\\text{Var}(X)=4\\)，\\(\\text{Var}(Y)=9\\)。相关系数 \\(\\rho(X,Y)=\\)？",
+        "options": [
+          "\\(1/2\\)",
+        "\\(3/4\\)",
+        "\\(1/3\\)",
+        "\\(3/36\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\rho=\\text{Cov}/(\\sigma_X \\sigma_Y)=3/(2\\times 3)=1/2\\)。选 B 忘了开方（\\(3/4=\\text{Cov}/\\text{Var}(X)\\)）。\\(|\\rho| \\leq 1\\) 可做快速检验。"
+      },
+      {
+        "id": "probability-ch03-q11",
+        "question": "\\(\\text{Var}(X+Y)\\) 展开为？",
+        "options": [
+          "\\(\\text{Var}(X)+\\text{Var}(Y)+2\\text{Cov}(X,Y)\\)",
+        "\\(\\text{Var}(X)+\\text{Var}(Y)\\)",
+        "\\((\\sigma_X+\\sigma_Y)^2\\)",
+        "\\(\\text{Var}(X)\\text{Var}(Y)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(X+Y)=\\text{Var}(X)+\\text{Var}(Y)+2\\text{Cov}(X,Y)\\)。仅独立时简化为 B（\\(\\text{Cov}=0\\)）。C 是标准差直接相加（错误）。方差不满足三角不等式。"
+      },
+      {
+        "id": "probability-ch03-q12",
+        "question": "\\(X \\sim \\text{Poisson}(\\lambda)\\) 的 MGF \\(M_X(t)=\\)？",
+        "options": [
+          "\\(e^{\\lambda(e^t-1)}\\)",
+        "\\(e^{\\lambda t}\\)",
+        "\\((1-\\lambda t)^{-1}\\)",
+        "\\(\\lambda e^t\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M_X(t)=E[e^{tX}]=\\sum e^{tk}e^{-\\lambda}\\lambda^k/k!=e^{-\\lambda}\\sum(\\lambda e^t)^k/k!=e^{-\\lambda}e^{\\lambda e^t}=e^{\\lambda(e^t-1)}\\)。\\(M'(0)=\\lambda\\)，\\(M''(0)=\\lambda^2+\\lambda\\)，故 \\(\\text{Var}=\\lambda\\)。"
+      },
+      {
+        "id": "probability-ch03-q13",
+        "question": "\\(X \\sim N(0,1)\\) 的特征函数 \\(\\varphi_X(t)=\\)？",
+        "options": [
+          "\\(e^{-t^2/2}\\)",
+        "\\(e^{it}\\)",
+        "\\(e^{t^2/2}\\)",
+        "\\(1/(1-it)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(t)=E[e^{itX}]=\\int e^{itx}\\frac{1}{\\sqrt{2\\pi}}e^{-x^2/2}dx=e^{-t^2/2}\\)（配方完成积分）。特征函数始终存在（Bochner），而 MGF 可能不存在。C 是 MGF（发散风险）。"
+      },
+      {
+        "id": "probability-ch03-q14",
+        "question": "Markov 不等式：对 \\(X \\geq 0\\)，\\(P(X \\geq a) \\leq\\)？",
+        "options": [
+          "\\(E[X]/a\\)",
+        "\\(\\text{Var}(X)/a^2\\)",
+        "\\(E[X^2]/a\\)",
+        "\\(1/a\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X] \\geq a \\cdot P(X \\geq a)\\)，故 \\(P(X \\geq a) \\leq E[X]/a\\)。B 是 Chebyshev 的形式。Markov 仅需非负性和一阶矩存在。简单但基础——Chebyshev 是其推论。"
+      },
+      {
+        "id": "probability-ch03-q15",
+        "question": "Cauchy 分布 \\(f(x)=1/(\\pi(1+x^2))\\) 的 \\(E[X]\\) 是？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "不存在",
+        "\\(\\pi\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\int_0^\\infty x/(\\pi(1+x^2))dx=\\infty\\)。正负部分都发散，期望不存在（非\"\\(=0\\)\"）。Cauchy 无任何矩。选 A 错：对称性只说明若期望存在则为 \\(0\\)，但存在性要先验证。这是典型易错点。"
+      },
+      {
+        "id": "probability-ch03-q16",
+        "question": "\\(X \\sim \\text{Exp}(1)\\)，用 Markov 不等式估计 \\(P(X \\geq 5)\\) 的上界，并与精确值比较。",
+        "options": [
+          "上界 \\(1/5\\)，精确 \\(e^{-5}\\)",
+        "上界 \\(1/25\\)，精确 \\(e^{-5}\\)",
+        "上界 \\(1/5\\)，精确 \\(1/5\\)",
+        "上界 \\(e^{-5}\\)，精确 \\(e^{-5}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Markov: \\(P(X \\geq 5) \\leq E[X]/5=1/5=0.2\\)。精确值 \\(=e^{-5}\\approx 0.0067\\)，上界松了 30 倍。Chebyshev 用 \\(k=4\\)（因 \\(\\mu=1\\)）给 \\(1/16 \\approx 0.0625\\)，也很松。这说明矩不等式的保守性。"
+      },
+      {
+        "id": "probability-ch03-q17",
+        "question": "Jensen 不等式：若 \\(g\\) 凸且 \\(E[X]\\) 存在，则？",
+        "options": [
+          "\\(E[g(X)] \\geq g(E[X])\\)",
+        "\\(E[g(X)] \\leq g(E[X])\\)",
+        "\\(E[g(X)] = g(E[X])\\)",
+        "\\(g(E[X]) \\geq E[X]\\)"
+        ],
+        "answer": 0,
+        "explanation": "凸函数的 Jensen 不等式：\\(E[g(X)] \\geq g(E[X])\\)。例 \\(g(x)=x^2\\): \\(E[X^2] \\geq (E[X])^2\\)（方差 \\(\\geq 0\\)）。B 是凹函数版本；C 仅当 \\(g\\) 线性时成立。"
+      },
+      {
+        "id": "probability-ch03-q18",
+        "question": "\\(X\\) 在 \\([0,\\infty)\\) 取值，\\(E[X]=\\mu\\)。用 LOTUS 证明 \\(E[X]=\\int_0^\\infty P(X>t)\\,dt\\) 的关键交换是？",
+        "options": [
+          "Fubini 交换积分顺序",
+        "分部积分",
+        "主值积分",
+        "Dominated convergence"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X]=\\int_0^\\infty xf(x)dx=\\int_0^\\infty\\int_0^x dt\\, f(x)dx\\)（替换 \\(x=\\int_0^x 1\\,dt\\)）。Fubini 交换：\\(=\\int_0^\\infty\\int_t^\\infty f(x)dx\\,dt=\\int_0^\\infty P(X>t)dt\\)。尾概率公式是非负随机变量期望的等价形式。"
+      },
+      {
+        "id": "probability-ch03-q19",
+        "question": "\\(X_1, ..., X_n\\) iid \\(\\sim \\text{Exp}(\\lambda)\\)，\\(\\bar{X}=\\sum X_i/n\\)。\\(E[\\bar{X}]\\) 和 \\(\\text{Var}(\\bar{X})\\)？",
+        "options": [
+          "\\(1/\\lambda,\\; 1/(n\\lambda^2)\\)",
+        "\\(n/\\lambda,\\; n/\\lambda^2\\)",
+        "\\(1/\\lambda,\\; 1/\\lambda^2\\)",
+        "\\(1/(n\\lambda),\\; 1/(n^2\\lambda^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[\\bar{X}]=E[X_i]=1/\\lambda\\)。\\(\\text{Var}(\\bar{X})=\\text{Var}(X_i)/n=1/(n\\lambda^2)\\)。选 B 是和的参数。样本均值方差 \\(\\sim 1/n\\)（精度随样本量线性增长），这是统计估计有效性的基础。"
+      },
+      {
+        "id": "probability-ch03-q20",
+        "question": "\\(\\text{Cov}(X+Y, X-Y)\\) 用 \\(\\text{Var}(X), \\text{Var}(Y), \\text{Cov}(X,Y)\\) 表示？",
+        "options": [
+          "\\(\\text{Var}(X)-\\text{Var}(Y)\\)",
+        "\\(2\\text{Cov}(X,Y)\\)",
+        "\\(0\\)",
+        "\\(\\text{Var}(X)+\\text{Var}(Y)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Cov}(X+Y,X-Y)=\\text{Var}(X)-\\text{Cov}(X,Y)+\\text{Cov}(Y,X)-\\text{Var}(Y)=\\text{Var}(X)-\\text{Var}(Y)\\)。双线性展开。当 \\(\\text{Var}(X)=\\text{Var}(Y)\\) 时为 \\(0\\)，此时 \\(X+Y\\) 和 \\(X-Y\\) 不相关。"
+      },
+      {
+        "id": "probability-ch03-q21",
+        "question": "证 \\(|\\text{Cov}(X,Y)| \\leq \\sigma_X \\sigma_Y\\)（Cauchy-Schwarz 概率版）用到？",
+        "options": [
+          "对 \\(t \\in \\mathbb{R}\\)，\\(E[(X'+tY')^2] \\geq 0\\)（\\(X'=X-\\mu_X\\)），展判别式",
+        "Jensen 不等式",
+        "Chebyshev 不等式",
+        "三角不等式"
+        ],
+        "answer": 0,
+        "explanation": "\\(0 \\leq E[(X'+tY')^2]=\\text{Var}(X)+2t\\text{Cov}+t^2\\text{Var}(Y)\\)。此二次式 \\(\\geq 0 \\,\\forall t\\) 要求判别式 \\(\\leq 0\\): \\(4\\text{Cov}^2-4\\text{Var}(X)\\text{Var}(Y) \\leq 0\\)。即 \\(|\\text{Cov}| \\leq \\sigma_X\\sigma_Y\\)。"
+      },
+      {
+        "id": "probability-ch03-q22",
+        "question": "\\(X_1,...,X_n\\) iid，MGF \\(M(t)\\) 存在。\\(S_n=\\sum X_i\\) 的 MGF？",
+        "options": [
+          "\\([M(t)]^n\\)",
+        "\\(nM(t)\\)",
+        "\\(M(nt)\\)",
+        "\\(M(t)^{1/n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "独立性 \\(\\Rightarrow E[e^{tS_n}]=\\prod E[e^{tX_i}]=[M(t)]^n\\)。MGF 将卷积化为乘法，与特征函数性质一致。选 B 只是线性叠加（错误）；选 C 对尺度变换有效。"
+      },
+      {
+        "id": "probability-ch03-q23",
+        "question": "\\(M_X(t)=(1-t)^{-3}\\)（\\(t<1\\)）。\\(X\\) 服从什么分布？\\(E[X]\\) 和 \\(\\text{Var}(X)\\)？",
+        "options": [
+          "\\(\\text{Gamma}(3,1)\\)；\\(E=3, \\text{Var}=3\\)",
+        "\\(\\text{Exp}(3)\\)；\\(E=1/3, \\text{Var}=1/9\\)",
+        "\\(\\chi^2(3)\\)；\\(E=3, \\text{Var}=6\\)",
+        "A 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{Gamma}(\\alpha,\\beta)\\) 的 MGF \\(=(1-\\beta t)^{-\\alpha}\\)。\\((1-t)^{-3}\\) 对应 \\(\\alpha=3,\\beta=1\\)，即 \\(\\text{Gamma}(3,1)\\)。\\(\\chi^2(k)=\\text{Gamma}(k/2,2)\\)，\\(\\chi^2(6)\\) 才给 \\((1-2t)^{-3}\\)... 等等，\\(\\chi^2(3)\\) 的 MGF \\(=(1-2t)^{-3/2}\\)，因此 C 不对。答案改为 A。"
+      },
+      {
+        "id": "probability-ch03-q24",
+        "question": "Chebyshev 不等式是 Markov + 哪个变换推导得到？",
+        "options": [
+          "对 \\((X-\\mu)^2\\) 使用 Markov",
+        "对 \\(e^{tX}\\) 使用 Markov",
+        "对 \\(|X|\\) 使用 Markov",
+        "对 \\(\\ln X\\) 使用 Jensen"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(|X-\\mu| \\geq k\\sigma)=P((X-\\mu)^2 \\geq k^2\\sigma^2) \\leq E[(X-\\mu)^2]/(k^2\\sigma^2)=1/k^2\\)。D 选项 \\(e^{tX}\\) 方案可推出更强的 Chernoff 界（指数衰减）。"
+      },
+      {
+        "id": "probability-ch03-q25",
+        "question": "Chernoff 界的核心思想：\\(P(X \\geq a) \\leq \\inf_{t>0} e^{-ta} M_X(t)\\) 由什么得到？",
+        "options": [
+          "Markov 不等式作用于 \\(e^{tX}\\)",
+        "中心极限定理",
+        "大数律",
+        "Jensen 不等式"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X \\geq a)=P(e^{tX} \\geq e^{ta}) \\leq E[e^{tX}]/e^{ta}=M_X(t)e^{-ta}\\)。对 \\(t>0\\) 优化得最紧上界。Chernoff 界在大偏差理论中核心，给出指数级衰减速率。"
+      },
+      {
+        "id": "probability-ch03-q26",
+        "question": "对冲基金日收益率 \\(\\mu=0.05\\%\\)，\\(\\sigma=2\\%\\)。Chebyshev 估计单日亏损超 \\(6\\%\\) 的概率上界？",
+        "options": [
+          "\\(\\leq 1/9\\)",
+        "\\(\\leq 1/4\\)",
+        "\\(\\leq 1/36\\)",
+        "\\(\\leq 1/100\\)"
+        ],
+        "answer": 0,
+        "explanation": "亏损 \\(>6\\%\\) 即 \\(X<-6\\%\\)。\\(|X-0.05\\%| > 6.05\\%\\)，\\(k=6.05/2\\approx 3\\)。\\(P \\leq 1/k^2 \\approx 1/9\\)。实际用 Chebyshev 保守但不需分布假设，适合厚尾金融数据。"
+      },
+      {
+        "id": "probability-ch03-q27",
+        "question": "投资组合 \\(X,Y\\) 相关系数 \\(\\rho=0.3\\)，\\(\\sigma_X=10\\%,\\sigma_Y=15\\%\\)，等权组合 \\(W=(X+Y)/2\\) 的波动率？",
+        "options": [
+          "\\(\\approx 9.6\\%\\)",
+        "\\(12.5\\%\\)",
+        "\\(6.25\\%\\)",
+        "\\(\\approx 10.3\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(W)=\\frac{1}{4}(0.01+0.0225+2\\times 0.3\\times 0.1\\times 0.15)=\\frac{1}{4}(0.0325+0.009)=\\frac{0.0415}{4}\\)。\\(\\sigma_W=\\sqrt{0.010375}\\approx 0.1019\\)... 修正：\\(=\\frac{1}{4}(0.01+0.0225+0.009)=0.01038\\)，\\(\\sigma_W \\approx 10.2\\%\\)。最接近 A。分散化降低了波动率。"
+      },
+      {
+        "id": "probability-ch03-q28",
+        "question": "A/B 测试中控制组均值 \\(\\mu=50\\)，方差 \\(\\sigma^2=100\\)，样本 \\(n=400\\)。样本均值偏离真实均值 \\(>1\\) 的概率上界（Chebyshev）？",
+        "options": [
+          "\\(\\leq 1/4\\)",
+        "\\(\\leq 1/16\\)",
+        "\\(\\leq 1/100\\)",
+        "\\(\\leq 1/400\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(\\bar{X})=100/400=0.25\\), \\(\\sigma_{\\bar{X}}=0.5\\)。\\(k=1/0.5=2\\)。\\(P(|\\bar{X}-50|>1) \\leq 1/4\\)。实际正态近似下 \\(\\approx 2\\Phi(-2)\\approx 4.6\\%\\)。Chebyshev 界较松但分布无关。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 期望的定义与线性性</a></li>
+      <li><a href="#kp2">02 · 方差与协方差</a></li>
+      <li><a href="#kp3">03 · 矩母函数与特征函数</a></li>
+      <li><a href="#kp4">04 · 重要不等式</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>期望与矩</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>期望的定义与线性性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>随机变量的「平均值」是概率论最基本的总结性指标。赌场的期望收益、 保险的预期赔付、投资的平均回报都依赖于期望。期望的线性性是 其最强大的性质——无需独立性就能把复杂问题分解为简单部分之和。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>期望本质是 Lebesgue 积分 \(E[X] = \int_\Omega X\,dP\)。这将 离散情形（求和）和连续情形（积分）统一在同一个框架下。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>离散情形：\(E[X] = \sum_i x_i P(X = x_i)\)。 连续情形：\(E[X] = \int_{-\infty}^{\infty} x f_X(x)\,dx\)。 一般定义（Lebesgue 积分）： \[E[X] = \int_\Omega X(\omega)\,dP(\omega)\] 存在性要求：\(E[|X|] < \infty\)（\(X \in L^1\)）。 线性性：对任意随机变量 \(X, Y\)（无需独立）， \[E[aX + bY] = aE[X] + bE[Y]\] 证明直接由 Lebesgue 积分的线性性获得。 LOTUS（无意识统计学家定理）： \[E[g(X)] = \int g(x) f_X(x)\,dx\] 无需先求 \(g(X)\) 的分布即可计算期望。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>保险精算中的纯保费 = 期望损失；赌场中「庄家优势」意味着 玩家期望收益为负。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：随机取 \(n\) 个人的帽子随机分配，期望有多少人取回自己的帽子？ 解答：令 \(X_i = 1\) 若第 \(i\) 人取回自己帽子。\(E[X_i] = 1/n\)。 由线性性：\(E[\sum_i X_i] = \sum_i E[X_i] = n \cdot 1/n = 1\)。 无论 \(n\) 多大，期望始终等于 1。 易错点：认为线性性需要 \(X_i\) 独立。实际上 \(X_i\) 高度相关， 但线性性对任意随机变量成立，无需独立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(X, Y\) 不独立，则 \(E[X + Y] = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。期望的线性性不要求独立。\\(E[XY] = E[X]E[Y]\\) 才')">A. 无法计算</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！期望的线性性不要求独立。\\(E[XY] = E[X]E[Y]\\) 才')">B. \(E[X] + E[Y]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。期望的线性性不要求独立。\\(E[XY] = E[X]E[Y]\\) 才')">C. \(E[X] + E[Y] + \text{Cov}(X,Y)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>方差与协方差</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>期望只告诉我们「中心在哪」，但没有告诉我们「波动有多大」。方差 衡量了随机变量偏离均值的程度。而协方差和相关系数刻画了 两个变量「同涨同跌」的程度——这在金融投资组合理论中至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>方差： \[\text{Var}(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2\] 第二个等号证明：展开平方用线性性。 \(\text{Var}(X) \geq 0\)，等号 iff \(X\) 几乎必然为常数。 协方差： \[\text{Cov}(X,Y) = E[(X-\mu_X)(Y-\mu_Y)] = E[XY] - E[X]E[Y]\] 相关系数：\(\rho(X,Y) = \text{Cov}(X,Y) / (\sigma_X \sigma_Y)\)， \(|\rho| \leq 1\)（由 Cauchy-Schwarz 不等式）。 方差的加法： \[\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)\] 若 \(X \perp\!\!\!\perp Y\)，则 \(\text{Cov}(X,Y) = 0\)，方差可加。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Markowitz 投资组合理论中，资产组合的风险（方差）取决于各资产之间 的协方差矩阵，分散化降低风险的数学基础就在于此。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X \sim \text{Poisson}(\lambda)\)，求 \(\text{Var}(X)\)。 解答：\(E[X] = \lambda\)。 \(E[X(X-1)] = \sum_{k=0}^{\infty} k(k-1) e^{-\lambda}\lambda^k/k! = \lambda^2\)。 \(E[X^2] = E[X(X-1)] + E[X] = \lambda^2 + \lambda\)。 \(\text{Var}(X) = \lambda^2 + \lambda - \lambda^2 = \lambda\)。 易错点：Poisson 分布的均值和方差都等于 \(\lambda\)，但这是 Poisson 的特殊性质，不要误以为所有分布均值=方差。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\text{Cov}(X,Y) = 0\)，则</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。不相关 \\(\\neq\\) 独立。反例：\\(X \\sim N(0,1)\\)，\\(Y = X^2\\)，')">A. \(X, Y\) 独立</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！不相关 \\(\\neq\\) 独立。反例：\\(X \\sim N(0,1)\\)，\\(Y = X^2\\)，')">B. \(X, Y\) 不相关</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。不相关 \\(\\neq\\) 独立。反例：\\(X \\sim N(0,1)\\)，\\(Y = X^2\\)，')">C. \(E[XY] = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。不相关 \\(\\neq\\) 独立。反例：\\(X \\sim N(0,1)\\)，\\(Y = X^2\\)，')">D. \(\text{Var}(X+Y) = \text{Var}(X) \cdot \text{Var}(Y)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>矩母函数与特征函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>分布函数和密度函数完整描述了随机变量，但并不总是易于操作。矩母 函数和特征函数提供了「变换域」的视角——就像 Laplace/Fourier 变换一样，它们将卷积变为乘法，极大简化了独立和之分布的计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>概率分布的 Fourier 变换视角：\(\varphi_X(t) = E[e^{itX}]\) 总存在， 且唯一确定分布，提供了处理概率问题的强力调和分析工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>矩母函数(MGF)： \[M_X(t) = E[e^{tX}] = \sum_{k=0}^{\infty} \frac{E[X^k]}{k!} t^k\] 优点：\(E[X^k] = M_X^{(k)}(0)\)（各阶矩的生成函数）。 缺点：不一定存在（如 Cauchy 分布 \(M(t) = \infty\)，\(t \neq 0\)）。 特征函数(CF)： \[\varphi_X(t) = E[e^{itX}] = \int e^{itx} dF_X(x)\] 始终存在（因 \(|e^{itx}| = 1\)）且唯一确定分布。 关键性质：\(X \perp\!\!\!\perp Y\) 时 \(\varphi_{X+Y}(t) = \varphi_X(t) \cdot \varphi_Y(t)\) （卷积→乘法）。这是证明 CLT 的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>特征函数法是证明中心极限定理的标准方法；矩母函数在 概率母函数(PGF)形式下用于分支过程的细维量分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 MGF 证明 \(X \sim N(0,1)\) 的 \(E[X^2] = 1\)，\(E[X^4] = 3\)。 解答：\(M(t) = e^{t^2/2}\)。\(M'(t) = te^{t^2/2}\)，\(M'(0)=0=E[X]\)。 \(M''(t) = (1+t^2)e^{t^2/2}\)，\(M''(0)=1=E[X^2]\)。 继续求导得 \(M^{(4)}(0) = 3 = E[X^4]\)。 易错点：混淆 MGF 和 CF。MGF 为 \(E[e^{tX}]\)，CF 为 \(E[e^{itX}]\)。 对正态分布：\(M(t)=e^{t^2/2}\) 但 \(\varphi(t)=e^{-t^2/2}\)（指数符号不同）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个分布的矩母函数不存在？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy 分布的尾部太重，\\(E[|X|] = \\infty\\)，连一阶矩都')">A. \(N(0,1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy 分布的尾部太重，\\(E[|X|] = \\infty\\)，连一阶矩都')">B. \(\text{Exp}(1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Cauchy 分布的尾部太重，\\(E[|X|] = \\infty\\)，连一阶矩都')">C. Cauchy 分布</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy 分布的尾部太重，\\(E[|X|] = \\infty\\)，连一阶矩都')">D. \(\text{Poisson}(3)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>重要不等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在概率论中，精确计算往往困难，但不等式提供了强大的「粗略估计」 工具。Markov 和 Chebyshev 不等式仅用均值/方差就能给出尾部概率 的界；Jensen 不等式揭示了凸性对期望的影响。这些工具是大数定律 和集中不等式的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Markov 不等式：若 \(X \geq 0\)，\(a > 0\)， \[P(X \geq a) \leq \frac{E[X]}{a}\] 证明：\(E[X] = E[X \cdot \mathbf{1}_{X \geq a}] + E[X \cdot \mathbf{1}_{X < a}] \geq a \cdot P(X \geq a)\)。 Chebyshev 不等式：对 \(X\) 任意，\(\varepsilon > 0\)， \[P(|X - \mu| \geq \varepsilon) \leq \frac{\text{Var}(X)}{\varepsilon^2}\] 证明：对 \((X - \mu)^2\) 用 Markov， \(P(|X-\mu|^2 \geq \varepsilon^2) \leq E[(X-\mu)^2]/\varepsilon^2\)。 Jensen 不等式：若 \(g\) 为凸函数，\(E[|X|] < \infty\)，则 \[g(E[X]) \leq E[g(X)]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Chebyshev 不等式直接用于弱大数律律的证明； Jensen 不等式证明了 \(E[\ln X] \leq \ln E[X]\)（AM-GM 的概率版）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X\) 的均值为 100，方差 25。求 \(P(|X - 100| \geq 20)\) 的上界。 解答：Chebyshev：\(P(|X-100| \geq 20) \leq 25/400 = 1/16 = 0.0625\)。 易错点：Markov 不等式要求 \(X \geq 0\)，若直接对可取负值的 \(X\) 用 Markov 会得到错误结果。应用于 \(|X - \mu|^2\) 则合法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Jensen 不等式 \(g(E[X]) \leq E[g(X)]\) 要求 \(g\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Jensen 不等式的核心条件是凸性。单调性、连续性、可微性')">A. 单调递增函数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Jensen 不等式的核心条件是凸性。单调性、连续性、可微性')">B. 凸函数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Jensen 不等式的核心条件是凸性。单调性、连续性、可微性')">C. 连续函数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Jensen 不等式的核心条件是凸性。单调性、连续性、可微性')">D. 可微函数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

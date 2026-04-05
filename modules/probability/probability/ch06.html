@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 中心极限定理 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch06-q1",
+        "question": "经典 CLT（Lindeberg-Lévy）的条件和结论？",
+        "options": [
+          "iid，\\(\\sigma^2<\\infty\\)，\\(\\sqrt{n}(\\bar{X}_n-\\mu)/\\sigma \\xrightarrow{d} N(0,1)\\)",
+        "iid，\\(\\bar{X}_n \\xrightarrow{a.s.} N(0,1)\\)",
+        "仅需 \\(E[X]<\\infty\\)",
+        "\\(S_n \\to N(n\\mu,n\\sigma^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "CLT: \\(\\frac{S_n-n\\mu}{\\sigma\\sqrt{n}} \\xrightarrow{d} N(0,1)\\)。需 iid + 二阶矩有限。B 错（是分布收敛非 a.s.）。D 表述不严谨（\\(S_n\\) 本身不\"收敛\"到正态，而是标准化后收敛）。"
+      },
+      {
+        "id": "probability-ch06-q2",
+        "question": "\\(X_i\\) iid，\\(\\mu=50\\)，\\(\\sigma=10\\)，\\(n=100\\)。\\(P(\\bar{X}_{100}>52)\\) 的 CLT 近似？",
+        "options": [
+          "\\(P(Z>2) \\approx 0.023\\)",
+        "\\(P(Z>0.2) \\approx 0.42\\)",
+        "\\(P(Z>52) \\approx 0\\)",
+        "\\(0.5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Z=(\\bar{X}-50)/(10/\\sqrt{100})=(52-50)/1=2\\)。\\(P(Z>2) \\approx 0.0228\\)。标准化：减均值除标准误。选 B 忘了除以 \\(\\sqrt{n}\\)（标准误 = \\(\\sigma/\\sqrt{n}\\)）。"
+      },
+      {
+        "id": "probability-ch06-q3",
+        "question": "CLT 的特征函数证明：关键步骤 \\([\\varphi(t/\\sqrt{n})]^n \\to e^{-t^2/2}\\) 使用了什么展开？",
+        "options": [
+          "\\(\\varphi(t)=1+i\\mu t-\\sigma^2 t^2/2+o(t^2)\\) 的 Taylor 展开",
+        "Fourier 变换",
+        "Laplace 方法",
+        "鞍点近似"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(t/\\sqrt{n})=1-\\sigma^2 t^2/(2n)+o(1/n)\\)（标准化后 \\(\\mu=0\\)）。\\([1-t^2/(2n)+o(1/n)]^n \\to e^{-t^2/2}\\)。Lévy 连续定理保证分布收敛。这是 CLT 最优雅的证法。"
+      },
+      {
+        "id": "probability-ch06-q4",
+        "question": "Lévy 连续定理的作用？",
+        "options": [
+          "特征函数逐点收敛 \\(\\Leftrightarrow\\) 分布收敛（极限是特征函数时）",
+        "MGF 收敛 \\(\\Rightarrow\\) 分布收敛",
+        "\\(L^2\\) 收敛 \\(\\Rightarrow\\) 分布收敛",
+        "CDF 收敛 \\(\\Rightarrow\\) 密度收敛"
+        ],
+        "answer": 0,
+        "explanation": "Lévy: \\(\\varphi_n(t) \\to \\varphi(t)\\)（\\(\\forall t\\)，\\(\\varphi\\) 在 \\(0\\) 连续）\\(\\Rightarrow F_n \\xrightarrow{d} F\\)。MGF 也可（B），但特征函数始终存在，更通用。D 不成立（分布收敛不保证密度收敛）。"
+      },
+      {
+        "id": "probability-ch06-q5",
+        "question": "Berry-Esseen 定理给出 CLT 的误差上界包含什么？",
+        "options": [
+          "\\(\\sup_x|F_n(x)-\\Phi(x)| \\leq C \\cdot \\rho/(\\sigma^3\\sqrt{n})\\)（\\(\\rho=E[|X|^3]\\)）",
+        "\\(O(1/n)\\)",
+        "\\(O(e^{-n})\\)",
+        "无显式上界"
+        ],
+        "answer": 0,
+        "explanation": "\\(C \\leq 0.4748\\)（最佳常数）。误差为 \\(O(1/\\sqrt{n})\\)，由三阶矩 \\(\\rho=E[|X-\\mu|^3]\\) 决定。越对称（\\(\\rho\\) 小）近似越好。B 是 Edgeworth 展开下一项。"
+      },
+      {
+        "id": "probability-ch06-q6",
+        "question": "Lindeberg 条件比 Lyapunov 条件的关系？",
+        "options": [
+          "Lyapunov \\(\\Rightarrow\\) Lindeberg，但反之不然",
+        "等价",
+        "Lindeberg \\(\\Rightarrow\\) Lyapunov",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "Lyapunov（\\(\\sum E[|X_k|^{2+\\delta}]/s_n^{2+\\delta} \\to 0\\)）是更强的条件。Lindeberg 条件更一般但更难验证。iid 情形两者均自动满足。Feller 定理给出 Lindeberg 在某些条件下也是必要的。"
+      },
+      {
+        "id": "probability-ch06-q7",
+        "question": "CLT 的实际应用：\\(n=36\\) 次掷骰子，总点数 \\(S_{36}\\) 超过 \\(140\\) 的概率近似？（\\(\\mu=3.5, \\sigma^2=35/12\\)）",
+        "options": [
+          "\\(\\approx 0.11\\)",
+        "\\(\\approx 0.5\\)",
+        "\\(\\approx 0.025\\)",
+        "\\(\\approx 0.31\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[S]=126, \\text{Var}(S)=36 \\times 35/12=105, \\sigma_S \\approx 10.25\\)。\\(Z=(140-126)/10.25 \\approx 1.37\\)。\\(P(Z>1.37) \\approx 0.085\\)。最接近 A。连续性修正可改善近似。"
+      },
+      {
+        "id": "probability-ch06-q8",
+        "question": "\\(X_i\\) iid Bernoulli(\\(0.5\\))，\\(n=400\\)。\\(P(190 \\leq S_{400} \\leq 210)\\) 的 CLT 近似？",
+        "options": [
+          "\\(\\approx 0.683\\)",
+        "\\(\\approx 0.95\\)",
+        "\\(\\approx 0.5\\)",
+        "\\(\\approx 0.997\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu=200, \\sigma=\\sqrt{100}=10\\)。\\(P(-1 \\leq Z \\leq 1) \\approx 0.683\\)。\\(z=(190-200)/10=-1\\) 和 \\((210-200)/10=1\\)。经典\"\\(68\\)-\\(95\\)-\\(99.7\\)\"规则的直接应用。"
+      },
+      {
+        "id": "probability-ch06-q9",
+        "question": "De Moivre-Laplace 定理是 CLT 在什么分布上的特例？",
+        "options": [
+          "Binomial",
+        "Poisson",
+        "Geometric",
+        "Hypergeometric"
+        ],
+        "answer": 0,
+        "explanation": "\\(X \\sim \\text{Bin}(n,p)\\)：\\((X-np)/\\sqrt{np(1-p)} \\xrightarrow{d} N(0,1)\\)。这是历史上第一个 CLT 结果（de Moivre 1733, Laplace 1812），先于一般 CLT 百年。正态曲线最早就作为二项系数的近似。"
+      },
+      {
+        "id": "probability-ch06-q10",
+        "question": "独立（不同分布）\\(X_k\\) 满足 Lindeberg 条件。CLT 结论是？",
+        "options": [
+          "\\(\\frac{S_n-E[S_n]}{s_n} \\xrightarrow{d} N(0,1)\\)（\\(s_n^2=\\sum \\text{Var}(X_k)\\)）",
+        "\\(\\bar{X}_n \\xrightarrow{d} N(\\mu,\\sigma^2/n)\\)",
+        "仅对 iid 成立",
+        "\\(S_n/n \\to \\mu\\)"
+        ],
+        "answer": 0,
+        "explanation": "Lindeberg CLT 对独立不同分布：\\(s_n^2=\\sum_{k=1}^n \\sigma_k^2\\)，标准化 \\((S_n-\\sum\\mu_k)/s_n \\xrightarrow{d} N(0,1)\\)。经典 CLT 是 Lindeberg 的 iid 特例。"
+      },
+      {
+        "id": "probability-ch06-q11",
+        "question": "证 CLT 时，\\(\\ln\\varphi_n(t) \\to -t^2/2\\) 的关键是？",
+        "options": [
+          "\\(\\ln(1+x) \\approx x-x^2/2\\) 和 \\(n \\cdot O(1/n) = O(1)\\) 的平衡",
+        "\\(e^{ix}\\) 的有界性",
+        "分部积分",
+        "Fourier 反演"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ln[(1-t^2/(2n)+o(1/n))^n]=n\\ln(1-t^2/(2n)+o(1/n)) \\to n \\cdot (-t^2/(2n))=-t^2/2\\)。Taylor 展开 \\(\\ln(1+u) \\approx u\\) 对 \\(u \\to 0\\)。\\(n\\) 个小量的乘积转化为 \\(n\\) 个对数的和。"
+      },
+      {
+        "id": "probability-ch06-q12",
+        "question": "Berry-Esseen 上界 \\(C\\rho/(\\sigma^3\\sqrt{n})\\) 中 \\(C\\) 的最佳已知值约为？",
+        "options": [
+          "\\(0.4748\\)",
+        "\\(1\\)",
+        "\\(\\pi\\)",
+        "\\(0.1\\)"
+        ],
+        "answer": 0,
+        "explanation": "Shevtsova (2011) 证明 \\(C \\leq 0.4748\\)（iid 情形）。\\(C \\geq 0.4097\\)（Esseen 下界已知）。实际常数在 \\([0.41, 0.48]\\) 之间。非 iid 情形的常数更大。"
+      },
+      {
+        "id": "probability-ch06-q13",
+        "question": "Lindeberg 条件的直觉含义？",
+        "options": [
+          "没有单个 \\(X_k\\) 对总和 \\(S_n\\) 贡献\"过大\"",
+        "所有 \\(X_k\\) 同分布",
+        "\\(X_k\\) 有界",
+        "\\(E[X_k]=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Lindeberg：\\(\\frac{1}{s_n^2}\\sum E[X_k^2\\mathbf{1}_{|X_k|>\\varepsilon s_n}] \\to 0\\)。这排除了\"一个分量主导总方差\"的情形。UAN（uniformly asymptotically negligible）条件等价。有界变量自动满足。"
+      },
+      {
+        "id": "probability-ch06-q14",
+        "question": "民调 \\(n=1000\\)，\\(\\hat{p}=0.52\\)。\\(p>0.5\\) 的置信度？",
+        "options": [
+          "CLT 近似 \\(Z=(0.52-0.5)/\\sqrt{0.5\\times 0.5/1000}\\approx 1.26\\)，置信度 \\(\\approx 90\\%\\)",
+        "\\(99\\%\\)",
+        "\\(50\\%\\)",
+        "\\(\\approx 80\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{SE}=\\sqrt{0.25/1000}\\approx 0.0158\\)。\\(Z=0.02/0.0158\\approx 1.26\\)。\\(P(Z>1.26)\\approx 0.104\\)，即 \\(p>0.5\\) 的置信约 \\(90\\%\\)。选举预测中 \\(n=1000\\) 对 \\(2\\%\\) 领先仅给中等置信。"
+      },
+      {
+        "id": "probability-ch06-q15",
+        "question": "CLT 近似离散分布时，连续性修正是什么？",
+        "options": [
+          "\\(P(X \\leq k) \\approx \\Phi((k+0.5-\\mu)/\\sigma)\\)",
+        "\\(P(X \\leq k) \\approx \\Phi((k-\\mu)/\\sigma)\\)",
+        "加减 \\(1/(2n)\\)",
+        "对 \\(\\sigma\\) 修正"
+        ],
+        "answer": 0,
+        "explanation": "离散变量 \\(X=k\\) 对应连续区间 \\([k-0.5, k+0.5]\\)。\\(P(X \\leq k) \\approx \\Phi((k+0.5-\\mu)/\\sigma)\\)。对小 \\(n\\) 改善显著：\\(\\text{Bin}(10,0.5)\\) 时修正使误差减半。"
+      },
+      {
+        "id": "probability-ch06-q16",
+        "question": "CLT 的 Delta 方法：\\(\\sqrt{n}(\\bar{X}_n-\\mu) \\xrightarrow{d} N(0,\\sigma^2)\\)，\\(g\\) 可微。\\(\\sqrt{n}(g(\\bar{X}_n)-g(\\mu)) \\xrightarrow{d}\\)？",
+        "options": [
+          "\\(N(0, [g'(\\mu)]^2\\sigma^2)\\)",
+        "\\(N(g(\\mu), \\sigma^2)\\)",
+        "\\(g(N(0,\\sigma^2))\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "Delta 方法：\\(g(\\bar{X}_n) \\approx g(\\mu)+g'(\\mu)(\\bar{X}_n-\\mu)\\)，\\(\\sqrt{n}(g(\\bar{X}_n)-g(\\mu)) \\xrightarrow{d} N(0,[g'(\\mu)]^2\\sigma^2)\\)。当 \\(g'(\\mu)=0\\) 时需二阶 Delta 方法。"
+      },
+      {
+        "id": "probability-ch06-q17",
+        "question": "\\(X_i\\) iid Poisson(\\(1\\))，\\(n=100\\)。\\(P(S_{100}>110)\\) 的 CLT 近似？",
+        "options": [
+          "\\(P(Z>1) \\approx 0.159\\)",
+        "\\(P(Z>10) \\approx 0\\)",
+        "\\(P(Z>0.1) \\approx 0.46\\)",
+        "\\(0.5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu=100, \\sigma^2=100, \\sigma=10\\)。\\(Z=(110-100)/10=1\\)。\\(P(Z>1) \\approx 0.159\\)。CLT 对 Poisson 近似很好（Poisson 本身就趋正态）。选 B 错把 \\(\\sigma=1\\)。"
+      },
+      {
+        "id": "probability-ch06-q18",
+        "question": "CLT 为何要求 \\(\\sigma^2<\\infty\\)？不满足时什么替代？",
+        "options": [
+          "\\(\\sigma^2=\\infty\\) 时标准化后可收敛到稳定分布",
+        "永远不收敛",
+        "收敛到 Cauchy",
+        "只有 A 中 \\(\\alpha\\)-稳定分布（\\(\\alpha<2\\)）"
+        ],
+        "answer": 3,
+        "explanation": "广义 CLT (GCLT)：适当标准化的 iid 和只能收敛到 \\(\\alpha\\)-稳定分布。\\(\\alpha=2\\) 即正态（CLT）。\\(\\alpha=1\\) 含 Cauchy。\\(\\sigma^2=\\infty\\) 但尾 \\(P(|X|>t) \\sim t^{-\\alpha}\\)（\\(\\alpha<2\\)）时得到 \\(\\alpha\\)-稳定极限。"
+      },
+      {
+        "id": "probability-ch06-q19",
+        "question": "Lyapunov 条件：\\(\\exists\\delta>0\\) 使 \\(\\sum E[|X_k-\\mu_k|^{2+\\delta}]/s_n^{2+\\delta} \\to 0\\)。对 iid 情形自动满足因为？",
+        "options": [
+          "分子 \\(= n \\cdot E[|X|^{2+\\delta}]\\)，分母 \\(\\sim n^{1+\\delta/2}\\sigma^{2+\\delta}\\)，比值 \\(\\sim n^{-\\delta/2} \\to 0\\)",
+        "iid 意味着 \\(\\delta=0\\)",
+        "特征函数存在",
+        "mgf 存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum E[|X_k|^{2+\\delta}]=nE[|X|^{2+\\delta}]\\)，\\(s_n^{2+\\delta}=(n\\sigma^2)^{(2+\\delta)/2}=n^{1+\\delta/2}\\sigma^{2+\\delta}\\)。比值 \\(=E[|X|^{2+\\delta}]/(n^{\\delta/2}\\sigma^{2+\\delta}) \\to 0\\)。只要 \\((2+\\delta)\\)-阶矩存在即可。"
+      },
+      {
+        "id": "probability-ch06-q20",
+        "question": "Edgeworth 展开给出的 CLT 下一阶修正项是什么？",
+        "options": [
+          "\\(F_n(x)=\\Phi(x)-\\frac{\\gamma_1}{6\\sqrt{n}}(x^2-1)\\varphi(x)+O(1/n)\\)（\\(\\gamma_1\\) 偏度）",
+        "\\(\\Phi(x)+1/n\\)",
+        "\\(\\Phi(x)-x/n\\)",
+        "\\(\\ln\\Phi(x)/\\sqrt{n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gamma_1=E[(X-\\mu)^3]/\\sigma^3\\)（偏度）。Edgeworth: \\(P(\\frac{S_n-n\\mu}{\\sigma\\sqrt{n}} \\leq x) \\approx \\Phi(x)-\\frac{\\gamma_1}{6\\sqrt{n}}(x^2-1)\\varphi(x)\\)。偏度为零时（如对称分布）修正消失，CLT 更精确。"
+      },
+      {
+        "id": "probability-ch06-q21",
+        "question": "多元 CLT：\\(\\mathbf{X}_i\\) iid \\(\\mathbb{R}^d\\)，\\(\\text{Cov}=\\Sigma\\)。\\(\\sqrt{n}(\\bar{\\mathbf{X}}-\\boldsymbol{\\mu}) \\xrightarrow{d}\\)？",
+        "options": [
+          "\\(N_d(\\mathbf{0}, \\Sigma)\\)",
+        "\\(N_d(\\boldsymbol{\\mu}, \\Sigma/n)\\)",
+        "\\(\\chi^2(d)\\)",
+        "\\(N_1(0,\\text{tr}(\\Sigma))\\)"
+        ],
+        "answer": 0,
+        "explanation": "多元 CLT: \\(\\sqrt{n}(\\bar{\\mathbf{X}}-\\boldsymbol{\\mu}) \\xrightarrow{d} N_d(\\mathbf{0},\\Sigma)\\)。Cramér-Wold 装置：对任意 \\(\\mathbf{a}\\)，\\(\\mathbf{a}^T\\bar{\\mathbf{X}}\\) 满足一维 CLT。B 是 \\(\\bar{\\mathbf{X}}\\) 的有限样本分布（若正态母体）。"
+      },
+      {
+        "id": "probability-ch06-q22",
+        "question": "Delta 方法应用：\\(\\hat{p}_n=\\bar{X}_n\\)（Bernoulli 均值），\\(g(p)=\\ln(p/(1-p))\\)（logit）。\\(g(\\hat{p}_n)\\) 的渐近方差？",
+        "options": [
+          "\\(1/(np(1-p))\\)",
+        "\\(p(1-p)/n\\)",
+        "\\(1/n\\)",
+        "\\([\\ln p]^2/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(g'(p)=1/(p(1-p))\\)。Delta: 渐近方差 \\(=[g'(p)]^2 \\cdot p(1-p)/n=1/(p(1-p))/n\\)（不是 \\(1/(np(1-p))\\)... 修正）。\\(\\text{Var}_{\\text{asy}}=[g'(p)]^2 \\sigma^2/n\\)，\\(\\sigma^2=p(1-p)\\)，\\([g']^2=1/(p(1-p))^2\\)。结果 \\(=1/(np(1-p))\\)。logit 变换的方差稳定化效果。"
+      },
+      {
+        "id": "probability-ch06-q23",
+        "question": "CLT 不能在概率收敛意义下成立（即 \\(Z_n\\) 不 \\(\\xrightarrow{P}\\) 任何随机变量 \\(Z\\)），这是因为？",
+        "options": [
+          "极限 \\(N(0,1)\\) 非退化，不是常数",
+        "收敛速度太慢",
+        "正态分布无界",
+        "\\(Z_n\\) 不是 Cauchy 列"
+        ],
+        "answer": 0,
+        "explanation": "分布收敛到非退化极限时不能提升为概率收敛。\\(Z_n \\xrightarrow{P} Z\\) 要求 \\(P(|Z_n-Z|>\\varepsilon) \\to 0\\)，但 \\(Z_n\\) 和 \\(Z\\) 可以独立构造，不在同一概率空间上。Skorokhod 表示定理可在特殊空间上实现 a.s. 收敛。"
+      },
+      {
+        "id": "probability-ch06-q24",
+        "question": "\\(\\hat{p}_n\\) 的 \\(95\\%\\) Wald 置信区间为 \\(\\hat{p} \\pm 1.96\\sqrt{\\hat{p}(1-\\hat{p})/n}\\)。何时此区间表现差？",
+        "options": [
+          "\\(p\\) 接近 \\(0\\) 或 \\(1\\)，\\(n\\) 较小时",
+        "\\(p=0.5\\) 时",
+        "\\(n>1000\\) 时",
+        "永远不差"
+        ],
+        "answer": 0,
+        "explanation": "\\(p\\) 接近边界时分布高度偏态，CLT 近似差：覆盖率远低于名义 \\(95\\%\\)。Wilson 区间或 Clopper-Pearson 精确区间更稳健。\\(n=20, p=0.05\\) 时 Wald 区间甚至可含负值。"
+      },
+      {
+        "id": "probability-ch06-q25",
+        "question": "CLT 对 Bernoulli(\\(p\\)) 的近似在 \\(n\\) 多大时才\"够好\"（经验法则）？",
+        "options": [
+          "\\(np \\geq 5\\) 且 \\(n(1-p) \\geq 5\\)",
+        "\\(n \\geq 30\\)",
+        "\\(n > 1/p\\)",
+        "\\(np > 100\\)"
+        ],
+        "answer": 0,
+        "explanation": "经典规则：\\(np\\) 和 \\(n(1-p)\\) 均 \\(\\geq 5\\)。\\(p=0.01\\) 需 \\(n \\geq 500\\)。\\(p=0.5\\) 时 \\(n \\geq 10\\) 即可。Berry-Esseen 提供更精确指导：误差 \\(\\leq C|1-2p|/(2\\sqrt{np(1-p)})\\)。"
+      },
+      {
+        "id": "probability-ch06-q26",
+        "question": "质量控制：日产 \\(n=500\\) 零件，次品率 \\(p=0.02\\)。日次品数超 \\(15\\) 则停线。误停概率？",
+        "options": [
+          "\\(P(X>15) \\approx P(Z>1.58) \\approx 0.057\\)",
+        "\\(\\approx 0.5\\)",
+        "\\(\\approx 0.001\\)",
+        "\\(\\approx 0.25\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu=10,\\sigma=\\sqrt{9.8}\\approx 3.13\\)。\\(Z=(15.5-10)/3.13 \\approx 1.76\\)... 修正：\\((15-10)/3.13\\approx 1.60\\)。\\(P(Z>1.60)\\approx 0.055\\)。约 \\(5.5\\%\\) 误停率。CLT 驱动的 SPC (统计过程控制)。"
+      },
+      {
+        "id": "probability-ch06-q27",
+        "question": "保险公司 \\(n=10000\\) 保单，各独立索赔 \\(\\mu=300\\)，\\(\\sigma=500\\)。总索赔超 \\(\\\\)3.1M$ 的概率？",
+        "options": [
+          "\\(P(Z>2) \\approx 0.023\\)",
+        "\\(P(Z>10) \\approx 0\\)",
+        "\\(\\approx 0.5\\)",
+        "\\(\\approx 0.1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[S]=3M, \\sigma_S=500\\sqrt{10000}=50000\\)。\\(Z=(3100000-3000000)/50000=2\\)。\\(P(Z>2)\\approx 0.023\\)。保险公司据此设置资本金准备金。这是精算学中的集体风险模型。"
+      },
+      {
+        "id": "probability-ch06-q28",
+        "question": "A/B 实验，对照组 \\(n_1=5000\\), \\(\\hat{p}_1=0.10\\)；实验组 \\(n_2=5000\\), \\(\\hat{p}_2=0.12\\)。Z 检验统计量？",
+        "options": [
+          "\\(Z=(\\hat{p}_2-\\hat{p}_1)/\\sqrt{\\hat{p}(1-\\hat{p})(1/n_1+1/n_2)} \\approx 3.1\\)（\\(\\hat{p}=0.11\\)）",
+        "\\(Z=0.02/0.01 = 2\\)",
+        "\\(Z=100\\)",
+        "无法检验"
+        ],
+        "answer": 0,
+        "explanation": "池化 \\(\\hat{p}=0.11\\)。\\(\\text{SE}=\\sqrt{0.11\\times 0.89 \\times 2/5000}\\approx 0.00626\\)。\\(Z=0.02/0.00626\\approx 3.19\\)。\\(p\\)-值 \\(<0.001\\)，极显著。CLT 保证了 Z 检验在大样本下的有效性。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · CLT 的陈述与直觉</a></li>
+      <li><a href="#kp2">02 · CLT 的证明框架（特征函数法）</a></li>
+      <li><a href="#kp3">03 · Berry-Esseen 界与 Lindeberg 条件</a></li>
+      <li><a href="#kp4">04 · CLT 的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>中心极限定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>CLT 的陈述与直觉</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>为什么自然界和社会中众多现象近似正态分布？身高、考试分数、 测量误差……中心极限定理(CLT)给出了答案：大量独立随机 因素的叠加，无论各因素服从什么分布，总和渐近正态。 CLT 是概率论最深刻的定理之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>CLT 揭示了正态分布的普适性：它是独立随机变量和在 适当标准化后的「万有引力器」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>CLT 陈述：设 \(X_i\) i.i.d.，\(E[X_i] = \mu\)，\(\text{Var}(X_i) = \sigma^2 \in (0, \infty)\)。令 \(S_n = \sum_i X_i\)，则 \[\frac{S_n - n\mu}{\sigma\sqrt{n}} = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \xrightarrow{d} N(0, 1)\] 即对任意 \(x \in \mathbb{R}\)， \[P\!\left(\frac{S_n - n\mu}{\sigma\sqrt{n}} \leq x\right) \to \Phi(x) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{x} e^{-t^2/2}\,dt\] 直觉：标准化后的和消除了均值和尺度影响，只留下 「波动的形状」，而这恐好是正态分布。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>质量控制：当 \(n\) 足够大时，\(\bar{X}_n\) 近似正态分布，可直接用 正态分布表进行判断。这是 \(z\)-检验和置信区间的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：某产品重量 \(X_i\) i.i.d.，\(\mu = 500g\)，\(\sigma = 10g\)。 抽 100 件，\(\bar{X}_{100}\) 偏离 500g 超过 2g 的概率？ 解答：\(\bar{X}_{100} \approx N(500, 100/100) = N(500, 1)\)。 \(P(|\bar{X}-500| > 2) = P(|Z| > 2) \approx 0.0456\)。 易错点：忘记标准化时除以 \(\sigma/\sqrt{n}\)（而非 \(\sigma\)）。 \(\bar{X}_n\) 的标准差是 \(\sigma/\sqrt{n} = 1\)，不是 \(\sigma = 10\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CLT 要求 \(X_i\) 服从什么分布？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。CLT 适用于任意分布，只要 \\(0 < \\sigma^2 < \\infty\\)。')">A. 必须是正态分布</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。CLT 适用于任意分布，只要 \\(0 < \\sigma^2 < \\infty\\)。')">B. 必须是对称分布</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！CLT 适用于任意分布，只要 \\(0 < \\sigma^2 < \\infty\\)。')">C. 任意分布，只要方差有限</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。CLT 适用于任意分布，只要 \\(0 < \\sigma^2 < \\infty\\)。')">D. 任意分布，无需方差有限</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>CLT 的证明框架（特征函数法）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>CLT 的结果如此普适，它的证明是如何实现的？特征函数法将 概率问题转化为解析问题：利用特征函数的逐点收敛等价于 分布收敛（Lévy 连续性定理），将问题归结为 Taylor 展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特征函数是概率分布的 Fourier 变换，它将卷积（和的分布） 变成乘积，这是证明方法的核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>证明框架：设 \(Y_i = (X_i - \mu)/\sigma\) i.i.d.，\(E[Y_i]=0\)， \(E[Y_i^2]=1\)，\(\varphi_Y(t) = E[e^{itY}]\)。 标准化和：\(Z_n = (S_n - n\mu)/(\sigma\sqrt{n}) = \frac{1}{\sqrt{n}}\sum Y_i\)。 Step 1：\(\varphi_{Z_n}(t) = [\varphi_Y(t/\sqrt{n})]^n\)（独立性）。 Step 2：Taylor 展开。\(\varphi_Y(s) = 1 + is \cdot 0 - s^2/2 + o(s^2) = 1 - s^2/2 + o(s^2)\)。 令 \(s = t/\sqrt{n}\)： \[\varphi_{Z_n}(t) = \left[1 - \frac{t^2}{2n} + o(1/n)\right]^n \to e^{-t^2/2}\] 而 \(e^{-t^2/2}\) 恰好是 \(N(0,1)\) 的特征函数。 Step 3：由 Lévy 连续性定理：\(\varphi_{Z_n} \to \varphi_Z\) 逐点 \(\Rightarrow\) \(Z_n \xrightarrow{d} Z\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(X_i \sim \text{Bernoulli}(1/2)\) 的 CLT。 解答：\(\varphi_Y(t) = E[e^{it(2X-1)}] = (e^{it} + e^{-it})/2 = \cos t\)。 \(\varphi_{Z_n}(t) = [\cos(t/\sqrt{n})]^n\)。用 \(\ln\cos s \approx -s^2/2\)： \(n \ln\cos(t/\sqrt{n}) \approx -t^2/2\)，故 \(\varphi_{Z_n}(t) \to e^{-t^2/2}\) ✓ 易错点：在 Taylor 展开中遗漏了 \(o(s^2)\) 余项，导致误以为 精确成立而非渐近成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CLT 证明中用到的关键工具是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Lévy 定理将特征函数的逐点收敛与分布收敛等价起来，')">A. Markov 不等式</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Lévy 定理将特征函数的逐点收敛与分布收敛等价起来，')">B. Borel-Cantelli 引理</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Lévy 定理将特征函数的逐点收敛与分布收敛等价起来，')">C. Lévy 连续性定理</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Lévy 定理将特征函数的逐点收敛与分布收敛等价起来，')">D. Kolmogorov 0-1 律</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Berry-Esseen 界与 Lindeberg 条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>CLT 告诉我们收敛到正态，但收敛有多快？\(n\) 取多大才够？ Berry-Esseen 给出精确的收敛速度。另外，若 \(X_i\) 不同分布 （但独立），CLT 还成立吗？Lindeberg 条件给出了答案。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Berry-Esseen 定理：设 \(X_i\) i.i.d.，\(E[|X_i|^3] = \rho < \infty\)，则 \[\sup_x \left|P\!\left(\frac{S_n-n\mu}{\sigma\sqrt{n}} \leq x\right) - \Phi(x)\right| \leq \frac{C \rho}{\sigma^3 \sqrt{n}}\] 其中 \(C \leq 0.4748\)。收敛速度为 \(O(1/\sqrt{n})\)。 Lindeberg CLT（非同分布版）：设 \(X_i\) 独立，\(E[X_i]=0\)， \(\text{Var}(X_i) = \sigma_i^2\)，\(s_n^2 = \sum \sigma_i^2\)。 若对每个 \(\varepsilon > 0\)，Lindeberg 条件成立： \[\frac{1}{s_n^2} \sum_{i=1}^{n} E[X_i^2 \cdot \mathbf{1}_{|X_i| > \varepsilon s_n}] \to 0\] 则 \(S_n / s_n \xrightarrow{d} N(0,1)\)。 直觉：Lindeberg 条件要求「没有单个 \(X_i\) 占据主导地位」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Berry-Esseen 帮助确定置信区间的有效样本量； Lindeberg CLT 用于非同质总体的统计推断。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_i \sim \text{Bernoulli}(1/2)\) i.i.d.，\(n = 100\)。 估计 \(P(40 \leq S_{100} \leq 60)\)。 解答：\(\mu = 50\)，\(\sigma = \sqrt{100 \cdot 1/4} = 5\)。 \(P(40 \leq S \leq 60) = P(-2 \leq Z \leq 2) \approx 0.9544\)。 Berry-Esseen：误差 \(\leq C/(4\sqrt{100}) \approx 0.012\)。 易错点：用 CLT 近似离散分布时忘记连续性修正（\(\pm 0.5\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Berry-Esseen 定理给出的收敛速度是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。收敛速度为 \\(O(1/\\sqrt{n})\\)，且此阶不可改进（存在特定分布恰好达到此下界），这就是 Berry-Esseen 定理的精确阶。')">A. \(O(1/n)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！收敛速度为 \\(O(1/\\sqrt{n})\\)，且此阶不可改进（存在特定分布恰好达到此下界），这就是 Berry-Esseen 定理的精确阶。')">B. \(O(1/\sqrt{n})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。收敛速度为 \\(O(1/\\sqrt{n})\\)，且此阶不可改进（存在特定分布恰好达到此下界），这就是 Berry-Esseen 定理的精确阶。')">C. \(O(\ln n / n)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。收敛速度为 \\(O(1/\\sqrt{n})\\)，且此阶不可改进（存在特定分布恰好达到此下界），这就是 Berry-Esseen 定理的精确阶。')">D. \(O(1/n^2)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>CLT 的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>CLT 不仅是理论定理，它直接支撑了统计学中最常用的工具：置信区间 和假设检验。当总体分布未知但样本量足够大时，CLT 保证了 正态近似的有效性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>置信区间构造：对均值 \(\mu\) 的 \(1-\alpha\) 置信区间： 由 CLT，\(\frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \approx N(0,1)\)，故 \[P\!\left(\bar{X}_n - z_{\alpha/2}\frac{\sigma}{\sqrt{n}} \leq \mu \leq \bar{X}_n + z_{\alpha/2}\frac{\sigma}{\sqrt{n}}\right) \approx 1-\alpha\] 当 \(\sigma\) 未知时，用样本标准差 \(S_n\) 代替，得近似区间。 \(n \geq 30\) 时正态近似通常合理（经验法则）。 大样本比例检验：\(\hat{p} = \bar{X}_n\)， \[Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1-p_0)/n}}\] 在 \(H_0: p = p_0\) 下 \(Z \approx N(0,1)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>民调机构报告的「\(\pm 3\%\) 误差」就是 CLT 置信区间的半宽； A/B 测试中的转化率差异检验基于 CLT。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：抽样 \(n = 400\)，样本比例 \(\hat{p} = 0.55\)。给出 \(p\) 的 95% 置信区间。 解答：\(\hat{p} \pm z_{0.025}\sqrt{\hat{p}(1-\hat{p})/n} = 0.55 \pm 1.96 \sqrt{0.55 \times 0.45/400} = 0.55 \pm 0.0488\)，即 \([0.501, 0.599]\)。 易错点：置信区间是​「\(\mu\) 以概率 95% 被覆盖」，不是 「\(\mu\) 有 95% 的概率在区间内」（后者是贝叶斯可信区间）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">95% 置信区间的正确解读是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。频率学派下 \\(\\mu\\) 是固定常数，不是随机变量，不能说')">A. \(\mu\) 有 95% 的概率在区间内</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！频率学派下 \\(\\mu\\) 是固定常数，不是随机变量，不能说')">B. 重复抽样时，95% 的区间会包含 \(\mu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。频率学派下 \\(\\mu\\) 是固定常数，不是随机变量，不能说')">C. 样本有 95% 在区间内</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="ch07.html" class="nav-next">Ch.7 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

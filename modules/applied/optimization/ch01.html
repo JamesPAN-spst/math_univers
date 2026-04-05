@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 凸集与凸函数 — 优化理论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "optimization-ch01-q1",
+        "question": "判断集合 \\(S = \\{(x,y) \\in \\mathbb{R}^2 \\mid x + y \\leq 1,\\; x \\geq 0,\\; y \\geq 0\\}\\) 是否为凸集，并给出顶点。",
+        "options": [
+          "凸集，顶点为 \\((0,0),(1,0),(0,1)\\)",
+        "非凸集",
+        "凸集，顶点为 \\((0,0),(1,1)\\)",
+        "凸集，顶点为 \\((1,0),(0,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S\\) 是三个半平面 \\(\\{x+y \\leq 1\\}, \\{x \\geq 0\\}, \\{y \\geq 0\\}\\) 的交集。半平面是凸集，凸集的交仍是凸集，因此 \\(S\\) 是凸集。\\(S\\) 是一个三角形，顶点为 \\((0,0),(1,0),(0,1)\\)。选项 D 遗漏了原点顶点。"
+      },
+      {
+        "id": "optimization-ch01-q2",
+        "question": "设 \\(x_1, x_2, x_3 \\in \\mathbb{R}^n\\)，向量 \\(v = 0.3 x_1 + 0.5 x_2 + 0.2 x_3\\) 是否为 \\(\\{x_1, x_2, x_3\\}\\) 的凸组合？",
+        "options": [
+          "是，因为系数之和为 1 且均非负",
+        "否，因为系数不相等",
+        "是，因为系数之和为 1",
+        "否，因为需要恰好两个点"
+        ],
+        "answer": 0,
+        "explanation": "凸组合要求系数 \\(\\alpha_i \\geq 0\\) 且 \\(\\sum \\alpha_i = 1\\)。此处 \\(0.3 + 0.5 + 0.2 = 1\\) 且均非负，因此 \\(v\\) 是凸组合。选项 C 忽略了非负性条件——若系数中有负数则不是凸组合。凸组合不要求系数相等或只用两个点。"
+      },
+      {
+        "id": "optimization-ch01-q3",
+        "question": "判断集合 \\(C = \\{x \\in \\mathbb{R}^2 \\mid \\|x\\|_\\infty \\leq 1\\} = \\{(x_1,x_2) \\mid |x_1| \\leq 1, |x_2| \\leq 1\\}\\) 是否为凸集。",
+        "options": [
+          "非凸集，因为边界不是圆形",
+        "凸集，因为它是四个半平面的交",
+        "非凸集，因为包含四个角点",
+        "凸集，因为它是圆盘"
+        ],
+        "answer": 1,
+        "explanation": "\\(C = \\{x_1 \\leq 1\\} \\cap \\{x_1 \\geq -1\\} \\cap \\{x_2 \\leq 1\\} \\cap \\{x_2 \\geq -1\\}\\)，是四个半平面（凸集）的交集，因此是凸集。\\(C\\) 是正方形 \\([-1,1]^2\\)。形状不需要是圆形也可以是凸集。角点的存在不影响凸性。"
+      },
+      {
+        "id": "optimization-ch01-q4",
+        "question": "函数 \\(f(x) = |x|\\) 在 \\(\\mathbb{R}\\) 上是否为凸函数？",
+        "options": [
+          "不是，因为在 \\(x=0\\) 不可微",
+        "是凸函数，但不是严格凸函数",
+        "是严格凸函数",
+        "既非凸也非凹"
+        ],
+        "answer": 1,
+        "explanation": "对任意 \\(x,y\\) 和 \\(\\theta \\in [0,1]\\)，三角不等式给出 \\(|\\theta x + (1-\\theta)y| \\leq \\theta|x| + (1-\\theta)|y|\\)，故 \\(|x|\\) 凸。但取 \\(x=1, y=2, \\theta=1/2\\)：\\(|1.5| = 1.5 = 0.5 \\cdot 1 + 0.5 \\cdot 2\\)，等号成立（因为同号段是线性的），所以不是严格凸。可微性不是凸函数的必要条件。"
+      },
+      {
+        "id": "optimization-ch01-q5",
+        "question": "设 \\(f(x) = x^2 + 2x + 1\\)，利用二阶条件判断 \\(f\\) 在 \\(\\mathbb{R}\\) 上是否为凸函数。",
+        "options": [
+          "凸，因为 \\(f''(x) = 2 > 0\\)",
+        "非凸，因为 \\(f\\) 有负值",
+        "凸，因为 \\(f(x) = (x+1)^2 \\geq 0\\)",
+        "非凸，因为 \\(f'(x)\\) 可为负"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(x) = 2x + 2\\), \\(f''(x) = 2 > 0\\) 对所有 \\(x\\) 成立，因此 \\(f\\) 严格凸。选项 C 给出的是非负性（不等价于凸性）。选项 D 的推理错误——导数为负只说明函数递减，不影响凸性。"
+      },
+      {
+        "id": "optimization-ch01-q6",
+        "question": "设 \\(f(x) = 5x^2\\)。求 \\(f\\) 的强凸参数 \\(\\mu\\) 和 Lipschitz 梯度常数 \\(L\\)。",
+        "options": [
+          "\\(\\mu = 5, L = 5, \\kappa = 1\\)",
+        "\\(\\mu = 10, L = 10, \\kappa = 1\\)",
+        "\\(\\mu = 5, L = 10, \\kappa = 2\\)",
+        "\\(\\mu = 0, L = 10, \\kappa = \\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f'(x) = 10x\\), \\(f''(x) = 10\\)。对一元函数，\\(\\nabla^2 f(x) = f''(x) = 10\\)。强凸参数 \\(\\mu = \\inf_x f''(x) = 10\\)，Lipschitz 常数 \\(L = \\sup_x f''(x) = 10\\)，条件数 \\(\\kappa = L/\\mu = 1\\)。直觉上 \\(f(x) = 5x^2\\) 的等高线是对称的\"圆形\"（一维中退化为对称区间），所以 \\(\\kappa = 1\\)。"
+      },
+      {
+        "id": "optimization-ch01-q7",
+        "question": "Jensen 不等式指出，若 \\(f\\) 为凸函数，\\(X\\) 为随机变量，则下列哪个成立？",
+        "options": [
+          "\\(f(\\mathbb{E}[X]) \\geq \\mathbb{E}[f(X)]\\)",
+        "\\(f(\\mathbb{E}[X]) \\leq \\mathbb{E}[f(X)]\\)",
+        "\\(f(\\mathbb{E}[X]) = \\mathbb{E}[f(X)]\\)",
+        "\\(\\mathbb{E}[f(X)] \\leq 0\\)"
+        ],
+        "answer": 1,
+        "explanation": "Jensen 不等式：\\(f\\) 凸时 \\(f(\\mathbb{E}[X]) \\leq \\mathbb{E}[f(X)]\\)。直觉：凸函数在平均值处的值 \\(\\leq\\) 函数值的平均。选项 A 是凹函数的 Jensen 不等式（方向相反）。等号成立 iff \\(X\\) 几乎必然为常数或 \\(f\\) 在 \\(X\\) 的支撑上是仿射的。"
+      },
+      {
+        "id": "optimization-ch01-q8",
+        "question": "判断集合 \\(S = \\{(x,y) \\in \\mathbb{R}^2 \\mid xy \\geq 1,\\; x > 0\\}\\) 是否为凸集。",
+        "options": [
+          "凸集",
+        "非凸集，反例 \\((1,1)\\) 和 \\((4, 0.25)\\) 的中点",
+        "凸集，因为是连通的",
+        "非凸集，因为边界 \\(xy=1\\) 不是直线"
+        ],
+        "answer": 0,
+        "explanation": "取 \\((x_1,y_1), (x_2,y_2) \\in S\\)，以及 \\(\\theta \\in [0,1]\\)。设 \\((\\bar{x},\\bar{y}) = \\theta(x_1,y_1) + (1-\\theta)(x_2,y_2)\\)。\\(\\bar{x} > 0\\) 显然。由 AM-GM: \\(\\bar{x}\\bar{y} = [\\theta x_1+(1-\\theta)x_2][\\theta y_1+(1-\\theta)y_2] \\geq [\\theta\\sqrt{x_1y_1}+(1-\\theta)\\sqrt{x_2y_2}]^2 \\geq [\\theta \\cdot 1 + (1-\\theta) \\cdot 1]^2 = 1\\)。更严格地，利用 \\(f(x,y)=-xy\\) 在 \\(x>0\\) 上是拟凸的来论证。选项 D 的推理不正确——凸集的边界不必是直线。"
+      },
+      {
+        "id": "optimization-ch01-q9",
+        "question": "求点集 \\(\\{(0,0), (2,0), (0,2)\\}\\) 的凸包，并判断 \\((1,0.5)\\) 是否在凸包内。",
+        "options": [
+          "凸包是三角形区域，\\((1,0.5)\\) 在凸包内",
+        "凸包是三角形区域，\\((1,0.5)\\) 在凸包外",
+        "凸包是直线段",
+        "凸包是整个 \\(\\mathbb{R}^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "三点不共线，凸包是以三点为顶点的三角形 \\(\\{(x,y) \\mid x \\geq 0, y \\geq 0, x+y \\leq 2\\}\\)。检验 \\((1,0.5)\\)：\\(1 \\geq 0\\) ✓, \\(0.5 \\geq 0\\) ✓, \\(1+0.5 = 1.5 \\leq 2\\) ✓。或者写成凸组合：\\((1,0.5) = 0.25(0,0) + 0.5(2,0) + 0.25(0,2)\\)，系数非负且和为 1。"
+      },
+      {
+        "id": "optimization-ch01-q10",
+        "question": "设 \\(f(x_1,x_2) = x_1^2 + 3x_2^2 + 2x_1 x_2\\)。利用 Hessian 判定 \\(f\\) 的凸性。",
+        "options": [
+          "\\(f\\) 凸但不严格凸",
+        "\\(f\\) 严格凸",
+        "\\(f\\) 非凸",
+        "\\(f\\) 凹"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\nabla^2 f = \\begin{pmatrix}2 & 2 \\\\ 2 & 6\\end{pmatrix}\\)。特征值：\\(\\lambda = \\frac{8 \\pm \\sqrt{16+16}}{2}/... \\) 用行列式判定法：\\(\\Delta_1 = 2 > 0\\)，\\(\\Delta_2 = 2 \\times 6 - 2 \\times 2 = 8 > 0\\)。所有顺序主子式为正，故 \\(\\nabla^2 f \\succ 0\\)，\\(f\\) 严格凸。"
+      },
+      {
+        "id": "optimization-ch01-q11",
+        "question": "设 \\(f(x) = e^{ax}\\)（\\(a \\neq 0\\)）。利用一阶条件证明 \\(f\\) 是凸函数并验证 \\(f(0) + f(2) \\geq 2f(1)\\)。",
+        "options": [
+          "\\(f''(x) = a^2 e^{ax} > 0\\)，故凸；\\(1 + e^{2a} \\geq 2e^a\\) 成立",
+        "\\(f\\) 非凸因为 \\(f''\\) 可为负",
+        "\\(f\\) 凸但不等式不一定成立",
+        "\\(f\\) 凹"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(x) = ae^{ax}\\), \\(f''(x) = a^2 e^{ax} > 0\\) 对所有 \\(x\\)（因 \\(a \\neq 0\\)），故 \\(f\\) 严格凸。\\(f(0)+f(2) \\geq 2f(1)\\) 等价于 \\(1 + e^{2a} \\geq 2e^a\\)，即 \\((e^a - 1)^2 \\geq 0\\)，恒成立。这恰好是凸函数的中点不等式 \\(f(\\frac{x+y}{2}) \\leq \\frac{f(x)+f(y)}{2}\\) 在 \\(x=0, y=2\\) 的应用。"
+      },
+      {
+        "id": "optimization-ch01-q12",
+        "question": "设 \\(A = \\begin{pmatrix}4 & 0 \\\\ 0 & 1\\end{pmatrix}\\)，\\(f(\\mathbf{x}) = \\frac{1}{2}\\mathbf{x}^T A \\mathbf{x}\\)。求强凸参数 \\(\\mu\\)、Lipschitz 常数 \\(L\\) 和条件数 \\(\\kappa\\)，并估计梯度下降达到 \\(\\epsilon\\) 精度所需迭代次数的量级。",
+        "options": [
+          "\\(\\mu = 1, L = 4, \\kappa = 4\\)，迭代 \\(O(4\\ln(1/\\epsilon))\\)",
+        "\\(\\mu = 4, L = 1, \\kappa = 0.25\\)",
+        "\\(\\mu = 1, L = 4, \\kappa = 4\\)，迭代 \\(O(\\ln(1/\\epsilon))\\)",
+        "\\(\\mu = 2, L = 2, \\kappa = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla^2 f = A\\)，特征值 \\(\\lambda_1 = 1, \\lambda_2 = 4\\)。\\(\\mu = \\lambda_{\\min} = 1\\), \\(L = \\lambda_{\\max} = 4\\), \\(\\kappa = 4\\)。GD 在强凸 \\(L\\)-光滑条件下的线性收敛率：收敛因子 \\((\\kappa-1)/(\\kappa+1) = 3/5\\)，迭代次数 \\(O(\\kappa \\ln(1/\\epsilon)) = O(4\\ln(1/\\epsilon))\\)。"
+      },
+      {
+        "id": "optimization-ch01-q13",
+        "question": "设 \\(f(x) = \\frac{1}{2}x^2 + \\frac{\\lambda}{2}x^2 = \\frac{1+\\lambda}{2}x^2\\)（\\(\\lambda > 0\\)）。将原始函数 \\(g(x) = \\frac{1}{2}x^2\\) 加 \\(L_2\\) 正则化后的强凸参数和条件数如何变化？",
+        "options": [
+          "强凸参数从 1 变为 \\(1+\\lambda\\)，条件数从 1 变为 1",
+        "强凸参数从 1 变为 \\(\\lambda\\)，条件数增大",
+        "强凸参数不变，条件数不变",
+        "强凸参数从 1 变为 \\(1+\\lambda\\)，条件数从 1 变为 \\((1+\\lambda)\\)"
+        ],
+        "answer": 0,
+        "explanation": "原始 \\(g(x) = \\frac{1}{2}x^2\\) 有 \\(\\mu = L = 1\\), \\(\\kappa = 1\\)。加正则化后 \\(f(x) = \\frac{1+\\lambda}{2}x^2\\)，\\(\\mu = L = 1+\\lambda\\), \\(\\kappa = 1\\)。此例中条件数不变（因为原函数本身 \\(\\kappa = 1\\)）。实际中 \\(L_2\\) 正则化对 \\(\\kappa > 1\\) 的函数有效：如 \\(g(\\mathbf{x}) = \\frac{1}{2}\\mathbf{x}^T A \\mathbf{x}\\) 加正则化后最小特征值增大至 \\(\\lambda_{\\min} + \\lambda\\)，\\(\\kappa\\) 减小。"
+      },
+      {
+        "id": "optimization-ch01-q14",
+        "question": "利用 Jensen 不等式证明算术-几何平均不等式：对 \\(a, b > 0\\)，\\(\\frac{a+b}{2} \\geq \\sqrt{ab}\\)。提示：\\(f(x) = -\\ln x\\) 是凸函数。",
+        "options": [
+          "\\(-\\ln(\\frac{a+b}{2}) \\leq \\frac{-\\ln a - \\ln b}{2}\\)，取指数即得",
+        "直接由 \\((a-b)^2 \\geq 0\\) 得到，无需 Jensen",
+        "Jensen 不等式不适用于此证明",
+        "需要用 Cauchy-Schwarz 不等式"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = -\\ln x\\) 凸（\\(f''(x) = 1/x^2 > 0\\)）。取等概率分布 \\(P(X=a) = P(X=b) = 1/2\\)。Jensen: \\(-\\ln(\\frac{a+b}{2}) \\leq \\frac{-\\ln a - \\ln b}{2} = -\\frac{\\ln(ab)}{2} = -\\ln\\sqrt{ab}\\)。两边乘 \\(-1\\) 并取指数：\\(\\frac{a+b}{2} \\geq \\sqrt{ab}\\)。选项 B 也给出了正确的代数证明，但题目要求用 Jensen 不等式。"
+      },
+      {
+        "id": "optimization-ch01-q15",
+        "question": "以下哪个函数的逐点上确界 \\(f(x) = \\max(f_1(x), f_2(x))\\) 仍为凸函数？",
+        "options": [
+          "\\(f_1(x) = x^2, f_2(x) = 2x - 1\\)（两个凸函数的上确界）",
+        "\\(f_1(x) = -x^2, f_2(x) = x\\)（一凹一凸）",
+        "\\(f_1(x) = \\sin x, f_2(x) = \\cos x\\)（两个非凸函数）",
+        "A 和 B 都保凸"
+        ],
+        "answer": 0,
+        "explanation": "凸函数族的逐点上确界保凸：若 \\(f_1, f_2\\) 凸，则 \\(\\max(f_1, f_2)\\) 凸。A 中两个都凸，故上确界凸。B 中 \\(f_1 = -x^2\\) 凹，保凸定理不适用。C 中 \\(\\sin, \\cos\\) 非凸。上方图 \\(\\mathrm{epi}(\\max(f_1,f_2)) = \\mathrm{epi}(f_1) \\cap \\mathrm{epi}(f_2)\\)，凸集的交保凸。"
+      },
+      {
+        "id": "optimization-ch01-q16",
+        "question": "设 \\(f(x,y) = x^2 - y^2\\)。判断 \\(f\\) 在 \\(\\mathbb{R}^2\\) 上是凸函数、凹函数还是都不是。",
+        "options": [
+          "凸函数",
+        "凹函数",
+        "既非凸也非凹",
+        "在 \\(x > 0\\) 时凸"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\nabla^2 f = \\begin{pmatrix}2 & 0 \\\\ 0 & -2\\end{pmatrix}\\)，特征值 \\(2, -2\\)。Hessian 不定（有正有负特征值），因此 \\(f\\) 既非凸也非凹。沿 \\(x\\) 方向 \\(f\\) 表现为凸（\\(f_{xx}=2>0\\)），沿 \\(y\\) 方向凹（\\(f_{yy}=-2<0\\)）。"
+      },
+      {
+        "id": "optimization-ch01-q17",
+        "question": "设 \\(C_1 = \\{x \\in \\mathbb{R}^n \\mid \\|x\\|_2 \\leq 1\\}\\), \\(C_2 = \\{x \\mid a^T x \\leq b\\}\\)。\\(C_1 \\cap C_2\\) 是否为凸集？\\(C_1 \\cup C_2\\) 呢？",
+        "options": [
+          "交集凸，并集一般不凸",
+        "交集不凸，并集凸",
+        "交集和并集都凸",
+        "交集和并集都不凸"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_1\\)（球）和 \\(C_2\\)（半空间）都是凸集。凸集的交保凸，所以 \\(C_1 \\cap C_2\\) 凸。但凸集的并一般不凸：例如 \\(C_1 = B_1(0)\\)（单位球）和 \\(C_2 = \\{x \\mid x_1 \\leq 2\\}\\)，取 \\((\\tfrac{1}{2},0)\\) 和 \\((2,0)\\) 在并中，但中点 \\((1.25,0)\\) 不在 \\(C_1\\) 中，也不一定在 \\(C_2\\) 中（视 \\(b\\) 而定）。"
+      },
+      {
+        "id": "optimization-ch01-q18",
+        "question": "设 \\(f: \\mathbb{R}^n \\to \\mathbb{R}\\) 可微凸，\\(\\nabla f(x^*) = 0\\)。证明 \\(x^*\\) 是全局极小点（选择正确的论证）。",
+        "options": [
+          "由一阶条件 \\(f(y) \\geq f(x^*) + \\nabla f(x^*)^T(y - x^*) = f(x^*)\\)，对所有 \\(y\\) 成立",
+        "由二阶条件 \\(\\nabla^2 f(x^*) \\succ 0\\) 得到",
+        "由梯度下降收敛性得到",
+        "由 Jensen 不等式得到"
+        ],
+        "answer": 0,
+        "explanation": "凸函数的一阶条件 \\(f(y) \\geq f(x^*) + \\nabla f(x^*)^T(y-x^*)\\) 对所有 \\(y\\) 成立。当 \\(\\nabla f(x^*) = 0\\) 时，\\(f(y) \\geq f(x^*)\\) 对所有 \\(y\\)，即 \\(x^*\\) 全局极小。这正是凸优化的核心优势——驻点即全局极小。选项 B 不正确：\\(\\nabla^2 f \\succ 0\\) 是严格局部极小的充分条件，但 \\(\\nabla f = 0\\) 加凸性就够了，无需二阶条件。"
+      },
+      {
+        "id": "optimization-ch01-q19",
+        "question": "设 \\(f(\\mathbf{x}) = \\frac{1}{2}\\mathbf{x}^T A \\mathbf{x}\\)，\\(A\\) 的特征值为 \\(\\{1, 2, 50\\}\\)。从 \\(\\mathbf{x}_0\\) 出发做 GD（\\(\\alpha = 1/L\\)），达到 \\(f(\\mathbf{x}_k) - f^* \\leq 10^{-6}(f(\\mathbf{x}_0) - f^*)\\) 约需多少步？",
+        "options": [
+          "约 \\(50 \\times 14 = 700\\) 步",
+        "约 \\(3 \\times 14 = 42\\) 步",
+        "约 \\(2500 \\times 14\\) 步",
+        "约 14 步"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu = 1, L = 50, \\kappa = 50\\)。GD 在强凸情况下：\\(f(\\mathbf{x}_k) - f^* \\leq (\\frac{\\kappa-1}{\\kappa+1})^{2k}(f(\\mathbf{x}_0)-f^*)\\)。要求 \\((\\frac{49}{51})^{2k} \\leq 10^{-6}\\)，即 \\(2k \\ln(49/51) \\leq -6\\ln 10\\)，\\(k \\geq \\frac{6\\ln 10}{2\\ln(51/49)} \\approx \\frac{13.8}{0.078} \\approx 177\\)。更粗略的估计 \\(k \\approx \\kappa \\ln(1/\\epsilon) = 50 \\times 14 = 700\\)。两种估计都在选项 A 的量级。"
+      },
+      {
+        "id": "optimization-ch01-q20",
+        "question": "函数 \\(f(x) = x^4\\) 在 \\(x=0\\) 处的二阶导 \\(f''(0) = 0\\)。\\(f\\) 在 \\(x=0\\) 是否为严格局部极小？\\(f\\) 是否严格凸？",
+        "options": [
+          "是严格局部极小且严格凸，尽管 \\(f''(0)=0\\)",
+        "不是严格局部极小，因为 \\(f''(0)=0\\)",
+        "是严格局部极小但不是严格凸",
+        "不是严格凸，因为不满足 \\(f''(x) > 0\\) 处处成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(x)=4x^3\\), \\(f''(x)=12x^2\\)。\\(f''(x) \\geq 0\\) 处处成立（半正定），故 \\(f\\) 凸。\\(f''(0)=0\\) 但 \\(f(x)=x^4 > 0 = f(0)\\) 对所有 \\(x \\neq 0\\)，所以 \\(x=0\\) 是严格全局极小。实际上 \\(f\\) 也是严格凸：\\(f(\\theta x + (1-\\theta)y) < \\theta f(x) + (1-\\theta)f(y)\\) 对不同的 \\(x,y\\) 成立。这是经典易错点：\\(f'' \\succ 0\\) 是严格凸的充分但非必要条件。"
+      },
+      {
+        "id": "optimization-ch01-q21",
+        "question": "设 \\(f_\\alpha(x) = \\alpha^T x + \\beta_\\alpha\\)（仿射函数族），定义 \\(g(x) = \\sup_{\\alpha \\in A} f_\\alpha(x)\\)。证明 \\(g\\) 凸的关键论据是什么？",
+        "options": [
+          "\\(\\mathrm{epi}(g) = \\bigcap_\\alpha \\mathrm{epi}(f_\\alpha)\\)，凸集的交保凸",
+        "\\(g\\) 是仿射的所以自动凸",
+        "上确界运算总保凸无需论证",
+        "由 Jensen 不等式直接推出"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{epi}(g) = \\{(x,t) : g(x) \\leq t\\} = \\{(x,t) : f_\\alpha(x) \\leq t, \\forall \\alpha\\} = \\bigcap_\\alpha \\mathrm{epi}(f_\\alpha)\\)。每个 \\(f_\\alpha\\) 仿射故凸，\\(\\mathrm{epi}(f_\\alpha)\\) 是半空间（凸集）。凸集的任意交仍凸，故 \\(\\mathrm{epi}(g)\\) 凸，即 \\(g\\) 凸。注意 \\(g\\) 本身一般不是仿射的——它是分段线性函数。"
+      },
+      {
+        "id": "optimization-ch01-q22",
+        "question": "利用复合规则判断 \\(h(x) = e^{x^2}\\) 在 \\(\\mathbb{R}\\) 上是否凸。",
+        "options": [
+          "凸，因为 \\(e^t\\) 凸递增且 \\(x^2\\) 凸，复合保凸",
+        "非凸，因为 \\(x^2\\) 非单调",
+        "凸，因为 \\(h''(x) > 0\\)",
+        "A 和 C 都正确"
+        ],
+        "answer": 3,
+        "explanation": "复合规则：\\(e^t\\) 凸且递增，\\(x^2\\) 凸，故 \\(e^{x^2}\\) 凸（A 正确）。直接验证：\\(h'(x) = 2xe^{x^2}\\), \\(h''(x) = (2+4x^2)e^{x^2} > 0\\)（C 正确）。两种方法得到相同结论。注意 B 的推理无效：复合规则要求外层函数递增（而非内层单调），这里 \\(e^t\\) 确实递增。"
+      },
+      {
+        "id": "optimization-ch01-q23",
+        "question": "半正定锥 \\(S_+^2 = \\{A \\in \\mathbb{R}^{2 \\times 2} \\mid A = A^T, A \\succeq 0\\}\\) 是否为凸锥？判断 \\(\\begin{pmatrix}1 & 0.5 \\\\ 0.5 & 1\\end{pmatrix}\\) 是否在此锥中。",
+        "options": [
+          "是凸锥；矩阵在锥中（特征值 \\(0.5, 1.5\\)，均非负）",
+        "是凸锥；矩阵不在锥中",
+        "不是凸锥",
+        "是凸集但不是锥"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_+^2\\) 是凸锥：\\(A, B \\succeq 0\\), \\(\\alpha, \\beta \\geq 0\\) 时 \\(\\alpha A + \\beta B \\succeq 0\\)。给定矩阵的特征值 \\(\\lambda = 1 \\pm 0.5 = \\{0.5, 1.5\\}\\)，均非负，故半正定。或用 Sylvester 准则：\\(\\Delta_1 = 1 > 0\\), \\(\\det = 1 - 0.25 = 0.75 > 0\\)，正定（因此也半正定）。"
+      },
+      {
+        "id": "optimization-ch01-q24",
+        "question": "函数 \\(f(x) = \\|x\\|_1 = \\sum_i |x_i|\\) 在 \\(\\mathbb{R}^n\\) 上是否凸？它在 \\(x=0\\) 处可微吗？",
+        "options": [
+          "凸且在 \\(x=0\\) 可微",
+        "凸但在 \\(x=0\\) 不可微",
+        "非凸",
+        "凸且处处可微"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\|x\\|_1 = \\sum |x_i|\\)。每个 \\(|x_i|\\) 凸，非负和保凸，故 \\(\\|x\\|_1\\) 凸。在 \\(x=0\\) 处，\\(|x_i|\\) 的导数不存在（左导 \\(-1\\)，右导 \\(+1\\)），故 \\(\\|x\\|_1\\) 不可微。但存在次梯度 \\(g \\in [-1,1]^n\\)（\\(\\partial\\|x\\|_1|_{x=0} = [-1,1]^n\\)）。这是 LASSO 优化中需要次梯度方法的根本原因。"
+      },
+      {
+        "id": "optimization-ch01-q25",
+        "question": "设 \\(f(x) = \\frac{1}{n}\\sum_{i=1}^n (a_i^T x - b_i)^2\\)，\\(A \\in \\mathbb{R}^{n \\times d}\\) 行向量为 \\(a_i^T\\)。用 \\(A\\) 的奇异值表示 \\(\\mu, L, \\kappa\\)。",
+        "options": [
+          "\\(L = 2\\sigma_{\\max}^2(A)/n\\), \\(\\mu = 2\\sigma_{\\min}^2(A)/n\\), \\(\\kappa = (\\sigma_{\\max}/\\sigma_{\\min})^2\\)",
+        "\\(L = \\sigma_{\\max}(A)\\), \\(\\mu = \\sigma_{\\min}(A)\\)",
+        "\\(\\kappa = n\\)",
+        "\\(L = \\|A\\|_F^2/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = \\frac{1}{n}\\|Ax - b\\|^2\\)。\\(\\nabla^2 f = \\frac{2}{n}A^T A\\)。其特征值为 \\(\\frac{2}{n}\\sigma_i^2(A)\\)。故 \\(L = \\frac{2}{n}\\sigma_{\\max}^2\\), \\(\\mu = \\frac{2}{n}\\sigma_{\\min}^2\\)（当 \\(A\\) 列满秩时 \\(\\sigma_{\\min} > 0\\)）。\\(\\kappa = \\sigma_{\\max}^2/\\sigma_{\\min}^2 = \\mathrm{cond}(A)^2\\)。矩阵条件数 \\(\\mathrm{cond}(A) = \\sigma_{\\max}/\\sigma_{\\min}\\) 直接决定优化难度。"
+      },
+      {
+        "id": "optimization-ch01-q26",
+        "question": "在投资组合优化中，投资者在 \\(n\\) 种资产上配置权重 \\(w \\in \\mathbb{R}^n\\)，约束 \\(w_i \\geq 0\\) 和 \\(\\sum w_i = 1\\)。该可行域 \\(\\Delta_n\\)（概率单纯形）是凸集吗？若目标函数为凸的 Markowitz 风险 \\(w^T \\Sigma w\\)（\\(\\Sigma \\succeq 0\\)），解释为什么此优化问题一定有全局最优解。",
+        "options": [
+          "\\(\\Delta_n\\) 凸且紧，凸函数在紧凸集上的极值存在且全局最优",
+        "\\(\\Delta_n\\) 非凸，需要分支定界",
+        "\\(\\Delta_n\\) 凸但 \\(w^T\\Sigma w\\) 非凸",
+        "全局最优解不一定存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Delta_n = \\{w \\mid w \\geq 0, \\mathbf{1}^T w = 1\\}\\) 是有限个半空间和超平面的交，凸且有界闭（紧）。\\(w^T \\Sigma w\\) 凸（\\(\\Sigma \\succeq 0\\)）。由 Weierstrass 极值定理，连续函数在紧集上取到最大最小值。凸函数在凸集上的局部极小即全局极小。因此 Markowitz 模型有全局最优且可用凸优化软件高效求解。"
+      },
+      {
+        "id": "optimization-ch01-q27",
+        "question": "在机器学习中，逻辑回归的负对数似然 \\(\\ell(w) = \\sum_i \\log(1 + e^{-y_i w^T x_i})\\) 作为关于 \\(w\\) 的函数，利用凸函数的保凸运算解释为什么 \\(\\ell\\) 是凸函数。",
+        "options": [
+          "\\(\\log(1+e^t)\\) 凸，\\(-y_i w^T x_i\\) 关于 \\(w\\) 仿射，仿射复合保凸，非负和保凸",
+        "\\(\\ell\\) 非凸因为有指数项",
+        "需要计算 Hessian 逐点验证",
+        "只有当 \\(y_i \\in \\{-1,1\\}\\) 时才凸"
+        ],
+        "answer": 0,
+        "explanation": "(1) \\(g(t) = \\log(1 + e^t)\\)（softplus）凸（\\(g'' = \\sigma(t)(1-\\sigma(t)) > 0\\)）。(2) \\(h_i(w) = -y_i w^T x_i\\) 是 \\(w\\) 的仿射函数。(3) 凸函数与仿射函数的复合保凸：\\(g(h_i(w))\\) 凸。(4) 凸函数的非负和（系数都是 1）保凸。因此 \\(\\ell(w)\\) 凸，梯度下降可找到全局最优。选项 D 不准确——\\(y_i\\) 的值不影响凸性论证。"
+      },
+      {
+        "id": "optimization-ch01-q28",
+        "question": "在信号处理中，需要求解 \\(\\min_x \\|Ax - b\\|_2^2 + \\lambda\\|x\\|_1\\)（LASSO）。目标函数的第一项和第二项分别是什么类型的凸函数？为什么总和仍然凸？",
+        "options": [
+          "第一项强凸（若 \\(A\\) 列满秩），第二项凸不可微；凸函数之和凸",
+        "第一项凸可微，第二项凸不可微；但总和不一定凸",
+        "两项都严格凸",
+        "第一项非凸"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Ax-b\\|^2\\) 关于 \\(x\\)：\\(\\nabla^2 = 2A^TA \\succeq 0\\)（凸），当 \\(A\\) 列满秩时 \\(A^TA \\succ 0\\)（强凸）。\\(\\lambda\\|x\\|_1\\) 凸但在坐标超平面上不可微（\\(|x_i|\\) 在零点不可微）。凸函数的非负加权和保凸，因此 LASSO 目标凸。不可微性意味着不能直接用梯度下降，需要近端梯度(Proximal Gradient)或 ISTA/FISTA 算法。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="optimization"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/optimization.html" class="module-name">优化理论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 凸集的定义与凸组合</a></li>
+      <li><a href="#kp2">02 · 凸函数的定义与判定条件</a></li>
+      <li><a href="#kp3">03 · 强凸函数与条件数</a></li>
+      <li><a href="#kp4">04 · Jensen 不等式与保凸运算</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>凸集与凸函数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>凸集的定义与凸组合</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在工程优化和经济学中，我们需要在约束集合上寻找最优方案。凸集 是最"友好"的约束——在凸集上优化凸函数，局部最优即全局最优， 这是优化理论的基石。凸集还出现在投资组合（概率单纯形）、控制 论（可达集）和机器学习（可行参数域）等核心领域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>凸性的核心是"内插封闭性"：集合 \(C\) 是凸集当且仅当任意两点 的连线段完全在 \(C\) 内。这一几何直觉推广到凸组合 \(\sum \alpha_i x_i\)（\(\alpha_i \geq 0, \sum \alpha_i = 1\)）和凸包 \(\mathrm{conv}(S)\)。凸锥则结合了凸性与锥性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>凸集定义：\(C \subseteq \mathbb{R}^n\) 是凸集 iff \[\forall x, y \in C,\; \forall \theta \in [0,1]:\; \theta x + (1-\theta) y \in C\] 凸组合：点 \(x_1, \ldots, x_k\) 的凸组合为 \(\sum_{i=1}^k \alpha_i x_i\)， 其中 \(\alpha_i \geq 0\), \(\sum \alpha_i = 1\)。凸包 \(\mathrm{conv}(S) = \{\sum \alpha_i x_i \mid x_i \in S,\, \alpha_i \geq 0,\, \sum \alpha_i = 1\}\) 是包含 \(S\) 的最小凸集。 凸锥：\(K\) 是凸锥 iff \(\forall x, y \in K,\, \forall \alpha, \beta \geq 0\): \(\alpha x + \beta y \in K\)。典型例子：半正定锥 \(S_+^n\)。 保凸运算：凸集的交仍是凸集；仿射映射保凸（\(f(C)\) 与 \(f^{-1}(C)\) 都保凸性）；投影保凸。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在投资组合优化中，可行配置向量构成单纯形 \(\Delta_n = \{w \in \mathbb{R}^n \mid w_i \geq 0,\, \sum w_i = 1\}\)， 凸性保证了分散投资策略总是可行的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：判断集合 \(S = \{(x,y) \in \mathbb{R}^2 \mid x^2 + y^2 \leq 1,\, x \geq 0\}\) 是否为凸集。 解答：\(S\) 是圆盘 \(\{x^2+y^2 \leq 1\}\)（凸集）与半平面 \(\{x \geq 0\}\)（凸集） 的交集。凸集的交仍凸，所以 \(S\) 是凸集。 易错点：不要混淆凸集和连通集。\(\{x \in \mathbb{R} \mid x^2 \geq 1\} = (-\infty,-1] \cup [1,+\infty)\) 不是凸集但每个连通分量是凸集。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个集合不是凸集？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。单位圆（边界）不是凸集——\\((1,0)\\) 和 \\((-1,0)\\) 的中点 \\((0,0)\\)')">A. \(\{x \in \mathbb{R}^n \mid Ax = b\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。单位圆（边界）不是凸集——\\((1,0)\\) 和 \\((-1,0)\\) 的中点 \\((0,0)\\)')">B. \(\{x \in \mathbb{R}^n \mid \|x\| \leq 1\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！单位圆（边界）不是凸集——\\((1,0)\\) 和 \\((-1,0)\\) 的中点 \\((0,0)\\)')">C. \(\{x \in \mathbb{R}^2 \mid x_1^2 + x_2^2 = 1\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。单位圆（边界）不是凸集——\\((1,0)\\) 和 \\((-1,0)\\) 的中点 \\((0,0)\\)')">D. \(\{x \in \mathbb{R}^n \mid x \geq 0\}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>凸函数的定义与判定条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>凸函数是优化理论的核心对象。其最重要性质是"任何局部极小值都是 全局极小值"，使得凸最小化在理论和计算上都可控。掌握凸函数的多 种等价判定条件（零阶/一阶/二阶）是将实际问题建模为凸优化的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>凸函数可通过上方图 \(\mathrm{epi}(f) = \{(x,t) \mid f(x) \leq t\}\) 理解 ——\(f\) 凸当且仅当 \(\mathrm{epi}(f)\) 是凸集，将函数性质转化为集合性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>零阶定义：\(f: C \to \mathbb{R}\) 是凸函数 iff \(\forall x,y \in C\), \(\forall \theta \in [0,1]\): \[f(\theta x + (1-\theta)y) \leq \theta f(x) + (1-\theta)f(y)\] 一阶条件（\(f\) 可微）：\(f\) 凸 iff \[f(y) \geq f(x) + \nabla f(x)^T(y - x)\] 几何含义：函数图像总在其切平面之上。 二阶条件（\(f\) 二次可微）：\(f\) 凸 iff \(\nabla^2 f(x) \succeq 0\) （Hessian 半正定）。严格凸的充分条件：\(\nabla^2 f(x) \succ 0\) （但非必要，如 \(f(x)=x^4\) 在 \(x=0\) 处 \(f''=0\) 仍严格凸）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在统计学中，指数族分布的负对数似然是凸函数，因此 MLE 有唯一解 可用凸优化高效求解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(f(x) = \log(1 + e^x)\)（softplus）是凸函数。 解答：\(f'(x) = \frac{e^x}{1+e^x} = \sigma(x)\)， \(f''(x) = \sigma(x)(1-\sigma(x))\)。因 \(0 < \sigma(x) < 1\)， 故 \(f''(x) > 0\)，函数严格凸。 易错点：\(\nabla^2 f \succ 0\) 是严格凸的充分非必要条件。 \(f(x)=x^4\) 在 \(x=0\) 处 \(f''(0)=0\)，但 \(f\) 仍严格凸。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(f\) 可微凸，\(\nabla f(x^*) = 0\)，则 \(x^*\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。一阶条件 \\(f(y) \\geq f(x^*) + 0\\) 对所有 \\(y\\) 成立，')">A. 局部极小但不一定全局极小</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！一阶条件 \\(f(y) \\geq f(x^*) + 0\\) 对所有 \\(y\\) 成立，')">B. 全局极小</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。一阶条件 \\(f(y) \\geq f(x^*) + 0\\) 对所有 \\(y\\) 成立，')">C. 鞍点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。一阶条件 \\(f(y) \\geq f(x^*) + 0\\) 对所有 \\(y\\) 成立，')">D. 无法确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>强凸函数与条件数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>仅知函数凸还不够——我们需量化"有多凸"。强凸函数在最小点附近 提供二次下界，直接决定梯度下降的收敛速率。条件数 \(\kappa = L/\mu\) 是衡量优化问题"难度"的核心指标，贯穿算法设计与分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>强凸定义：\(f\) 是 \(\mu\)-强凸（\(\mu > 0\)）iff \[f(y) \geq f(x) + \nabla f(x)^T(y-x) + \frac{\mu}{2}\|y-x\|^2\] 等价：\(\nabla^2 f(x) \succeq \mu I\) 处处成立。 Lipschitz 梯度：\(\|\nabla f(x) - \nabla f(y)\| \leq L\|x-y\|\)， 等价 \(\nabla^2 f(x) \preceq LI\)。 条件数 \(\kappa = L/\mu\)：\(\kappa = 1\) 时等高线为圆，梯度下降一步到位； \(\kappa \gg 1\) 时等高线极扁，锯齿路径缓慢收敛。 梯度下降收敛： \[f(x_k) - f^* \leq \left(\frac{\kappa-1}{\kappa+1}\right)^{2k}(f(x_0)-f^*)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(L_2\) 正则化添加 \(\frac{\lambda}{2}\|w\|^2\) 使损失函数变为 \(\lambda\)-强凸， 条件数从可能无穷降至 \(L/\lambda\)，大幅加速训练。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x) = \frac{1}{2}x^TAx\)，\(A\) 特征值 \(\lambda_1=1, \lambda_2=100\)， 求 \(\mu, L, \kappa\)。 解答：\(\mu = \lambda_{\min}(A) = 1\), \(L = \lambda_{\max}(A) = 100\), \(\kappa = 100\)。收敛因子 \((99/101)^2 \approx 0.96\)。 易错点：\(\mu\) 是所有点上 Hessian 最小特征值的下确界，不是某点值。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">添加 \(\frac{\lambda}{2}\|x\|^2\) 对凸函数的影响？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\nabla^2(f + \\frac{\\lambda}{2}\\|x\\|^2) = \\nabla^2 f + \\lambda I \\succeq \\lambda I\\)。')">A. 不改变凸性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\nabla^2(f + \\frac{\\lambda}{2}\\|x\\|^2) = \\nabla^2 f + \\lambda I \\succeq \\lambda I\\)。')">B. 使函数变为 \(\lambda\)-强凸</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\nabla^2(f + \\frac{\\lambda}{2}\\|x\\|^2) = \\nabla^2 f + \\lambda I \\succeq \\lambda I\\)。')">C. 使函数非凸</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\nabla^2(f + \\frac{\\lambda}{2}\\|x\\|^2) = \\nabla^2 f + \\lambda I \\succeq \\lambda I\\)。')">D. 使条件数增大</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Jensen 不等式与保凸运算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际建模中，复杂函数的凸性不可能逐一从定义验证。保凸运算规则 提供了"组合积木"方法，从简单凸函数构造复杂凸函数。Jensen 不 等式则是凸性在概率论和信息论中的重要桥梁，是证明 KL 散度非负、 EM 算法收敛等关键结果的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Jensen 不等式：若 \(f\) 凸，\(X\) 是随机变量，则 \[f(\mathbb{E}[X]) \leq \mathbb{E}[f(X)]\] 直观：函数在平均值处的值 \(\leq\) 函数值的平均。 保凸运算： (1) 非负加权和：\(\alpha_1 f_1 + \alpha_2 f_2\)（\(\alpha_i \geq 0\)）保凸 (2) 仿射复合：\(f(Ax+b)\) 保凸 (3) 逐点上确界：\(f(x) = \sup_\alpha f_\alpha(x)\) 保凸 (4) 复合规则：\(h\) 凸递增且 \(g\) 凸 \(\Rightarrow\) \(h \circ g\) 凸 (5) 透视函数：\(f\) 凸 \(\Rightarrow\) \(g(x,t)=tf(x/t)\) 凸（\(t>0\)） 拟凸函数：\(f\) 拟凸 iff 下水平集 \(\{x \mid f(x) \leq \alpha\}\) 对所有 \(\alpha\) 是凸集。凸 \(\Rightarrow\) 拟凸，反之不成立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Jensen 不等式证明 KL 散度非负： \(D_{\mathrm{KL}}(P\|Q) = \mathbb{E}_P[\log(P/Q)] \geq -\log(\mathbb{E}_P[Q/P]) = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：判断 \(f(x) = \max(x_1, \ldots, x_n)\) 是否凸。 解答：\(f(x) = \sup_i e_i^T x\) 是仿射函数的逐点上确界，故 \(f\) 凸。 易错点：逐点下确界不保凸。\(\inf_\alpha f_\alpha(x)\) 即使每个 \(f_\alpha\) 凸，结果也不一定凸。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个运算不保凸？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。凸函数的逐点下确界不一定凸。上确界保凸因为上方图是各')">A. 两个凸函数的非负加权和</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。凸函数的逐点下确界不一定凸。上确界保凸因为上方图是各')">B. 凸函数族的逐点上确界</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！凸函数的逐点下确界不一定凸。上确界保凸因为上方图是各')">C. 凸函数族的逐点下确界</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。凸函数的逐点下确界不一定凸。上确界保凸因为上方图是各')">D. 凸函数与仿射映射的复合</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/applied/optimization.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 Laplace 与 Poisson 方程 — 偏微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "pde-ch04-q1",
+        "question": "调和函数 \\(u\\)（\\(\\Delta u=0\\)）的均值性质：\\(u\\) 在球心的值等于？",
+        "options": [
+          "\\(u\\) 在球面上的平均值",
+        "\\(u\\) 在球体内的最大值",
+        "\\(u\\) 在球面上的最大值",
+        "零"
+        ],
+        "answer": 0,
+        "explanation": "\\(u(\\mathbf{x}_0)=\\frac{1}{|\\partial B_r|}\\int_{\\partial B_r} u\\,dS\\)（球面均值性质），也等于球体积平均。这是调和函数最深刻的性质——值由周围环境\"投票\"决定。反之，满足均值性质的连续函数一定调和。"
+      },
+      {
+        "id": "pde-ch04-q2",
+        "question": "Laplace 方程极大值原理：\\(\\Delta u=0\\) 在有界区域 \\(\\Omega\\) 中，\\(u\\) 的最大值在？",
+        "options": [
+          "\\(\\partial\\Omega\\)（边界）上取得",
+        "\\(\\Omega\\) 内部",
+        "中心点",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "弱极大值原理：\\(\\max_{\\bar\\Omega}u=\\max_{\\partial\\Omega}u\\)。强极大值原理：如果内部取最大值则 \\(u\\) 为常数。物理直觉：稳态温度不可能在内部有极值（热量从高温流向低温，会拉平极值）。"
+      },
+      {
+        "id": "pde-ch04-q3",
+        "question": "\\(n\\) 维 Laplace 方程的基本解（\\(n\\geq 3\\)）是？",
+        "options": [
+          "\\(\\Phi(x)=\\frac{1}{n(n-2)\\omega_n|x|^{n-2}}\\)",
+        "\\(\\Phi=\\frac{1}{|x|}\\)",
+        "\\(\\Phi=\\ln|x|\\)",
+        "\\(\\Phi=|x|^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(-\\Delta\\Phi=\\delta\\) 的解。\\(n=3\\)：\\(\\Phi=\\frac{1}{4\\pi|x|}\\)（Coulomb 势）。\\(n=2\\)：\\(\\Phi=-\\frac{1}{2\\pi}\\ln|x|\\)（对数势）。\\(\\omega_n\\) 为 \\(n\\) 维单位球面面积。基本解是构建 Green 函数的核心。"
+      },
+      {
+        "id": "pde-ch04-q4",
+        "question": "Poisson 方程 \\(-\\Delta u=f\\) 在 \\(\\Omega\\) 上，Dirichlet 条件 \\(u|_{\\partial\\Omega}=g\\)。解的唯一性如何证明？",
+        "options": [
+          "极大值原理或能量方法",
+        "无法证明",
+        "用 Fourier 展开",
+        "仅在特殊区域可证"
+        ],
+        "answer": 0,
+        "explanation": "差 \\(w=u_1-u_2\\) 满足 \\(\\Delta w=0\\)，\\(w|_{\\partial\\Omega}=0\\)。极大值原理：\\(\\max w=0\\)，\\(\\min w=0\\) → \\(w\\equiv 0\\)。能量方法：\\(\\int|\\nabla w|^2=-\\int w\\Delta w=0\\) → \\(\\nabla w=0\\) → \\(w=\\text{const}=0\\)。"
+      },
+      {
+        "id": "pde-ch04-q5",
+        "question": "\\(u=x^2-y^2\\) 是调和函数吗？",
+        "options": [
+          "是：\\(\\Delta u=2+(-2)=0\\)",
+        "不是",
+        "仅在原点调和",
+        "需要更多信息"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_{xx}=2\\)，\\(u_{yy}=-2\\)，\\(\\Delta u=0\\) ✓。\\(x^2-y^2=\\text{Re}(z^2)\\)（\\(z=x+iy\\)），全纯函数的实部和虚部都是调和的。"
+      },
+      {
+        "id": "pde-ch04-q6",
+        "question": "极大值原理的直接推论：Dirichlet 问题的解满足什么稳定性估计？",
+        "options": [
+          "\\(\\max_\\Omega|u|\\leq\\max_{\\partial\\Omega}|g|\\)（边界数据控制内部）",
+        "\\(\\max_\\Omega|u|=1\\)",
+        "\\(u\\) 无界",
+        "\\(\\max_\\Omega|u|\\leq\\|f\\|_2\\)"
+        ],
+        "answer": 0,
+        "explanation": "对 \\(\\Delta u=0\\)，极大值和极小值都在边界取得 → \\(\\min g\\leq u\\leq\\max g\\)。连续依赖于数据：\\(g\\) 变化 \\(\\varepsilon\\) → \\(u\\) 变化 \\(\\leq\\varepsilon\\)（Hadamard 适定性第三条）。"
+      },
+      {
+        "id": "pde-ch04-q7",
+        "question": "三维 Poisson 方程 \\(-\\Delta u=f\\) 在全空间的解公式？",
+        "options": [
+          "\\(u=\\Phi*f=\\frac{1}{4\\pi}\\int\\frac{f(y)}{|x-y|}\\,dy\\)",
+        "\\(u=f\\)",
+        "\\(u=\\int f\\,dy\\)",
+        "\\(u=e^{-|x|}*f\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u=-\\Delta^{-1}f=\\Phi*f\\)，\\(\\Phi(x)=\\frac{1}{4\\pi|x|}\\)。这就是静电位：电荷密度 \\(f\\) 产生库仑势 \\(u\\)。卷积结构使得 FFT 可高效求解。"
+      },
+      {
+        "id": "pde-ch04-q8",
+        "question": "二维调和函数的均值性质。\\(u\\) 在圆盘 \\(B_r(0)\\) 上调和，\\(u(0)=5\\)。则 \\(\\frac{1}{2\\pi r}\\oint_{|x|=r}u\\,ds\\) 等于？",
+        "options": [
+          "\\(5\\)",
+        "\\(5r\\)",
+        "\\(10\\)",
+        "\\(5/(2\\pi r)\\)"
+        ],
+        "answer": 0,
+        "explanation": "均值性质：\\(u(\\mathbf{0})=\\frac{1}{2\\pi r}\\oint u\\,ds\\)。\\(u(0)=5\\) → 圆周平均 \\(=5\\)。不管 \\(r\\) 多大（只要在调和区域内），平均值始终等于中心值。"
+      },
+      {
+        "id": "pde-ch04-q9",
+        "question": "镜像法求上半平面 \\(\\{y>0\\}\\) 中 \\(-\\Delta u=0\\)，\\(u(x,0)=g(x)\\) 的 Green 函数。关于 \\(y=0\\) 镜像意味着？",
+        "options": [
+          "\\(G(\\mathbf{x},\\mathbf{y})=\\Phi(\\mathbf{x}-\\mathbf{y})-\\Phi(\\mathbf{x}-\\mathbf{y}^*)\\)，\\(\\mathbf{y}^*\\) 为 \\(\\mathbf{y}\\) 关于 \\(y=0\\) 的镜像",
+        "\\(G=\\Phi+\\Phi\\)",
+        "\\(G=0\\)",
+        "不适用"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbf{y}^*=(y_1,-y_2)\\)（将源点翻转到下半平面）。\\(G|_{y=0}=\\Phi-\\Phi|_{\\text{对称点}}=0\\)（满足 Dirichlet 条件）。上半平面的 Poisson 核 \\(P(x,y)=-\\partial_n G|_{\\partial\\Omega}=\\frac{y}{\\pi(x^2+y^2)}\\)。"
+      },
+      {
+        "id": "pde-ch04-q10",
+        "question": "Neumann 问题 \\(-\\Delta u=f\\) 在 \\(\\Omega\\) 中，\\(\\partial_n u|_{\\partial\\Omega}=h\\)。解存在的必要条件？",
+        "options": [
+          "\\(\\int_\\Omega f\\,dx=\\int_{\\partial\\Omega}h\\,dS\\)（相容条件）",
+        "\\(f=0\\)",
+        "\\(h=0\\)",
+        "无条件"
+        ],
+        "answer": 0,
+        "explanation": "对方程积分 \\(\\int_\\Omega\\Delta u\\,dx=\\int_{\\partial\\Omega}\\partial_n u\\,dS\\)（散度定理）。\\(-\\int f=\\int h\\)，即 \\(\\int f+\\int h=0\\)... 准确说 \\(\\int_\\Omega(-\\Delta u)=\\int f\\)，\\(\\int_\\Omega\\Delta u=\\int\\partial_n u=\\int h\\)，所以 \\(\\int h=-\\int f\\)，即 \\(\\int f+\\int h=0\\)。物理上：稳态时净热产生 = 净热流出。"
+      },
+      {
+        "id": "pde-ch04-q11",
+        "question": "调和函数一定是解析（实解析）的吗？",
+        "options": [
+          "是——调和函数在其区域上无穷次可微且可展为收敛幂级数",
+        "不一定",
+        "仅在二维",
+        "需额外条件"
+        ],
+        "answer": 0,
+        "explanation": "均值性质 → 内部估计 → \\(|D^\\alpha u|\\leq C^{|\\alpha|+1}\\alpha!/r^{|\\alpha|}\\) → 幂级数收敛。椭圆正则性的极端情况：\\(\\Delta u=0\\)（\\(f=0\\) 光滑） → \\(u\\) 实解析。这是 Laplace 方程（椭圆型）的特有性质。"
+      },
+      {
+        "id": "pde-ch04-q12",
+        "question": "\\(u\\) 在 \\(\\Omega\\) 中调和且 \\(u\\geq 0\\)，\\(u\\) 在内部某点 \\(=0\\)。由强极大值原理推出？",
+        "options": [
+          "\\(u\\equiv 0\\)",
+        "\\(u>0\\) 处处",
+        "\\(u\\) 在边界为零",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(-u\\) 调和，\\(-u\\leq 0\\)，\\(-u\\) 在内部取最大值 \\(=0\\)。强极大值原理 → \\(-u\\equiv 0\\) → \\(u\\equiv 0\\)。物理：非负温度在内部为零意味着处处为零（极值不可能在内部取得，除非常数）。"
+      },
+      {
+        "id": "pde-ch04-q13",
+        "question": "Green 函数 \\(G(\\mathbf{x},\\mathbf{y})\\) 满足什么方程和边界条件？",
+        "options": [
+          "\\(-\\Delta_x G=\\delta(\\mathbf{x}-\\mathbf{y})\\) 在 \\(\\Omega\\) 中，\\(G=0\\) 在 \\(\\partial\\Omega\\)",
+        "\\(\\Delta G=0\\)",
+        "\\(G=\\delta\\) 在边界",
+        "\\(G\\) 是任意的"
+        ],
+        "answer": 0,
+        "explanation": "Green 函数是带齐次 Dirichlet 条件的点源响应。\\(G=\\Phi(\\mathbf{x}-\\mathbf{y})+h(\\mathbf{x},\\mathbf{y})\\)，\\(h\\) 校正使 \\(G|_{\\partial\\Omega}=0\\)。解的表示 \\(u(\\mathbf{x})=\\int_\\Omega G f\\,d\\mathbf{y}-\\int_{\\partial\\Omega}g\\partial_n G\\,dS\\)。"
+      },
+      {
+        "id": "pde-ch04-q14",
+        "question": "Poisson 方程 Dirichlet 问题的解可用什么变分原理等价表述？",
+        "options": [
+          "最小化 Dirichlet 能量 \\(J[u]=\\frac{1}{2}\\int|\\nabla u|^2\\,dx-\\int fu\\,dx\\)",
+        "最大化 \\(\\int u^2\\)",
+        "最小化 \\(\\int u\\)",
+        "无变分形式"
+        ],
+        "answer": 0,
+        "explanation": "\\(u\\) 是 \\(J\\) 在 \\(\\{u|_{\\partial\\Omega}=g\\}\\) 上的唯一极小值。Euler-Lagrange 方程：\\(-\\Delta u=f\\)。变分方法是有限元法的理论基础——将 PDE 转化为优化问题。"
+      },
+      {
+        "id": "pde-ch04-q15",
+        "question": "求球 \\(B_R\\) 中 \\(-\\Delta u=0\\) 的 Poisson 积分公式（二维情形，圆盘 \\(B_R\\)）。",
+        "options": [
+          "\\(u(r,\\theta)=\\frac{1}{2\\pi}\\int_0^{2\\pi}\\frac{R^2-r^2}{R^2-2Rr\\cos(\\theta-\\phi)+r^2}g(\\phi)\\,d\\phi\\)",
+        "\\(u=g(\\theta)\\)",
+        "\\(u=R^2 g\\)",
+        "\\(u=\\frac{R-r}{2\\pi}g\\)"
+        ],
+        "answer": 0,
+        "explanation": "Poisson 核 \\(P(r,\\theta-\\phi)=\\frac{R^2-r^2}{R^2-2Rr\\cos(\\theta-\\phi)+r^2}\\)。\\(r\\to R\\) 时 \\(P\\to\\delta(\\theta-\\phi)\\)（恢复边界值），\\(r=0\\) 时 \\(P=1\\)（均值性质）。这给出了从边界数据重建内部解的显式公式。"
+      },
+      {
+        "id": "pde-ch04-q16",
+        "question": "Harnack 不等式：\\(u>0\\) 在 \\(B_R\\) 中调和，\\(u(0)=M\\)。在 \\(B_{R/2}\\) 中 \\(u\\) 的上下界？",
+        "options": [
+          "\\(C^{-1}M\\leq u\\leq CM\\)（\\(C\\) 为取决于维数的常数）",
+        "\\(u=M\\)",
+        "\\(0<u<\\infty\\)",
+        "无定量估计"
+        ],
+        "answer": 0,
+        "explanation": "Harnack 不等式：\\(\\frac{R^{n-2}(R-r)}{(R+r)^{n-1}}u(0)\\leq u(x)\\leq\\frac{R^{n-2}(R+r)}{(R-r)^{n-1}}u(0)\\)（\\(|x|=r<R\\)）。在 \\(r=R/2\\) 时上下界比为有限常数 → 非负调和函数在紧子集上值可比较。"
+      },
+      {
+        "id": "pde-ch04-q17",
+        "question": "Liouville 定理：\\(\\mathbb{R}^n\\) 上有界调和函数一定是？",
+        "options": [
+          "常数",
+        "线性函数",
+        "多项式",
+        "指数函数"
+        ],
+        "answer": 0,
+        "explanation": "证明：均值性质 + 导数估计 \\(|D^\\alpha u(x)|\\leq C_\\alpha R^{-|\\alpha|}\\sup_{B_R}|u|\\leq C_\\alpha R^{-|\\alpha|}M\\)。\\(R\\to\\infty\\) 时 \\(|D^\\alpha u|=0\\)（\\(|\\alpha|\\geq 1\\)）→ \\(u=\\text{const}\\)。这是复分析 Liouville 定理的推广。"
+      },
+      {
+        "id": "pde-ch04-q18",
+        "question": "在正方形 \\([0,1]^2\\) 上的 Laplace 方程，边界条件 \\(u(x,0)=\\sin(\\pi x)\\)，其余三边 \\(=0\\)。解？",
+        "options": [
+          "\\(u=\\frac{\\sinh(\\pi(1-y))}{\\sinh\\pi}\\sin(\\pi x)\\)",
+        "\\(u=e^{-\\pi y}\\sin(\\pi x)\\)",
+        "\\(u=\\sin(\\pi x)\\sin(\\pi y)\\)",
+        "\\(u=\\sin(\\pi x)\\cos(\\pi y)\\)"
+        ],
+        "answer": 0,
+        "explanation": "分离变量 \\(u=X(x)Y(y)\\)。\\(X''+\\lambda X=0\\)，\\(X(0)=X(1)=0\\) → \\(\\lambda=\\pi^2\\)，\\(X=\\sin\\pi x\\)。\\(Y''-\\pi^2 Y=0\\)，\\(Y(1)=0\\) → \\(Y=C\\sinh(\\pi(1-y))\\)。\\(Y(0)=1\\)：\\(C=1/\\sinh\\pi\\)。"
+      },
+      {
+        "id": "pde-ch04-q19",
+        "question": "Neumann 问题的解不唯一（差一个常数）。如何使解唯一？",
+        "options": [
+          "添加额外条件如 \\(\\int_\\Omega u\\,dx=0\\)（零平均）",
+        "取 \\(u(0)=0\\)",
+        "取最大的解",
+        "不可能唯一"
+        ],
+        "answer": 0,
+        "explanation": "Neumann 条件只确定 \\(\\nabla u\\)，\\(u+C\\) 对任意常数 \\(C\\) 仍满足。常见归一化：\\(\\int u=0\\)（零平均）或指定某点值。物理上：绝热边界的温度有一个无法确定的平均温度——需要额外信息。"
+      },
+      {
+        "id": "pde-ch04-q20",
+        "question": "如果 \\(u\\) 在 \\(\\Omega\\) 中调和且在 \\(\\bar\\Omega\\) 上连续，\\(u|_{\\partial\\Omega}=\\text{const}\\)，则？",
+        "options": [
+          "\\(u\\equiv\\text{const}\\)（在 \\(\\Omega\\) 中也为常数）",
+        "\\(u\\) 可以不为常数",
+        "\\(u\\) 取极大值",
+        "取决于区域形状"
+        ],
+        "answer": 0,
+        "explanation": "\\(u-c\\) 调和且边界 \\(=0\\)。极大值原理：\\(\\max(u-c)=0\\)，\\(\\min(u-c)=0\\) → \\(u=c\\)。物理：表面温度均匀的稳态物体内部温度也均匀。"
+      },
+      {
+        "id": "pde-ch04-q21",
+        "question": "\\(u=\\ln|x|\\) 在 \\(\\mathbb{R}^2\\setminus\\{0\\}\\) 中满足 \\(\\Delta u=0\\)（调和）。但 \\(u\\) 无界。这和 Liouville 定理矛盾吗？",
+        "options": [
+          "不矛盾：Liouville 定理要求在整个 \\(\\mathbb{R}^n\\) 上调和（在 \\(0\\) 处需有意义）",
+        "矛盾",
+        "Liouville 定理不适用于二维",
+        "\\(u\\) 不调和"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ln|x|\\) 在 \\(x=0\\) 有奇点，不在 \\(\\mathbb{R}^2\\) 上调和。Liouville 要求全空间调和——\\(\\ln|x|\\) 有孤立奇点，不满足前提。去掉一点后定理不成立。类比：\\(1/z\\) 在 \\(\\mathbb{C}\\setminus\\{0\\}\\) 全纯但有界→ 不矛盾于 Liouville。"
+      },
+      {
+        "id": "pde-ch04-q22",
+        "question": "极大值原理的证明为什么需要用到均值性质（或子调和函数理论）？",
+        "options": [
+          "因为直接用二阶条件（\\(\\Delta u\\leq 0\\) 在极大点）不够精细——需要严格不等式或微扰",
+        "不需要",
+        "只有特殊区域成立",
+        "证明是平凡的"
+        ],
+        "answer": 0,
+        "explanation": "在内部极大点 \\(\\Delta u\\leq 0\\)，但调和要求 \\(\\Delta u=0\\)——不直接矛盾。需要更精细论证：考虑 \\(v=u+\\varepsilon|x|^2\\)，\\(\\Delta v=2n\\varepsilon>0\\) → 子调和，内部极大 → \\(\\Delta v\\leq 0\\)矛盾。\\(\\varepsilon\\to 0\\) 得结论。或用均值性质直接证。"
+      },
+      {
+        "id": "pde-ch04-q23",
+        "question": "Green 函数的对称性 \\(G(\\mathbf{x},\\mathbf{y})=G(\\mathbf{y},\\mathbf{x})\\) 的物理意义？",
+        "options": [
+          "互易原理：\\(\\mathbf{y}\\) 处点源在 \\(\\mathbf{x}\\) 处的响应 = \\(\\mathbf{x}\\) 处点源在 \\(\\mathbf{y}\\) 处的响应",
+        "\\(G\\) 对称矩阵",
+        "无物理意义",
+        "仅在球域成立"
+        ],
+        "answer": 0,
+        "explanation": "互易性（reciprocity）可由 Green 第二恒等式证明：\\(\\int(G_x\\Delta G_y-G_y\\Delta G_x)=0+\\text{边界项}=0\\)。在电磁学中：两导体间的互电容相等；在弹性力学中：Maxwell 互易定理。"
+      },
+      {
+        "id": "pde-ch04-q24",
+        "question": "解 Poisson 方程 \\(-\\Delta u=1\\) 在单位圆盘 \\(B_1\\) 中，\\(u|_{\\partial B_1}=0\\)。利用径向对称性。",
+        "options": [
+          "\\(u=(1-r^2)/4\\)",
+        "\\(u=1-r^2\\)",
+        "\\(u=(1-r)/2\\)",
+        "\\(u=\\ln(1/r)\\)"
+        ],
+        "answer": 0,
+        "explanation": "径向 \\(u=u(r)\\)：\\(-\\Delta u=-u''-u'/r=1\\)。\\(u''+u'/r=-1\\)，\\((ru')'=-r\\)，\\(ru'=-r^2/2+C_1\\)，\\(u'=-r/2+C_1/r\\)。\\(u'(0)\\) 有限 → \\(C_1=0\\)。\\(u=-r^2/4+C_2\\)。\\(u(1)=0\\)：\\(C_2=1/4\\)。\\(u=(1-r^2)/4\\)。"
+      },
+      {
+        "id": "pde-ch04-q25",
+        "question": "如何从均值性质推出极大值原理？",
+        "options": [
+          "若 \\(u(x_0)=\\max u\\)，均值性质要求 \\(u(x_0)=\\frac{1}{|B_r|}\\int_{B_r}u\\leq u(x_0)\\)，等号成立 → \\(u\\) 在 \\(B_r\\) 中恒等于 \\(u(x_0)\\)",
+        "不能推出",
+        "需要 \\(u>0\\)",
+        "仅在凸域成立"
+        ],
+        "answer": 0,
+        "explanation": "均值 \\(=\\) 极大值 → 被积函数处处 \\(\\leq\\) 极大值但平均 \\(=\\) 极大值 → 处处 \\(=\\) 极大值。连通性 → 从 \\(x_0\\) 出发逐步扩大球 → \\(u\\) 在全域为常数。这是最优雅的证明——完全由均值性质驱动。"
+      },
+      {
+        "id": "pde-ch04-q26",
+        "question": "静电学中，导体球内 Laplace 方程 \\(\\Delta V=0\\)，球面有电位分布。求内部电位用？",
+        "options": [
+          "Poisson 积分公式（球上的 Green 函数/Poisson 核）",
+        "Coulomb 定律直接积分",
+        "数值模拟",
+        "解析延拓"
+        ],
+        "answer": 0,
+        "explanation": "\\(V(\\mathbf{x})=\\frac{R^2-|\\mathbf{x}|^2}{4\\pi R}\\int_{|\\mathbf{y}|=R}\\frac{V(\\mathbf{y})}{|\\mathbf{x}-\\mathbf{y}|^3}dS(\\mathbf{y})\\)（三维 Poisson 核）。电位在导体内调和（无电荷），边界条件给定 → Poisson 积分给出精确解。"
+      },
+      {
+        "id": "pde-ch04-q27",
+        "question": "地下水稳态流动满足 \\(\\nabla\\cdot(K\\nabla h)=0\\)（\\(K\\) 是渗透率，\\(h\\) 水头）。当 \\(K\\) 为常数时方程简化为？",
+        "options": [
+          "Laplace 方程 \\(\\Delta h=0\\)",
+        "热方程",
+        "波方程",
+        "Burgers 方程"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\Delta h=0\\) → \\(\\Delta h=0\\)。水头 \\(h\\) 是调和函数，由边界水头（Dirichlet）或流量（Neumann）确定。极大值原理：地下水头不可能在内部有极值——水流从高水头流向低水头。"
+      },
+      {
+        "id": "pde-ch04-q28",
+        "question": "图像处理中的 Laplace 平滑：将像素值替换为邻域平均值，等价于什么 PDE 操作？",
+        "options": [
+          "一步热方程扩散（Laplace 方程离散化就是平均滤波器）",
+        "波方程",
+        "边缘检测",
+        "无关联"
+        ],
+        "answer": 0,
+        "explanation": "离散 Laplacian \\(\\Delta_d u=\\frac{1}{4}(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1})-u_{i,j}\\)。设 \\(u^{n+1}=u^n+\\tau\\Delta_d u^n\\) 就是显式热方程。平衡态 \\(\\Delta_d u=0\\) → 每个像素等于邻域平均。均值性质 = 平滑 = 去噪（代价：模糊边缘）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="pde"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/pde.html" class="module-name">偏微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 调和函数与均值性质</a></li>
+      <li><a href="#kp2">02 · 极大值原理与唯一性</a></li>
+      <li><a href="#kp3">03 · 基本解与 Green 函数</a></li>
+      <li><a href="#kp4">04 · Poisson 方程与 Dirichlet/Neumann 问题</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>Laplace 与 Poisson 方程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>调和函数与均值性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Laplace 方程 \(\Delta u = 0\) 描述稳态温度分布、静电势、引力势、 不可压缩流体的速度势等。其解——调和函数——具有极端的正则性 （解析函数！）和深刻的几何性质。均值性质是其最直观的刻画： 调和函数在每一点的值等于周围任意球面上的平均值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>均值性质揭示了椭圆型方程的本质：无「信息源」时值完全由周围 决定。这与随机游走（Brown 运动）停时问题的联系并非偶然—— 调和函数是鞅（在概率意义下）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Laplace 方程</strong>：\(\Delta u = \sum_{i=1}^n \frac{\partial^2 u}{\partial x_i^2} = 0\)。 <strong>均值性质</strong>：若 \(u\) 在 \(\Omega\) 上调和，则对任意 \(B_r(x) \subset \Omega\)： \[u(x) = \frac{1}{|\partial B_r(x)|}\int_{\partial B_r(x)} u\,dS = \frac{1}{|B_r(x)|}\int_{B_r(x)} u\,dy\] （球面均值 = 体积均值 = 中心点值） <strong>证明思路</strong>（球面均值）：定义 \(\phi(r) = \frac{1}{|\partial B_r|}\int_{\partial B_r} u\,dS\)。 求导：\(\phi'(r) = \frac{1}{|\partial B_r|}\int_{\partial B_r} \frac{\partial u}{\partial n}\,dS = \frac{1}{|\partial B_r|}\int_{B_r}\Delta u\,dy = 0\)。 故 \(\phi(r)\) 是常数，\(\phi(r) = \lim_{r \to 0}\phi(r) = u(x)\)。 <strong>逆定理</strong>：满足均值性质的连续函数是调和的（Koebe 定理）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 静电学中导体空腔内无电荷则电势为调和函数 - 图像处理中 Laplace 方程用于图像修复（inpainting）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：若 \(u\) 在单位圆 \(|x| \leq 1\) 上调和，\(u|_{|x|=1} = \cos\theta\)。 不用求解，求 \(u(0)\)。 解答：均值性质：\(u(0) = \frac{1}{2\pi}\int_0^{2\pi}\cos\theta\,d\theta = 0\)。 易错点：均值性质需要球面完全在 \(\Omega\) 内。如果球面跨越边界， 公式不成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">调和函数的均值性质断言？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。均值性质是逐点的：\\(u(x)\\) 等于以 \\(x\\) 为中心、任意半径')">A. 调和函数在整个域上取平均值</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！均值性质是逐点的：\\(u(x)\\) 等于以 \\(x\\) 为中心、任意半径')">B. 调和函数在每点的值等于任意内切球面上的平均值</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。均值性质是逐点的：\\(u(x)\\) 等于以 \\(x\\) 为中心、任意半径')">C. 调和函数一定是常数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。均值性质是逐点的：\\(u(x)\\) 等于以 \\(x\\) 为中心、任意半径')">D. 调和函数的梯度在球面上平均为零</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>极大值原理与唯一性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>调和函数不能在内部取到最大值（除非是常数函数）——这看似简单的 命题（极大值原理）是椭圆型 PDE 理论最有力的工具。它立即给出 Dirichlet 问题的唯一性和对边值的连续依赖，而且完全不需要 解的显式公式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>强极大值原理</strong>：若 \(u\) 在连通开域 \(\Omega\) 上调和，则 \(u\) 不能在 \(\Omega\) 内部取到最大值（除非 \(u\) 是常数）。 <strong>证明</strong>（均值性质法）：设 \(u(x_0) = \max_\Omega u\)。 \(u(x_0) = \frac{1}{|B_r|}\int_{B_r(x_0)} u\,dy \leq u(x_0)\)。 等号成立要求 \(u \equiv u(x_0)\) 在 \(B_r\) 上。 连通性 ⇒ \(u\) 在整个 \(\Omega\) 上为常数。 <strong>弱极大值原理</strong>：\(\max_{\overline{\Omega}} u = \max_{\partial\Omega} u\)。 <strong>Dirichlet 唯一性</strong>：设 \(u_1, u_2\) 解 \(\Delta u = 0\)， \(u_1|_{\partial\Omega} = u_2|_{\partial\Omega}\)。 \(w = u_1 - u_2\) 调和且 \(w|_{\partial\Omega} = 0\)。 极大值原理 ⇒ \(\max w \leq 0\)，对 \(-w\) 类似 ⇒ \(w \equiv 0\)。 <strong>比较原理</strong>：\(\Delta u = 0 \leq \Delta v = f \geq 0\) 在 \(\Omega\) 中，\(u|_{\partial\Omega} \leq v|_{\partial\Omega}\) ⇒ \(u \leq v\) 在 \(\Omega\) 中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 椭圆型方程数值解的误差估计：误差满足类似的极大值原理</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\Delta u = 0\) 在单位圆内，\(u|_{|x|=1} \leq 5\)。证明 \(u(x) \leq 5\) 处处成立。 解答：极大值原理：\(\max_{\overline{B_1}} u = \max_{|x|=1} u \leq 5\)。✓ 易错点：极大值原理的前提是 \(u\) <strong>调和</strong>（非次调和）。 若 \(\Delta u > 0\)（严格次调和），极大值原理的结论可能更强。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若非常值调和函数 \(u\) 在域 \(\Omega\) 内某点取到最大值，这可能吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。强极大值原理断言：连通域上非常值调和函数不能在内部取到')">A. 可能，只要 \(\Omega\) 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！强极大值原理断言：连通域上非常值调和函数不能在内部取到')">B. 不可能（强极大值原理）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。强极大值原理断言：连通域上非常值调和函数不能在内部取到')">C. 可能，如果边界值更大</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。强极大值原理断言：连通域上非常值调和函数不能在内部取到')">D. 取决于维数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>基本解与 Green 函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Green 函数是 PDE 理论中最强大的概念之一：如果知道了 Green 函数， 就能通过积分公式直接写出任意边值/源项问题的解。Green 函数是 Laplace 算子的「逆算子核」——它描述了一个点源电荷在某区域中 产生的电势（考虑了边界效应）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Green 函数 = 基本解 + 修正项（用于满足边界条件）。 在物理上，基本解是自由空间的点源响应，修正项是边界反射的「像」。 这是镜像法(method of images)的数学框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>基本解</strong> \(\Phi(x)\)：\(\Delta\Phi = \delta(x)\)。 \[\Phi(x) = \begin{cases} -\frac{1}{2\pi}\ln|x| & n=2 \\ \frac{1}{n(n-2)\omega_n}|x|^{2-n} & n \geq 3 \end{cases}\] 其中 \(\omega_n\) 为 \(n\) 维单位球体积。 三维：\(\Phi(x) = -\frac{1}{4\pi|x|}\)（库仑势/引力势）。 <strong>Green 函数</strong>：\(G(x,y)\) 对固定 \(y \in \Omega\) 满足 \(\Delta_x G = \delta(x-y)\) 在 \(\Omega\) 中，\(G|_{x \in \partial\Omega} = 0\)。 分解：\(G(x,y) = \Phi(x-y) + H(x,y)\)，其中 \(H\) 调和补偿边界条件。 <strong>Green 表示公式</strong>：\(\Delta u = f\) 在 \(\Omega\)，\(u|_{\partial\Omega} = g\) ⇒ \[u(x) = \int_\Omega G(x,y)f(y)\,dy - \int_{\partial\Omega}\frac{\partial G}{\partial n_y}(x,y)g(y)\,dS_y\] <strong>半空间的 Green 函数</strong>（镜像法）：\(\Omega = \{x_n > 0\}\)。 \(G(x,y) = \Phi(x-y) - \Phi(x-y^*)\)，\(y^* = (y_1,\ldots,-y_n)\)（镜像点）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 静电学中的镜像电荷法即是 Green 函数的物理实现 - 声学中 Green 函数用于计算腔体内的声场</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用镜像法写出上半平面 \(\{y > 0\}\) 中 \(\Delta u = 0\)，\(u(x,0) = g(x)\) 的解。 解答：Green 函数 \(G(x,y;\xi,\eta) = -\frac{1}{2\pi}[\ln r - \ln r^*]\)， \(r = \sqrt{(x-\xi)^2+(y-\eta)^2}\)，\(r^* = \sqrt{(x-\xi)^2+(y+\eta)^2}\)。 Poisson 积分公式：\(u(x,y) = \frac{y}{\pi}\int_{-\infty}^\infty \frac{g(\xi)}{(x-\xi)^2+y^2}\,d\xi\)。 验证：\(y \to 0^+\) 时被积函数趋于 \(\pi\delta(x-\xi)g(\xi)\)。✓ 易错点：镜像点是关于边界的反射，不是关于源点。 上半平面中 \((x,y)\) 的镜像是 \((x,-y)\)，不是 \((-x,y)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">三维自由空间中 Laplace 方程的基本解是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。三维基本解 \\(\\Phi(x) = -\\frac{1}{4\\pi|x|}\\)，即库仑势。')">A. \(-\frac{1}{2\pi}\ln|x|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！三维基本解 \\(\\Phi(x) = -\\frac{1}{4\\pi|x|}\\)，即库仑势。')">B. \(-\frac{1}{4\pi|x|}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。三维基本解 \\(\\Phi(x) = -\\frac{1}{4\\pi|x|}\\)，即库仑势。')">C. \(\frac{1}{|x|^2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。三维基本解 \\(\\Phi(x) = -\\frac{1}{4\\pi|x|}\\)，即库仑势。')">D. \(e^{-|x|}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Poisson 方程与 Dirichlet/Neumann 问题</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Poisson 方程 \(\Delta u = f\) 是带源项的 Laplace 方程，描述了 有电荷/质量分布时的电势/引力势。Dirichlet 和 Neumann 两种 边值问题分别对应物理上固定电位和固定电场法向分量的情况。 理解这两种问题的可解性条件和物理意义是学习椭圆型 PDE 的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Poisson 方程</strong>：\(\Delta u = f\) 在 \(\Omega\) 中。 <strong>Dirichlet 问题</strong>：\(u|_{\partial\Omega} = g\)。 存在唯一性：对光滑域，\(f \in L^2, g \in H^{1/2}(\partial\Omega)\) 时存在唯一弱解。 <strong>Neumann 问题</strong>：\(\frac{\partial u}{\partial n}\Big|_{\partial\Omega} = h\)。 <strong>可解性条件（相容条件）</strong>： \[\int_\Omega f\,dx = \int_{\partial\Omega} h\,dS\] 证明：\(\int_\Omega \Delta u\,dx = \int_{\partial\Omega}\frac{\partial u}{\partial n}\,dS\)（散度定理）， 左 \(= \int f\)，右 \(= \int h\)。 若条件满足，解存在但仅确定到常数（\(u + C\) 也是解）。 唯一性需加归一化条件如 \(\int_\Omega u\,dx = 0\)。 <strong>物理解释</strong>： - Dirichlet = 边界温度固定（恒温器） - Neumann = 边界热流固定（绝热/加热） - 相容条件 = 稳态时进出系统的热流必须平衡</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 静电场：Dirichlet 对应固定电位导体，Neumann 对应固定面电荷密度 - 流体力学：不可压缩流体的压力场满足 Poisson 方程</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在单位圆盘上求解 \(\Delta u = 0\)，\(\frac{\partial u}{\partial n}\Big|_{r=1} = \cos\theta\)。 验证相容条件。 解答：\(\int_0^{2\pi}\cos\theta\,d\theta = 0\)。✓（相容条件满足。） 设 \(u = r\cos\theta + C\)（试解）。\(\Delta u = 0\)。✓ \(\frac{\partial u}{\partial r}\Big|_{r=1} = \cos\theta\)。✓ 取 \(C=0\) 为归一化选择。 易错点：Neumann 问题忘记检查相容条件就直接求解， 可能得到矛盾。如 \(\Delta u = 0\)，\(\partial u/\partial n = 1\)（常数）在单位圆上， \(\int 1\,dS = 2\pi \neq 0 = \int \Delta u\)，无解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Neumann 问题 \(\Delta u = 0\)，\(\partial u/\partial n = h\) 的相容条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。由散度定理 \\(\\int_\\Omega \\Delta u\\,dx = \\int_{\\partial\\Omega} \\partial u/\\partial n\\,dS\\)，')">A. \(\int_\Omega u\,dx = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！由散度定理 \\(\\int_\\Omega \\Delta u\\,dx = \\int_{\\partial\\Omega} \\partial u/\\partial n\\,dS\\)，')">B. \(\int_{\partial\Omega} h\,dS = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。由散度定理 \\(\\int_\\Omega \\Delta u\\,dx = \\int_{\\partial\\Omega} \\partial u/\\partial n\\,dS\\)，')">C. \(\max_{\partial\Omega} |h| < \infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。由散度定理 \\(\\int_\\Omega \\Delta u\\,dx = \\int_{\\partial\\Omega} \\partial u/\\partial n\\,dS\\)，')">D. \(h\) 连续</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/analysis/pde.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

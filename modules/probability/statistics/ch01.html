@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 统计模型与充分统计量 — 统计推断 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "statistics-ch01-q1",
+        "question": "统计模型 \\(\\{P_\\theta: \\theta \\in \\Theta\\}\\) 中 \\(\\Theta\\) 的含义？",
+        "options": [
+          "参数空间：所有可能参数值的集合",
+        "样本空间",
+        "数据集合",
+        "估计量的值域"
+        ],
+        "answer": 0,
+        "explanation": "参数化统计模型：用有限维参数 \\(\\theta\\) 索引分布族。\\(\\Theta \\subset \\mathbb{R}^d\\)（参数模型）。非参数模型中 \\(\\Theta\\) 无穷维（如所有连续 CDF）。模型选择 = 选择合适的 \\(\\Theta\\)。"
+      },
+      {
+        "id": "statistics-ch01-q2",
+        "question": "可辨识性 (identifiability) 的定义？",
+        "options": [
+          "\\(\\theta_1 \\neq \\theta_2 \\Rightarrow P_{\\theta_1} \\neq P_{\\theta_2}\\)",
+        "\\(\\theta\\) 可估计",
+        "模型拟合好",
+        "参数有限"
+        ],
+        "answer": 0,
+        "explanation": "可辨识 = 不同参数给不同分布（参数到分布的映射是单射）。不可辨识的例子：过参数化混合模型（标签交换）。可辨识是一致估计存在的必要条件。"
+      },
+      {
+        "id": "statistics-ch01-q3",
+        "question": "统计量 \\(T(X)\\) 的定义？",
+        "options": [
+          "样本的可测函数（不依赖未知参数 \\(\\theta\\)）",
+        "参数 \\(\\theta\\) 的函数",
+        "任意随机变量",
+        "似然函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(T: \\mathcal{X}^n \\to \\mathbb{R}^k\\)，不含 \\(\\theta\\)。例：样本均值 \\(\\bar{X}\\)、顺序统计量、样本方差。似然函数 \\(L(\\theta|x)\\) 不是统计量（含 \\(\\theta\\)）。统计量是数据约简的基础。"
+      },
+      {
+        "id": "statistics-ch01-q4",
+        "question": "充分统计量 \\(T(X)\\) for \\(\\theta\\) 的定义？",
+        "options": [
+          "\\(X|T(X)=t\\) 的条件分布不依赖 \\(\\theta\\)",
+        "\\(T(X)\\) 的分布不依赖 \\(\\theta\\)",
+        "\\(T(X)=\\theta\\)",
+        "\\(T\\) 是 \\(\\theta\\) 的 MLE $"
+        ],
+        "answer": 0,
+        "explanation": "充分性 = \"\\(T\\) 包含了样本中关于 \\(\\theta\\) 的全部信息\"。给定 \\(T\\)，样本的条件分布无额外参数信息。直觉：知道 \\(T\\) 后，数据的具体排列不再告诉你 \\(\\theta\\) 的更多信息。"
+      },
+      {
+        "id": "statistics-ch01-q5",
+        "question": "\\(X_1,...,X_n \\sim N(\\mu,\\sigma^2)\\)（\\(\\sigma^2\\) 已知）。\\(\\mu\\) 的充分统计量？",
+        "options": [
+          "\\(\\bar{X}=\\sum X_i/n\\)",
+        "\\(\\max X_i\\)",
+        "\\(X_1\\)",
+        "\\(\\text{median}(X_i)\\)"
+        ],
+        "answer": 0,
+        "explanation": "联合密度 \\(\\propto \\exp(-\\sum(x_i-\\mu)^2/(2\\sigma^2))=\\exp(-n(\\bar{x}-\\mu)^2/(2\\sigma^2)) \\cdot \\exp(-\\sum(x_i-\\bar{x})^2/(2\\sigma^2))\\)。第二项不含 \\(\\mu\\)。因式分解 ⟹ \\(\\bar{X}\\) 充分。"
+      },
+      {
+        "id": "statistics-ch01-q6",
+        "question": "Fisher-Neyman 因式分解定理：\\(T(x)\\) 充分 \\(\\Leftrightarrow\\)？",
+        "options": [
+          "\\(f(x|\\theta)=g(T(x),\\theta) \\cdot h(x)\\)",
+        "\\(f(x|\\theta)=f(x)\\)",
+        "\\(T(x)=\\theta\\)",
+        "\\(g\\) 不依赖 \\(\\theta\\)"
+        ],
+        "answer": 0,
+        "explanation": "密度/PMF 分解为：依赖 \\(\\theta\\) 的部分只通过 \\(T(x)\\)，加上完全不含 \\(\\theta\\) 的部分 \\(h(x)\\)。这是验证充分性的主要工具。指数族中自然充分统计量自动满足。"
+      },
+      {
+        "id": "statistics-ch01-q7",
+        "question": "指数族 \\(f(x|\\theta)=h(x)\\exp(\\eta(\\theta)^T T(x)-A(\\theta))\\) 中 \\(T(x)\\) 是什么？",
+        "options": [
+          "充分统计量（自然充分统计量）",
+        "参数",
+        "归一化常数",
+        "先验分布"
+        ],
+        "answer": 0,
+        "explanation": "指数族天然给出充分统计量 \\(T(x)\\)。\\(\\eta(\\theta)\\) 是自然参数，\\(A(\\theta)=\\ln \\int h(x)e^{\\eta^T T(x)}dx\\) 是对数配分函数。正态、Poisson、二项、Gamma 等都是指数族。"
+      },
+      {
+        "id": "statistics-ch01-q8",
+        "question": "\\(X_1,...,X_n \\sim \\text{Poisson}(\\lambda)\\)。\\(\\lambda\\) 的充分统计量？",
+        "options": [
+          "\\(T=\\sum X_i\\)",
+        "\\(T=\\max X_i\\)",
+        "\\(T=\\prod X_i\\)",
+        "\\(T=X_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X=x|\\lambda)=\\prod \\frac{e^{-\\lambda}\\lambda^{x_i}}{x_i!}=\\frac{e^{-n\\lambda}\\lambda^{\\sum x_i}}{\\prod x_i!}\\)。因式分解：\\(g(\\sum x_i,\\lambda)=e^{-n\\lambda}\\lambda^{\\sum x_i}\\), \\(h(x)=1/\\prod x_i!\\)。\\(\\sum X_i\\) 充分。"
+      },
+      {
+        "id": "statistics-ch01-q9",
+        "question": "\\(X_1,...,X_n \\sim U(0,\\theta)\\)。\\(\\theta\\) 的充分统计量？",
+        "options": [
+          "\\(X_{(n)}=\\max X_i\\)",
+        "\\(\\bar{X}\\)",
+        "\\(\\sum X_i\\)",
+        "\\(\\min X_i\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x|\\theta)=\\theta^{-n}\\prod \\mathbf{1}_{0 \\leq x_i \\leq \\theta}=\\theta^{-n}\\mathbf{1}_{x_{(n)} \\leq \\theta}\\prod\\mathbf{1}_{x_i \\geq 0}\\)。\\(g(x_{(n)},\\theta)=\\theta^{-n}\\mathbf{1}_{x_{(n)}\\leq\\theta}\\)。非指数族。\\(\\bar{X}\\) 不充分。"
+      },
+      {
+        "id": "statistics-ch01-q10",
+        "question": "最小充分统计量的定义？",
+        "options": [
+          "它是所有充分统计量的函数：\\(T\\) 最小充分 ⟺ \\(T=g(S)\\) 对任意充分统计量 \\(S\\)",
+        "维数最低",
+        "等于 MLE",
+        "等于样本本身"
+        ],
+        "answer": 0,
+        "explanation": "最小充分 = 最大约简（不丢失信息的最小量）。判定准则：\\(T(x)=T(y) \\Leftrightarrow f(x|\\theta)/f(y|\\theta)\\) 不依赖 \\(\\theta\\)（似然比判据）。指数族的自然统计量通常是最小充分的。"
+      },
+      {
+        "id": "statistics-ch01-q11",
+        "question": "\\(X_1,...,X_n \\sim N(\\mu,\\sigma^2)\\)（\\(\\mu,\\sigma^2\\) 均未知）。最小充分统计量？",
+        "options": [
+          "\\((\\sum X_i, \\sum X_i^2)\\)",
+        "\\(\\bar{X}\\)",
+        "\\(S^2\\)",
+        "\\((X_{(1)}, X_{(n)})\\)"
+        ],
+        "answer": 0,
+        "explanation": "二参数指数族 ⟹ 自然统计量 \\((\\sum X_i, \\sum X_i^2)\\) 最小充分（维度 \\(=\\) 参数个数 \\(=2\\)）。等价于 \\((\\bar{X}, S^2)\\)。仅 \\(\\bar{X}\\) 只对 \\(\\mu\\)（\\(\\sigma^2\\) 已知时）充分。"
+      },
+      {
+        "id": "statistics-ch01-q12",
+        "question": "完备统计量 (complete statistic) 的定义？",
+        "options": [
+          "\\(E_\\theta[g(T)]=0\\)（\\(\\forall \\theta\\)）\\(\\Rightarrow\\) \\(g(T)=0\\) a.e.",
+        "\\(T\\) 是充分的",
+        "\\(T\\) 的方差最小",
+        "\\(T\\) 可逆"
+        ],
+        "answer": 0,
+        "explanation": "完备性排除了\"无信息函数\"。完备 + 充分 = 完备充分统计量，保证 UMVUE 存在（Lehmann-Scheffé）。指数族在自然参数空间有内点时，自然统计量完备。"
+      },
+      {
+        "id": "statistics-ch01-q13",
+        "question": "Lehmann-Scheffé 定理：若 \\(T\\) 完备充分，\\(g(T)\\) 无偏估计 \\(\\tau(\\theta)\\)，则？",
+        "options": [
+          "\\(g(T)\\) 是 \\(\\tau(\\theta)\\) 的唯一 UMVUE",
+        "\\(g(T)\\) 方差最大",
+        "\\(g(T)\\) 有偏",
+        "需要额外条件"
+        ],
+        "answer": 0,
+        "explanation": "完备性保证无偏估计唯一（在 \\(T\\) 的函数中）。充分性保证不能用更少信息做得更好。Rao-Blackwell + 完备性 \\(\\Rightarrow\\) UMVUE。例：\\(\\bar{X}\\) 是正态 \\(\\mu\\) 的 UMVUE。"
+      },
+      {
+        "id": "statistics-ch01-q14",
+        "question": "参数模型 vs 非参数模型的根本区别？",
+        "options": [
+          "参数模型中分布族 \\(\\{P_\\theta\\}\\) 由有限维 \\(\\theta\\) 索引；非参数无此限制",
+        "参数模型更准确",
+        "非参数模型不能做推断",
+        "参数模型不需要假设"
+        ],
+        "answer": 0,
+        "explanation": "参数：\\(\\theta \\in \\mathbb{R}^d\\)（\\(d\\) 固定）。非参数：\\(\\theta\\) 无穷维（如 CDF 的全体）。半参数：有限维兴趣参数 + 无穷维干扰（如 Cox 模型）。模型误设风险 vs 效率的权衡。"
+      },
+      {
+        "id": "statistics-ch01-q15",
+        "question": "\\(X_1,...,X_n \\sim \\text{Bernoulli}(p)\\)。似然比 \\(f(x|p)/f(y|p)\\) 不依赖 \\(p\\) 当且仅当？",
+        "options": [
+          "\\(\\sum x_i=\\sum y_i\\)",
+        "\\(x=y\\)",
+        "\\(x_1=y_1\\)",
+        "\\(\\max x_i=\\max y_i\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x|p)/f(y|p)=p^{\\sum x_i-\\sum y_i}(1-p)^{n-\\sum x_i-(n-\\sum y_i)}\\)。不依赖 \\(p\\) ⟺ \\(\\sum x_i=\\sum y_i\\)。这验证了 \\(\\sum X_i\\) 是最小充分统计量（似然比判据）。"
+      },
+      {
+        "id": "statistics-ch01-q16",
+        "question": "辅助统计量 (ancillary statistic) 的定义？",
+        "options": [
+          "分布不依赖 \\(\\theta\\) 的统计量",
+        "充分统计量",
+        "与 \\(\\theta\\) 独立",
+        "等于常数"
+        ],
+        "answer": 0,
+        "explanation": "辅助统计量的分布与 \\(\\theta\\) 无关，但可能蕴含关于样本分散程度的信息。例：\\(N(\\mu,1)\\) 中 \\(X_1-X_2\\) 是辅助的（\\(\\sim N(0,2)\\)）。Basu 定理：完备充分统计量与辅助统计量独立。"
+      },
+      {
+        "id": "statistics-ch01-q17",
+        "question": "Basu 定理？",
+        "options": [
+          "完备充分统计量与辅助统计量独立",
+        "充分统计量与所有统计量独立",
+        "辅助统计量是常数",
+        "完备统计量等于 MLE"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 完备充分、\\(V\\) 辅助 ⟹ \\(T \\perp V\\)。应用：\\(N(\\mu,\\sigma^2)\\) 中 \\(\\bar{X} \\perp S^2\\)（\\(\\bar{X}\\) 完备充分 for \\(\\mu\\), \\(S^2/\\sigma^2\\) 辅助 when \\(\\mu\\) is the only parameter of interest — 更精确的说法是 \\(\\bar{X}\\) 和 \\(S^2\\) 独立，由正态的特殊性质）。"
+      },
+      {
+        "id": "statistics-ch01-q18",
+        "question": "指数族的对数配分函数 \\(A(\\eta)\\) 与充分统计量的矩的关系？",
+        "options": [
+          "\\(\\nabla_\\eta A(\\eta)=E_\\eta[T(X)]\\), \\(\\nabla^2 A(\\eta)=\\text{Cov}_\\eta(T(X))\\)",
+        "\\(A(\\eta)=E[T]\\)",
+        "\\(A''=\\text{Var}(\\theta)\\)",
+        "\\(A\\) 是线性函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(f=h(x)e^{\\eta^T T(x)-A(\\eta)}\\)。\\(\\int f dx=1\\) 对 \\(\\eta\\) 求导：\\(E[T]=A'(\\eta)\\)。二阶导：\\(\\text{Cov}(T)=A''(\\eta) \\geq 0\\)（\\(A\\) 凸）。这给出了对数配分函数的完整统计意义。"
+      },
+      {
+        "id": "statistics-ch01-q19",
+        "question": "Rao-Blackwell 定理：\\(\\delta\\) 是 \\(\\tau(\\theta)\\) 的无偏估计，\\(T\\) 充分。\\(\\delta^*=E[\\delta|T]\\) 满足？",
+        "options": [
+          "\\(E[\\delta^*]=\\tau(\\theta)\\) 且 \\(\\text{Var}(\\delta^*) \\leq \\text{Var}(\\delta)\\)",
+        "\\(\\delta^*=\\delta\\)",
+        "\\(\\text{Var}(\\delta^*)>\\text{Var}(\\delta)\\)",
+        "\\(\\delta^*\\) 有偏"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[\\delta^*]=E[E[\\delta|T]]=E[\\delta]=\\tau(\\theta)\\)（无偏）。\\(\\text{Var}(\\delta)=\\text{Var}(\\delta^*)+E[\\text{Var}(\\delta|T)] \\geq \\text{Var}(\\delta^*)\\)。条件化于充分统计量不增加方差——改进估计的基本定理。"
+      },
+      {
+        "id": "statistics-ch01-q20",
+        "question": "\\(X_1,...,X_n \\sim \\text{Exp}(\\lambda)\\)。最小充分完备统计量？",
+        "options": [
+          "\\(T=\\sum X_i\\)（\\(T \\sim \\text{Gamma}(n,\\lambda)\\)）",
+        "\\(\\bar{X}\\)",
+        "\\(X_{(1)}\\)",
+        "\\((\\sum X_i, \\sum X_i^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "指数分布是单参数指数族。\\(f=\\lambda^n e^{-\\lambda \\sum x_i}\\)。自然参数 \\(\\eta=-\\lambda\\)，\\(T=\\sum X_i\\)。\\(T\\) 最小充分且完备（指数族理论）。\\(\\bar{X}\\) 等价（\\(=T/n\\)）。"
+      },
+      {
+        "id": "statistics-ch01-q21",
+        "question": "为什么 \\(U(0,\\theta)\\) 的顺序统计量 \\(X_{(n)}\\) 充分但\"不完备\"？",
+        "options": [
+          "存在不恒为零的函数 \\(g\\) 使 \\(E_\\theta[g(X_{(n)})]=0\\)（\\(\\forall \\theta\\)）",
+        "\\(X_{(n)}\\) 不充分",
+        "均匀分布不是指数族",
+        "顺序统计量永远完备"
+        ],
+        "answer": 0,
+        "explanation": "\\(X_{(n)} \\sim\\) 密度 \\(n x^{n-1}/\\theta^n\\)（\\(0<x<\\theta\\)）。取 \\(g(t)=t^n-cn^{n-1}\\) 适当选 \\(c\\) 使期望为零。非指数族 ⟹ 完备性不自动成立。UMVUE 仍存在但需不同论证。"
+      },
+      {
+        "id": "statistics-ch01-q22",
+        "question": "Fisher 信息量 \\(I(\\theta)\\) 的定义？",
+        "options": [
+          "\\(I(\\theta)=E[(\\partial_\\theta \\ln f(X|\\theta))^2]=-E[\\partial^2_\\theta \\ln f(X|\\theta)]\\)",
+        "\\(I(\\theta)=\\text{Var}(X)\\)",
+        "\\(I(\\theta)=1/\\text{Var}(\\hat\\theta)\\)",
+        "\\(I(\\theta)=E[X^2]\\)"
+        ],
+        "answer": 0,
+        "explanation": "Score 函数 \\(S(\\theta)=\\partial_\\theta \\ln f\\)。\\(I(\\theta)=\\text{Var}(S)=E[S^2]\\)（\\(E[S]=0\\)）。\\(n\\) 个 iid 样本：\\(I_n=nI_1\\)。Fisher 信息越大 ⟹ 参数越容易估计。Cramér-Rao 下界 \\(\\text{Var}(\\hat\\theta) \\geq 1/I_n\\)。"
+      },
+      {
+        "id": "statistics-ch01-q23",
+        "question": "Cramér-Rao 下界 (CRLB)：\\(\\text{Var}_\\theta(\\hat\\tau) \\geq\\)？",
+        "options": [
+          "\\([\\tau'(\\theta)]^2/(nI(\\theta))\\)",
+        "\\(1/n\\)",
+        "\\(\\sigma^2/n\\)",
+        "\\(\\tau(\\theta)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat\\tau\\) 无偏估 \\(\\tau(\\theta)\\)。\\(\\text{Var}(\\hat\\tau) \\geq \\frac{[\\tau'(\\theta)]^2}{nI(\\theta)}\\)。证明用 Cauchy-Schwarz：\\(\\text{Cov}(\\hat\\tau, S)^2 \\leq \\text{Var}(\\hat\\tau)\\text{Var}(S)\\)。达到下界 ⟺ 指数族中 \\(\\tau=E[T]\\)。"
+      },
+      {
+        "id": "statistics-ch01-q24",
+        "question": "\\(X_1,...,X_n \\sim N(\\mu, \\sigma^2)\\)。\\((\\bar{X},S^2)\\) 完备充分。\\(E[S^2]=\\)？",
+        "options": [
+          "\\(\\sigma^2\\)（无偏）",
+        "\\(\\sigma^2(n-1)/n\\)",
+        "\\(\\sigma^2 n/(n-1)\\)",
+        "\\(\\sigma^4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S^2=\\frac{1}{n-1}\\sum(X_i-\\bar{X})^2\\)。\\(E[S^2]=\\sigma^2\\)。\\((n-1)S^2/\\sigma^2 \\sim \\chi^2_{n-1}\\)。\\(S^2\\) 是 \\(\\sigma^2\\) 的 UMVUE（Lehmann-Scheffé：\\(S^2\\) 是完备充分统计量的函数，且无偏）。"
+      },
+      {
+        "id": "statistics-ch01-q25",
+        "question": "充分性对数据约简的实际意义？",
+        "options": [
+          "只需存储 \\(T(X)\\) 而非全部数据，不损失关于 \\(\\theta\\) 的推断能力",
+        "可以丢弃所有数据",
+        "一定能降维到一维",
+        "只适用于连续分布"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\) 个数据 → \\(\\dim(T)\\) 维统计量。固定维度充分 ⟹ 数据约简与 \\(n\\) 无关（指数族典型特征）。非指数族中最小充分统计量维度可能随 \\(n\\) 增长（如顺序统计量）。"
+      },
+      {
+        "id": "statistics-ch01-q26",
+        "question": "质控中 \\(n\\) 个产品重量 \\(X_i \\sim N(\\mu, \\sigma^2)\\)（\\(\\sigma\\) 已知）。判断 \\(\\mu\\) 是否达标只需计算？",
+        "options": [
+          "\\(\\bar{X}\\)（\\(\\mu\\) 的充分统计量）",
+        "每个 \\(X_i\\) 的值",
+        "\\(\\max X_i\\)",
+        "\\(X_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\bar{X}\\) 充分 ⟹ 包含了全部关于 \\(\\mu\\) 的信息。无需存储原始数据。检验 \\(H_0:\\mu=\\mu_0\\): \\(Z=\\sqrt{n}(\\bar{X}-\\mu_0)/\\sigma\\)。大数据流中只更新 \\(\\sum X_i\\) 和 \\(n\\)。"
+      },
+      {
+        "id": "statistics-ch01-q27",
+        "question": "GLM（广义线性模型）使用指数族的原因？",
+        "options": [
+          "指数族有自然充分统计量，保证 MLE 良好性质（存在、唯一、渐近正态）",
+        "指数族易计算",
+        "仅因为正态是指数族",
+        "不需要连接函数"
+        ],
+        "answer": 0,
+        "explanation": "指数族的对数似然凹（\\(A(\\eta)\\) 凸的对偶），MLE 存在且唯一（正则条件下）。自然连接函数 \\(g(\\mu)=\\eta\\)。二项 → logit，Poisson → log。充分统计量结构使 IRLS 算法高效。"
+      },
+      {
+        "id": "statistics-ch01-q28",
+        "question": "\\(n\\) 次掷硬币结果只提供 \\(T=\\sum X_i\\)（总正面数）。\\(T\\) 对 \\(p\\) 充分意味着？",
+        "options": [
+          "知道 \\(T\\) 后，具体哪些次正朝上不影响对 \\(p\\) 的推断",
+        "\\(T\\) 就是 \\(p\\)",
+        "每次掷币独立性不重要",
+        "\\(T\\) 的分布不依赖 \\(p\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X|T=t)=\\binom{n}{t}^{-1}\\)（与 \\(p\\) 无关——超几何类型）。10 次掷硬币中，\\(7\\) 正 \\(3\\) 反足够；不需要知道\"第1357次正面\"。数据约简：\\(n \\to 1\\) 维。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="statistics"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/statistics.html" class="module-name">统计推断</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 统计模型与参数化</a></li>
+      <li><a href="#kp2">02 · 充分统计量与因子化定理</a></li>
+      <li><a href="#kp3">03 · 最小充分统计量</a></li>
+      <li><a href="#kp4">04 · 指数族</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>统计模型与充分统计量</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>统计模型与参数化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>统计推断的第一步是确定数据的数学模型。统计模型 \(\{P_\theta : \theta \in \Theta\}\) 是一族甙选分布，随机样本的真实分布被假定属于这个族。 统计学的任务就是从数据中推断未知参数 \(\theta\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\theta\) 编码了我们不知道的东西；\(\Theta\) 编码了我们认为可能的 范围。统计量是 \(T(X)\)：仅依赖于数据的函数（不含 \(\theta\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>统计模型：\(\{P_\theta : \theta \in \Theta\}\)，\(\Theta \subseteq \mathbb{R}^d\)。 观测数据 \(X = (X_1, \ldots, X_n) \sim P_\theta\)。 似然函数：对连续模型， \[L(\theta|x) = \prod_{i=1}^{n} f(x_i|\theta)\] 对数似然：\(\ell(\theta) = \sum_{i=1}^{n} \ln f(x_i|\theta)\)。 统计量 \(T(X)\) 是数据的可测函数，不依赖于 \(\theta\)。 例：\(\bar{X}\)，\(S^2\)，\(\max X_i\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>临床试验中设定统计模型（如生存分析用 Cox 模型）； 机器学习中的模型选择（类别的参数表达能力）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_1, \ldots, X_n \overset{iid}{\sim} N(\mu, \sigma^2)\)。 写出似然函数。 解答：\(L(\mu,\sigma^2) = (2\pi\sigma^2)^{-n/2} \exp\!\left(-\frac{\sum(x_i-\mu)^2}{2\sigma^2}\right)\)。 \(\ell = -\frac{n}{2}\ln(2\pi\sigma^2) - \frac{\sum(x_i-\mu)^2}{2\sigma^2}\)。 易错点：似然函数是 \(\theta\) 的函数（数据固定），而密度函数是 \(x\) 的函数（\(\theta\) 固定）。两者表达式相同，视角不同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">似然函数 \(L(\theta|x)\) 是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L(\\theta|x) = f(x|\\theta)\\) 数值上相同，但视为 \\(\\theta\\) 的函数。')">A. \(x\) 的概率密度</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(L(\\theta|x) = f(x|\\theta)\\) 数值上相同，但视为 \\(\\theta\\) 的函数。')">B. \(\theta\) 的函数（\(x\) 固定）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L(\\theta|x) = f(x|\\theta)\\) 数值上相同，但视为 \\(\\theta\\) 的函数。')">C. \(\theta\) 的概率密度</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>充分统计量与因子化定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>数据 \(X\) 可能很大，但关于 \(\theta\) 的信息可能可以用较小的统计量 \(T(X)\) 完整捕获。充分统计量的意义是：知道 \(T\) 后，数据 中不再含有关于 \(\theta\) 的额外信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>充分性将数据压缩为「无损摘要」。\(T\) 充分 iff \(P(X|T,\theta) = P(X|T)\) （给定 \(T\) 后，\(X\) 的条件分布不依赖 \(\theta\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>充分统计量定义：\(T(X)\) 对 \(\theta\) 充分 iff \(P_\theta(X \in A \;|\; T(X) = t)\) 不依赖于 \(\theta\)。 Fisher-Neyman 因子化定理：\(T\) 充分 iff 存在函数 \(g, h\) 使得 \[f(x|\theta) = g(T(x), \theta) \cdot h(x)\] 即似然分解为 “依赖 \(\theta\)+\(T\) 的部分” × “只依赖 \(x\) 的部分”。 证明要点：条件密度 \(f(x|T=t,\theta) = f(x|\theta)/f_T(t|\theta)\)。 若 \(f(x|\theta) = g(T(x),\theta) h(x)\)，则 \(f_T(t|\theta) = g(t,\theta) c(t)\)， 故 \(f(x|T=t,\theta) = h(x)/c(t)\) 与 \(\theta\) 无关。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>数据压缩：充分统计量允许用低维摘要代替原始数据， 在大数据场景下节省存储和计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_i \sim \text{Poisson}(\lambda)\) i.i.d.。证明 \(T = \sum X_i\) 充分。 解答：\(f(\mathbf{x}|\lambda) = \prod e^{-\lambda}\lambda^{x_i}/x_i! = e^{-n\lambda} \lambda^{\sum x_i} / \prod x_i!\)。 令 \(g(t,\lambda) = e^{-n\lambda}\lambda^t\)，\(h(x) = 1/\prod x_i!\)。由因子化 ✓ 易错点：不是任何统计量都是充分的。\(T = X_1\) 不是 \(\text{Poisson}(\lambda)\) 模型中的充分统计量。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">因子化定理中，\(h(x)\) 的角色是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(h(x)\\) 仅依赖数据 \\(x\\)，与参数 \\(\\theta\\) 无关。')">A. 包含 \(\theta\) 信息的部分</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(h(x)\\) 仅依赖数据 \\(x\\)，与参数 \\(\\theta\\) 无关。')">B. 与 \(\theta\) 无关的部分</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(h(x)\\) 仅依赖数据 \\(x\\)，与参数 \\(\\theta\\) 无关。')">C. 归一化常数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>最小充分统计量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(X\) 本身总是充分的（平凡的充分性）。我们要找的是「最小」 的充分统计量——它用最简洁的方式捕获全部 \(\theta\) 信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>最小充分统计量是充分统计量的函数（即每个充分统计量都能 “算出”它）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：充分统计量 \(T\) 是最小充分的 iff 对每个充分统计量 \(T'\)，\(T\) 是 \(T'\) 的函数。 判定方法：\(T\) 最小充分 iff \[\frac{f(x|\theta)}{f(y|\theta)} \text{ 不依赖 } \theta \;\Leftrightarrow\; T(x) = T(y)\] 即似然比​的值仅通过 \(T\) 取值来编码。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>最小充分统计量结合 Rao-Blackwell 定理可以改进估计量的 效率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_i \sim U(0, \theta)\) i.i.d.。找最小充分统计量。 解答：\(f(\mathbf{x}|\theta) = \theta^{-n} \mathbf{1}_{\max x_i \leq \theta} \mathbf{1}_{\min x_i \geq 0}\)。 \(f(\mathbf{x})/f(\mathbf{y}) = \mathbf{1}_{\max x_i \leq \theta}/\mathbf{1}_{\max y_i \leq \theta}\)。 此比不依赖 \(\theta\) iff \(\max x_i = \max y_i\)。故 \(T = X_{(n)}\) 最小充分。 易错点：误以为 \(\bar{X}\) 是充分的。对 \(U(0,\theta)\)，\(\bar{X}\) 不充分。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(X_i \sim N(\mu, 1)\) i.i.d. 的最小充分统计量是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！方差已知 = 1，因子化为 \\(e^{-n(\\bar{x}-\\mu)^2/2} \\cdot h(x)\\)，')">A. \(\bar{X}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。方差已知 = 1，因子化为 \\(e^{-n(\\bar{x}-\\mu)^2/2} \\cdot h(x)\\)，')">B. \((\bar{X}, S^2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。方差已知 = 1，因子化为 \\(e^{-n(\\bar{x}-\\mu)^2/2} \\cdot h(x)\\)，')">C. \(\sum X_i^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>指数族</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>统计学中最重要的分布族——指数族——涵盖了正态、指数、Poisson、 二项、Gamma 等几乎所有常见分布。它的统一形式使得充分统计量、 MLE 等都有简洁形式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>指数族是满足 \(\ln f = \eta \cdot T - A(\eta) + \ln h\) 的分布族。 它的自然参数 \(\eta\) 与充分统计量 \(T\) 成对偶。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>指数族形式： \[f(x|\theta) = h(x) \exp(\eta(\theta) \cdot T(x) - A(\theta))\] \(\eta(\theta)\)：自然参数；\(T(x)\)：充分统计量；\(A(\theta)\)：对数配分函数。 性质：\(A(\theta)\) 是矩生成函数： \[E[T] = A'(\eta), \quad \text{Var}(T) = A''(\eta)\] 常见例子： - \(N(\mu, \sigma^2)\)：\(\eta = (\mu/\sigma^2, -1/(2\sigma^2))\)，\(T = (x, x^2)\) - \(\text{Poisson}(\lambda)\)：\(\eta = \ln\lambda\)，\(T = x\)，\(A = e^\eta\) - \(\text{Exp}(\lambda)\)：\(\eta = -\lambda\)，\(T = x\)，\(A = -\ln(-\eta)\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>广义线性模型(GLM)的基础就是指数族；机器学习中的 softmax 回归也是指数族形式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\text{Bernoulli}(p)\) 属于指数族。 解答：\(f(x|p) = p^x(1-p)^{1-x} = (1-p)\exp(x \ln\frac{p}{1-p})\)。 形式：\(h=1\)，\(\eta = \ln(p/(1-p))\)（对数几率），\(T=x\)，\(A = \ln(1+e^\eta)\)。 易错点：指数族的参数化不唯一。\(\eta\) 是自然参数， 与常用参数 \(\theta\) 的关系可能是非线性的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">指数族的 \(A(\eta)\) 的一阶导数 \(A'(\eta)\) 等于</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A\\'(\\eta) = E[T]\\)，\\(A\\'\\'(\\eta) = \\text{Var}(T)\\)。\\(A\\) 是')">A. \(\text{Var}(T)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(A\\'(\\eta) = E[T]\\)，\\(A\\'\\'(\\eta) = \\text{Var}(T)\\)。\\(A\\) 是')">B. \(E[T]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A\\'(\\eta) = E[T]\\)，\\(A\\'\\'(\\eta) = \\text{Var}(T)\\)。\\(A\\) 是')">C. \(\text{Mode}(T)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/probability/statistics.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

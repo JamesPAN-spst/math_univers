@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 开映射与闭图定理 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch06-q1",
+        "question": "开映射定理：\\(T: X \\to Y\\)（\\(X, Y\\) Banach），\\(T\\) 有界线性且满射，则？",
+        "options": [
+          "\\(T\\) 是开映射（把开集映为开集）",
+        "\\(T\\) 是闭映射",
+        "\\(T\\) 是等距",
+        "\\(T\\) 是紧算子"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 满射 \\(\\Rightarrow\\) \\(T\\) 开映射。等价于：\\(\\exists r > 0\\)，\\(T(B_X(0,1)) \\supseteq B_Y(0,r)\\)。推论：如果 \\(T\\) 还是单射，\\(T^{-1}\\) 有界（\\(\\|T^{-1}\\| \\leq 1/r\\)）。证明核心：Baire 范畴定理（完备性关键）。这不对一般赋范空间成立。"
+      },
+      {
+        "id": "functional-ch06-q2",
+        "question": "开映射定理推论：\\(T: X \\to Y\\) 是有界线性双射（\\(X, Y\\) Banach）。则？",
+        "options": [
+          "\\(T^{-1}\\) 也是有界线性算子",
+        "\\(T^{-1}\\) 可能无界",
+        "\\(T\\) 是等距",
+        "\\(T^{-1}\\) 不一定线性"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 双射 + 有界 + Banach 空间 \\(\\Rightarrow\\) \\(T^{-1}\\) 有界（\\(T\\) 开映射 \\(\\Rightarrow\\) \\(T^{-1}\\) 连续）。这叫逆算子定理（Bounded Inverse Theorem）。如果 \\(X\\) 或 \\(Y\\) 不完备，反例存在（同一向量空间上两个不等价范数的恒等映射）。"
+      },
+      {
+        "id": "functional-ch06-q3",
+        "question": "闭图定理：\\(T: X \\to Y\\)（\\(X, Y\\) Banach），\\(T\\) 是线性算子。\\(T\\) 有界 \\(\\Leftrightarrow\\)？",
+        "options": [
+          "\\(T\\) 的图 \\(\\Gamma(T) = \\{(x, Tx) : x \\in X\\}\\) 是 \\(X \\times Y\\) 中的闭集",
+        "\\(T\\) 的图有界",
+        "\\(T\\) 的图紧",
+        "\\(T\\) 的图是开集"
+        ],
+        "answer": 0,
+        "explanation": "闭图定理：\\(T\\) 有界 \\(\\Leftrightarrow\\) \\(\\Gamma(T)\\) 闭。闭图条件：\\(x_n \\to x\\) 且 \\(Tx_n \\to y\\) \\(\\Rightarrow\\) \\(Tx = y\\)。比直接验证连续性更方便——不需要 \\(Tx_n \\to Tx\\)，而是\"如果碰巧 \\(Tx_n\\) 收敛，那极限必须是 \\(Tx\\)\"。"
+      },
+      {
+        "id": "functional-ch06-q4",
+        "question": "逆算子定理：\\(T: X \\to Y\\) Banach 空间间有界双射。\\(T^{-1}\\) 有界且 \\(\\|T^{-1}\\| \\leq ?\\)",
+        "options": [
+          "不能从 \\(\\|T\\|\\) 直接给出上界（\\(\\|T^{-1}\\|\\) 与 \\(\\|T\\|\\) 无简单关系）",
+        "\\(\\|T^{-1}\\| = 1/\\|T\\|\\)",
+        "\\(\\|T^{-1}\\| = \\|T\\|\\)",
+        "\\(\\|T^{-1}\\| \\leq \\|T\\|^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|T^{-1}\\|\\) 与 \\(\\|T\\|\\) 无直接不等式关系。例：\\(T: \\ell^2 \\to \\ell^2\\)，\\(T(e_n) = e_n/n\\)。\\(\\|T\\| = 1\\)。\\(T^{-1}(e_n) = ne_n\\)，\\(\\|T^{-1}\\| = \\infty\\)——但 \\(T\\) 不是满射！若 \\(T\\) 满射，\\(T^{-1}\\) 有界但 \\(\\|T^{-1}\\|\\) 需单独计算。"
+      },
+      {
+        "id": "functional-ch06-q5",
+        "question": "闭图定理的应用场景：\\(T\\) 定义在全空间上的线性算子，容易验证图闭但不容易直接验证有界。例？",
+        "options": [
+          "在两个不同范数下完备的空间上的恒等映射",
+        "微分算子",
+        "任何线性算子",
+        "仅有限秩算子"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 是 Banach 空间在范数 \\(\\|\\cdot\\|_1\\) 和 \\(\\|\\cdot\\|_2\\) 下。\\(I: (X, \\|\\cdot\\|_1) \\to (X, \\|\\cdot\\|_2)\\)，\\(Ix = x\\)。若 \\(\\|x_n - x\\|_1 \\to 0\\) 且 \\(\\|x_n - y\\|_2 \\to 0\\)，需证 \\(x = y\\)。若这成立（图闭），闭图定理给出 \\(I\\) 有界，即两范数等价。"
+      },
+      {
+        "id": "functional-ch06-q6",
+        "question": "闭图定理中，\"\\(T\\) 线性\"是否可省略？",
+        "options": [
+          "不可省略（非线性闭图不保证连续）",
+        "可省略",
+        "可省略但需传统连续性",
+        "仅在 Hilbert 空间可省"
+        ],
+        "answer": 0,
+        "explanation": "\\(f: \\mathbb{R} \\to \\mathbb{R}\\)，\\(f(x) = 1/x\\)（\\(x \\neq 0\\)），\\(f(0) = 0\\)。图 \\(\\{(x, 1/x): x \\neq 0\\} \\cup \\{(0,0)\\}\\) 是闭的（\\((x_n, 1/x_n) \\to (a, b)\\) 则 \\(ab = 1\\) 或 \\(a = x_n \\to 0\\) 只能 \\(|1/x_n| \\to \\infty\\) 不收敛）。但 \\(f\\) 不连续。线性 + 闭图才给有界。"
+      },
+      {
+        "id": "functional-ch06-q7",
+        "question": "\\(T: \\ell^1 \\to \\ell^2\\)，\\(T(x) = (x_n/n)\\)。\\(T\\) 有界，\\(T\\) 是满射吗？\\(T\\) 是开映射吗？",
+        "options": [
+          "\\(T\\) 非满射（\\((1/n) \\notin \\text{Im}(T)\\)），故开映射定理不直接适用",
+        "\\(T\\) 满射",
+        "\\(T\\) 是开映射",
+        "\\(T\\) 无界"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Tx\\|_2 = (\\sum |x_n|^2/n^2)^{1/2} \\leq (\\sum |x_n|^2)^{1/2} \\leq \\|x\\|_1\\)（有界）。\\(y = (1/n) \\in \\ell^2\\)：\\(Tx = y\\) 需 \\(x_n = n \\cdot (1/n) = 1\\)，\\((1,1,1,...) \\notin \\ell^1\\)。不满射。开映射定理的前提（满射）不满足。"
+      },
+      {
+        "id": "functional-ch06-q8",
+        "question": "两个 Banach 范数：\\(X\\) 上 \\(\\|\\cdot\\|_1\\) 和 \\(\\|\\cdot\\|_2\\) 都使 \\(X\\) 完备。若 \\(\\|x\\|_2 \\leq C \\|x\\|_1\\)（\\(\\|\\cdot\\|_1\\) 强于 \\(\\|\\cdot\\|_2\\)），则？",
+        "options": [
+          "两范数等价（\\(\\|\\cdot\\|_1 \\leq C' \\|\\cdot\\|_2\\)）",
+        "不一定等价",
+        "\\(\\|\\cdot\\|_1 = \\|\\cdot\\|_2\\)",
+        "需要额外条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(I: (X, \\|\\cdot\\|_1) \\to (X, \\|\\cdot\\|_2)\\)：\\(\\|Ix\\|_2 \\leq C\\|x\\|_1\\)（有界），\\(I\\) 是双射。两个空间都 Banach。开映射定理：\\(I\\) 是开映射，\\(I^{-1}\\) 有界，即 \\(\\|x\\|_1 \\leq C' \\|x\\|_2\\)。仅\"一半\"不等式 + 两端完备 = 等价。"
+      },
+      {
+        "id": "functional-ch06-q9",
+        "question": "微分算子 \\(D: (C^1[0,1], \\|\\cdot\\|_{C^1}) \\to (C[0,1], \\|\\cdot\\|_\\infty)\\) 有界。但 \\(D: (C^1[0,1], \\|\\cdot\\|_\\infty) \\to (C[0,1], \\|\\cdot\\|_\\infty)\\) 无界。闭图定理如何解释？",
+        "options": [
+          "第二种情况定义域不完备（\\((C^1, \\|\\cdot\\|_\\infty)\\) 不是 Banach），闭图定理不适用",
+        "\\(D\\) 的图不闭",
+        "\\(D\\) 不是线性的",
+        "闭图定理不适用于微分算子"
+        ],
+        "answer": 0,
+        "explanation": "\\((C^1[0,1], \\|\\cdot\\|_\\infty)\\) 不完备：\\(f_n \\to f\\) 一致，\\(f\\) 不一定可微。图闭？\\(f_n \\to f\\)（\\(\\|\\cdot\\|_\\infty\\)），\\(f_n' \\to g\\)（\\(\\|\\cdot\\|_\\infty\\)）\\(\\Rightarrow\\) \\(f' = g\\)（一致收敛极限可交换）——图确实闭。但定义域不 Banach，闭图定理不给出有界性。"
+      },
+      {
+        "id": "functional-ch06-q10",
+        "question": "\\(T: X \\to Y\\) Banach，\\(T\\) 有界双射。等价范数定理：\\(\\|x\\|' = \\|Tx\\|_Y\\) 与 \\(\\|x\\|_X\\) 等价。为什么？",
+        "options": [
+          "\\(\\|Tx\\| \\leq \\|T\\| \\|x\\|\\) 且 \\(\\|x\\| = \\|T^{-1}Tx\\| \\leq \\|T^{-1}\\| \\|Tx\\|\\)",
+        "因为 \\(T\\) 等距",
+        "因为 Hahn-Banach",
+        "因为 X 有限维"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|x\\|' = \\|Tx\\| \\leq \\|T\\| \\|x\\|\\)。反向：\\(\\|x\\| \\leq \\|T^{-1}\\| \\|Tx\\| = \\|T^{-1}\\| \\|x\\|'\\)。因此 \\(\\frac{1}{\\|T^{-1}\\|} \\|x\\| \\leq \\|x\\|' \\leq \\|T\\| \\|x\\|\\)。逆算子定理保证 \\(\\|T^{-1}\\| < \\infty\\)。"
+      },
+      {
+        "id": "functional-ch06-q11",
+        "question": "闭图定理应用：设 \\(H\\) Hilbert，\\(T: H \\to H\\) 线性且处处定义。若 \\(\\langle Tx, y \\rangle = \\langle x, Ty \\rangle\\)（\\(\\forall x, y\\)），则 \\(T\\) 有界。证明用？",
+        "options": [
+          "闭图定理：\\(x_n \\to x\\)，\\(Tx_n \\to y\\)，则 \\(\\langle y, z \\rangle = \\lim \\langle Tx_n, z \\rangle = \\lim \\langle x_n, Tz \\rangle = \\langle x, Tz \\rangle = \\langle Tx, z \\rangle\\)，故 \\(y = Tx\\)",
+        "一致有界原理",
+        "Hahn-Banach",
+        "谱定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 自伴（处处定义）。闭图验证：\\(x_n \\to x\\)，\\(Tx_n \\to y\\)。\\(\\forall z\\)：\\(\\langle y, z \\rangle = \\lim \\langle Tx_n, z \\rangle = \\lim \\langle x_n, Tz \\rangle = \\langle x, Tz \\rangle = \\langle Tx, z \\rangle\\)。\\(y = Tx\\)。图闭，闭图定理 \\(\\Rightarrow\\) \\(T\\) 有界。Hellinger-Toeplitz 定理。"
+      },
+      {
+        "id": "functional-ch06-q12",
+        "question": "开映射定理的量化版本：\\(T: X \\to Y\\) 满射，\\(X, Y\\) Banach。则 \\(\\exists C > 0\\)：\\(\\forall y\\)，\\(\\exists x\\)，\\(Tx = y\\) 且 \\(\\|x\\| \\leq C\\|y\\|\\)。\\(C\\) 的最优值？",
+        "options": [
+          "\\(C = \\|T^{-1}\\|\\)（若 \\(T\\) 双射）或一般为 \\(\\inf\\{\\|x\\| : Tx = y\\}/\\|y\\|\\) 的上确界",
+        "\\(C = \\|T\\|\\)",
+        "\\(C = 1\\)",
+        "\\(C\\) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 满射（不一定单射）：\\(\\|y\\|_\\natural = \\inf\\{\\|x\\| : Tx = y\\} = \\|[x]\\|_{X/\\ker T}\\)（商范数）。开映射定理给出 \\(\\tilde{T}: X/\\ker T \\to Y\\) 是同构，\\(\\|y\\|_\\natural \\leq C\\|y\\|\\)。\\(C = \\|\\tilde{T}^{-1}\\|\\)。"
+      },
+      {
+        "id": "functional-ch06-q13",
+        "question": "闭图定理与闭算子：定义在稠密子空间 \\(D(T) \\subseteq X\\) 上的算子 \\(T\\) 称为闭的如果图闭。闭算子不一定有界。例？",
+        "options": [
+          "微分算子 \\(d/dx: H^1[0,1] \\to L^2[0,1]\\)（\\(D(T) = H^1\\) 是 \\(L^2\\) 的稠密子空间）",
+        "恒等算子",
+        "零算子",
+        "有界算子"
+        ],
+        "answer": 0,
+        "explanation": "\\(T = d/dx\\)，\\(D(T) = H^1[0,1] \\subsetneq L^2[0,1]\\)。\\(T\\) 闭：\\(f_n \\to f\\)（\\(L^2\\)），\\(f_n' \\to g\\)（\\(L^2\\)）\\(\\Rightarrow\\) \\(f' = g\\)（弱意义下）。\\(T\\) 无界：\\(f_n(x) = \\sin(nx)/\\sqrt{n}\\)，\\(\\|f_n\\|_{L^2} \\leq 1/\\sqrt{n}\\) 但 \\(\\|f_n'\\|_{L^2} = \\sqrt{n}\\)。闭但无界 \\(\\Rightarrow\\) 定义域不能是全空间（否则闭图定理给有界）。"
+      },
+      {
+        "id": "functional-ch06-q14",
+        "question": "\\(T: X \\to Y\\) 有界双射。\\(\\|Tx\\| \\geq c \\|x\\|\\)（\\(c > 0\\)）（\\(T\\) 有下界）。此条件等价于？",
+        "options": [
+          "\\(T\\) 单射且 \\(\\text{Im}(T)\\) 闭",
+        "\\(T\\) 满射",
+        "\\(T\\) 是等距",
+        "\\(T^{-1}\\) 无界"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Tx\\| \\geq c\\|x\\|\\)：(1) 单射（\\(Tx = 0 \\Rightarrow x = 0\\)）；(2) 像闭：\\(Tx_n \\to y\\) \\(\\Rightarrow\\) \\(x_n\\) Cauchy（\\(\\|x_n - x_m\\| \\leq (1/c)\\|Tx_n - Tx_m\\|\\)），\\(x_n \\to x\\)，\\(Tx = y\\)。\\(T^{-1}\\) 在 \\(\\text{Im}(T)\\) 上有界（\\(\\|T^{-1}\\| \\leq 1/c\\)）。若再加满射则双射。"
+      },
+      {
+        "id": "functional-ch06-q15",
+        "question": "对称算子 vs 自伴算子：\\(T\\) 定义在 \\(D(T) \\subseteq H\\) 上稠密。\\(\\langle Tx, y \\rangle = \\langle x, Ty \\rangle\\)（\\(x, y \\in D(T)\\)）称对称。自伴还需要？",
+        "options": [
+          "\\(D(T) = D(T^*)\\)（定义域也要\"对\"）",
+        "\\(T\\) 有界",
+        "\\(D(T) = H\\)",
+        "对称自动自伴"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^*\\) 的域 \\(D(T^*) = \\{y: x \\mapsto \\langle Tx, y \\rangle\\) 连续 on \\(D(T)\\}\\)。对称 \\(\\Rightarrow\\) \\(D(T) \\subseteq D(T^*)\\)，\\(T^*|_{D(T)} = T\\)。自伴 = 对称 + \\(D(T) = D(T^*)\\)。区别至关重要：量子力学中可观测量需自伴（保证实谱），仅对称不够（可能有复本征值扩展）。"
+      },
+      {
+        "id": "functional-ch06-q16",
+        "question": "\\(T: X \\to Y\\) Banach 空间之间满射有界线性。开映射定理给出：\\(T(B_X)\\) 包含 \\(B_Y(0,r)\\)（\\(r > 0\\)）。\\(r\\) 的具体值？",
+        "options": [
+          "\\(r = 1/\\|T^{-1}\\|\\)（若 \\(T\\) 双射），一般 \\(r = 1/\\|\\tilde{T}^{-1}\\|\\)",
+        "\\(r = \\|T\\|\\)",
+        "\\(r = 1\\)",
+        "不可确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 双射：\\(T(B_X) \\supseteq \\{y: \\|T^{-1} y\\| < 1\\} = \\{y: \\|y\\| < 1/\\|T^{-1}\\|\\}\\)。一般：\\(\\tilde{T}: X/\\ker T \\to Y\\) 同构，\\(r = 1/\\|\\tilde{T}^{-1}\\|\\)。\\(T(B_X)\\) 的\"半径\"由逆映射范数控制——反映 \\(T\\) \"收缩\" \\(X\\) 的程度。"
+      },
+      {
+        "id": "functional-ch06-q17",
+        "question": "逆算子定理应用：\\(X\\) 上两个完备范数 \\(\\|\\cdot\\|_1, \\|\\cdot\\|_2\\)。若 \\(\\|x_n\\|_1 \\to 0 \\Rightarrow \\|x_n\\|_2 \\to 0\\)，则范数等价？",
+        "options": [
+          "不一定（需要双向）",
+        "是（闭图定理）",
+        "仅在有限维",
+        "永远不等价"
+        ],
+        "answer": 1,
+        "explanation": "\\(I: (X, \\|\\cdot\\|_1) \\to (X, \\|\\cdot\\|_2)\\)。闭图验证：\\(x_n \\xrightarrow{\\|\\cdot\\|_1} x\\) 且 \\(x_n \\xrightarrow{\\|\\cdot\\|_2} y\\)。\\((x_n - x) \\xrightarrow{\\|\\cdot\\|_1} 0 \\Rightarrow (x_n - x) \\xrightarrow{\\|\\cdot\\|_2} 0\\)（条件），故 \\(y = x\\)。闭图定理：\\(I\\) 有界。开映射定理：\\(I\\) 是同构（双射 + 有界 + Banach）。"
+      },
+      {
+        "id": "functional-ch06-q18",
+        "question": "开映射定理对非满射能给什么？\\(T: X \\to Y\\)，\\(\\text{Im}(T)\\) 是 \\(Y\\) 的第二范畴集（不是\"瘦\"的），则？",
+        "options": [
+          "\\(\\text{Im}(T)\\) 闭且 \\(T\\) 满射到 \\(\\text{Im}(T)\\)（但 Im(T) 不一定等于 \\(Y\\)）",
+        "\\(T\\) 满射",
+        "\\(\\text{Im}(T) = Y\\)",
+        "不能得出更多"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\overline{T(B_X)}\\) 在 \\(\\overline{\\text{Im}(T)}\\) 中有内点（Baire）。若 \\(\\text{Im}(T)\\) 本身是 Banach（闭子空间），开映射定理对 \\(T: X \\to \\text{Im}(T)\\) 适用。一般情况：\\(\\text{Im}(T)\\) 是 \\(Y\\) 的第二范畴 \\(\\Rightarrow\\) \\(\\text{Im}(T)\\) 必须是闭（带Gap lemma）。"
+      },
+      {
+        "id": "functional-ch06-q19",
+        "question": "闭算子 \\(T\\) 的图范数：\\(\\|x\\|_T = \\|x\\| + \\|Tx\\|\\)。（\\(D(T), \\|\\cdot\\|_T\\)）是 Banach 空间 \\(\\Leftrightarrow\\) \\(T\\) 闭。解释？",
+        "options": [
+          "图范数完备 \\(\\Leftrightarrow\\) 图 \\(\\Gamma(T)\\) 在 \\(X \\times Y\\) 中闭 \\(\\Leftrightarrow\\) \\(T\\) 闭",
+        "总是 Banach",
+        "永远不 Banach",
+        "仅当 \\(T\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "\\((D(T), \\|\\cdot\\|_T)\\) 与 \\((\\Gamma(T), \\|\\cdot\\|_{X \\times Y})\\) 等距（\\((x, Tx) \\mapsto x\\)）。\\(\\Gamma(T)\\) 闭 \\(\\Leftrightarrow\\) \\(\\Gamma(T)\\) 作为 \\(X \\times Y\\)（Banach）的子空间完备 \\(\\Leftrightarrow\\) \\((D(T), \\|\\cdot\\|_T)\\) 完备。这给出研究无界闭算子的框架——在图范数下它成为有界算子。"
+      },
+      {
+        "id": "functional-ch06-q20",
+        "question": "Zabreiko 定理：\\(X\\) Banach 上的次可加半范数 \\(p\\)（\\(p(x+y) \\leq p(x) + p(y)\\)）。若 \\(\\sum x_n\\) 收敛 \\(\\Rightarrow\\) \\(p(\\sum x_n) \\leq \\sum p(x_n)\\)（\\(\\sigma\\)-次可加），则 \\(p\\) 连续。这推广了？",
+        "options": [
+          "开映射定理和闭图定理的共同推广",
+        "Hahn-Banach",
+        "Riesz 表示",
+        "一致有界原理"
+        ],
+        "answer": 0,
+        "explanation": "Zabreiko（1969）：次可加 + \\(\\sigma\\)-次可加 + Banach \\(\\Rightarrow\\) 连续。开映射定理：\\(p(x) = \\inf\\{\\|z\\| : Tz = x\\}\\) 次可加且 \\(\\sigma\\)-次可加（\\(T\\) 满射），Zabreiko 给出连续性 \\(\\Leftrightarrow\\) \\(T\\) 开。闭图定理：\\(p(x) = \\|Tx\\|\\) 类似。一个定理统一两者。"
+      },
+      {
+        "id": "functional-ch06-q21",
+        "question": "开映射定理的证明第二步：已知 \\(\\overline{T(B_X)} \\supseteq B_Y(0, 2\\delta)\\)。用 Cauchy 序列技巧得到 \\(T(B_X) \\supseteq B_Y(0, \\delta)\\)。关键思路？",
+        "options": [
+          "对 \\(\\|y\\| < \\delta\\)，递归构造 \\(x_n\\)，\\(\\|x_n\\| < 2^{-n}\\)，\\(y - T(\\sum_{k=1}^n x_k) \\to 0\\)",
+        "直接用紧性",
+        "用 Hahn-Banach",
+        "用谱分解"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|y_0\\| < \\delta\\)。\\(y_0 \\in \\overline{T(B_X(0, 1/2))}\\)：\\(\\exists x_1\\)，\\(\\|x_1\\| < 1/2\\)，\\(\\|y_0 - Tx_1\\| < \\delta/2\\)。\\(y_1 = y_0 - Tx_1\\)：\\(\\|y_1\\| < \\delta/2\\)，找 \\(x_2\\)，\\(\\|x_2\\| < 1/4\\)。递归：\\(x = \\sum x_n\\) 绝对收敛（\\(\\sum \\|x_n\\| < 1\\)），\\(Tx = y_0\\)。\\(X\\) 完备保证级数收敛！"
+      },
+      {
+        "id": "functional-ch06-q22",
+        "question": "Banach 同构定理：\\(X/\\ker T \\cong \\text{Im}(T)\\)（当 \\(\\text{Im}(T)\\) 闭时）。这类比代数中的？",
+        "options": [
+          "第一同构定理",
+        "Lagrange 定理",
+        "Sylow 定理",
+        "中国剩余定理"
+        ],
+        "answer": 0,
+        "explanation": "代数第一同构定理：\\(G/\\ker\\phi \\cong \\text{Im}(\\phi)\\)。Banach 版本：\\(T: X \\to Y\\)（\\(\\text{Im}(T)\\) 闭），\\(\\tilde{T}: X/\\ker T \\to \\text{Im}(T)\\)（双射有界）。开映射定理：\\(\\tilde{T}^{-1}\\) 也有界，故 \\(\\tilde{T}\\) 是同构（拓扑 + 代数）。\\(\\text{Im}(T)\\) 闭是关键——否则只有代数同构，没有拓扑同构。"
+      },
+      {
+        "id": "functional-ch06-q23",
+        "question": "\\(T: X \\to Y\\) 有界，\\(T\\) 有有界逆 \\(\\Leftrightarrow\\) \\(T\\) 双射且？",
+        "options": [
+          "\\(X, Y\\) Banach（逆算子定理自动保证）",
+        "\\(T\\) 等距",
+        "\\(T\\) 自伴",
+        "额外需要 \\(T^{-1}\\) 线性"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 双射 + 有界 + Banach 两端 \\(\\Rightarrow\\) \\(T^{-1}\\) 有界（开映射定理/逆算子定理）。不需要额外条件！\\(T^{-1}\\) 自动线性（\\(T\\) 线性双射的逆是线性的）。这是Banach空间理论的力量——完备性让拓扑-代数条件自动匹配。"
+      },
+      {
+        "id": "functional-ch06-q24",
+        "question": "Hellinger-Toeplitz 定理：处处定义的对称算子是有界的。若 \\(T\\) 对称但无界，则？",
+        "options": [
+          "\\(T\\) 不可能处处定义在 Hilbert 空间上（\\(D(T) \\neq H\\)）",
+        "\\(T\\) 不是线性的",
+        "\\(T\\) 的图不闭",
+        "矛盾"
+        ],
+        "answer": 0,
+        "explanation": "闭图 + 处处定义 \\(\\Rightarrow\\) 有界（闭图定理）。对称 \\(\\Rightarrow\\) 图闭（\\(x_n \\to x\\)，\\(Tx_n \\to y\\)：\\(\\langle y,z \\rangle = \\lim \\langle Tx_n, z \\rangle = \\lim \\langle x_n, Tz \\rangle = \\langle x, Tz \\rangle = \\langle Tx, z \\rangle\\)）。无界 + 对称 \\(\\Rightarrow\\) \\(D(T) \\subsetneq H\\)。量子力学启示：位置/动量算子必须是无界的，只能在稠密子空间上定义。"
+      },
+      {
+        "id": "functional-ch06-q25",
+        "question": "闭值域定理：\\(T: X \\to Y\\) Banach，\\(\\text{Im}(T)\\) 闭 \\(\\Leftrightarrow\\) \\(\\text{Im}(T^*)\\) 闭。这连接了算子和其伴随的什么性质？",
+        "options": [
+          "值域闭性是\"自伴随\"的——\\(T\\) 的值域闭 \\(\\Leftrightarrow\\) \\(T^*\\) 的值域闭",
+        "\\(T\\) 满射 \\(\\Leftrightarrow\\) \\(T^*\\) 满射",
+        "\\(\\ker T = \\ker T^*\\)",
+        "\\(\\|T\\| = \\|T^*\\|\\)"
+        ],
+        "answer": 0,
+        "explanation": "闭值域定理（Banach）：\\(\\overline{\\text{Im}(T)} = (\\ker T^*)^\\perp\\)，\\(\\overline{\\text{Im}(T^*)} = (\\ker T)^\\perp\\)。\\(\\text{Im}(T)\\) 闭 \\(\\Leftrightarrow\\) \\(\\text{Im}(T) = (\\ker T^*)^\\perp\\) \\(\\Leftrightarrow\\) \\(\\text{Im}(T^*)\\) 闭。应用：Fredholm 理论中判断方程 \\(Tx = y\\) 可解性。"
+      },
+      {
+        "id": "functional-ch06-q26",
+        "question": "在 PDE 中，证明弱解的正则性（弱解自动是强解）经常用到？",
+        "options": [
+          "闭图定理（弱解满足的等式蕴含图闭，从而得到更高正则性估计）",
+        "开映射定理",
+        "Hahn-Banach",
+        "Riesz 表示"
+        ],
+        "answer": 0,
+        "explanation": "椭圆正则性：若 \\(u \\in H^1\\) 满足 \\(-\\Delta u = f\\)（\\(f \\in L^2\\)），则 \\(u \\in H^2\\)。映射 \\(T: H^2 \\cap H_0^1 \\to L^2\\)，\\(Tu = -\\Delta u\\) 是有界双射（Lax-Milgram + 正则性）。逆算子定理：\\(T^{-1}: L^2 \\to H^2\\) 有界，即 \\(\\|u\\|_{H^2} \\leq C\\|f\\|_{L^2}\\)。"
+      },
+      {
+        "id": "functional-ch06-q27",
+        "question": "在数据科学中，矩阵补全（matrix completion）：若线性映射 \\(\\mathcal{A}: \\mathbb{R}^{m \\times n} \\to \\mathbb{R}^p\\)（观测算子）满足 RIP（\\(\\|\\mathcal{A}(X)\\| \\approx \\|X\\|\\)），开映射定理给出什么？",
+        "options": [
+          "\\(\\mathcal{A}\\) 在低秩矩阵上有有界逆——可以从观测恢复原始矩阵",
+        "\\(\\mathcal{A}\\) 满射",
+        "补全不可能",
+        "需要更多观测"
+        ],
+        "answer": 0,
+        "explanation": "RIP：\\(\\exists c, C\\)，\\(c\\|X\\|_F \\leq \\|\\mathcal{A}X\\| \\leq C\\|X\\|_F\\)（在 \\(k\\)-秩矩阵上）。\\(\\mathcal{A}\\) 在低秩子空间上双射 + 下界 \\(\\Rightarrow\\) \\(\\mathcal{A}^{-1}\\) 有界。恢复误差 \\(\\|X - X^*\\| \\leq (1/c)\\|\\mathcal{A}(X - X^*)\\|\\)。有限维中\"开映射\"即双射 + 条件数有界。"
+      },
+      {
+        "id": "functional-ch06-q28",
+        "question": "在数值分析中，Lax-Milgram 给出 \\(Au = f\\) 的解满足 \\(\\|u\\| \\leq C\\|f\\|\\)（稳定性）。离散化 \\(A_h u_h = f_h\\)（\\(A_h\\) 离散算子），逆算子定理保证？",
+        "options": [
+          "若 \\(A_h\\) 双射且在 Banach 空间间有界，则 \\(A_h^{-1}\\) 有界（离散稳定性）",
+        "收敛性",
+        "一致性",
+        "精度"
+        ],
+        "answer": 0,
+        "explanation": "有限元/差分中：\\(A_h: V_h \\to V_h^*\\)。若 \\(A_h\\) 满足 inf-sup 条件（\\(\\inf_u \\sup_v |a_h(u,v)|/(\\|u\\|\\|v\\|) \\geq \\beta > 0\\)），等价于 \\(A_h\\) 双射 + 下界，逆算子定理给 \\(\\|u_h\\| \\leq (1/\\beta)\\|f_h\\|\\)。这是有限元稳定性理论的核心——开映射/逆算子定理的离散版本。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Baire 范畴定理与一致有界原理</a></li>
+      <li><a href="#kp2">02 · 开映射定理</a></li>
+      <li><a href="#kp3">03 · 闭图定理</a></li>
+      <li><a href="#kp4">04 · 三大定理的逻辑关系与综合应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>开映射与闭图定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Baire 范畴定理与一致有界原理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Baire 范畴定理说：完备度量空间不能是可数个"稀薄"（无处稠密） 闭集的并。这看似纯拓扑结论，却是泛函分析三大定理的共同基础。 一致有界原理（Banach-Steinhaus）是第一个应用：如果一族算子 在每个点上有界，则这些算子的范数一致有界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Baire 定理将完备性的分析学性质转化为拓扑学结论。 一致有界原理是"逐点性质 ⇒ 一致性质"的深刻跳跃， 在有限维中平凡，但在无穷维中非平凡。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Baire 范畴定理</strong>：完备度量空间中，可数个稠密开集之交仍稠密。 等价地：完备度量空间不是可数个无处稠密闭集之并。 <strong>定理 (Banach-Steinhaus / 一致有界原理)</strong>：设 \(X\) 为 Banach 空间， \(Y\) 为赋范空间，\(\{T_\alpha\} \subseteq B(X, Y)\)。若对每个 \(x \in X\)， \(\sup_\alpha \|T_\alpha x\| < \infty\)，则 \(\sup_\alpha \|T_\alpha\| < \infty\)。 <strong>证明（Baire）</strong>：令 \(F_n = \{x : \sup_\alpha \|T_\alpha x\| \leq n\}\)， \(F_n\) 闭，且 \(\bigcup F_n = X\)。由 Baire，某个 \(F_N\) 含开球 \(B(x_0, r)\)。对 \(\|h\| < r\)： \[\|T_\alpha h\| \leq \|T_\alpha(x_0 + h)\| + \|T_\alpha x_0\| \leq 2N\] 故 \(\|T_\alpha\| \leq 2N/r\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Fourier 分析：存在 \(L^1\) 函数其 Fourier 级数在某点发散 （用一致有界原理证明 Dirichlet 核的 \(L^1\) 范数无界）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(f_n: C([0,1]) \to \mathbb{R}\)，\(f_n(g) = g(1/n)\) （点求值泛函）。\(\|f_n\| = 1\) 对所有 \(n\)，且对每个 \(g\)， \(\sup_n |f_n(g)| = \sup_n |g(1/n)| \leq \|g\|_\infty < \infty\)。 一致有界原理给出 \(\sup \|f_n\| < \infty\)——确实 \(= 1\)。 易错点：一致有界原理需要 \(X\) 是 Banach 空间（完备）， 不能用于不完备的赋范空间。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">一致有界原理的前提中，哪个不能去掉？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(X\\) 的完备性用于 Baire 定理；算子的线性和有界性')">A. \(X\) 的完备性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(X\\) 的完备性用于 Baire 定理；算子的线性和有界性')">B. \(T_\alpha\) 的线性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(X\\) 的完备性用于 Baire 定理；算子的线性和有界性')">C. \(Y\) 的完备性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(X\\) 的完备性用于 Baire 定理；算子的线性和有界性')">D. A 和 B 都不能去掉</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>开映射定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>连续映射将开集映为开集吗？一般不会。但对 Banach 空间之间的 满射有界线性算子，开映射定理给出肯定回答——满射的连续线性 算子自动将开集映为开集。这一定理保证了"线性方程有解时， 解连续依赖于数据"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>开映射定理的证明利用 Baire 定理：满射保证像集覆盖全空间， 完备性保证覆盖中某个"层"有内点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (开映射)</strong>：设 \(X, Y\) 为 Banach 空间，\(T \in B(X, Y)\) 满射。 则 \(T\) 是开映射（将开集映为开集）。 <strong>证明框架</strong>： Step 1. \(\overline{T(B_X(0,1))} \supseteq B_Y(0, r)\) 对某 \(r > 0\)。 （\(Y = \bigcup_n T(B_X(0,n))\)，由 Baire，某个 \(\overline{T(B_X(0,n_0))}\) 含内点，齐次性约化到 \(n_0 = 1\)。） Step 2. \(T(B_X(0,1)) \supseteq B_Y(0, r/2)\)。 （用完备性"补全"：对 \(\|y\| < r/2\)，迭代找 \(x_n\) 使 \(\|y - T(x_1 + \cdots + x_n)\| < r/2^{n+1}\)， \(\sum x_n\) 收敛到 \(x\)，\(Tx = y\)。） <strong>推论 (逆映射定理)</strong>：若 \(T\) 还是单射（即双射），则 \(T^{-1}\) 有界（连续）。即 \(T\) 是拓扑同构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在 PDE 中，线性算子 \(T\) 给出方程 \(Tu = f\)，开映射定理保证 可逆时解连续依赖于 \(f\)（适定性的第三个条件）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：导数算子 \(D: C^1([0,1]) \to C([0,1])\)，\(Df = f'\)。 \(D\) 是有界线性算子吗？ 解答：用 \(C^1\) 范数 \(\|f\|_{C^1} = \|f\|_\infty + \|f'\|_\infty\)。 \(\|Df\|_\infty = \|f'\|_\infty \leq \|f\|_{C^1}\)。D 有界。 \(D\) 满射（对 \(g \in C\)，\(f(x) = \int_0^x g(t) dt \in C^1\)，\(Df = g\)）。 开映射定理保证 \(D\) 是开映射。 易错点：开映射定理需要两个空间都完备且算子满射。 若非满射或空间不完备，结论可能不成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">开映射定理的条件包括？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。需要 \\(X, Y\\) Banach（完备）+ \\(T\\) 有界线性满射。')">A. \(T\) 单射</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！需要 \\(X, Y\\) Banach（完备）+ \\(T\\) 有界线性满射。')">B. \(X, Y\) 都是 Banach 空间且 \(T\) 满射</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。需要 \\(X, Y\\) Banach（完备）+ \\(T\\) 有界线性满射。')">C. \(T\) 紧</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。需要 \\(X, Y\\) Banach（完备）+ \\(T\\) 有界线性满射。')">D. \(Y\) 是 Hilbert 空间</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>闭图定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>验证一个线性算子是否有界（连续）可能很困难——需要估计算子范数。 闭图定理提供了一种更间接的方法：只需验证算子的图 \(\{(x, Tx) : x \in X\}\) 在乘积空间中是闭的。闭图条件通常 比直接估计范数更容易验证，使闭图定理成为证明算子连续性的利器。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>闭图定理将"连续性"转化为"图的拓扑性质"。算子 \(T\) 的图 \(G(T) = \{(x, Tx)\} \subseteq X \times Y\) 在闭映射下自动闭， 反之（Banach 空间上）闭图保证有界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (闭图)</strong>：设 \(X, Y\) Banach 空间，\(T: X \to Y\) 线性。 若 \(G(T) = \{(x, Tx) : x \in X\}\) 在 \(X \times Y\) （范数 \(\|(x,y)\| = \|x\| + \|y\|\)）中闭，则 \(T\) 有界。 <strong>闭图条件等价于</strong>：\(x_n \to x\) 且 \(Tx_n \to y \Rightarrow Tx = y\)。 <strong>证明</strong>: 在 \(G(T)\) 上定义投影 \(\pi_1: (x, Tx) \mapsto x\) 和 \(\pi_2: (x, Tx) \mapsto Tx\)。\(G(T)\) 闭 + \(X \times Y\) Banach ⇒ \(G(T)\) Banach。\(\pi_1: G(T) \to X\) 是连续双射（线性有界满射）， 由开映射定理 \(\pi_1^{-1}\) 有界，故 \(T = \pi_2 \circ \pi_1^{-1}\) 有界。 <strong>逻辑关系</strong>：闭图定理由开映射定理推出，而开映射定理基于 Baire 范畴定理。三者的逻辑链：Baire → 开映射 → 闭图。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(T: L^2([0,1]) \to L^2([0,1])\)，\(Tu(x) = xu(x)\)（乘法算子）。 用闭图定理证明 \(T\) 有界。 解答：设 \(u_n \to u\) 且 \(Tu_n = xu_n \to v\) 在 \(L^2\) 中。 则 \(xu_n \to xu\) 在 \(L^2\) 中（因为 \(\|x(u_n - u)\|_2 \leq \|u_n - u\|_2\)）。 故 \(v = xu = Tu\)，图闭。由闭图定理 \(T\) 有界。✓ 易错点：闭图定理需要两空间都完备。若 \(X\) 或 \(Y\) 不完备， 闭图不保证有界。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">闭图定理说 \(G(T)\) 闭蕴含？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。闭图 + Banach 空间 ⇒ \\(T\\) 有界。不涉及满射或紧性。')">A. \(T\) 是满射</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。闭图 + Banach 空间 ⇒ \\(T\\) 有界。不涉及满射或紧性。')">B. \(T\) 是紧算子</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！闭图 + Banach 空间 ⇒ \\(T\\) 有界。不涉及满射或紧性。')">C. \(T\) 是有界（连续）算子</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。闭图 + Banach 空间 ⇒ \\(T\\) 有界。不涉及满射或紧性。')">D. \(T\) 有逆</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>三大定理的逻辑关系与综合应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一致有界原理、开映射/逆映射定理、闭图定理并称为泛函分析的 "三大定理"。它们表面独立，实际都基于 Baire 范畴定理。 理解它们之间的逻辑关系和各自的应用场景是掌握泛函分析的 里程碑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>三大定理的共同精神：完备性（Banach 空间）+线性性 ⇒ 自动 正则性。有限维空间中这些结论平凡，只有无穷维才需要深层定理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>逻辑链</strong>： \[\text{Baire 范畴定理} \Rightarrow \text{一致有界原理 (Banach-Steinhaus)}\] \[\text{Baire 范畴定理} \Rightarrow \text{开映射定理} \Rightarrow \text{逆映射定理}\] \[\text{开映射定理} \Rightarrow \text{闭图定理}\] <strong>对比表</strong>： | 定理 | 输入 | 结论 | |------|------|------| | 一致有界 | 逐点有界族 | 一致有界 | | 开映射 | 满射有界线性 | 开映射 | | 闭图 | 闭图线性 | 有界 | <strong>综合应用</strong>：等价范数定理——若 \(\|\cdot\|_1\) 和 \(\|\cdot\|_2\) 使 \(X\) 都成为 Banach 空间，且 \(\|x\|_1 \leq C\|x\|_2\)， 则 \(\|x\|_2 \leq C'\|x\|_1\)（由恒等映射和逆映射定理）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Fourier 级数理论：用一致有界原理证明存在连续函数的 Fourier 级数在某点发散；用闭图定理证明弱微分算子的连续性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(X\) 在范数 \(\|\cdot\|_1\) 和 \(\|\cdot\|_2\) 下都是 Banach 空间，且 \(\|x\|_1 \leq \|x\|_2\) 对所有 \(x\)。 证明存在 \(C\) 使 \(\|x\|_2 \leq C\|x\|_1\)。 解答：恒等映射 \(I: (X, \|\cdot\|_2) \to (X, \|\cdot\|_1)\) 有界 （\(\|Ix\|_1 \leq \|x\|_2\)）且双射。 两空间都 Banach，由逆映射定理 \(I^{-1}\) 有界， 即 \(\|x\|_2 = \|I^{-1}x\|_2 \leq C\|x\|_1\)。 易错点：忘记验证两个空间的完备性。 若其中一个不完备，逆映射定理不适用。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">三大定理都基于什么共同基础？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。一致有界原理、开映射定理（→闭图定理）都依赖于')">A. Hahn-Banach 定理</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！一致有界原理、开映射定理（→闭图定理）都依赖于')">B. Baire 范畴定理</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。一致有界原理、开映射定理（→闭图定理）都依赖于')">C. Riesz 表示定理</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。一致有界原理、开映射定理（→闭图定理）都依赖于')">D. Zorn 引理</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="ch07.html" class="nav-next">Ch.7 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

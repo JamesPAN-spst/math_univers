@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 古典密码 — 密码学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "cryptography-ch01-q1",
+        "question": "用 Caesar 密码 \\(k=5\\) 加密字母 W（编号 22），求密文字母的编号。",
+        "options": [
+          "\\(27\\)  B) \\(1\\)  C) \\(3\\)  D) \\(17\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(E_5(22)=(22+5)\\bmod26=27\\bmod26=1\\)，对应字母 B。Caesar 密码的加密运算是模 26 加法。选 A 是忘记取模的常见错误：\\(22+5=27\\) 但必须 \\(\\bmod 26\\) 得到 \\(1\\)。"
+      },
+      {
+        "id": "cryptography-ch01-q2",
+        "question": "Vigenère 密码密钥 \\(\\mathbf{k}=(2,5,1)\\)，加密明文 \"CAT\"（编号 2,0,19）。求密文。",
+        "options": [
+          "ECU  B) EFU  C) DFT  D) EET"
+        ],
+        "answer": 1,
+        "explanation": "\\(C:2+2=4\\to E\\)；\\(A:0+5=5\\to F\\)；\\(T:19+1=20\\to U\\)。密文 \"EFU\"。Vigenère 对每个位置用不同的偏移量（密钥循环），破坏了单字母频率特征。选 A 中第三个字母错误（\\(19+1=20\\) 不是 \\(20\\)，是 U 不是 U，让我确认 \\(20\\to U\\)，对）。"
+      },
+      {
+        "id": "cryptography-ch01-q3",
+        "question": "密文中字母 X 出现 30 次（最高频），若为单表替代密码，X 最可能对应的明文字母是什么？",
+        "options": [
+          "A  B) E  C) T  D) S"
+        ],
+        "answer": 1,
+        "explanation": "英语中最高频字母为 E（约 12.7%），其次 T（约 9.1%）。频率分析的首要假设是最高频密文字母对应 E。计算位移 \\(k=X-E=23-4=19\\)。但需结合 bigram 等更多统计信息综合确认，单一频率可能因样本量而偏差。"
+      },
+      {
+        "id": "cryptography-ch01-q4",
+        "question": "Kerckhoffs 原则的核心内容是什么？",
+        "options": [
+          "加密算法必须保密  B) 安全性应仅依赖于密钥的保密性  C) 密钥必须足够长  D) 必须使用公钥加密"
+        ],
+        "answer": 1,
+        "explanation": "Kerckhoffs 在 1883 年提出：密码系统的安全性不应依赖算法保密，而应仅取决于密钥。这意味着算法可以公开接受审计和攻击测试。现代 AES、RSA 等算法完全公开，安全性建立在密钥的保密和数学难题上。违反此原则的\"安全靠隐蔽\"方案一旦算法泄露即全部崩溃。"
+      },
+      {
+        "id": "cryptography-ch01-q5",
+        "question": "Alice 用 One-time Pad 加密 \\(m=1101\\)，密钥 \\(k=1010\\)，求密文 \\(c\\)。",
+        "options": [
+          "\\(0111\\)  B) \\(1010\\)  C) \\(0100\\)  D) \\(1111\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c=m\\oplus k=1101\\oplus1010=0111\\)。逐位 XOR：\\(1\\oplus1=0,1\\oplus0=1,0\\oplus1=1,1\\oplus0=1\\)。解密验证：\\(c\\oplus k=0111\\oplus1010=1101=m\\)✓。OTP 的正确性来自 XOR 的自逆性。"
+      },
+      {
+        "id": "cryptography-ch01-q6",
+        "question": "英语文本的重合指数(IC)约为 \\(0.065\\)，随机文本的 IC 约为多少？",
+        "options": [
+          "\\(0.038\\)  B) \\(0.065\\)  C) \\(0.050\\)  D) \\(0.100\\)"
+        ],
+        "answer": 0,
+        "explanation": "随机文本中每个字母概率 \\(1/26\\)，\\(\\text{IC}=\\sum p_i^2=26\\times(1/26)^2=1/26\\approx0.038\\)。英语 IC 远高于 \\(0.038\\) 是因为字母频率不均匀。Kasiski 检验中若分组后 IC 接近 \\(0.065\\)，说明密钥长度猜测正确。"
+      },
+      {
+        "id": "cryptography-ch01-q7",
+        "question": "完善保密（Perfect Secrecy）的定义是什么？",
+        "options": [
+          "\\(P(M=m|C=c)=P(M=m)\\) 对所有 \\(m,c\\)  B) 密钥长度 \\(\\geq128\\) 位  C) 使用了 AES 加密  D) 攻击者的计算能力有限"
+        ],
+        "answer": 0,
+        "explanation": "Shannon 的完善保密定义要求密文不泄露任何关于明文的信息：观察密文后，对明文的后验概率不变。等价于 \\(M\\) 与 \\(C\\) 统计独立。这是信息论意义上的无条件安全，不依赖任何计算假设。One-time Pad 是唯一满足此性质的实用方案。"
+      },
+      {
+        "id": "cryptography-ch01-q8",
+        "question": "Caesar 密码的密钥空间大小为 26。若使用仿射密码 \\(E(x)=(ax+b)\\bmod26\\)（\\(\\gcd(a,26)=1\\)），密钥空间为多少？",
+        "options": [
+          "\\(676\\)  B) \\(312\\)  C) \\(286\\)  D) \\(52\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(a\\) 必须与 26 互素，\\(\\varphi(26)=\\varphi(2)\\varphi(13)=1\\times12=12\\) 种选择。\\(b\\) 有 26 种选择。密钥空间 \\(=12\\times26=312\\)。选 A 是 \\(26\\times26=676\\)，忽略了 \\(\\gcd\\) 条件。仿射密码虽然比 Caesar 更大，但 312 仍可暴力搜索。"
+      },
+      {
+        "id": "cryptography-ch01-q9",
+        "question": "Kasiski 检验中发现密文中 \"YPR\" 出现 3 次，间距分别为 15、25、30。推测 Vigenère 密钥长度最可能为多少？",
+        "options": [
+          "\\(3\\)  B) \\(5\\)  C) \\(15\\)  D) \\(25\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\gcd(15,25,30)=5\\)。密钥长度最可能为 5。间距是密钥长度的倍数（相同密钥片段加密相同明文片段产生重复）。\\(\\gcd\\) 提取最大公因子作为密钥长度估计。验证：\\(15/5=3,25/5=5,30/5=6\\)，都是整数。可进一步用 IC 确认。"
+      },
+      {
+        "id": "cryptography-ch01-q10",
+        "question": "对长度 200 的密文分组后（猜测密钥长度 \\(m=4\\)），第 1 组的 IC 为 \\(0.064\\)，第 2 组为 \\(0.066\\)，第 3 组为 \\(0.041\\)，第 4 组为 \\(0.063\\)。判断密钥长度猜测是否正确。",
+        "options": [
+          "正确，IC 都接近 0.065  B) 不正确，第 3 组 IC 太低  C) 无法判断  D) 正确，只要平均值接近即可"
+        ],
+        "answer": 1,
+        "explanation": "英语文本 IC \\(\\approx0.065\\)，随机 IC \\(\\approx0.038\\)。第 3 组 IC=0.041 接近随机值，说明该组仍包含多个 Caesar 层（未充分分离）。正确密钥长度下所有分组的 IC 都应接近 0.065。应尝试 \\(m=8\\) 或 \\(m=12\\)（\\(4\\) 的倍数）。"
+      },
+      {
+        "id": "cryptography-ch01-q11",
+        "question": "密码系统中攻击模型从弱到强排列正确的是？",
+        "options": [
+          "COA < KPA < CCA < CPA  B) COA < KPA < CPA < CCA  C) KPA < COA < CPA < CCA  D) CPA < CCA < KPA < COA"
+        ],
+        "answer": 1,
+        "explanation": "COA（唯密文）< KPA（已知明文）< CPA（选择明文）< CCA（选择密文）。每一级攻击者的能力严格增强。CCA 中攻击者可获得任意密文的解密结果（解密预言机），能力最强。能抵抗 CCA 的方案（IND-CCA2 安全）被认为最安全。"
+      },
+      {
+        "id": "cryptography-ch01-q12",
+        "question": "仿射密码 \\(E(x)=(5x+3)\\bmod26\\)，解密函数 \\(D(y)\\) 中需要计算 \\(5^{-1}\\bmod26\\)。求 \\(5^{-1}\\bmod26\\)。",
+        "options": [
+          "\\(21\\)  B) \\(5\\)  C) \\(11\\)  D) \\(15\\)"
+        ],
+        "answer": 0,
+        "explanation": "需找 \\(a\\) 使 \\(5a\\equiv1\\pmod{26}\\)。\\(5\\times21=105=4\\times26+1\\)，\\(105\\bmod26=1\\)✓。故 \\(5^{-1}=21\\)。解密：\\(D(y)=21(y-3)\\bmod26\\)。可用扩展欧几里得算法系统求解：\\(26=5\\times5+1\\)，\\(1=26-5\\times5\\)，故 \\(5^{-1}\\equiv-5\\equiv21\\pmod{26}\\)。"
+      },
+      {
+        "id": "cryptography-ch01-q13",
+        "question": "使用频率分析破译单表替代密码时，以下哪个 bigram 对照最有用？",
+        "options": [
+          "最高频的单字母  B) 连续相同字母对 (如 LL, SS)  C) 最高频 bigram (如 TH, HE, IN)  D) 三字母组频率"
+        ],
+        "answer": 2,
+        "explanation": "英语中 TH 出现频率约 3.5%，HE 约 3.1%。bigram 频率比单字母频率提供更多结构信息，能更快缩小映射可能性。例如密文中最高频 bigram \"QX\" 很可能对应 TH。单字母频率能给初始猜测，但 bigram 大幅加速破译过程。连续字母对虽有用但频率较低。"
+      },
+      {
+        "id": "cryptography-ch01-q14",
+        "question": "Alice 用 OTP 对两条消息 \\(m_1=1010,m_2=1100\\) 重用了同一密钥 \\(k\\)。窃听者截获 \\(c_1,c_2\\)，可计算出什么？",
+        "options": [
+          "\\(m_1\\) 和 \\(m_2\\) 的值  B) \\(m_1\\oplus m_2=0110\\)  C) 密钥 \\(k\\) 的值  D) 什么也得不到"
+        ],
+        "answer": 1,
+        "explanation": "\\(c_1\\oplus c_2=(m_1\\oplus k)\\oplus(m_2\\oplus k)=m_1\\oplus m_2=1010\\oplus1100=0110\\)。两条密文的 XOR 完全消去密钥，暴露明文差异。若明文有结构（如 ASCII 英文），crib-dragging 技术可逐步恢复两条明文。这就是 OTP 绝对不能重用的原因。"
+      },
+      {
+        "id": "cryptography-ch01-q15",
+        "question": "一个密码系统明文空间 \\(|\\mathcal{M}|=100\\)，密钥空间 \\(|\\mathcal{K}|=50\\)。它能否实现完善保密？",
+        "options": [
+          "能  B) 不能，因为 \\(|\\mathcal{K}|<|\\mathcal{M}|\\)  C) 取决于加密算法  D) 取决于明文分布"
+        ],
+        "answer": 1,
+        "explanation": "Shannon 定理证明完善保密要求 \\(|\\mathcal{K}|\\geq|\\mathcal{M}|\\)。\\(50<100\\) 不满足条件。直觉：密钥不够多时，存在某个密文 \\(c\\) 使得可能的明文集合 \\(\\{D_k(c):k\\in\\mathcal{K}\\}\\) 不覆盖整个 \\(\\mathcal{M}\\)，从而 \\(P(M=m_0|C=c)=0\\neq P(M=m_0)\\)，违反完善保密。"
+      },
+      {
+        "id": "cryptography-ch01-q16",
+        "question": "OTP 中二进制密钥 \\(k\\) 均匀随机。设 \\(m=0\\)（1 bit），\\(c=m\\oplus k\\)。\\(P(M=0|C=1)=?\\)",
+        "options": [
+          "\\(0\\)  B) \\(\\frac{1}{2}\\)  C) \\(1\\)  D) 取决于先验"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(C=1|M=0)=P(K=1)=1/2\\)。\\(P(C=1|M=1)=P(K=0)=1/2\\)。\\(P(C=1)=1/2\\)。\\(P(M=0|C=1)=\\frac{P(C=1|M=0)P(M=0)}{P(C=1)}\\)。若先验 \\(P(M=0)=P(M=1)=1/2\\)，则后验 \\(=1/2\\)。但即使先验不均匀，由 OTP 的完善保密性，后验永远等于先验：\\(P(M=m|C=c)=P(M=m)\\)。"
+      },
+      {
+        "id": "cryptography-ch01-q17",
+        "question": "多字母替代密码 Hill cipher 使用矩阵 \\(K=\\begin{pmatrix}3&3\\\\2&5\\end{pmatrix}\\bmod26\\) 加密。\\(\\det K\\bmod26=?\\) 该密钥是否有效？",
+        "options": [
+          "\\(\\det=9\\)，有效  B) \\(\\det=9\\)，无效  C) \\(\\det=0\\)，无效  D) \\(\\det=21\\)，有效"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\det K=3\\times5-3\\times2=15-6=9\\)。需 \\(\\gcd(9,26)=1\\)（因为 \\(9=3^2\\)，\\(26=2\\times13\\)），\\(\\gcd=1\\)✓，密钥有效。若 \\(\\gcd(\\det,26)\\neq1\\) 则无法求逆矩阵，解密不可能。选 B 的 \"无效\" 判断错误。Hill cipher 是线性的，容易被 KPA 破解（解线性方程组）。"
+      },
+      {
+        "id": "cryptography-ch01-q18",
+        "question": "对 Vigenère 密文，对所有可能密钥长度 \\(m=1\\) 到 \\(m=10\\) 计算各组平均 IC。结果为：\\(m=1\\): 0.043, \\(m=2\\): 0.044, \\(m=3\\): 0.064, \\(m=4\\): 0.044, \\(m=5\\): 0.044, \\(m=6\\): 0.065, \\(m=7\\): 0.041, \\(m=8\\): 0.044, \\(m=9\\): 0.063, \\(m=10\\): 0.043。密钥长度最可能是？",
+        "options": [
+          "\\(3\\)  B) \\(6\\)  C) \\(9\\)  D) 以上均可能，需进一步分析"
+        ],
+        "answer": 0,
+        "explanation": "\\(m=3\\): IC=0.064≈英语，\\(m=6\\): IC=0.065≈英语，\\(m=9\\): IC=0.063≈英语。\\(m=6\\) 和 \\(m=9\\) 是 \\(m=3\\) 的倍数，所以它们的分组也能把 Vigenère 分离成 Caesar（因为 3 整除 6 和 9）。密钥长度应取满足 IC 条件的最小值 \\(m=3\\)。这是一个关键的实战技巧。"
+      },
+      {
+        "id": "cryptography-ch01-q19",
+        "question": "密码系统的语义安全性要求对任意两条等长消息 \\(m_0,m_1\\)，攻击者区分优势 \\(\\epsilon\\) 可忽略。若方案对 \\(n\\) 位密钥满足 \\(\\epsilon\\leq2^{-n/2}\\)，则 128 位密钥的区分优势上界为？",
+        "options": [
+          "\\(2^{-64}\\)  B) \\(2^{-128}\\)  C) \\(2^{-32}\\)  D) \\(2^{-256}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\epsilon\\leq2^{-n/2}=2^{-128/2}=2^{-64}\\)。这个概率极小（约 \\(5.4\\times10^{-20}\\)），被认为计算上不可行。语义安全等价于 IND-CPA（不可区分性），是现代密码方案的标准安全目标。选 B 混淆了 \\(2^{-n}\\) 和 \\(2^{-n/2}\\)。"
+      },
+      {
+        "id": "cryptography-ch01-q20",
+        "question": "证明 Shannon 定理 \\(|\\mathcal{K}|\\geq|\\mathcal{M}|\\) 时，关键论证是：若 \\(|\\mathcal{K}|<|\\mathcal{M}|\\)，则存在 \\(c\\) 和 \\(m_0\\) 使得 \\(P(M=m_0|C=c)=0\\)。若 \\(|\\mathcal{M}|=4,|\\mathcal{K}|=3\\)，对某个 \\(c\\) 最多能覆盖多少个不同明文？",
+        "options": [
+          "\\(3\\)  B) \\(4\\)  C) \\(2\\)  D) \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{D_k(c):k\\in\\mathcal{K}\\}\\) 最多有 \\(|\\mathcal{K}|=3\\) 个不同的值。\\(|\\mathcal{M}|=4>3\\)，所以至少有一个明文 \\(m_0\\) 不在此集合中，\\(P(C=c|M=m_0)=0\\)，进而 \\(P(M=m_0|C=c)=0\\neq P(M=m_0)\\)（若 \\(P(M=m_0)>0\\)），违反完善保密。这就是 Shannon 定理的证明核心。"
+      },
+      {
+        "id": "cryptography-ch01-q21",
+        "question": "频率分析中，已确定映射 E→X, T→Q, A→Z。密文 \"QXZQ\" 最可能解密为什么？",
+        "options": [
+          "\"TEXT\"  B) \"TEAT\"  C) \"TETA\"  D) \"THAT\""
+        ],
+        "answer": 1,
+        "explanation": "\\(Q\\to T,X\\to E,Z\\to A,Q\\to T\\)，解密 \"TEAT\"。注意 \"THAT\" 需要 \\(X\\to H\\) 但已知 \\(X\\to E\\)，故 D 错误。频率分析是逐步积累确认的过程：先用高频字母建立初始映射，再用 bigram 和词汇知识精炼。选 D 是未检查已建立映射的常见分析错误。"
+      },
+      {
+        "id": "cryptography-ch01-q22",
+        "question": "Vigenère 密码密钥长度 \\(m=4\\)。若仅对密文字母 \\(c_1,c_5,c_9,\\ldots\\)（即位置 \\(\\equiv 1\\pmod{4}\\)）做频率分析，本质上在破译什么密码？",
+        "options": [
+          "密钥的第 1 个字母对应的 Caesar 密码  B) 完整的 Vigenère 密码  C) 仿射密码  D) Hill cipher"
+        ],
+        "answer": 0,
+        "explanation": "Vigenère 中位置 \\(\\equiv 1\\pmod{4}\\) 的字母都用密钥第 1 个字母 \\(k_1\\) 加密，等价于偏移量 \\(k_1\\) 的 Caesar 密码。频率分析该子序列即可确定 \\(k_1\\)。对其余 3 组重复即可恢复完整密钥。这就是 Kasiski 方法的核心：将 Vigenère 分解为多个独立的 Caesar 密码。"
+      },
+      {
+        "id": "cryptography-ch01-q23",
+        "question": "若将语义安全的条件弱化为 \\(\\epsilon\\leq0.01\\)（1%的区分概率），攻击者在 10000 次加密中至少成功区分一次的概率约为多少？",
+        "options": [
+          "\\(\\approx0.01\\)  B) \\(\\approx1-e^{-100}\\approx1\\)  C) \\(\\approx0.5\\)  D) \\(\\approx0.1\\)"
+        ],
+        "answer": 1,
+        "explanation": "每次独立尝试成功率 \\(\\epsilon=0.01\\)。10000 次中至少一次成功：\\(1-(1-0.01)^{10000}=1-0.99^{10000}\\approx1-e^{-100}\\approx1\\)。这说明即便单次优势很小，大量尝试后安全性完全崩塌。可忽略函数 \\(\\text{negl}(n)\\) 必须比任何多项式倒数都小，否则多项式次攻击就能放大优势。"
+      },
+      {
+        "id": "cryptography-ch01-q24",
+        "question": "OTP 加密 \\(m\\in\\{0,1\\}^n\\)，均匀密钥 \\(k\\)。若只发送密文的前 \\(n-1\\) 位，窃听者对 \\(m\\) 的最后一位知道多少信息？",
+        "options": [
+          "0 bit  B) 1 bit  C) \\(0.5\\) bit  D) 取决于 \\(m\\)"
+        ],
+        "answer": 0,
+        "explanation": "密文 \\(c=m\\oplus k\\)，\\(c\\) 的前 \\(n-1\\) 位 \\(=m_{1..n-1}\\oplus k_{1..n-1}\\)。由于 \\(k\\) 均匀随机，前 \\(n-1\\) 位密文不泄露 \\(m_{1..n-1}\\) 的任何信息，更不泄露 \\(m_n\\)（因为 \\(m_n\\) 与密文无关）。OTP 的完善保密性意味着部分密文也不泄露信息。\\(I(M_n;C_{1..n-1})=0\\)，因为 \\(k_n\\) 完全独立。"
+      },
+      {
+        "id": "cryptography-ch01-q25",
+        "question": "证明任何确定性加密方案（相同明文总得相同密文）不满足 IND-CPA 安全。攻击策略是什么？",
+        "options": [
+          "提交 \\(m_0=m_1\\)  B) 提交 \\(m_0\\neq m_1\\)，利用加密预言机先查询 \\(m_0\\) 的密文  C) 暴力搜索密钥  D) 利用频率分析"
+        ],
+        "answer": 1,
+        "explanation": "CPA 攻击者可使用加密预言机。攻击：(1)先查询 \\(E_k(m_0)\\) 得密文 \\(c_0\\)；(2)提交 \\((m_0,m_1)\\) 获得挑战密文 \\(c^*\\)；(3)若 \\(c^*=c_0\\) 则输出 0（目标是 \\(m_0\\)），否则输出 1。确定性加密下 \\(c^*=E_k(m_b)\\)，故 \\(b=0\\) 时恒等，攻破 IND-CPA。这就是为什么现代加密必须引入随机性（如 IV、nonce）。"
+      },
+      {
+        "id": "cryptography-ch01-q26",
+        "question": "历史上 Enigma 机器使用转子实现多表替代加密。假设 Enigma 有 3 个转子各 26 位置、插线板交换 10 对字母，其密钥空间约为 \\(26^3\\times\\binom{26}{20}\\times\\frac{20!}{10!\\cdot2^{10}}\\approx1.6\\times10^{20}\\)。若每秒检查 \\(10^9\\) 个密钥，暴力破解需要多少年？",
+        "options": [
+          "\\(\\approx5\\) 年  B) \\(\\approx5000\\) 年  C) \\(\\approx50\\) 亿年  D) \\(\\approx50\\) 年"
+        ],
+        "answer": 1,
+        "explanation": "\\(1.6\\times10^{20}/10^9=1.6\\times10^{11}\\) 秒 \\(=1.6\\times10^{11}/3.15\\times10^7\\approx5000\\) 年。因此暴力搜索不可行。Bletchley Park 的突破在于利用已知明文（\"天气报告\"格式）和 Enigma 的结构弱点（己反馈性质），大幅缩小搜索空间。这是密码分析中利用结构弱点而非暴力的经典案例。"
+      },
+      {
+        "id": "cryptography-ch01-q27",
+        "question": "现代即时通讯 App 使用端到端加密保护用户隐私。若一个 App 声称使用 Caesar 密码（\\(k\\in\\{0,..,25\\}\\)），从安全角度分析其弱点数量和严重性。",
+        "options": [
+          "密钥空间仅 26，暴力破解瞬间完成  B) 无弱点，Caesar 不可破  C) 仅在密钥泄露时不安全  D) 密钥空间足够，但速度慢"
+        ],
+        "answer": 0,
+        "explanation": "Caesar 密码的密钥空间仅 26 种，暴力搜索在微秒内完成，完全不安全。即便密钥保密，频率分析也能轻松破译。现代通讯至少需 128 位密钥空间（\\(2^{128}\\approx3.4\\times10^{38}\\)）。此外 Caesar 是确定性加密、不满足 IND-CPA。实际 App 使用 AES-256 或 ChaCha20 等现代算法。"
+      },
+      {
+        "id": "cryptography-ch01-q28",
+        "question": "某公司在数据库中用固定密钥和确定性加密存储用户密码。攻击者获得密文数据库后发现有 500 个用户的密文完全相同。这说明什么？如何改进？",
+        "options": [
+          "这 500 人使用了相同的密码；改用加盐哈希  B) 加密算法有 bug  C) 密钥泄露了  D) 数据库损坏"
+        ],
+        "answer": 0,
+        "explanation": "确定性加密下相同明文→相同密文。500 人的密文相同意味着密码相同（很可能是弱密码如 \"123456\"）。改进：使用密码学哈希 + 盐值（每用户随机 salt），即 \\(H(\\text{salt}\\|\\text{password})\\)，相同密码因不同 salt 得到不同哈希值。这与 ECB 模式泄露模式信息的原理完全一致——确定性是安全的大敌。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="cryptography"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/cryptography.html" class="module-name">密码学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 古典替代密码（Caesar 与 Vigenère）</a></li>
+      <li><a href="#kp2">02 · 频率分析与密码破译</a></li>
+      <li><a href="#kp3">03 · Kerckhoffs 原则与密码安全模型</a></li>
+      <li><a href="#kp4">04 · 完善保密与 One-time Pad</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>古典密码</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>古典替代密码（Caesar 与 Vigenère）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>密码学的历史几乎与文字一样古老。从 Caesar 密码到 Vigenère 密码， 古典替代密码揭示了加密的基本思想：通过某种规则将明文映射为密文。 理解这些经典系统不仅是密码学入门，也为理解现代密码的设计哲学 奠定了基础——它们的脆弱性恰好说明了为什么需要更强的加密方案。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>替代密码的本质是字母表上的映射。Caesar 密码是 \(\mathbb{Z}/26\mathbb{Z}\) 上的平移，Vigenère 是周期性多表替代——从单一映射到映射序列的推广。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Caesar 密码</strong>：密钥 \(k \in \{0,1,\ldots,25\}\)，加密 \[E_k(x) = (x + k) \bmod 26\] 解密 \(D_k(y) = (y - k) \bmod 26\)。密钥空间仅 26，暴力可破。 <strong>Vigenère 密码</strong>：密钥为长度 \(m\) 的向量 \(\mathbf{k}=(k_1,\ldots,k_m)\)， \[E_{\mathbf{k}}(x_1 x_2 \cdots) = (x_1+k_1)(x_2+k_2)\cdots \pmod{26}\] 密钥空间 \(26^m\)，当 \(m\) 较大时暴力不可行。 但 Vigenère 具有周期结构：相距 \(m\) 的密文字母用同一密钥加密， 这一规律性成为破译的突破口。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 历史应用：罗马军事通信（Caesar）、16-19 世纪外交密码（Vigenère） - 教学价值：理解密钥空间、密钥管理等核心概念</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Caesar 密码 \(k=3\) 加密 "MATH"。 解答：M(12)→P(15), A(0)→D(3), T(19)→W(22), H(7)→K(10)。 密文为 "PDWK"。 易错点：忘记模 26 运算。如 X(23)+3=26，应为 A(0) 而非溢出。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Vigenère 密码相比 Caesar 密码的本质改进是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Vigenère 用周期性多表替代使得单字母频率分析失效，')">A. 使用了更大的字母表</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Vigenère 用周期性多表替代使得单字母频率分析失效，')">B. 引入了多表替代，破坏了单字母频率特征</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Vigenère 用周期性多表替代使得单字母频率分析失效，')">C. 使用了非线性变换</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Vigenère 用周期性多表替代使得单字母频率分析失效，')">D. 密钥是随机生成的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>频率分析与密码破译</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>单表替代密码看似有 \(26!\) 种可能密钥，暴力搜索不现实。但 Al-Kindi 在 9 世纪发现了频率分析法——利用自然语言中字母出现频率不均匀的 统计特性来破译密码。这一方法不仅彻底攻破了单表替代，也引出了 密码学的核心教训：加密必须破坏明文的统计特征。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>频率分析的抽象：加密是明文分布 \(P_X\) 到密文分布 \(P_Y\) 的映射。 若加密保留了 \(P_X\) 的结构（如字母频率），则可从 \(P_Y\) 反推 \(P_X\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>单表替代的破译</strong>：英语中字母频率分布高度不均—— \(P(\text{E})\approx 0.127\)，\(P(\text{T})\approx 0.091\)， \(P(\text{Z})\approx 0.001\)。 攻击步骤：(1) 统计密文频率 \(\hat{P}(c_i)\)； (2) 将频率最高的密文字母对应 E、T、A 等； (3) 利用双字母组(bigram)和常见单词精炼。 <strong>Vigenère 的破译</strong>（Kasiski 检验 + 重合指数）： (1) 找密文中重复片段的间距，\(\gcd\) 推测密钥长度 \(m\)； (2) 按位置分组后每组退化为 Caesar 密码； (3) 重合指数 \(\text{IC} = \sum p_i^2\)，英语约 0.065， 随机文本约 \(1/26 \approx 0.038\)。 \[\text{IC} = \frac{\sum_{i=0}^{25} n_i(n_i-1)}{N(N-1)}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 二战中 Enigma 的破译也依赖统计分析与已知明文攻击 - 现代侧信道分析的思想根源</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：密文 "LXFOPVEFRNHR" 的频率最高字母为 R（出现 3 次）， 若为单表替代，R 最可能对应哪个明文字母？ 解答：英语中最高频字母为 E。猜测 R↔E，位移 \(= 17-4 = 13\)。 验证其他频率是否吻合。 易错点：仅凭最高频一个字母就确定映射。应结合 bigram 和 常见单词综合判断，单一频率可能因样本量小而偏差。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">重合指数(Index of Coincidence)主要用于 Vigenère 破译中的哪一步？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。对不同猜测的密钥长度 \\(m\\) 分组后计算各组 IC，')">A. 确定明文语言</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！对不同猜测的密钥长度 \\(m\\) 分组后计算各组 IC，')">B. 确定密钥长度</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。对不同猜测的密钥长度 \\(m\\) 分组后计算各组 IC，')">C. 确定密钥内容</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。对不同猜测的密钥长度 \\(m\\) 分组后计算各组 IC，')">D. 验证解密结果</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Kerckhoffs 原则与密码安全模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>密码系统的安全性应该依赖于什么？1883 年 Kerckhoffs 提出了影响 深远的原则：系统的安全性应仅依赖于密钥的保密，而非算法的保密。 这一原则至今仍是现代密码学设计的基石，催生了对安全性的严格数学 定义——从「算法保密」转向「可证明安全」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>密码系统形式化为五元组 \((\mathcal{P}, \mathcal{C}, \mathcal{K}, E, D)\)： 明文空间、密文空间、密钥空间、加密函数族、解密函数族。 安全性成为可形式化分析的数学性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Kerckhoffs 原则</strong>：敌手知道加密算法 \(E\)，仅不知密钥 \(k\)。 安全性 \(\equiv\) 在已知 \(E\) 下，不知 \(k\) 时无法从 \(c\) 恢复 \(m\)。 <strong>攻击模型层次</strong>（由弱到强）： (1) 唯密文攻击(COA)：仅知密文 (2) 已知明文攻击(KPA)：知道若干 \((m_i, c_i)\) 对 (3) 选择明文攻击(CPA)：可选择 \(m\) 获得 \(c\) (4) 选择密文攻击(CCA)：可选择 \(c\) 获得 \(m\) <strong>安全性定义</strong>（语义安全/不可区分性）： 对任意两条等长明文 \(m_0, m_1\)，敌手无法以显著优于 \(1/2\) 的概率区分 \(E_k(m_0)\) 和 \(E_k(m_1)\)： \[\left|\Pr[\mathcal{A}(E_k(m_0))=1] - \Pr[\mathcal{A}(E_k(m_1))=1]\right| \leq \text{negl}(n)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 开源密码算法（AES、RSA）的安全性正是 Kerckhoffs 原则的体现 - 安全审计依赖公开算法而非「安全靠隐蔽」</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：一个公司使用自研的秘密加密算法保护数据，声称「因为没人 知道算法所以安全」。从 Kerckhoffs 原则角度分析这种做法的风险。 解答：违反 Kerckhoffs 原则。风险包括：(1) 算法可能被逆向工程； (2) 无法经受公开的安全审计；(3) 一旦算法泄露，全部数据暴露 且无法仅更换密钥来恢复安全性。 易错点：将「算法保密」等同于「安全」。安全性应建立在密钥空间 的数学难题上，而非算法的不透明性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪种攻击模型的攻击者能力最强？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。CCA 中攻击者可主动提交密文并获得解密结果，能力最强。')">A. 唯密文攻击</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。CCA 中攻击者可主动提交密文并获得解密结果，能力最强。')">B. 已知明文攻击</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。CCA 中攻击者可主动提交密文并获得解密结果，能力最强。')">C. 选择明文攻击</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！CCA 中攻击者可主动提交密文并获得解密结果，能力最强。')">D. 选择密文攻击</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>完善保密与 One-time Pad</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>能否设计出信息论意义上绝对安全的密码？Shannon 在 1949 年证明了 One-time Pad 具有「完善保密」性质——密文不泄露任何关于明文的信息。 但代价是密钥必须与明文等长且一次性使用。Shannon 定理揭示了完善 保密的代价：\(|\mathcal{K}| \geq |\mathcal{M}|\)，即绝对安全需要 「不可压缩的」随机性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完善保密用条件概率刻画：\(P(M=m\mid C=c) = P(M=m)\)， 即观察密文不改变对明文的任何先验信念——信息论意义上的安全。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>完善保密定义</strong>：\(\forall m \in \mathcal{M},\; \forall c \in \mathcal{C}\)， \[P(M = m \mid C = c) = P(M = m)\] 等价于 \(P(C = c \mid M = m) = P(C = c)\)，即 \(M\) 与 \(C\) 独立。 <strong>One-time Pad (OTP)</strong>：\(m, k \in \{0,1\}^n\)，\(k\) 均匀随机， \[c = m \oplus k, \quad m = c \oplus k\] 证明 OTP 完善保密：对任意 \(m, c\)， \(P(C=c \mid M=m) = P(K = m \oplus c) = 2^{-n} = P(C=c)\)。 <strong>Shannon 定理</strong>：若密码系统具有完善保密，则 \(|\mathcal{K}| \geq |\mathcal{M}|\)。 证明：若 \(|\mathcal{K}| < |\mathcal{M}|\)，则存在 \(c\) 使得 \(\{D_k(c) : k \in \mathcal{K}\} \subsetneq \mathcal{M}\)， 集合外的 \(m_0\) 满足 \(P(M=m_0 \mid C=c) = 0 \neq P(M=m_0)\)，矛盾。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 冷战时期美苏「热线」使用 OTP - 量子密钥分发(QKD)为 OTP 提供安全的密钥生成通道</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Alice 用 OTP 加密 \(m = 1010\)，密钥 \(k = 0111\)，求密文。 解答：\(c = m \oplus k = 1010 \oplus 0111 = 1101\)。 解密验证：\(c \oplus k = 1101 \oplus 0111 = 1010 = m\)。✓ 易错点：重复使用 OTP 密钥。若 \(c_1 = m_1 \oplus k\)， \(c_2 = m_2 \oplus k\)，则 \(c_1 \oplus c_2 = m_1 \oplus m_2\)， 完全暴露明文差异，安全性崩溃。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">完善保密要求密钥长度至少为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Shannon 定理证明 \\(|\\mathcal{K}| \\geq |\\mathcal{M}|\\)。')">A. 明文长度的一半</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Shannon 定理证明 \\(|\\mathcal{K}| \\geq |\\mathcal{M}|\\)。')">B. 与明文等长</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Shannon 定理证明 \\(|\\mathcal{K}| \\geq |\\mathcal{M}|\\)。')">C. 固定的 128 位</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Shannon 定理证明 \\(|\\mathcal{K}| \\geq |\\mathcal{M}|\\)。')">D. 取决于攻击者计算能力</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/discrete/cryptography.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

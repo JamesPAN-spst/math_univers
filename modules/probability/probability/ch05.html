@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 大数定律 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch05-q1",
+        "question": "依概率收敛 \\(X_n \\xrightarrow{P} X\\) 的定义？",
+        "options": [
+          "\\(\\forall \\varepsilon>0\\): \\(P(|X_n-X|>\\varepsilon) \\to 0\\)",
+        "\\(P(\\lim X_n=X)=1\\)",
+        "\\(E|X_n-X| \\to 0\\)",
+        "\\(\\text{Var}(X_n-X) \\to 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "依概率收敛：偏差超过任意 \\(\\varepsilon\\) 的概率趋零。B 是几乎必然收敛（更强）。C 是 \\(L^1\\) 收敛。D 既不充分也不必要（但 D+均值收敛可推 P-收敛）。四种收敛模式需严格区分。"
+      },
+      {
+        "id": "probability-ch05-q2",
+        "question": "四种收敛的强弱关系（从强到弱）？",
+        "options": [
+          "a.s. → \\(L^p\\) → P → 分布",
+        "a.s. → P → \\(L^1\\) → 分布",
+        "a.s. → P → 分布；\\(L^p\\) → P → 分布",
+        "分布 → P → a.s. → \\(L^p\\)"
+        ],
+        "answer": 2,
+        "explanation": "a.s. \\(\\Rightarrow\\) P \\(\\Rightarrow\\) 分布；\\(L^p \\Rightarrow\\) P \\(\\Rightarrow\\) 分布。但 a.s. 和 \\(L^p\\) 互不蕴含。例：Typewriter 序列 \\(L^1 \\not\\Rightarrow\\) a.s.；反之 a.s. 收敛到 \\(0\\) 但 \\(E[X_n]=\\infty\\) 则 \\(\\not\\Rightarrow L^1\\)。"
+      },
+      {
+        "id": "probability-ch05-q3",
+        "question": "\\(X_n\\) iid，\\(E[X_i]=\\mu\\)，\\(\\text{Var}(X_i)=\\sigma^2<\\infty\\)。弱大数律 (WLLN) 结论？",
+        "options": [
+          "\\(\\bar{X}_n \\xrightarrow{P} \\mu\\)",
+        "\\(\\bar{X}_n \\xrightarrow{a.s.} \\mu\\)",
+        "\\(\\bar{X}_n \\xrightarrow{L^2} \\mu\\)",
+        "A 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{Var}(\\bar{X}_n)=\\sigma^2/n \\to 0\\)，Chebyshev: \\(P(|\\bar{X}_n-\\mu|>\\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0\\)（P-收敛）。且 \\(E[(\\bar{X}_n-\\mu)^2]=\\sigma^2/n \\to 0\\)（\\(L^2\\) 收敛）。两者均成立。"
+      },
+      {
+        "id": "probability-ch05-q4",
+        "question": "掷公平骰子 \\(n\\) 次，\\(\\bar{X}_n\\) 为样本均值。\\(\\bar{X}_n\\) 依概率收敛到？",
+        "options": [
+          "\\(3.5\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X_i]=(1+2+3+4+5+6)/6=3.5\\)，WLLN: \\(\\bar{X}_n \\xrightarrow{P} 3.5\\)。即掷骰频率均值趋近理论期望。这是赌场利润可预测性的数学保证。"
+      },
+      {
+        "id": "probability-ch05-q5",
+        "question": "Kolmogorov 强大数律 (SLLN) 需要什么条件（iid 版本）？",
+        "options": [
+          "\\(E[|X_1|]<\\infty\\)",
+        "\\(E[X_1^2]<\\infty\\)",
+        "\\(X_1\\) 有界",
+        "\\(X_i\\) 正态分布"
+        ],
+        "answer": 0,
+        "explanation": "SLLN (Kolmogorov): iid + \\(E[|X_1|]<\\infty \\Leftrightarrow \\bar{X}_n \\to E[X_1]\\) a.s.。只需一阶矩存在！WLLN 的 Chebyshev 证法需二阶矩，但 SLLN 的条件更弱。这是概率论最深刻的大定理之一。"
+      },
+      {
+        "id": "probability-ch05-q6",
+        "question": "\\(X_n\\) iid \\(\\text{Exp}(1)\\)，SLLN 保证 \\(\\bar{X}_n \\xrightarrow{a.s.}\\)？",
+        "options": [
+          "\\(1\\)",
+        "\\(0\\)",
+        "\\(e\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X_1]=1/1=1\\)。\\(E[|X_1|]=1<\\infty\\)。SLLN: \\(\\bar{X}_n \\to 1\\) a.s.。样本均值几乎确定地趋向总体均值。"
+      },
+      {
+        "id": "probability-ch05-q7",
+        "question": "蒙特卡洛估计 \\(I=\\int_0^1 g(x)dx\\) 使用 \\(\\hat{I}_n=\\frac{1}{n}\\sum g(U_i)\\)（\\(U_i\\) iid \\(U(0,1)\\)）。收敛性由什么保证？",
+        "options": [
+          "SLLN",
+        "CLT",
+        "Chebyshev",
+        "中值定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[g(U)]=\\int_0^1 g(x)dx=I\\)。SLLN: \\(\\hat{I}_n \\to I\\) a.s.。蒙特卡洛积分的理论基础就是强大数律。CLT 额外给出误差的渐进分布。"
+      },
+      {
+        "id": "probability-ch05-q8",
+        "question": "\\(X_n \\xrightarrow{P} 0\\) 但 \\(X_n \\not\\to 0\\) a.s. 的经典例子？",
+        "options": [
+          "Typewriter 序列（\\(\\mathbf{1}_{[k/2^m,(k+1)/2^m]}\\) 遍历 \\([0,1]\\)）",
+        "\\(X_n=n \\cdot \\text{Bernoulli}(1/n)\\)",
+        "\\(X_n \\sim N(0,1/n)\\)",
+        "\\(X_n=1/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "Typewriter: 每个 \\(\\omega \\in [0,1]\\) 被无穷多 \\(X_n\\) 覆盖（不收敛到 0），但覆盖时间间隔增长，\\(P(X_n \\neq 0) \\to 0\\)。B 中 \\(P(X_n=n)=1/n \\to 0\\) 也是 \\(\\xrightarrow{P}0\\) 但 \\(E[X_n]=1\\)。"
+      },
+      {
+        "id": "probability-ch05-q9",
+        "question": "依分布收敛 \\(X_n \\xrightarrow{d} X\\) 且 \\(X_n \\xrightarrow{d} c\\)（常数），能否推出 \\(\\xrightarrow{P}\\)？",
+        "options": [
+          "能，收敛到常数时分布收敛等价于概率收敛",
+        "不能",
+        "仅对连续分布",
+        "仅对正态"
+        ],
+        "answer": 0,
+        "explanation": "\\(X_n \\xrightarrow{d} c \\Leftrightarrow X_n \\xrightarrow{P} c\\)。证：\\(P(|X_n-c|>\\varepsilon)=P(X_n>c+\\varepsilon)+P(X_n<c-\\varepsilon) \\to 0\\)（CDF 在连续点收敛）。这一等价常在 WLLN 和一致性证明中使用。"
+      },
+      {
+        "id": "probability-ch05-q10",
+        "question": "WLLN 的 Chebyshev 证法的核心不等式是？",
+        "options": [
+          "\\(P(|\\bar{X}_n-\\mu|>\\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2)\\)",
+        "\\(P(|\\bar{X}_n-\\mu|>\\varepsilon) \\leq E[\\bar{X}_n]/\\varepsilon\\)",
+        "\\(P(|\\bar{X}_n-\\mu|>\\varepsilon) \\leq e^{-n\\varepsilon^2/2}\\)",
+        "\\(P(|\\bar{X}_n-\\mu|>\\varepsilon) = \\Phi(-\\varepsilon\\sqrt{n}/\\sigma)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Chebyshev 应用于 \\(\\bar{X}_n\\): \\(\\text{Var}(\\bar{X}_n)=\\sigma^2/n\\)，\\(P(|\\bar{X}_n-\\mu|>\\varepsilon) \\leq \\sigma^2/(n\\varepsilon^2) \\to 0\\)。C 是 Hoeffding（更紧但需有界），D 是 CLT 渐近（非精确不等式）。"
+      },
+      {
+        "id": "probability-ch05-q11",
+        "question": "Khintchine WLLN: iid + \\(E[X_1]=\\mu\\)（仅一阶矩），\\(\\bar{X}_n \\xrightarrow{P} \\mu\\)。其证明工具？",
+        "options": [
+          "截断 + Chebyshev",
+        "特征函数方法",
+        "Markov 不等式",
+        "A 或 B 均可"
+        ],
+        "answer": 3,
+        "explanation": "Khintchine 弱化了二阶矩要求。特征函数法：\\(\\varphi_{\\bar{X}_n}(t)=[\\varphi(t/n)]^n \\to e^{i\\mu t}\\)（Lévy 连续定理）。截断法也可：截断在 \\(c_n \\to \\infty\\) 处，控制截断误差。两者等价。"
+      },
+      {
+        "id": "probability-ch05-q12",
+        "question": "\\(X_n\\) iid Cauchy 分布，\\(\\bar{X}_n\\) 是否满足 SLLN？",
+        "options": [
+          "不满足，\\(E[|X_1|]=\\infty\\)",
+        "满足，\\(\\bar{X}_n \\to 0\\)",
+        "满足，\\(\\bar{X}_n \\to \\infty\\)",
+        "取决于样本"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy 无一阶矩（\\(E[|X|]=\\infty\\)），SLLN 条件不满足。实际上 \\(\\bar{X}_n \\sim \\text{Cauchy}\\)（Cauchy 的可加性使 \\(\\bar{X}_n\\) 与 \\(X_1\\) 同分布），完全不收敛。SLLN 条件是必要条件。"
+      },
+      {
+        "id": "probability-ch05-q13",
+        "question": "SLLN 的证明（iid + \\(E[X_1^4]<\\infty\\) 简化版）核心步骤？",
+        "options": [
+          "证 \\(\\sum \\text{Var}(\\bar{X}_n)<\\infty\\)，用 BC1",
+        "证 \\(E[(\\bar{X}_n-\\mu)^4]=O(1/n^2)\\)，再 \\(\\sum 1/n^2<\\infty\\)，无穷子列 a.s. 收敛",
+        "直接用 CLT",
+        "使用遍历定理"
+        ],
+        "answer": 1,
+        "explanation": "四阶矩法：\\(E[(\\bar{X}_n-\\mu)^4]=O(1/n^2)\\)。Markov: \\(P(|\\bar{X}_n-\\mu|>\\varepsilon) \\leq C/n^2\\)。\\(\\sum 1/n^2<\\infty\\)，BC1: a.s. 仅有限多偏差。完整 SLLN（仅一阶矩）证明更难，需截断+Kronecker 引理。"
+      },
+      {
+        "id": "probability-ch05-q14",
+        "question": "蒙特卡洛估计 \\(E[g(X)]\\) 的误差 \\(|\\hat{I}_n-I|\\) 以概率 \\(95\\%\\) 不超过？",
+        "options": [
+          "\\(\\approx 1.96\\sigma_g/\\sqrt{n}\\)",
+        "\\(\\sigma_g/n\\)",
+        "\\(1/n\\)",
+        "\\(\\sigma_g/\\sqrt{n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "CLT: \\(\\sqrt{n}(\\hat{I}_n-I)/\\sigma_g \\xrightarrow{d} N(0,1)\\)。\\(95\\%\\) 置信区间半宽 \\(\\approx 1.96\\sigma_g/\\sqrt{n}\\)。误差 \\(\\sim 1/\\sqrt{n}\\)：精度翻倍需 \\(4\\) 倍样本。选 D 缺系数。"
+      },
+      {
+        "id": "probability-ch05-q15",
+        "question": "用蒙特卡洛法估 \\(\\pi\\)，\\(N=10000\\) 个点。标准误差约为？",
+        "options": [
+          "\\(\\approx 0.016\\)",
+        "\\(\\approx 0.16\\)",
+        "\\(\\approx 0.0016\\)",
+        "\\(\\approx 1.6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(p=\\pi/4\\)，\\(\\text{Var}(\\hat{p})=p(1-p)/N\\)。\\(4\\hat{p}\\) 的标准误 \\(=4\\sqrt{p(1-p)/N}\\approx 4\\sqrt{0.168/10000}\\approx 4\\times 0.0041\\approx 0.016\\)。\\(4\\) 位有效数字需约 \\(10^8\\) 点。"
+      },
+      {
+        "id": "probability-ch05-q16",
+        "question": "方差缩减技术 \"对偶变量法\" 的原理？",
+        "options": [
+          "引入负相关样本对降低估计方差",
+        "增大样本量",
+        "使用重要性采样",
+        "改用准随机序列"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(U \\sim U(0,1)\\)，则 \\(1-U\\) 与 \\(U\\) 负相关。\\(\\hat{I}=(g(U)+g(1-U))/2\\) 的方差 \\(< \\text{Var}(g(U))/2\\)（当 \\(g\\) 单调时）。利用负协方差减少估计下方差。B 是暴力法；C 是另一技术。"
+      },
+      {
+        "id": "probability-ch05-q17",
+        "question": "Slutsky 定理：\\(X_n \\xrightarrow{d} X\\)，\\(Y_n \\xrightarrow{P} c\\)（常数），则 \\(X_n+Y_n \\xrightarrow{d}\\)？",
+        "options": [
+          "\\(X+c\\)",
+        "\\(X+Y\\)（一般不成立）",
+        "无法确定",
+        "\\(c\\)"
+        ],
+        "answer": 0,
+        "explanation": "Slutsky: \\(X_n \\xrightarrow{d} X\\), \\(Y_n \\xrightarrow{P} c \\Rightarrow X_n+Y_n \\xrightarrow{d} X+c\\)，\\(X_nY_n \\xrightarrow{d} cX\\)。注意 \\(Y_n\\) 必须收敛到常数，两个分布收敛的和不能直接合并。"
+      },
+      {
+        "id": "probability-ch05-q18",
+        "question": "a.s. 收敛 \\(\\Rightarrow\\) 概率收敛的证明使用？",
+        "options": [
+          "有界收敛定理（or Dominated convergence）",
+        "Fatou 引理",
+        "单调收敛定理",
+        "A 或 B 均可"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbf{1}_{|X_n-X|>\\varepsilon} \\to 0\\) a.s.（由 a.s. 收敛）。\\(|\\mathbf{1}| \\leq 1\\)。DCT: \\(E[\\mathbf{1}_{|X_n-X|>\\varepsilon}]=P(|X_n-X|>\\varepsilon) \\to 0\\)。即概率收敛。也可用 \\(\\lim P(\\sup_{k \\geq n}|X_k-X|>\\varepsilon)=0\\) 直接推。"
+      },
+      {
+        "id": "probability-ch05-q19",
+        "question": "\\(X_n\\) 独立（不 iid），\\(E[X_n]=0\\)，\\(\\text{Var}(X_n)=\\sigma_n^2\\)。\\(\\bar{X}_n \\xrightarrow{P} 0\\) 的充分条件？",
+        "options": [
+          "\\(\\frac{1}{n^2}\\sum \\sigma_k^2 \\to 0\\)",
+        "\\(\\sigma_n^2 \\to 0\\)",
+        "\\(\\sum \\sigma_n^2<\\infty\\)",
+        "\\(\\sigma_n^2\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(\\bar{X}_n)=\\frac{1}{n^2}\\sum \\sigma_k^2\\)。Chebyshev: \\(P(|\\bar{X}_n|>\\varepsilon) \\leq \\frac{1}{n^2\\varepsilon^2}\\sum\\sigma_k^2\\)。若 \\(\\to 0\\) 则 \\(\\bar{X}_n \\xrightarrow{P} 0\\)。D 仅给 \\(\\text{Var} \\leq C/n\\)。"
+      },
+      {
+        "id": "probability-ch05-q20",
+        "question": "Glivenko-Cantelli 定理说什么？",
+        "options": [
+          "经验 CDF \\(\\hat{F}_n(x) \\to F(x)\\) 一致地 a.s.",
+        "\\(\\hat{F}_n(x) \\to F(x)\\) 逐点",
+        "\\(\\hat{F}_n\\) 收敛于正态",
+        "\\(\\hat{F}_n\\) 在固定点收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sup_x|\\hat{F}_n(x)-F(x)| \\to 0\\) a.s.。这是 SLLN 的函数级推广（经验度量一致收敛到真实分布）。被称为统计学的\"基本定理\"。逐点收敛（B/D）由 SLLN 即得，但一致性更强。"
+      },
+      {
+        "id": "probability-ch05-q21",
+        "question": "\\(X_n\\) iid，\\(E[|X_1|]=\\infty\\)。SLLN 是否仍有某种结论？",
+        "options": [
+          "\\(|\\bar{X}_n| \\to \\infty\\) a.s.",
+        "\\(\\bar{X}_n\\) 几乎处处振荡",
+        "\\(\\bar{X}_n\\) 仍收敛到某有限值",
+        "A 或 B 取决于对称性"
+        ],
+        "answer": 3,
+        "explanation": "\\(E[|X|]=\\infty\\) 时：若 \\(X\\) 对称且 \\(P(|X|>t) \\sim t^{-1}\\)（如 Cauchy），\\(\\bar{X}_n \\sim X_1\\)（不收敛但不趋 \\(\\infty\\)）。一般情况可 \\(\\to \\pm\\infty\\)（如一侧重尾）。SLLN 反向：\\(E[|X|]=\\infty \\Rightarrow\\) 不 a.s. 收敛到有限值。"
+      },
+      {
+        "id": "probability-ch05-q22",
+        "question": "Kolmogorov SLLN 完整证法的两个关键工具？",
+        "options": [
+          "截断 + Kronecker 引理",
+        "特征函数 + Lévy 连续定理",
+        "鞅收敛定理",
+        "遍历定理"
+        ],
+        "answer": 0,
+        "explanation": "步骤：（1）截断 \\(Y_n=X_n\\mathbf{1}_{|X_n| \\leq n}\\)，BC1 保证截断误差 a.s. 有限。（2）对 \\(\\sum(Y_n-E[Y_n])/n\\) 用 Kolmogorov 极大不等式证收敛。（3）Kronecker 引理：\\(\\sum a_n/n\\) 收敛 \\(\\Rightarrow \\frac{1}{n}\\sum a_k \\to 0\\)。"
+      },
+      {
+        "id": "probability-ch05-q23",
+        "question": "Kolmogorov 三级数定理中，\\(X_n\\) 独立。\\(\\sum X_n\\) a.s. 收敛 \\(\\Rightarrow\\)？",
+        "options": [
+          "三个级数均收敛",
+        "仅 \\(\\sum \\text{Var}(X_n)<\\infty\\)",
+        "\\(X_n \\to 0\\) a.s.",
+        "A 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "a.s. 收敛的级数必有 \\(X_n \\to 0\\) a.s.（一般分析）。Kolmogorov 三级数给出充要条件。注意反向（三级数条件必要性）也依赖独立性。C 是必要的但不充分（调和级数）。"
+      },
+      {
+        "id": "probability-ch05-q24",
+        "question": "\\(X_n \\xrightarrow{P} X\\) 是否有子列 \\(X_{n_k} \\xrightarrow{a.s.} X\\)？",
+        "options": [
+          "是，总能提取 a.s. 收敛子列",
+        "否",
+        "仅对 \\(L^2\\) 收敛成立",
+        "仅对有界随机变量"
+        ],
+        "answer": 0,
+        "explanation": "选 \\(n_k\\) 使 \\(P(|X_{n_k}-X|>1/k)<2^{-k}\\)。\\(\\sum P(|X_{n_k}-X|>1/k)<\\infty\\)，BC1: \\(P(\\limsup\\{|X_{n_k}-X|>1/k\\})=0\\)，即 \\(X_{n_k} \\to X\\) a.s.。这是概率收敛与a.s. 收敛的桥梁。"
+      },
+      {
+        "id": "probability-ch05-q25",
+        "question": "Kolmogorov 极大不等式：\\(S_n=\\sum_{k=1}^n X_k\\)（独立、\\(E[X_k]=0\\)），\\(P(\\max_{k \\leq n}|S_k| \\geq \\varepsilon) \\leq\\)？",
+        "options": [
+          "\\(\\text{Var}(S_n)/\\varepsilon^2\\)",
+        "\\(n/\\varepsilon^2\\)",
+        "\\(E[S_n^2]/\\varepsilon\\)",
+        "\\(\\sum P(|X_k| \\geq \\varepsilon/n)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\max_{k \\leq n}|S_k| \\geq \\varepsilon) \\leq \\text{Var}(S_n)/\\varepsilon^2\\)。比 Chebyshev（只控制 \\(S_n\\)）更强，控制了部分和的最大值。证明用\"stopping time trick\"。是 SLLN 证明的关键工具。"
+      },
+      {
+        "id": "probability-ch05-q26",
+        "question": "保险公司 \\(n\\) 个独立赔案，平均赔额 \\(\\mu\\)。实际平均赔额偏离 \\(\\mu\\) 超 \\(5\\%\\) 的概率如何随 \\(n\\) 变化？",
+        "options": [
+          "\\(\\sim 1/n\\)（Chebyshev）",
+        "\\(\\sim 1/\\sqrt{n}\\)",
+        "不变",
+        "\\(\\sim e^{-cn}\\)（Hoeffding）"
+        ],
+        "answer": 0,
+        "explanation": "Chebyshev: \\(P(|\\bar{X}-\\mu|>0.05\\mu) \\leq \\sigma^2/(n \\cdot (0.05\\mu)^2)=O(1/n)\\)。若赔额有界则 Hoeffding 给指数衰减 D。大数律保证精算稳定性——保单池越大风险越可控。"
+      },
+      {
+        "id": "probability-ch05-q27",
+        "question": "蒙特卡洛估计期权价格，\\(10000\\) 次模拟的标准误差 \\(\\approx 0.5\\)。要将标准误降至 \\(0.1\\)，需多少次模拟？",
+        "options": [
+          "\\(250000\\)",
+        "\\(50000\\)",
+        "\\(100000\\)",
+        "\\(2000000\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{SE} \\propto 1/\\sqrt{n}\\)。\\(0.5/0.1=5\\) 倍缩减需 \\(n' = 10000 \\times 25=250000\\)。蒙特卡洛的 \\(O(1/\\sqrt{n})\\) 收敛速率是计算金融的基本约束。方差缩减技术可显著改善。"
+      },
+      {
+        "id": "probability-ch05-q28",
+        "question": "在线广告 CTR 估计：\\(n=5000\\) 次展示，\\(150\\) 次点击。SLLN 保证 \\(\\hat{p}=0.03\\) 是 \\(p\\) 的一致估计。\\(95\\%\\) 近似置信区间？",
+        "options": [
+          "\\(0.03 \\pm 0.0047\\)",
+        "\\(0.03 \\pm 0.03\\)",
+        "\\(0.03 \\pm 0.001\\)",
+        "不可估计"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{SE}=\\sqrt{0.03\\times 0.97/5000}\\approx 0.00241\\)。\\(95\\%\\): \\(0.03 \\pm 1.96 \\times 0.00241 \\approx 0.03 \\pm 0.0047\\)。SLLN 保证一致性，CLT 给出精度。互联网 A/B 测试的标准方法。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 收敛类型的层次</a></li>
+      <li><a href="#kp2">02 · 弱大数定律</a></li>
+      <li><a href="#kp3">03 · 强大数定律</a></li>
+      <li><a href="#kp4">04 · 应用：蒙特卡洛方法与 Kolmogorov 三级数定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>大数定律</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>收敛类型的层次</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>随机变量序列的「收敛」有多种含义——几乎必然收敛、依概率收敛、 依分布收敛、\(L^p\) 收敛——它们之间的蓑涵关系构成了概率论的 「收敛层次图」。理清这张图是理解大数定律、中心极限定理和 统计渐近理论的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>四种收敛对应不同的「强度」要求：a.s. 是逐点收敛（不计零 测集），\(L^p\) 是积分均值意义下的收敛，概率收敛是尾部控制， 分布收敛是最弱的，仅要求 CDF 逐点收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：设 \(X_n, X\) 为随机变量。 (1) 几乎必然(a.s.)：\(P(\omega: X_n(\omega) \to X(\omega)) = 1\) (2) 依概率：\(\forall \varepsilon > 0\)，\(P(|X_n - X| > \varepsilon) \to 0\) (3) \(L^p\) (\(p \geq 1\))：\(E[|X_n - X|^p] \to 0\) (4) 依分布：\(F_{X_n}(x) \to F_X(x)\) 在 \(F_X\) 的连续点 蓑涵关系： \[a.s. \Rightarrow \text{概率} \Rightarrow \text{分布}\] \[L^p \Rightarrow \text{概率} \Rightarrow \text{分布}\] 反向一般不成立。例外：若 \(X_n \xrightarrow{d} c\)（常数）， 则 \(X_n \xrightarrow{P} c\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>统计学中，一致性用依概率收敛；渐近正态性用依分布收敛； 几乎必然收敛保证了路径级别的行为。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n \sim U(0, 1/n)\)。证明 \(X_n \xrightarrow{P} 0\) 但给出 一个不 a.s. 收敛的例子。 解答：\(P(|X_n| > \varepsilon) \leq P(X_n > 0) \cdot \mathbf{1}_{1/n > \varepsilon} \to 0\)，故依概率收敛。 不 a.s. 的反例：「滑动块」序列，在 \([0,1]\) 上循环越 来越短的区间取值 1，其余为 0。依概率收敛到 0 但对每个 \(\omega\)，\(X_n(\omega)\) 无数次等于 1。 易错点：依概率收敛不能保证路径级收敛； 应区分「对大多数 \(\omega\)」(a.s.) 与「超过的概率小」(概率)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个蓑涵关系是正确的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L^p \\Rightarrow\\) 依概率（由 Markov 不等式）。A 反向了；')">A. 依分布 \(\Rightarrow\) 依概率</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L^p \\Rightarrow\\) 依概率（由 Markov 不等式）。A 反向了；')">B. 依概率 \(\Rightarrow\) a.s.</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(L^p \\Rightarrow\\) 依概率（由 Markov 不等式）。A 反向了；')">C. \(L^2\) \(\Rightarrow\) 依概率</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L^p \\Rightarrow\\) 依概率（由 Markov 不等式）。A 反向了；')">D. a.s. \(\Rightarrow\) \(L^1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>弱大数定律</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>招牌赌场老板开赌场为什么稳赚不赔？因为随着游戏次数增加，样本 均值 \(\bar{X}_n\) 越来越接近理论均值 \(\mu\)。弱大数定律精确描述了 这种「平均值的稳定性」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Khintchine 弱大数律律：设 \(X_1, X_2, \ldots\) i.i.d.，\(E[X_1] = \mu\)，则 \[\bar{X}_n = \frac{1}{n}\sum_{i=1}^{n} X_i \xrightarrow{P} \mu\] 简单证明（需 \(\text{Var}(X_1) = \sigma^2 < \infty\)）： \(E[\bar{X}_n] = \mu\)，\(\text{Var}(\bar{X}_n) = \sigma^2/n\)。 由 Chebyshev： \[P(|\bar{X}_n - \mu| \geq \varepsilon) \leq \frac{\sigma^2}{n\varepsilon^2} \to 0\] 注意：Khintchine 的完整证明（仅需 \(E[X_1]\) 存在，不需方差） 使用特征函数截断法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>民意调查：样本比例趋近真实比例；质量控制：抽检均值 趋近总体均值。弱大数律是统计推断的基本保证。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：估计 \(\pi\)：在单位正方形内随机撤点，\(X_i = 1\) 若落在 单位圆内。则 \(P(X_i=1) = \pi/4\)。由 WLLN： \(\bar{X}_n \xrightarrow{P} \pi/4\)，即 \(4\bar{X}_n \xrightarrow{P} \pi\)。 易错点：弱大数定律只保证依概率收敛，并不保证对每次 实验都收敛（那是 a.s. 收敛 = 强大数律）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">弱大数律的 Chebyshev 证明需要什么额外条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Chebyshev 证明用了 \\(\\text{Var}(\\bar{X}_n) = \\sigma^2/n\\)，需 \\(\\sigma^2 < \\infty\\)。')">A. 无额外条件，仅需均值存在</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Chebyshev 证明用了 \\(\\text{Var}(\\bar{X}_n) = \\sigma^2/n\\)，需 \\(\\sigma^2 < \\infty\\)。')">B. 方差有限</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Chebyshev 证明用了 \\(\\text{Var}(\\bar{X}_n) = \\sigma^2/n\\)，需 \\(\\sigma^2 < \\infty\\)。')">C. 矩母函数存在</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Chebyshev 证明用了 \\(\\text{Var}(\\bar{X}_n) = \\sigma^2/n\\)，需 \\(\\sigma^2 < \\infty\\)。')">D. 随机变量有界</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>强大数定律</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>弱大数定律说「\(\bar{X}_n\) 以高概率接近 \(\mu\)」，但强大数定律 更进一步：\(\bar{X}_n\) 几乎必然收敛到 \(\mu\)。这意味着在单次 无限重复实验中，样本均值将一定趋近真实均值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从依概率到几乎必然的跳跃反映了测度论的深度： 强大数律的证明需要 Borel-Cantelli 引理或矩阵法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Kolmogorov 强大数定律：设 \(X_i\) i.i.d.，\(E[|X_1|] < \infty\)，则 \[\bar{X}_n \to \mu \quad \text{a.s.}\] 简化证明（额外假设 \(E[X_1^4] < \infty\)）： \(E[(\bar{X}_n - \mu)^4] = O(1/n^2)\)。 因此 \(\sum_n P(|\bar{X}_n - \mu| > \varepsilon) \leq \sum_n E[(\bar{X}_n-\mu)^4]/\varepsilon^4 = O(\sum 1/n^2) < \infty\)。 由 BC1：\(P(|\bar{X}_n - \mu| > \varepsilon \text{ i.o.}) = 0\)。对 \(\varepsilon = 1/k\) 取交集即得 a.s. 收敛。 完整证明仅需 \(E[|X_1|] < \infty\)，但使用截断+独立随机变量的 极大不等式，技术上更复杂。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>蒙特卡洛方法的理论保证：样本均值 \(\bar{X}_n\) a.s. 收敛到 \(E[g(U)]\)，从而可计算任意积分 \(\int g\,d\mu\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_i \sim \text{Bernoulli}(p)\) i.i.d.，证明频率 \(\bar{X}_n \to p\) a.s. 解答：\(E[|X_1|] = p < \infty\)。由 SLLN：\(\bar{X}_n \to E[X_1] = p\) a.s. 这就是「频率稳定性」的严格数学表述。 易错点：SLLN 要求 \(E[|X_1|] < \infty\)。若均值不存在 （如 Cauchy 分布），\(\bar{X}_n\) 不收敛。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(X_i\) i.i.d. 服从 Cauchy 分布。\(\bar{X}_n\) 的行为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy 分布的 \\(\\bar{X}_n\\) 仍服从同一 Cauchy 分布')">A. 依概率收敛到 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy 分布的 \\(\\bar{X}_n\\) 仍服从同一 Cauchy 分布')">B. 几乎必然收敛到 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Cauchy 分布的 \\(\\bar{X}_n\\) 仍服从同一 Cauchy 分布')">C. \(\bar{X}_n\) 仍服从 Cauchy 分布</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Cauchy 分布的 \\(\\bar{X}_n\\) 仍服从同一 Cauchy 分布')">D. \(\bar{X}_n \to \infty\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>应用：蒙特卡洛方法与 Kolmogorov 三级数定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>大数定律的最重要应用之一是蒙特卡洛(MC)方法：用随机抽样代替 确定性计算。当积分维度很高时，这几乎是唯一可行的方法。而 Kolmogorov 三级数定理提供了独立随机变量级数 a.s. 收敛的 充要条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>蒙特卡洛积分：要计算 \(I = \int_D g(x)\,dx\)，令 \(U_i \sim U(D)\) i.i.d.， \[\hat{I}_n = \frac{|D|}{n} \sum_{i=1}^{n} g(U_i) \xrightarrow{a.s.} I\] 由 SLLN，因 \(E[g(U)] = I/|D|\)。 误差：由 CLT，\(\hat{I}_n\) 的标准差 \(\sim \sigma/\sqrt{n}\)， 与维度无关！这是 MC 在高维积分中胜过求积公式的关键。 Kolmogorov 三级数定理（陈述）：设 \(X_n\) 独立（不必同分布）。 \(\sum X_n\) a.s. 收敛 iff 以下三个级数同时收敛（截断版本）： \[\sum P(|X_n| > c) < \infty,\quad \sum E[\tilde{X}_n] \text{ 收敛},\quad \sum \text{Var}(\tilde{X}_n) < \infty\] 其中 \(\tilde{X}_n = X_n \mathbf{1}_{|X_n| \leq c}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>MC 方法广泛用于金融衍生品定价、统计物理、机器学习中的 变分推断。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 MC 方法估计 \(I = \int_0^1 e^{x^2}\,dx\)。N=10000 次抽样。 解答：生成 \(U_i \sim U(0,1)\) i.i.d.，\(\hat{I} = \frac{1}{N}\sum e^{U_i^2}\)。 由 SLLN，\(\hat{I} \to I \approx 1.4627\)。 易错点：忘记乘以区间长度 \(|D|\)。若积分域不是 \([0,1]\) 而是 \([a,b]\)，则 \(\hat{I} = \frac{b-a}{N}\sum g(U_i)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">蒙特卡洛积分的收敛速度与积分维度的关系？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。CLT 保证误差 ~ \\(\\sigma/\\sqrt{n}\\)，与维度无关。而梯形/Simpson')">A. 维度越高收敛越慢</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！CLT 保证误差 ~ \\(\\sigma/\\sqrt{n}\\)，与维度无关。而梯形/Simpson')">B. 收敛速度 \(O(1/\sqrt{n})\)，与维度无关</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。CLT 保证误差 ~ \\(\\sigma/\\sqrt{n}\\)，与维度无关。而梯形/Simpson')">C. 收敛速度 \(O(1/n)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

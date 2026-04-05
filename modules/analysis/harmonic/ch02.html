@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 Fourier 变换 — 调和分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "harmonic-ch02-q1",
+        "question": "\\(f \\in L^1(\\mathbb{R})\\) 的 Fourier 变换定义？",
+        "options": [
+          "\\(\\hat{f}(\\xi) = \\int_{-\\infty}^\\infty f(x) e^{-2\\pi i x\\xi}\\, dx\\)（或 \\(\\int f(x) e^{-ix\\xi}\\, dx\\)，取决于约定）",
+        "\\(\\hat{f}(\\xi) = \\sum c_n e^{in\\xi}\\)",
+        "\\(\\hat{f}(\\xi) = f'(\\xi)\\)",
+        "\\(\\hat{f}(\\xi) = f(\\xi)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "常见约定：(1) \\(\\hat f(\\xi) = \\int f e^{-2\\pi i x\\xi}\\, dx\\)（频率 \\(\\xi\\) Hz）；(2) \\(\\hat f(\\omega) = \\int f e^{-i\\omega x}\\, dx\\)（角频率 \\(\\omega\\)）。约定影响反转公式中的 \\(2\\pi\\) 因子。物理：\\(\\hat f(\\xi)\\) 是频率 \\(\\xi\\) 的分量振幅——时域→频域变换。"
+      },
+      {
+        "id": "harmonic-ch02-q2",
+        "question": "\\(f(x) = e^{-a|x|}\\)（\\(a > 0\\)）的 Fourier 变换 \\(\\hat f(\\xi) = ?\\)（约定 \\(\\hat f = \\int f e^{-2\\pi i x\\xi}\\, dx\\)）",
+        "options": [
+          "\\(\\frac{2a}{a^2 + 4\\pi^2\\xi^2}\\)（Lorentz/Cauchy 型）",
+        "\\(e^{-a|\\xi|}\\)",
+        "\\(\\frac{1}{a + i\\xi}\\)",
+        "\\(\\delta(\\xi)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat f = \\int_0^\\infty e^{-ax} e^{-2\\pi ix\\xi}\\, dx + \\int_{-\\infty}^0 e^{ax} e^{-2\\pi ix\\xi}\\, dx = \\frac{1}{a + 2\\pi i\\xi} + \\frac{1}{a - 2\\pi i\\xi} = \\frac{2a}{a^2 + 4\\pi^2\\xi^2}\\)。指数衰减 \\(\\to\\) 有理函数（Lorentz 谱线形状）。\\(a\\) 小：\\(f\\) 宽，\\(\\hat f\\) 窄（不确定性原理）。"
+      },
+      {
+        "id": "harmonic-ch02-q3",
+        "question": "Schwartz 空间 \\(\\mathcal{S}(\\mathbb{R})\\) 的定义？",
+        "options": [
+          "所有 \\(C^\\infty\\) 函数 \\(\\varphi\\)，使 \\(|x^m \\varphi^{(n)}(x)| \\to 0\\)（\\(|x| \\to \\infty\\)）对所有 \\(m, n \\geq 0\\)（速降函数）",
+        "紧支撑 \\(C^\\infty\\)",
+        "\\(L^2\\) 函数",
+        "多项式"
+        ],
+        "answer": 0,
+        "explanation": "速降：比任何多项式 \\(|x|^m\\) 衰减更快，且每阶导数也速降。\\(\\mathcal{S} \\subset L^p\\)（\\(\\forall p\\)）。\\(e^{-x^2} \\in \\mathcal{S}\\)，\\(e^{-|x|} \\notin \\mathcal{S}\\)（在 0 不 \\(C^\\infty\\)）。\\(\\mathcal{S}\\) 是 Fourier 变换的\"自然定义域\"——\\(\\mathcal{F}: \\mathcal{S} \\to \\mathcal{S}\\) 是自同构。"
+      },
+      {
+        "id": "harmonic-ch02-q4",
+        "question": "Fourier 变换的基本性质：\\(\\widehat{f(x-a)}(\\xi) = ?\\)（平移性质）",
+        "options": [
+          "\\(e^{-2\\pi ia\\xi}\\hat f(\\xi)\\)（时域平移 = 频域相移）",
+        "\\(\\hat f(\\xi - a)\\)",
+        "\\(\\hat f(\\xi) + a\\)",
+        "\\(a \\hat f(\\xi)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int f(x-a)e^{-2\\pi ix\\xi}\\, dx = e^{-2\\pi ia\\xi}\\int f(t) e^{-2\\pi it\\xi}\\, dt\\)（令 \\(t = x-a\\)）。对称：\\(\\widehat{e^{2\\pi iax}f(x)}(\\xi) = \\hat f(\\xi - a)\\)（频域平移 = 时域调制）。合称\"平移-调制对偶\"。"
+      },
+      {
+        "id": "harmonic-ch02-q5",
+        "question": "Fourier 反转公式：\\(f(x) = ?\\)（从 \\(\\hat f\\) 恢复 \\(f\\)）",
+        "options": [
+          "\\(\\int_{-\\infty}^\\infty \\hat f(\\xi) e^{2\\pi i x\\xi}\\, d\\xi\\)（\\(f\\) 充分好时成立）",
+        "\\(\\hat f(-x)\\)",
+        "\\(\\int \\hat f \\cdot f\\)",
+        "\\(\\hat f(x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{F}^{-1}[\\hat f](x) = \\int \\hat f(\\xi) e^{2\\pi ix\\xi}\\, d\\xi\\)。对 \\(f \\in \\mathcal{S}\\)：精确成立。\\(f \\in L^1\\) 且 \\(\\hat f \\in L^1\\)：也成立。一般 \\(L^1\\)：\\(\\hat f\\) 可能不在 \\(L^1\\)（如方波），需用 Abel 或 Cesàro 求和。"
+      },
+      {
+        "id": "harmonic-ch02-q6",
+        "question": "Gauss 函数 \\(f(x) = e^{-\\pi x^2}\\) 的 Fourier 变换？",
+        "options": [
+          "\\(\\hat f(\\xi) = e^{-\\pi\\xi^2}\\)（Gauss 函数是 Fourier 变换的不动点）",
+        "\\(e^{-\\xi^2}\\)",
+        "\\(\\sqrt{\\pi} e^{-\\xi^2/4}\\)",
+        "\\(1/(1+\\xi^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "配方法：\\(\\int e^{-\\pi x^2} e^{-2\\pi ix\\xi}\\, dx = e^{-\\pi\\xi^2}\\int e^{-\\pi(x+i\\xi)^2}\\, dx = e^{-\\pi\\xi^2}\\)（围道积分/变量替换）。\\(e^{-\\pi x^2}\\) 是唯一（归一化后）的 \\(\\hat f = f\\) 不动点。推广：\\(e^{-ax^2} \\to \\sqrt{\\pi/a}\\, e^{-\\pi^2\\xi^2/a}\\)——时域窄↔频域宽（不确定性）。"
+      },
+      {
+        "id": "harmonic-ch02-q7",
+        "question": "卷积定理：\\(\\widehat{f * g}(\\xi) = ?\\)",
+        "options": [
+          "\\(\\hat f(\\xi) \\cdot \\hat g(\\xi)\\)（卷积↔乘法）",
+        "\\(\\hat f * \\hat g\\)",
+        "\\(\\hat f + \\hat g\\)",
+        "\\(\\hat f / \\hat g\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((f*g)(x) = \\int f(t) g(x-t)\\, dt\\)。\\(\\widehat{f*g}(\\xi) = \\iint f(t)g(x-t) e^{-2\\pi ix\\xi}\\, dt\\, dx = \\hat f(\\xi) \\hat g(\\xi)\\)（Fubini + 平移性质）。对偶：\\(\\widehat{fg} = \\hat f * \\hat g\\)。卷积定理将卷积（复杂：\\(O(N^2)\\)）转化为逐点乘法——FFT 算法的理论基础。"
+      },
+      {
+        "id": "harmonic-ch02-q8",
+        "question": "Plancherel 定理：\\(\\mathcal{F}: L^2 \\to L^2\\) 是等距同构。\\(\\|\\hat f\\|_2 = ?\\)",
+        "options": [
+          "\\(\\|f\\|_2\\)（保持 \\(L^2\\) 范数）",
+        "\\(2\\pi\\|f\\|_2\\)",
+        "\\(\\|f\\|_1\\)",
+        "\\(\\|f\\|_\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int |\\hat f|^2\\, d\\xi = \\int |f|^2\\, dx\\)（约定 \\(\\hat f = \\int f e^{-2\\pi ix\\xi}\\, dx\\) 时无额外常数）。先对 \\(\\mathcal{S}\\) 证明（直接计算），再由 \\(\\mathcal{S}\\) 在 \\(L^2\\) 中稠密延拓。\\(L^1 \\cap L^2\\) 上 \\(\\hat f\\) 由积分定义；纯 \\(L^2\\) 时为 \\(L^2\\) 极限。"
+      },
+      {
+        "id": "harmonic-ch02-q9",
+        "question": "\\(\\widehat{f'}(\\xi) = ?\\)（\\(f\\) 充分光滑且可积）",
+        "options": [
+          "\\(2\\pi i\\xi \\hat f(\\xi)\\)（微分↔乘以 \\(2\\pi i\\xi\\)）",
+        "\\(\\hat f'(\\xi)\\)",
+        "\\(-\\hat f(\\xi)\\)",
+        "\\(\\xi^2 \\hat f(\\xi)\\)"
+        ],
+        "answer": 0,
+        "explanation": "分部积分：\\(\\int f'(x) e^{-2\\pi ix\\xi}\\, dx = [f e^{-2\\pi ix\\xi}]_{-\\infty}^\\infty + 2\\pi i\\xi \\int f e^{-2\\pi ix\\xi}\\, dx\\)。\\(f \\to 0\\)（\\(|x|\\to\\infty\\)）\\(\\Rightarrow\\) 边界项消失。\\(\\widehat{f'} = 2\\pi i\\xi \\hat f\\)。推广：\\(\\widehat{f^{(k)}} = (2\\pi i\\xi)^k \\hat f\\)——PDE 可代数化。"
+      },
+      {
+        "id": "harmonic-ch02-q10",
+        "question": "Schwartz 空间在 Fourier 变换下的性质：\\(f \\in \\mathcal{S} \\Rightarrow \\hat f \\in ?\\)",
+        "options": [
+          "\\(\\mathcal{S}\\)（\\(\\mathcal{F}: \\mathcal{S} \\to \\mathcal{S}\\) 是自同构）",
+        "\\(L^1\\) 但不一定 \\(\\mathcal{S}\\)",
+        "\\(C_c^\\infty\\)",
+        "\\(L^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "需证 \\(\\xi^m \\hat f^{(n)}(\\xi) \\to 0\\)。\\(\\hat f^{(n)}(\\xi) = \\widehat{(-2\\pi ix)^n f}(\\xi)\\)（\\(x^n f \\in \\mathcal{S}\\)）。\\(\\xi^m \\hat f(\\xi) = \\widehat{(\\frac{-1}{2\\pi i}\\partial_x)^m f}(\\xi)\\)。\\(\\mathcal{S} \\ni\\) 乘多项式和求导后仍在 \\(\\mathcal{S}\\)（速降定义）\\(\\Rightarrow\\) \\(\\hat f \\in \\mathcal{S}\\)。\\(\\mathcal{F}^4 = \\text{Id}\\)。"
+      },
+      {
+        "id": "harmonic-ch02-q11",
+        "question": "Parseval 公式（\\(L^2\\) 内积版）：\\(\\int f(x)\\overline{g(x)}\\, dx = ?\\)",
+        "options": [
+          "\\(\\int \\hat f(\\xi) \\overline{\\hat g(\\xi)}\\, d\\xi\\)",
+        "\\(\\int |\\hat f| |\\hat g|\\, d\\xi\\)",
+        "\\(\\hat f(0) \\overline{\\hat g(0)}\\)",
+        "\\(\\int \\hat f \\hat g\\, d\\xi\\)"
+        ],
+        "answer": 0,
+        "explanation": "极化：\\(\\langle f, g \\rangle = \\frac{1}{4}[\\|f+g\\|^2 - \\|f-g\\|^2 + i\\|f+ig\\|^2 - i\\|f-ig\\|^2]\\)，Plancherel 对每项成立 \\(\\Rightarrow\\) \\(\\langle f, g \\rangle = \\langle \\hat f, \\hat g \\rangle\\)。Fourier 变换是 \\(L^2\\) 上的酉算子。"
+      },
+      {
+        "id": "harmonic-ch02-q12",
+        "question": "尺度变换：\\(\\hat{f_a}(\\xi) = ?\\)（\\(f_a(x) = f(ax)\\)，\\(a > 0\\)）",
+        "options": [
+          "\\(\\frac{1}{a}\\hat f(\\xi/a)\\)（压缩时域 → 拉伸频域）",
+        "\\(a \\hat f(a\\xi)\\)",
+        "\\(\\hat f(\\xi)\\)",
+        "\\(\\hat f(\\xi) / a^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int f(ax)e^{-2\\pi ix\\xi}\\, dx = \\frac{1}{a}\\int f(t)e^{-2\\pi it\\xi/a}\\, dt = \\frac{1}{a}\\hat f(\\xi/a)\\)。时域压缩 \\(a\\) 倍→频域扩展 \\(a\\) 倍（振幅缩 \\(1/a\\)）。不确定性原理的直观：窄信号需宽频谱。"
+      },
+      {
+        "id": "harmonic-ch02-q13",
+        "question": "不确定性原理（Heisenberg）：\\(\\Delta x \\cdot \\Delta\\xi \\geq ?\\)",
+        "options": [
+          "\\(\\frac{1}{4\\pi}\\)（\\(\\Delta x^2 = \\int x^2|f|^2/\\|f\\|^2\\)，\\(\\Delta\\xi^2 = \\int \\xi^2|\\hat f|^2/\\|\\hat f\\|^2\\)）",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\pi\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy-Schwarz：\\(\\|f\\|_2^2 = \\int f \\bar f = -\\int x(f\\bar f)'\\, dx/1 \\leq \\|xf\\|_2 \\cdot \\|f'\\|_2\\)（分部积分+三角不等式的精化）。\\(\\|f'\\|_2 = 2\\pi\\|\\xi\\hat f\\|_2\\)。\\(\\|xf\\|\\cdot\\|\\xi\\hat f\\| \\geq \\|f\\|^2/(4\\pi)\\)。等号：\\(f = Ce^{-ax^2}\\)（Gauss 包）。"
+      },
+      {
+        "id": "harmonic-ch02-q14",
+        "question": "\\(f \\in L^1(\\mathbb{R})\\) 时 \\(\\hat f\\) 一定在 \\(L^1\\) 中吗？",
+        "options": [
+          "不一定（\\(\\hat f \\in C_0\\)（连续→0）但不一定 \\(\\in L^1\\)，如方波的 \\(\\hat f \\sim \\text{sinc}\\)）",
+        "一定",
+        "\\(\\hat f \\in L^2\\)",
+        "\\(\\hat f\\) 无界"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat f\\) 连续（\\(e^{-ix\\xi}\\) 的连续性 + 控制收敛）。Riemann-Lebesgue：\\(\\hat f(\\xi) \\to 0\\)（\\(|\\xi|\\to\\infty\\)）。但 \\(\\hat f\\) 可能不可积：\\(f = \\chi_{[-1,1]} \\Rightarrow \\hat f = \\text{sinc}(\\xi) = \\sin(2\\pi\\xi)/(\\pi\\xi) \\notin L^1\\)。这是反转公式不能直接用于所有 \\(L^1\\) 函数的原因。"
+      },
+      {
+        "id": "harmonic-ch02-q15",
+        "question": "卷积与正则化：\\(f \\in L^1\\)，\\(\\varphi_\\epsilon(x) = \\epsilon^{-1}\\varphi(x/\\epsilon)\\)（\\(\\varphi\\) 好核）。\\(f * \\varphi_\\epsilon \\to ?\\)（\\(\\epsilon \\to 0\\)）",
+        "options": [
+          "\\(f\\)（在适当意义下：\\(L^p\\) 或逐点连续点处）",
+        "\\(0\\)",
+        "\\(\\hat f\\)",
+        "\\(\\varphi\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\widehat{f*\\varphi_\\epsilon} = \\hat f \\cdot \\hat\\varphi(\\epsilon\\xi)\\)。\\(\\epsilon \\to 0\\)：\\(\\hat\\varphi(\\epsilon\\xi) \\to \\hat\\varphi(0) = 1\\)（\\(\\int\\varphi = 1\\) 时）。\\(\\widehat{f*\\varphi_\\epsilon} \\to \\hat f\\)。\\(L^2\\) 或逐点（好核三条件）。正则化/磨光是 PDE 和分析的基本工具。"
+      },
+      {
+        "id": "harmonic-ch02-q16",
+        "question": "对 \\(f, g \\in L^2\\)：\\(\\int f \\bar g\\, dx = \\int \\hat f \\bar{\\hat g}\\, d\\xi\\)（Parseval）。若 \\(g = \\delta\\)（形式上），\\(\\int f\\delta = f(0) = \\int \\hat f\\, d\\xi\\)。这说明？",
+        "options": [
+          "\\(f(0) = \\int \\hat f(\\xi)\\, d\\xi\\)（反转公式在 \\(x=0\\) 的特例）",
+        "\\(\\hat f(0) = f(0)\\)",
+        "\\(\\int f = 0\\)",
+        "\\(f = \\hat f\\)"
+        ],
+        "answer": 0,
+        "explanation": "反转公式：\\(f(x) = \\int \\hat f(\\xi)e^{2\\pi ix\\xi}\\, d\\xi\\)。\\(x = 0\\)：\\(f(0) = \\int \\hat f(\\xi)\\, d\\xi\\)。对称地：\\(\\hat f(0) = \\int f(x)\\, dx\\)。\"频域原点 = 时域总面积\"，\"时域原点 = 频域总面积\"。"
+      },
+      {
+        "id": "harmonic-ch02-q17",
+        "question": "\\(\\hat f(\\xi)\\) 的实部和虚部与 \\(f\\) 奇偶分解的关系？\\(f = f_e + f_o\\)。",
+        "options": [
+          "\\(\\text{Re}(\\hat f) = \\widehat{f_e}\\)（余弦变换），\\(\\text{Im}(\\hat f) = -i\\widehat{f_o}\\)...更准确：\\(\\hat{f_e}\\) 实偶，\\(\\hat{f_o}\\) 纯虚奇",
+        "\\(\\text{Re}(\\hat f) = \\hat{f_o}\\)",
+        "无关",
+        "\\(\\hat f\\) 总是实的"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_e(x) = [f(x)+f(-x)]/2\\)（偶）。\\(\\hat{f_e}(\\xi) = \\int f_e \\cos(2\\pi x\\xi)\\, dx\\)（实偶——\\(\\sin\\) 项消掉）。\\(\\hat{f_o}\\)：纯虚奇。\\(f\\) 实值 \\(\\Rightarrow\\) \\(\\hat f(-\\xi) = \\overline{\\hat f(\\xi)}\\)（Hermite 对称）。实偶函数的 Fourier 变换也是实偶的。"
+      },
+      {
+        "id": "harmonic-ch02-q18",
+        "question": "\\(\\mathcal{F}^4 = \\text{Id}\\)（在 \\(\\mathcal{S}\\) 上）。\\(\\mathcal{F}\\) 的特征值？",
+        "options": [
+          "\\(\\{1, -1, i, -i\\}\\)（即 \\(\\lambda^4 = 1\\) 的四个根）",
+        "\\(\\{1, -1\\}\\)",
+        "\\(\\{0, 1\\}\\)",
+        "\\(\\{e^{i\\theta}\\}\\)（连续谱）"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{F}^4 = I \\Rightarrow \\lambda^4 = 1 \\Rightarrow \\lambda \\in \\{1, -1, i, -i\\}\\)。特征函数：Hermite 函数 \\(h_n(x) = H_n(x) e^{-\\pi x^2}\\)。\\(\\mathcal{F}[h_n] = (-i)^n h_n\\)。\\(n \\equiv 0 \\pmod 4\\)：\\(\\lambda = 1\\)；\\(n \\equiv 1\\)：\\(\\lambda = -i\\)；\\(n \\equiv 2\\)：\\(\\lambda = -1\\)；\\(n \\equiv 3\\)：\\(\\lambda = i\\)。"
+      },
+      {
+        "id": "harmonic-ch02-q19",
+        "question": "Hardy 不确定性原理的一个强形式：若 \\(|f(x)| \\leq Ce^{-\\pi ax^2}\\) 且 \\(|\\hat f(\\xi)| \\leq Ce^{-\\pi b\\xi^2}\\)，\\(ab > 1\\)，则？",
+        "options": [
+          "\\(f \\equiv 0\\)",
+        "\\(f = e^{-\\pi x^2}\\)",
+        "无法确定",
+        "\\(f\\) 是多项式"
+        ],
+        "answer": 0,
+        "explanation": "\\(ab = 1\\)：\\(f\\) 必为 \\(Ce^{-\\pi ax^2}\\) 的常数倍（Gauss 型——唯一极值）。\\(ab > 1\\)：时频衰减\"太快\"——不可能（除非 \\(f = 0\\)）。物理：不可能同时精确定位时间和频率。\\(ab < 1\\)：有无穷多函数满足（不确定性未被饱和）。"
+      },
+      {
+        "id": "harmonic-ch02-q20",
+        "question": "Poisson 求和公式：\\(\\sum_{n \\in \\mathbb{Z}} f(n) = ?\\)",
+        "options": [
+          "\\(\\sum_{n \\in \\mathbb{Z}} \\hat f(n)\\)",
+        "\\(\\hat f(0)\\)",
+        "\\(\\int f\\)",
+        "\\(\\sum f(n)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(g(x) = \\sum_{n} f(x+n)\\)（周期化：\\(g\\) 是周期 1 的函数）。\\(g\\) 的 Fourier 系数：\\(c_k = \\int_0^1 g(x) e^{-2\\pi ikx}\\, dx = \\int_{\\mathbb{R}} f(x) e^{-2\\pi ikx}\\, dx = \\hat f(k)\\)。\\(g(0) = \\sum f(n) = \\sum c_k = \\sum \\hat f(k)\\)。应用：\\(\\theta\\) 函数、数论（Jacobi 恒等式）。"
+      },
+      {
+        "id": "harmonic-ch02-q21",
+        "question": "Fourier 变换不能同时使函数在时域和频域都具有紧支撑。即 \\(f\\) 和 \\(\\hat f\\) 不能同时紧支撑（除非 \\(f = 0\\)）。为什么？",
+        "options": [
+          "\\(f\\) 紧支撑 \\(\\Rightarrow\\) \\(\\hat f\\) 是整函数（由 Paley-Wiener 定理）——整函数不能紧支撑（除非恒为零）",
+        "因为 Parseval",
+        "因为 \\(\\hat f\\) 连续",
+        "不正确——可以同时紧支撑"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 紧支撑：\\(\\hat f(\\xi) = \\int_K f e^{-2\\pi ix\\xi}\\, dx\\)，\\(K\\) 紧。\\(\\hat f\\) 可以对 \\(\\xi \\in \\mathbb{C}\\) 解析延拓——\\(\\hat f\\) 是整函数。整函数的零点集是离散的——不可能在一个区间上为零（除非恒零）。Paley-Wiener：\\(f \\in L^2\\) 支撑在 \\([-R,R]\\) \\(\\Leftrightarrow\\) \\(\\hat f\\) 是指数型 \\(\\leq 2\\pi R\\) 的整函数。"
+      },
+      {
+        "id": "harmonic-ch02-q22",
+        "question": "Hausdorff-Young 不等式：\\(f \\in L^p\\)（\\(1 \\leq p \\leq 2\\)）\\(\\Rightarrow \\hat f \\in L^{p'}\\)（\\(1/p + 1/p' = 1\\)），\\(\\|\\hat f\\|_{p'} \\leq ?\\)",
+        "options": [
+          "\\(\\|f\\|_p\\)（最佳常数取决于 \\(p\\)，Beckner 给出精确常数）",
+        "\\(\\|f\\|_p^2\\)",
+        "\\(\\|f\\|_2\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(p = 1\\)：\\(\\|\\hat f\\|_\\infty \\leq \\|f\\|_1\\)（显然）。\\(p = 2\\)：\\(\\|\\hat f\\|_2 = \\|f\\|_2\\)（Plancherel）。插值（Riesz-Thorin）给出中间值。\\(p > 2\\)：\\(\\hat f\\) 一般不在 \\(L^{p'}\\)（\\(p' < 2\\)）——Fourier 变换不再是 \\(L^p \\to L^{p'}\\) 有界。精确常数：Beckner（1975），等号在 Gauss 函数取到。"
+      },
+      {
+        "id": "harmonic-ch02-q23",
+        "question": "求 \\(\\int_0^\\infty \\frac{\\sin x}{x}\\, dx\\) 用 Fourier 变换？",
+        "options": [
+          "\\(\\pi/2\\)",
+        "\\(\\pi\\)",
+        "\\(1\\)",
+        "\\(\\pi/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_{[-1,1]}(x) \\to \\hat\\chi(\\xi) = \\frac{\\sin(2\\pi\\xi)}{\\pi\\xi}\\)。反转公式在 \\(x = 0\\)：\\(1 = \\int \\frac{\\sin(2\\pi\\xi)}{\\pi\\xi}\\, d\\xi = \\frac{2}{\\pi}\\int_0^\\infty \\frac{\\sin u}{u}\\, du\\)（\\(u = 2\\pi\\xi\\)）。\\(\\int_0^\\infty \\frac{\\sin u}{u}\\, du = \\pi/2\\)。Dirichlet 积分——调和分析的经典结果。"
+      },
+      {
+        "id": "harmonic-ch02-q24",
+        "question": "Shannon 采样定理：\\(\\hat f\\) 支撑在 \\([-W, W]\\)（带限）\\(\\Rightarrow\\) \\(f(x) = ?\\)",
+        "options": [
+          "\\(\\sum_{n \\in \\mathbb{Z}} f(n/(2W)) \\text{sinc}(2Wx - n)\\)（从采样点精确重建）",
+        "\\(f\\) 的平均值",
+        "近似值",
+        "不能重建"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat f\\) 支撑 \\([-W,W]\\)：\\(\\hat f(\\xi) = \\sum \\hat f(\\xi) \\cdot 1_{[-W,W]}\\)。Poisson：离散化。\\(f\\) 的信息完全由 \\(\\{f(n/(2W))\\}\\) 确定——采样率 \\(\\geq 2W\\)（Nyquist 率）。\\(\\text{sinc}(x) = \\sin(\\pi x)/(\\pi x)\\)（插值核）。数字通信的理论基石。"
+      },
+      {
+        "id": "harmonic-ch02-q25",
+        "question": "\\(\\mathcal{S}\\) 上的拓扑：\\(\\varphi_n \\to \\varphi\\) 在 \\(\\mathcal{S}\\) 中 \\(\\Leftrightarrow\\) \\(\\sup_x |x^\\alpha D^\\beta(\\varphi_n - \\varphi)(x)| \\to 0\\)（\\(\\forall \\alpha, \\beta\\)）。\\(\\mathcal{S}\\) 是什么类型的拓扑向量空间？",
+        "options": [
+          "Fréchet 空间（可度量、完备、由可数个半范数定义的局部凸空间）",
+        "Banach 空间",
+        "Hilbert 空间",
+        "不可度量"
+        ],
+        "answer": 0,
+        "explanation": "半范数族 \\(\\|\\varphi\\|_{\\alpha,\\beta} = \\sup |x^\\alpha D^\\beta \\varphi|\\)（可数：\\(\\alpha, \\beta \\in \\mathbb{N}_0\\)）。度量：\\(d(\\varphi, \\psi) = \\sum_{k} 2^{-k}\\|\\varphi-\\psi\\|_k/(1+\\|\\varphi-\\psi\\|_k)\\)。完备性可验证。\\(\\mathcal{S}\\) 不是赋范空间（无单一范数刻画所有半范数），但是 Fréchet 空间。"
+      },
+      {
+        "id": "harmonic-ch02-q26",
+        "question": "FFT（快速 Fourier 变换）将 \\(N\\) 点 DFT 的复杂度从 \\(O(N^2)\\) 降到？",
+        "options": [
+          "\\(O(N\\log N)\\)（Cooley-Tukey 算法，1965）",
+        "\\(O(N)\\)",
+        "\\(O(N^{3/2})\\)",
+        "\\(O(\\log N)\\)"
+        ],
+        "answer": 0,
+        "explanation": "DFT：\\(\\hat f_k = \\sum_{j=0}^{N-1} f_j e^{-2\\pi ijk/N}\\)，直接计算 \\(O(N^2)\\)。分治：\\(N = 2^m\\) 时，奇偶分组递推。\\(T(N) = 2T(N/2) + O(N) = O(N\\log N)\\)。FFT 使得频谱分析可用于实时信号处理（音频、图像、通信）。"
+      },
+      {
+        "id": "harmonic-ch02-q27",
+        "question": "核磁共振（MRI）中，信号直接测量的是 \\(k\\) 空间数据（= 图像的 Fourier 变换）。图像重建用？",
+        "options": [
+          "逆 Fourier 变换（IFFT）",
+        "正 Fourier 变换",
+        "Taylor 展开",
+        "小波变换"
+        ],
+        "answer": 0,
+        "explanation": "MRI 的物理信号：\\(S(k_x, k_y) = \\int\\int \\rho(x,y) e^{-2\\pi i(k_x x + k_y y)}\\, dx\\, dy = \\hat\\rho(k_x, k_y)\\)（\\(\\rho\\) 是质子密度/图像）。图像重建 \\(= \\mathcal{F}^{-1}[S]\\)。采集策略（螺旋、EPI）决定 \\(k\\) 空间采样格式。分辨率受 \\(k\\) 空间范围限制（不确定性原理）。"
+      },
+      {
+        "id": "harmonic-ch02-q28",
+        "question": "量子力学中 Heisenberg 不确定性原理 \\(\\Delta x \\cdot \\Delta p \\geq \\hbar/2\\) 与 Fourier 分析的关系？",
+        "options": [
+          "位置波函数 \\(\\psi(x)\\) 和动量波函数 \\(\\hat\\psi(p)\\) 是 Fourier 变换对——\\(\\Delta x \\cdot \\Delta p \\geq \\hbar/2\\) 直接是数学不确定性原理",
+        "无关",
+        "仅类比",
+        "QM 不用 Fourier"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\psi(x) \\in L^2\\)：\\(|\\psi(x)|^2\\) 是位置概率密度。\\(\\hat\\psi(p) = \\frac{1}{\\sqrt{2\\pi\\hbar}}\\int \\psi(x) e^{-ipx/\\hbar}\\, dx\\)。数学：\\(\\Delta x \\cdot \\Delta\\xi \\geq 1/(4\\pi)\\)。\\(p = h\\xi = 2\\pi\\hbar\\xi\\)。\\(\\Delta p = 2\\pi\\hbar\\Delta\\xi\\)。\\(\\Delta x \\cdot \\Delta p = 2\\pi\\hbar \\cdot \\Delta x \\cdot \\Delta\\xi \\geq 2\\pi\\hbar/(4\\pi) = \\hbar/2\\)。量子不确定性 = Fourier 不确定性。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="harmonic"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/harmonic.html" class="module-name">调和分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Fourier 变换的定义与基本性质</a></li>
+      <li><a href="#kp2">02 · 反转公式与 Plancherel 定理</a></li>
+      <li><a href="#kp3">03 · Schwartz 空间与缓增分布</a></li>
+      <li><a href="#kp4">04 · 不确定性原理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>Fourier 变换</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Fourier 变换的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 级数处理周期函数，但物理世界的信号通常不是周期的。 Fourier 变换将级数推广到非周期函数：把离散频率 \(n\) 推广为 连续频率 \(\xi\)，求和 \(\sum\) 推广为积分 \(\int\)。\(L^1\) 和 \(L^2\) 上的 Fourier 变换是信号处理和 PDE 的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fourier 变换是"时域 ↔ 频域"的同构。在 \(L^2\) 上它是 等距同构（Plancherel），在 \(L^1\) 上连续但非满射。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(L^1\) 定义</strong>：\(\hat{f}(\xi) = \int_{\mathbb{R}} f(x) e^{-2\pi i x \xi}\, dx\)。 <strong>基本性质</strong>： - 线性 - 平移：\(\widehat{f(\cdot - a)}(\xi) = e^{-2\pi i a\xi} \hat{f}(\xi)\) - 调制：\(\widehat{e^{2\pi i bx} f}(\xi) = \hat{f}(\xi - b)\) - 伸缩：\(\widehat{f(\lambda \cdot)}(\xi) = \frac{1}{|\lambda|}\hat{f}(\xi/\lambda)\) - 求导：\(\widehat{f'}(\xi) = 2\pi i\xi \hat{f}(\xi)\) - 卷积：\(\widehat{f * g} = \hat{f} \cdot \hat{g}\) <strong>Riemann-Lebesgue</strong>：\(f \in L^1 \Rightarrow \hat{f} \in C_0\) （连续且趋于 0）。但 \(\hat{f}\) 不一定在 \(L^1\) 中。 <strong>Gauss 函数</strong>：\(f(x) = e^{-\pi x^2}\)。 \(\hat{f}(\xi) = e^{-\pi\xi^2}\)（Gauss 函数是 Fourier 变换的不动点！）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学中，位置表象 \(\psi(x)\) 和动量表象 \(\hat{\psi}(p)\) 通过 Fourier 变换关联；不确定性原理 \(\Delta x \cdot \Delta p \geq \hbar/2\) 是 Fourier 变换的数学性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x) = \chi_{[-1/2, 1/2]}(x)\)（特征函数）的 Fourier 变换。 解答：\(\hat{f}(\xi) = \int_{-1/2}^{1/2} e^{-2\pi ix\xi} dx = \frac{\sin(\pi\xi)}{\pi\xi} = \text{sinc}(\xi)\)。 易错点：\(\hat{f} = \text{sinc} \notin L^1(\mathbb{R})\)！ 虽然 \(f \in L^1\)，但 \(\hat{f}\) 不一定在 \(L^1\) 中。 这是反变换公式不能直接对所有 \(L^1\) 函数使用的原因。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fourier 变换将卷积变成？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\widehat{f * g} = \\hat{f} \\cdot \\hat{g}\\)——卷积定理。')">A. 卷积</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\widehat{f * g} = \\hat{f} \\cdot \\hat{g}\\)——卷积定理。')">B. 逐点乘积</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\widehat{f * g} = \\hat{f} \\cdot \\hat{g}\\)——卷积定理。')">C. 加法</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\widehat{f * g} = \\hat{f} \\cdot \\hat{g}\\)——卷积定理。')">D. 微分</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>反转公式与 Plancherel 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如果知道 \(\hat{f}\)，能否恢复 \(f\)？反转公式 \(f(x) = \int \hat{f}(\xi) e^{2\pi ix\xi} d\xi\) 给出肯定回答—— 但需要 \(\hat{f} \in L^1\)。更根本的是 Plancherel 定理： Fourier 变换在 \(L^2\) 上是等距同构，保持 \(L^2\) 范数不变。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Plancherel 定理说 Fourier 变换是 \(L^2\) 上的"旋转" （酉变换），保持所有几何结构（范数、内积、正交性）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>反转公式</strong>：若 \(f, \hat{f} \in L^1\)，则 \[f(x) = \int_{\mathbb{R}} \hat{f}(\xi) e^{2\pi ix\xi}\, d\xi\] a.e. 成立。 <strong>Plancherel 定理</strong>：Fourier 变换延拓为 \(L^2(\mathbb{R})\) 上的等距同构（酉算子）： \[\|\hat{f}\|_2 = \|f\|_2, \quad \forall f \in L^2\] （即 \(\int |\hat{f}|^2 = \int |f|^2\)——能量守恒。） <strong>Parseval 恒等式</strong>：\(\int f\bar{g}\, dx = \int \hat{f}\overline{\hat{g}}\, d\xi\) （内积守恒）。 <strong>构造</strong>：\(L^1 \cap L^2\) 上定义 Fourier 变换，证明等距性， 再由 \(L^1 \cap L^2\) 在 \(L^2\) 中稠密，唯一延拓到 \(L^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x) = e^{-|x|}\)。\(\hat{f}(\xi) = \frac{2}{1 + (2\pi\xi)^2}\) （计算：分 \(x > 0\) 和 \(x < 0\) 积分）。 验证 Plancherel：\(\|f\|_2^2 = \int e^{-2|x|} dx = 1\)。 \(\|\hat{f}\|_2^2 = \int \frac{4}{(1 + 4\pi^2\xi^2)^2} d\xi = 1\)（部分分式积分）。✓ 易错点：\(L^2\) Fourier 变换不能用积分定义（\(L^2\) 函数不一定 在 \(L^1\) 中），必须通过密度论证或截断定义。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Plancherel 定理说 Fourier 变换在 \(L^2\) 上是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。等距 + 满射 = 酉。保持 \\(L^2\\) 范数和内积。')">A. 有界算子</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。等距 + 满射 = 酉。保持 \\(L^2\\) 范数和内积。')">B. 紧算子</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！等距 + 满射 = 酉。保持 \\(L^2\\) 范数和内积。')">C. 酉算子（等距满射）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。等距 + 满射 = 酉。保持 \\(L^2\\) 范数和内积。')">D. 投影算子</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Schwartz 空间与缓增分布</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(L^1\) 和 \(L^2\) 上的 Fourier 变换各有局限。Schwartz 空间 \(\mathcal{S}(\mathbb{R})\)——快速递降函数空间——是 Fourier 变换 的"完美领地"：\(\mathcal{F}: \mathcal{S} \to \mathcal{S}\) 是同构。 其对偶空间——缓增分布 \(\mathcal{S}'\)——允许对 \(\delta\) 函数等 广义函数做 Fourier 变换，是 PDE 和物理学的标准框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\mathcal{S}\) 是 \(L^1\) 和 \(L^2\) 的公共"核心"， \(\mathcal{S}'\) 是它们的公共"包络"。Fourier 变换在 \(\mathcal{S} \hookrightarrow L^2 \hookrightarrow \mathcal{S}'\) 的每个层次都有良好定义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Schwartz 空间</strong>：\(\mathcal{S}(\mathbb{R}^n) = \{f \in C^\infty : \sup |x^\alpha D^\beta f| < \infty, \forall \alpha, \beta\}\)。 即：\(f\) 和所有导数比任何多项式都衰减得快。 \(\mathcal{F}: \mathcal{S} \to \mathcal{S}\) 是拓扑同构 （\(\hat{f}\) 的光滑性来自 \(f\) 的衰减，\(\hat{f}\) 的衰减来自 \(f\) 的光滑性）。 <strong>缓增分布</strong>：\(\mathcal{S}' = \mathcal{S}(\mathbb{R}^n)^*\)（连续线性泛函）。 \(L^p \subseteq \mathcal{S}'\)（\(1 \leq p \leq \infty\)）。 <strong>\(\delta\) 分布</strong>：\(\langle \delta, \varphi \rangle = \varphi(0)\)。 \(\hat{\delta} = 1\)（\(\mathcal{F}\delta(\xi) = \int \delta(x) e^{-2\pi ix\xi} dx = 1\)）。 \(\hat{1} = \delta\)（对偶性）。 <strong>分布的 Fourier 变换</strong>：\(\langle \hat{T}, \varphi \rangle = \langle T, \hat{\varphi} \rangle\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子场论中，传播子 \(G(x-y) = \int \frac{e^{ip(x-y)}}{p^2 + m^2} d^4p\) 作为缓增分布的 Fourier 变换有严格定义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\hat{\delta}' = ?\)（\(\delta'\) 的 Fourier 变换）。 解答：\(\langle \hat{\delta}', \varphi \rangle = \langle \delta', \hat{\varphi} \rangle = -\hat{\varphi}'(0) = -\int(-2\pi ix)\varphi(x) dx = \langle 2\pi ix, \varphi\rangle\)。 故 \(\hat{\delta}' = 2\pi i x\)（作为分布）。 易错点：\(\hat{1}\) 不是普通函数——它是 \(\delta\) 分布。 不能写 \(\hat{1}(\xi) = 0\)（\(\xi \neq 0\)）然后忽略 \(\xi = 0\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Schwartz 空间中函数的特征是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathcal{S}\\) 函数光滑（\\(C^\\infty\\)）且比任何多项式')">A. 紧支集</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathcal{S}\\) 函数光滑（\\(C^\\infty\\)）且比任何多项式')">B. 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathcal{S}\\) 函数光滑（\\(C^\\infty\\)）且比任何多项式')">C. 光滑且快速递降</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathcal{S}\\) 函数光滑（\\(C^\\infty\\)）且比任何多项式')">D. 多项式增长</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>不确定性原理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个函数不能同时在时域和频域上都"很集中"——这就是 Heisenberg 不确定性原理的数学形式。在信号处理中，这意味着时间分辨率和 频率分辨率不能同时任意精确。不确定性原理是 Fourier 分析 最深层的概念之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不确定性原理体现了 Fourier 变换的"互补性"—— 函数的"紧致性"和其 Fourier 变换的"紧致性"互相对立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Heisenberg 不确定性原理</strong>：设 \(f \in L^2(\mathbb{R})\), \(\|f\|_2 = 1\)。 定义位置方差 \((\Delta x)^2 = \int x^2 |f(x)|^2 dx\)， 频率方差 \((\Delta \xi)^2 = \int \xi^2 |\hat{f}(\xi)|^2 d\xi\)。则 \[\Delta x \cdot \Delta \xi \geq \frac{1}{4\pi}\] 等号当且仅当 \(f\) 是 Gauss 函数 \(f(x) = Ce^{-ax^2}\)（\(a > 0\)）。 <strong>证明</strong>：\(\int |xf|^2 \cdot \int |f'|^2 \geq |\int xf \cdot \overline{f'}|^2\) （Cauchy-Schwarz）。 分部积分：\(\int xf\overline{f'} dx = -\frac{1}{2}\int |f|^2 dx = -1/2\)。 用 \(\widehat{f'}(\xi) = 2\pi i\xi \hat{f}(\xi)\) 将 \(\int |f'|^2\) 换为 \((2\pi)^2 \int \xi^2 |\hat{f}|^2\)。 得 \((\Delta x)^2 (2\pi\Delta\xi)^2 \geq 1/4\)，即 \(\Delta x \Delta\xi \geq 1/(4\pi)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学：\(\Delta x \cdot \Delta p \geq \hbar/2\)（\(p = \hbar\xi\)）。 雷达/通信：脉冲越短，频带越宽。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 Gauss 函数 \(f(x) = (2a/\pi)^{1/4} e^{-ax^2}\) 达到等号。 解答：\(\|f\|_2 = 1\)。\(\Delta x = 1/(2\sqrt{a})\)。 \(\hat{f}(\xi) = (2/(\pi a))^{1/4} e^{-\pi^2\xi^2/a}\)... 简化后 \(\Delta \xi = \sqrt{a}/(2\pi)\)。 \(\Delta x \cdot \Delta \xi = 1/(4\pi)\)。等号成立。✓ 易错点：不确定性原理的精确常数取决于 Fourier 变换的约定 （\(2\pi\) 放在哪里）。不同教材常数不同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">哪个函数使不确定性不等式取等号？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Gauss 函数 \\(e^{-ax^2}\\) 是唯一使 \\(\\Delta x \\cdot \\Delta\\xi\\)')">A. 矩形脉冲</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Gauss 函数 \\(e^{-ax^2}\\) 是唯一使 \\(\\Delta x \\cdot \\Delta\\xi\\)')">B. \(\delta\) 函数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Gauss 函数 \\(e^{-ax^2}\\) 是唯一使 \\(\\Delta x \\cdot \\Delta\\xi\\)')">C. Gauss 函数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Gauss 函数 \\(e^{-ax^2}\\) 是唯一使 \\(\\Delta x \\cdot \\Delta\\xi\\)')">D. 正弦函数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/analysis/harmonic.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

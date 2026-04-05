@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 混合策略与零和博弈 — 博弈论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "game-theory-ch03-q1",
+        "question": "混合策略 Nash 均衡中的\"无差异原则\"（indifference principle）是什么？",
+        "options": [
+          "在混合 NE 中，一个玩家以正概率使用的所有纯策略必须给出相同的期望收益  B) 收益递增  C) 收益最大  D) 与对手无关"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(\\sigma_i^*(s)>0\\) 且 \\(\\sigma_i^*(s')>0\\) 但 \\(u_i(s,\\sigma_{-i}^*)>u_i(s',\\sigma_{-i}^*)\\)，则把概率从 \\(s'\\) 转移到 \\(s\\) 可提高期望收益→\\(\\sigma_i^*\\) 不是 BR→矛盾。因此：所有支撑中的纯策略给出相同期望收益。实际求解：令对手的混合使自己对支撑中的每个策略无差异——由此解出对手的混合概率。注意：是\"对手\"的混合概率由\"我\"的无差异条件决定。"
+      },
+      {
+        "id": "game-theory-ch03-q2",
+        "question": "\\(2\\times2\\) 博弈：\\((U,L)=(3,1)\\)，\\((U,R)=(0,2)\\)，\\((D,L)=(1,3)\\)，\\((D,R)=(2,0)\\)。求混合 NE 中行玩家选 \\(U\\) 的概率 \\(p\\)。",
+        "options": [
+          "\\(p=3/4\\)  B) \\(p=1/2\\)  C) \\(p=2/3\\)  D) \\(p=1/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "列玩家无差异条件（决定 \\(p\\)）：\\(E_2[L]=E_2[R]\\)。\\(E_2[L]=1\\cdot p+3(1-p)=3-2p\\)。\\(E_2[R]=2p+0(1-p)=2p\\)。\\(3-2p=2p\\Rightarrow p=3/4\\)。行玩家无差异（决定 \\(q\\)=列玩家选 L 的概率）：\\(E_1[U]=3q+0(1-q)=3q\\)，\\(E_1[D]=q+2(1-q)=2-q\\)。\\(3q=2-q\\Rightarrow q=1/2\\)。混合 NE：\\((p,q)=(3/4,1/2)\\)。"
+      },
+      {
+        "id": "game-theory-ch03-q3",
+        "question": "极小极大定理（Minimax Theorem, von Neumann 1928）的核心结论是什么？",
+        "options": [
+          "在二人零和有限博弈中：\\(\\max_\\sigma\\min_\\tau u(\\sigma,\\tau)=\\min_\\tau\\max_\\sigma u(\\sigma,\\tau)=v\\)（博弈值存在）  B) 仅对非零和博弈  C) 不存在值  D) max min \\(\\neq\\) min max"
+        ],
+        "answer": 0,
+        "explanation": "零和：\\(u_1=-u_2\\)。Minimax 定理：混合策略下 max-min = min-max = \\(v\\)（博弈值）。直觉：行玩家保证 \\(\\geq v\\)（用 maximin 策略），列玩家保证 \\(\\leq v\\)（用 minimax 策略）。两者在 NE 处相遇。\\(v\\) 是博弈的\"公平价格\"。例：石头剪刀布 \\(v=0\\)（公平）。如果 \\(v>0\\)：行玩家有结构性优势。von Neumann 证明这是博弈论的第一个深刻定理。"
+      },
+      {
+        "id": "game-theory-ch03-q4",
+        "question": "\\(2\\times2\\) 零和博弈：\\(A=\\begin{pmatrix}3&-1\\\\-2&4\\end{pmatrix}\\)（行玩家收益矩阵）。博弈值 \\(v=?\\)",
+        "options": [
+          "\\(v=1\\)  B) \\(v=0\\)  C) \\(v=2\\)  D) \\(v=-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "行玩家选 \\(U\\) 概率 \\(p\\)，列玩家的 BR 使行收益最小。\\(E[L]=3p-2(1-p)=5p-2\\)。\\(E[R]=-p+4(1-p)=4-5p\\)。\\(5p-2=4-5p\\Rightarrow10p=6\\Rightarrow p=0.6\\)。\\(v=5(0.6)-2=1\\)。验证：列玩家选 L 概率 \\(q\\)：\\(E[U]=3q-(1-q)=4q-1\\)，\\(E[D]=-2q+4(1-q)=4-6q\\)。\\(4q-1=4-6q\\Rightarrow q=0.5\\)。\\(v=4(0.5)-1=1\\) ✓。"
+      },
+      {
+        "id": "game-theory-ch03-q5",
+        "question": "将零和博弈转化为线性规划（LP）求解。行玩家的 LP 形式是什么？",
+        "options": [
+          "\\(\\max v\\) s.t. \\(\\sum_i p_i a_{ij}\\geq v,\\forall j\\); \\(\\sum p_i=1\\); \\(p_i\\geq0\\)  B) 非线性规划  C) 整数规划  D) 二次规划"
+        ],
+        "answer": 0,
+        "explanation": "行玩家目标：\\(\\max_p\\min_j\\sum_i p_i a_{ij}\\)。引入变量 \\(v=\\min_j(...)\\)：\\(\\max v\\) s.t. \\(\\sum_i p_i a_{ij}\\geq v\\) \\(\\forall j\\)。这是标准 LP（变量 \\(v,p_1,...,p_m\\)）。对偶 LP = 列玩家的 minimax 问题——强对偶定理保证对偶值相等=\\(v\\)。大型零和博弈（\\(m,n\\sim10^4\\)）可用 LP solver 在多项式时间求解。"
+      },
+      {
+        "id": "game-theory-ch03-q6",
+        "question": "\\(3\\times3\\) 零和博弈中使用 LP 求解。鞍点（saddle point）存在的条件是什么？",
+        "options": [
+          "\\(\\max_i\\min_j a_{ij}=\\min_j\\max_i a_{ij}\\)——此时纯策略即可达到博弈值（无需混合）  B) 总是存在  C) 从不存在  D) 仅 \\(2\\times2\\)"
+        ],
+        "answer": 0,
+        "explanation": "鞍点 \\((i^*,j^*)\\)：\\(a_{i^*j}\\leq a_{i^*j^*}\\leq a_{ij^*}\\) \\(\\forall i,j\\)——行极小等于列极大。此时 \\(v=a_{i^*j^*}\\)，纯策略 NE。检验：找 max-min-row 和 min-max-col，若相等则有鞍点。例：\\(\\begin{pmatrix}1&3\\\\5&2\\end{pmatrix}\\)。\\(\\min\\) 行：\\((1,2)\\)→\\(\\max=2\\)。\\(\\max\\) 列：\\((5,3)\\)→\\(\\min=3\\)。\\(2\\neq3\\)→无鞍点→需混合策略。"
+      },
+      {
+        "id": "game-theory-ch03-q7",
+        "question": "安全策略（maximin strategy）：不考虑他人策略，保证自己最低收益最大化。\\(\\max_{s_i}\\min_{s_{-i}}u_i(s_i,s_{-i})\\) 就是安全值。在非零和博弈中安全策略与 NE 策略的关系？",
+        "options": [
+          "NE 收益 \\(\\geq\\) 安全值——NE 至少和安全策略一样好  B) 安全策略总是 NE  C) NE 收益 \\(<\\) 安全值  D) 无关系"
+        ],
+        "answer": 0,
+        "explanation": "安全值 \\(\\underline{v}_i=\\max_{s_i}\\min_{s_{-i}}u_i(s_i,s_{-i})\\)。在任何 NE \\((s^*)\\) 中：\\(u_i(s^*)\\geq\\underline{v}_i\\)（否则玩家 \\(i\\) 可以单方面切换到安全策略获得 \\(\\geq\\underline{v}_i\\)）。零和博弈中 NE 值 = 安全值。非零和博弈中 NE 值通常 \\(>\\) 安全值——因为 NE 利用了对手的理性（对手也不是针对你最差情况行动）。"
+      },
+      {
+        "id": "game-theory-ch03-q8",
+        "question": "\\(2\\times3\\) 博弈（行 2 策略，列 3 策略）的混合 NE 求解。如果行玩家两个纯策略都在支撑中，列玩家的支撑大小至少为？",
+        "options": [
+          "至少 2——行玩家的两个无差异方程需要至少两个未知数（列玩家支撑中的策略概率）  B) 1  C) 3  D) 0"
+        ],
+        "answer": 0,
+        "explanation": "\\(|S_1|=2,|S_2|=3\\)。完全混合 NE：行玩家 2 个无差异条件 + 概率和 =1→3 个方程 3 个未知数→可能有唯一解。部分支撑 NE：列玩家仅用 2 个策略→2 个方程 2 个未知数。一般来说需要检查所有支撑大小组合。\\(2\\times3\\) 的支撑组合：\\((1,1),(1,2),(1,3),(2,2),(2,3)\\)——共 \\(C(2,1)\\times C(3,1)+...\\) 种。"
+      },
+      {
+        "id": "game-theory-ch03-q9",
+        "question": "将军博弈（Colonel Blotto）：两个将军各有 \\(B\\) 单位兵力分配到 \\(k\\) 个战场。每个战场独立比较兵力，多者赢。这是什么类型的博弈？",
+        "options": [
+          "零和博弈——一方的胜利就是另一方的失败。混合 NE 中兵力分配是随机化的  B) 合作博弈  C) 非零和  D) 单人决策"
+        ],
+        "answer": 0,
+        "explanation": "Blotto 博弈（Borel 1921）是经典零和博弈。\\(k=2\\) 战场时 NE 已知——均匀分配是 NE。\\(k\\geq3\\) 时分析复杂——Roberson (2006) 给出一般解。关键结果：NE 策略是\"均匀边际\"——每个战场的边际分配近似均匀 \\([0,2B/k]\\)。应用：军事战略、选举中的资源分配（广告预算在各州的分配）、体育竞赛（如何在多场比赛中分配训练资源）。"
+      },
+      {
+        "id": "game-theory-ch03-q10",
+        "question": "用 LP 对偶求解零和博弈。原问题（行玩家）的对偶问题（列玩家）是什么？",
+        "options": [
+          "\\(\\min w\\) s.t. \\(\\sum_j q_j a_{ij}\\leq w,\\forall i\\); \\(\\sum q_j=1\\); \\(q_j\\geq0\\)——强对偶给出 \\(v=w\\)  B) 同一个 LP  C) 无对偶  D) 整数规划"
+        ],
+        "answer": 0,
+        "explanation": "原：\\(\\max v\\) s.t. \\(Ap\\geq v\\mathbf{1},\\mathbf{1}^Tp=1,p\\geq0\\)。对偶：\\(\\min w\\) s.t. \\(A^Tq\\leq w\\mathbf{1},\\mathbf{1}^Tq=1,q\\geq0\\)。强对偶：\\(v^*=w^*\\)（minimax = maximin）。LP 对偶优美地\"证明\"了 minimax 定理——因为 LP 强对偶总成立（Slater 条件满足）。互补松弛条件给出 NE 的支撑结构。"
+      },
+      {
+        "id": "game-theory-ch03-q11",
+        "question": "在 \\(2\\times2\\) 对称博弈中，混合 NE 中的概率如何与收益参数关联？博弈矩阵 \\(\\begin{pmatrix}a,a&b,c\\\\c,b&d,d\\end{pmatrix}\\)，混合 NE 中选策略 1 的概率 \\(p=?\\)",
+        "options": [
+          "\\(p=\\frac{d-c}{a-b-c+d}\\)（由对手无差异条件得出）  B) \\(p=1/2\\)  C) \\(p=a/(a+d)\\)  D) \\(p=b/c\\)"
+        ],
+        "answer": 0,
+        "explanation": "列玩家无差异：\\(ap+c(1-p)=bp+d(1-p)\\)。\\((a-c)p+c=(b-d)p+d\\)。\\((a-c-b+d)p=d-c\\)。\\(p=(d-c)/(a-b-c+d)\\)。验证囚徒困境 \\((a,b,c,d)=(3,0,5,1)\\)：\\(p=(1-5)/(3-0-5+1)=-4/(-1)=4\\)——\\(p>1\\) 不合法→无内部混合 NE→唯一 NE 是纯策略 \\((D,D)\\)。"
+      },
+      {
+        "id": "game-theory-ch03-q12",
+        "question": "性别之战（Battle of the Sexes）：\\((O,O)=(3,1),(F,F)=(1,3)\\)，其他 \\((0,0)\\)。三个 NE 是什么？",
+        "options": [
+          "纯策略 \\((O,O),(F,F)\\) + 混合 \\(p=3/4\\)(选O), \\(q=1/4\\)(选O)  B) 仅两个纯策略 NE  C) 仅混合 NE  D) 无 NE"
+        ],
+        "answer": 0,
+        "explanation": "纯策略 NE：\\((O,O)\\) 和 \\((F,F)\\)（验证：双方不偏离）。混合 NE：行无差异→\\(3q+0(1-q)=0q+1(1-q)\\Rightarrow3q=1-q\\Rightarrow q=1/4\\)。列无差异→\\(p+0(1-p)=0p+3(1-p)\\Rightarrow p=3(1-p)\\Rightarrow p=3/4\\)。混合 NE 期望收益：行 \\(=3(1/4)=3/4\\)，列 \\(=3(1-3/4)=3/4\\)——两人都只得 \\(3/4\\)，低于任一纯 NE！混合均衡在此博弈中不效率。"
+      },
+      {
+        "id": "game-theory-ch03-q13",
+        "question": "匹配硬币（Matching Pennies）博弈是零和博弈。收益矩阵 \\(\\begin{pmatrix}1,-1&-1,1\\\\-1,1&1,-1\\end{pmatrix}\\)。博弈值 \\(v=?\\)",
+        "options": [
+          "\\(v=0\\)——对称零和博弈的值为 \\(0\\)  B) \\(v=1\\)  C) \\(v=-1\\)  D) \\(v=1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "对称：\\(a_{ij}=-a_{ji}\\) 且行列对称→\\(v=0\\)。NE：\\((1/2,1/2)\\)。期望收益为 \\(0\\)。匹配硬币 = 最简单的零和博弈——一方希望匹配，另一方希望不匹配。体育运动中的左右选择（足球罚点球方向、网球发球方向）都类似匹配硬币。Chiappori et al. (2002) 验证了职业足球罚点球数据符合混合 NE 预测。"
+      },
+      {
+        "id": "game-theory-ch03-q14",
+        "question": "\\(3\\times3\\) 零和博弈 \\(A=\\begin{pmatrix}2&-1&0\\\\-1&3&-2\\\\1&0&-1\\end{pmatrix}\\)。检查是否有鞍点。",
+        "options": [
+          "行最小：\\((-1,-2,-1)\\)→maximin\\(=-1\\)；列最大：\\((2,3,0)\\)→minimax\\(=0\\)。\\(-1\\neq0\\)→无鞍点  B) 有鞍点 \\((1,3)\\)  C) 有鞍点 \\((3,2)\\)  D) 无法确定"
+        ],
+        "answer": 0,
+        "explanation": "行 1 最小 \\(=\\min(2,-1,0)=-1\\)。行 2 最小 \\(=\\min(-1,3,-2)=-2\\)。行 3 最小 \\(=\\min(1,0,-1)=-1\\)。maximin \\(=\\max(-1,-2,-1)=-1\\)（行 1 或行 3）。列 1 最大 \\(=\\max(2,-1,1)=2\\)。列 2 最大 \\(=\\max(-1,3,0)=3\\)。列 3 最大 \\(=\\max(0,-2,-1)=0\\)。minimax \\(=\\min(2,3,0)=0\\)（列 3）。\\(-1\\neq0\\)→无鞍点→需混合策略→用 LP 求解。"
+      },
+      {
+        "id": "game-theory-ch03-q15",
+        "question": "Fictitious Play（虚拟对弈）算法：每轮选择对历史频率的最优反应。对零和博弈的收敛性？",
+        "options": [
+          "Robinson 1951 定理：在零和博弈中 FP 的经验频率收敛到 NE  B) 不收敛  C) 仅对 \\(2\\times2\\)  D) 发散"
+        ],
+        "answer": 0,
+        "explanation": "FP 过程：\\(t\\) 轮时，玩家 \\(i\\) 统计对手历史策略的经验分布 \\(\\hat{\\sigma}_{-i}^{(t)}\\)，选择 \\(\\text{BR}(\\hat{\\sigma}_{-i}^{(t)})\\)。经验频率 \\(\\bar{\\sigma}_i^{(t)}=\\frac{1}{t}\\sum_{\\tau=1}^t e_{s_i^\\tau}\\)。定理（Robinson）：在零和博弈中 \\(\\bar{\\sigma}^{(t)}\\to\\text{NE}\\)。非零和博弈中 FP 不一定收敛（Shapley 1964 给出反例：\\(3\\times3\\) 非零和博弈中 FP 循环不收敛）。收敛速度 \\(O(1/\\sqrt{t})\\)。"
+      },
+      {
+        "id": "game-theory-ch03-q16",
+        "question": "多人非零和博弈中的混合 NE 求解。\\(n\\) 人博弈中第 \\(i\\) 人有 \\(k_i\\) 个策略。混合 NE 的变量数和方程数？",
+        "options": [
+          "变量 \\(\\sum_i k_i\\) 个概率值（减去 \\(n\\) 个概率和约束），方程来自各 BR 条件——一般无封闭解  B) 恰好 \\(n\\) 个方程  C) \\(k^n\\) 个变量  D) 有封闭解"
+        ],
+        "answer": 0,
+        "explanation": "变量：\\(\\sum_i k_i-n\\)（每人的 \\(k_i-1\\) 个自由概率）。方程：每人 \\(i\\) 的支撑策略的无差异条件 + 支撑外策略贡献的不等式。系统通常过定（方程数 \\(>\\) 未知数）除非猜对支撑。\\(n\\geq3\\) 时问题本质上更难——不再有 LP 简化（非零和）。Lemke-Howson 仅对 \\(n=2\\)。多人博弈 NE 计算更难——可能是 FIXP-complete。"
+      },
+      {
+        "id": "game-theory-ch03-q17",
+        "question": "安全博弈（security game）中的 maximin 策略。防御者保护 \\(n\\) 个目标，资源覆盖 \\(k<n\\) 个。攻击者选择一个目标。防御者的混合 maximin 策略是什么？",
+        "options": [
+          "每个目标被覆盖的概率等于 \\(k/n\\)（均匀随机化）——若目标价值不同则按价值加权  B) 全部防守最高价值目标  C) 无需混合  D) 不防守"
+        ],
+        "answer": 0,
+        "explanation": "零和安全博弈（Stackelberg 模型）：防御者先承诺混合策略，攻击者观察后选最优攻击目标。等价值目标：\\(p_i^*=k/n\\)（均匀覆盖）。不等价值（\\(v_1>v_2>...\\)）：最优覆盖概率通过 LP 求解——\\(\\max\\min_j[(1-p_j)\\cdot v_j]\\)。IRIS（ARMOR升级版）：用于美国联邦航空安全分配空警到航班。"
+      },
+      {
+        "id": "game-theory-ch03-q18",
+        "question": "LP 对偶用于证明 minimax 定理。写出 \\(2\\times2\\) 零和博弈 \\(A=\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}\\) 的博弈值封闭公式（假设 \\(a+d\\neq b+c\\)，无鞍点时）。",
+        "options": [
+          "\\(v=\\frac{ad-bc}{a+d-b-c}\\)  B) \\(v=(a+d)/2\\)  C) \\(v=\\max(a,d)\\)  D) \\(v=\\min(a,b,c,d)\\)"
+        ],
+        "answer": 0,
+        "explanation": "行选 U 概率 \\(p\\)，列无差异：\\(ap+c(1-p)=bp+d(1-p)\\)→\\(p=(d-c)/(a-b-c+d)\\)。\\(v=ap+c(1-p)=a\\frac{d-c}{a+d-b-c}+c\\frac{a-b}{a+d-b-c}=\\frac{ad-ac+ac-bc}{a+d-b-c}=\\frac{ad-bc}{a+d-b-c}\\)。验证前题 \\(\\begin{pmatrix}3&-1\\\\-2&4\\end{pmatrix}\\)：\\(v=(12-2)/(3+4-(-1)-(-2))=10/10=1\\) ✓。"
+      },
+      {
+        "id": "game-theory-ch03-q19",
+        "question": "\\(\\alpha\\)-\\(\\beta\\) 剪枝在零和博弈树搜索中的作用。与 minimax 搜索相比，剪枝节省多少计算？",
+        "options": [
+          "最优排序下从 \\(O(b^d)\\) 降至 \\(O(b^{d/2})\\)——等效搜索深度加倍  B) 不节省  C) 总是 \\(O(1)\\)  D) \\(O(b)\\)"
+        ],
+        "answer": 0,
+        "explanation": "完全 minimax 搜索：遍历所有 \\(b^d\\) 个叶节点（\\(b\\) 分支因子，\\(d\\) 深度）。\\(\\alpha\\)-\\(\\beta\\) 剪枝：维护 \\([\\alpha,\\beta]\\) 窗口，当子树值超出窗口时跳过。最优排序（好着法先搜索）：仅需 \\(O(b^{d/2})\\) 个节点。随机排序：\\(O(b^{3d/4})\\)。国际象棋 \\(b\\approx35,d=20\\)：\\(35^{10}\\approx2.7\\times10^{15}\\) vs \\(35^{20}\\approx10^{30}\\)——剪枝使搜索变得可行。AlphaZero 进一步用 MCTS + 神经网络替代 \\(\\alpha\\)-\\(\\beta\\)。"
+      },
+      {
+        "id": "game-theory-ch03-q20",
+        "question": "\\(n\\times n\\) 对称零和博弈（\\(a_{ij}=-a_{ji}\\)）的博弈值是多少？",
+        "options": [
+          "\\(v=0\\)——反对称矩阵的 minimax 值为 \\(0\\)，NE 中两人使用相同的混合策略  B) \\(v=1\\)  C) 取决于矩阵  D) \\(v=-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "对称零和：\\(A=-A^T\\)。若行玩家用 \\(\\sigma^*\\) 达到 \\(v\\)：\\(\\min_j\\sum_i\\sigma^*_i a_{ij}\\geq v\\)。转置：列玩家用相同 \\(\\sigma^*\\) 可保证 \\(\\leq -v\\)（因为 \\(A^T=-A\\)）。minimax \\(\\leq-v\\)。但 minimax \\(=v\\)（minimax 定理）。所以 \\(v=-v\\)→\\(v=0\\)。石头剪刀布是此定理的实例。"
+      },
+      {
+        "id": "game-theory-ch03-q21",
+        "question": "无穷维零和博弈（如 Blotto 博弈 \\(k\\geq3\\)）。Nash 存在性需要什么条件？",
+        "options": [
+          "策略空间紧（如有限兵力 \\(\\leq B\\)），收益函数在适当拓扑下连续→Glicksberg 定理保证混合 NE 存在  B) 总是存在  C) 从不存在  D) 仅有限策略"
+        ],
+        "answer": 0,
+        "explanation": "Glicksberg (1952)：策略空间紧 Hausdorff + 收益函数连续→混合策略 NE 存在。\"混合\"指策略空间上的概率测度。Blotto：策略 = \\(k\\) 维单纯形（紧），收益 = 赢得战场数（不连续！——需离散化或弱化连续性条件）。Roberson 2006 的解巧妙地用连续分布避开了不连续性问题。一般性：Reny (1999) 的更弱条件允许不连续收益函数。"
+      },
+      {
+        "id": "game-theory-ch03-q22",
+        "question": "线性补偿问题（LCP）与二人博弈 NE 的关系？",
+        "options": [
+          "两人博弈的 NE 可表为 LCP：找 \\((x,y)\\) 使 \\(Mx+q\\geq0\\), \\(x\\geq0\\), \\(x^T(Mx+q)=0\\)——互补松弛条件  B) LCP 仅用于 LP  C) 无关  D) NP-hard"
+        ],
+        "answer": 0,
+        "explanation": "\\(2\\) 人博弈 NE 条件：\\(A\\sigma_2-v_1\\mathbf{1}\\leq0\\) 且 \\(\\sigma_1\\geq0\\) 且互补（\\(\\sigma_{1i}>0\\Rightarrow\\) 第 \\(i\\) 行等号）。这正是 LCP 结构。Lemke-Howson 算法本质上求解此 LCP——沿互补旋转路径。零和博弈的 LCP 退化为 LP（更简单）。一般二人博弈的 LCP 不一定有多项式算法（PPAD-complete）。Cottle et al. 的专著系统研究了 LCP。"
+      },
+      {
+        "id": "game-theory-ch03-q23",
+        "question": "多臂老虎机（MAB）问题与零和博弈的联系。UCB1 算法的 regret 界？",
+        "options": [
+          "UCB1：选 \\(\\arg\\max_a[\\hat{\\mu}_a+\\sqrt{\\frac{2\\ln t}{N_a(t)}}]\\)。Regret \\(O(\\sqrt{KT\\ln T})\\)。与博弈论的 regret matching 对应  B) 无 regret 保证  C) \\(O(T)\\) regret  D) 仅对两臂"
+        ],
+        "answer": 0,
+        "explanation": "MAB = 单玩家对抗\"自然\"的零和博弈。UCB1（Auer et al. 2002）的 regret \\(=E[\\sum_{t=1}^T\\mu^*-\\mu_{a_t}]\\)。上界 \\(O(\\sqrt{KT\\ln T})\\)（\\(K\\) 臂，\\(T\\) 轮）。与博弈的联系：外部 regret \\(\\to0\\) 的算法（如 Multiplicative Weights/Hedge）在重复零和博弈中经验频率收敛到 NE——这是 regret matching 与 NE 等价性的基础。"
+      },
+      {
+        "id": "game-theory-ch03-q24",
+        "question": "对称双矩阵博弈的混合 NE 数量。Oddness 定理（Wilson 1971）的内容？",
+        "options": [
+          "\"几乎所有\"有限博弈（generic game）有奇数个 NE（含混合）  B) 偶数个  C) 恰好 1 个  D) 无穷多个"
+        ],
+        "answer": 0,
+        "explanation": "Wilson：fixing one player's payoffs and varying the other's—generic perturbation下NE 数为奇数。\\(2\\times2\\) 博弈：1 或 3 个 NE（退化情况除外）。\\(3\\times3\\)：可以有 1,3,5,...个。推论：如果只找到了偶数个 NE，一定还有至少一个没找到。Harsanyi (1973) 进一步证明 generic game 有有限多个 NE（正则博弈）。McLennan-Park-Turocy 最多 NE 数量：\\(m\\times n\\) 博弈最多 \\(\\prod_i\\binom{m_i-1}{m_i}\\) 个 NE（Harsanyi bound）。"
+      },
+      {
+        "id": "game-theory-ch03-q25",
+        "question": "在线学习与博弈论的交叉：Multiplicative Weights Update (MWU) 算法在零和博弈中的收敛性？",
+        "options": [
+          "两个玩家各自使用 MWU（no-regret 算法），经验频率以 \\(O(\\sqrt{\\ln K/T})\\) 速率收敛到 NE  B) 不收敛  C) 瞬间收敛  D) 仅对特定博弈"
+        ],
+        "answer": 0,
+        "explanation": "MWU：\\(w_i^{t+1}=w_i^t(1-\\eta\\ell_i^t)\\)，归一化。Regret \\(\\leq\\sqrt{T\\ln K}\\)。定理（Freund-Schapire 1999）：两个 no-regret 玩家在零和博弈中的平均策略 \\(\\bar{\\sigma}^T\\to\\text{NE}\\)。收敛速率 \\(O(\\sqrt{\\ln K/T})\\)（\\(K\\) 策略数）。这是 MCTS 和对抗训练的理论基础——AlphaZero 的 self-play 可视为 no-regret 学习在零和博弈中的实例。"
+      },
+      {
+        "id": "game-theory-ch03-q26",
+        "question": "足球罚点球是经典的 \\(2\\times2\\) 零和博弈（射手选方向 vs 守门员选方向）。经济学家用数据验证了什么？",
+        "options": [
+          "职业球员的射门方向统计分布接近混合 NE 预测——无法从历史数据中找到规律  B) 球员总射右  C) 守门员总站中间  D) 不是博弈"
+        ],
+        "answer": 0,
+        "explanation": "Chiappori-Levitt-Groseclose (2002)，Palacios-Huerta (2003) 分析职业足球罚点球数据：射手选左/右的频率和守门员扑救方向频率与混合 NE 理论预测高度一致（\\(p\\)-value \\(<0.05\\) 不拒绝 NE 假说）。进一步检验：射手的选择应该是序列独立的（不应有模式）——数据也支持这一点。这是博弈论实证验证的经典案例之一。"
+      },
+      {
+        "id": "game-theory-ch03-q27",
+        "question": "AI 对弈（如 AlphaZero 下国际象棋/围棋）本质上是求解零和博弈的近似 NE。AI 使用什么方法替代传统 minimax 搜索？",
+        "options": [
+          "Monte Carlo Tree Search (MCTS) + 深度神经网络策略/价值函数——结合探索与利用（UCB），逐步逼近最优策略  B) 纯 minimax  C) 随机搜索  D) 穷举"
+        ],
+        "answer": 0,
+        "explanation": "AlphaZero（Silver et al. 2017）：(1) 策略网络 \\(p_\\theta(a|s)\\) 指导 MCTS 中的节点展开；(2) 价值网络 \\(v_\\theta(s)\\) 评估局面；(3) 自我对弈（self-play）生成训练数据。MCTS 使用 PUCT：\\(\\arg\\max_a[Q(s,a)+c\\cdot P(s,a)\\frac{\\sqrt{N(s)}}{1+N(s,a)}]\\)。无需人工知识（不同于 Stockfish 的手工评估函数）。围棋：\\(b\\approx250,d\\approx150\\)→不可能用 \\(\\alpha\\)-\\(\\beta\\)，MCTS 是关键。"
+      },
+      {
+        "id": "game-theory-ch03-q28",
+        "question": "扑克 AI（如 Libratus/Pluribus）是如何处理不完美信息零和博弈的？",
+        "options": [
+          "使用 CFR（Counterfactual Regret Minimization）算法——通过反事实遗憾最小化收敛到近似 NE  B) 穷举搜索  C) 固定策略  D) 只用启发式"
+        ],
+        "answer": 0,
+        "explanation": "CFR（Zinkevich 2008）：在博弈树中对每个信息集维护 regret 计数器，策略按 regret-matching 更新。定理：累积 regret \\(\\to O(\\sqrt{T})\\)→平均策略收敛到 NE。Libratus（Brown-Sandholm 2017）：(1) 预先用 CFR+ 训练蓝图策略；(2) 实时子博弈求解（nested subgame solving）精炼策略；(3) 在 \\(2\\times10^{12}\\) 节点的博弈树上近似 NE。Libratus 在单挑无限注德州扑克中以统计显著优势击败顶尖人类。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="game-theory"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/game-theory.html" class="module-name">博弈论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 混合策略 NE 的计算</a></li>
+      <li><a href="#kp2">02 · 零和博弈与极小极大定理</a></li>
+      <li><a href="#kp3">03 · 零和博弈的线性规划解法</a></li>
+      <li><a href="#kp4">04 · 安全策略与极小极大决策</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>混合策略与零和博弈</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>混合策略 NE 的计算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>很多博弈没有纯策略 NE（如匹配硬币），必须用混合策略。 2×2 博弈的混合 NE 有简洁的解析解，是博弈论必备技术。 支撑定理提供了核心计算思路：使对手无差异。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>混合 NE 的计算归结为解线性方程组（无差异条件） + 非负性约束 + 概率归一化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>2×2 混合 NE 的完整解法</strong>： 博弈 \(A=\begin{pmatrix}a_{11}&a_{12}\\a_{21}&a_{22}\end{pmatrix}\), \(B=\begin{pmatrix}b_{11}&b_{12}\\b_{21}&b_{22}\end{pmatrix}\)。 行玩家混合使列玩家无差异： \[p \cdot b_{11} + (1-p) \cdot b_{21} = p \cdot b_{12} + (1-p) \cdot b_{22}\] \[p = \frac{b_{22} - b_{21}}{b_{11} - b_{12} - b_{21} + b_{22}}\] 同理，列玩家的混合概率： \[q = \frac{a_{22} - a_{12}}{a_{11} - a_{12} - a_{21} + a_{22}}\] 必须验证 \(p, q \in [0,1]\)。若不在该范围，则无内点混合 NE。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 体育赛事中的随机化策略（罚球方向选择）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：博弈 \(\begin{pmatrix}(2,1)&(0,0)\\(0,0)&(1,2)\end{pmatrix}\)。找混合 NE。 解答：行玩家的 \(p\) 使列玩家无差异： \(p \cdot 1 + (1-p) \cdot 0 = p \cdot 0 + (1-p) \cdot 2\)，\(p = 2-2p\)，\(p = 2/3\)。 列玩家的 \(q\) 使行玩家无差异： \(2q + 0 = 0 + (1-q)\)，\(q = 1/3\)。 混合 NE: \(((2/3, 1/3), (1/3, 2/3))\)，期望支付 (2/3, 2/3)。 易错点：行玩家的混合概率由列玩家的支付矩阵决定，不是自己的！</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">混合 NE 中行玩家的混合概率由什么决定？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。行玩家混合是为了让列玩家无差异，所以用列玩家的支付来算。')">A. 自己的支付矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！行玩家混合是为了让列玩家无差异，所以用列玩家的支付来算。')">B. 对手的支付矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。行玩家混合是为了让列玩家无差异，所以用列玩家的支付来算。')">C. 两人支付之和</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。行玩家混合是为了让列玩家无差异，所以用列玩家的支付来算。')">D. 随机确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>零和博弈与极小极大定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>零和博弈是最对抗的情境：一方之得 = 另一方之失（\(u_1 + u_2 = 0\)）。 军事对抗、体育竞技、安全攻防都可建模为零和博弈。 von Neumann 的极小极大定理（比 Nash 早 22 年）彻底解决了这类问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>零和博弈 \(u_2 = -u_1\)，只需用行玩家的支付矩阵 \(A\)， 列玩家的为 \(-A\)。博弈成为纯筹争。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>极小极大策略</strong>： 行玩家最大化最坏情况：\(\max_i \min_j A_{ij}\) 列玩家最小化对手最优情况：\(\min_j \max_i A_{ij}\) <strong>一般不等式</strong>： \[\max_i \min_j A_{ij} \leq \min_j \max_i A_{ij}\] <strong>von Neumann 极小极大定理</strong>（混合策略下）： \[\max_{\sigma_1} \min_{\sigma_2} \sigma_1^T A \sigma_2 = \min_{\sigma_2} \max_{\sigma_1} \sigma_1^T A \sigma_2 = v\] \(v\) 称为博弈的值(value of the game)。 在混合策略下 maxmin = minmax，极小极大策略即为 NE。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 网络安全攻防博弈：攻击者与防御者的零和建模 - 对抗搜索中的极小极大算法（围棋/象棋 AI）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：矩阵 \(A = \begin{pmatrix}3&-1\\-2&4\end{pmatrix}\)。求零和博弈的值和混合 NE。 解答：纯策略 maxmin = max(min(3,-1), min(-2,4)) = max(-1,-2) = -1。 minmax = min(max(3,-2), max(-1,4)) = min(3,4) = 3。 maxmin \(\neq\) minmax，故无纯策略鞍点。 混合策略：\(p\) 使列玩家无差异：\(3p-2(1-p) = -p+4(1-p)\)， \(5p-2 = 4-5p\)，\(p=3/5\)。\(q\) 同理：\(3q-(1-q)=-2q+4(1-q)\)， \(4q-1=4-6q\)，\(q=1/2\)。\(v = 3(3/5)-2(2/5)=1\)。 易错点：纯策略 maxmin ≠ minmax 不意味着无解，而是需要混合策略。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">von Neumann 极小极大定理适用于哪类博弈？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。极小极大定理是零和博弈的专属结果。一般博弈中')">A. 所有有限博弈</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！极小极大定理是零和博弈的专属结果。一般博弈中')">B. 只限于两人零和博弈</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。极小极大定理是零和博弈的专属结果。一般博弈中')">C. 只限于对称博弈</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。极小极大定理是零和博弈的专属结果。一般博弈中')">D. 只限于完全信息博弈</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>零和博弈的线性规划解法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>零和博弈的 NE 可通过线性规划（LP）高效求解，这是 博弈论与优化理论的深刻联系。LP 对偶性与极小极大定理 紧密关联，可视为同一定理的不同表述。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>极小极大问题 ↔ LP 对偶对 ↔ 强对偶定理保证 maxmin=minmax。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>行玩家的 LP</strong>： \[\max v \quad \text{s.t.} \quad A^T p \geq v \mathbf{1},\; \mathbf{1}^T p = 1,\; p \geq 0\] 其中 \(p\) 是行玩家的混合策略。 <strong>列玩家的对偶 LP</strong>： \[\min w \quad \text{s.t.} \quad A q \leq w \mathbf{1},\; \mathbf{1}^T q = 1,\; q \geq 0\] 由 LP 强对偶定理，\(v^* = w^*\)，这正是 von Neumann 定理。 可用单纯形法或内点法在多项式时间内求解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 大规模安全博弈用 LP solver 求解 - 双矩阵博弈的 Lemke-Howson 算法</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：将前一个 KP 的例题改写为 LP。 解答：max \(v\) s.t. \(3p_1 - 2p_2 \geq v\), \(-p_1 + 4p_2 \geq v\), \(p_1 + p_2 = 1\), \(p_1, p_2 \geq 0\)。 代入 \(p_2 = 1-p_1\)：\(5p_1 - 2 \geq v\) 且 \(4 - 5p_1 \geq v\)。 最优时两个约束取等：\(p_1 = 3/5\), \(v = 1\)。与直接法一致。 易错点：LP 的对偶转换时不等式方向很容易写反。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">零和博弈的 LP 对偶对体现了什么定理？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。LP 全对偶定理 \\(v^* = w^*\\) 就是 maxmin = minmax 的数学表述。')">A. Nash 存在性定理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！LP 全对偶定理 \\(v^* = w^*\\) 就是 maxmin = minmax 的数学表述。')">B. von Neumann 极小极大定理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。LP 全对偶定理 \\(v^* = w^*\\) 就是 maxmin = minmax 的数学表述。')">C. Brouwer 不动点定理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。LP 全对偶定理 \\(v^* = w^*\\) 就是 maxmin = minmax 的数学表述。')">D. 中心极限定理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>安全策略与极小极大决策</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当玩家对对手的理性性或策略不确定时，极小极大策略提供了 最保守的决策方式：假设最坏情况并最大化其下的收益。 在安全关键领域（军事、金融风控），这种态度常常是合理的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>安全策略 = 极小极大策略：最大化最坏保证收益。 在零和博弈中它是 NE，在一般博弈中它可能不是。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>安全值</strong>：玩家 \(i\) 的安全值为 \[\bar{v}_i = \max_{\sigma_i} \min_{\sigma_{-i}} u_i(\sigma_i, \sigma_{-i})\] 即最坏情况下能保证的最高收益。 <strong>NE 与安全值的关系</strong>：任何 NE 的支付 \(\geq\) 安全值。 因为 NE 中每人都在玩最优反应，而安全值是假设最坏情况。 <strong>零和博弈的特殊性</strong>： NE 策略 \(=\) 极小极大策略 \(=\) 安全策略。三者合一。 \[\sigma_1^* = \arg\max_{\sigma_1} \min_{\sigma_2} \sigma_1^T A \sigma_2\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 密码学中的最坏情况安全分析 - 算法博弈论中的安全策略设计</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：博弈 \(\begin{pmatrix}(3,3)&(0,5)\\(5,0)&(1,1)\end{pmatrix}\)。 分别计算两人的安全值和安全策略。 解答：行玩家：选 T 时最坏 0，选 B 时最坏 1。\(\bar{v}_1 = 1\)，安全策略 B。 NE 是 (B,R)=(1,1)，支付等于安全值。 但注意 (T,L)=(3,3) 也是 NE 且更优。 易错点：安全策略可能过于保守，放弃了更好的均衡。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在零和博弈中，安全策略、极小极大策略和 NE 策略的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是零和博弈的独特美妆性质。一般博弈中三者可能不同。')">A. 三者完全无关</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是零和博弈的独特美妆性质。一般博弈中三者可能不同。')">B. 安全策略 = 极小极大策略 ≠ NE</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！这是零和博弈的独特美妆性质。一般博弈中三者可能不同。')">C. 三者完全一致</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是零和博弈的独特美妆性质。一般博弈中三者可能不同。')">D. 只在纯策略时一致</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/probability/game-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 覆叠空间 — 代数拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "alg-topo-ch02-q1",
+        "question": "覆叠空间 \\(p: \\tilde{X} \\to X\\) 的定义核心条件是什么？",
+        "options": [
+          "\\(p\\) 是同胚",
+        "每个 \\(x \\in X\\) 有邻域 \\(U\\) 使得 \\(p^{-1}(U) = \\bigsqcup_\\alpha V_\\alpha\\)（不交并），每个 \\(V_\\alpha \\xrightarrow{p} U\\) 是同胚",
+        "\\(p\\) 是满射",
+        "\\(\\tilde{X}\\) 是 \\(X\\) 的子空间"
+        ],
+        "answer": 1,
+        "explanation": "覆叠映射：局部地看，\\(\\tilde{X}\\) 是 \\(X\\) 的\"多层复制\"。每个均匀覆盖邻域 \\(U\\) 的原像是若干不交\"薄片\"（sheets），每片同胚映到 \\(U\\)。层数 = \\(|p^{-1}(x)|\\)（纤维基数），对连通覆叠是常数。\\(\\mathbb{R} \\xrightarrow{e^{2\\pi it}} S^1\\) 是无穷层覆叠。"
+      },
+      {
+        "id": "alg-topo-ch02-q2",
+        "question": "\\(p: \\mathbb{R} \\to S^1\\), \\(p(t) = e^{2\\pi it}\\) 是什么？",
+        "options": [
+          "万有覆叠空间",
+        "二重覆叠",
+        "不是覆叠",
+        "有限覆叠"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tilde{X} = \\mathbb{R}\\)（单连通），纤维 \\(p^{-1}(z) = \\{t + n : n \\in \\mathbb{Z}\\}\\)（无穷层）。\\(\\pi_1(\\mathbb{R}) = 0\\)，所以这是万有覆叠。覆叠变换群 \\(= \\{t \\mapsto t + n\\} \\cong \\mathbb{Z} = \\pi_1(S^1)\\)。每个覆叠空间都有 \\(p^{-1}(U)\\) 分裂成薄片的性质——\\(\\mathbb{R}\\) 的每段 \\((n, n+1)\\) 是一片。"
+      },
+      {
+        "id": "alg-topo-ch02-q3",
+        "question": "道路提升性质：\\(p: \\tilde{X} \\to X\\) 覆叠，\\(\\gamma: [0,1] \\to X\\) 道路，\\(\\tilde{x}_0 \\in p^{-1}(\\gamma(0))\\)。则存在唯一提升 \\(\\tilde{\\gamma}\\) 使得什么？",
+        "options": [
+          "\\(p \\circ \\tilde{\\gamma} = \\gamma\\) 且 \\(\\tilde{\\gamma}(0) = \\tilde{x}_0\\)",
+        "\\(\\tilde{\\gamma} = \\gamma\\)",
+        "多条提升",
+        "无提升"
+        ],
+        "answer": 0,
+        "explanation": "道路提升存在且唯一（给定起点）。\\(\\tilde{\\gamma}\\) \"跟踪\" \\(\\gamma\\) 在 \\(\\tilde{X}\\) 中的一层上跑，到分叉处（薄片边界）自动接续合适的片。唯一性来自离散选择的连续性。类似地，同伦提升：如果 \\(\\gamma_0 \\simeq \\gamma_1\\) rel 端点，则 \\(\\tilde{\\gamma}_0 \\simeq \\tilde{\\gamma}_1\\) rel 端点。"
+      },
+      {
+        "id": "alg-topo-ch02-q4",
+        "question": "\\(p: S^2 \\to \\mathbb{RP}^2\\)（\\(x \\sim -x\\) 的商映射）是几重覆叠？",
+        "options": [
+          "1",
+        "2",
+        "\\(\\infty\\)",
+        "3"
+        ],
+        "answer": 1,
+        "explanation": "\\(|p^{-1}(x)| = 2\\)（每个 \\(\\mathbb{RP}^2\\) 中的点对应 \\(S^2\\) 上的一对对径点）。二重覆叠。\\(\\pi_1(\\mathbb{RP}^2) = \\mathbb{Z}/2\\)，覆叠层数 = \\(|\\pi_1(X)/p_*\\pi_1(\\tilde{X})| = |\\mathbb{Z}/2| = 2\\)（\\(S^2\\) 单连通 \\(\\Rightarrow p_*\\pi_1 = 0\\)）。\\(S^2\\) 是 \\(\\mathbb{RP}^2\\) 的万有覆叠。"
+      },
+      {
+        "id": "alg-topo-ch02-q5",
+        "question": "覆叠空间分类定理的核心陈述是什么？",
+        "options": [
+          "连通覆叠空间与 \\(\\pi_1(X)\\) 的子群一一对应（分类对应）",
+        "覆叠空间与同调群对应",
+        "覆叠空间总同胚于 \\(X\\)",
+        "覆叠空间不可分类"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 良好（连通、局部道路连通、半局部单连通）。连通覆叠 \\((\\tilde{X}, p)\\) \\(\\leftrightarrow\\) \\(\\pi_1(X)\\) 的共轭类/子群 \\(H = p_*\\pi_1(\\tilde{X})\\)。层数 \\(= [\\pi_1(X) : H]\\)。\\(H = \\pi_1(X)\\) \\(\\Leftrightarrow\\) 同胚（平凡覆叠）。\\(H = 0\\) \\(\\Leftrightarrow\\) 万有覆叠。覆叠越多层，对应子群越小。"
+      },
+      {
+        "id": "alg-topo-ch02-q6",
+        "question": "万有覆叠空间的定义和性质？",
+        "options": [
+          "单连通的覆叠空间",
+        "覆叠所有其他覆叠空间",
+        "对应 \\(\\pi_1\\) 的平凡子群 \\(\\{e\\}\\)",
+        "以上全部"
+        ],
+        "answer": 3,
+        "explanation": "万有覆叠 \\(\\tilde{X}\\)：(A) \\(\\pi_1(\\tilde{X}) = 0\\)（单连通）。(C) \\(p_*\\pi_1(\\tilde{X}) = 0\\)（对应平凡子群）。(B) 存在覆叠映射 \\(\\tilde{X} \\to \\hat{X}\\) 到 \\(X\\) 的任何连通覆叠 \\(\\hat{X}\\)（\"万有\"性质）。覆叠变换群 \\(\\text{Deck}(\\tilde{X}/X) \\cong \\pi_1(X)\\)。"
+      },
+      {
+        "id": "alg-topo-ch02-q7",
+        "question": "\\(S^1\\) 的所有连通覆叠空间有哪些？",
+        "options": [
+          "\\(\\mathbb{R}\\)（万有覆叠）和 \\(S^1 \\xrightarrow{z \\mapsto z^n} S^1\\)（\\(n\\)-重覆叠，\\(n \\geq 1\\)）",
+        "只有 \\(\\mathbb{R}\\)",
+        "\\(\\mathbb{R}^2\\)",
+        "无穷多不可数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_1(S^1) = \\mathbb{Z}\\)。\\(\\mathbb{Z}\\) 的子群：\\(n\\mathbb{Z}\\)（\\(n = 0, 1, 2, \\ldots\\)）。\\(n\\mathbb{Z}\\) 对应 \\(n\\)-重覆叠 \\(S^1 \\to S^1\\), \\(z \\mapsto z^n\\)。\\(0 \\cdot \\mathbb{Z} = 0\\) 对应万有覆叠 \\(\\mathbb{R}\\)。\\(1 \\cdot \\mathbb{Z} = \\mathbb{Z}\\) 对应平凡覆叠（同胚）。完全分类！"
+      },
+      {
+        "id": "alg-topo-ch02-q8",
+        "question": "\\(p: S^3 \\to SO(3)\\)（\\(SU(2) \\to SO(3)\\) 的二重覆叠）中，纤维 \\(p^{-1}(R)\\) 对任意旋转 \\(R\\) 包含几个点？",
+        "options": [
+          "1",
+        "2",
+        "3",
+        "\\(\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(SU(2) \\cong S^3 \\to SO(3)\\)，核 \\(= \\{\\pm I\\}\\)。每个旋转 \\(R \\in SO(3)\\) 有恰好 2 个原像 \\(\\pm A \\in SU(2)\\)。\\(\\pi_1(SO(3)) = \\mathbb{Z}/2\\)，\\(S^3\\) 单连通（万有覆叠），层数 \\(= |\\pi_1| = 2\\)。"
+      },
+      {
+        "id": "alg-topo-ch02-q9",
+        "question": "同伦提升性质：\\(p: \\tilde{X} \\to X\\) 覆叠，\\(F: [0,1]^2 \\to X\\) 同伦，\\(\\tilde{F}_0\\) 是 \\(F|_{t=0}\\) 的提升。\\(\\tilde{F}\\) 存在且唯一吗？",
+        "options": [
+          "存在且唯一",
+        "存在但不唯一",
+        "可能不存在",
+        "需要额外条件"
+        ],
+        "answer": 0,
+        "explanation": "同伦提升引理：覆叠映射有（唯一的）同伦提升性质。给定 \\(\\tilde{F}(s,0)\\) 后，\\(\\tilde{F}\\) 唯一确定。关键：道路逐步提升，同伦是\"道路的连续族\"，连续参数化保证提升的连续性。这保证了：基点固定的环路同伦提升后仍是环路同伦——\\(p_*\\) 是单射。"
+      },
+      {
+        "id": "alg-topo-ch02-q10",
+        "question": "正规覆叠（Galois 覆叠）的特征是什么？",
+        "options": [
+          "\\(p_*\\pi_1(\\tilde{X})\\) 是 \\(\\pi_1(X)\\) 的正规子群",
+        "覆叠变换群 \\(\\text{Deck}(\\tilde{X}/X)\\) 在纤维上传递作用",
+        "\\(X = \\tilde{X}/\\text{Deck}\\)",
+        "全部正确"
+        ],
+        "answer": 3,
+        "explanation": "正规覆叠等价条件：(A) \\(H = p_*\\pi_1(\\tilde{X}) \\trianglelefteq \\pi_1(X)\\)。(B) Deck 群在每条纤维上传递。(C) \\(X \\cong \\tilde{X}/\\text{Deck}\\)。此时 \\(\\text{Deck} \\cong \\pi_1(X)/H\\)。万有覆叠总是正规的（\\(H = 0 \\trianglelefteq \\pi_1\\)）。\\(p: S^1 \\to S^1, z \\mapsto z^n\\) 正规，\\(\\text{Deck} = \\mathbb{Z}/n\\)（旋转 \\(2\\pi k/n\\)）。"
+      },
+      {
+        "id": "alg-topo-ch02-q11",
+        "question": "\\(T^2 = \\mathbb{R}^2/\\mathbb{Z}^2\\)。覆叠 \\(p: \\mathbb{R}^2 \\to T^2\\) 的覆叠变换群是什么？",
+        "options": [
+          "\\(\\mathbb{Z}^2\\)（平移 \\((m,n)\\)）",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\{e\\}\\)",
+        "\\(GL(2, \\mathbb{Z})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Deck}(\\mathbb{R}^2/T^2) = \\{(x,y) \\mapsto (x+m, y+n) : (m,n) \\in \\mathbb{Z}^2\\} \\cong \\mathbb{Z}^2\\)。\\(\\mathbb{R}^2\\) 单连通 \\(\\Rightarrow\\) 万有覆叠 \\(\\Rightarrow \\text{Deck} = \\pi_1(T^2) = \\mathbb{Z}^2\\)。基本域是 \\([0,1)^2\\)。"
+      },
+      {
+        "id": "alg-topo-ch02-q12",
+        "question": "覆叠空间的一个推论：如果 \\(X\\) 有万有覆叠 \\(\\tilde{X}\\)，且 \\(|\\pi_1(X)| = n < \\infty\\)，那么 \\(\\tilde{X} \\to X\\) 是几层覆叠？",
+        "options": [
+          "\\(n\\)",
+        "\\(\\infty\\)",
+        "1",
+        "\\(n^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "万有覆叠层数 \\(= |\\pi_1(X) / p_*\\pi_1(\\tilde{X})| = |\\pi_1(X)/\\{e\\}| = |\\pi_1(X)| = n\\)。\\(\\text{Deck} = \\pi_1(X)\\)，\\(|\\text{Deck}| = n\\)。例如 \\(S^2 \\to \\mathbb{RP}^2\\)（\\(n = 2\\)），\\(S^3 \\to L(p,q)\\)（\\(n = p\\)，透镜空间）。"
+      },
+      {
+        "id": "alg-topo-ch02-q13",
+        "question": "设 \\(p: \\tilde{X} \\to X\\) 覆叠。如果 \\(\\tilde{X}\\) 紧致且 \\(X\\) 连通，那么覆叠层数是什么？",
+        "options": [
+          "一定有限",
+        "可以是无穷",
+        "一定为 1",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tilde{X}\\) 紧致 \\(\\Rightarrow p^{-1}(x)\\) 是 \\(\\tilde{X}\\) 的闭离散子集 \\(\\Rightarrow\\) 有限（紧空间中离散闭集有限）。例如 \\(S^n \\to \\mathbb{RP}^n\\)（2 层），\\(S^1 \\to S^1\\)（\\(n\\) 层，\\(\\tilde{X} = S^1\\) 紧致）。无穷层覆叠 \\(\\mathbb{R} \\to S^1\\)：\\(\\tilde{X} = \\mathbb{R}\\) 非紧致。"
+      },
+      {
+        "id": "alg-topo-ch02-q14",
+        "question": "\\(\\pi_1(X)\\) 的子群格与 \\(X\\) 的覆叠空间格的关系类似于什么代数理论？",
+        "options": [
+          "Galois 理论（域扩张与 Galois 群的子群对应）",
+        "线性代数的子空间格",
+        "无类似",
+        "集合论的幂集"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_1\\) 的子群 \\(\\leftrightarrow\\) 覆叠空间（格反转）。正规子群 \\(\\leftrightarrow\\) 正规/Galois 覆叠。\\(\\text{Deck} = \\pi_1/H\\)。这完美类比 Galois 理论：子域 \\(\\leftrightarrow\\) Galois 群的子群，正规子域 \\(\\leftrightarrow\\) 正规子群。Grothendieck 将两者统一到\"基本群函子\"的框架中（étale 基本群）。"
+      },
+      {
+        "id": "alg-topo-ch02-q15",
+        "question": "\\(\\tilde{X}\\) 是 \\(X\\) 的万有覆叠。如果 \\(X\\) 是紧致 Riemann 面 \\(\\Sigma_g\\)（\\(g \\geq 2\\)），\\(\\tilde{X}\\) 是什么？",
+        "options": [
+          "\\(S^2\\)",
+        "\\(\\mathbb{R}^2\\)",
+        "双曲平面 \\(\\mathbb{H}^2\\)",
+        "\\(T^2\\)"
+        ],
+        "answer": 2,
+        "explanation": "曲面万有覆叠的分类（几何化）：\\(g = 0\\)（\\(S^2\\)）\\(\\Rightarrow \\tilde{X} = S^2\\)。\\(g = 1\\)（\\(T^2\\)）\\(\\Rightarrow \\tilde{X} = \\mathbb{R}^2\\)。\\(g \\geq 2\\) \\(\\Rightarrow \\tilde{X} = \\mathbb{H}^2\\)（双曲平面）。\\(\\Sigma_g = \\mathbb{H}^2/\\Gamma\\)（\\(\\Gamma \\cong \\pi_1(\\Sigma_g)\\) 是 \\(\\mathrm{Isom}(\\mathbb{H}^2)\\) 的离散子群）。这是2维几何化(Thurston 2-dim geometry)。"
+      },
+      {
+        "id": "alg-topo-ch02-q16",
+        "question": "映射提升判据：\\(f: (Y, y_0) \\to (X, x_0)\\)，\\(p: (\\tilde{X}, \\tilde{x}_0) \\to (X, x_0)\\) 覆叠，\\(Y\\) 道路连通局部道路连通。\\(f\\) 可以提升为 \\(\\tilde{f}: Y \\to \\tilde{X}\\) 的充要条件？",
+        "options": [
+          "\\(f_*\\pi_1(Y) \\subseteq p_*\\pi_1(\\tilde{X})\\)",
+        "\\(f\\) 是覆叠映射",
+        "\\(Y\\) 单连通",
+        "总可以"
+        ],
+        "answer": 0,
+        "explanation": "提升存在 \\(\\iff f_*\\pi_1(Y, y_0) \\subseteq p_*\\pi_1(\\tilde{X}, \\tilde{x}_0)\\)。\\(Y\\) 单连通时 \\(f_*\\pi_1(Y) = 0 \\subseteq\\) 任何子群，总可以提升（C 是充分条件）。这是覆叠空间理论的核心工具——将映射\"升级\"到覆叠空间上工作（更大更简单的空间）。"
+      },
+      {
+        "id": "alg-topo-ch02-q17",
+        "question": "\\(p: \\tilde{X} \\to X\\) 是 \\(n\\)-重覆叠。\\(\\chi(\\tilde{X})\\) 和 \\(\\chi(X)\\)（Euler 特征数）的关系？",
+        "options": [
+          "\\(\\chi(\\tilde{X}) = n \\cdot \\chi(X)\\)",
+        "\\(\\chi(\\tilde{X}) = \\chi(X)\\)",
+        "\\(\\chi(\\tilde{X}) = \\chi(X)/n\\)",
+        "无关系"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\)-重覆叠：每个胞腔 \\(\\sigma\\) 的原像有 \\(n\\) 个胞腔 \\(\\tilde{\\sigma}_1, \\ldots, \\tilde{\\sigma}_n\\)。\\(\\tilde{X}\\) 的 \\(k\\)-胞腔数 \\(= n \\cdot\\) \\(X\\) 的 \\(k\\)-胞腔数。\\(\\chi(\\tilde{X}) = \\sum (-1)^k n c_k = n \\chi(X)\\)。例如 \\(S^2 \\to \\mathbb{RP}^2\\)（2 层）：\\(\\chi(S^2) = 2 = 2 \\chi(\\mathbb{RP}^2) = 2 \\cdot 1\\)。"
+      },
+      {
+        "id": "alg-topo-ch02-q18",
+        "question": "覆叠映射是局部同胚。反之，局部同胚是否是覆叠映射？",
+        "options": [
+          "是",
+        "不一定——需要均匀覆盖性质",
+        "当且仅当紧致时",
+        "当且仅当满射时"
+        ],
+        "answer": 1,
+        "explanation": "覆叠 \\(\\Rightarrow\\) 局部同胚（每片 \\(V_\\alpha \\to U\\) 是同胚）。但局部同胚不一定是覆叠：\\(p: (0, 2) \\to S^1\\), \\(p(t) = e^{2\\pi it}\\) 是局部同胚但不是覆叠（\\(e^{2\\pi i \\cdot 0}\\) 的邻域原像不分裂成不交同胚片——\\((0,\\epsilon)\\) 和 \\((1, 1+\\epsilon)\\) 只有后者完整）。需要均匀覆盖性（evenly covered）。"
+      },
+      {
+        "id": "alg-topo-ch02-q19",
+        "question": "\\(p_*: \\pi_1(\\tilde{X}, \\tilde{x}_0) \\to \\pi_1(X, x_0)\\) 是单射。为什么？",
+        "options": [
+          "\\(p\\) 是覆叠 \\(\\Rightarrow\\) 同伦提升唯一 \\(\\Rightarrow\\) \\(p_*([\\tilde{\\gamma}]) = [e] \\Rightarrow \\tilde{\\gamma}\\) 提升为常道路 \\(\\Rightarrow [\\tilde{\\gamma}] = [e]\\)",
+        "\\(p\\) 单射",
+        "\\(\\tilde{X}\\) 单连通",
+        "需要额外假设"
+        ],
+        "answer": 0,
+        "explanation": "\\(p_*([\\tilde{\\gamma}]) = [p \\circ \\tilde{\\gamma}] = [c_{x_0}]\\)。即 \\(p \\circ \\tilde{\\gamma} \\simeq c_{x_0}\\) rel 端点。同伦提升：存在 \\(\\tilde{H}\\) 使 \\(\\tilde{H}(\\cdot, 0) = \\tilde{\\gamma}\\), \\(\\tilde{H}(\\cdot, 1) = c_{\\tilde{x}_0}\\)。所以 \\(\\tilde{\\gamma} \\simeq c_{\\tilde{x}_0}\\), \\([\\tilde{\\gamma}] = [e]\\), \\(p_*\\) 单射。B 错（\\(p\\) 一般非单射）。C 只是特例。"
+      },
+      {
+        "id": "alg-topo-ch02-q20",
+        "question": "透镜空间 \\(L(p, q) = S^3/\\mathbb{Z}_p\\)（\\(\\mathbb{Z}_p\\) 由 \\((z_1, z_2) \\mapsto (e^{2\\pi i/p}z_1, e^{2\\pi iq/p}z_2)\\) 生成）。\\(\\pi_1(L(p,q)) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/p\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/q\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S^3 \\to L(p,q)\\) 是 \\(p\\)-重正规覆叠，\\(S^3\\) 单连通。\\(\\text{Deck} = \\mathbb{Z}/p = \\pi_1(L(p,q))\\)。注意 \\(\\pi_1\\) 不区分不同 \\(q\\)！但 \\(L(5,1) \\not\\simeq L(5,2)\\)（同伦但不同胚），需要更精细的不变量（如 Reidemeister 扭转）。"
+      },
+      {
+        "id": "alg-topo-ch02-q21",
+        "question": "\\(X\\) 的万有覆叠存在的充分条件是什么？",
+        "options": [
+          "\\(X\\) 连通、局部道路连通、半局部单连通",
+        "\\(X\\) 紧致",
+        "\\(X\\) 是流形",
+        "\\(X\\) 简单连通"
+        ],
+        "answer": 0,
+        "explanation": "半局部单连通：每个 \\(x \\in X\\) 有邻域 \\(U\\) 使得 \\(i_*: \\pi_1(U, x) \\to \\pi_1(X, x)\\) 平凡（\\(U\\) 中的环路在 \\(X\\) 中可缩，不要求在 \\(U\\) 中可缩）。CW 复形总满足此条件。Hawaiian earring 不满足——没有万有覆叠。流形（C）和紧致空间（B）不自动保证（但流形满足因为局部可缩）。"
+      },
+      {
+        "id": "alg-topo-ch02-q22",
+        "question": "\\(X = S^1 \\vee S^1\\)（figure-eight）的万有覆叠 \\(\\tilde{X}\\) 长什么样？",
+        "options": [
+          "\\(\\mathbb{R}^2\\)",
+        "无穷 4-正则树（Cayley 图）",
+        "\\(S^2\\)",
+        "\\(\\mathbb{R}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\pi_1(X) = F_2 = \\langle a, b\\rangle\\)（自由群）。\\(\\tilde{X}\\) = \\(F_2\\) 的 Cayley 图：每个顶点有 4 条边（\\(a, a^{-1}, b, b^{-1}\\)），形成无穷 4-正则树。\\(\\tilde{X}\\) 可缩（树是可缩的），\\(\\pi_1(\\tilde{X}) = 0\\)，\\(\\text{Deck} = F_2\\)。"
+      },
+      {
+        "id": "alg-topo-ch02-q23",
+        "question": "覆叠空间理论在拓扑中的核心价值是什么？",
+        "options": [
+          "把非单连通空间的问题提升到单连通空间（万有覆叠）解决",
+        "只是分类练习",
+        "与同调无关",
+        "A 正确，且覆叠变换群 \\(\\cong \\pi_1\\) 提供了代数工具"
+        ],
+        "answer": 3,
+        "explanation": "策略：\\(X\\) 复杂 \\(\\to\\) 提升到 \\(\\tilde{X}\\)（单连通，更简单）\\(\\to\\) 在 \\(\\tilde{X}\\) 上解决问题 \\(\\to\\) 用 \\(\\text{Deck} = \\pi_1\\) 的作用投影回 \\(X\\)。例如：\\(\\mathbb{RP}^n\\) 上的问题提升到 \\(S^n\\)。等变拓扑和 Galois 理论类似。覆叠空间是同调/上同调理论中许多长正合序列的基础。"
+      },
+      {
+        "id": "alg-topo-ch02-q24",
+        "question": "有限图 \\(G\\)（1 维 CW 复形）的基本群是什么？",
+        "options": [
+          "自由群 \\(F_r\\)（\\(r = 1 - \\chi(G) = 1 - V + E\\)）",
+        "\\(\\mathbb{Z}^{V-1}\\)",
+        "平凡群",
+        "取决于嵌入"
+        ],
+        "answer": 0,
+        "explanation": "图形变收缩到生成树 \\(T\\)（\\(\\pi_1(T) = 0\\)），额外的每条边 \\(e_i \\notin T\\) 贡献一个自由生成元。\\(E - (V-1) = E - V + 1\\) 条额外边。\\(\\pi_1(G) = F_{E-V+1}\\)。\\(r = 1 - \\chi(G)\\)。例如 \\(S^1 \\vee S^1\\)：\\(V = 1, E = 2\\), \\(r = 2\\), \\(F_2\\)。"
+      },
+      {
+        "id": "alg-topo-ch02-q25",
+        "question": "Riemann 存在定理：紧致 Riemann 面 \\(X\\) 的有限群 \\(G\\) 的正规覆叠对应什么？",
+        "options": [
+          "\\(\\pi_1(X)\\) 的有限指标正规子群",
+        "\\(X\\) 的全纯映射",
+        "A 正确，且分支覆叠推广了覆叠概念",
+        "代数簇"
+        ],
+        "answer": 2,
+        "explanation": "分支覆叠：除有限多点（分支点）外是覆叠映射。Riemann 存在定理：每个有限群表示 \\(\\pi_1(X \\setminus \\{p_1,\\ldots,p_n\\}) \\to G\\) 对应一个分支覆叠 \\(\\tilde{X} \\to X\\)。这连接了拓扑（覆叠）和复代数几何（Riemann 面）。推广到代数几何中的 étale 覆叠。"
+      },
+      {
+        "id": "alg-topo-ch02-q26",
+        "question": "在密码学中，椭圆曲线的等积映射 (isogeny) 可以理解为什么？",
+        "options": [
+          "覆叠映射（分支覆叠）",
+        "加密函数",
+        "哈希函数",
+        "A 正确，等积密码学 (isogeny-based cryptography) 利用图的结构"
+        ],
+        "answer": 3,
+        "explanation": "等积映射 \\(\\phi: E_1 \\to E_2\\) 是椭圆曲线间的有限覆叠（分支可能）。等积图（超奇异等积图）的图结构用于后量子密码方案（如 SIKE/SIDH）。图的 expander 性质保证安全。覆叠空间理论提供了理解等积几何的框架。"
+      },
+      {
+        "id": "alg-topo-ch02-q27",
+        "question": "在凝聚态物理中，拓扑绝缘体的性质由什么拓扑不变量描述？",
+        "options": [
+          "Berry 相位 / Chern 数",
+        "基本群",
+        "Euler 特征数",
+        "A，其底层是向量丛的分类（覆叠空间推广）"
+        ],
+        "answer": 3,
+        "explanation": "Bloch 束是 Brillouin 区（\\(T^n\\)）上的向量丛。Chern 数是其特征类的积分。覆叠空间理论推广到纤维丛：覆叠 = 离散纤维丛。向量丛分类用到分类空间 \\(BG\\)（\\(G\\) = 结构群），\\(BG\\) 的构造涉及万有丛（万有覆叠的推广）。"
+      },
+      {
+        "id": "alg-topo-ch02-q28",
+        "question": "在网络科学中，图的覆叠（lifting）是什么？",
+        "options": [
+          "图同态 \\(p: \\tilde{G} \\to G\\) 使每个顶点的邻域一一对应（图覆叠）",
+        "图的着色",
+        "最短路径",
+        "A，用于构造 expander 图和研究图的谱理论"
+        ],
+        "answer": 3,
+        "explanation": "图覆叠：\\(p: \\tilde{G} \\to G\\)，每个 \\(v\\) 的邻居集 biject 到 \\(p(v)\\) 的邻居集（与拓扑覆叠对应——图的 1-维 CW 复形的覆叠）。覆叠变换群 = 图自同构群的子群。用电压图（voltage graph）构造正则覆叠。覆叠保持谱性质（\\(\\tilde{G}\\) 的 adjacency 谱包含 \\(G\\) 的谱），用于构造 Ramanujan 图（最优 expander）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="alg-topo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/alg-topo.html" class="module-name">代数拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 覆叠空间的定义与基本性质</a></li>
+      <li><a href="#kp2">02 · 道路提升与同伦提升</a></li>
+      <li><a href="#kp3">03 · 覆叠空间与 \(\pi_1\) 的子群对应</a></li>
+      <li><a href="#kp4">04 · 万有覆叠空间与覆叠变换</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>覆叠空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>覆叠空间的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>覆叠空间是一个"解开"底空间拓扑复杂性的手段。\(\mathbb{R}\) 是 \(S^1\) 的覆叠空间——螺旋线在圆上"螺旋展开"。覆叠空间上的问题往往更 简单（如提升道路、提升同伦），然后可以投射回底空间获得信息。 覆叠理论是基本群与群论之间最具体的桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>覆叠映射 \(p: \tilde{X} \to X\) 是"局部同胚 + 均匀铺叠"的映射。 每根纤维 \(p^{-1}(x)\) 是离散集（"叶片"）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(p: \tilde{X} \to X\) 是覆叠映射 \(\iff\) \(\forall x \in X\)，\(\exists\) 均匀覆盖邻域 \(U \ni x\) 使 \(p^{-1}(U) = \bigsqcup_\alpha V_\alpha\)（不交并）， 每个 \(p|_{V_\alpha}: V_\alpha \to U\) 是同胚。 <strong>基本性质</strong>： (1) \(p\) 是局部同胚 (2) \(|p^{-1}(x)|\) 在连通空间上为常数（覆叠度/层数） (3) \(\tilde{X}\) 连通、\(X\) 连通 \(\Rightarrow\) \(p\) 满射 <strong>经典例子</strong>： - \(p: \mathbb{R} \to S^1\)，\(p(t) = e^{2\pi it}\)（无穷重覆叠） - \(p: S^n \to \mathbb{R}P^n\)，\(p(x) = [x]\)（二重覆叠） - \(p: S^1 \to S^1\)，\(p(z) = z^n\)（\(n\) 重覆叠）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(p: \mathbb{R} \to S^1\)，\(p(t) = e^{2\pi it}\) 是覆叠映射。 解答：取 \(x = e^{2\pi i\theta} \in S^1\)。开邻域 \(U = \{e^{2\pi is} : s \in (\theta-\varepsilon, \theta+\varepsilon)\}\)。 \(p^{-1}(U) = \bigsqcup_{n \in \mathbb{Z}} (\theta - \varepsilon + n, \theta + \varepsilon + n)\)（不交开区间的并）。 \(p\) 在每个 \((\theta-\varepsilon+n, \theta+\varepsilon+n)\) 上是到 \(U\) 的同胚。 易错点：\(p: \mathbb{R}_{\geq 0} \to S^1\)，\(p(t) = e^{2\pi it}\) 不是覆叠（\(t=0\) 处 \(p^{-1}(1)\) 的一个邻域不是与 \(U\) 同胚的开集）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(S^1 \to S^1\)，\(z \mapsto z^3\) 的覆叠度是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z^3 = w\\) 有 3 个解（3 个三次根），每根纤维有 3 叶。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z^3 = w\\) 有 3 个解（3 个三次根），每根纤维有 3 叶。')">B. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(z^3 = w\\) 有 3 个解（3 个三次根），每根纤维有 3 叶。')">C. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z^3 = w\\) 有 3 个解（3 个三次根），每根纤维有 3 叶。')">D. \(\infty\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>道路提升与同伦提升</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>覆叠空间的威力在于"提升"性质：底空间中的道路可以唯一地"提升" 到覆叠空间（给定起点）。更强地，同伦也可以提升。这使得底空间 的拓扑信息（如基本群的元素）可以翻译为覆叠空间中的几何信息 （道路终点在哪叶上）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>提升性质是覆叠映射的核心特征。道路提升的终点编码了基本群的作用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>道路提升定理</strong>：\(p: \tilde{X} \to X\) 覆叠，\(\gamma: [0,1] \to X\) 道路， \(\tilde{x}_0 \in p^{-1}(\gamma(0))\)。 则存在唯一道路 \(\tilde{\gamma}: [0,1] \to \tilde{X}\)， \(p \circ \tilde{\gamma} = \gamma\)，\(\tilde{\gamma}(0) = \tilde{x}_0\)。 证明思路：用均匀覆盖邻域逐段构造 + 唯一性由 \(\tilde{X}\) 的 Hausdorff 性和连通性保证。 <strong>同伦提升定理</strong>：\(H: [0,1]^2 \to X\) 是同伦（\(\gamma_0\) 到 \(\gamma_1\) 相对端点），\(\tilde{\gamma}_0\) 是 \(\gamma_0\) 的提升。 则 \(H\) 提升为 \(\tilde{H}: [0,1]^2 \to \tilde{X}\)， 且 \(\tilde{\gamma}_0, \tilde{\gamma}_1\) 有相同终点。 <strong>推论</strong>：\(p_*: \pi_1(\tilde{X}, \tilde{x}_0) \to \pi_1(X, x_0)\) 是单射。 \[\pi_1(\tilde{X}) \hookrightarrow \pi_1(X)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(p: \mathbb{R} \to S^1\)，\(p(t) = e^{2\pi it}\)。 回路 \(\gamma(s) = e^{2\pi i \cdot 3s}\)（绕 3 圈）。 从 \(\tilde{x}_0 = 0\) 提升。 解答：\(\tilde{\gamma}(s) = 3s\)。\(\tilde{\gamma}(0) = 0\)， \(\tilde{\gamma}(1) = 3\)。终点 \(3\) 编码了绕圈数 \(= 3\)， 即 \([\gamma]\) 在 \(\pi_1(S^1) \cong \mathbb{Z}\) 中对应 \(3\)。 易错点：不同提升起点得到不同提升道路，但终点"偏移量"相同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(p_*: \pi_1(\tilde{X}) \to \pi_1(X)\) 是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。同伦提升保证了 \\(p_*\\) 的单射性。一般不满射（除非 \\(\\tilde{X} = X\\)）。')">A. 满射</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！同伦提升保证了 \\(p_*\\) 的单射性。一般不满射（除非 \\(\\tilde{X} = X\\)）。')">B. 单射</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。同伦提升保证了 \\(p_*\\) 的单射性。一般不满射（除非 \\(\\tilde{X} = X\\)）。')">C. 同构</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。同伦提升保证了 \\(p_*\\) 的单射性。一般不满射（除非 \\(\\tilde{X} = X\\)）。')">D. 零映射</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>覆叠空间与 \(\pi_1\) 的子群对应</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>覆叠理论最深刻的结果是"覆叠空间的分类"：底空间 \(X\) 的覆叠空间 （在同构意义下）与 \(\pi_1(X)\) 的子群一一对应。这是基本群理论的 巅峰，将拓扑问题完全转化为群论问题。万有覆叠空间对应平凡子群 \(\{e\}\)——它是所有覆叠空间的"母空间"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>覆叠 ↔ 子群。覆叠度 = 子群指标。正则覆叠 ↔ 正规子群。 这是 Galois 理论在拓扑中的类比。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>基本对应</strong>：\(X\) 道路连通、局部道路连通、半局部单连通。 \[\{\text{覆叠} \; p: \tilde{X} \to X\} / \text{等价} \longleftrightarrow \{\text{子群} \; H \leq \pi_1(X)\} / \text{共轭}\] 对应为 \(H = p_*(\pi_1(\tilde{X}))\)。 <strong>覆叠度</strong>：\([\pi_1(X) : H]\) = 覆叠度 = \(|p^{-1}(x)|\)。 <strong>万有覆叠空间</strong>：\(\tilde{X}\) 单连通（\(\pi_1(\tilde{X}) = 0\)）， 对应子群 \(H = \{e\}\)。覆叠度 = \(|\pi_1(X)|\)。 \[\pi_1(X) \cong \mathrm{Deck}(\tilde{X}/X)\] （覆叠变换群/甲板变换群）。 <strong>正则覆叠</strong>：\(H \trianglelefteq \pi_1(X)\) \(\iff\) 覆叠变换群 \(\cong \pi_1(X)/H\) 可迁地作用于纤维。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 曲面分类可通过覆叠空间实现（如 \(T^2\) 的万有覆叠 \(= \mathbb{R}^2\)）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^1\) 的所有连通覆叠空间有哪些？ 解答：\(\pi_1(S^1) = \mathbb{Z}\)。\(\mathbb{Z}\) 的子群 = \(n\mathbb{Z}\)（\(n \geq 0\)）。 \(n = 0\)：\(H = 0\)，万有覆叠 \(= \mathbb{R}\)。 \(n \geq 1\)：\(H = n\mathbb{Z}\)，覆叠 \(= S^1 \xrightarrow{z \mapsto z^n} S^1\)，\(n\) 重覆叠。 覆叠空间全部是 \(\mathbb{R}\) 和 \(S^1\)（不同重数）。 易错点：\(n = 0\) 给的是万有覆叠 \(\mathbb{R}\)（无穷重）， 不是"零重覆叠"。\([\mathbb{Z} : 0] = \infty\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\pi_1(X) = S_3\)（3 阶对称群），\(X\) 有多少种不同构的连通覆叠空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。覆叠空间（up to 等价）对应子群的共轭类。\\(S_3\\) 的子群')">A. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。覆叠空间（up to 等价）对应子群的共轭类。\\(S_3\\) 的子群')">B. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。覆叠空间（up to 等价）对应子群的共轭类。\\(S_3\\) 的子群')">C. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！覆叠空间（up to 等价）对应子群的共轭类。\\(S_3\\) 的子群')">D. 和 \(S_3\) 的共轭类子群数一样</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>万有覆叠空间与覆叠变换</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>万有覆叠空间是单连通的覆叠——它是"最大"的覆叠空间，包含了 底空间所有拓扑信息。覆叠变换群（甲板变换群）自由离散地作用于 万有覆叠空间，使得底空间是商空间。这给出了一种用群作用构造 空间的方法——也是理解 \(\mathbb{R}P^n\), 透镜空间等的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(X = \tilde{X} / \pi_1(X)\)——空间是其万有覆叠被基本群"折叠"的结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>万有覆叠空间</strong>：\(p: \tilde{X} \to X\)，\(\tilde{X}\) 单连通。 存在性条件：\(X\) 连通、局部道路连通、半局部单连通。 <strong>构造</strong>：\(\tilde{X} = \{[\gamma] : \gamma \text{ 是从 } x_0 \text{ 出发的道路}\}\) （道路的同伦类为点），\(p([\gamma]) = \gamma(1)\)。 拓扑由道路类的"管状"邻域定义。 <strong>覆叠变换（甲板变换）</strong>：\(\mathrm{Deck}(\tilde{X}/X) = \{f: \tilde{X} \to \tilde{X} : p \circ f = p\}\)。 <strong>关键定理</strong>：\(\tilde{X}\) 单连通 \(\Rightarrow\) \[\mathrm{Deck}(\tilde{X}/X) \cong \pi_1(X, x_0)\] 且 \(\mathrm{Deck}\) 自由可迁地作用于每根纤维，\(X \cong \tilde{X} / \mathrm{Deck}\)。 <strong>实例</strong>： - \(\tilde{S^1} = \mathbb{R}\)，\(\mathrm{Deck} = \mathbb{Z}\)（\(t \mapsto t+n\)），\(S^1 = \mathbb{R}/\mathbb{Z}\) - \(\tilde{\mathbb{R}P^n} = S^n\)，\(\mathrm{Deck} = \mathbb{Z}/2\mathbb{Z}\)（对径映射）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 透镜空间 \(L(p,q) = S^3 / \mathbb{Z}_p\) 是 \(S^3\) 被循环群作用的商</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}P^2\) 的万有覆叠空间和覆叠变换群是什么？ 解答：\(\tilde{\mathbb{R}P^2} = S^2\)（\(S^2\) 单连通）。 覆叠映射 \(p: S^2 \to \mathbb{R}P^2\)，\(p(x) = p(-x) = [x]\)。 甲板变换群 \(= \{id, A\}\)，\(A(x) = -x\)（对径映射），\(\cong \mathbb{Z}/2\mathbb{Z}\)。 验证：\(\pi_1(\mathbb{R}P^2) = \mathbb{Z}/2\mathbb{Z} = \mathrm{Deck}\)。✓ 易错点：\(\mathbb{R}P^n\)（\(n \geq 2\)）的 \(\pi_1 = \mathbb{Z}/2\mathbb{Z}\)（不随 \(n\) 增长）。 \(\mathbb{R}P^1 \cong S^1\) 的 \(\pi_1 = \mathbb{Z}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}^2\) 是 \(T^2\) 的万有覆叠空间。甲板变换群是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(T^2 = \\mathbb{R}^2 / \\mathbb{Z}^2\\)，')">A. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(T^2 = \\mathbb{R}^2 / \\mathbb{Z}^2\\)，')">B. \(\mathbb{Z}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(T^2 = \\mathbb{R}^2 / \\mathbb{Z}^2\\)，')">C. \(\mathbb{Z}/2\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(T^2 = \\mathbb{R}^2 / \\mathbb{Z}^2\\)，')">D. \(SO(2)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/geometry/alg-topo.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

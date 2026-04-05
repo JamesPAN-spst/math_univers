@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 联络与曲率初步 — 微分几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "diffgeo-ch06-q1",
+        "question": "仿射联络 \\(\\nabla\\) 的作用是什么？",
+        "options": [
+          "定义函数的梯度",
+        "提供向量场沿另一向量场方向的\"导数\"（协变导数）",
+        "定义度量",
+        "定义流形的维数"
+        ],
+        "answer": 1,
+        "explanation": "仿射联络 \\(\\nabla: \\mathfrak{X}(M) \\times \\mathfrak{X}(M) \\to \\mathfrak{X}(M)\\), \\((X, Y) \\mapsto \\nabla_X Y\\)（\\(X\\) 方向对 \\(Y\\) 求协变导数）。在平坦 \\(\\mathbb{R}^n\\) 中 \\(\\nabla_X Y = X^i \\partial_i Y^j \\partial_j\\)（沿 \\(X\\) 方向求分量导数），但曲空间需要联络修正。\\(\\nabla\\) 不由流形结构唯一确定——需要额外选取。"
+      },
+      {
+        "id": "diffgeo-ch06-q2",
+        "question": "Christoffel 符号 \\(\\Gamma^k_{ij}\\) 的定义是什么？",
+        "options": [
+          "\\(\\nabla_{\\partial_i} \\partial_j = \\Gamma^k_{ij} \\partial_k\\)",
+        "度量的分量",
+        "曲率的分量",
+        "向量场的分量"
+        ],
+        "answer": 0,
+        "explanation": "在坐标卡 \\((x^1, \\ldots, x^n)\\) 中，\\(\\nabla_{\\partial_i} \\partial_j = \\sum_k \\Gamma^k_{ij} \\partial_k\\)。\\(\\Gamma^k_{ij}\\) 有 \\(n^3\\) 个分量（\\(i, j, k\\) 各 \\(n\\) 个）。Christoffel 符号不是张量（坐标变换不按张量规则），但协变导数 \\(\\nabla_X Y\\) 是张量。"
+      },
+      {
+        "id": "diffgeo-ch06-q3",
+        "question": "协变导数 \\(\\nabla_X Y\\) 满足什么线性性质？",
+        "options": [
+          "\\(\\nabla_{fX} Y = f\\nabla_X Y\\)（\\(f\\) 线性）",
+        "\\(\\nabla_X(fY) = X(f)Y + f\\nabla_X Y\\)（Leibniz 律）",
+        "A 和 B 都需要",
+        "\\(\\nabla_X Y = X(Y)\\)"
+        ],
+        "answer": 2,
+        "explanation": "联络的公理：(1) \\(\\nabla_{fX+gY}Z = f\\nabla_XZ + g\\nabla_YZ\\)（\\(C^\\infty\\) 线性于 \\(X\\)）；(2) \\(\\nabla_X(Y+Z) = \\nabla_XY + \\nabla_XZ\\)；(3) \\(\\nabla_X(fY) = X(f)Y + f\\nabla_XY\\)（Leibniz 律）。\\(X\\) 方向是 \\(C^\\infty\\) 线性（\"张量性\"），\\(Y\\) 方向是 Leibniz（不是 \\(C^\\infty\\) 线性）。D 缺少修正项 \\(\\Gamma\\)。"
+      },
+      {
+        "id": "diffgeo-ch06-q4",
+        "question": "\\(\\mathbb{R}^n\\) 上标准联络（平坦联络）的 Christoffel 符号是什么？",
+        "options": [
+          "\\(\\Gamma^k_{ij} = \\delta^k_i \\delta^k_j\\)",
+        "\\(\\Gamma^k_{ij} = 0\\)（全部为零）",
+        "\\(\\Gamma^k_{ij} = g^{kl}\\partial_i g_{jl}\\)",
+        "取决于坐标"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{R}^n\\) 标准坐标下 \\(\\nabla_{\\partial_i}\\partial_j = 0\\)（坐标基向量为常向量场，沿任何方向导数为零）。\\(\\Gamma^k_{ij} = 0\\)。注意 D 也有道理——换到极坐标等 \\(\\Gamma\\) 非零！但题目问标准联络在标准坐标下，答案 B。"
+      },
+      {
+        "id": "diffgeo-ch06-q5",
+        "question": "联络的曲率张量 \\(R(X,Y)Z\\) 衡量什么？",
+        "options": [
+          "空间的弯曲程度",
+        "\\(\\nabla_X \\nabla_Y Z - \\nabla_Y \\nabla_X Z - \\nabla_{[X,Y]} Z\\)",
+        "平行移动的路径依赖性",
+        "全部正确"
+        ],
+        "answer": 3,
+        "explanation": "\\(R(X,Y)Z = \\nabla_X\\nabla_YZ - \\nabla_Y\\nabla_XZ - \\nabla_{[X,Y]}Z\\)（B 是定义）。几何意义：沿闭合路径平行移动向量后回到起点是否旋转（C）。\\(R = 0 \\iff\\) 空间平坦（平行移动路径无关）。\\(R \\neq 0\\) 说明空间弯曲（A）。"
+      },
+      {
+        "id": "diffgeo-ch06-q6",
+        "question": "Levi-Civita 联络的独特性质是什么？",
+        "options": [
+          "唯一满足无挠 (\\(T = 0\\)) 和与度量相容 (\\(\\nabla g = 0\\)) 的联络",
+        "任何联络都满足",
+        "只对平坦空间存在",
+        "不唯一"
+        ],
+        "answer": 0,
+        "explanation": "Levi-Civita 联络是 Riemann 流形 \\((M, g)\\) 上的典范联络。\\(\\nabla g = 0\\)（平行移动保持内积）+ \\(T(X,Y) = \\nabla_XY - \\nabla_YX - [X,Y] = 0\\)（无挠）\\(\\Rightarrow\\) 联络唯一确定。Christoffel 符号 \\(\\Gamma^k_{ij} = \\frac{1}{2}g^{kl}(\\partial_i g_{jl} + \\partial_j g_{il} - \\partial_l g_{ij})\\)。"
+      },
+      {
+        "id": "diffgeo-ch06-q7",
+        "question": "曲率张量 \\(R^l_{ijk}\\) 的坐标表达式是什么？",
+        "options": [
+          "\\(R^l_{ijk} = \\partial_i \\Gamma^l_{jk} - \\partial_j \\Gamma^l_{ik} + \\Gamma^l_{im}\\Gamma^m_{jk} - \\Gamma^l_{jm}\\Gamma^m_{ik}\\)",
+        "\\(R^l_{ijk} = \\Gamma^l_{ij}\\)",
+        "\\(R^l_{ijk} = \\partial_i \\partial_j g_{kl}\\)",
+        "\\(R^l_{ijk} = 0\\) 总成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(\\partial_i, \\partial_j)\\partial_k = R^l_{ijk}\\partial_l\\)。计算 \\(\\nabla_{\\partial_i}\\nabla_{\\partial_j}\\partial_k - \\nabla_{\\partial_j}\\nabla_{\\partial_i}\\partial_k\\)（\\([\\partial_i, \\partial_j] = 0\\)），展开得 A。这个表达式有两类项：\\(\\partial \\Gamma\\) 项和 \\(\\Gamma \\Gamma\\) 项。\\(R = 0\\) 等价于 \\(\\Gamma\\) 满足某些微分方程。"
+      },
+      {
+        "id": "diffgeo-ch06-q8",
+        "question": "曲线 \\(\\gamma(t)\\) 上向量场 \\(V(t)\\) 沿 \\(\\gamma\\) 平行移动的条件是什么？",
+        "options": [
+          "\\(\\frac{dV}{dt} = 0\\)",
+        "\\(\\frac{DV}{dt} = \\nabla_{\\gamma'} V = 0\\)",
+        "\\(V\\) 是常向量",
+        "\\(V \\perp \\gamma'\\)"
+        ],
+        "answer": 1,
+        "explanation": "平行移动：\\(\\nabla_{\\gamma'(t)} V(t) = 0\\)。坐标中：\\(\\frac{dV^k}{dt} + \\Gamma^k_{ij} \\frac{dx^i}{dt} V^j = 0\\)（一阶线性 ODE）。\\(\\mathbb{R}^n\\) 中 \\(\\Gamma = 0\\)，\\(\\frac{dV^k}{dt} = 0\\)（常向量，A）。曲空间中 \\(\\Gamma \\neq 0\\) 修正了\"常数\"的含义。"
+      },
+      {
+        "id": "diffgeo-ch06-q9",
+        "question": "球面 \\(S^2\\) 上的 Levi-Civita 联络在球坐标 \\((\\theta, \\phi)\\) 下的非零 Christoffel 符号包含什么？",
+        "options": [
+          "\\(\\Gamma^\\theta_{\\phi\\phi} = -\\sin\\theta\\cos\\theta\\), \\(\\Gamma^\\phi_{\\theta\\phi} = \\cot\\theta\\)",
+        "全为零",
+        "\\(\\Gamma^\\theta_{\\theta\\theta} = 1\\)",
+        "与 \\(\\mathbb{R}^2\\) 相同"
+        ],
+        "answer": 0,
+        "explanation": "\\(g = d\\theta^2 + \\sin^2\\theta\\,d\\phi^2\\)。\\(\\Gamma^\\theta_{\\phi\\phi} = -\\frac{1}{2}g^{\\theta\\theta}\\partial_\\theta g_{\\phi\\phi} = -\\sin\\theta\\cos\\theta\\)。\\(\\Gamma^\\phi_{\\theta\\phi} = \\Gamma^\\phi_{\\phi\\theta} = \\frac{1}{2}g^{\\phi\\phi}\\partial_\\theta g_{\\phi\\phi} = \\frac{\\cos\\theta}{\\sin\\theta} = \\cot\\theta\\)。其他为零。B 只在平坦空间成立。"
+      },
+      {
+        "id": "diffgeo-ch06-q10",
+        "question": "\\(\\mathbb{R}^2\\) 上标准联络的曲率张量是什么？",
+        "options": [
+          "\\(R = 0\\)",
+        "\\(R = 1\\)",
+        "\\(R\\) 是单位矩阵",
+        "取决于坐标"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{R}^2\\) 平坦，\\(\\Gamma^k_{ij} = 0\\)（标准坐标），\\(R^l_{ijk} = 0\\)。平坦空间的定义就是曲率为零。平行移动与路径无关，向量绕闭合回路不旋转。所有 \\(\\mathbb{R}^n\\) 的标准联络曲率为零。"
+      },
+      {
+        "id": "diffgeo-ch06-q11",
+        "question": "Levi-Civita 联络的 Christoffel 符号公式中，\\(\\Gamma^k_{ij} = \\frac{1}{2}g^{kl}(\\partial_i g_{jl} + \\partial_j g_{il} - \\partial_l g_{ij})\\)。如果 \\(g_{ij} = \\delta_{ij}\\)（常数），\\(\\Gamma = ?\\)",
+        "options": [
+          "零",
+        "\\(\\delta^k_{ij}\\)",
+        "取决于维数",
+        "非零"
+        ],
+        "answer": 0,
+        "explanation": "\\(g_{ij} = \\delta_{ij}\\) 是常数，所有偏导 \\(\\partial g = 0\\)，\\(\\Gamma^k_{ij} = 0\\)。这就是 \\(\\mathbb{R}^n\\) 标准坐标的情况。但若用非标准坐标（如极坐标）表示 \\(\\mathbb{R}^n\\) 的平坦度量，\\(\\Gamma \\neq 0\\)。\\(\\Gamma\\) 不是张量——取决于坐标选择。"
+      },
+      {
+        "id": "diffgeo-ch06-q12",
+        "question": "挠率 \\(T(X,Y) = \\nabla_X Y - \\nabla_Y X - [X,Y]\\) 衡量什么？",
+        "options": [
+          "平行四边形不闭合的程度",
+        "曲率",
+        "测地线偏差",
+        "体积变化"
+        ],
+        "answer": 0,
+        "explanation": "沿 \\(X\\) 平行移动 \\(Y\\)，再沿 \\(Y\\) 平行移动 \\(X\\)，两条路径的终点差 = \\(T(X,Y)\\)（对无穷小平行四边形）。\\(T = 0\\)（无挠）意味着平行四边形\"闭合\"。Levi-Civita 联络选择 \\(T = 0\\)，但一般仿射联络可以有挠率（如 Einstein-Cartan 理论中考虑挠率）。"
+      },
+      {
+        "id": "diffgeo-ch06-q13",
+        "question": "向量场 \\(Y = Y^j \\partial_j\\) 沿 \\(X = X^i \\partial_i\\) 的协变导数在坐标中是什么？",
+        "options": [
+          "\\((\\nabla_X Y)^k = X^i \\partial_i Y^k + X^i Y^j \\Gamma^k_{ij}\\)",
+        "\\((\\nabla_X Y)^k = X^i \\partial_i Y^k\\)",
+        "\\((\\nabla_X Y)^k = \\Gamma^k_{ij} Y^j\\)",
+        "\\((\\nabla_X Y)^k = X^i Y^j\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla_X Y = X^i \\nabla_{\\partial_i}(Y^j \\partial_j) = X^i(\\partial_i Y^j \\partial_j + Y^j \\Gamma^k_{ij}\\partial_k) = X^i(\\partial_i Y^k + Y^j \\Gamma^k_{ij})\\partial_k\\)。B 缺少 \\(\\Gamma\\) 项（只在平坦空间正确）。\\(\\Gamma\\) 项\"修正\"了坐标基不平行的效果。"
+      },
+      {
+        "id": "diffgeo-ch06-q14",
+        "question": "Bianchi 第一恒等式是什么？",
+        "options": [
+          "\\(R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0\\)（无挠时）",
+        "\\(\\nabla R = 0\\)",
+        "\\(R_{ijkl} = R_{klij}\\)",
+        "\\(R = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "第一 Bianchi 恒等式（代数 Bianchi）：\\(R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0\\)（对无挠联络）。这减少了曲率张量的独立分量数。第二 Bianchi 恒等式（微分 Bianchi）：\\((\\nabla_X R)(Y,Z) + (\\nabla_Y R)(Z,X) + (\\nabla_Z R)(X,Y) = 0\\)。B 是\"\\(\\nabla R = 0\\)\"只在对称空间成立。\\(C\\) 是曲率张量的对称性。"
+      },
+      {
+        "id": "diffgeo-ch06-q15",
+        "question": "度量相容 \\(\\nabla g = 0\\) 在物理上意味着什么？",
+        "options": [
+          "平行移动保持向量长度和夹角",
+        "空间是平坦的",
+        "测地线是直线",
+        "曲率为零"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla g = 0 \\iff\\) 对平行向量场 \\(V, W\\)（\\(\\nabla_{\\gamma'} V = \\nabla_{\\gamma'} W = 0\\)），\\(g(V,W)\\) 沿 \\(\\gamma\\) 恒定。即平行移动是等距变换（保持\"尺子\"和\"量角器\"）。这不意味着空间平坦（B/D 错——\\(S^2\\) 的 Levi-Civita 联络度量相容但有曲率）。测地线可以弯曲（C 错）。"
+      },
+      {
+        "id": "diffgeo-ch06-q16",
+        "question": "两个联络 \\(\\nabla, \\nabla'\\) 的差 \\(S(X,Y) = \\nabla'_XY - \\nabla_XY\\) 是什么？",
+        "options": [
+          "向量场",
+        "\\((1,2)\\)-张量场",
+        "函数",
+        "不是张量"
+        ],
+        "answer": 1,
+        "explanation": "\\(S(fX, Y) = f\\nabla'_XY - f\\nabla_XY = fS(X,Y)\\)（\\(X\\) 方向 \\(C^\\infty\\) 线性）。\\(S(X, fY) = f\\nabla'_XY + X(f)Y - f\\nabla_XY - X(f)Y = fS(X,Y)\\)（\\(Y\\) 方向也 \\(C^\\infty\\) 线性）。两个方向都线性 \\(\\Rightarrow S\\) 是张量！具体是 \\((1,2)\\) 型张量 \\(S^k_{ij}\\)。联络不是张量，但联络之差是。"
+      },
+      {
+        "id": "diffgeo-ch06-q17",
+        "question": "\\(n\\) 维 Riemann 流形的曲率张量 \\(R_{ijkl}\\) 有多少个独立分量？",
+        "options": [
+          "\\(n^4\\)",
+        "\\(\\frac{n^2(n^2-1)}{12}\\)",
+        "\\(n^2\\)",
+        "\\(n\\)"
+        ],
+        "answer": 1,
+        "explanation": "对称性：\\(R_{ijkl} = -R_{jikl} = -R_{ijlk}\\)（前/后对反对称），\\(R_{ijkl} = R_{klij}\\)（对交换），加上第一 Bianchi 恒等式。独立分量 \\(= \\frac{n^2(n^2-1)}{12}\\)。\\(n = 2\\)：1 个。\\(n = 3\\)：6 个。\\(n = 4\\)：20 个。\\(n = 2\\) 时一个数（Gauss 曲率）完全决定曲率。"
+      },
+      {
+        "id": "diffgeo-ch06-q18",
+        "question": "平行移动的路径依赖性与曲率的关系（Ambrose-Singer 定理思想）是什么？",
+        "options": [
+          "沿无穷小平行四边形平行移动的旋转 = 曲率张量",
+        "曲率 = 零 \\(\\iff\\) 平行移动路径无关",
+        "A 和 B 都正确",
+        "平行移动总路径无关"
+        ],
+        "answer": 2,
+        "explanation": "(A) 沿 \\(\\partial_i, \\partial_j\\) 方向的无穷小平行四边形（面积 \\(\\delta_i \\delta_j\\)），平行移动向量 \\(V\\) 回到起点后变化 \\(\\delta V^k \\approx R^k_{lij} V^l \\delta_i \\delta_j\\)。(B) \\(R = 0 \\iff\\) 平行移动只依赖终点不依赖路径（整体 \\(\\Rightarrow\\) 局部用 Frobenius 可积性证明）。曲率精确测量路径依赖性。"
+      },
+      {
+        "id": "diffgeo-ch06-q19",
+        "question": "Ricci 张量 \\(R_{ij}\\) 的定义是什么？",
+        "options": [
+          "\\(R_{ij} = R^k_{ikj}\\)（曲率张量的缩并）",
+        "\\(R_{ij} = g^{kl}R_{kilj}\\)",
+        "A 和 B 等价",
+        "\\(R_{ij} = \\partial_i \\partial_j \\ln \\sqrt{g}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\text{Ric}(X,Y) = \\text{tr}(Z \\mapsto R(Z,X)Y)\\)。坐标中 \\(R_{ij} = R^k_{kij}\\) 或等价地 \\(R_{ij} = g^{kl}R_{kilj}\\)。\\(R_{ij}\\) 是 2 阶对称张量，是曲率张量的\"平均\"。Einstein 场方程 \\(R_{ij} - \\frac{1}{2}Rg_{ij} = 8\\pi G T_{ij}\\) 涉及 Ricci 张量和标量曲率 \\(R = g^{ij}R_{ij}\\)。"
+      },
+      {
+        "id": "diffgeo-ch06-q20",
+        "question": "Levi-Civita 联络的存在唯一性证明（Koszul 公式）的形式是什么？",
+        "options": [
+          "\\(2g(\\nabla_XY, Z) = Xg(Y,Z) + Yg(X,Z) - Zg(X,Y) + g([X,Y],Z) - g([X,Z],Y) - g([Y,Z],X)\\)",
+        "\\(\\nabla_XY = [X,Y]\\)",
+        "\\(\\nabla_XY = dY(X)\\)",
+        "不存在显式公式"
+        ],
+        "answer": 0,
+        "explanation": "Koszul 公式唯一确定 \\(\\nabla_XY\\)（通过 \\(g(\\nabla_XY, Z)\\) 对任意 \\(Z\\)，由 \\(g\\) 非退化恢复 \\(\\nabla_XY\\)）。验证：此式定义的 \\(\\nabla\\) 满足线性、Leibniz、无挠、度量相容。Koszul 公式等价于 Christoffel 公式 \\(\\Gamma^k_{ij} = \\frac{1}{2}g^{kl}(\\partial_i g_{jl} + \\partial_j g_{il} - \\partial_l g_{ij})\\)。"
+      },
+      {
+        "id": "diffgeo-ch06-q21",
+        "question": "测地线方程 \\(\\frac{d^2 x^k}{dt^2} + \\Gamma^k_{ij}\\frac{dx^i}{dt}\\frac{dx^j}{dt} = 0\\) 是什么的 Euler-Lagrange 方程？",
+        "options": [
+          "能量泛函 \\(E[\\gamma] = \\int g_{ij}\\dot{x}^i\\dot{x}^j\\,dt\\)",
+        "长度泛函 \\(L[\\gamma] = \\int \\sqrt{g_{ij}\\dot{x}^i\\dot{x}^j}\\,dt\\)",
+        "A 和 B 的临界点都满足",
+        "曲率泛函"
+        ],
+        "answer": 2,
+        "explanation": "测地线是长度泛函 \\(L\\) 和能量泛函 \\(E\\) 的临界曲线（对 \\(E\\) 是等速参数化的测地线，对 \\(L\\) 是常速重参数化后的测地线）。\\(E\\) 的 Euler-Lagrange 方程直接给出测地线方程。\\(L\\) 的临界点也是测地线但需要保证参数化（弧长参数等速）。两者等价但 \\(E\\) 计算更方便。"
+      },
+      {
+        "id": "diffgeo-ch06-q22",
+        "question": "在 \\(n = 2\\) 维 Riemann 面上，曲率张量只有一个独立分量。它等于什么？",
+        "options": [
+          "Gauss 曲率 \\(K\\)",
+        "\\(R_{1212} = K \\cdot \\det(g)\\)",
+        "A 和 B 等价",
+        "零"
+        ],
+        "answer": 2,
+        "explanation": "\\(n = 2\\) 时 \\(R_{ijkl}\\) 只有 \\(\\frac{4 \\cdot 3}{12} = 1\\) 个独立分量。\\(R_{1212} = K \\cdot (g_{11}g_{22} - g_{12}^2) = K \\cdot \\det(g)\\)（\\(K\\) = Gauss 曲率）。\\(K > 0\\)（球面），\\(K = 0\\)（平面/圆柱），\\(K < 0\\)（双曲面）。2 维的曲率完全由一个标量 \\(K\\) 决定。"
+      },
+      {
+        "id": "diffgeo-ch06-q23",
+        "question": "联络 1-形式 \\(\\omega^i_j\\)（在标架 \\(\\{e_i\\}\\) 下）与 Christoffel 符号的关系是什么？",
+        "options": [
+          "\\(\\omega^i_j = \\Gamma^i_{jk} dx^k\\)",
+        "\\(\\omega^i_j = d(e^i)\\)",
+        "\\(\\omega^i_j\\) 与基的选取无关",
+        "\\(\\omega^i_j = g^{il}\\Gamma_{ljk}dx^k\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla e_j = \\omega^i_j \\otimes e_i\\)，即 \\(\\nabla_X e_j = \\omega^i_j(X) e_i\\)。在坐标基下 \\(\\omega^i_j = \\Gamma^i_{jk} dx^k\\)。结构方程（Cartan）：\\(d\\theta^i + \\omega^i_j \\wedge \\theta^j = T^i\\)（第一），\\(d\\omega^i_j + \\omega^i_k \\wedge \\omega^k_j = \\Omega^i_j\\)（第二，\\(\\Omega\\) = 曲率 2-形式）。"
+      },
+      {
+        "id": "diffgeo-ch06-q24",
+        "question": "Gauss 绝妙定理 (Theorema Egregium)：\\(S \\subseteq \\mathbb{R}^3\\) 曲面的 Gauss 曲率 \\(K\\) 是内蕴量。这意味着什么？",
+        "options": [
+          "\\(K\\) 只依赖第一基本形式（内蕴度量），不依赖嵌入方式",
+        "\\(K\\) 总是正的",
+        "\\(K\\) 是外蕴量",
+        "\\(K\\) 恒为常数"
+        ],
+        "answer": 0,
+        "explanation": "虽然 \\(K = \\kappa_1 \\kappa_2\\) 的定义用了主曲率（外蕴），但 Gauss 证明 \\(K\\) 可以仅用度量 \\(g_{ij}\\) 及其导数表示。等距变换保持 \\(K\\)：将纸张弯曲（不拉伸）不改变 \\(K\\)（圆柱 \\(K = 0\\) = 平面 \\(K = 0\\)）。球面 \\(K = 1/r^2 > 0\\) 不能（局部）等距展开到平面。"
+      },
+      {
+        "id": "diffgeo-ch06-q25",
+        "question": "第二 Bianchi 恒等式对 Ricci 张量的推论是什么？",
+        "options": [
+          "\\(\\nabla^j R_{ij} = \\frac{1}{2}\\nabla_i R\\)（缩并 Bianchi 恒等式）",
+        "\\(R_{ij} = 0\\)",
+        "\\(\\nabla R = 0\\)",
+        "\\(R_{ij} = g_{ij}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla_l R^l_{ijk} + \\nabla_i R^l_{jlk} + \\nabla_j R^l_{lik} = 0\\)（微分 Bianchi）。缩并 \\(l = i\\)：\\(\\nabla^i R_{ij} = \\frac{1}{2}\\nabla_j R\\)（\\(R = g^{ij}R_{ij}\\)）。等价于 \\(\\nabla^j(R_{ij} - \\frac{1}{2}Rg_{ij}) = 0\\)（Einstein 张量无散）。这是 Einstein 场方程 \\(G_{ij} = 8\\pi G T_{ij}\\) 与能量守恒 \\(\\nabla^j T_{ij} = 0\\) 一致的数学原因。"
+      },
+      {
+        "id": "diffgeo-ch06-q26",
+        "question": "GPS 导航系统需要考虑广义相对论效应。卫星时钟在引力场中比地面慢。这与什么几何概念相关？",
+        "options": [
+          "时空曲率（由 Levi-Civita 联络和 Riemann 曲率张量描述）",
+        "平坦度量",
+        "欧氏距离",
+        "拓扑不变量"
+        ],
+        "answer": 0,
+        "explanation": "广义相对论中时空 \\((M^4, g)\\) 是 Lorentz 流形，引力通过曲率描述。Levi-Civita 联络决定测地线（自由粒子和光的轨迹）。GPS 卫星在较弱引力场中（时间快约 \\(45\\mu s\\)/天），需要修正。若不修正，定位误差约 \\(10 km\\)/天。Christoffel 符号编码了引力场;\"联络 = 引力\"。"
+      },
+      {
+        "id": "diffgeo-ch06-q27",
+        "question": "在计算机图形学中，曲面上的纹理映射需要在曲面上平行移动纹理方向。这用什么数学工具？",
+        "options": [
+          "联络（平行移动）",
+        "拓扑排序",
+        "快速 Fourier 变换",
+        "哈希函数"
+        ],
+        "answer": 0,
+        "explanation": "在曲面上沿路径平行移动向量（如纹理的\"上\"方向），使用 Levi-Civita 联络。曲率导致平行移动路径依赖——在球面上绕赤道回来方向旋转（全息和环量）。图形学中的方向场设计和纹理合成直接使用联络理论。"
+      },
+      {
+        "id": "diffgeo-ch06-q28",
+        "question": "在机器学习中，自然梯度 (natural gradient) 使用 Fisher 信息矩阵 \\(g_{ij} = E[\\partial_i \\log p \\cdot \\partial_j \\log p]\\) 作为参数空间上的 Riemann 度量。其 Levi-Civita 联络给出的测地线有什么意义？",
+        "options": [
+          "参数空间中信息几何意义下的\"最短路径\"",
+        "普通梯度方向",
+        "随机游走",
+        "牛顿方向"
+        ],
+        "answer": 0,
+        "explanation": "Fisher 信息度量将概率分布族参数化为 Riemann 流形（统计流形）。测地线是分布之间\"信息距离\"最短的路径。自然梯度 \\(\\tilde{\\nabla} f = g^{ij}\\partial_j f\\) 比普通梯度计算考虑了参数空间的弯曲。\\(\\alpha\\)-联络（Amari）是信息几何中联络的推广。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="diffgeo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/diffgeo.html" class="module-name">微分几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 仿射联络与 Christoffel 符号</a></li>
+      <li><a href="#kp2">02 · 协变导数与平行移动</a></li>
+      <li><a href="#kp3">03 · 挠率与曲率张量</a></li>
+      <li><a href="#kp4">04 · Levi-Civita 联络</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>联络与曲率初步</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>仿射联络与 Christoffel 符号</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在 \(\mathbb{R}^n\) 中，我们可以直接比较不同点的切向量（平行平移）。 但在弯曲流形上，不同点的切空间没有自然的对应关系。仿射联络 \(\nabla\) 填补了这个空白——它定义了如何"沿曲线运输"切向量。 Christoffel 符号是联络在坐标卡中的具体表显，是计算的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>联络 = 在向量丛上定义"导数"的额外结构。它不来自流形本身， 而是额外选取的数据（直到有度量时才有自然的选取——Levi-Civita）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>仿射联络</strong>：\(\nabla: \Gamma(TM) \times \Gamma(TM) \to \Gamma(TM)\)， \((X, Y) \mapsto \nabla_X Y\)，满足： (1) \(\nabla_{fX+gY} Z = f\nabla_X Z + g\nabla_Y Z\)（\(C^\infty\)-线性于 \(X\)） (2) \(\nabla_X(Y+Z) = \nabla_X Y + \nabla_X Z\) (3) \(\nabla_X(fY) = (Xf)Y + f\nabla_X Y\)（Leibniz 法则于 \(Y\)） <strong>Christoffel 符号</strong>：坐标中 \(\nabla_{\partial_i} \partial_j = \Gamma^k_{ij} \partial_k\)。 对一般 \(Y = Y^j \partial_j\)： \[(\nabla_X Y)^k = X^i \frac{\partial Y^k}{\partial x^i} + \Gamma^k_{ij} X^i Y^j\] \(\Gamma^k_{ij}\) 共 \(n^3\) 个分量（\(n = \dim M\)）。 \(\Gamma\) 不是张量（坐标变换时变换律含非齐次项）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中 Christoffel 符号编码引力场的强度</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^2\) 极坐标 \((r, \theta)\)。欧式度量 \(ds^2 = dr^2 + r^2 d\theta^2\)。求 \(\Gamma^r_{\theta\theta}\)。 解答：\(g_{rr} = 1\)，\(g_{\theta\theta} = r^2\)，其余 \(= 0\)。 \(\Gamma^r_{\theta\theta} = -\frac{1}{2} g^{rr} \frac{\partial g_{\theta\theta}}{\partial r} = -\frac{1}{2} \cdot 1 \cdot 2r = -r\)。 物理意义：圆周方向运动产生向心加速度项。 易错点：极坐标中 \(\Gamma\) 不全为零——即使空间是平坦的， 弯曲的坐标系也会产生非零 Christoffel 符号。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Christoffel 符号是张量吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Christoffel 符号的变换律含非齐次项（\\(\\partial^2 x / \\partial \\tilde{x}^2\\)），')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Christoffel 符号的变换律含非齐次项（\\(\\partial^2 x / \\partial \\tilde{x}^2\\)），')">B. 否</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Christoffel 符号的变换律含非齐次项（\\(\\partial^2 x / \\partial \\tilde{x}^2\\)），')">C. 只在特殊坐标下是</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Christoffel 符号的变换律含非齐次项（\\(\\partial^2 x / \\partial \\tilde{x}^2\\)），')">D. 取决于联络</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>协变导数与平行移动</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>普通导数 \(dY/dt\) 沿曲线对向量场求导在弯曲流形上没有意义（不同 点的切空间不能直接相减）。协变导数 \(\nabla_{\gamma'} Y\) 利用联络 定义了沿曲线的"正确导数"。平行移动则是"导数为零"的运输—— 保持向量"平行"地沿曲线滑动。平行移动的路径依赖性就是曲率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>协变导数 = 联络沿曲线的限制。平行移动 = 联络定义的"搬运方式"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>协变导数沿曲线</strong>：设 \(\gamma: I \to M\)，\(Y\) 是沿 \(\gamma\) 的 向量场（\(Y(t) \in T_{\gamma(t)}M\)）。 \[\frac{DY}{dt} = \nabla_{\gamma'(t)} Y = \left(\frac{dY^k}{dt} + \Gamma^k_{ij} \dot{\gamma}^i Y^j\right) \partial_k\] <strong>平行移动</strong>：\(Y\) 沿 \(\gamma\) 平行 \(\iff \frac{DY}{dt} = 0\)，即 \[\frac{dY^k}{dt} + \Gamma^k_{ij} \dot{\gamma}^i Y^j = 0\] 这是一阶线性 ODE，给定初始 \(Y(0) \in T_{\gamma(0)}M\) 后 解唯一存在。 <strong>平行移动的路径依赖</strong>：从 \(p\) 沿不同路径移动到 \(q\)， 平行移动的结果一般不同——差异由曲率测量。 在平坦空间中，平行移动与路径无关。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中自由粒子沿测地线运动 = 四速度平行移动 - 陀螺仪的进动效应与弯曲空间中的平行移动有关</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2\) 上从北极出发，沿经线到赤道，再沿赤道走 \(90°\)， 再沿经线回北极。初始向南的切向量经过平行移动后旋转了多少度？ 解答：这是经典的"球面三角形平行移动"。 三角形三个角都是 \(90°\)，内角和 \(= 270°\)，角亏 \(= 90°\)。 向量旋转角度 = 面积 / \(R^2 = (\pi/2)/1 = \pi/2 = 90°\)。 （Gauss-Bonnet 的体现：曲率导致平行移动的路径依赖。） 易错点：平坦空间（如 \(\mathbb{R}^2\)）中平行移动与路径无关， 但弯曲空间中一定有路径依赖——这正是"曲率"的直觉来源。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">平行移动保持哪个量？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。度量兼容联络下平行移动保持内积，从而保持长度和夹角。')">A. 向量在坐标系中的分量</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！度量兼容联络下平行移动保持内积，从而保持长度和夹角。')">B. 向量的长度（若有度量且联络兼容）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。度量兼容联络下平行移动保持内积，从而保持长度和夹角。')">C. 向量的方向（全局意义上）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。度量兼容联络下平行移动保持内积，从而保持长度和夹角。')">D. 向量的坐标方向</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>挠率与曲率张量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>联络有两个基本的"障碍量"：挠率测量"平行四边形是否闭合"， 曲率测量"平行移动的路径依赖性"。两者都是张量，是联络的 内在不变量。无挠条件在黎曼几何中自然满足（Levi-Civita 联络）， 但在某些物理理论（Einstein-Cartan 理论）中挠率非零。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>挠率和曲率分别是联络"一阶"和"二阶"的特征： 挠率涉及 \(\nabla_X Y - \nabla_Y X\)，曲率涉及 \(\nabla_X \nabla_Y - \nabla_Y \nabla_X\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>挠率张量</strong>： \[T(X, Y) = \nabla_X Y - \nabla_Y X - [X, Y]\] 坐标中 \(T^k_{ij} = \Gamma^k_{ij} - \Gamma^k_{ji}\)。 \(T = 0 \iff \Gamma^k_{ij} = \Gamma^k_{ji}\)（对称联络）。 <strong>Riemann 曲率张量</strong>： \[R(X,Y)Z = \nabla_X \nabla_Y Z - \nabla_Y \nabla_X Z - \nabla_{[X,Y]} Z\] 坐标中： \[R^l{}_{kij} = \partial_i \Gamma^l_{jk} - \partial_j \Gamma^l_{ik} + \Gamma^l_{im} \Gamma^m_{jk} - \Gamma^l_{jm} \Gamma^m_{ik}\] \(R = 0 \iff\) 平行移动与路径无关 \(\iff\) 局部可以找到"平行坐标 系"使 \(\Gamma \equiv 0\)。 <strong>Bianchi 恒等式</strong>（第一）：无挠时 \(R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Einstein 场方程 \(R_{\mu\nu} - \frac{1}{2}Rg_{\mu\nu} = 8\pi T_{\mu\nu}\) 中曲率编码引力场</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^n\)（标准联络，\(\Gamma = 0\)）的曲率张量是什么？ 解答：\(R^l_{kij} = \partial_i(0) - \partial_j(0) + 0 - 0 = 0\)。 \(\mathbb{R}^n\) 是平坦的，曲率为零。 易错点：极坐标中 \(\Gamma \neq 0\)，但 \(R = 0\)（\(\mathbb{R}^2\) 仍是平坦的）。 \(\Gamma = 0\) 是坐标依赖的，但 \(R = 0\) 是内在性质。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(R = 0\) 意味着什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(R = 0\\) 意味着平坦（局部同构于 \\(\\mathbb{R}^n\\)，但全局不一定——如圆柱面和 Möbius 带都是平坦的但拓扑不同于 \\(\\mathbb{R}^n\\)）。')">A. \(\Gamma = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(R = 0\\) 意味着平坦（局部同构于 \\(\\mathbb{R}^n\\)，但全局不一定——如圆柱面和 Möbius 带都是平坦的但拓扑不同于 \\(\\mathbb{R}^n\\)）。')">B. 空间是平坦的（平行移动无路径依赖）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(R = 0\\) 意味着平坦（局部同构于 \\(\\mathbb{R}^n\\)，但全局不一定——如圆柱面和 Möbius 带都是平坦的但拓扑不同于 \\(\\mathbb{R}^n\\)）。')">C. 流形是 \(\mathbb{R}^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(R = 0\\) 意味着平坦（局部同构于 \\(\\mathbb{R}^n\\)，但全局不一定——如圆柱面和 Möbius 带都是平坦的但拓扑不同于 \\(\\mathbb{R}^n\\)）。')">D. 挠率为零</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Levi-Civita 联络</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>仿射联络有很多种选择，哪个是"最自然"的？在黎曼流形上， Levi-Civita 联络由两个条件唯一确定：无挠 + 度量兼容。这是 黎曼几何的基本定理，保证了测地线、曲率等概念都有唯一的 标准定义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Levi-Civita 联络是度量决定的唯一联络——几何内在地确定了 如何"平行搬运"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>条件</strong>：\((M, g)\) 黎曼流形，\(\nabla\) 满足： (1) 无挠：\(T = 0\)，即 \(\nabla_X Y - \nabla_Y X = [X, Y]\) (2) 度量兼容：\(\nabla g = 0\)，即 \(Xg(Y,Z) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)\) <strong>存在唯一性（Levi-Civita 基本定理）</strong>： 由 Koszul 公式唯一确定 \(\nabla\)： \[2g(\nabla_X Y, Z) = Xg(Y,Z) + Yg(X,Z) - Zg(X,Y)\] \[+ g([X,Y],Z) - g([X,Z],Y) - g([Y,Z],X)\] Christoffel 符号： \[\Gamma^k_{ij} = \frac{1}{2} g^{kl}\left(\frac{\partial g_{jl}}{\partial x^i} + \frac{\partial g_{il}}{\partial x^j} - \frac{\partial g_{ij}}{\partial x^l}\right)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 黎曼几何中所有标准概念（测地线、曲率、Jacobi 场）都基于 Levi-Civita 联络 - 广义相对论中时空的 Levi-Civita 联络决定引力场</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2\) 上球面度量 \(ds^2 = d\theta^2 + \sin^2\theta\,d\varphi^2\)。 求 \(\Gamma^\theta_{\varphi\varphi}\)。 解答：\(g_{\theta\theta} = 1\)，\(g_{\varphi\varphi} = \sin^2\theta\)， \(g^{\theta\theta} = 1\)。 \(\Gamma^\theta_{\varphi\varphi} = -\frac{1}{2}g^{\theta\theta}\frac{\partial g_{\varphi\varphi}}{\partial\theta} = -\frac{1}{2} \cdot 2\sin\theta\cos\theta = -\sin\theta\cos\theta\)。 易错点：忘记 \(g^{kl}\) 是逆度量（不是 \(g_{kl}\)）。对对角度量 \(g^{kk} = 1/g_{kk}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Levi-Civita 联络由什么唯一确定？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。两个条件缺一不可。仅无挠有多种联络（如 Weitzenböck 联络），仅度量兼容也有多种。')">A. 度量 \(g\) 和挠率 \(T\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！两个条件缺一不可。仅无挠有多种联络（如 Weitzenböck 联络），仅度量兼容也有多种。')">B. 度量 \(g\)（无挠 + 度量兼容）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。两个条件缺一不可。仅无挠有多种联络（如 Weitzenböck 联络），仅度量兼容也有多种。')">C. 仅挠率条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。两个条件缺一不可。仅无挠有多种联络（如 Weitzenböck 联络），仅度量兼容也有多种。')">D. 仅度量兼容条件</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/geometry/diffgeo.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

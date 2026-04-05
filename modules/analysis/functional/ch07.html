@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.7 紧算子与谱论初步 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch07-q1",
+        "question": "紧算子 \\(T: X \\to Y\\) 的定义？",
+        "options": [
+          "\\(T\\) 将有界集映为相对紧集（闭包紧）",
+        "\\(T\\) 将有界集映为有界集",
+        "\\(T\\) 是有限秩",
+        "\\(T\\) 的范数 \\(< 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 紧 \\(\\Leftrightarrow\\) \\(T(B_X)\\) 的闭包在 \\(Y\\) 中紧 \\(\\Leftrightarrow\\) \\(\\{x_n\\}\\) 有界 \\(\\Rightarrow\\) \\(\\{Tx_n\\}\\) 有收敛子列。紧算子\"压缩\"有界集使之紧——弥补无限维空间有界集不紧的缺陷。有限秩 \\(\\Rightarrow\\) 紧，但反之不然。"
+      },
+      {
+        "id": "functional-ch07-q2",
+        "question": "积分算子 \\(Tf(x) = \\int_0^1 K(x,y) f(y)\\, dy\\)（\\(K \\in L^2([0,1]^2)\\)）是 \\(L^2[0,1]\\) 上的紧算子吗？",
+        "options": [
+          "是（Hilbert-Schmidt 算子紧）",
+        "不一定",
+        "仅当 \\(K\\) 连续",
+        "仅当 \\(K\\) 对角"
+        ],
+        "answer": 0,
+        "explanation": "\\(K \\in L^2\\) \\(\\Rightarrow\\) \\(T\\) 是 Hilbert-Schmidt 算子。\\(\\|T\\|_{HS}^2 = \\int\\int |K(x,y)|^2\\, dx\\, dy < \\infty\\)。Hilbert-Schmidt \\(\\subset\\) 紧算子（\\(T\\) 可被有限秩算子在 HS 范数下逼近，紧算子是有限秩的范数极限）。积分算子在分析中是紧算子的典型来源。"
+      },
+      {
+        "id": "functional-ch07-q3",
+        "question": "紧算子 \\(T\\) 在无限维 Banach 空间上的谱 \\(\\sigma(T)\\) 有什么特殊性质？",
+        "options": [
+          "\\(0 \\in \\sigma(T)\\)，\\(\\sigma(T) \\setminus \\{0\\}\\) 是至多可数集且只能以 \\(0\\) 为聚点",
+        "\\(\\sigma(T)\\) 有限",
+        "\\(\\sigma(T) = \\{0\\}\\)",
+        "\\(\\sigma(T)\\) 不可数"
+        ],
+        "answer": 0,
+        "explanation": "谱的结构：(1) \\(0 \\in \\sigma(T)\\)（\\(T\\) 不可逆，因为只要维度无穷，紧算子无有界逆）；(2) \\(0 \\neq \\lambda \\in \\sigma(T) \\Rightarrow \\lambda\\) 是特征值；(3) 非零特征值至多可数，只能在 \\(0\\) 处聚点；(4) 每个非零特征值的特征空间有限维。"
+      },
+      {
+        "id": "functional-ch07-q4",
+        "question": "\\(T: \\ell^2 \\to \\ell^2\\)，\\(T(e_n) = e_n/n\\)（对角算子）。\\(T\\) 紧吗？谱是？",
+        "options": [
+          "紧，\\(\\sigma(T) = \\{0, 1, 1/2, 1/3, ...\\}\\)",
+        "不紧，\\(\\sigma(T) = [0,1]\\)",
+        "紧，\\(\\sigma(T) = \\{0\\}\\)",
+        "不紧，\\(\\sigma(T) = \\{1/n\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T_N(e_n) = e_n/n\\)（\\(n \\leq N\\)），\\(= 0\\)（\\(n > N\\)）：有限秩。\\(\\|T - T_N\\| = 1/(N+1) \\to 0\\)。有限秩算子范数极限 \\(\\Rightarrow\\) \\(T\\) 紧。\\(Te_n = e_n/n\\)，特征值 \\(\\lambda_n = 1/n \\to 0\\)。\\(\\sigma(T) = \\{1/n : n \\geq 1\\} \\cup \\{0\\}\\)（\\(0\\) 是聚点，属于谱）。"
+      },
+      {
+        "id": "functional-ch07-q5",
+        "question": "Fredholm 替代（alternative）：\\(T\\) 紧，\\(\\lambda \\neq 0\\)。方程 \\((T - \\lambda I)x = y\\) 的可解性？",
+        "options": [
+          "要么对所有 \\(y\\) 有唯一解（\\(\\lambda\\) 不是特征值），要么 \\(\\ker(T - \\lambda I) \\neq \\{0\\}\\)（\\(\\lambda\\) 是特征值），此时 \\(y\\) 需满足正交条件",
+        "总有解",
+        "从不有解",
+        "有无穷多解"
+        ],
+        "answer": 0,
+        "explanation": "Fredholm 替代：\\(\\lambda \\neq 0\\)。情况一：\\(\\lambda \\notin \\sigma_p(T)\\)，\\((T - \\lambda I)^{-1}\\) 存在有界，\\(\\forall y\\) 有唯一解。情况二：\\(\\lambda \\in \\sigma_p(T)\\)，\\((T-\\lambda I)x = y\\) 有解 \\(\\Leftrightarrow\\) \\(y \\perp \\ker(T^* - \\bar\\lambda I)\\)。类比线性代数：\\(Ax = b\\) 有解 \\(\\Leftrightarrow\\) \\(b \\perp \\ker A^T\\)。"
+      },
+      {
+        "id": "functional-ch07-q6",
+        "question": "\\(T\\) 紧，\\(\\lambda \\neq 0\\)，\\(\\dim \\ker(T - \\lambda I) < \\infty\\)。这有限维性的意义？",
+        "options": [
+          "特征空间有限维——每个非零特征值只有有限个线性无关的特征向量",
+        "有无穷维特征空间",
+        "特征空间可能无限维",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "紧算子的非零特征值 \\(\\lambda\\)：\\(\\ker(T - \\lambda I)\\) 有限维。若无穷维，\\(T|_{\\ker} = \\lambda I\\)，紧算子在无穷维空间上 \\(\\neq\\) 有界可逆（\\(\\lambda I\\) 不紧，\\(\\lambda \\neq 0\\)），矛盾。这限制了\"共振\"的维度——物理上每个频率只有有限个模态。"
+      },
+      {
+        "id": "functional-ch07-q7",
+        "question": "自伴紧算子 \\(T = T^*\\)（\\(H\\) Hilbert）的谱定理：\\(T\\) 可以对角化为？",
+        "options": [
+          "\\(Tx = \\sum_n \\lambda_n \\langle x, e_n \\rangle e_n\\)（\\(e_n\\) 特征向量 ONB，\\(\\lambda_n \\to 0\\)）",
+        "\\(T = UDU^*\\)（\\(U\\) 酉，\\(D\\) 有界对角）",
+        "A 和 B 等价",
+        "\\(T\\) 不可对角化"
+        ],
+        "answer": 2,
+        "explanation": "自伴紧算子谱定理：\\(\\exists\\) ONB \\(\\{e_n\\} \\cup \\{f_\\alpha\\}\\)（\\(f_\\alpha \\in \\ker T\\)），\\(Te_n = \\lambda_n e_n\\)（\\(\\lambda_n \\in \\mathbb{R}\\)，\\(\\lambda_n \\to 0\\)），\\(Tf_\\alpha = 0\\)。\\(Tx = \\sum \\lambda_n \\langle x, e_n \\rangle e_n\\)。这是有限维矩阵对角化的无限维版本——紧性保证\"特征值趋零\"。"
+      },
+      {
+        "id": "functional-ch07-q8",
+        "question": "恒等算子 \\(I: \\ell^2 \\to \\ell^2\\) 紧吗？",
+        "options": [
+          "紧（当且仅当空间有限维）",
+        "不紧",
+        "紧（有界算子都紧）",
+        "取决于范数"
+        ],
+        "answer": 1,
+        "explanation": "\\(I(B_{\\ell^2})\\) = 单位闭球，在无限维 \\(\\ell^2\\) 中不紧（\\(e_n\\) 无收敛子列）。\\(I\\) 不紧。推论：\\(\\lambda \\neq 0\\) 的 \\(\\lambda I\\) 不紧（无限维下）。紧算子比有界算子\"小\"——它们构成 \\(B(X,Y)\\) 的闭双边理想。"
+      },
+      {
+        "id": "functional-ch07-q9",
+        "question": "Volterra 算子 \\(Vf(x) = \\int_0^x f(t)\\, dt\\) on \\(L^2[0,1]\\)。谱 \\(\\sigma(V) = ?\\)",
+        "options": [
+          "\\(\\{0\\}\\)（没有非零特征值）",
+        "\\(\\{0, 1, 1/2, ...\\}\\)",
+        "\\([0,1]\\)",
+        "空集"
+        ],
+        "answer": 0,
+        "explanation": "\\(V\\) 紧（Hilbert-Schmidt）。\\(Vf = \\lambda f\\)（\\(\\lambda \\neq 0\\)）\\(\\Rightarrow\\) \\(\\lambda f'(x) = f(x)\\)，\\(f(0) = 0\\) \\(\\Rightarrow\\) \\(f(x) = Ce^{x/\\lambda}\\)，\\(f(0) = C = 0\\)，\\(f = 0\\)。无非零特征值！\\(\\sigma(V) = \\{0\\}\\)（因 \\(V\\) 紧，\\(0 \\in \\sigma\\)，无其他点）。谱可以只有 \\(\\{0\\}\\)——quasi-nilpotent 算子。"
+      },
+      {
+        "id": "functional-ch07-q10",
+        "question": "Fredholm 替代在积分方程中的应用：\\(f(x) - \\lambda \\int_0^1 K(x,y) f(y)\\, dy = g(x)\\)。\\(\\lambda\\) \"好\"（非特征值的倒数）时？",
+        "options": [
+          "方程对所有 \\(g\\) 有唯一解",
+        "无解",
+        "仅齐次解",
+        "无穷多解"
+        ],
+        "answer": 0,
+        "explanation": "\\((I - \\lambda T)f = g\\)。\\(\\lambda \\neq 0\\)，\\(1/\\lambda \\notin \\sigma_p(T)\\)（\\(T\\) 紧）\\(\\Rightarrow\\) \\((I - \\lambda T)^{-1}\\) 存在有界。\\(f = (I - \\lambda T)^{-1} g\\)（唯一解）。\\(1/\\lambda\\) 是 \\(T\\) 的特征值时，Fredholm 替代给出可解性条件 \\(g \\perp \\ker(I - \\bar\\lambda T^*)\\)。"
+      },
+      {
+        "id": "functional-ch07-q11",
+        "question": "自伴紧算子 \\(T\\) 的最大特征值 \\(|\\lambda_1| = \\|T\\|\\)。如何找 \\(\\lambda_1\\)？",
+        "options": [
+          "\\(\\lambda_1 = \\sup_{\\|x\\|=1} \\langle Tx, x \\rangle\\) 或 \\(\\lambda_1 = \\inf_{\\|x\\|=1} \\langle Tx, x \\rangle\\)（取绝对值大的）",
+        "\\(\\lambda_1 = \\|T\\|\\)",
+        "A 对正算子成立",
+        "A 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\|T\\| = \\sup_{\\|x\\|=1} |\\langle Tx, x \\rangle|\\)（自伴算子谱半径 = 范数）。\\(\\lambda_1 = \\max(\\sup \\langle Tx,x \\rangle, -\\inf \\langle Tx,x \\rangle)\\) 中绝对值最大者。正算子 \\(T \\geq 0\\)：\\(\\lambda_1 = \\sup \\langle Tx,x \\rangle = \\|T\\|\\)。Rayleigh 商的极值就是最大/最小特征值。"
+      },
+      {
+        "id": "functional-ch07-q12",
+        "question": "有限秩算子 \\(T: X \\to Y\\)，\\(\\text{Im}(T)\\) 有限维。\\(T\\) 紧吗？",
+        "options": [
+          "一定紧（有限维中有界集紧）",
+        "不一定",
+        "仅当 \\(T\\) 有界",
+        "需额外条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 有界（\\(\\text{Im}(T)\\) 有限维 + \\(T\\) 线性不自动保证有界——需要 \\(T\\) 有界或等价条件）。修正：有界有限秩 \\(\\Rightarrow\\) 紧。\\(T(B_X) \\subseteq M\\)（有限维闭子空间），\\(T(B_X)\\) 有界，在 \\(M\\) 中有界闭 \\(\\Rightarrow\\) 紧。紧算子 \\(\\supseteq\\) 有限秩，实际上紧 = 有限秩的范数极限。"
+      },
+      {
+        "id": "functional-ch07-q13",
+        "question": "\\(T\\) 紧加单位：\\((I + T)\\) 是 Fredholm 算子（有限维核，有限余维像）。指标 \\(\\text{ind}(I + T) = ?\\)",
+        "options": [
+          "\\(0\\)（\\(\\dim \\ker(I+T) = \\text{codim}\\ \\text{Im}(I+T)\\)）",
+        "\\(\\dim \\ker T\\)",
+        "\\(1\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(I + T\\)（\\(T\\) 紧）是 Fredholm 算子，\\(\\text{ind}(I+T) = \\dim\\ker(I+T) - \\text{codim}\\ \\text{Im}(I+T) = 0\\)。连续变形：\\(t \\mapsto I + tT\\)（\\(0 \\leq t \\leq 1\\)），\\(\\text{ind}\\) 连续取整数值，\\(\\text{ind}(I+0 \\cdot T) = \\text{ind}(I) = 0\\)，故恒为 \\(0\\)。"
+      },
+      {
+        "id": "functional-ch07-q14",
+        "question": "\\(T = T^*\\) 紧，\\(\\lambda_n\\) 是非零特征值（按 \\(|\\lambda_1| \\geq |\\lambda_2| \\geq ...\\) 排列）。Courant-Fischer 极小极大原理：\\(\\lambda_n = ?\\)",
+        "options": [
+          "\\(\\lambda_n = \\min_{S: \\dim S = n-1} \\max_{\\|x\\| = 1, x \\perp S} \\langle Tx, x \\rangle\\)（正特征值排列）",
+        "\\(\\lambda_n = \\langle Te_n, e_n \\rangle\\)",
+        "\\(\\lambda_n = \\|T^n\\|^{1/n}\\)",
+        "\\(\\lambda_n = \\text{tr}(T^n)/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "Courant-Fischer：\\(\\lambda_n = \\min_{\\dim S = n-1} \\max_{\\|x\\|=1, x \\perp S} \\langle Tx, x \\rangle\\)。\\(S\\) 变量遍历 \\((n-1)\\)-维子空间。\\(n=1\\)：\\(\\lambda_1 = \\max \\langle Tx,x \\rangle\\)。几何：第 \\(n\\) 个特征值是在排除 \\(n-1\\) 个方向后的\"最大 Rayleigh 商\"。"
+      },
+      {
+        "id": "functional-ch07-q15",
+        "question": "右移位 \\(S(x_1, x_2, ...) = (0, x_1, x_2, ...)\\) in \\(\\ell^2\\) 紧吗？",
+        "options": [
+          "不紧（\\(S\\) 是等距，\\(\\|Se_n\\| = 1\\)，\\(\\|Se_n - Se_m\\| = \\sqrt{2}\\)）",
+        "紧",
+        "仅在 \\(\\ell^1\\) 中紧",
+        "是有限秩的"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Sx\\| = \\|x\\|\\)（等距嵌入）。\\(S(B_{\\ell^2})\\) 的闭包包含单位球面的无穷子集 \\(\\{Se_n\\}\\)，\\(\\|Se_n - Se_m\\| = \\sqrt{2}\\)，无收敛子列。\\(S\\) 不紧。等距算子在无限维空间上不紧（除非值域有限维）。"
+      },
+      {
+        "id": "functional-ch07-q16",
+        "question": "Fredholm 替代的线性代数源头：\\(A \\in \\mathbb{R}^{n \\times n}\\)，\\(Ax = b\\)。\\(\\lambda = 0\\) 的 Fredholm 替代？",
+        "options": [
+          "\\(Ax = b\\) 有解 \\(\\Leftrightarrow\\) \\(b \\perp \\ker A^T\\)",
+        "\\(Ax = b\\) 总有解",
+        "\\(Ax = b\\) 有唯一解",
+        "\\(\\ker A = \\{0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Im}(A) = (\\ker A^T)^\\perp\\)。\\(b \\in \\text{Im}(A) \\Leftrightarrow b \\perp \\ker A^T\\)。这就是有限维 Fredholm 替代。无限维推广：\\(T\\) 紧，\\((T - \\lambda I)x = y\\) 有解 \\(\\Leftrightarrow\\) \\(y \\perp \\ker(T^* - \\bar\\lambda I)\\)。且 \\(\\dim \\ker(T - \\lambda I) = \\dim \\ker(T^* - \\bar\\lambda I)\\)。"
+      },
+      {
+        "id": "functional-ch07-q17",
+        "question": "自伴紧算子 \\(T\\) 的迹（trace）：\\(\\text{tr}(T) = \\sum \\lambda_n\\)。何时迹有限？",
+        "options": [
+          "当 \\(T\\) 是迹类算子（\\(\\sum |\\lambda_n| < \\infty\\)）",
+        "总是有限",
+        "当 \\(T\\) 的范数 \\(< 1\\)",
+        "当 \\(T\\) 有限秩"
+        ],
+        "answer": 0,
+        "explanation": "紧 \\(\\not\\Rightarrow\\) 迹有限。\\(T(e_n) = e_n/n\\)：\\(\\sum \\lambda_n = \\sum 1/n = \\infty\\)（不是迹类）。迹类算子（trace class / nuclear）：\\(\\sum |\\lambda_n| < \\infty\\)（或等价 \\(\\text{tr}(|T|) < \\infty\\)）。Hilbert-Schmidt：\\(\\sum |\\lambda_n|^2 < \\infty\\)。层次：有限秩 \\(\\subset\\) 迹类 \\(\\subset\\) Hilbert-Schmidt \\(\\subset\\) 紧。"
+      },
+      {
+        "id": "functional-ch07-q18",
+        "question": "\\(T_n \\to T\\) 算子范数收敛，\\(T_n\\) 紧。\\(T\\) 一定紧吗？",
+        "options": [
+          "是（紧算子构成 \\(B(X,Y)\\) 的闭子空间，\\(Y\\) Banach 时）",
+        "不一定",
+        "仅在 Hilbert 空间",
+        "需要 \\(T_n\\) 有限秩"
+        ],
+        "answer": 0,
+        "explanation": "紧算子的范数极限是紧的（\\(Y\\) 完备时）。\\(\\{x_n\\}\\) 有界。对角线论证：\\(T_1\\) 紧 \\(\\Rightarrow\\) \\(\\{T_1 x_{n}\\}\\) 有收敛子列 \\(\\{x_{n_1}\\}\\)。\\(T_2\\) 紧 \\(\\Rightarrow\\) \\(\\{T_2 x_{n_1}\\}\\) 有收敛子列...。对角子列 \\(\\{x_{n_k}\\}\\) 使 \\(T_j x_{n_k}\\) 对固定 \\(j\\) 收敛，\\(T\\) 是范数极限给 \\(Tx_{n_k}\\) 收敛。"
+      },
+      {
+        "id": "functional-ch07-q19",
+        "question": "谱半径公式 \\(r(T) = \\lim_{n \\to \\infty} \\|T^n\\|^{1/n}\\)。对紧算子 \\(T\\)，\\(r(T) = |\\lambda_1|\\)（最大特征值模），这对一般有界算子成立吗？",
+        "options": [
+          "\\(r(T) = |\\lambda_1|\\)（若点谱非空），但一般算子可能有连续谱使 \\(r(T) > \\sup |\\lambda|\\)——不对一般算子",
+        "总成立",
+        "从不成立",
+        "仅在自伴情况"
+        ],
+        "answer": 0,
+        "explanation": "紧算子：\\(\\sigma(T) \\setminus \\{0\\}\\) 全是点谱，\\(r(T) = \\sup\\{|\\lambda| : \\lambda \\in \\sigma(T)\\} = \\max(|\\lambda_1|, 0) = |\\lambda_1|\\)（若有非零特征值）。一般算子：\\(\\sigma(T)\\) 可能有连续谱/剩余谱且无对应特征向量。谱半径公式对所有算子成立，但 \\(r(T)\\) 未必是特征值。"
+      },
+      {
+        "id": "functional-ch07-q20",
+        "question": "Riesz-Schauder 理论：\\(T\\) 紧，\\(\\lambda \\neq 0\\)。核与余核维度相等：\\(\\dim \\ker(T - \\lambda I) = \\dim \\ker(T^* - \\bar\\lambda I)\\)。这叫？",
+        "options": [
+          "Fredholm 指标为零",
+        "自伴性",
+        "正规性",
+        "对角化"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{ind}(\\lambda I - T) = \\dim\\ker(\\lambda I - T) - \\dim(Y/\\text{Im}(\\lambda I - T)) = \\dim\\ker - \\dim\\ker(T^* - \\bar\\lambda) = 0\\)。紧扰动的 Fredholm 指标为零。非负特征值的几何重数 = 代数余维（解集维度 = 约束方程数）——完美匹配。"
+      },
+      {
+        "id": "functional-ch07-q21",
+        "question": "自伴紧算子的极值特征值 \\(\\lambda_1 = \\|T\\|\\) 或 \\(\\lambda_1 = -\\|T\\|\\)。如何确定正还是负？",
+        "options": [
+          "\\(\\lambda_1 = \\sup_{\\|x\\|=1} \\langle Tx, x \\rangle\\)（可能正或负或零）",
+        "总是正的",
+        "总是负的",
+        "取决于维数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sup \\langle Tx,x \\rangle = \\lambda^+\\)（最大特征值），\\(\\inf \\langle Tx,x \\rangle = \\lambda^-\\)（最小特征值）。\\(\\|T\\| = \\max(|\\lambda^+|, |\\lambda^-|)\\)。正算子（\\(T \\geq 0\\)）：\\(\\lambda^- = 0\\)，\\(\\|T\\| = \\lambda^+ = \\lambda_1\\)。不定算子：\\(\\|T\\|\\) 可能达到正极端或负极端。"
+      },
+      {
+        "id": "functional-ch07-q22",
+        "question": "Schauder 定理：\\(T\\) 紧 \\(\\Leftrightarrow\\) \\(T^*\\) 紧。证明的关键？",
+        "options": [
+          "用 Arzelà-Ascoli：\\(T^*(B_{Y^*})\\) 等度连续 + 逐点有界",
+        "用谱定理",
+        "直接从定义",
+        "用开映射定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^* g(x) = g(Tx)\\)。\\(\\{T^* g : \\|g\\| \\leq 1\\}\\) 在 \\(X^*\\) 中。等度连续：\\(|T^*g(x) - T^*g(y)| = |g(Tx - Ty)| \\leq \\|T(x-y)\\|\\)。逐点有界：\\(|T^*g(x)| \\leq \\|Tx\\|\\)。\\(T\\) 紧 \\(\\Rightarrow\\) \\(T(B_X)\\) 紧 \\(\\Rightarrow\\) Arzelà-Ascoli \\(\\Rightarrow\\) \\(\\{T^*g\\}|_{T(B_X)}\\) 紧 \\(\\Rightarrow\\) \\(T^*\\) 紧。"
+      },
+      {
+        "id": "functional-ch07-q23",
+        "question": "谱映射定理：\\(p(\\sigma(T)) = \\sigma(p(T))\\)（\\(p\\) 多项式）。\\(T\\) 紧自伴，\\(\\sigma(T) = \\{0, 1/n\\}\\)。\\(\\sigma(T^2) = ?\\)",
+        "options": [
+          "\\(\\{0, 1/n^2\\}\\)",
+        "\\(\\{0, 2/n\\}\\)",
+        "\\(\\{0, 1/n\\}\\)",
+        "\\(\\{1/n^2\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(p(\\lambda) = \\lambda^2\\)：\\(\\sigma(T^2) = \\{p(\\lambda) : \\lambda \\in \\sigma(T)\\} = \\{0^2, (1/n)^2\\} = \\{0, 1/n^2\\}\\)。谱映射定理将谱的计算简化为标量多项式的计算。\\(T^2\\) 仍紧自伴，特征值 \\(1/n^2 \\to 0\\)。"
+      },
+      {
+        "id": "functional-ch07-q24",
+        "question": "齐次 Fredholm 积分方程 \\(f(x) = \\lambda \\int_0^1 K(x,y) f(y)\\, dy\\) 的非平凡解存在 \\(\\Leftrightarrow\\) \\(1/\\lambda\\) 是 \\(T\\) 的特征值。若 \\(K(x,y) = xy\\)，特征值是？",
+        "options": [
+          "\\(\\lambda_1 = 1/3\\)（唯一非零特征值）",
+        "\\(\\lambda_n = 1/n\\)",
+        "\\(\\lambda = 1\\)",
+        "无特征值"
+        ],
+        "answer": 0,
+        "explanation": "\\(Tf(x) = \\int_0^1 xy f(y)\\, dy = x \\int_0^1 y f(y)\\, dy = c \\cdot x\\)。\\(\\text{Im}(T) = \\text{span}\\{x\\}\\)（秩 1）。\\(T(x) = x \\int_0^1 y \\cdot y\\, dy = x/3 = (1/3)x\\)。唯一非零特征值 \\(\\lambda = 1/3\\)，特征函数 \\(f(x) = x\\)。秩 \\(n\\) 算子至多 \\(n\\) 个非零特征值。"
+      },
+      {
+        "id": "functional-ch07-q25",
+        "question": "\\(T\\) 正定自伴紧算子（\\(\\langle Tx, x \\rangle > 0\\)，\\(x \\neq 0\\)）。\\(T\\) 的平方根 \\(T^{1/2}\\) 由什么定义？",
+        "options": [
+          "\\(T^{1/2} x = \\sum \\sqrt{\\lambda_n} \\langle x, e_n \\rangle e_n\\)（谱定理给出谱函数微积分）",
+        "\\(T^{1/2} = T/2\\)",
+        "不存在",
+        "\\(T^{1/2} = T \\cdot T\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Tx = \\sum \\lambda_n \\langle x, e_n \\rangle e_n\\)（\\(\\lambda_n > 0\\)）。\\(T^{1/2} x = \\sum \\sqrt{\\lambda_n} \\langle x, e_n \\rangle e_n\\)。\\(T^{1/2}\\) 正定自伴紧，\\((T^{1/2})^2 = T\\)。一般：\\(f(T) = \\sum f(\\lambda_n) \\langle x, e_n \\rangle e_n\\)（连续函数微积分）。这是谱定理最强大的应用——将算子函数化简为标量函数。"
+      },
+      {
+        "id": "functional-ch07-q26",
+        "question": "在量子力学中，Schrödinger 方程 \\((-\\Delta + V)\\psi = E\\psi\\)。若势能 \\(V\\) 使 \\((-\\Delta + V)^{-1}\\) 紧（在适当 Sobolev 空间中），则能级 \\(E_n\\) 满足？",
+        "options": [
+          "\\(E_n \\to \\infty\\)（离散谱，特征值趋向无穷）",
+        "\\(E_n \\to 0\\)",
+        "\\(E_n\\) 有限",
+        "连续谱"
+        ],
+        "answer": 0,
+        "explanation": "\\((-\\Delta+V)^{-1}\\) 紧 \\(\\Rightarrow\\) 特征值 \\(1/(E_n + c) \\to 0\\)，即 \\(E_n \\to \\infty\\)。势阱中的粒子有离散能级：\\(E_1 < E_2 < ... \\to \\infty\\)。每个能级有限维（有限简并度）。紧预解式 \\(\\Rightarrow\\) 离散谱——这是量子力学中束缚态理论的数学基础。"
+      },
+      {
+        "id": "functional-ch07-q27",
+        "question": "SVD（奇异值分解）：\\(A \\in \\mathbb{R}^{m \\times n}\\)，\\(A = U\\Sigma V^T\\)。\\(\\Sigma\\) 的对角元素是 \\(A^T A\\) 的特征值的平方根——这是哪个定理的有限维版本？",
+        "options": [
+          "自伴紧算子谱定理（\\(T^* T\\) 正自伴紧，特征值 = 奇异值的平方）",
+        "Hahn-Banach",
+        "开映射定理",
+        "Baire 范畴"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^*T\\) 正自伴。谱定理：\\(T^*T e_n = \\sigma_n^2 e_n\\)。\\(U = T V \\Sigma^{-1}\\)。\\(T = \\sum \\sigma_n u_n v_n^*\\)（奇异值展开）。无限维：紧算子 \\(T\\) 的 Schmidt 分解 \\(Tx = \\sum \\sigma_n \\langle x, v_n \\rangle u_n\\)（\\(\\sigma_n \\to 0\\)）。SVD = 谱定理的矩阵版本。"
+      },
+      {
+        "id": "functional-ch07-q28",
+        "question": "在反问题（inverse problems）中，\\(Tf = g\\)（\\(T\\) 紧）。即使 \\(T\\) 单射，\\(T^{-1}\\) 一般无界。处理方法？",
+        "options": [
+          "Tikhonov 正则化：\\(\\min_f \\|Tf - g\\|^2 + \\alpha \\|f\\|^2\\)（\\(\\alpha > 0\\)），解 \\(f_\\alpha = (T^*T + \\alpha I)^{-1} T^* g\\)",
+        "直接求逆",
+        "用 Fubini 定理",
+        "忽略不稳定性"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^{-1}\\) 无界：小扰动 \\(\\delta g\\) 被 \\(1/\\sigma_n\\)（\\(\\sigma_n \\to 0\\)）放大。正则化用 \\(\\sigma_n^2/(\\sigma_n^2 + \\alpha)\\) 替代 \\(1/\\sigma_n^2\\)——截断小奇异值的放大效应。\\(\\alpha\\) 平衡拟合度和稳定性。Fredholm 理论指导可解性，谱理论指导正则化策略。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.7 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 紧算子的定义与性质</a></li>
+      <li><a href="#kp2">02 · 谱的定义与分类</a></li>
+      <li><a href="#kp3">03 · 紧自伴算子的谱定理</a></li>
+      <li><a href="#kp4">04 · Fredholm 替代与 Sturm-Liouville 应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 7</p>
+      <h1>紧算子与谱论初步</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>紧算子的定义与性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在有限维空间中，线性算子自动将有界集映为有界集（因此列紧集）。 无穷维空间中这不再成立——一般算子不保持紧性。紧算子是介于 有限维操作和一般操作之间的"好算子"：它们保持紧性，保留了 有限维矩阵理论中许多优美的性质（如谱离散、特征值分解）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>紧算子 = 有限秩算子的极限。这一刻画体现了"无穷维中 最接近有限维的对象"的思想。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(T: X \to Y\) 为紧算子，若 \(T(B_X)\)（有界集的像） 在 \(Y\) 中列紧（即 \(\overline{T(B_X)}\) 紧致）。 <strong>性质</strong>： (1) 紧算子是有界的：\(\overline{T(B_X)}\) 紧 ⇒ 有界 ⇒ \(\|T\| < \infty\)。 (2) 有限秩算子紧（像空间有限维，有界闭集紧致）。 (3) 紧算子的极限紧：若 \(T_n\) 紧，\(\|T_n - T\| \to 0\)，则 \(T\) 紧。 (4) 紧算子的复合：\(T\) 紧，\(S\) 有界 ⇒ \(ST\) 和 \(TS\) 紧。 (5) 在 Hilbert 空间中：\(T\) 紧 \(\Leftrightarrow\) \(T\) 是有限秩算子的范数极限。 <strong>关键判别</strong>：若 \(X\) 无穷维 Banach 空间，恒等算子 \(I\) 不紧 （Riesz 引理：闭单位球不列紧）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>积分算子 \((Tf)(x) = \int K(x,y) f(y) dy\) 在适当条件下紧 （Hilbert-Schmidt 算子），PDE 的 Green 函数给出紧算子。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(T: l^2 \to l^2\)，\(T(x_1, x_2, \ldots) = (x_1, x_2/2, x_3/3, \ldots)\)。 证明 \(T\) 紧。 解答：定义 \(T_n(x_1, \ldots) = (x_1, x_2/2, \ldots, x_n/n, 0, 0, \ldots)\)。 \(T_n\) 有限秩（像在前 \(n\) 个坐标），故紧。 \(\|T - T_n\| = \sup_{k > n} 1/k = 1/(n+1) \to 0\)。 紧算子的极限紧。✓ 易错点：恒等算子在无穷维空间中不紧！ \(I(B_X) = B_X\)，闭单位球在无穷维中不列紧。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">紧算子的哪个性质对一般有界算子不成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。一般有界算子映有界集为有界集，但不一定列紧。')">A. 有界性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！一般有界算子映有界集为有界集，但不一定列紧。')">B. 将有界集映为列紧集</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。一般有界算子映有界集为有界集，但不一定列紧。')">C. 线性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。一般有界算子映有界集为有界集，但不一定列紧。')">D. 连续性</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>谱的定义与分类</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>矩阵的特征值完全决定了矩阵的结构（Jordan 形）。无穷维算子 的"特征值理论"是什么？谱 \(\sigma(T)\) 推广了特征值的概念： \(\lambda \in \sigma(T)\) 当 \(T - \lambda I\) 不可逆。但无穷维中 "不可逆"的原因比有限维更多——可能不是单射（特征值）， 也可能不是满射或逆无界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>谱将算子分析转化为复分析——谱是复平面的紧子集， 预解式 \(R(\lambda, T) = (T - \lambda I)^{-1}\) 是解析的算子值函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>预解集</strong>：\(\rho(T) = \{\lambda \in \mathbb{C} : (T - \lambda I)^{-1} \in B(X)\}\)（存在 + 有界 + 定义在全空间）。 <strong>谱</strong>：\(\sigma(T) = \mathbb{C} \setminus \rho(T)\)。 <strong>谱的分类</strong>： - 点谱 \(\sigma_p(T)\)：\(T - \lambda I\) 不是单射（\(\lambda\) 是特征值） - 连续谱 \(\sigma_c(T)\)：\(T - \lambda I\) 单射，像稠密但不等于 \(Y\)，逆无界 - 剩余谱 \(\sigma_r(T)\)：\(T - \lambda I\) 单射，像不稠密 <strong>基本性质</strong>： (1) \(\sigma(T)\) 是紧集合（\(\sigma(T) \subseteq \overline{B}(0, \|T\|)\)） (2) \(\sigma(T)\) 非空（\(X\) 为复 Banach 空间时） (3) 谱半径 \(r(T) = \sup\{|\lambda| : \lambda \in \sigma(T)\} = \lim \|T^n\|^{1/n}\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：右移算子 \(R: l^2 \to l^2\)，\(R(x_1, x_2, \ldots) = (0, x_1, x_2, \ldots)\)。 求 \(\sigma_p(R)\)。 解答：\(Rx = \lambda x \Rightarrow (0, x_1, x_2, \ldots) = (\lambda x_1, \lambda x_2, \ldots)\) \(\Rightarrow \lambda x_1 = 0\)，\(x_1 = \lambda x_2\)，\(\ldots\) 若 \(\lambda = 0\)：\(x = 0\)（非特征向量）。 若 \(\lambda \neq 0\)：\(x_1 = 0 \Rightarrow x_n = 0\) 对所有 \(n\)。 故 \(\sigma_p(R) = \emptyset\)（没有特征值！）。 但 \(\sigma(R) = \overline{B}(0, 1)\)（闭单位圆盘）。 易错点：无穷维算子可以没有特征值但谱非空。 谱不等于特征值集。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Banach 空间上有界线性算子的谱一定是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。谱是 \\(\\overline{B}(0, \\|T\\|)\\) 中的闭集，故紧。')">A. 有限集</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。谱是 \\(\\overline{B}(0, \\|T\\|)\\) 中的闭集，故紧。')">B. 可数集</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！谱是 \\(\\overline{B}(0, \\|T\\|)\\) 中的闭集，故紧。')">C. 非空紧集</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。谱是 \\(\\overline{B}(0, \\|T\\|)\\) 中的闭集，故紧。')">D. 连通集</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>紧自伴算子的谱定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实对称矩阵可以正交对角化——这是有限维线性代数最优美的结果。 紧自伴算子的谱定理将此推广到无穷维：Hilbert 空间上的紧自伴 算子有实特征值序列趋于零，对应的特征向量构成标准正交系。 这一定理是量子力学中可观测量谱分解的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>谱定理将紧自伴算子"对角化"为特征值与特征向量的组合： \(T = \sum \lambda_n \langle \cdot, e_n \rangle e_n\)。 这完美推广了矩阵的 \(A = Q\Lambda Q^T\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>：设 \(T: H \to H\) 为紧自伴算子，\(H\) 为可分 Hilbert 空间。则： (1) \(\sigma(T) \subseteq \mathbb{R}\)（因为自伴） (2) 不同特征值的特征向量正交 (3) \(\sigma(T) \setminus \{0\}\) 至多可数，且仅在 \(0\) 处聚集 (4) 存在标准正交系 \(\{e_n\}\) 和实数列 \(\lambda_n \to 0\) 使 \[Tx = \sum_{n=1}^{\infty} \lambda_n \langle x, e_n \rangle e_n\] <strong>自伴算子特征值为实</strong>：\(\lambda \langle x, x\rangle = \langle Tx, x\rangle = \langle x, Tx\rangle = \overline{\lambda} \langle x, x\rangle\)， 故 \(\lambda = \overline{\lambda} \in \mathbb{R}\)。 <strong>\(\|T\|\) 或 \(-\|T\|\) 是特征值</strong>： \(\|T\| = \sup_{\|x\|=1} |\langle Tx, x\rangle|\)（自伴算子）， 取到 sup 的极值点即为特征向量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>PCA（主成分分析）：协方差算子是紧自伴的，其特征值和特征向量 即主成分方向和方差。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(T: l^2 \to l^2\)，\(T(x_1, x_2, \ldots) = (x_1, x_2/2, x_3/3, \ldots)\)。 求谱。 解答：\(T\) 自伴（对角算子实系数）且紧（前面已证）。 特征值为 \(\{1/n : n \geq 1\}\)，特征向量为 \(e_n\)。 \(\sigma(T) = \{0\} \cup \{1/n : n \geq 1\}\)（\(0\) 是聚点但不是特征值， 因为 \(Tx = 0 \Rightarrow x = 0\)）。 易错点：\(0\) 可能在谱中但不是特征值（\(\ker T = \{0\}\) 但 \(T\) 不可逆——逆无界）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">紧自伴算子的特征值序列满足？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。非零特征值至多可数，只能在 0 处聚集。')">A. 收敛到 \(\|T\|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！非零特征值至多可数，只能在 0 处聚集。')">B. 只在 0 处聚集</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。非零特征值至多可数，只能在 0 处聚集。')">C. 全为正数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。非零特征值至多可数，只能在 0 处聚集。')">D. 总是有限个</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Fredholm 替代与 Sturm-Liouville 应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>紧算子理论的一个核心应用是 Fredholm 替代定理：对紧算子 \(T\)， 方程 \((I - T)x = y\) 要么对所有 \(y\) 有唯一解，要么齐次方程 \((I - T)x = 0\) 有非平凡解。这推广了有限维线性方程组的 Fredholm 替代（秩-零度定理），在积分方程和 Sturm-Liouville 问题中有根本性应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fredholm 替代体现了"紧算子使无穷维问题表现得像有限维"的精神： \(I - T\)（\(T\) 紧）的可逆性问题归结为核空间的有限维分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Fredholm 替代)</strong>：设 \(T: X \to X\) 紧，\(\lambda \neq 0\)。则恰好一个成立： (a) \((T - \lambda I)x = 0\) 只有零解，此时 \(T - \lambda I\) 是双射 （方程 \((T - \lambda I)x = y\) 对每个 \(y\) 有唯一解）； (b) \((T - \lambda I)x = 0\) 有非零解（\(\lambda\) 是特征值）， 此时 \((T - \lambda I)x = y\) 仅当 \(y\) 满足有限个正交条件时有解。 <strong>Riesz-Schauder 定理</strong>：紧算子的非零谱点都是特征值， 其特征空间有限维，且 \(\sigma(T) \setminus \{0\}\) 至多可数。 <strong>Sturm-Liouville 问题</strong>：\(-u'' + q(x)u = \lambda u\) 在 \([0,1]\)， 边界条件 \(u(0) = u(1) = 0\)。 转化为积分方程 \(u = \lambda K u\)，\(K\) 为 Green 函数给出的 紧自伴算子，谱定理保证特征值可数、特征函数正交完备。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>振动膜的固有频率 = Laplacian 的特征值（Sturm-Liouville 推广）； 量子力学中束缚态能量 = Hamilton 算子的离散谱。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：积分方程 \(u(x) = \lambda \int_0^1 K(x,y) u(y) dy + f(x)\)， \(K(x,y) = \min(x,y)\)。 解答：\(K\) 是 \(-u'' = \lambda u\), \(u(0) = u(1) = 0\) 的 Green 函数。 特征值 \(\lambda_n = n^2\pi^2\)，特征函数 \(u_n = \sin(n\pi x)\)。 由 Fredholm 替代，当 \(\lambda \neq n^2\pi^2\) 对所有 \(n\) 时， 方程对每个 \(f\) 有唯一解。 易错点：Fredholm 替代是"二择一"——不能同时有非零核 和对所有右端项可解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fredholm 替代定理中，若 \(\ker(T - \lambda I) = \{0\}\)，则？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\lambda \\neq 0\\), \\(T\\) 紧, \\(\\ker = \\{0\\}\\) ⇒ \\(T - \\lambda I\\) 双射，')">A. \(T - \lambda I\) 是满射且有连续逆</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\lambda \\neq 0\\), \\(T\\) 紧, \\(\\ker = \\{0\\}\\) ⇒ \\(T - \\lambda I\\) 双射，')">B. \(\lambda\) 不在谱中</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\lambda \\neq 0\\), \\(T\\) 紧, \\(\\ker = \\{0\\}\\) ⇒ \\(T - \\lambda I\\) 双射，')">C. \(T\) 是紧的</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\lambda \\neq 0\\), \\(T\\) 紧, \\(\\ker = \\{0\\}\\) ⇒ \\(T - \\lambda I\\) 双射，')">D. A 和 B 都对</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch06.html" class="nav-prev">← Ch.6</a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

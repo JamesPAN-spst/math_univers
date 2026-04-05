@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 奇异同调 — 代数拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "alg-topo-ch04-q1",
+        "question": "奇异 \\(n\\)-单纯形是什么？",
+        "options": [
+          "\\(\\Delta^n\\) 到 \\(X\\) 的连续映射 \\(\\sigma: \\Delta^n \\to X\\)",
+        "\\(X\\) 中的 \\(n\\)-维子流形",
+        "单纯复形的 \\(n\\)-面",
+        "光滑映射"
+        ],
+        "answer": 0,
+        "explanation": "标准 \\(n\\)-单纯形 \\(\\Delta^n = \\{(t_0, \\ldots, t_n) : t_i \\geq 0, \\sum t_i = 1\\} \\subseteq \\mathbb{R}^{n+1}\\)。奇异单纯形 \\(\\sigma: \\Delta^n \\to X\\) 是任意连续映射（不要求单射/光滑）——\"奇异\"就是不施加正则性条件。\\(C_n^{\\text{sing}}(X) = \\) 所有奇异 \\(n\\)-单纯形的自由 Abel 群。每个空间自动有奇异链复形，不需要三角剖分。"
+      },
+      {
+        "id": "alg-topo-ch04-q2",
+        "question": "奇异同调相比单纯同调的优势是什么？",
+        "options": [
+          "对任意拓扑空间定义（不需三角剖分）",
+        "自动是同伦不变量",
+        "A 和 B",
+        "计算更简单"
+        ],
+        "answer": 2,
+        "explanation": "单纯同调需要三角剖分（单纯复形），不是所有空间有。奇异同调对任意拓扑空间 \\(X\\) 定义：\\(C_n^{\\text{sing}}(X) = \\) 所有 \\(\\sigma: \\Delta^n \\to X\\) 的自由群。同伦不变性直接从定义证明。缺点：\\(C_n\\) 极大（不可数生成），实际计算需要间接方法（切除、Mayer-Vietoris、长正合序列等）。"
+      },
+      {
+        "id": "alg-topo-ch04-q3",
+        "question": "奇异同调的同伦不变性意味着什么？",
+        "options": [
+          "\\(f \\simeq g: X \\to Y \\Rightarrow f_* = g_*: H_n(X) \\to H_n(Y)\\)",
+        "\\(X \\simeq Y\\)（同伦等价）\\(\\Rightarrow H_n(X) \\cong H_n(Y)\\)",
+        "A 和 B",
+        "\\(H_n(X) = H_n(Y)\\) 对同胚空间"
+        ],
+        "answer": 2,
+        "explanation": "(A) 同伦映射诱导相同的同调映射。(B) 推论：同伦等价的空间同调同构。\\(D\\) 也对但太弱（同胚 \\(\\Rightarrow\\) 同伦等价但反之不然）。可缩空间 \\(\\simeq \\text{pt}\\)，\\(H_n = H_n(\\text{pt})\\)。\\(\\mathbb{R}^n \\simeq \\text{pt}\\)，\\(S^{n-1} \\simeq \\mathbb{R}^n \\setminus \\{0\\}\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q4",
+        "question": "\\(H_n(S^k; \\mathbb{Z}) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}\\)（\\(n = 0\\) 或 \\(n = k\\)），\\(0\\) 其他",
+        "\\(\\mathbb{Z}\\) 对所有 \\(n\\)",
+        "\\(\\mathbb{Z}\\)（\\(n = 0\\)），\\(0\\) 其他",
+        "\\(\\mathbb{Z}^2\\)（\\(n = k\\)）"
+        ],
+        "answer": 0,
+        "explanation": "\\(H_n(S^k) = \\begin{cases} \\mathbb{Z} & n = 0 \\text{ 或 } n = k \\\\ 0 & \\text{其他}\\end{cases}\\)。证明：悬挂 \\(\\Sigma S^{k-1} = S^k\\)，\\(\\tilde{H}_n(S^k) = \\tilde{H}_{n-1}(S^{k-1})\\)，递推从 \\(S^0\\)（两个点，\\(\\tilde{H}_0 = \\mathbb{Z}\\)）开始。\\(H_k(S^k) = \\mathbb{Z}\\) 的生成元 = 基本类。"
+      },
+      {
+        "id": "alg-topo-ch04-q5",
+        "question": "Mayer-Vietoris 序列是什么？",
+        "options": [
+          "\\(X = A \\cup B\\) 时 \\(\\cdots \\to H_n(A \\cap B) \\to H_n(A) \\oplus H_n(B) \\to H_n(X) \\to H_{n-1}(A \\cap B) \\to \\cdots\\)",
+        "短正合序列",
+        "只对流形成立",
+        "只对 CW 复形成立"
+        ],
+        "answer": 0,
+        "explanation": "Mayer-Vietoris 长正合序列：\"同调的 van Kampen\"。\\(X = \\mathrm{Int}(A) \\cup \\mathrm{Int}(B)\\)。连接同态 \\(\\partial_*: H_n(X) \\to H_{n-1}(A \\cap B)\\) 是关键。应用：\\(S^n = D^n_+ \\cup D^n_-\\), \\(D^n_\\pm\\) 可缩, \\(D^n_+ \\cap D^n_- = S^{n-1}\\) \\(\\Rightarrow\\) 递推 \\(H_k(S^n)\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q6",
+        "question": "相对同调群 \\(H_n(X, A)\\) 的直觉含义是什么？",
+        "options": [
+          "\"\\(X\\) 模掉 \\(A\\)\" 的同调，衡量 \\(X\\) 有但 \\(A\\) 没有的拓扑特征",
+        "\\(X\\) 和 \\(A\\) 的同调之差",
+        "\\(X/A\\) 的同调（在好的情况下）",
+        "A 和 C"
+        ],
+        "answer": 3,
+        "explanation": "\\(C_n(X, A) = C_n(X)/C_n(A)\\)，链复形的商。相对同调 \\(H_n(X, A) \\cong \\tilde{H}_n(X/A)\\)（对好的对 \\((X, A)\\)——即切除定理成立时）。长正合序列：\\(\\cdots \\to H_n(A) \\xrightarrow{i_*} H_n(X) \\xrightarrow{j_*} H_n(X,A) \\xrightarrow{\\partial_*} H_{n-1}(A) \\to \\cdots\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q7",
+        "question": "对 \\((X, A)\\) 的长正合序列中，连接同态 \\(\\partial_*: H_n(X, A) \\to H_{n-1}(A)\\) 的作用是什么？",
+        "options": [
+          "将相对闭链的边界\"推回\"到 \\(A\\) 中",
+        "零映射",
+        "同构",
+        "投影"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\alpha] \\in H_n(X, A)\\)：\\(\\alpha \\in C_n(X)\\), \\(\\partial \\alpha \\in C_{n-1}(A)\\)（\\(\\alpha\\) 的边界落在 \\(A\\) 中）。\\(\\partial_*([\\alpha]) = [\\partial\\alpha] \\in H_{n-1}(A)\\)。几何上：相对链的\"边\"是 \\(A\\) 中的绝对链。这是蛇引理在拓扑中的体现。"
+      },
+      {
+        "id": "alg-topo-ch04-q8",
+        "question": "用 Mayer-Vietoris 序列计算 \\(H_1(T^2)\\)。\\(T^2 = A \\cup B\\)，\\(A, B \\simeq S^1\\), \\(A \\cap B \\simeq S^1 \\sqcup S^1\\)。",
+        "options": [
+          "\\(H_1(T^2) = \\mathbb{Z}^2\\)",
+        "\\(H_1(T^2) = \\mathbb{Z}\\)",
+        "\\(H_1(T^2) = 0\\)",
+        "\\(H_1(T^2) = \\mathbb{Z}^3\\)"
+        ],
+        "answer": 0,
+        "explanation": "MV：\\(H_1(A \\cap B) \\to H_1(A) \\oplus H_1(B) \\to H_1(T^2) \\to H_0(A \\cap B) \\to H_0(A) \\oplus H_0(B)\\)。\\(H_1(A \\cap B) = \\mathbb{Z}^2\\), \\(H_1(A) \\oplus H_1(B) = \\mathbb{Z}^2\\)。分析映射后 \\(H_1(T^2) = \\mathbb{Z}^2\\)。（详细计算需追踪映射的具体矩阵。）\\(\\chi(T^2) = 1 - 2 + 1 = 0\\) ✓。"
+      },
+      {
+        "id": "alg-topo-ch04-q9",
+        "question": "切除定理 (Excision) 的陈述？",
+        "options": [
+          "\\(Z \\subseteq \\mathrm{Int}(A) \\Rightarrow H_n(X \\setminus Z, A \\setminus Z) \\cong H_n(X, A)\\)",
+        "\\(H_n(X) = H_n(X \\setminus Z)\\)",
+        "切除不影响绝对同调",
+        "A 正确，直觉是\"远离边界\"的部分可以安全移除"
+        ],
+        "answer": 3,
+        "explanation": "切除定理：\\(Z \\subseteq \\mathrm{Int}(A)\\)，则包含 \\((X \\setminus Z, A \\setminus Z) \\hookrightarrow (X, A)\\) 诱导的 \\(H_n(X \\setminus Z, A \\setminus Z) \\cong H_n(X, A)\\) 同构。推论：\\(H_n(X/A) \\cong H_n(X, A)\\)（好的对）。切除是计算同调的核心工具——将复杂空间分解为可管理的部分。"
+      },
+      {
+        "id": "alg-topo-ch04-q10",
+        "question": "\\(H_n(D^k, S^{k-1}) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}\\)（\\(n = k\\)），\\(0\\) 其他",
+        "\\(\\mathbb{Z}\\)（\\(n = k-1\\)）",
+        "\\(\\mathbb{Z}^2\\)",
+        "\\(0\\) 所有 \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(D^k/S^{k-1} \\cong S^k\\)。\\(H_n(D^k, S^{k-1}) \\cong \\tilde{H}_n(S^k) = \\begin{cases}\\mathbb{Z} & n = k \\\\ 0 & \\text{其他}\\end{cases}\\)。也可用长正合序列：\\(D^k\\) 可缩 \\(\\Rightarrow H_n(D^k) = 0\\)（\\(n \\geq 1\\)），\\(\\partial_*: H_n(D^k, S^{k-1}) \\xrightarrow{\\cong} H_{n-1}(S^{k-1})\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q11",
+        "question": "CW 复形的胞腔同调 (cellular homology) 与奇异同调的关系？",
+        "options": [
+          "同构：\\(H_n^{\\text{CW}}(X) \\cong H_n^{\\text{sing}}(X)\\)",
+        "不同的理论",
+        "CW 同调更精细",
+        "A 正确，且 CW 链群更小——实际计算用 CW"
+        ],
+        "answer": 3,
+        "explanation": "CW 链群 \\(C_n^{\\text{CW}} = H_n(X^n, X^{n-1}) \\cong \\mathbb{Z}^{c_n}\\)（\\(c_n\\) = \\(n\\)-胞腔数）。远比奇异链群小。\\(\\partial^{\\text{CW}}\\)（胞腔边界映射）的矩阵由粘合映射的度给出。定理：\\(H_n^{\\text{CW}} \\cong H_n^{\\text{sing}}\\)。这让CW复形的同调计算变得组合化和可行。"
+      },
+      {
+        "id": "alg-topo-ch04-q12",
+        "question": "奇异链群 \\(C_n(X)\\) 一般是什么结构？",
+        "options": [
+          "有限生成",
+        "自由但不可数秩",
+        "不是自由群",
+        "有限群"
+        ],
+        "answer": 1,
+        "explanation": "对非平凡空间 \\(X\\)，存在不可数多连续映射 \\(\\sigma: \\Delta^n \\to X\\)。\\(C_n^{\\text{sing}}(X) = \\bigoplus_\\sigma \\mathbb{Z}\\)（不可数直和）。但同调群 \\(H_n(X)\\) 对 CW 复形是有限生成的——巨大的链群\"商掉\"后得到小的同调群。这是为什么直接用 \\(C_n^{\\text{sing}}\\) 计算不实际——需要间接方法。"
+      },
+      {
+        "id": "alg-topo-ch04-q13",
+        "question": "映射度 (degree)：\\(f: S^n \\to S^n\\) 的度 \\(\\deg(f)\\) 定义为什么？",
+        "options": [
+          "\\(f_*: H_n(S^n) \\to H_n(S^n)\\) 的\"乘数\"（\\(f_*(\\alpha) = (\\deg f)\\alpha\\)）",
+        "\\(f\\) 的导数",
+        "\\(f\\) 的维数",
+        "\\(f\\) 的原像个数"
+        ],
+        "answer": 0,
+        "explanation": "\\(H_n(S^n) = \\mathbb{Z}\\)，\\(f_*\\) 是 \\(\\mathbb{Z} \\to \\mathbb{Z}\\) 的群同态 \\(= \\) 乘以某整数 \\(d = \\deg(f)\\)。\\(\\deg(\\mathrm{id}) = 1\\)。\\(\\deg(-\\mathrm{id}) = (-1)^{n+1}\\)（对径映射）。\\(\\deg(f \\circ g) = \\deg f \\cdot \\deg g\\)。应用：Brouwer 不动点定理——\\(\\deg(-\\mathrm{id}|_{S^{2n}}) = -1 \\neq 1\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q14",
+        "question": "用 Mayer-Vietoris 证明 \\(H_n(S^n) = \\mathbb{Z}\\)（\\(n \\geq 1\\)）的递推步骤？",
+        "options": [
+          "\\(S^n = D^n_+ \\cup D^n_-\\), \\(D^\\pm\\) 可缩, \\(D^+ \\cap D^- \\simeq S^{n-1}\\)",
+        "MV: \\(H_k(D^+) \\oplus H_k(D^-) = 0\\)（\\(k \\geq 1\\)），\\(\\partial_*: H_n(S^n) \\xrightarrow{\\cong} H_{n-1}(S^{n-1})\\)",
+        "A 和 B",
+        "直接计算"
+        ],
+        "answer": 2,
+        "explanation": "\\(S^n = D^n_+ \\cup D^n_-\\)（上/下半球，\\(D^n_\\pm\\) 可缩）。\\(D^n_+ \\cap D^n_- = S^{n-1}\\)（赤道）。MV：\\(0 = \\tilde{H}_n(D^+) \\oplus \\tilde{H}_n(D^-) \\to \\tilde{H}_n(S^n) \\xrightarrow{\\partial_*} \\tilde{H}_{n-1}(S^{n-1}) \\to \\tilde{H}_{n-1}(D^+) \\oplus \\tilde{H}_{n-1}(D^-) = 0\\)。\\(\\partial_*\\) 是同构。递推从 \\(\\tilde{H}_0(S^0) = \\mathbb{Z}\\) 开始。"
+      },
+      {
+        "id": "alg-topo-ch04-q15",
+        "question": "同调群中的挠 (torsion) 部分代表什么几何意义？",
+        "options": [
+          "不可定向性",
+        "\\(n\\alpha = 0\\)（\\(\\alpha\\) 的 \\(n\\) 倍是边界）——有限阶\"洞\"",
+        "A 和 B 都有体现",
+        "无几何意义"
+        ],
+        "answer": 2,
+        "explanation": "\\(H_1(\\mathbb{RP}^2) = \\mathbb{Z}/2\\)：生成元 \\([\\alpha]\\) 满足 \\(2[\\alpha] = 0\\)（绕两次可缩）。\\(\\mathbb{Z}/2\\) 挠反映 \\(\\mathbb{RP}^2\\) 的不可定向性。Klein 瓶 \\(H_1\\) 有 \\(\\mathbb{Z}/2\\) 挠也是不可定向性导致。一般地：闭流形 \\(M^n\\) 不可定向 \\(\\iff H_{n-1}(M; \\mathbb{Z})\\) 有 \\(\\mathbb{Z}/2\\) 挠。"
+      },
+      {
+        "id": "alg-topo-ch04-q16",
+        "question": "好的对 (good pair) \\((X, A)\\) 满足什么条件时有 \\(H_n(X, A) \\cong \\tilde{H}_n(X/A)\\)？",
+        "options": [
+          "\\(A\\) 是 \\(X\\) 的形变收缩核的邻域",
+        "\\(A\\) 是开集",
+        "\\(A\\) 闭且是某邻域的形变收缩核",
+        "总成立"
+        ],
+        "answer": 2,
+        "explanation": "好的对条件：\\(A\\) 是 \\(X\\) 的闭子空间，且 \\(A\\) 是某邻域 \\(V\\) 的形变收缩核（即 \\(A \\hookrightarrow V \\simeq A\\)）。CW 对（\\(X\\) CW 复形，\\(A\\) 子复形）总是好的对。此时 \\(H_n(X, A) \\cong \\tilde{H}_n(X/A)\\)——商空间的约化同调等于相对同调。"
+      },
+      {
+        "id": "alg-topo-ch04-q17",
+        "question": "\\(f: S^n \\to S^n\\) 映射度 \\(= -1\\) 的例子？",
+        "options": [
+          "反射 \\(r(x_0, x_1, \\ldots, x_n) = (-x_0, x_1, \\ldots, x_n)\\)",
+        "恒等映射",
+        "常映射",
+        "对径映射 \\(x \\mapsto -x\\)"
+        ],
+        "answer": 0,
+        "explanation": "反射翻转一个坐标：\\(\\deg(r) = -1\\)（翻转定向）。对径映射 \\(x \\mapsto -x\\)：翻转所有 \\(n+1\\) 个坐标，\\(\\deg = (-1)^{n+1}\\)。\\(n\\) 偶时 \\(\\deg(\\text{对径}) = -1\\)，\\(n\\) 奇时 \\(= +1\\)。常映射 \\(\\deg = 0\\)。恒等 \\(\\deg = 1\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q18",
+        "question": "\"不存在收缩 \\(r: D^{n+1} \\to S^n\\)\" 用同调怎么证明？",
+        "options": [
+          "\\(r \\circ i = \\mathrm{id}_{S^n}\\) \\(\\Rightarrow\\) \\(r_* \\circ i_* = \\mathrm{id}\\)，但 \\(i_*: H_n(S^n) \\to H_n(D^{n+1})\\) 是 \\(\\mathbb{Z} \\to 0\\)，矛盾",
+        "\\(D^{n+1}\\) 不可缩",
+        "\\(S^n\\) 不紧致",
+        "反证法用 Baire 范畴"
+        ],
+        "answer": 0,
+        "explanation": "假设 \\(r: D^{n+1} \\to S^n\\), \\(r|_{S^n} = \\mathrm{id}\\)。\\(r_* \\circ i_* = \\mathrm{id}_*: H_n(S^n) \\to H_n(S^n)\\)。但 \\(H_n(D^{n+1}) = 0\\)（可缩），\\(i_*: \\mathbb{Z} = H_n(S^n) \\to 0\\)。\\(r_* \\circ i_* = 0 \\neq \\mathrm{id}\\)。矛盾。直接推出 Brouwer 不动点定理。"
+      },
+      {
+        "id": "alg-topo-ch04-q19",
+        "question": "\\(H_n(\\mathbb{RP}^n; \\mathbb{Z})\\) 的完整计算？",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}\\); \\(H_k = \\mathbb{Z}/2\\)（\\(k\\) 奇, \\(0 < k < n\\)）; \\(H_k = 0\\)（\\(k\\) 偶, \\(0 < k < n\\)）; \\(H_n = \\mathbb{Z}\\)(\\(n\\) 奇)/\\(0\\)(\\(n\\) 偶)",
+        "\\(\\mathbb{Z}\\) 所有维",
+        "\\(\\mathbb{Z}/2\\) 所有维",
+        "A（CW 链群计算：\\(\\partial\\) 交替为 0 和 \\(\\times 2\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathbb{RP}^n\\) CW 结构：一个 \\(k\\)-胞腔（\\(0 \\leq k \\leq n\\)）。边界映射 \\(\\partial_k: C_k \\to C_{k-1}\\) 是 \\(0\\) 或 \\(\\times 2\\) 交替。\\(\\partial_k = \\begin{cases}0 & k \\text{ 奇} \\\\ 2 & k \\text{ 偶}\\end{cases}\\)（\\(k \\geq 1\\)）。\\(H_0 = \\mathbb{Z}\\)。\\(n\\) 奇时 \\(H_n = \\mathbb{Z}\\)（可定向 = 闭有向流形）。\\(n\\) 偶时 \\(H_n = 0\\)（不可定向）。"
+      },
+      {
+        "id": "alg-topo-ch04-q20",
+        "question": "Mayer-Vietoris 的连接同态 \\(\\partial_*\\) 的构造？",
+        "options": [
+          "蛇引理应用于短正合序列 \\(0 \\to C_*(A \\cap B) \\to C_*(A) \\oplus C_*(B) \\to C_*(A + B) \\to 0\\)",
+        "直接定义",
+        "用度量",
+        "A 正确，\\(C_*(A + B) \\xrightarrow{\\sim} C_*(X)\\)（切除/小链定理）"
+        ],
+        "answer": 3,
+        "explanation": "\\(i\\): \\(A \\cap B \\to A, B\\)。\\(j\\): \\(A, B \\to X\\)。链层面：\\(0 \\to C_n(A \\cap B) \\xrightarrow{(i_{A*}, -i_{B*})} C_n(A) \\oplus C_n(B) \\xrightarrow{j_{A*}+j_{B*}} C_n(A) + C_n(B) \\to 0\\)（\\(C_*(A) + C_*(B) \\subseteq C_*(X)\\)）。小链定理：\\(C_*(A) + C_*(B) \\hookrightarrow C_*(X)\\) 诱导同调同构。蛇引理给出长正合序列。"
+      },
+      {
+        "id": "alg-topo-ch04-q21",
+        "question": "\\(\\mathbb{CP}^n\\)（复射影空间）的同调群？",
+        "options": [
+          "\\(H_{2k} = \\mathbb{Z}\\)（\\(0 \\leq k \\leq n\\)），\\(H_{2k+1} = 0\\)",
+        "\\(H_k = \\mathbb{Z}\\) 所有 \\(k\\)",
+        "\\(H_k = \\mathbb{Z}/2\\)",
+        "取决于 \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{CP}^n\\) CW 结构：一个 \\(2k\\)-胞腔（\\(0 \\leq k \\leq n\\)），无奇数维胞腔。\\(C_{2k} = \\mathbb{Z}, C_{2k+1} = 0\\)。所有边界映射 \\(= 0\\)（源或目标为零）。\\(H_{2k} = \\mathbb{Z}\\), \\(H_{2k+1} = 0\\)。\\(\\chi(\\mathbb{CP}^n) = n + 1\\)。\\(\\mathbb{CP}^1 = S^2\\), \\(H_0 = H_2 = \\mathbb{Z}\\), \\(H_1 = 0\\) ✓。"
+      },
+      {
+        "id": "alg-topo-ch04-q22",
+        "question": "Brouwer 不变区域定理：\\(f: U \\to \\mathbb{R}^n\\) 单射连续（\\(U \\subseteq \\mathbb{R}^n\\) 开），则 \\(f(U)\\) 开。证明用了什么？",
+        "options": [
+          "局部同调 \\(H_n(\\mathbb{R}^n, \\mathbb{R}^n \\setminus \\{x\\}) \\cong \\mathbb{Z}\\)",
+        "Sard 定理",
+        "紧致性",
+        "A 正确——局部同调检测\"维数\""
+        ],
+        "answer": 3,
+        "explanation": "局部同调 \\(H_n(X, X \\setminus \\{x\\})\\) 检测 \\(x\\) 的\"局部维数\"。\\(H_n(\\mathbb{R}^n, \\mathbb{R}^n \\setminus \\{x\\}) = \\mathbb{Z}\\)。\\(f\\) 单射 \\(\\Rightarrow\\) \\(f\\) 在局部同调上是同构 \\(\\Rightarrow\\) \\(f(x)\\) 是 \\(f(U)\\) 的内点。核心是\"维度不变性\"——\\(\\mathbb{R}^n \\not\\cong \\mathbb{R}^m\\)（\\(n \\neq m\\)）也用局部同调证明。"
+      },
+      {
+        "id": "alg-topo-ch04-q23",
+        "question": "不同系数的同调群 \\(H_n(X; G)\\)（\\(G\\) = 系数群如 \\(\\mathbb{Z}/p, \\mathbb{Q}, \\mathbb{R}\\)）之间的关系？",
+        "options": [
+          "万有系数定理：\\(H_n(X; G) \\cong (H_n(X; \\mathbb{Z}) \\otimes G) \\oplus \\text{Tor}_1(H_{n-1}(X; \\mathbb{Z}), G)\\)",
+        "\\(H_n(X; G) = H_n(X; \\mathbb{Z}) \\otimes G\\) 总成立",
+        "无关系",
+        "A 正确（B 只在 \\(H_{n-1}\\) 无挠时成立）"
+        ],
+        "answer": 3,
+        "explanation": "万有系数定理（同调版）：\\(0 \\to H_n(X) \\otimes G \\to H_n(X;G) \\to \\text{Tor}(H_{n-1}(X), G) \\to 0\\)（短正合序列，分裂但非典范）。\\(G = \\mathbb{Q}, \\mathbb{R}\\)：\\(\\text{Tor} = 0\\)（\\(\\mathbb{Q}, \\mathbb{R}\\) 无挠），\\(H_n(X; G) = H_n(X) \\otimes G\\)。\\(G = \\mathbb{Z}/p\\)：\\(\\text{Tor}\\) 检测 \\(p\\)-挠。"
+      },
+      {
+        "id": "alg-topo-ch04-q24",
+        "question": "楔和 \\(X \\vee Y\\) 的约化同调？",
+        "options": [
+          "\\(\\tilde{H}_n(X \\vee Y) \\cong \\tilde{H}_n(X) \\oplus \\tilde{H}_n(Y)\\)",
+        "\\(H_n(X \\vee Y) = H_n(X) \\times H_n(Y)\\)",
+        "\\(\\tilde{H}_n(X \\vee Y) = \\tilde{H}_n(X) \\otimes \\tilde{H}_n(Y)\\)",
+        "A（由 Mayer-Vietoris 或 CW 结构直接得到）"
+        ],
+        "answer": 3,
+        "explanation": "\\(X \\vee Y\\)（在基点粘合）。MV：\\(A = X \\cup \\text{锥}\\), \\(B = Y \\cup \\text{锥}\\), \\(A \\cap B \\simeq \\text{pt}\\)。\\(\\tilde{H}_n(A \\cap B) = 0\\)。\\(\\tilde{H}_n(X \\vee Y) = \\tilde{H}_n(A) \\oplus \\tilde{H}_n(B) = \\tilde{H}_n(X) \\oplus \\tilde{H}_n(Y)\\)。例如 \\(\\tilde{H}_1(S^1 \\vee S^1) = \\mathbb{Z}^2\\)。"
+      },
+      {
+        "id": "alg-topo-ch04-q25",
+        "question": "Lefschetz 不动点定理的陈述？",
+        "options": [
+          "\\(f: X \\to X\\)（紧致多面体），\\(L(f) = \\sum (-1)^n \\text{tr}(f_{*n}) \\neq 0 \\Rightarrow f\\) 有不动点",
+        "任何映射有不动点",
+        "\\(L(f) = \\chi(X)\\) 总成立",
+        "A（\\(L(\\mathrm{id}) = \\chi(X)\\)，\\(\\chi > 0\\) 时 \\(\\mathrm{id}\\) 有不动点——当然）"
+        ],
+        "answer": 3,
+        "explanation": "Lefschetz 数 \\(L(f) = \\sum_{n=0}^{\\dim X} (-1)^n \\text{tr}(f_{*n}: H_n(X;\\mathbb{Q}) \\to H_n(X;\\mathbb{Q}))\\)。\\(L(f) \\neq 0 \\Rightarrow f\\) 有不动点。\\(f = \\mathrm{id}\\)：\\(\\text{tr}(\\mathrm{id}) = \\beta_n\\), \\(L(\\mathrm{id}) = \\chi(X)\\)。推广 Brouwer：\\(\\chi(D^n) = 1 \\neq 0\\)。\\(S^{2n}\\)：\\(\\chi = 2\\)，所有自映射 \\(f\\) 若 \\(\\deg f \\neq (-1)^{2n+1} = -1\\) 则有不动点。"
+      },
+      {
+        "id": "alg-topo-ch04-q26",
+        "question": "在图像分析中，persistent homology 的 \\(H_0\\) 和 \\(H_1\\) 分别检测什么？",
+        "options": [
+          "\\(H_0\\) = 连通分量（簇），\\(H_1\\) = 环/洞",
+        "\\(H_0\\) = 边缘，\\(H_1\\) = 纹理",
+        "都检测颜色",
+        "A 正确，barcode/persistence diagram 可视化出生-死亡对"
+        ],
+        "answer": 3,
+        "explanation": "阈值化图像在不同灰度级：\\(H_0\\) 追踪连通区域的合并（聚类），\\(H_1\\) 追踪环的出现/消失。长寿命特征 = 显著结构特征，短寿命 = 噪声。persistence diagram 的点 \\((b_i, d_i)\\)（出生/死亡）构成拓扑特征的\"指纹\"。"
+      },
+      {
+        "id": "alg-topo-ch04-q27",
+        "question": "Borsuk-Ulam 定理的\"火腿三明治\"推论说什么？",
+        "options": [
+          "\\(\\mathbb{R}^n\\) 中 \\(n\\) 个有界可测集可以被一个超平面同时等分",
+        "任何函数有零点",
+        "不动点存在",
+        "A 正确（\\(n = 3\\)：一刀切三明治，同时平分火腿、面包、芝士）"
+        ],
+        "answer": 3,
+        "explanation": "Ham Sandwich 定理：\\(\\mathbb{R}^n\\) 中 \\(n\\) 个有界可测集 \\(A_1, \\ldots, A_n\\)，存在超平面 \\(H\\) 使每个 \\(A_i\\) 被等分为两半（测度相等）。证明用 Borsuk-Ulam：构造 \\(f: S^{n-1} \\to \\mathbb{R}^{n-1}\\)（\\(n-1\\) 个集合的不平衡量），\\(f(x) = f(-x)\\) 意味着所有不平衡为零。同调论支撑的存在性结果！"
+      },
+      {
+        "id": "alg-topo-ch04-q28",
+        "question": "在材料科学中，多孔材料的孔隙结构用什么拓扑工具分析？",
+        "options": [
+          "Betti 数 \\(\\beta_0, \\beta_1, \\beta_2\\)",
+        "Fourier 分析",
+        "\\(\\beta_0\\) = 连通孔隙数，\\(\\beta_1\\) = 隧道/环，\\(\\beta_2\\) = 封闭空腔",
+        "A 和 C"
+        ],
+        "answer": 3,
+        "explanation": "多孔材料（骨骼、泡沫、催化剂等）的 3D 图像 \\(\\to\\) 二值化 \\(\\to\\) 单纯/方体复形 \\(\\to\\) 计算 Betti 数。\\(\\beta_0\\) = 连通组分数。\\(\\beta_1\\) = 通道/隧道数。\\(\\beta_2\\) = 封闭空腔数。Persistent homology 追踪随阈值变化的拓扑特征——定量描述材料的\"连通性\"和\"孔隙率\"。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="alg-topo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/alg-topo.html" class="module-name">代数拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 奇异链与奇异同调的定义</a></li>
+      <li><a href="#kp2">02 · Eilenberg-Steenrod 公理与同伦不变性</a></li>
+      <li><a href="#kp3">03 · 长正合序列与 Mayer-Vietoris 序列</a></li>
+      <li><a href="#kp4">04 · 同调群的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>奇异同调</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>奇异链与奇异同调的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>单纯同调依赖于三角剖分——但不是所有空间都能三角化！奇异同调 直接对任意拓扑空间定义：用"所有可能的连续映射 \(\sigma: \Delta^n \to X\)" （奇异单纯形）替代三角剖分中的单纯形。这给出了不依赖任何组合 结构的同调理论——代价是链群变成巨大的自由群，但同调群仍然可计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>奇异同调是"所有可能的探测"的代数化——用标准单纯形"探测" 空间中的所有连续像，再取闭链/边界的商。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>奇异 \(n\)-单纯形</strong>：连续映射 \(\sigma: \Delta^n \to X\)。 <strong>奇异链群</strong>：\(S_n(X) = \bigoplus_\sigma \mathbb{Z} \cdot \sigma\) （所有奇异 \(n\)-单纯形自由生成）。 <strong>边缘算子</strong>：\(\partial_n(\sigma) = \sum_{i=0}^n (-1)^i \sigma \circ d_i\)， 其中 \(d_i: \Delta^{n-1} \to \Delta^n\) 是第 \(i\) 个面嵌入。 \(\partial^2 = 0\)（同一证明）。 <strong>奇异同调群</strong>： \[H_n^{\mathrm{sing}}(X; \mathbb{Z}) = \ker \partial_n / \mathrm{im}\,\partial_{n+1}\] <strong>与单纯同调的关系</strong>：对可三角化空间， \(H_n^{\mathrm{sing}}(X) \cong H_n^{\mathrm{simp}}(K)\)（任何三角剖分 \(K\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 奇异同调适用于任意拓扑空间（不需要三角剖分或 CW 结构）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(H_0^{\mathrm{sing}}(\{*\})\)（单点空间）。 解答：\(S_0(\{*\}) = \mathbb{Z}\)（唯一的 0-单纯形 \(\sigma_0: \Delta^0 \to \{*\}\)）。 \(S_1(\{*\}) = \mathbb{Z}\)（唯一的 1-单纯形 \(\sigma_1\)）， \(\partial_1(\sigma_1) = \sigma_0 - \sigma_0 = 0\)。 \(H_0 = \ker \partial_0 / \mathrm{im}\,\partial_1 = \mathbb{Z}/0 = \mathbb{Z}\)。 易错点：虽然链群是巨大的（\(S_n(X)\) 通常不可数生成）， 同调群通常是有限生成的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">奇异同调与单纯同调的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对可三角化空间（包括所有流形和 CW 复形），两种同调同构。')">A. 完全无关</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！对可三角化空间（包括所有流形和 CW 复形），两种同调同构。')">B. 对可三角化空间同构</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对可三角化空间（包括所有流形和 CW 复形），两种同调同构。')">C. 奇异同调总是更大</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对可三角化空间（包括所有流形和 CW 复形），两种同调同构。')">D. 仅对流形同构</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Eilenberg-Steenrod 公理与同伦不变性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>奇异同调满足一组简洁的公理（Eilenberg-Steenrod 公理），这些 公理唯一地刻画了"好"的同调理论。公理化方法的好处是：只要验证 某个构造满足公理，就自动继承所有同调的性质（长正合序列、Mayer- Vietoris 等），无需逐一证明。同伦不变性是最基本的公理之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>公理化将同调理论从具体构造中解放出来——不同构造（单纯、奇异、 胞腔、de Rham）只要满足公理就给出相同结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Eilenberg-Steenrod 公理</strong>（简化版）： 同调理论 \(h_*\) 是从拓扑空间对 \((X, A)\) 到交换群的函子序列， 配以连接同态 \(\partial: h_n(X,A) \to h_{n-1}(A)\)，满足： (1) <strong>同伦公理</strong>：\(f \simeq g \Rightarrow f_* = g_*\) (2) <strong>正合公理</strong>：长正合序列 \(\cdots \to h_n(A) \to h_n(X) \to h_n(X,A) \xrightarrow{\partial} h_{n-1}(A) \to \cdots\) (3) <strong>切除公理</strong>：\(U \subseteq \mathrm{int}(A)\)， \(h_n(X \setminus U, A \setminus U) \cong h_n(X, A)\) (4) <strong>维数公理</strong>：\(h_n(\{*\}) = 0\) 对 \(n \neq 0\) 奇异同调满足所有公理（验证需大量技术工作）。 \[f \simeq g \Rightarrow f_* = g_*: H_n(X) \to H_n(Y)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用同伦不变性说明 \(H_n(\mathbb{R}^k) = H_n(\{*\})\)。 解答：\(\mathbb{R}^k\) 可缩到 \(\{0\}\)（同伦 \(H(x,t) = tx\)）。 同伦等价 \(\Rightarrow\) \(H_n(\mathbb{R}^k) \cong H_n(\{0\})\)。 \(H_0(\{*\}) = \mathbb{Z}\)，\(H_n(\{*\}) = 0\)（\(n \geq 1\)）。 所以 \(H_n(\mathbb{R}^k) = 0\) 对 \(n \geq 1\)。 易错点：可缩空间与点有相同的同调，但可缩空间不等于点（拓扑不同）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Eilenberg-Steenrod 公理中，维数公理要求什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。维数公理规定单点空间的高维同调为零。加上 \\(H_0(\\{*\\}) \\cong \\mathbb{Z}\\)，')">A. \(H_0(\{*\}) = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！维数公理规定单点空间的高维同调为零。加上 \\(H_0(\\{*\\}) \\cong \\mathbb{Z}\\)，')">B. \(H_n(\{*\}) = 0\) 对 \(n \neq 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。维数公理规定单点空间的高维同调为零。加上 \\(H_0(\\{*\\}) \\cong \\mathbb{Z}\\)，')">C. \(H_n(S^n) = \mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。维数公理规定单点空间的高维同调为零。加上 \\(H_0(\\{*\\}) \\cong \\mathbb{Z}\\)，')">D. \(H_n(\mathbb{R}^n) = \mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>长正合序列与 Mayer-Vietoris 序列</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>直接计算同调群通常困难。长正合序列和 Mayer-Vietoris 是最强大的 计算工具：前者将空间对 \((X, A)\) 的同调串成长序列，后者将 \(X = U \cup V\) 的同调与 \(U, V, U \cap V\) 的同调串联起来。 大多数同调群的计算都归结于反复应用这两个工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>长正合序列是蛇引理 (snake lemma) 的拓扑实例——短正合序列 \(0 \to C_*(A) \to C_*(X) \to C_*(X,A) \to 0\) 在同调上产生长正合序列。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>相对同调的长正合序列</strong>： \[\cdots \to H_n(A) \xrightarrow{i_*} H_n(X) \xrightarrow{j_*} H_n(X,A) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\] 连接同态 \(\partial_*\) 来自蛇引理。 <strong>Mayer-Vietoris 序列</strong>：\(X = U \cup V\)（\(U, V\) 开）， \[\cdots \to H_n(U \cap V) \xrightarrow{(\phi_*, \psi_*)} H_n(U) \oplus H_n(V) \xrightarrow{i_* - j_*} H_n(X) \xrightarrow{\partial_*} H_{n-1}(U \cap V) \to \cdots\] <strong>应用</strong>：计算 \(H_n(S^n)\)：令 \(U = S^n \setminus \{N\}\)，\(V = S^n \setminus \{S\}\)。 \(U \simeq V \simeq \mathbb{R}^n \simeq \{*\}\)，\(U \cap V \simeq S^{n-1}\)。 Mayer-Vietoris 给出 \(H_k(S^n) \cong H_{k-1}(S^{n-1})\)（\(k \geq 2\)）， 递归得 \(H_k(S^n) = \begin{cases}\mathbb{Z} & k=0,n \\ 0 & \text{else}\end{cases}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Mayer-Vietoris 序列计算 \(H_1(S^1)\)。 解答：\(S^1 = U \cup V\)，\(U = S^1 \setminus \{N\}\)，\(V = S^1 \setminus \{S\}\)。 \(U \simeq V \simeq \mathbb{R}\)，\(U \cap V \simeq \mathbb{R} \sqcup \mathbb{R}\)（两段弧）。 \(H_0(U \cap V) = \mathbb{Z}^2\)，\(H_0(U) \oplus H_0(V) = \mathbb{Z}^2\)。 \(\cdots \to H_1(U) \oplus H_1(V) \to H_1(S^1) \to H_0(U \cap V) \to H_0(U) \oplus H_0(V) \to \cdots\) \(= 0 \to H_1(S^1) \to \mathbb{Z}^2 \xrightarrow{(1,-1)} \mathbb{Z}^2\)。 \(\ker = \{(a,a)\} \cong \mathbb{Z}\)。\(H_1(S^1) = \mathbb{Z}\)。 易错点：要仔细追踪 Mayer-Vietoris 中各映射的具体形式。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Mayer-Vietoris 序列的前提条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。只需 \\(X = U \\cup V\\) 且 \\(U, V\\) 开（或更一般地满足切除条件）。')">A. \(X = U \cap V\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！只需 \\(X = U \\cup V\\) 且 \\(U, V\\) 开（或更一般地满足切除条件）。')">B. \(X = U \cup V\)，\(U, V\) 开</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。只需 \\(X = U \\cup V\\) 且 \\(U, V\\) 开（或更一般地满足切除条件）。')">C. \(U, V\) 单连通</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。只需 \\(X = U \\cup V\\) 且 \\(U, V\\) 开（或更一般地满足切除条件）。')">D. \(X\) 是流形</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>同调群的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同调群是拓扑学中最实用的不变量——它可以证明许多经典定理。 Brouwer 不动点定理（任意维）、Borsuk-Ulam 定理、以及 流形不变域定理都能用同调优雅地证明。这些定理在分析、组合数学 和应用数学中有深远意义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同调的"功能"：通过代数不变量证明拓扑的"不可能性"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Brouwer 不动点定理（一般）</strong>：连续 \(f: D^n \to D^n\) 有不动点。 证明：类似 \(n=2\) 的情况。若无不动点，构造收缩 \(r: D^n \to S^{n-1}\)。 则 \(r \circ i = \mathrm{id}\)，\(r_* \circ i_* = \mathrm{id}\)。 但 \(H_{n-1}(D^n) = 0\)，\(H_{n-1}(S^{n-1}) = \mathbb{Z}\)。 \[\mathbb{Z} \xrightarrow{i_*} 0 \xrightarrow{r_*} \mathbb{Z}\] 不可能为 \(\mathrm{id}\)。矛盾。 <strong>映射度</strong>：\(f: S^n \to S^n\) 诱导 \(f_*: H_n(S^n) \to H_n(S^n)\)， 即 \(f_*: \mathbb{Z} \to \mathbb{Z}\)，\(f_*(1) = \deg(f)\)。 \(\deg(f)\) 是整数，\(\deg(f \circ g) = \deg(f) \cdot \deg(g)\)。 恒等 \(\deg = 1\)，对径 \(\deg = (-1)^{n+1}\)，常值 \(\deg = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Borsuk-Ulam 定理（\(f: S^n \to \mathbb{R}^n\) 必有 \(f(x) = f(-x)\)）可用映射度证明 - "火腿三明治定理"是 Borsuk-Ulam 的推论</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: S^1 \to S^1\)，\(f(z) = z^3\)。求 \(\deg(f)\)。 解答：\(f_*: H_1(S^1) \to H_1(S^1)\)，\(H_1(S^1) = \mathbb{Z}\)。 \(f\) 将生成元（绕一圈）映为绕三圈：\(f_*(1) = 3\)。 \(\deg(f) = 3\)。 （一般地，\(\deg(z^n) = n\)。） 易错点：\(\deg(f)\) 与 \(f\) 的方向有关。\(f(z) = \bar{z}\)（复共轭） 的 \(\deg = -1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">对径映射 \(A: S^{2n} \to S^{2n}\)，\(A(x) = -x\)，\(\deg(A) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\deg(A) = (-1)^{2n+1} = -1\\)。对奇数维球面')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\deg(A) = (-1)^{2n+1} = -1\\)。对奇数维球面')">B. \(-1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\deg(A) = (-1)^{2n+1} = -1\\)。对奇数维球面')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\deg(A) = (-1)^{2n+1} = -1\\)。对奇数维球面')">D. \(2n+1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/geometry/alg-topo.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

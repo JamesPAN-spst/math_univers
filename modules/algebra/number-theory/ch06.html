@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 丢番图方程 — 数论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "number-theory-ch06-q1",
+        "question": "求方程 \\(12x + 8y = 20\\) 的通解。（提示：先简化）",
+        "options": [
+          "\\(x = 1 + 2t,\\; y = 1 - 3t \\;(t \\in \\mathbb{Z})\\)",
+        "\\(x = 1 + 8t,\\; y = 1 - 12t\\)",
+        "\\(x = 5 + 2t,\\; y = -5 - 3t\\)",
+        "无整数解"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gcd(12,8)=4\\)，\\(4 \\mid 20\\)，有解。先简化为 \\(3x+2y=5\\)。特解 \\(x_0=1,y_0=1\\)（因为 \\(3+2=5\\)）。通解 \\(x=1+\\frac{2}{1}t=1+2t\\)，\\(y=1-\\frac{3}{1}t=1-3t\\)。选项B是忘记先除以 \\(\\gcd\\) 的常见错误，直接用原系数 \\(8,12\\) 做步长。验证: \\(12(1+2t)+8(1-3t)=12+24t+8-24t=20\\) ✓。易错: 不简化直接求解会导致参数化错误或遗漏解。"
+      },
+      {
+        "id": "number-theory-ch06-q2",
+        "question": "用扩展欧几里得算法求方程 \\(7x + 11y = 1\\) 的一组特解 \\((x_0, y_0)\\)。",
+        "options": [
+          "\\((-3, 2)\\)",
+        "\\((2, -3)\\)",
+        "\\((11, -7)\\)",
+        "\\((-11, 7)\\)"
+        ],
+        "answer": 0,
+        "explanation": "扩展欧几里得: \\(11=1\\times7+4\\)，\\(7=1\\times4+3\\)，\\(4=1\\times3+1\\)。回代: \\(1=4-3=4-(7-4)=2\\times4-7=2(11-7)-7=2\\times11-3\\times7\\)。故 \\(7(-3)+11(2)=-21+22=1\\)，特解 \\(x_0=-3,\\;y_0=2\\)。选项B将 \\(x,y\\) 位置搞反。验证: \\(7(-3)+11(2)=-21+22=1\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch06-q3",
+        "question": "用参数 \\(m=2,\\;n=1\\) 和公式 \\(a=m^2-n^2,\\;b=2mn,\\;c=m^2+n^2\\) 生成的本原勾股数是？",
+        "options": [
+          "\\((3, 4, 5)\\)",
+        "\\((4, 3, 5)\\)",
+        "\\((5, 12, 13)\\)",
+        "\\((8, 15, 17)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a=4-1=3\\)，\\(b=2\\times2\\times1=4\\)，\\(c=4+1=5\\)。验证勾股关系: \\(9+16=25\\) ✓。检验本原条件: \\(\\gcd(2,1)=1\\) 且 \\(m-n=1\\) 为奇数 ✓。\\((3,4,5)\\) 是最小的本原勾股数。"
+      },
+      {
+        "id": "number-theory-ch06-q4",
+        "question": "\\((9, 12, 15)\\) 是否为本原勾股数？",
+        "options": [
+          "是本原勾股数",
+        "不是勾股数",
+        "是勾股数但不是本原的，\\(\\gcd = 3\\)",
+        "是勾股数但不是本原的，\\(\\gcd = 5\\)"
+        ],
+        "answer": 2,
+        "explanation": "勾股关系: \\(81+144=225=15^2\\) ✓，是勾股数。但 \\(\\gcd(9,12,15)=3 \\neq 1\\)，不是本原的。实际上 \\((9,12,15)=3\\times(3,4,5)\\)。易错: 只检查勾股关系 \\(a^2+b^2=c^2\\) 而忘记检查三者互素性。"
+      },
+      {
+        "id": "number-theory-ch06-q5",
+        "question": "验证 \\((x,y)=(2,1)\\) 是 \\(x^2 - 3y^2 = 1\\) 的解，并利用乘法公式 \\((x_n+y_n\\sqrt{3})=(2+\\sqrt{3})^n\\) 求下一组正整数解。",
+        "options": [
+          "下一组解为 \\((7, 4)\\)",
+        "下一组解为 \\((5, 3)\\)",
+        "下一组解为 \\((4, 2)\\)",
+        "下一组解为 \\((8, 5)\\)"
+        ],
+        "answer": 0,
+        "explanation": "验证: \\(4-3=1\\) ✓。下一组: \\((2+\\sqrt{3})^2=4+4\\sqrt{3}+3=7+4\\sqrt{3}\\)，即 \\((x_2,y_2)=(7,4)\\)。验证: \\(49-48=1\\) ✓。选项B: \\(25-27=-2\\neq1\\)；选项D: \\(64-75=-11\\neq1\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q6",
+        "question": "\\(x^2 - 2y^2 = 1\\) 的基本解为 \\((3,2)\\)。求第三组解 \\((n=3)\\)。",
+        "options": [
+          "\\((99, 70)\\)",
+        "\\((51, 36)\\)",
+        "\\((99, 72)\\)",
+        "\\((97, 70)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n=2\\): \\((3+2\\sqrt{2})^2=9+12\\sqrt{2}+8=17+12\\sqrt{2}\\)，即 \\((17,12)\\)。\\(n=3\\): \\((17+12\\sqrt{2})(3+2\\sqrt{2})=51+34\\sqrt{2}+36\\sqrt{2}+48=99+70\\sqrt{2}\\)，即 \\((99,70)\\)。验证: \\(9801-9800=1\\) ✓。选项B: \\(51^2-2\\times36^2=2601-2592=9\\neq1\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q7",
+        "question": "关于费马大定理 (Fermat's Last Theorem)，下列哪个陈述正确？",
+        "options": [
+          "当 \\(n \\geq 3\\) 时，\\(x^n + y^n = z^n\\) 无正整数解",
+        "当 \\(n \\geq 2\\) 时，\\(x^n + y^n = z^n\\) 无正整数解",
+        "当 \\(n \\geq 3\\) 时，\\(x^n + y^n = z^n\\) 有有限多组正整数解",
+        "当 \\(n \\geq 3\\) 时，\\(x^n + y^n = z^n\\) 无整数解（包括零和负数）"
+        ],
+        "answer": 0,
+        "explanation": "费马大定理（1995年Andrew Wiles证明）: 对任意整数 \\(n\\geq3\\)，方程 \\(x^n+y^n=z^n\\) 无正整数解。B错: \\(n=2\\) 时有无穷多组勾股数如 \\((3,4,5)\\)。C错: 解的个数是零而非有限多。D错: 允许零或负数时有平凡解如 \\((1,-1,0)\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q8",
+        "question": "求方程 \\(21x + 14y = 35\\) 的所有正整数解 \\((x>0,\\;y>0)\\)。",
+        "options": [
+          "仅 \\((x,y)=(1,1)\\)",
+        "\\((1,1)\\) 和 \\((3,-2)\\)",
+        "无正整数解",
+        "有无穷多组"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gcd(21,14)=7\\)，\\(7\\mid35\\)。简化: \\(3x+2y=5\\)。特解 \\((1,1)\\)，通解 \\(x=1+2t,\\;y=1-3t\\)。正整数约束: \\(x>0\\Rightarrow t\\geq0\\)；\\(y>0\\Rightarrow t\\leq0\\)。故 \\(t=0\\) 唯一，\\((x,y)=(1,1)\\)。验证: \\(21+14=35\\) ✓。选项B中 \\(y=-2<0\\) 不满足条件。"
+      },
+      {
+        "id": "number-theory-ch06-q9",
+        "question": "方程 \\(5x + 7y = 83\\) 有多少组非负整数解？",
+        "options": [
+          "1 组",
+        "2 组",
+        "3 组",
+        "0 组"
+        ],
+        "answer": 1,
+        "explanation": "找特解: \\(y=4\\) 时 \\(5x=55\\)，\\(x=11\\)。通解 \\(x=11+7t,\\;y=4-5t\\)。非负约束: \\(x\\geq0\\Rightarrow t\\geq-11/7\\Rightarrow t\\geq-1\\)；\\(y\\geq0\\Rightarrow t\\leq4/5\\Rightarrow t\\leq0\\)。\\(t\\in\\{-1,0\\}\\): \\(t=-1\\)→\\((4,9)\\)，\\(t=0\\)→\\((11,4)\\)。验证: \\(20+63=83\\) ✓，\\(55+28=83\\) ✓。共2组。易错: 忘记检查 \\(t=-1\\) 而只报告特解本身。"
+      },
+      {
+        "id": "number-theory-ch06-q10",
+        "question": "用参数 \\((m,n)=(4,3)\\) 生成的本原勾股数是？",
+        "options": [
+          "\\((7, 24, 25)\\)",
+        "\\((24, 7, 25)\\)",
+        "不满足本原条件，无法生成",
+        "\\((9, 40, 41)\\)"
+        ],
+        "answer": 0,
+        "explanation": "条件验证: \\(\\gcd(4,3)=1\\) ✓，\\(m-n=1\\)（奇）✓。计算: \\(a=16-9=7\\)，\\(b=2\\times4\\times3=24\\)，\\(c=16+9=25\\)。勾股验证: \\(49+576=625=25^2\\) ✓。本原: \\(\\gcd(7,24,25)=1\\) ✓。选项D对应 \\((m,n)=(5,4)\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q11",
+        "question": "判断 \\((20, 21, 29)\\) 是否为本原勾股数。若是，求其生成参数 \\((m,n)\\)。",
+        "options": [
+          "是本原勾股数，\\((m,n)=(5,2)\\)",
+        "不是勾股数",
+        "是本原勾股数，\\((m,n)=(4,3)\\)",
+        "是勾股数但不是本原"
+        ],
+        "answer": 0,
+        "explanation": "\\(400+441=841=29^2\\) ✓，\\(\\gcd(20,21,29)=1\\) ✓。\\(b=20\\)（偶），\\(b=2mn=20\\Rightarrow mn=10\\)。\\(c=m^2+n^2=29\\)。\\((m+n)^2=m^2+2mn+n^2=29+20=49\\Rightarrow m+n=7\\)。\\((m-n)^2=29-20=9\\Rightarrow m-n=3\\)。解得 \\(m=5,n=2\\)。验证: \\(\\gcd(5,2)=1\\)，\\(m-n=3\\)（奇）✓。"
+      },
+      {
+        "id": "number-theory-ch06-q12",
+        "question": "求 Pell 方程 \\(x^2 - 7y^2 = 1\\) 的基本解（最小正整数解）。",
+        "options": [
+          "\\((8, 3)\\)",
+        "\\((3, 1)\\)",
+        "\\((4, 1)\\)",
+        "\\((7, 2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "逐一尝试: \\(y=1\\)→\\(x^2=8\\)（非平方），\\(y=2\\)→\\(x^2=29\\)（非平方），\\(y=3\\)→\\(x^2=64=8^2\\) ✓。基本解 \\((8,3)\\)。验证: \\(64-7\\times9=64-63=1\\) ✓。选项B: \\(9-7=2\\neq1\\)。选项D: \\(49-28=21\\neq1\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q13",
+        "question": "已知 \\(x^2-5y^2=1\\) 的基本解为 \\((9,4)\\)。求第二组正整数解。",
+        "options": [
+          "\\((161, 72)\\)",
+        "\\((81, 36)\\)",
+        "\\((161, 80)\\)",
+        "\\((18, 8)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((x_2+y_2\\sqrt{5})=(9+4\\sqrt{5})^2=81+72\\sqrt{5}+80=161+72\\sqrt{5}\\)。即 \\((161,72)\\)。验证: \\(161^2-5\\times72^2=25921-25920=1\\) ✓。易错①: 展开时忘记 \\((4\\sqrt{5})^2=80\\) 这个常数项，误得 \\((81,72)\\)。易错②: 选项D相当于 \\(2\\times(9,4)\\)——解的\"乘法\"不是分量简单加倍。"
+      },
+      {
+        "id": "number-theory-ch06-q14",
+        "question": "费马通过证明 \\(x^4+y^4=z^2\\) 无正整数解来处理 \\(n=4\\) 的情形。验证: 对所有 \\(1\\leq x \\leq y \\leq 3\\)，\\(x^4+y^4\\) 均不是完全平方数。",
+        "options": [
+          "正确: 6 组 \\((x,y)\\) 中 \\(x^4+y^4\\) 均非完全平方",
+        "错误: \\((2,2)\\) 给出 \\(x^4+y^4=32\\) 是完全平方",
+        "错误: \\((1,3)\\) 给出 \\(x^4+y^4=82\\) 是完全平方",
+        "错误: \\((3,3)\\) 给出 \\(x^4+y^4=162=81\\times2\\)"
+        ],
+        "answer": 0,
+        "explanation": "逐一验算: \\((1,1)\\)→\\(2\\)；\\((1,2)\\)→\\(17\\)；\\((1,3)\\)→\\(82\\)；\\((2,2)\\)→\\(32\\)；\\((2,3)\\)→\\(97\\)；\\((3,3)\\)→\\(162\\)。最接近的完全平方: \\(\\sqrt{2}\\approx1.4\\)，\\(\\sqrt{17}\\approx4.1\\)，\\(\\sqrt{82}\\approx9.06\\)，\\(\\sqrt{32}\\approx5.66\\)，\\(\\sqrt{97}\\approx9.85\\)，\\(\\sqrt{162}\\approx12.73\\)，均非整数。这是 \\(x^4+y^4=z^2\\) 无正整数解的数值验证。"
+      },
+      {
+        "id": "number-theory-ch06-q15",
+        "question": "\"\\(x^4+y^4=z^2\\) 无正整数解\" 能否推出 \"\\(x^4+y^4=z^4\\) 无正整数解\"？",
+        "options": [
+          "能: 若 \\(x^4+y^4=z^4\\)，令 \\(w=z^2\\)，则 \\(x^4+y^4=w^2\\)，矛盾",
+        "不能: 两个方程没有关系",
+        "能: 因为 \\(z^4 > z^2\\)（\\(z\\geq2\\) 时），方程右边更大所以更不可能",
+        "不能: \\(x^4+y^4=z^4\\) 可能有解但 \\(x^4+y^4=z^2\\) 无解"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(x^4+y^4=z^4\\) 有正整数解 \\((x,y,z)\\)，令 \\(w=z^2\\)，则 \\((x,y,w)\\) 是 \\(x^4+y^4=w^2\\) 的正整数解，与已知矛盾。因此\"无 \\(z^2\\) 解\"蕴含\"无 \\(z^4\\) 解\"。易错: 选项C的\"大所以困难\"不是有效的逻辑论证——大小比较不决定解的存在性。"
+      },
+      {
+        "id": "number-theory-ch06-q16",
+        "question": "用无穷递降法的思想证 \\(\\sqrt{3}\\) 无理: 若 \\(\\sqrt{3}=p/q\\)（最简分数），由 \\(p^2=3q^2\\) 第一步推出什么？",
+        "options": [
+          "\\(3 \\mid p\\) 且 \\(3 \\mid q\\)，与 \\(\\gcd(p,q)=1\\) 矛盾",
+        "\\(2 \\mid p\\) 且 \\(2 \\mid q\\)",
+        "\\(p = q\\)",
+        "不存在矛盾"
+        ],
+        "answer": 0,
+        "explanation": "\\(p^2=3q^2\\Rightarrow 3\\mid p^2\\Rightarrow 3\\mid p\\)（因 \\(3\\) 为素数）。令 \\(p=3k\\)，\\(9k^2=3q^2\\)，\\(q^2=3k^2\\Rightarrow 3\\mid q\\)。但 \\(\\gcd(p,q)=1\\) 与 \\(3\\mid p,\\;3\\mid q\\) 矛盾，故 \\(\\sqrt{3}\\) 不是有理数。这是无穷递降法的最简单形式: 假设最简→推出可以再约分→矛盾。"
+      },
+      {
+        "id": "number-theory-ch06-q17",
+        "question": "列出所有斜边 \\(c \\leq 20\\) 的本原勾股数。",
+        "options": [
+          "\\((3,4,5)\\)，\\((5,12,13)\\)，\\((8,15,17)\\) — 共 3 组",
+        "\\((3,4,5)\\)，\\((5,12,13)\\) — 共 2 组",
+        "\\((3,4,5)\\)，\\((5,12,13)\\)，\\((8,15,17)\\)，\\((7,24,25)\\) — 共 4 组",
+        "\\((3,4,5)\\)，\\((6,8,10)\\)，\\((5,12,13)\\) — 共 3 组"
+        ],
+        "answer": 0,
+        "explanation": "枚举满足 \\(\\gcd(m,n)=1\\)、\\(m-n\\) 为奇、\\(m>n>0\\) 且 \\(c=m^2+n^2\\leq20\\) 的参数: \\((2,1)\\to c=5\\)，\\((3,2)\\to c=13\\)，\\((4,1)\\to c=17\\)。\\((4,3)\\to c=25>20\\) 排除。共3组。选项C中 \\(25>20\\)；选项D中 \\((6,8,10)\\) 不是本原（\\(\\gcd=2\\)）。"
+      },
+      {
+        "id": "number-theory-ch06-q18",
+        "question": "求 \\(91x + 65y = 26\\) 的通解。",
+        "options": [
+          "\\(x = 1 + 5t,\\; y = -1 - 7t\\)",
+        "\\(x = 1 + 65t,\\; y = -1 - 91t\\)",
+        "\\(x = 2 + 5t,\\; y = -2 - 7t\\)",
+        "无整数解"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gcd(91,65)\\): \\(91=1\\times65+26\\)，\\(65=2\\times26+13\\)，\\(26=2\\times13\\)。\\(\\gcd=13\\)，\\(13\\mid26\\) ✓。简化: \\(7x+5y=2\\)。Bézout: \\(7(1)+5(-1)=2\\)，特解 \\((1,-1)\\)。通解 \\(x=1+5t\\)，\\(y=-1-7t\\)。选项B未除以 \\(\\gcd=13\\)，错误地用原系数做步长。验证 \\(t=1\\): \\(91(6)+65(-8)=546-520=26\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch06-q19",
+        "question": "求三元线性丢番图方程 \\(6x + 10y + 15z = 1\\) 的一组整数特解。",
+        "options": [
+          "\\((1, 1, -1)\\)",
+        "\\((8, -1, 0)\\)",
+        "\\((0, 0, 1)\\)",
+        "无整数解"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gcd(\\gcd(6,10),15)=\\gcd(2,15)=1\\mid1\\)，有解。分步: ①令 \\(w=6x+10y\\)，解 \\(w+15z=1\\)。取 \\(w=16,\\;z=-1\\)（因 \\(16-15=1\\)）。②解 \\(6x+10y=16\\)，\\(\\gcd(6,10)=2\\mid16\\)，简化 \\(3x+5y=8\\)。取 \\(x=1,y=1\\)（\\(3+5=8\\)）。故 \\((1,1,-1)\\)。验证: \\(6+10-15=1\\) ✓。选项B: \\(48-10+0=38\\neq1\\)；选项C: \\(0+0+15\\neq1\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q20",
+        "question": "证明任意本原勾股数 \\((a,b,c)\\) 中 \\(a\\cdot b\\) 必被 12 整除，并验证 \\((5,12,13)\\)。",
+        "options": [
+          "\\(ab=60\\)，\\(12\\mid60\\) ✓；关键: \\(4\\mid b\\)（偶数性）且 \\(3\\mid ab\\)（分类 \\(m,n\\!\\!\\mod3\\)）",
+        "\\(ab=60\\)，不一定被 12 整除",
+        "\\(12\\mid ab\\) 仅对 \\(c<100\\) 成立",
+        "\\(ab=65\\)，非 12 的倍数"
+        ],
+        "answer": 0,
+        "explanation": "由参数化 \\(b=2mn\\)，\\(m,n\\) 异奇偶→其中一个为偶数→\\(4\\mid 2mn=b\\)。又分析 \\(m,n\\!\\!\\mod3\\): 若某个被3整除则 \\(3\\mid mn\\mid ab\\)；若均不被3整除则 \\(m^2\\equiv n^2\\equiv1\\pmod{3}\\)，\\(a=m^2-n^2\\equiv0\\pmod{3}\\)。综合 \\(12\\mid ab\\)。\\((5,12,13)\\): \\(ab=60=12\\times5\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch06-q21",
+        "question": "求满足 \\(a + b + c = 132\\) 的本原勾股数 \\((a<b<c,\\;\\gcd(a,b,c)=1)\\)。",
+        "options": [
+          "\\((11, 60, 61)\\)",
+        "\\((33, 44, 55)\\)",
+        "\\((20, 48, 52)\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "由参数化: \\(a+b+c=(m^2\\!-\\!n^2)+2mn+(m^2\\!+\\!n^2)=2m^2+2mn=2m(m+n)=132\\)，故 \\(m(m+n)=66\\)。因 \\(m>n>0\\) 故 \\(m^2<66\\)，\\(m\\leq8\\)。分解 \\(66\\): \\(m=6,\\;m+n=11\\Rightarrow n=5\\)。\\(\\gcd(6,5)=1\\) ✓，\\(m-n=1\\)（奇）✓。\\(a=36-25=11\\)，\\(b=60\\)，\\(c=61\\)。验证: \\(121+3600=3721=61^2\\) ✓。选项B: \\(\\gcd=11\\)；选项C: \\(\\gcd=4\\)，均非本原。"
+      },
+      {
+        "id": "number-theory-ch06-q22",
+        "question": "用连分数展开 \\(\\sqrt{3}=[1;\\overline{1,2}]\\) 的渐近分数求 \\(x^2-3y^2=1\\) 的基本解。",
+        "options": [
+          "基本解 \\((2,1)\\)，由渐近分数 \\(p_1/q_1=2/1\\) 得到",
+        "基本解 \\((1,1)\\)，由渐近分数 \\(p_0/q_0=1/1\\) 得到",
+        "基本解 \\((7,4)\\)",
+        "连分数法不适用于 \\(D=3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sqrt{3}=[1;1,2,1,2,\\ldots]\\)，周期 \\(\\ell=2\\)（偶数）。渐近分数: \\(p_0/q_0=1/1\\)→\\(1-3=-2\\)；\\(p_1/q_1=(1\\times1+1)/(1\\times1+0)=2/1\\)→\\(4-3=1\\) ✓。周期为偶数时，\\(p_{\\ell-1}/q_{\\ell-1}\\) 给出 \\(x^2-Dy^2=1\\) 的基本解。选项C \\((7,4)\\) 是第二组解 \\((2+\\sqrt{3})^2=7+4\\sqrt{3}\\)。"
+      },
+      {
+        "id": "number-theory-ch06-q23",
+        "question": "Pell 方程 \\(x^2 - Dy^2 = -1\\) 在以下哪些 \\(D\\) 值有正整数解？",
+        "options": [
+          "仅 I, III",
+        "I, II, III, IV",
+        "仅 I, III, IV",
+        "仅 I, II, III"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^2-Dy^2=-1\\) 有解当且仅当 \\(\\sqrt{D}\\) 连分数周期长度为奇数。\\(D=2\\): \\([1;\\overline{2}]\\)，周期1（奇）✓（\\(1-2=-1\\)）。\\(D=3\\): \\([1;\\overline{1,2}]\\)，周期2（偶）✗。\\(D=5\\): \\([2;\\overline{4}]\\)，周期1（奇）✓（\\(4-5=-1\\)）。\\(D=7\\): \\([2;\\overline{1,1,1,4}]\\)，周期4（偶）✗。易错: 混淆 \\(x^2-Dy^2=1\\)（对所有非平方 \\(D\\) 均有解）和 \\(x^2-Dy^2=-1\\)（不一定有解）。"
+      },
+      {
+        "id": "number-theory-ch06-q24",
+        "question": "用无穷递降法证明 \\(\\sqrt{6}\\) 是无理数。若 \\(\\sqrt{6}=a/b\\) 最简，由 \\(a^2=6b^2\\) 经推导得到的递降等式为？",
+        "options": [
+          "\\(b^2 = 6d^2\\)（其中 \\(d < b\\)），形式完全相同→无穷递降矛盾",
+        "\\(c^2 = 3d^2\\)，与原方程形式不同",
+        "\\(a^2 = 3b^2\\)，简化但无递降",
+        "不可能形成递降"
+        ],
+        "answer": 0,
+        "explanation": "\\(a^2=6b^2\\Rightarrow 2\\mid a\\)，令 \\(a=2c\\)→\\(4c^2=6b^2\\)→\\(2c^2=3b^2\\)。\\(3\\mid 2c^2\\) 且 \\(\\gcd(2,3)=1\\)→\\(3\\mid c\\)，令 \\(c=3d\\)→\\(18d^2=3b^2\\)→\\(b^2=6d^2\\)。形式与原式完全相同！且 \\(d=c/3=a/6 < b\\)（因 \\(a=\\sqrt{6}\\,b\\)→\\(c=\\sqrt{6}\\,b/2\\)→\\(d<b\\)）。\\((a,b)→(b,d)\\) 严格递降，与正整数有界矛盾。"
+      },
+      {
+        "id": "number-theory-ch06-q25",
+        "question": "求广义 Pell 方程 \\(x^2 - 2y^2 = 7\\) 的两组最小正整数解。",
+        "options": [
+          "\\((3, 1)\\) 和 \\((5, 3)\\)",
+        "\\((3, 1)\\) 和 \\((7, 2)\\)",
+        "\\((5, 3)\\) 和 \\((9, 5)\\)",
+        "\\((3, 1)\\) 和 \\((3, -1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "逐一尝试: \\(y=1\\)→\\(x^2=9\\)，\\(x=3\\) ✓（\\(9-2=7\\)）。\\(y=2\\)→\\(x^2=15\\)（非平方）。\\(y=3\\)→\\(x^2=25\\)，\\(x=5\\) ✓（\\(25-18=7\\)）。两组最小正整数解: \\((3,1)\\) 和 \\((5,3)\\)。选项B: \\(49-8=41\\neq7\\)。选项C: \\((9,5)\\)→\\(81-50=31\\neq7\\)。更多解可由 \\((x+y\\sqrt{2})\\cdot(3+2\\sqrt{2})\\) 生成。"
+      },
+      {
+        "id": "number-theory-ch06-q26",
+        "question": "邮局只有 5 分和 8 分两种邮票。顾客需支付 99 分邮资。有多少种不同的购买方案（每种邮票数量 \\(\\geq 0\\)）？",
+        "options": [
+          "1 种",
+        "2 种",
+        "3 种",
+        "0 种"
+        ],
+        "answer": 1,
+        "explanation": "建模: \\(5x+8y=99\\)（\\(x,y\\geq0\\)）。特解: \\(y=3\\)→\\(5x=75\\)→\\(x=15\\)。通解 \\(x=15+8t\\)，\\(y=3-5t\\)。非负约束: \\(15+8t\\geq0\\Rightarrow t\\geq-1\\)；\\(3-5t\\geq0\\Rightarrow t\\leq0\\)。\\(t=-1\\)→\\((7,8)\\): \\(35+64=99\\) ✓；\\(t=0\\)→\\((15,3)\\): \\(75+24=99\\) ✓。共2种方案。"
+      },
+      {
+        "id": "number-theory-ch06-q27",
+        "question": "建筑工人用绳子验证墙角直角: 沿两面墙分别量出 \\(a=6\\text{m}\\) 和 \\(b=8\\text{m}\\)。对角线 \\(c\\) 应为多少才能确认直角？这是哪组本原勾股数的倍数？",
+        "options": [
+          "\\(c=10\\text{m}\\)，是 \\((3,4,5)\\) 的 2 倍",
+        "\\(c=10\\text{m}\\)，本身就是本原勾股数",
+        "\\(c=12\\text{m}\\)",
+        "\\(c=9\\text{m}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(6^2+8^2=36+64=100\\)，\\(c=10\\)。\\(\\gcd(6,8,10)=2\\)，化简得 \\((3,4,5)\\)。建筑业常用\"3-4-5法则\"及其倍数（如6-8-10、9-12-15）来验证直角，比量角器更精确。这是本原勾股数最经典的工程应用。"
+      },
+      {
+        "id": "number-theory-ch06-q28",
+        "question": "利用 Pell 方程逼近 \\(\\sqrt{2}\\)：基本解 \\((3,2)\\) 给出 \\(\\sqrt{2}\\approx3/2=1.5\\)；第二组解 \\((17,12)\\) 给出 \\(\\sqrt{2}\\approx17/12\\)。求 \\(|17/12 - \\sqrt{2}|\\) 的近似值。",
+        "options": [
+          "\\(\\approx 0.0025\\)",
+        "\\(\\approx 0.025\\)",
+        "\\(\\approx 0.08\\)",
+        "\\(\\approx 0.5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(17/12\\approx1.4167\\)，\\(\\sqrt{2}\\approx1.4142\\)，差值 \\(\\approx0.0025\\)。精确推导: 由 \\(x^2-2y^2=1\\) 得 \\(x/y-\\sqrt{2}=1/\\bigl(y(x+y\\sqrt{2})\\bigr)\\)。代入 \\((17,12)\\): \\(1/(12\\times(17+12\\sqrt{2}))\\approx1/(12\\times33.97)\\approx0.00245\\)。Pell方程逐级解给出越来越好的有理逼近: \\(n=1\\)→\\(1.5\\)（误差0.086），\\(n=2\\)→\\(1.4167\\)（误差0.0025），\\(n=3\\)→\\((99/70)\\approx1.41429\\)（误差0.00007）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="number-theory"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/number-theory.html" class="module-name">数论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 线性丢番图方程</a></li>
+      <li><a href="#kp2">02 · 勾股数与参数化</a></li>
+      <li><a href="#kp3">03 · Pell 方程</a></li>
+      <li><a href="#kp4">04 · 费马大定理与无穷递降法</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>丢番图方程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>线性丢番图方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性丢番图方程 \(ax + by = c\) 是最简单的整数方程，但元素的「整数性」 约束使得问题并不平凡。可解性完全由 \(\gcd(a,b) \mid c\) 决定， 解集是线性参数族。Bézout 等式是其完美工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>可解性</strong>: \(ax + by = c\) 有整数解 \(\Leftrightarrow \gcd(a,b) \mid c\)。 证: \(\Rightarrow\): \(\gcd(a,b) \mid a, \gcd(a,b) \mid b\)，故 \(\gcd(a,b) \mid c\)。 \(\Leftarrow\): 由 Bézout，\(\exists x_0,y_0\) 使 \(ax_0+by_0 = \gcd(a,b)\)。 乘以 \(c/\gcd(a,b)\) 即得特解。 <strong>通解</strong>: 若 \((x_0, y_0)\) 是特解，则通解为 \[x = x_0 + \frac{b}{d}t, \quad y = y_0 - \frac{a}{d}t, \quad t \in \mathbb{Z}\] 其中 \(d = \gcd(a,b)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>钱币找零问题：用 5 元和 7 元的硬币能否凑出 \(c\) 元？</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(12x + 8y = 20\) 的所有整数解。 解答: \(\gcd(12,8) = 4\)，\(4 \mid 20\)，有解。 简化: \(3x + 2y = 5\)。特解: \(x_0 = 1, y_0 = 1\)。 通解: \(x = 1 + 2t, y = 1 - 3t\)。 易错点: 忘记简化（同除 \(\gcd\)），直接用原方程求解导致参数化错误。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(15x + 10y = 7\) 是否有整数解？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\gcd(15,10) = 5\\)，\\(5 \\nmid 7\\)，无整数解。')">A. 有</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\gcd(15,10) = 5\\)，\\(5 \\nmid 7\\)，无整数解。')">B. 无，因为 \(\gcd(15,10)=5\) 不整除 7</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\gcd(15,10) = 5\\)，\\(5 \\nmid 7\\)，无整数解。')">C. 无，因为 7 是素数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\gcd(15,10) = 5\\)，\\(5 \\nmid 7\\)，无整数解。')">D. 有无穷多解</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>勾股数与参数化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(a^2 + b^2 = c^2\) 是数学史上最古老的问题之一。什么样的整数三元组 满足勾股定理？完全参数化给出了优雅的答案，展示了数论中「参数化」 的强大方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>勾股数的参数化本质是单位圆 \(x^2+y^2=1\) 上有理点的分类—— 连接了数论与代数几何。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: 勾股数 \((a,b,c) \in \mathbb{Z}^3\) 满足 \(a^2 + b^2 = c^2\)。 本原勾股数: \(\gcd(a,b,c) = 1\) 且 \(a,b,c > 0\)。 <strong>参数化定理</strong>: 所有本原勾股数（\(a\) 奇）为 \[a = m^2 - n^2, \quad b = 2mn, \quad c = m^2 + n^2\] 其中 \(m > n > 0\)，\(\gcd(m,n)=1\)，\(m-n\) 为奇。 证明思路: 由 \(a^2 = c^2 - b^2 = (c-b)(c+b)\)，利用 本原性推出 \(c-b\) 和 \(c+b\) 互素，从而各自为完全平方数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>勾股数在信号处理中用于构造整数坐标的直角三角形。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 列出所有 \(c \leq 25\) 的本原勾股数。 解答: \(m=2,n=1\): \((3,4,5)\)。\(m=3,n=2\): \((5,12,13)\)。 \(m=4,n=1\): \((15,8,17)\)。\(m=4,n=3\): \((7,24,25)\)。 \(m=3,n=1\)不符合（\(m-n=2\) 为偶）——等等，实际上 \(m=3,n=2\) 满足 \(m-n=1\) 奇。 易错点: 忘记条件 \(m-n\) 为奇，导致生成非本原的三元组。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\((m,n) = (5,2)\) 生成的勾股数是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(a=25-4=21, b=2 \\times 5 \\times 2=20, c=25+4=29\\)。')">A. \((21, 20, 29)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(a=25-4=21, b=2 \\times 5 \\times 2=20, c=25+4=29\\)。')">B. \((20, 21, 29)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(a=25-4=21, b=2 \\times 5 \\times 2=20, c=25+4=29\\)。')">C. \((9, 40, 41)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(a=25-4=21, b=2 \\times 5 \\times 2=20, c=25+4=29\\)。')">D. \((25, 4, ?)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Pell 方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Pell 方程 \(x^2 - Dy^2 = 1\)（\(D\) 非完全平方数）是最重要的二次丢番图 方程。它有无穷多解，全部由一个「基本解」生成。连分数展开提供了 求基本解的精妙算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Pell 方程的解集构成一个无穷循环群（通过范数 \(N(x+y\sqrt{D})= x^2-Dy^2\) 连接到二次域的单位群）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Pell 方程</strong>: \(x^2 - Dy^2 = 1\)，\(D > 0\) 非完全平方。 <strong>存在性</strong>: 存在无穷多组正整数解。 <strong>基本解</strong>: 最小正解 \((x_1, y_1)\)。 由 \(\sqrt{D}\) 的连分数展开找到: \(\sqrt{D}\) 的周期连分数的 渐进分数 \(p_k/q_k\) 使 \(p_k^2 - Dq_k^2 = \pm 1\)。 <strong>通解生成</strong>: 若 \((x_1, y_1)\) 是基本解，则所有解由 \[(x_n + y_n\sqrt{D}) = (x_1 + y_1\sqrt{D})^n, \quad n \in \mathbb{Z}\] 给出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>早期印度数学家 Brahmagupta 用 Pell 方程求 \(\sqrt{D}\) 的精确有理逼近。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(x^2 - 2y^2 = 1\) 的基本解。 解答: \(\sqrt{2} = [1; \overline{2}]\)。渐进分数: \(1/1, 3/2, 7/5, \ldots\) \(3^2 - 2 \times 2^2 = 9 - 8 = 1\)。基本解 \((3, 2)\)。 下一组解: \((3+2\sqrt{2})^2 = 17+12\sqrt{2}\)，即 \((17, 12)\)。 验证: \(17^2 - 2 \times 12^2 = 289 - 288 = 1\)。✓ 易错点: 将 \(x^2 - Dy^2 = -1\) 的解与 \(= 1\) 的解混淆。 \(x^2 - Dy^2 = -1\) 不一定有解（如 \(D=3\) 时无解）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(x^2 - 5y^2 = 1\) 的基本解是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(9^2 - 5 \\times 4^2 = 81 - 80 = 1\\)。✓')">A. \((2, 1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(9^2 - 5 \\times 4^2 = 81 - 80 = 1\\)。✓')">B. \((3, 1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(9^2 - 5 \\times 4^2 = 81 - 80 = 1\\)。✓')">C. \((9, 4)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(9^2 - 5 \\times 4^2 = 81 - 80 = 1\\)。✓')">D. \((4, 1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>费马大定理与无穷递降法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>费马大定理——“\(x^n + y^n = z^n\)（\(n \geq 3\)）无正整数解”——是数学史上 最著名的问题，困扰了数学家 350 年。费马本人用「无穷递降法」 证明了 \(n=4\) 的情况，展示了一种优雅的证明方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>无穷递降法是反证法的特殊形式: 假设存在解，由其构造更小的解， 无穷重复得到无穷递减的正整数序列——矛盾。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>费马大定理</strong>（陈述）: \(\forall n \geq 3\)， \(x^n + y^n = z^n\) 无正整数解。 1995 年由 Andrew Wiles 证明（依赖椅圆曲线、模形式等深刻理论， 证明细节超出本课范围）。 <strong>\(n=4\) 的无穷递降法证明</strong>: 证明 \(x^4 + y^4 = z^2\) 无正整数解 （更强的结果）。 假设存在最小解 \((x,y,z)\)。由勾股数参数化， \(x^2 = m^2 - n^2,\; y^2 = 2mn,\; z = m^2 + n^2\)。 经过细致分析，构造出 \((x', y', z')\) 使 \(z' < z\)，矛盾。 \[x^4 + y^4 = z^2 \text{ 无正整数解} \Rightarrow x^4 + y^4 = z^4 \text{ 无正整数解}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Wiles 的证明催生了模形式理论的重大发展，影响了整个算术几何。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用无穷递降法证明 \(\sqrt{2}\) 是无理数。 解答: 假设 \(\sqrt{2} = a/b\)，\(\gcd(a,b)=1\)，则 \(a^2 = 2b^2\)。 \(a^2\) 为偶，故 \(a\) 为偶，设 \(a = 2k\)，\(4k^2 = 2b^2\)，\(b^2 = 2k^2\)。 现在 \((b, k)\) 也满足相同关系且 \(b < a\)——无穷递降，矛盾。 易错点: 无穷递降法需要明确指出哪个量在递减（如 \(z\) 或 \(a\)）， 以及为什么它不能无限递减（正整数而言）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">无穷递降法的核心思想是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。无穷递降法反复构造更小的正整数解，但正整数不能无限递减，')">A. 构造递增的正整数序列</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！无穷递降法反复构造更小的正整数解，但正整数不能无限递减，')">B. 由一个解构造更小的解，得到与正整数有界矛盾</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。无穷递降法反复构造更小的正整数解，但正整数不能无限递减，')">C. 证明解不是整数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。无穷递降法反复构造更小的正整数解，但正整数不能无限递减，')">D. 用数学归纳法</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/algebra/number-theory.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

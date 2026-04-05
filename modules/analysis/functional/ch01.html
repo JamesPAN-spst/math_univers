@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 赋范空间 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch01-q1",
+        "question": "赋范空间 \\((X, \\|\\cdot\\|)\\) 的范数必须满足以下哪组条件？",
+        "options": [
+          "正定性、齐次性、三角不等式",
+        "对称性、正定性、三角不等式",
+        "正定性、次可加性、单调性",
+        "齐次性、对称性、传递性"
+        ],
+        "answer": 0,
+        "explanation": "范数三公理：(1) \\(\\|x\\| \\geq 0\\)，\\(\\|x\\| = 0 \\Leftrightarrow x = 0\\)（正定性）；(2) \\(\\|\\alpha x\\| = |\\alpha| \\|x\\|\\)（齐次性）；(3) \\(\\|x + y\\| \\leq \\|x\\| + \\|y\\|\\)（三角不等式/次可加性）。B 中\"对称性\"是度量的性质，不是范数的独立公理（范数自动导出度量的对称性）。"
+      },
+      {
+        "id": "functional-ch01-q2",
+        "question": "\\(\\mathbb{R}^2\\) 上，\\(\\|(x,y)\\|_1 = |x| + |y|\\)，\\(\\|(x,y)\\|_\\infty = \\max(|x|,|y|)\\)。单位球 \\(B_1 = \\{v: \\|v\\|_1 \\leq 1\\}\\) 的形状是？",
+        "options": [
+          "圆盘",
+        "菱形（旋转 45° 的正方形）",
+        "正方形（边平行于坐标轴）",
+        "六边形"
+        ],
+        "answer": 1,
+        "explanation": "\\(|x| + |y| \\leq 1\\) 的解集是顶点在 \\((\\pm 1, 0)\\)、\\((0, \\pm 1)\\) 的菱形。\\(\\|\\cdot\\|_\\infty\\) 的单位球是正方形 \\([-1,1]^2\\)，\\(\\|\\cdot\\|_2\\) 的单位球是圆。不同范数给出不同几何——但在有限维空间拓扑等价。"
+      },
+      {
+        "id": "functional-ch01-q3",
+        "question": "设 \\(T: \\mathbb{R}^n \\to \\mathbb{R}^m\\) 是线性映射，用矩阵 \\(A\\) 表示。\\(T\\) 的算子范数 \\(\\|T\\| = \\sup_{\\|x\\|=1} \\|Ax\\|\\) 在 \\(\\ell^2\\) 范数下等于？",
+        "options": [
+          "\\(A\\) 的最大奇异值 \\(\\sigma_1\\)",
+        "\\(A\\) 的最大特征值",
+        "\\(A\\) 的 Frobenius 范数",
+        "\\(\\text{tr}(A^T A)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|T\\|_{\\ell^2 \\to \\ell^2} = \\sup_{\\|x\\|_2=1} \\|Ax\\|_2 = \\sigma_1(A)\\)（最大奇异值）。证明：\\(\\|Ax\\|_2^2 = x^T A^T A x \\leq \\lambda_{\\max}(A^T A) = \\sigma_1^2\\)。特征值可以为负或复数（不直接给范数），Frobenius 范数 \\(\\|A\\|_F = \\sqrt{\\sum \\sigma_i^2} \\geq \\sigma_1\\)。"
+      },
+      {
+        "id": "functional-ch01-q4",
+        "question": "有界线性算子 \\(T: X \\to Y\\) 的\"有界\"等价于？",
+        "options": [
+          "连续",
+        "\\(T\\) 将有界集映为有界集",
+        "\\(\\exists C\\) 使 \\(\\|Tx\\| \\leq C\\|x\\|\\)",
+        "以上都等价"
+        ],
+        "answer": 3,
+        "explanation": "线性算子的有界 \\(\\Leftrightarrow\\) 连续 \\(\\Leftrightarrow\\) 在零点连续 \\(\\Leftrightarrow\\) 把有界集映成有界集。\\(\\|T\\| = \\sup_{\\|x\\|=1} \\|Tx\\| = \\inf\\{C: \\|Tx\\| \\leq C\\|x\\|\\}\\)。非线性情况下这些概念不等价！线性性是关键。"
+      },
+      {
+        "id": "functional-ch01-q5",
+        "question": "在有限维赋范空间 \\(\\mathbb{R}^n\\) 上，所有范数都是等价的。\"等价\"的含义是？",
+        "options": [
+          "相等",
+        "\\(\\exists c, C > 0\\) 使 \\(c\\|x\\|_a \\leq \\|x\\|_b \\leq C\\|x\\|_a\\)",
+        "导出相同的收敛序列",
+        "B 和 C 都对（B \\(\\Leftrightarrow\\) C）"
+        ],
+        "answer": 3,
+        "explanation": "两个范数等价 \\(\\Leftrightarrow\\) 相互控制（B） \\(\\Leftrightarrow\\) 导出相同拓扑 \\(\\Leftrightarrow\\) 相同的收敛、开集、紧集概念。证明思路：\\(\\|\\cdot\\|_b\\) 在 \\((\\mathbb{R}^n, \\|\\cdot\\|_a)\\) 的单位球面上连续且正，在紧集上有正的上下界。这在无限维空间失效！"
+      },
+      {
+        "id": "functional-ch01-q6",
+        "question": "Riesz 引理：若 \\(Y\\) 是赋范空间 \\(X\\) 的闭真子空间，则对任意 \\(0 < \\theta < 1\\)，存在 \\(\\|x_\\theta\\| = 1\\) 使 \\(\\text{dist}(x_\\theta, Y) \\geq \\theta\\)。\\(\\theta\\) 能取 \\(1\\) 吗？",
+        "options": [
+          "一般不能",
+        "一定能",
+        "仅在有限维空间能",
+        "仅在 Hilbert 空间能"
+        ],
+        "answer": 0,
+        "explanation": "Riesz 引理中 \\(\\theta < 1\\) 不可省略（在一般赋范空间中）。若 \\(X\\) 为 Hilbert 空间，可取 \\(\\theta = 1\\)（取 \\(Y\\) 的正交补中的单位向量）。反例：\\(X = C[0,1]\\)，\\(Y = \\{f: f(0) = 0\\}\\)，\\(\\text{dist}(\\mathbf{1}, Y) = 1\\) 但 infimum 不可达。在有限维空间 \\(\\theta = 1\\) 可取（紧性）。"
+      },
+      {
+        "id": "functional-ch01-q7",
+        "question": "\\(\\mathbb{R}^n\\) 中单位闭球紧，\\(\\ell^2\\) 中单位闭球不紧。原因是？",
+        "options": [
+          "\\(\\ell^2\\) 维数无穷，Riesz 引理排除了紧性",
+        "\\(\\ell^2\\) 不完备",
+        "\\(\\ell^2\\) 单位球不有界",
+        "\\(\\ell^2\\) 单位球不闭"
+        ],
+        "answer": 0,
+        "explanation": "Riesz 定理：赋范空间 \\(X\\) 的单位闭球紧 \\(\\Leftrightarrow\\) \\(\\dim X < \\infty\\)。在 \\(\\ell^2\\) 中，标准基 \\(e_n = (0,...,1,0,...)\\) 满足 \\(\\|e_n - e_m\\| = \\sqrt{2}\\)（\\(n \\neq m\\)），无收敛子列，故单位球不列紧。这是无限维空间与有限维的根本区别。"
+      },
+      {
+        "id": "functional-ch01-q8",
+        "question": "\\(C[0,1]\\) 上定义 \\(\\|f\\|_\\infty = \\sup_{x \\in [0,1]} |f(x)|\\) 和 \\(\\|f\\|_1 = \\int_0^1 |f(x)|\\, dx\\)。这两个范数等价吗？",
+        "options": [
+          "等价",
+        "不等价，\\(\\|f\\|_1 \\leq \\|f\\|_\\infty\\) 但反向无均匀常数",
+        "不等价，\\(\\|f\\|_\\infty \\leq \\|f\\|_1\\)",
+        "不可比较"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\|f\\|_1 = \\int |f| \\leq \\int \\|f\\|_\\infty = \\|f\\|_\\infty\\)。但取 \\(f_n(x) = x^n\\)：\\(\\|f_n\\|_\\infty = 1\\)，\\(\\|f_n\\|_1 = 1/(n+1) \\to 0\\)。无 \\(C\\) 使 \\(\\|f\\|_\\infty \\leq C \\|f\\|_1\\)。 \\(C[0,1]\\) 是无限维空间——范数不必等价！"
+      },
+      {
+        "id": "functional-ch01-q9",
+        "question": "微分算子 \\(D: C^1[0,1] \\to C[0,1]\\)，\\(Df = f'\\)。\\(D\\) 在 \\(\\|f\\|_\\infty\\) 下有界吗？",
+        "options": [
+          "有界",
+        "无界（\\(\\|D\\| = \\infty\\)）",
+        "有界当且仅当定义域有限维",
+        "不是线性算子"
+        ],
+        "answer": 1,
+        "explanation": "\\(f_n(x) = \\sin(nx)/n\\)：\\(\\|f_n\\|_\\infty = 1/n\\)，\\(\\|f_n'\\|_\\infty = \\|cos(nx)\\|_\\infty = 1\\)。\\(\\|Df_n\\|/\\|f_n\\| = n \\to \\infty\\)。微分算子在 sup 范数下无界——这是分析中最重要的无界算子之一，需要在适当的定义域上理解。"
+      },
+      {
+        "id": "functional-ch01-q10",
+        "question": "在赋范空间 \\(X\\) 中，闭子空间 \\(Y\\) 的 Riesz 引理给出 \\(\\theta\\)-近似正交元素。用此证明无限维空间单位球非紧的关键步骤？",
+        "options": [
+          "递归构造 \\(\\|x_n\\| = 1\\)，\\(\\text{dist}(x_{n+1}, \\text{span}\\{x_1,...,x_n\\}) \\geq 1/2\\)",
+        "直接找无穷正交基",
+        "用 Baire 范畴定理",
+        "用开覆盖无有限子覆盖"
+        ],
+        "answer": 0,
+        "explanation": "取 \\(x_1\\)，\\(\\|x_1\\| = 1\\)。\\(Y_1 = \\text{span}\\{x_1\\}\\) 闭。Riesz 引理（\\(\\theta = 1/2\\)）：\\(\\exists x_2\\)，\\(\\|x_2\\| = 1\\)，\\(\\|x_2 - x_1\\| \\geq 1/2\\)。递归得 \\(\\{x_n\\}\\)，\\(\\|x_n - x_m\\| \\geq 1/2\\)（\\(n \\neq m\\)），无 Cauchy 子列，故单位球不列紧。"
+      },
+      {
+        "id": "functional-ch01-q11",
+        "question": "\\(\\ell^p\\)（\\(1 \\leq p \\leq \\infty\\)）空间的范数为 \\(\\|x\\|_p = (\\sum |x_n|^p)^{1/p}\\)。对 \\(x = (1, 1/2, 1/4, ...)\\)，\\(\\|x\\|_2 = ?\\)",
+        "options": [
+          "\\(\\sqrt{4/3}\\)",
+        "\\(2\\)",
+        "\\(\\sqrt{2}\\)",
+        "\\(4/3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|x\\|_2^2 = \\sum (1/2^n)^2 = \\sum 1/4^n = 1/(1-1/4) = 4/3\\)（\\(n = 0, 1, 2, ...\\)）。\\(\\|x\\|_2 = \\sqrt{4/3} = 2/\\sqrt{3}\\)。\\(x = (1, 1/2, 1/4, ...) = (2^{-n})_{n \\geq 0}\\)，几何级数。"
+      },
+      {
+        "id": "functional-ch01-q12",
+        "question": "\\(T: \\ell^1 \\to \\ell^1\\) 定义 \\(T(x_1, x_2, ...) = (0, x_1, x_2, ...)\\)（右移位算子）。\\(\\|T\\| = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\|Tx\\|_1 = \\sum_{n=2}^\\infty |x_{n-1}| = \\sum_{n=1}^\\infty |x_n| = \\|x\\|_1\\)。所以 \\(\\|Tx\\| = \\|x\\|\\) 对所有 \\(x\\)，\\(\\|T\\| = 1\\)。右移位算子是等距算子（保持范数）。在 \\(\\ell^p\\) 中类似。"
+      },
+      {
+        "id": "functional-ch01-q13",
+        "question": "\\((\\mathbb{R}^n, \\|\\cdot\\|_p)\\) 中 \\(\\|x\\|_p \\leq \\|x\\|_q\\) 当 \\(p \\geq q\\) 还是 \\(p \\leq q\\)？",
+        "options": [
+          "\\(p \\geq q\\)（\\(\\|x\\|_\\infty \\leq \\|x\\|_2 \\leq \\|x\\|_1\\)）",
+        "\\(p \\leq q\\)（\\(\\|x\\|_1 \\leq \\|x\\|_2 \\leq \\|x\\|_\\infty\\)）",
+        "取决于 \\(n\\)",
+        "\\(\\|x\\|_p \\leq n^{1/q - 1/p} \\|x\\|_q\\)（\\(p \\geq q\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\|x\\|_\\infty \\leq \\|x\\|_2 \\leq \\|x\\|_1\\) 且 \\(\\|x\\|_p \\leq n^{1/q-1/p}\\|x\\|_q\\)（\\(q \\leq p\\)）。但也有 \\(\\|x\\|_p \\leq \\|x\\|_q\\)（\\(p \\geq q\\)，无常数）仅在 \\(\\ell^p\\) 序列空间成立。在 \\(\\mathbb{R}^n\\) 中需要维度因子。D 是精确的不等式。"
+      },
+      {
+        "id": "functional-ch01-q14",
+        "question": "在无限维赋范空间中，有界闭集一定是紧的吗？",
+        "options": [
+          "是（Bolzano-Weierstrass）",
+        "否（单位闭球就是反例）",
+        "仅在自反空间中",
+        "仅在可分空间中"
+        ],
+        "answer": 1,
+        "explanation": "赋范空间中：有界闭 \\(\\Rightarrow\\) 紧 当且仅当有限维（Riesz 定理）。无限维空间的单位闭球有界闭但不紧（Riesz 引理构造不收敛序列）。代替紧性，无限维分析用弱紧性（弱拓扑下）、相对紧性等概念。"
+      },
+      {
+        "id": "functional-ch01-q15",
+        "question": "\\(B(X,Y)\\) 表示 \\(X\\) 到 \\(Y\\) 的有界线性算子空间。若 \\(Y\\) 是 Banach 空间，\\(B(X,Y)\\) 是否完备？",
+        "options": [
+          "是（算子范数下完备）",
+        "仅当 \\(X\\) 也完备",
+        "仅当 \\(X\\) 有限维",
+        "否"
+        ],
+        "answer": 0,
+        "explanation": "关键定理：\\(Y\\) 完备 \\(\\Rightarrow\\) \\(B(X,Y)\\) 完备（无论 \\(X\\) 是否完备）。证明：若 \\(T_n\\) Cauchy，对每个 \\(x\\)，\\(T_n x\\) 在 \\(Y\\) 中 Cauchy（\\(\\|T_n x - T_m x\\| \\leq \\|T_n - T_m\\| \\|x\\|\\)），由 \\(Y\\) 完备收敛到 \\(Tx\\)。验证 \\(T\\) 线性有界且 \\(T_n \\to T\\)。"
+      },
+      {
+        "id": "functional-ch01-q16",
+        "question": "商空间 \\(X/Y\\)（\\(Y\\) 闭子空间）的商范数定义为 \\(\\|[x]\\| = \\inf_{y \\in Y} \\|x + y\\|\\)。为什么需要 \\(Y\\) 闭？",
+        "options": [
+          "保证 \\(\\|[x]\\| = 0 \\Rightarrow [x] = [0]\\)（正定性）",
+        "保证三角不等式",
+        "保证齐次性",
+        "保证商空间是线性空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|[x]\\| = \\text{dist}(x, Y) = 0\\) \\(\\Leftrightarrow\\) \\(x \\in \\overline{Y}\\)。若 \\(Y\\) 闭，\\(\\overline{Y} = Y\\)，所以 \\(x \\in Y\\)，\\([x] = [0]\\)。若 \\(Y\\) 不闭，存在 \\(x \\in \\overline{Y} \\setminus Y\\)，\\(\\|[x]\\| = 0\\) 但 \\([x] \\neq [0]\\)，正定性失败。"
+      },
+      {
+        "id": "functional-ch01-q17",
+        "question": "在 \\(\\mathbb{R}^n\\) 中，每个线性泛函 \\(f: \\mathbb{R}^n \\to \\mathbb{R}\\) 都连续。在无限维空间中呢？",
+        "options": [
+          "也都连续",
+        "存在不连续的线性泛函（需 AC 构造）",
+        "连续当且仅当值域有界",
+        "取决于空间是否可分"
+        ],
+        "answer": 1,
+        "explanation": "有限维空间所有线性映射连续（范数等价）。无限维空间存在不连续线性泛函：取 Hamel 基 \\(\\{e_\\alpha\\}\\)，定义 \\(f(e_n) = n\\)（\\(e_n\\) 为 \\(\\ell^2\\) 标准基），线性延拓得到无界泛函。构造需要选择公理（ZF 中无法构造具体例子）。"
+      },
+      {
+        "id": "functional-ch01-q18",
+        "question": "\\(L^p[0,1]\\)（\\(0 < p < 1\\)）定义 \\(d(f,g) = \\int |f - g|^p\\, dx\\)。这是范数吗？",
+        "options": [
+          "是",
+        "否，\\(d\\) 是度量但不是范数（不满足齐次性）",
+        "否，三角不等式不满足",
+        "否，\\(d(f,g)^{1/p}\\) 才是范数"
+        ],
+        "answer": 1,
+        "explanation": "\\(d(\\lambda f, 0) = |\\lambda|^p \\int |f|^p\\, dx = |\\lambda|^p d(f,0)\\)，但范数要求 \\(\\|\\lambda f\\| = |\\lambda| \\|f\\|\\)（1-齐次），这里是 \\(p\\)-齐次（\\(p < 1\\)）。\\(d\\) 确实是平移不变度量（三角不等式由 \\((a+b)^p \\leq a^p + b^p\\) 保证，\\(0 < p < 1\\)）。\\(L^p\\)（\\(p < 1\\)）是 F-空间，不是赋范空间。"
+      },
+      {
+        "id": "functional-ch01-q19",
+        "question": "\\(T: C[0,1] \\to C[0,1]\\)，\\((Tf)(x) = \\int_0^x f(t)\\, dt\\)。在 \\(\\|\\cdot\\|_\\infty\\) 下 \\(\\|T\\| = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(1/2\\)",
+        "\\(\\infty\\)",
+        "\\(\\pi\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|Tf(x)| = |\\int_0^x f(t)\\, dt| \\leq \\int_0^x |f(t)|\\, dt \\leq x \\|f\\|_\\infty \\leq \\|f\\|_\\infty\\)。\\(\\|Tf\\|_\\infty \\leq \\|f\\|_\\infty\\)，so \\(\\|T\\| \\leq 1\\)。取 \\(f \\equiv 1\\)：\\(Tf(x) = x\\)，\\(\\|Tf\\|_\\infty = 1 = \\|f\\|_\\infty\\)。\\(\\|T\\| = 1\\)。积分算子虽然\"平滑\"但范数可以为 1。"
+      },
+      {
+        "id": "functional-ch01-q20",
+        "question": "设 \\(X\\) 是无限维赋范空间，\\(B = \\{x: \\|x\\| \\leq 1\\}\\)。\\(B\\) 在弱拓扑下的闭包是？",
+        "options": [
+          "仍为 \\(B\\)（\\(B\\) 弱闭）",
+        "整个空间 \\(X\\)",
+        "比 \\(B\\) 严格大",
+        "取决于空间"
+        ],
+        "answer": 0,
+        "explanation": "范数闭凸集是弱闭的（Mazur 定理的逆）。\\(B\\) 是闭凸集，故弱闭。但 \\(B\\) 不弱紧（除非 \\(X\\) 自反）。注意：单位球面 \\(S = \\{x: \\|x\\| = 1\\}\\) 不是凸的，在无限维空间中弱闭包是整个闭球 \\(B\\)！"
+      },
+      {
+        "id": "functional-ch01-q21",
+        "question": "Minkowski 泛函：\\(X\\) 中凸集 \\(C\\)（\\(0 \\in \\text{int}(C)\\)），\\(p_C(x) = \\inf\\{t > 0 : x \\in tC\\}\\)。\\(p_C\\) 是范数当且仅当 \\(C\\) 满足？",
+        "options": [
+          "\\(C\\) 有界、平衡（\\(\\alpha C = C\\)，\\(|\\alpha| = 1\\)）且闭",
+        "\\(C\\) 凸、开",
+        "\\(C\\) 对称且凸",
+        "\\(C\\) 是单位球当且仅当 \\(C\\) 凸、有界、平衡、吸收"
+        ],
+        "answer": 3,
+        "explanation": "\\(p_C\\) 是半范数当 \\(C\\) 凸、吸收、平衡。正定性需 \\(C\\) 有界（\\(p_C(x) = 0\\) \\(\\Leftrightarrow\\) \\(x \\in tC\\) 对所有 \\(t > 0\\) \\(\\Leftrightarrow\\) \\(x = 0\\) 当 \\(C\\) 有界）。范数 \\(\\Leftrightarrow\\) \\(p_C\\) 正定 + 齐次 + 三角不等式 \\(\\Leftrightarrow\\) \\(C\\) 凸、有界、平衡、吸收。"
+      },
+      {
+        "id": "functional-ch01-q22",
+        "question": "设 \\(A = (a_{ij})\\) 是无限矩阵，\\(T_A: \\ell^1 \\to \\ell^1\\)，\\((T_A x)_i = \\sum_j a_{ij} x_j\\)。\\(T_A\\) 有界的充要条件？\\(\\|T_A\\| = ?\\)",
+        "options": [
+          "\\(\\|T_A\\| = \\sup_j \\sum_i |a_{ij}|\\)（列绝对值和的上确界）",
+        "\\(\\|T_A\\| = \\sup_i \\sum_j |a_{ij}|\\)（行绝对值和的上确界）",
+        "\\(\\|T_A\\| = \\sup_{i,j} |a_{ij}|\\)",
+        "\\(\\|T_A\\| = (\\sum_{i,j} |a_{ij}|^2)^{1/2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|T_A x\\|_1 = \\sum_i |\\sum_j a_{ij} x_j| \\leq \\sum_i \\sum_j |a_{ij}| |x_j| = \\sum_j |x_j| \\sum_i |a_{ij}| \\leq (\\sup_j \\sum_i |a_{ij}|) \\|x\\|_1\\)。取 \\(x = e_j\\)（标准基向量）达到等号。\\(\\ell^1\\) 上的矩阵算子范数 = 最大列绝对值和。（\\(\\ell^\\infty\\) 上是最大行绝对值和。）"
+      },
+      {
+        "id": "functional-ch01-q23",
+        "question": "有限维子空间 \\(Y\\) 在任何赋范空间 \\(X\\) 中都是闭的。证明的关键是？",
+        "options": [
+          "\\(Y\\) 上所有范数等价，故 \\(Y\\) 上范数收敛与坐标收敛等价",
+        "\\(Y\\) 有限维故紧",
+        "Hahn-Banach 定理",
+        "\\(Y\\) 是完备的"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y \\cong \\mathbb{R}^n\\)。取 \\(Y\\) 的基 \\(\\{e_1,...,e_n\\}\\)，\\(T: \\mathbb{R}^n \\to Y\\)，\\(T(\\alpha) = \\sum \\alpha_i e_i\\)。\\(\\|T(\\alpha)\\|_X\\) 给出 \\(\\mathbb{R}^n\\) 上的范数，与 \\(\\|\\alpha\\|_2\\) 等价。若 \\(y_k \\in Y\\)，\\(y_k \\to x\\)（\\(X\\) 中），坐标 \\(\\alpha_k\\) 有界（范数等价），有收敛子列，极限仍在 \\(Y\\) 中。"
+      },
+      {
+        "id": "functional-ch01-q24",
+        "question": "\\(X = C[0,1]\\)（\\(\\|\\cdot\\|_\\infty\\)），\\(K = \\{f: \\|f\\|_\\infty \\leq 1, |f(x) - f(y)| \\leq |x - y|\\}\\)（Lipschitz 条件）。\\(K\\) 紧吗？",
+        "options": [
+          "紧（Arzelà-Ascoli 定理）",
+        "不紧（无限维）",
+        "仅列紧",
+        "在弱拓扑下紧"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\) 一致有界（\\(\\|f\\|_\\infty \\leq 1\\)）且等度连续（Lipschitz 常数 \\(\\leq 1\\)）。Arzelà-Ascoli：\\(C(K)\\) 中的子集紧 \\(\\Leftrightarrow\\) 闭 + 一致有界 + 等度连续。\\(K\\) 闭（极限保持 Lipschitz）。虽然无限维，紧性来自等度连续的额外约束。"
+      },
+      {
+        "id": "functional-ch01-q25",
+        "question": "\\(X = \\ell^\\infty\\)，\\(T: X \\to X\\)，\\(T(x_1, x_2, x_3, ...) = (x_2, x_3, x_4, ...)\\)（左移位）。\\(\\|T\\| = ?\\)，\\(T\\) 是满射吗？",
+        "options": [
+          "\\(\\|T\\| = 1\\)，满射",
+        "\\(\\|T\\| = 1\\)，非满射",
+        "\\(\\|T\\| = 2\\)，满射",
+        "\\(\\|T\\| = 1\\)，单射"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Tx\\|_\\infty = \\sup_{n \\geq 2} |x_n| \\leq \\sup_{n \\geq 1} |x_n| = \\|x\\|_\\infty\\)，\\(\\|T\\| \\leq 1\\)。\\(T(0, x_1, x_2, ...) = (x_1, x_2, ...) = x\\)，\\(\\|T\\| = 1\\)。满射：对任意 \\(y = (y_1, y_2, ...)\\)，\\(T(0, y_1, y_2, ...) = y\\)。非单射：\\(Te_1 = 0\\)。"
+      },
+      {
+        "id": "functional-ch01-q26",
+        "question": "在机器学习中，算子范数用于分析神经网络的 Lipschitz 常数。全连接层 \\(f(x) = Wx + b\\) 在 \\(\\ell^2\\) 范数下的 Lipschitz 常数为？",
+        "options": [
+          "\\(\\|W\\|_F\\)（Frobenius 范数）",
+        "\\(\\sigma_{\\max}(W)\\)（最大奇异值）",
+        "\\(\\|b\\|_2\\)",
+        "\\(\\text{tr}(W)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\|f(x) - f(y)\\|_2 = \\|W(x-y)\\|_2 \\leq \\|W\\|_{op} \\|x-y\\|_2 = \\sigma_{\\max}(W) \\|x-y\\|_2\\)。Lipschitz 常数 = 算子范数 = 最大奇异值。谱归一化（spectral normalization）通过约束 \\(\\sigma_{\\max}(W) = 1\\) 来控制网络的 Lip 常数，用于 GAN 稳定训练。"
+      },
+      {
+        "id": "functional-ch01-q27",
+        "question": "在数值分析中，迭代法 \\(x_{n+1} = Tx_n\\) 收敛的充分条件是 \\(T\\) 为压缩映射。在赋范空间中，线性压缩等价于？",
+        "options": [
+          "\\(\\|T\\| < 1\\)",
+        "\\(T\\) 的谱半径 \\(< 1\\)",
+        "\\(T\\) 有界",
+        "A 是充分条件，B 是充要条件（对完备空间）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\|T\\| < 1\\) \\(\\Rightarrow\\) \\(\\|T^n\\| \\leq \\|T\\|^n \\to 0\\)，\\(x_n \\to x^*\\)（Banach 压缩映射定理需完备性）。谱半径 \\(r(T) = \\lim \\|T^n\\|^{1/n} < 1\\) 是 \\(T^n \\to 0\\) 的充要条件。可能 \\(\\|T\\| > 1\\) 但 \\(r(T) < 1\\)（换等价范数使 \\(\\|T\\|' < 1\\)）。"
+      },
+      {
+        "id": "functional-ch01-q28",
+        "question": "在信号处理中，\\(\\ell^1\\) 范数最小化（LASSO）\\(\\min \\|x\\|_1\\) s.t. \\(Ax = b\\) 促进稀疏解。为什么 \\(\\ell^1\\) 球的几何形状有利于稀疏？",
+        "options": [
+          "\\(\\ell^1\\) 球有\"尖角\"在坐标轴上，约束平面更可能在角点相切",
+        "\\(\\ell^1\\) 球是光滑的",
+        "\\(\\ell^1\\) 球是所有范数中最大的",
+        "\\(\\ell^1\\) 范数是最小的范数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ell^1\\) 球（菱形/超八面体）的顶点在坐标轴上（稀疏向量）。线性约束 \\(Ax = b\\) 定义仿射子空间，与 \\(\\ell^1\\) 球的切点大概率在顶点（稀疏）。\\(\\ell^2\\) 球光滑，切点一般不稀疏。这是压缩感知的几何直觉——赋范空间的单位球几何决定优化解的结构特征。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 范数与赋范空间的基本结构</a></li>
+      <li><a href="#kp2">02 · 有界线性算子与算子范数</a></li>
+      <li><a href="#kp3">03 · 有限维空间的特殊性</a></li>
+      <li><a href="#kp4">04 · Riesz 引理与紧性判别</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>赋范空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>范数与赋范空间的基本结构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在研究函数空间和无穷维线性空间时，我们需要一种"大小"概念来衡量 向量之间的距离。有限维空间中所有范数等价，但无穷维空间中不同范数 可以导致完全不同的拓扑结构。赋范空间的理论为分析学提供了统一的 几何框架——它推广了 \(\mathbb{R}^n\) 中熟悉的距离概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>范数将"大小"概念公理化为三条性质：正定性、齐次性和三角不等式。 赋范空间 \((X, \|\cdot\|)\) 自动成为度量空间（\(d(x,y) = \|x - y\|\)）， 从而拓扑学的所有概念（开集、收敛、连续等）自动可用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：线性空间 \(X\) 上的范数 \(\|\cdot\|: X \to [0, \infty)\) 满足： (N1) \(\|x\| = 0 \Leftrightarrow x = 0\)（正定性） (N2) \(\|\alpha x\| = |\alpha| \|x\|\)（齐次性） (N3) \(\|x + y\| \leq \|x\| + \|y\|\)（三角不等式） <strong>典型范数</strong>： - \(\mathbb{R}^n\)：\(\|x\|_p = (\sum |x_i|^p)^{1/p}\)（\(1 \leq p \leq \infty\)） - \(C([a,b])\)：\(\|f\|_\infty = \sup_{x \in [a,b]} |f(x)|\) - \(L^p\)：\(\|f\|_p = (\int |f|^p)^{1/p}\) <strong>等价范数</strong>：\(\|\cdot\|_1 \sim \|\cdot\|_2\) 若存在 \(c, C > 0\) 使 \[c\|x\|_1 \leq \|x\|_2 \leq C\|x\|_1, \quad \forall x \in X\] <strong>有限维空间上所有范数等价</strong>（证明利用紧致性）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>赋范空间是信号处理、控制论和数值分析的基础。不同范数选择 对应不同的误差度量：\(\|\cdot\|_\infty\) 度量最坏情形误差， \(\|\cdot\|_2\) 度量均方误差。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(C([0,1])\) 上，证明 \(\|f\|_1 = \int_0^1 |f| dx\) 和 \(\|f\|_\infty = \sup |f|\) 不等价。 解答：取 \(f_n(x) = x^n\)。\(\|f_n\|_\infty = 1\) 对所有 \(n\)， 但 \(\|f_n\|_1 = 1/(n+1) \to 0\)。若等价，则 \(c \|f_n\|_\infty \leq \|f_n\|_1\) 对某 \(c > 0\)，矛盾。 易错点：在无穷维空间中假设所有范数等价。 只有有限维空间上范数才等价。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">无穷维赋范空间上，不同范数？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。无穷维空间上范数可能等价也可能不等价。')">A. 一定等价</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。无穷维空间上范数可能等价也可能不等价。')">B. 一定不等价</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！无穷维空间上范数可能等价也可能不等价。')">C. 可能等价也可能不等价</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。无穷维空间上范数可能等价也可能不等价。')">D. 等价当且仅当空间完备</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>有界线性算子与算子范数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性映射是线性代数的核心对象，但在无穷维空间中，线性映射 不一定连续！（有限维空间中线性 ⇒ 连续，但无穷维不行。） 有界线性算子正是"连续的线性映射"，算子范数则量化了一个 线性算子"放大向量"的最大程度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>算子范数 \(\|T\| = \sup_{\|x\| \leq 1} \|Tx\|\) 将算子空间自身 变为赋范空间。"有界 ⇔ 连续"是泛函分析中线性算子理论的出发点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：线性算子 \(T: X \to Y\)（\(X, Y\) 赋范空间）有界，若 \[\|T\| := \sup_{\|x\| \leq 1} \|Tx\| < \infty\] 等价定义：\(\|T\| = \sup_{x \neq 0} \|Tx\|/\|x\|\) \(= \inf\{M : \|Tx\| \leq M\|x\|, \forall x\}\)。 <strong>关键定理</strong>：\(T\) 有界 \(\Leftrightarrow\) \(T\) 连续 \(\Leftrightarrow\) \(T\) 在 \(0\) 处连续。 证明 (\(\Leftarrow\))：设 \(T\) 在 \(0\) 处连续但无界，则存在 \(x_n\) 使 \(\|x_n\| = 1\) 但 \(\|Tx_n\| \geq n\)。 令 \(y_n = x_n/n \to 0\)，但 \(\|Ty_n\| = \|Tx_n\|/n \geq 1\)， 矛盾于 \(Ty_n \to T(0) = 0\)。 <strong>算子范数的乘法性</strong>：\(\|ST\| \leq \|S\| \cdot \|T\|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：积分算子 \(T: C([0,1]) \to C([0,1])\)，\((Tf)(x) = \int_0^x f(t) dt\)。 求 \(\|T\|\)（用 \(\|\cdot\|_\infty\) 范数）。 解答：\(\|Tf\|_\infty = \sup_x |\int_0^x f(t) dt| \leq \sup_x \int_0^x |f(t)| dt \leq \|f\|_\infty\)。故 \(\|T\| \leq 1\)。 取 \(f = 1\)，\(Tf(x) = x\)，\(\|Tf\|_\infty = 1 = \|f\|_\infty\)。 故 \(\|T\| = 1\)。 易错点：混淆"有界算子"（\(\|T\| < \infty\)）和"有界函数"。 有界算子是指算子范数有限，而不是像集有界。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在无穷维赋范空间上，线性算子一定连续吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。无穷维空间上存在不连续的线性算子（需要选择公理构造）。')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！无穷维空间上存在不连续的线性算子（需要选择公理构造）。')">B. 否，需要有界性</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。无穷维空间上存在不连续的线性算子（需要选择公理构造）。')">C. 是，如果空间完备</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。无穷维空间上存在不连续的线性算子（需要选择公理构造）。')">D. 否，除非算子是紧的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>有限维空间的特殊性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在有限维赋范空间中，许多"好的"性质自动成立：所有范数等价、 空间自动完备、单位球紧致、线性算子自动连续。但这些性质在 无穷维空间中全部失效！理解有限维的特殊性是掌握泛函分析的 第一步——泛函分析的定理都在弥补无穷维带来的困难。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Riesz 引理刻画了有限维与无穷维的本质区别：单位球紧致 当且仅当空间有限维。这说明无穷维空间中不存在"有限覆盖"， 是许多泛函分析难题的根源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>：赋范空间 \(X\) 有限维 \(\Leftrightarrow\) 闭单位球 \(\overline{B} = \{x : \|x\| \leq 1\}\) 紧致。 <strong>Riesz 引理</strong>：设 \(Y \subsetneq X\) 为闭真子空间，则对任意 \(0 < \theta < 1\)，存在 \(x_\theta \in X\) 使 \(\|x_\theta\| = 1\) 且 \(d(x_\theta, Y) \geq \theta\)。 <strong>推论</strong>：无穷维空间的闭单位球不紧致。 证明：取真闭子空间链 \(Y_1 \subsetneq Y_2 \subsetneq \cdots\)， 由 Riesz 引理取 \(x_n \in Y_{n+1}\), \(\|x_n\| = 1\), \(d(x_n, Y_n) \geq 1/2\)。对 \(m < n\)，\(x_m \in Y_n\)，故 \(\|x_n - x_m\| \geq 1/2\)，\(\{x_n\}\) 无收敛子列。 <strong>有限维空间的性质</strong>： (i) 所有范数等价 (ii) 完备（因为同构于 \(\mathbb{R}^n\)） (iii) 线性算子自动有界（连续）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(l^2\) 中，标准基 \(\{e_n\}\) 满足 \(\|e_n\| = 1\)， \(\|e_m - e_n\| = \sqrt{2}\)（\(m \neq n\)），无收敛子列。 这验证了闭单位球在 \(l^2\) 中不紧致。 易错点：试图在无穷维空间中用"有界闭集紧致"（Heine-Borel）。 Heine-Borel 仅对 \(\mathbb{R}^n\) 成立，不对无穷维空间成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Riesz 引理中的 \(\theta\) 能否取 \(1\)？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。对 Hilbert 空间 \\(\\theta = 1\\) 可达（取正交补中的单位向量）。')">A. 能，对所有赋范空间</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。对 Hilbert 空间 \\(\\theta = 1\\) 可达（取正交补中的单位向量）。')">B. 能，对 Hilbert 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！对 Hilbert 空间 \\(\\theta = 1\\) 可达（取正交补中的单位向量）。')">C. 不一定，取决于空间</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。对 Hilbert 空间 \\(\\theta = 1\\) 可达（取正交补中的单位向量）。')">D. 不能，对所有空间</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Riesz 引理与紧性判别</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在有限维空间中，紧致性（有界闭 ⇔ 紧）是分析学的核心工具。 无穷维空间中有界闭集不再紧致，这迫使我们寻找新的"紧致性替代品"。 紧算子（将有界集映为列紧集）和弱拓扑紧性成为替代方案。Riesz 引理 不仅刻画了有限维，也是估计子空间距离的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Riesz 引理的证明</strong>：设 \(Y \subsetneq X\) 闭，\(0 < \theta < 1\)。 取 \(x_0 \in X \setminus Y\)，令 \(d = d(x_0, Y) = \inf_{y \in Y} \|x_0 - y\| > 0\) （\(Y\) 闭故 \(d > 0\)）。取 \(y_0 \in Y\) 使 \(\|x_0 - y_0\| < d/\theta\)。 令 \(x_\theta = (x_0 - y_0)/\|x_0 - y_0\|\)，则 \(\|x_\theta\| = 1\)。 对任意 \(y \in Y\)： \[\|x_\theta - y\| = \frac{\|x_0 - y_0 - \|x_0 - y_0\| y\|}{\|x_0 - y_0\|} = \frac{\|x_0 - (y_0 + \|x_0 - y_0\| y)\|}{\|x_0 - y_0\|} \geq \frac{d}{\|x_0 - y_0\|} > \theta\] <strong>列紧集</strong>：\(A \subseteq X\) 列紧，若其中的每个序列都有收敛子列 （极限属于 \(\overline{A}\)）。列紧 + 完备 ⇒ 紧致。 <strong>无穷维空间中的紧集</strong>：必须是闭、有界且"足够小"（如有限秩 算子的像集、等度连续族等）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Arzelà-Ascoli 定理给出 \(C([a,b])\) 中列紧集的刻画： 一致有界 + 等度连续 ⇔ 列紧。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(l^1\) 中的集合 \(A = \{x : \sum n|x_n| \leq 1\}\) 紧致。 解答：A 闭且有界（\(\|x\|_1 \leq 1\)）。对任意 \(\varepsilon > 0\)， 取 \(N\) 使 \(1/N < \varepsilon\)。对 \(x \in A\)， \(\sum_{n > N} |x_n| \leq (1/N) \sum n|x_n| \leq 1/N < \varepsilon\)。 故 \(A\) 可被有限维集 \(\varepsilon\)-逼近，满足全有界性。 易错点：误以为 Banach 空间中有界闭集自动紧致。 有限维才有这个性质；无穷维需要额外条件。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">赋范空间的闭单位球紧致等价于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是 Riesz 定理——闭单位球紧致当且仅当空间有限维。')">A. 空间是 Banach 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是 Riesz 定理——闭单位球紧致当且仅当空间有限维。')">B. 空间是 Hilbert 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！这是 Riesz 定理——闭单位球紧致当且仅当空间有限维。')">C. 空间是有限维的</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是 Riesz 定理——闭单位球紧致当且仅当空间有限维。')">D. 空间是可分的</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

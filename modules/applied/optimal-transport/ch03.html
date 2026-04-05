@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 Wasserstein 距离 — 最优传输 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "optimal-transport-ch03-q1",
+        "question": "\\(p\\)-Wasserstein 距离的定义 \\(W_p(\\mu,\\nu)=(\\inf_{\\pi\\in\\Pi(\\mu,\\nu)}\\int\\|x-y\\|^pd\\pi)^{1/p}\\) 中, \\(p=1\\) 和 \\(p=2\\) 分别有什么特殊性质？",
+        "options": [
+          "\\(W_1\\)=Earth Mover's Distance, 有 KR 对偶(Lipschitz 形式); \\(W_2\\) 有 Riemannian 几何结构(Otto calculus), 与 Brenier 定理直接关联",
+        "\\(p=1\\) 和 \\(p=2\\) 无区别",
+        "只有 \\(p=2\\) 有意义",
+        "\\(p\\) 必须是整数"
+        ],
+        "answer": 0,
+        "explanation": "\\(W_1\\): KR 对偶 \\(\\sup_{\\|f\\|_{Lip}\\leq 1}(\\mathbb{E}_\\mu[f]-\\mathbb{E}_\\nu[f])\\)——计算方便(WGAN)。\\(W_1\\) 也叫 Earth Mover's Distance。\\(W_2\\): \\(W_2^2\\) 可微, 概率测度空间具 Riemannian 结构——切空间=\\(L^2(\\mu)\\) 中的向量场。\\(W_2\\) 测地线=\\(\\mu,\\nu\\) 之间的\"McCann 位移插值\"。\\(p=\\infty\\): \\(W_\\infty=\\inf_\\pi\\text{ess}\\sup_\\pi\\|x-y\\|\\)——最坏情况传输。应用选 \\(p\\): 信号处理常用 \\(W_2\\); ML/NLP 常用 \\(W_1\\); 图像检索用 \\(W_1\\)(直方图)。"
+      },
+      {
+        "id": "optimal-transport-ch03-q2",
+        "question": "两个高斯分布 \\(\\mu=\\mathcal{N}(m_1,\\Sigma_1)\\) 和 \\(\\nu=\\mathcal{N}(m_2,\\Sigma_2)\\) 之间的 \\(W_2\\) 距离闭式公式？",
+        "options": [
+          "\\(W_2^2=\\|m_1-m_2\\|^2+\\text{tr}(\\Sigma_1+\\Sigma_2-2(\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2})\\)——均值项+协方差项(Bures 度量)",
+        "\\(W_2^2=\\|m_1-m_2\\|^2\\)",
+        "高斯无闭式",
+        "\\(W_2^2=D_{KL}(\\mu\\|\\nu)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Dowson-Landau / Olkin-Pukelsheim (1982). 最优映射: \\(T(x)=m_2+A(x-m_1)\\), \\(A=\\Sigma_1^{-1/2}(\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2}\\Sigma_1^{-1/2}\\)。协方差部分: \\(\\text{tr}(\\Sigma_1)+\\text{tr}(\\Sigma_2)-2\\text{tr}((\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2})\\)——也称 Bures-Wasserstein 距离。量子信息中: 密度算子的 Bures 度量。对角情形: \\(W_2^2=\\sum_i(\\sqrt{\\sigma_{1,i}}-\\sqrt{\\sigma_{2,i}})^2+|m_{1,i}-m_{2,i}|^2\\)。这是高斯 OT 最常用的公式, FID(Fréchet Inception Distance)评价生成模型正是此公式。"
+      },
+      {
+        "id": "optimal-transport-ch03-q3",
+        "question": "FID (Fréchet Inception Distance) 如何用 \\(W_2\\) 评价生成模型？",
+        "options": [
+          "将真实/生成图像的 Inception 特征拟合为高斯 \\(\\mathcal{N}(m_r,\\Sigma_r)\\) 和 \\(\\mathcal{N}(m_g,\\Sigma_g)\\), 用高斯 \\(W_2^2\\) 公式计算——FID\\(=\\|m_r-m_g\\|^2+\\text{tr}(\\Sigma_r+\\Sigma_g-2(\\Sigma_r^{1/2}\\Sigma_g\\Sigma_r^{1/2})^{1/2})\\)",
+        "FID 用 KL 散度",
+        "FID 不涉及 Wasserstein",
+        "直接比较像素"
+        ],
+        "answer": 0,
+        "explanation": "Heusel et al. (2017): FID 是评价 GAN/Diffusion/VAE 等生成模型的标准指标。步骤: (1) 提取 Inception-v3 pool3 层特征(2048维); (2) 计算真实集 \\((m_r,\\Sigma_r)\\) 和生成集 \\((m_g,\\Sigma_g)\\) 的均值和协方差; (3) 高斯 \\(W_2^2\\)。FID 低 = 生成分布接近真实。局限: 高斯假设(忽略高阶矩), Inception 特征偏向 ImageNet。改进: KID (Kernel Inception Distance, 无偏), FJD (联合距离)。"
+      },
+      {
+        "id": "optimal-transport-ch03-q4",
+        "question": "\\(W_p\\) 与其他概率距离的比较: \\(W_p\\) 相比 Total Variation (TV), KL 散度有什么优势？",
+        "options": [
+          "\\(W_p\\) 感知空间几何——\\(\\delta_0\\) 和 \\(\\delta_\\epsilon\\) 的 \\(\\text{TV}=1\\)(最大), \\(W_1=\\epsilon\\)(反映实际距离); TV/KL 对支撑不重叠的分布\"过于严厉\"",
+        "TV 更好",
+        "KL 散度更细致",
+        "三者等价"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{TV}(\\mu,\\nu)=\\sup_A|\\mu(A)-\\nu(A)|\\): 不看\"多远\", 只看\"多不同\"。\\(\\delta_x,\\delta_y\\): \\(\\text{TV}=1\\)(\\(x\\neq y\\)时), \\(D_{KL}=\\infty\\), \\(W_1=|x-y|\\)。Wasserstein \"提升了底层空间的度量\"到分布空间。Pinsker: \\(\\text{TV}\\leq\\sqrt{D_{KL}/2}\\)。\\(\\text{TV}\\leq W_1/\\text{diam}\\) (有界空间)。弱收敛: \\(W_p\\) 诱导的拓扑 = 弱拓扑 + \\(p\\)-矩收敛。应用: 梯度流(Wasserstein提供连续梯度); GAN(避免JS 饱和); 统计(minimax 率 \\(W_p\\sim n^{-1/d}\\))。"
+      },
+      {
+        "id": "optimal-transport-ch03-q5",
+        "question": "Wasserstein 测地线: \\(W_2\\) 空间中 \\(\\mu\\) 到 \\(\\nu\\) 的\"直线\"(测地线)是什么？",
+        "options": [
+          "McCann 位移插值: \\(\\mu_t=((1-t)Id+tT)_\\#\\mu\\), \\(t\\in[0,1]\\), \\(T=\\nabla\\phi\\) 为 Brenier 映射——\\(W_2(\\mu_0,\\mu_t)=tW_2(\\mu_0,\\mu_1)\\)",
+        "\\(\\mu_t=(1-t)\\mu+t\\nu\\)(线性插值)",
+        "测地线不存在",
+        "测地线是欧氏直线"
+        ],
+        "answer": 0,
+        "explanation": "线性混合 \\((1-t)\\mu+t\\nu\\) 不是测地线——它不保持 \\(W_2\\) 距离线性。位移插值: 每个质量点沿直线从 \\(x\\) 到 \\(T(x)\\) 匀速运动, 时间 \\(t\\) 的位置 \\(x_t=(1-t)x+tT(x)\\)。\\(\\mu_t=((1-t)I+t\\nabla\\phi)_\\#\\mu\\)。\\(W_2(\\mu_0,\\mu_t)=t\\cdot W_2(\\mu_0,\\mu_1)\\)——等距参数化测地线。物理: 不可压缩流体？不是——密度可以变化。连续方程: \\(\\partial_t\\rho+\\nabla\\cdot(\\rho v)=0\\), 速度场 \\(v_t=(T-I)\\circ T_t^{-1}\\) 恒定方向。"
+      },
+      {
+        "id": "optimal-transport-ch03-q6",
+        "question": "Wasserstein 重心(Barycenter): 给定分布 \\(\\mu_1,...,\\mu_K\\) 和权重 \\(\\lambda_i\\), 重心如何定义？",
+        "options": [
+          "\\(\\bar\\mu=\\arg\\min_\\mu\\sum_i\\lambda_iW_2^2(\\mu,\\mu_i)\\)——在 \\(W_2\\) 空间中的\"加权均值\"; 高斯重心有闭式(固定点方程), 一般分布需迭代算法",
+        "\\(\\bar\\mu=(1/K)\\sum\\mu_i\\)",
+        "重心不存在",
+        "只适用于离散分布"
+        ],
+        "answer": 0,
+        "explanation": "Agueh-Carlier (2011): 存在性+唯一性(在绝对连续情况下)。高斯: \\(\\bar\\Sigma\\) 满足 \\(\\bar\\Sigma=\\sum_i\\lambda_i(\\bar\\Sigma^{1/2}\\Sigma_i\\bar\\Sigma^{1/2})^{1/2}\\)——矩阵固定点方程, 迭代求解。一般: 自由支撑重心是LP/二次规划。定网格: Sinkhorn 重心 \\(\\min_\\mu\\sum_i\\lambda_i OT_\\epsilon(\\mu,\\mu_i)\\)——可用Sinkhorn迭代。应用: 纹理混合(图形学), 形状插值, 多源域自适应, 联邦学习(平均分布)。"
+      },
+      {
+        "id": "optimal-transport-ch03-q7",
+        "question": "Wasserstein 距离的统计估计: 给定 \\(\\mu,\\nu\\) 的 i.i.d. 样本, \\(W_p\\) 的 minimax 估计率？",
+        "options": [
+          "\\(\\mathbb{E}[W_p(\\hat\\mu_n,\\mu)]\\sim n^{-1/d}\\)(\\(d>2p\\)时)——维度灾难(curse of dimensionality); 一维无灾难: \\(n^{-1/2}\\)",
+        "总是 \\(n^{-1/2}\\)",
+        "与维度 \\(d\\) 无关",
+        "估计不一致"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat\\mu_n=\\frac{1}{n}\\sum_i\\delta_{X_i}\\)。\\(\\mathbb{E}[W_p^p(\\hat\\mu_n,\\mu)]\\asymp n^{-p/d}\\)(\\(d>2p\\))——维度灾难! \\(d=1\\): \\(W_1\\) 估计 \\(n^{-1/2}\\)（与中心极限定理类似）。\\(d=2, p=1\\): \\(n^{-1/2}\\sqrt{\\log n}\\)(对数修正)。缓解: (1) 切片 Wasserstein(投影到一维): \\(\\text{SW}_p=(\\int_{S^{d-1}}W_p^p(\\mu_\\theta,\\nu_\\theta)d\\sigma(\\theta))^{1/p}\\)——\\(O(n^{-1/2})\\) 估计率, 无维度灾难; (2) 正则化 \\(W_\\epsilon\\) 也改善统计效率(\\(O(n^{-1/2})\\)); (3) 小批量方法。"
+      },
+      {
+        "id": "optimal-transport-ch03-q8",
+        "question": "\\(W_2\\) 空间 \\((\\mathcal{P}_2(\\mathbb{R}^d),W_2)\\) 是什么类型的度量空间？其曲率性质？",
+        "options": [
+          "非负曲率(Alexandrov 意义): 三角形\"胖于\"欧氏三角形; 不是 Riemannian 流形但是测地空间, 形式上 sectional curvature \\(\\geq 0\\)",
+        "负曲率",
+        "欧氏空间",
+        "不是度量空间"
+        ],
+        "answer": 0,
+        "explanation": "Ambrosio-Gigli-Savaré: \\((\\mathcal{P}_2(\\mathbb{R}^d),W_2)\\) 是 Polish 测地空间(完备、可分)。曲率: Sturm-Lott-Villani 用 OT 定义了度量测度空间的 Ricci 曲率下界(CD(K,N) 条件)。对 \\(\\mathbb{R}^d\\): \\(\\mathcal{P}_2(\\mathbb{R}^d)\\) 有非负 Alexandrov 曲率。直观: 位移插值 \\(\\mu_t\\) \"膨胀\"(Brunn-Minkowski)→三角形胖。但不是流形: 维度无限, Dirac 测度是奇点(切锥退化)。Otto (2001): 形式上将 \\(\\mathcal{P}_2\\) 视为无穷维 Riemannian 流形→梯度流理论。"
+      },
+      {
+        "id": "optimal-transport-ch03-q9",
+        "question": "Wasserstein 距离在公平性(Fairness)评估中如何使用？",
+        "options": [
+          "用 \\(W_p\\) 度量不同群组预测分布的差异——\"最优传输公平\": 将群组 \\(A\\) 的预测\"传输\"到群组 \\(B\\), 传输成本=不公平程度",
+        "公平性不涉及分布距离",
+        "只用 TV 距离",
+        "Wasserstein 不能比较条件分布"
+        ],
+        "answer": 0,
+        "explanation": "算法公平性: \\(P(\\hat{Y}|A=0)\\) vs \\(P(\\hat{Y}|A=1)\\) 应该\"相似\"。Wasserstein Fairness (Jiang et al., 2020): 约束 \\(W_p(P_{\\hat{Y}|A=0},P_{\\hat{Y}|A=1})\\leq\\epsilon\\)。优势: \\(W_p\\) 反映分数分布的实际差异(不仅仅是统计显著性)。后处理: 用 OT 映射将一个群组的分数\"对齐\"到另一个——一维情况用分位数映射。OT 在公平 representation learning 中也有应用: 学习使 \\(W(P_{Z|A=0},P_{Z|A=1})\\leq\\epsilon\\) 的表示 \\(Z\\)。"
+      },
+      {
+        "id": "optimal-transport-ch03-q10",
+        "question": "Gromov-Wasserstein 距离: 当 \\(\\mu,\\nu\\) 在不同度量空间时, 如何比较？",
+        "options": [
+          "\\(GW(\\mu,\\nu)=\\inf_\\pi\\int\\int|d_X(x,x')-d_Y(y,y')|^2d\\pi(x,y)d\\pi(x',y')\\)——比较内部距离结构而非点对点; 用于跨域匹配(如图对齐)",
+        "只能用 Wasserstein",
+        "不同空间不能比较",
+        "GW 不是距离"
+        ],
+        "answer": 0,
+        "explanation": "Mémoli (2011): GW 距离比较\"形状\"——保持内部距离关系的最优匹配。不需要两个空间共享同一嵌入。\\(\\pi\\in\\Pi(\\mu,\\nu)\\): 软匹配。目标: \\(\\sum|d_X(x_i,x_k)-d_Y(y_j,y_l)|^2\\pi_{ij}\\pi_{kl}\\)——四阶(非线性!)。算法: 条件梯度 (Frank-Wolfe) 迭代, 每步解一个标准 OT 问题。应用: 蛋白质结构比较, 跨语言词嵌入对齐(不同语言的词向量空间), 图核(Graph Kernels), 计算机视觉形状匹配。Fused GW: \\(\\alpha\\cdot GW+(1-\\alpha)\\cdot W\\)——同时比较结构和特征。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="optimal-transport"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/optimal-transport.html" class="module-name">最优传输</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · \(W_p\) 距离的定义与度量空间结构</a></li>
+      <li><a href="#kp2">02 · \(W_p\) 与其他距离/散度的比较</a></li>
+      <li><a href="#kp3">03 · Wasserstein 空间上的测地线</a></li>
+      <li><a href="#kp4">04 · Wasserstein 重心与多边际传输</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>Wasserstein 距离</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>\(W_p\) 距离的定义与度量空间结构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Wasserstein 距离 \(W_p\) 赋予概率测度空间 \(\mathcal{P}_p(X)\) 完备可 分度量空间结构。与 KL 散度（不对称、不满足三角不等式）和 TV 距 离（不考虑底空间几何）不同，\(W_p\) 是真正的"几何"距离——它感知 底空间中"多远"。这使 Wasserstein 空间成为现代概率论和机器学习 的核心几何对象。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\((\mathcal{P}_p(X), W_p)\) 继承了 \((X, d)\) 的几何结构：测地线、曲率等。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(p\)-Wasserstein 距离（\(p \geq 1\)）： \[W_p(\mu,\nu) = \left(\inf_{\gamma \in \Pi(\mu,\nu)} \int_{X \times X} d(x,y)^p \, d\gamma(x,y)\right)^{1/p}\] \(\mathcal{P}_p(X) = \{\mu \in \mathcal{P}(X) : \int d(x, x_0)^p \, d\mu < \infty\}\)（有限 \(p\) 阶矩）。 完备性：若 \((X,d)\) 完备，则 \((\mathcal{P}_p(X), W_p)\) 完备。 可分性：若 \((X,d)\) 可分，则 \((\mathcal{P}_p(X), W_p)\) 也可分。 收敛拓扑（\(p=1\) 时）：\(W_1(\mu_n, \mu) \to 0\) 当且仅当 \(\mu_n \xrightarrow{w} \mu\)（弱收敛）且 \(\int d(x,x_0) \, d\mu_n \to \int d(x,x_0) \, d\mu\) （一阶矩收敛）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>统计中的分布收敛速率分析：\(W_2\) 是最自然的度量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu_n = (1-1/n)\delta_0 + (1/n)\delta_n\), \(\mu = \delta_0\)（\(\mathbb{R}\) 上）。 \(W_1(\mu_n, \mu)\)？TV 距离？ 解答：\(W_1 = \inf_\gamma \int |x-y| d\gamma\)。最优传输：质量 \(1-1/n\) 留在 \(0\)， \(1/n\) 从 \(n\) 到 \(0\)，代价 \(= (1/n) \cdot n = 1\)。\(W_1 = 1\) \(\not\to 0\)！ 但 \(\text{TV} = 2/n \to 0\)。 \(\mu_n\) 弱收敛到 \(\mu\)，但一阶矩不收敛。 易错点：弱收敛不蕴含 \(W_p\) 收敛——还需矩条件。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个距离/散度满足三角不等式？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。KL 散度不对称也不满足三角不等式；JS 散度对称但也不是度量。\\(W_p\\) 是真度量。')">A. KL 散度</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！KL 散度不对称也不满足三角不等式；JS 散度对称但也不是度量。\\(W_p\\) 是真度量。')">B. \(W_p\) 距离</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。KL 散度不对称也不满足三角不等式；JS 散度对称但也不是度量。\\(W_p\\) 是真度量。')">C. JS 散度</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。KL 散度不对称也不满足三角不等式；JS 散度对称但也不是度量。\\(W_p\\) 是真度量。')">D. A 和 C</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>\(W_p\) 与其他距离/散度的比较</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际使用中如何选择 \(W_p\)、KL、TV、MMD 等度量？需要理解它们各自 的优劣和适用场景。尤其是在生成模型训练中，\(W_1\) 相比 KL/JS 的 梯度稳定性是 WGAN 成功的关键。但 \(W_p\) 的计算成本也更高。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不同度量对分布差异的敏感度不同——\(W_p\) 对平移敏感，TV 对支撑 差异敏感，KL 对密度比敏感。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>关键比较： 1) TV vs \(W_1\)：Pinsker 不等式 \(\text{TV}(\mu,\nu) \leq \sqrt{KL(\mu\|\nu)/2}\)。 但 \(\text{TV}\) 不感知底空间度量：\(\text{TV}(\delta_0, \delta_\varepsilon) = 2\) 对所有 \(\varepsilon > 0\)，而 \(W_1(\delta_0, \delta_\varepsilon) = \varepsilon \to 0\)。 2) KL vs \(W_p\)：KL 要求 \(\nu \ll \mu\)（绝对连续），否则 \(= +\infty\)。 \(W_p\) 对支撑不重叠的分布仍有限且有意义。 3) 不等式链：\(W_1(\mu,\nu) \leq C \cdot \text{TV}(\mu,\nu)\) 当 \(X\) 有界直径 \(C\)。反之无上界。 4) 维数灾难：经验分布 \(\hat{\mu}_n\) 的 \(W_p\) 收敛速率为 \(O(n^{-1/d})\) （\(d\) 维），而 KL 不受此限。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>文本生成中 exposure bias 的度量：\(W\) 距离比 BLEU 更好地反映语义距离。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu_\theta = \delta_\theta\)（参数化点质量），\(\nu = \delta_0\)。 求 \(W_1, \text{TV}, KL\) 关于 \(\theta\) 的梯度。 解答：\(W_1 = |\theta|\)：\(\partial W_1 / \partial\theta = \text{sign}(\theta)\)。梯度常数——训练稳定！ \(\text{TV} = 2 \cdot \mathbf{1}_{\theta \neq 0}\)：不连续，梯度要么 0 要么不存在。 \(KL = +\infty\)（支撑不重叠）。 这就是 WGAN 成功的根本原因。 易错点：\(W_p\) 的梯度优势在分布支撑不重叠时最明显——这恰是 GAN 训练初期的情况。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(W_1(\delta_0, \delta_\varepsilon)\) 和 \(\text{TV}(\delta_0, \delta_\varepsilon)\)（\(\varepsilon > 0\)）？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(W_1\\) 反映"多远"，TV 只关心"是否不同"。')">A. \(W_1 = \varepsilon\), TV = 2</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(W_1\\) 反映"多远"，TV 只关心"是否不同"。')">B. \(W_1 = 2\), TV = \(\varepsilon\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(W_1\\) 反映"多远"，TV 只关心"是否不同"。')">C. 都等于 \(\varepsilon\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(W_1\\) 反映"多远"，TV 只关心"是否不同"。')">D. 都等于 2</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Wasserstein 空间上的测地线</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Wasserstein 空间不仅是度量空间，还是一个具有丰富几何的测地空间。 \((\mathcal{P}_2(\mathbb{R}^d), W_2)\) 中的测地线对应 McCann 位移插 值——两个分布之间的"最自然"路径。这种几何视角引发了 Otto 微积 分学(Otto Calculus)和 gradient flow 理论，成为现代 PDE 和概率论 的核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Wasserstein 测地线 \(=\) 位移插值 \(\mu_t = ((1-t)Id + tT)_\#\mu\)， 其中 \(T\) 是最优传输映射。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>McCann 位移插值：设 \(T\) 是 \(\mu\) 到 \(\nu\) 的最优映射（Brenier），定义 \[\mu_t = ((1-t)\text{Id} + tT)_\#\mu, \quad t \in [0,1]\] 则 \(\mu_0 = \mu, \mu_1 = \nu\)，且 \(W_2(\mu_s, \mu_t) = |s-t| \cdot W_2(\mu,\nu)\) ——等速测地线。 位移凸性(Displacement Convexity)：泛函 \(\mathcal{F}(\mu)\) 沿测地线是凸的： \[\mathcal{F}(\mu_t) \leq (1-t)\mathcal{F}(\mu_0) + t\mathcal{F}(\mu_1)\] 例如 Boltzmann 熵 \(H(\mu) = \int \rho \log \rho \, dx\)（\(d\mu = \rho \, dx\)）。 位移凸性 \(\Rightarrow\) 热方程解的唯一性和长时行为分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Flow Matching / Rectified Flow：训练神经网络沿 McCann 插值学习速度场， 生成模型的最新范式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu = \mathcal{N}(0,1), \nu = \mathcal{N}(2,4)\)（一维）。\(\mu_{1/2}\) 的分布？ 解答：最优映射 \(T(x) = 2x + 2\)（分位数匹配）。 \(T_{1/2}(x) = (1-1/2)x + (1/2)(2x+2) = 3x/2 + 1\)。 \(\mu_{1/2} = (T_{1/2})_\#\mathcal{N}(0,1) = \mathcal{N}(1, 9/4)\)。 均值 \(= 1\)（\(0\) 和 \(2\) 的中点），标准差 \(= 3/2\)（\(1\) 和 \(2\) 的中点）。 易错点：位移插值不等于混合（\(\neq (1-t)\mu + t\nu\)）——它是"传输"中间态，保持单峰性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">McCann 位移插值 \(\mu_t\) 是什么的推前？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mu_t = ((1-t)\\text{Id}+tT)_\\#\\mu\\)，其中 \\(T\\) 是最优传输映射。')">A. \(\mu + t(\nu - \mu)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mu_t = ((1-t)\\text{Id}+tT)_\\#\\mu\\)，其中 \\(T\\) 是最优传输映射。')">B. 线性插值映射 \((1-t)\text{Id}+tT\) 对 \(\mu\) 的推前</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mu_t = ((1-t)\\text{Id}+tT)_\\#\\mu\\)，其中 \\(T\\) 是最优传输映射。')">C. \(\nu\) 的 \(t\)-缩放</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mu_t = ((1-t)\\text{Id}+tT)_\\#\\mu\\)，其中 \\(T\\) 是最优传输映射。')">D. 随机采样</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Wasserstein 重心与多边际传输</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定多个分布 \(\mu_1, \ldots, \mu_K\)，它们的 Wasserstein 重心 (barycenter)是使加权 \(W_2^2\) 和最小的分布。这推广了欧氏空间中 的 Fréchet 均值，在形状分析、纹理混合、联邦学习中有重要应用。 多边际最优传输(Multi-marginal OT)进一步推广到同时耦合多个分布。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Wasserstein 重心 \(=\) 概率测度空间中的 Fréchet 均值。 多边际 OT \(=\) 多个分布的最优联合耦合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Wasserstein 重心： \[\bar{\mu} = \arg\min_{\mu} \sum_{k=1}^K \lambda_k W_2^2(\mu, \mu_k), \quad \lambda_k > 0, \sum \lambda_k = 1\] 离散情况（每个 \(\mu_k\) 有 \(n\) 个支撑点）的 LP 公式规模巨大—— 需要高效算法（Sinkhorn 重心或 free support 方法）。 多边际 OT： \[\inf_{\gamma \in \Pi(\mu_1,...,\mu_K)} \int c(x_1,...,x_K) \, d\gamma(x_1,...,x_K)\] 代价函数 \(c\) 作用于 \(K\) 个变量。密度泛函理论中的电子关联能等价于 特殊的多边际 OT 问题（Coulomb 代价）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>联邦学习中模型聚合：将各客户端参数分布用 Wasserstein 重心融合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu_1 = \delta_0, \mu_2 = \delta_2\)，等权 \(\lambda = (1/2, 1/2)\)。 \(W_2\) 重心？ 解答：\(\bar{\mu} = \arg\min_\mu \frac{1}{2}W_2^2(\mu, \delta_0) + \frac{1}{2}W_2^2(\mu, \delta_2)\)。 对点质量 \(\mu = \delta_m\)：\(= \frac{1}{2}m^2 + \frac{1}{2}(m-2)^2\)。 导数 \(= m + (m-2) = 0 \Rightarrow m = 1\)。\(\bar{\mu} = \delta_1\)。 （重心是中点——直观！但对非点质量分布，结果更有趣。） 易错点：\(W_2\) 重心不同于逐点混合 \(\frac{1}{2}\delta_0 + \frac{1}{2}\delta_2\)， 后者是双峰的，前者集中在中间。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mu_1 = \mathcal{N}(0,1), \mu_2 = \mathcal{N}(4,1)\)，\(W_2\) 等权重心是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！位移插值中间点 = 均值平均、方差平均。混合是双峰的（不是重心）。')">A. \(\mathcal{N}(2,1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。位移插值中间点 = 均值平均、方差平均。混合是双峰的（不是重心）。')">B. \(\frac{1}{2}\mathcal{N}(0,1) + \frac{1}{2}\mathcal{N}(4,1)\)（双峰混合）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。位移插值中间点 = 均值平均、方差平均。混合是双峰的（不是重心）。')">C. \(\mathcal{N}(2,2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。位移插值中间点 = 均值平均、方差平均。混合是双峰的（不是重心）。')">D. \(\delta_2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/applied/optimal-transport.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

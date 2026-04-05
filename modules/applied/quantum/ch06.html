@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 量子机器学习 — 量子计算 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "quantum-ch06-q1",
+        "question": "变分量子线路(VQC/PQC)作为机器学习模型: \\(f(x;\\theta)=\\langle 0|U^\\dagger(x,\\theta)OU(x,\\theta)|0\\rangle\\)。它与经典神经网络的类比？",
+        "options": [
+          "数据编码(embedding) \\(\\to\\) 参数化酉旋转 \\(\\to\\) 测量——类似输入层→隐藏层→输出; 参数 \\(\\theta\\) 通过经典优化器更新(混合量子-经典循环)",
+        "VQC 不需要训练",
+        "VQC 与神经网络无关",
+        "只有量子优化器"
+        ],
+        "answer": 0,
+        "explanation": "VQC: (1) 编码: \\(x\\to|\\psi(x)\\rangle\\)(角度编码 \\(R_y(x_i)\\), 振幅编码, IQP 编码等); (2) ansatz: \\(U(\\theta)=\\prod_l[\\text{entangle}\\cdot\\bigotimes_i R(\\theta_{l,i})]\\)(交替纠缠+旋转层); (3) 测量: \\(\\langle O\\rangle=\\text{tr}(O\\rho)\\)。训练: \\(\\theta^*=\\arg\\min_\\theta\\mathcal{L}(\\{f(x_i;\\theta),y_i\\})\\), 梯度用 parameter shift rule。表达力: VQC 可以实现任何函数(给定足够层数/qubit), 但 barren plateau 和硬件噪声限制实际能力。"
+      },
+      {
+        "id": "quantum-ch06-q2",
+        "question": "量子核方法: 数据映射到量子态 \\(|x\\rangle\\to|\\phi(x)\\rangle\\), 核函数 \\(k(x,x')=|\\langle\\phi(x)|\\phi(x')\\rangle|^2\\)。与经典核方法的区别？",
+        "options": [
+          "量子特征空间维度 \\(2^n\\) 指数大于输入维度——如果经典不能高效计算这个核, 量子核方法可能有优势; 但 Huang et al. 证明需要特定数据结构才能获得真正优势",
+        "量子核总是更好",
+        "核函数与量子无关",
+        "不需要测量"
+        ],
+        "answer": 0,
+        "explanation": "量子核: \\(k(x,x')=|\\langle 0|U^\\dagger(x)U(x')|0\\rangle|^2\\)。用 SWAP test 或直接线路 \\(U^\\dagger(x)U(x')\\) 测量估计。Havlíček et al. (2019): 在超导量子计算机上演示。问题: (1) 大多数随机量子核→指数集中(\\(k\\to 0\\))→无用; (2) Huang et al. (2021): 如果数据无\"量子结构\", 经典方法同样好。关键: 量子核只在数据本身来自量子过程(如量子化学、量子多体物理)时才有明确优势——\"量子数据\"假说。"
+      },
+      {
+        "id": "quantum-ch06-q3",
+        "question": "VQE(Variational Quantum Eigensolver)求解分子基态能量。其目标函数和算法框架？",
+        "options": [
+          "最小化能量期望 \\(E(\\theta)=\\langle\\psi(\\theta)|H|\\psi(\\theta)\\rangle\\geq E_0\\)（变分原理）; 量子机制备 \\(|\\psi(\\theta)\\rangle\\) 并测量 \\(\\langle H\\rangle\\), 经典机优化 \\(\\theta\\)",
+        "VQE 找最大能量",
+        "不涉及变分原理",
+        "只需量子计算机"
+        ],
+        "answer": 0,
+        "explanation": "分子 Hamiltonian: \\(H=\\sum_i h_iP_i\\)（Pauli 分解, \\(P_i\\in\\{I,X,Y,Z\\}^{\\otimes n}\\)）。每个 \\(\\langle P_i\\rangle\\) 通过量子测量估计。\\(E(\\theta)=\\sum_ih_i\\langle P_i\\rangle\\)。Ansatz 选择: UCCSD(化学启发), Hardware-Efficient(适配硬件), ADAPT-VQE(迭代增长)。经典优化器: COBYLA, SPSA(抗噪声), 自然梯度。优势: 比全量子相位估计（QPE）需要更浅线路→适合 NISQ。挑战: barren plateau, 局部极小, 测量开销(\\(O(n^4)\\) Pauli 项)。实验: H₂, LiH, BeH₂ 的小分子演示。"
+      },
+      {
+        "id": "quantum-ch06-q4",
+        "question": "QAOA(Quantum Approximate Optimization Algorithm)解组合优化问题。其线路结构？",
+        "options": [
+          "\\(|\\gamma,\\beta\\rangle=\\prod_{l=1}^p e^{-i\\beta_lB}e^{-i\\gamma_lC}|+\\rangle^n\\), \\(C\\)=问题哈密顿量(如 MaxCut), \\(B=\\sum_iX_i\\)(混合); \\(p\\to\\infty\\) 时恢复绝热演化",
+        "不需要混合算子",
+        "只有一层",
+        "QAOA 不能处理组合优化"
+        ],
+        "answer": 0,
+        "explanation": "MaxCut: \\(C=\\sum_{(i,j)\\in E}\\frac{1-Z_iZ_j}{2}\\)（每条边对切割的贡献）。QAOA-\\(p\\): 交替 \\(e^{-i\\gamma_lC}\\)（相位分离）和 \\(e^{-i\\beta_lB}\\)（混合）。\\(p=1\\): 只有2个参数, 近似比 \\(\\geq 0.692\\)（3-正则图）。\\(p\\to\\infty\\): 等价于量子退火→精确解(QA定理)。优化 \\((\\gamma,\\beta)\\): 经典优化, 采样 \\(O(1/\\epsilon^2)\\) 次。Farhi-Goldstone-Gutmann: \\(p\\) 固定时 QAOA 可能优于经典局域算法。实际: \\(p\\sim 5-20\\), 与模拟退火竞争。变体: Warm-QAOA, Recursive-QAOA, Multi-angle QAOA。"
+      },
+      {
+        "id": "quantum-ch06-q5",
+        "question": "Barren Plateau(贫瘠高原)问题: 为什么深随机量子线路的梯度趋向零？",
+        "options": [
+          "\\(\\text{Var}[\\partial_\\theta\\langle O\\rangle]\\sim O(1/2^n)\\)——随机 PQC 构成近似 2-设计, 梯度以指数速率集中于零→无法训练",
+        "梯度不会消失",
+        "只在经典网络中出现",
+        "增加层数可解决"
+        ],
+        "answer": 0,
+        "explanation": "McClean et al. (2018): 若 \\(U(\\theta)\\) 形成 \\(t\\geq 2\\)-设计(足够随机), 则 \\(\\mathbb{E}[\\partial_\\theta\\langle O\\rangle]=0\\), \\(\\text{Var}[\\partial_\\theta\\langle O\\rangle]\\leq O(2^{-n})\\)。原因: 高度随机的酉→测量期望值几乎与参数无关。后果: 需 \\(\\Omega(2^n)\\) 次采样才能估计梯度方向——指数开销。缓解: (1) 浅线路+局域测量; (2) 参数初始化策略(identity block); (3) 分层训练; (4) 量子自然梯度; (5) 问题启发的 ansatz(非随机)。这是 VQA 能否规模化的核心障碍。"
+      },
+      {
+        "id": "quantum-ch06-q6",
+        "question": "量子数据编码(Quantum Feature Map)的选择如何影响模型表达力？角度编码 vs 振幅编码？",
+        "options": [
+          "角度编码: \\(R_y(x_i)|0\\rangle\\), \\(n\\) 个 qubit 编码 \\(n\\) 维(线性); 振幅编码: \\(|x\\rangle=\\sum_i x_i|i\\rangle/\\|x\\|\\), \\(n\\) qubit 编码 \\(2^n\\) 维(指数)但制备线路深 \\(O(2^n)\\)",
+        "编码方式不影响结果",
+        "振幅编码总是更好",
+        "角度编码需要指数 qubit"
+        ],
+        "answer": 0,
+        "explanation": "角度编码: 简单, \\(R_y(x_i)\\) 或 \\(R_z(x_i)\\), 1:1 对应特征→qubit。重编码(data re-uploading): 在每层重新编码数据→增加表达力。振幅编码: \\(N\\) 维向量→\\(\\log_2 N\\) qubit, 紧凑。但: 通用振幅制备需 \\(O(N)\\) CNOT→抵消空间优势。IQP 编码: \\(\\prod_{ij}e^{-ix_ix_j Z_iZ_j}H^{\\otimes n}|0\\rangle\\)——非线性交互项, 经典难以模拟(除非 PH 坍缩)。选择要平衡: 线路深度、表达能力、是否有经典优势。"
+      },
+      {
+        "id": "quantum-ch06-q7",
+        "question": "量子生成对抗网络(qGAN): 如何用量子线路做生成模型？",
+        "options": [
+          "生成器: 参数化量子线路 \\(G(\\theta)|0\\rangle\\) 生成量子态/经典样本; 判别器: 经典网络或量子线路; 对抗训练 \\(\\min_G\\max_D V(G,D)\\) 的量子版本",
+        "量子不能做生成模型",
+        "qGAN 不需要对抗训练",
+        "只有经典判别器"
+        ],
+        "answer": 0,
+        "explanation": "Dallaire-Demers & Killoran (2018), Lloyd & Weedbrook: 量子GAN。模式: (1) G=PQC, D=经典: \\(G(\\theta)\\) 生成测量样本 \\(\\to D\\) 区分真假; (2) G=PQC, D=PQC: SWAP test 比较量子态。应用: 学习量子态分布(量子化学模拟态、量子纠错码字)。优势: 量子 G 可能高效表示经典 G 难以表示的分布(log-partition function)。挑战: 训练稳定性(与经典 GAN 类似)、barren plateau、模式坍缩。Born Machine: 测量概率 \\(|\\langle x|\\psi(\\theta)\\rangle|^2\\) 直接作为概率模型。"
+      },
+      {
+        "id": "quantum-ch06-q8",
+        "question": "量子优势(Quantum Advantage/Supremacy): 什么条件下量子机器学习能证明超越经典？",
+        "options": [
+          "需要同时满足: (1) 量子模型比等参数经典模型预测更好; (2) 优势不能被更大经典模型消除; (3) 训练高效(无 barren plateau); 目前只在特定量子数据任务上有理论证明",
+        "量子 ML 总是更好",
+        "参数数相同就够证明",
+        "量子优势已被普遍证明"
+        ],
+        "answer": 0,
+        "explanation": "Huang et al. (2022) Nature: \"指数量子优势在预测量子系统属性\"——量子核方法用 \\(O(\\log n)\\) 数据估计, 经典需 \\(O(2^n)\\)。条件: 数据必须来自量子过程。经典数据: Liu et al. (2021) 构造了 contrived 问题有量子优势, 但自然 ML 任务尚无证据。实际: NISQ 量子 ML 受噪声限制, 大多数任务被经典方法(尤其 Transformer)碾压。前景: 量子化学模拟、量子传感数据分析、量子通信协议优化。"
+      },
+      {
+        "id": "quantum-ch06-q9",
+        "question": "量子 Boltzmann 机(QBM)如何利用量子效应增强经典 Boltzmann 机？",
+        "options": [
+          "哈密顿量含非对角项(横场): \\(H=-\\sum_{ij}J_{ij}Z_iZ_j-\\sum_ih_iX_i\\); 量子隧穿帮助在能量景观中穿越势垒——可能比经典 Gibbs 采样更快混合",
+        "QBM 和经典 BM 相同",
+        "量子效应不影响采样",
+        "QBM 不需要温度参数"
+        ],
+        "answer": 0,
+        "explanation": "经典 BM: \\(p(v,h)=e^{-E(v,h)}/Z\\), \\(E=-\\sum w_{ij}s_is_j\\)。训练: 对比散度(CD), Gibbs 采样。QBM: \\(\\rho=e^{-H}/\\text{tr}(e^{-H})\\), \\(H\\) 含 \\(X\\) 项(非对角)→量子态不是经典位串概率。优势猜想: (1) 横场 \\(X_i\\) 项提供量子隧穿→逃离局部最优; (2) 量子热态可表示更复杂的分布。训练: 量子自然梯度, 需要 \\(\\partial\\langle H\\rangle/\\partial\\theta\\)——难以高效估计。实验: D-Wave 量子退火器上的受限 QBM。理论优势仍有争议。"
+      },
+      {
+        "id": "quantum-ch06-q10",
+        "question": "量子纠错+量子机器学习: 纠错如何改变 QML 的能力？",
+        "options": [
+          "容错量子计算可运行 QPE 等深线路→超越 VQA; 但纠错开销巨大(千倍物理 qubit)——关键问题是纠错后的 QML 能否比经典有多项式以上优势",
+        "纠错对 QML 无影响",
+        "NISQ 就足够",
+        "纠错消除所有量子优势"
+        ],
+        "answer": 0,
+        "explanation": "NISQ QML: 浅线路 VQA, 受噪声/barren plateau 限制。容错 QML: (1) 精确相位估计→精确基态能量(量子化学); (2) 量子线性代数(HHL→推荐系统?); (3) 量子 SDP 求解器。但: (1) qRAM 假设通常不现实; (2)\"去量化\"——Tang 等证明很多 HHL 应用可经典化(采样+低秩近似)。剩余优势: 量子模拟(Hamiltonian 时间演化)是最robust的量子优势——QML 与量子模拟的交叉点(如用 ML 学习量子相变)可能是 killer app。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="quantum"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/quantum.html" class="module-name">量子计算</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 变分量子线路与参数化量子门</a></li>
+      <li><a href="#kp2">02 · 量子核方法</a></li>
+      <li><a href="#kp3">03 · VQE 与 QAOA</a></li>
+      <li><a href="#kp4">04 · 量子优势的前沿与挑战</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>量子机器学习</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>变分量子线路与参数化量子门</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当前量子硬件（NISQ 时代）噪声大、量子比特少，无法运行深层精确 算法。变分量子线路(Variational Quantum Circuit, VQC)——也叫参数 化量子线路(PQC)——用浅层量子线路+经典优化器的混合范式，是 NISQ 设备上最有希望的计算模型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>VQC \(=\) 参数化酉算子 \(U(\theta)\)；经典优化器调节 \(\theta\) 最小化 损失函数 \(L(\theta) = \langle 0|U^\dagger(\theta) H U(\theta)|0\rangle\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>参数化量子门：\(R_Y(\theta) = e^{-i\theta Y/2}\)，\(R_Z(\phi) = e^{-i\phi Z/2}\)。 Ansatz 结构：交替层 \(U(\theta) = \prod_{l=1}^{L} W_l(\theta_l) V_l\)， 其中 \(W_l\) 是参数化旋转层，\(V_l\) 是纠缠层(CNOT)。 参数位移规则(Parameter Shift Rule)： \[\frac{\partial L}{\partial \theta_i} = \frac{L(\theta_i + \pi/2) - L(\theta_i - \pi/2)}{2}\] 只需两次线路执行即可精确计算梯度——不需要反向传播！ Barren Plateau 问题：随机初始化时，对于输出量子比特数 \(n\)： \[\mathrm{Var}\left[\frac{\partial L}{\partial \theta_i}\right] \sim O(2^{-n})\] 梯度指数衰减——深线路+大系统面临训练困难。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>VQE(Variational Quantum Eigensolver)：估计分子基态能量。 QAOA(Quantum Approximate Optimization Algorithm)：组合优化近似求解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：单量子比特 VQC \(U(\theta) = R_Y(\theta)\)，测量 \(Z\) 期望。 \(L(\theta) = \langle 0|R_Y(-\theta)ZR_Y(\theta)|0\rangle\)。 解答：\(R_Y(\theta)|0\rangle = \cos(\theta/2)|0\rangle + \sin(\theta/2)|1\rangle\)。 \(L(\theta) = \cos^2(\theta/2) - \sin^2(\theta/2) = \cos\theta\)。 参数位移验证：\(\frac{L(\theta+\pi/2) - L(\theta-\pi/2)}{2} = \frac{\cos(\theta+\pi/2) - \cos(\theta-\pi/2)}{2} = -\sin\theta\)。✓ 易错点：参数位移规则只适用于生成元特征值为 \(\pm 1/2\) 的门。一般门需修正。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Barren Plateau 现象指的是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。梯度方差 \\(\\sim O(2^{-n})\\)，使得随机初始化几乎无法找到有效方向。')">A. 量子线路深度不够</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！梯度方差 \\(\\sim O(2^{-n})\\)，使得随机初始化几乎无法找到有效方向。')">B. 损失函数梯度指数衰减至零</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。梯度方差 \\(\\sim O(2^{-n})\\)，使得随机初始化几乎无法找到有效方向。')">C. 量子噪声破坏计算</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。梯度方差 \\(\\sim O(2^{-n})\\)，使得随机初始化几乎无法找到有效方向。')">D. 经典优化器收敛慢</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>量子核方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子计算可以自然地定义高维特征映射：将经典数据 \(x\) 编码为量子态 \(|\phi(x)\rangle\)，内积 \(|\langle\phi(x)|\phi(x')\rangle|^2\) 定义量子核。 量子核方法将经典核 SVM 推广到量子特征空间，理论上可以访问经典 难以计算的核函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>量子特征映射 \(x \mapsto |\phi(x)\rangle \in \mathcal{H}_{2^n}\) 嵌入到 指数维 Hilbert 空间。量子核 \(K(x,x') = |\langle\phi(x)|\phi(x')\rangle|^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>量子特征映射：编码线路 \(U_\phi(x)|0\rangle^n = |\phi(x)\rangle\)。 常用方案：ZZ-feature map \[U_\phi(x) = \exp\left(i\sum_{j<k} (x_j x_k) Z_j Z_k\right) \prod_j R_Z(x_j)\] 量子核的计算： \[K(x, x') = |\langle 0^n| U_\phi^\dagger(x') U_\phi(x) |0^n\rangle|^2\] 在量子计算机上用 SWAP test 或 Hadamard test 估计。 量子优势条件（Liu et al. 2021）：当量子核对应的 RKHS 包含 经典核无法高效近似的函数类时，量子核 SVM 有指数优势。 但同时存在"指数集中"(exponential concentration)问题： \[K(x, x') \to \delta_{xx'} \quad \text{当 } n \to \infty\] 核矩阵退化为单位矩阵——失去泛化能力。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>分子性质分类、金融风险评估中的模式识别——量子核在小数据集上有潜力。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：2-qubit，\(U_\phi(x) = R_Z(x_1) \otimes R_Z(x_2)\)。 求 \(K(x,x')\)。 解答：\(|\phi(x)\rangle = e^{-ix_1 Z/2}|0\rangle \otimes e^{-ix_2 Z/2}|0\rangle = e^{-ix_1/2}|0\rangle \otimes e^{-ix_2/2}|0\rangle\)。 \(\langle\phi(x')|\phi(x)\rangle = e^{i(x'_1-x_1)/2} \cdot e^{i(x'_2-x_2)/2}\)。 \(K = |e^{i(x'_1-x_1+x'_2-x_2)/2}|^2 = 1\)。 核恒等于 1——太简单的编码无法区分数据！需要纠缠门。 易错点：全局相位不影响核值。纯旋转编码（不含纠缠）可能产生平凡核。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">量子核的指数集中问题会导致？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！当 \\(n\\) 大时 \\(K(x,x\\') \\approx 0\\)（\\(x \\neq x\\'\\)），核矩阵退化，')">A. 核矩阵趋近单位矩阵，失去泛化能力</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。当 \\(n\\) 大时 \\(K(x,x\\') \\approx 0\\)（\\(x \\neq x\\'\\)），核矩阵退化，')">B. 计算速度变慢</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。当 \\(n\\) 大时 \\(K(x,x\\') \\approx 0\\)（\\(x \\neq x\\'\\)），核矩阵退化，')">C. 量子比特退相干</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。当 \\(n\\) 大时 \\(K(x,x\\') \\approx 0\\)（\\(x \\neq x\\'\\)），核矩阵退化，')">D. 训练数据泄露</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>VQE 与 QAOA</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>VQE(Variational Quantum Eigensolver)瞄准量子化学——在 NISQ 设备 上估计分子 Hamilton 量的基态能量。QAOA(Quantum Approximate Optimization Algorithm)瞄准组合优化——如 MaxCut、旅行商等 NP-hard 问题。两者都是"量子-经典混合"范式的旗舰算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>VQE：\(\min_\theta \langle 0|U^\dagger(\theta) H U(\theta)|0\rangle\)，利用变分原理。 QAOA：\(p\) 层交替应用问题 Hamilton \(H_C\) 和混合 Hamilton \(H_B\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>VQE 流程： 1) 选择 ansatz \(U(\theta)\)（UCCSD、Hardware-efficient 等） 2) 在量子计算机上准备 \(|\psi(\theta)\rangle = U(\theta)|0\rangle\) 3) 测量 \(\langle H \rangle\) -- Hamilton 量分解为 Pauli 串的线性组合 \[H = \sum_i c_i P_i, \quad \langle H \rangle = \sum_i c_i \langle P_i \rangle\] 4) 经典优化器更新 \(\theta\)（COBYLA, L-BFGS-B 等） QAOA 线路（\(p\) 层）： \[|\gamma, \beta\rangle = \prod_{j=1}^{p} e^{-i\beta_j H_B} e^{-i\gamma_j H_C} |+\rangle^n\] \(H_C = \sum_{(i,j) \in E} \frac{1-Z_i Z_j}{2}\)（MaxCut 问题）。 \(H_B = \sum_i X_i\)（混合/驱动 Hamilton）。 \(p \to \infty\) 时 QAOA 给出精确解（绝热极限）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>VQE 已在 Google/IBM 量子硬件上演示 \(H_2, LiH\) 等小分子能量计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：2-qubit MaxCut QAOA（\(p=1\)），图为单边 \((0,1)\)。 \(H_C = (1-Z_0 Z_1)/2\)。初始态 \(|++\rangle\)。 1 层 QAOA 后测量 \(\langle H_C \rangle\)。 解答：\(e^{-i\gamma H_C}|++\rangle = e^{-i\gamma(1-Z_0Z_1)/2}|++\rangle\)。 \(|++\rangle\) 在 \(Z_0Z_1\) 的 \(+1,-1\) 特征空间的分量： \(|++\rangle = \frac{1}{2}(|00\rangle+|01\rangle+|10\rangle+|11\rangle)\)。 \(Z_0Z_1 = +1\) 对 \(|00\rangle,|11\rangle\)；\(= -1\) 对 \(|01\rangle,|10\rangle\)。 \(e^{-i\gamma/2}[e^{i\gamma/2}(|00\rangle+|11\rangle)+e^{-i\gamma/2}(|01\rangle+|10\rangle)]/2\)。 最优 \(\gamma, \beta\) 使切割期望最大化。 易错点：QAOA 的 \(p=1\) 通常只能给出近似解，增加 \(p\) 改善质量但线路更深。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">VQE 的变分原理保证？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！变分原理只保证上界。能否达到 \\(E_0\\) 取决于 ansatz 的表达能力。')">A. \(\langle\psi(\theta)|H|\psi(\theta)\rangle \geq E_0\)（基态能量）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。变分原理只保证上界。能否达到 \\(E_0\\) 取决于 ansatz 的表达能力。')">B. \(\langle\psi(\theta)|H|\psi(\theta)\rangle = E_0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。变分原理只保证上界。能否达到 \\(E_0\\) 取决于 ansatz 的表达能力。')">C. 收敛速度是多项式的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。变分原理只保证上界。能否达到 \\(E_0\\) 取决于 ansatz 的表达能力。')">D. ansatz 一定包含基态</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>量子优势的前沿与挑战</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子机器学习(QML)到底能否提供实际优势？这是该领域最核心的开放 问题。理论上已证明在特定人工构造问题上存在量子优势，但在自然/ 实际数据集上的优势尚无定论。理解量子优势的条件和限制是避免 "量子炒作"的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>量子优势 \(=\) 量子算法在某计算任务上比最优经典算法有渐进加速。 需区分：计算优势 vs 采样优势 vs 实际优势。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>已知的量子 ML 优势结果： 1) HHL 算法（量子线性系统求解）：时间 \(O(\log N \cdot \kappa^2 / \varepsilon)\) vs 经典 \(O(N\kappa)\)——但输入输出瓶颈限制实际应用。 \[A|x\rangle = |b\rangle \quad \Rightarrow \quad |x\rangle = A^{-1}|b\rangle\] 2) 量子采样优势：BosonSampling, Random Circuit Sampling 在采样 任务上有超多项式优势（已有实验验证）。 限制与挑战： - 数据加载(Data Loading)瓶颈：\(N\) 个经典数据编码到量子态可能需 \(O(N)\) - 去量子化(Dequantization, Tang 2019)：发现经典采样可模拟某些量子 ML 算法 - Barren plateau：指数级梯度消失 - 噪声：NISQ 设备误差累积</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>药物发现（分子模拟）和材料科学是 QML 最有可能首先实现优势的领域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：HHL 算法要求 \(A\) 的条件数 \(\kappa\) 小才高效。若 \(\kappa = N\)， 量子加速还存在吗？ 解答：HHL 复杂度 \(O(\text{poly}(\log N) \cdot \kappa^2)\)。 若 \(\kappa = N\)，则 \(\kappa^2 = N^2\)——比经典 \(O(N^2)\) 并无改善。 指数加速要求 \(\kappa = O(\text{poly}(\log N))\)。 易错点：引用量子加速时必须说明条件——无条件的"指数加速"声称通常是误导。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Tang(2019)的"去量子化"结果说明了什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。去量子化找到经典 \\(O(\\text{poly}(k, 1/\\varepsilon))\\) 替代方案（\\(k\\) = 低秩参数），')">A. 量子计算机不可能有任何优势</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！去量子化找到经典 \\(O(\\text{poly}(k, 1/\\varepsilon))\\) 替代方案（\\(k\\) = 低秩参数），')">B. 某些量子推荐系统算法可被经典模拟</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。去量子化找到经典 \\(O(\\text{poly}(k, 1/\\varepsilon))\\) 替代方案（\\(k\\) = 低秩参数），')">C. 量子核方法无意义</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。去量子化找到经典 \\(O(\\text{poly}(k, 1/\\varepsilon))\\) 替代方案（\\(k\\) = 低秩参数），')">D. NISQ 设备已经过时</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/applied/quantum.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 信源编码 — 信息论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "info-theory-ch02-q1",
+        "question": "前缀码（prefix-free code）的定义是什么？",
+        "options": [
+          "任何码字都不是另一个码字的前缀  B) 所有码字等长  C) 码字按字典序排列  D) 码字以 0 开头"
+        ],
+        "answer": 0,
+        "explanation": "前缀码保证唯一可解码性（unambiguous decoding）：读取比特流时，每遇到一个完整码字立即解码，不需要分隔符。例 \\(\\{0,10,11\\}\\) 是前缀码（\\(0\\) 不是 \\(10\\) 或 \\(11\\) 的前缀）。\\(\\{0,01,11\\}\\) 不是（\\(0\\) 是 \\(01\\) 的前缀）。前缀码等价于二叉树的叶节点标记。"
+      },
+      {
+        "id": "info-theory-ch02-q2",
+        "question": "Kraft 不等式：长度为 \\(l_1,l_2,...,l_n\\) 的前缀码存在的充要条件是 \\(\\sum 2^{-l_i}\\leq1\\)。码字长度 \\(l_1=1,l_2=2,l_3=2\\) 是否满足？",
+        "options": [
+          "是，\\(2^{-1}+2^{-2}+2^{-2}=1\\leq1\\)  B) 否，总和 \\(>1\\)  C) 否，需要等长  D) 无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(1/2+1/4+1/4=1\\leq1\\)✓。可构造前缀码：\\(\\{0,10,11\\}\\)。Kraft 不等式的等号意味着所有叶节点恰好填满二叉树（完整码树）。若 \\(\\sum 2^{-l_i}<1\\)，存在未被使用的叶节点（码树不满）——相当于浪费了码空间。"
+      },
+      {
+        "id": "info-theory-ch02-q3",
+        "question": "Shannon 第一定理（信源编码定理）的核心结论是什么？",
+        "options": [
+          "无损压缩的平均码长下界为熵 \\(H(X)\\)，且可被逼近  B) 压缩可以无限好  C) 熵等于码长  D) 必须用等长码"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\bar{L}\\geq H(X)\\)（下界），且存在前缀码使 \\(H(X)\\leq\\bar{L}<H(X)+1\\)。对 \\(n\\) 个独立符号联合编码（块编码），\\(\\bar{L}_n/n\\to H(X)\\)（\\(n\\to\\infty\\)）。直觉：熵是消息的\"真实信息量\"，不能用更少比特无损表示。Shannon 第一定理是数据压缩的理论极限。"
+      },
+      {
+        "id": "info-theory-ch02-q4",
+        "question": "对分布 \\(P(a)=0.5,P(b)=0.25,P(c)=0.125,P(d)=0.125\\)，Huffman 编码的码字长度为？",
+        "options": [
+          "\\(a:1,b:2,c:3,d:3\\)  B) \\(a:2,b:2,c:2,d:2\\)  C) \\(a:1,b:1,c:1,d:1\\)  D) \\(a:3,b:3,c:1,d:1\\)"
+        ],
+        "answer": 0,
+        "explanation": "Huffman 构造：合并最小概率 \\(c(0.125),d(0.125)\\to cd(0.25)\\)，再合并 \\(b(0.25),cd(0.25)\\to bcd(0.5)\\)，最后 \\(a(0.5),bcd(0.5)\\)。码：\\(a\\to0,b\\to10,c\\to110,d\\to111\\)。\\(\\bar{L}=0.5\\times1+0.25\\times2+0.125\\times3+0.125\\times3=1.75=H(X)\\)！此例恰好达到熵（因为概率都是 \\(2^{-k}\\)）。"
+      },
+      {
+        "id": "info-theory-ch02-q5",
+        "question": "算术编码相比 Huffman 编码的主要优势是什么？",
+        "options": [
+          "可以逼近每符号接近熵的码长，不受 1 bit 整数限制  B) 更简单  C) 不需要知道概率  D) 解码更快"
+        ],
+        "answer": 0,
+        "explanation": "Huffman 每个符号最少 1 bit（即使熵很低，如 \\(H=0.01\\) 时 Huffman 仍需 1 bit/符号）。算术编码将整个消息映射到 \\([0,1)\\) 的一个子区间，精确到 \\(H(X)+\\epsilon\\) bit/符号（\\(\\epsilon\\) 任意小）。JPEG、H.265/HEVC 视频编码都使用算术编码。而 DEFLATE（zip/gzip）基于 Huffman 因历史原因。"
+      },
+      {
+        "id": "info-theory-ch02-q6",
+        "question": "信源 \\(P(a)=0.5,P(b)=0.3,P(c)=0.2\\)。\\(H(X)=?\\)（取两位小数）",
+        "options": [
+          "\\(\\approx1.49\\) bit  B) \\(\\approx1.58\\) bit  C) \\(\\approx1.00\\) bit  D) \\(\\approx2.00\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(H=-0.5\\log_2 0.5-0.3\\log_2 0.3-0.2\\log_2 0.2=0.5+0.3\\times1.737+0.2\\times2.322=0.5+0.521+0.464=1.485\\approx1.49\\) bit。Huffman 编码此源：\\(a\\to0,b\\to10,c\\to11\\)，\\(\\bar{L}=0.5+0.6+0.4=1.5\\) bit \\(>H=1.49\\)。差距仅 0.01 bit。"
+      },
+      {
+        "id": "info-theory-ch02-q7",
+        "question": "McMillan 不等式说：任何唯一可解码码（不一定前缀码）也满足 \\(\\sum 2^{-l_i}\\leq1\\)。这意味着什么？",
+        "options": [
+          "前缀码在最优性上不逊于任何唯一可解码码  B) 前缀码码长更短  C) 非前缀码不存在  D) 等长码最优"
+        ],
+        "answer": 0,
+        "explanation": "McMillan 定理：唯一可解码码的码长集合 \\(\\{l_i\\}\\) 满足 Kraft 不等式。因此一定存在具有相同码长集合的前缀码。结论：寻找最优码时只需考虑前缀码——不损失最优性。这大大简化了码设计问题（Huffman 算法只搜索前缀码即可）。"
+      },
+      {
+        "id": "info-theory-ch02-q8",
+        "question": "对 \\(P(a)=0.4,P(b)=0.3,P(c)=0.2,P(d)=0.1\\) 构造 Huffman 编码。平均码长 \\(\\bar{L}=?\\)",
+        "options": [
+          "\\(1.9\\) bit  B) \\(2.0\\) bit  C) \\(1.85\\) bit  D) \\(1.7\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "合并 \\(c(0.2),d(0.1)\\to0.3\\)。合并 \\(b(0.3),cd(0.3)\\to0.6\\)。合并 \\(a(0.4),bcd(0.6)\\)。码：\\(a\\to0(1),b\\to10(2),c\\to110(3),d\\to111(3)\\)。\\(\\bar{L}=0.4\\times1+0.3\\times2+0.2\\times3+0.1\\times3=0.4+0.6+0.6+0.3=1.9\\)。\\(H=1.846\\)（可验证），\\(\\bar{L}=1.9>H\\)，冗余 \\(=0.054\\) bit。"
+      },
+      {
+        "id": "info-theory-ch02-q9",
+        "question": "算术编码中消息 \"ab\" 的区间（\\(P(a)=0.6,P(b)=0.4\\)）：初始 \\([0,1)\\)，\"a\" 后区间 \\([0,0.6)\\)，\"b\" 后区间为？",
+        "options": [
+          "\\([0.36,0.6)\\)  B) \\([0,0.4)\\)  C) \\([0.6,1.0)\\)  D) \\([0.24,0.6)\\)"
+        ],
+        "answer": 0,
+        "explanation": "区间 \\([L,H)=[0,0.6)\\)，宽度 \\(w=0.6\\)。\"b\" 对应概率区间 \\([0.6,1.0)\\)（在 \\(P\\) 的 CDF 中）。新区间：\\(L'=L+w\\times0.6=0+0.6\\times0.6=0.36\\)，\\(H'=L+w\\times1.0=0.6\\)。所以 \"ab\" \\(\\to[0.36,0.6)\\)。输出满足 \\(0.36\\leq x<0.6\\) 的最短二进制小数即为码字。码长 \\(\\approx-\\log_2(0.6-0.36)=-\\log_2 0.24\\approx2.06\\) bit。"
+      },
+      {
+        "id": "info-theory-ch02-q10",
+        "question": "Huffman 编码的最优性：在所有前缀码中 \\(\\bar{L}\\) 最小。但它是否对单个符号最优？",
+        "options": [
+          "对单个符号最优，但对序列编码（块编码）不一定最优  B) 全局最优  C) 仅对二元源最优  D) 不最优"
+        ],
+        "answer": 0,
+        "explanation": "Huffman 在逐符号编码的前缀码中最优。但 \\(H\\leq\\bar{L}<H+1\\)，码长受整数位限制。对 \\(n\\) 个符号联合 Huffman 编码（\\(|\\mathcal{X}|^n\\) 个联合符号），\\(H^{(n)}\\leq\\bar{L}_n<H^{(n)}+1\\)，\\(\\bar{L}_n/n<H+1/n\\)。\\(n\\to\\infty\\) 可无限逼近 \\(H\\) 但字母表指数膨胀。算术编码无此限制——对任意长消息直接逼近 \\(H\\)。"
+      },
+      {
+        "id": "info-theory-ch02-q11",
+        "question": "信源编码定理的逆定理：若编码率 \\(R<H(X)\\)，则错误概率如何？",
+        "options": [
+          "错误概率 \\(P_e\\to1\\)（\\(n\\to\\infty\\)）  B) \\(P_e\\to0\\)  C) \\(P_e=0.5\\)  D) 取决于编码方式"
+        ],
+        "answer": 0,
+        "explanation": "\\(R<H\\) 意味着比特预算不够表示消息的全部变异性。典型集中有 \\(\\approx2^{nH}\\) 个典型序列，但只有 \\(2^{nR}<2^{nH}\\) 个码字，不能覆盖所有典型序列。\\(P_e\\to1\\)。这就是压缩的硬极限——不能无损压缩到小于熵。有损压缩（\\(R<H\\)）需要率失真理论框架。"
+      },
+      {
+        "id": "info-theory-ch02-q12",
+        "question": "LZ77（Lempel-Ziv 77）算法的核心思想是什么？",
+        "options": [
+          "用\"(偏移, 长度, 下一字符)\"三元组表示重复字串  B) 统计字符频率  C) 分块编码  D) 使用固定码本"
+        ],
+        "answer": 0,
+        "explanation": "LZ77 在滑动窗口中寻找当前待编码串的最长匹配，输出 \\((d,l,c)\\)：\\(d\\) 是匹配距离，\\(l\\) 是匹配长度，\\(c\\) 是匹配后下一个字符。无需事先知道概率分布——自适应、通用。gzip/DEFLATE = LZ77 + Huffman 编码。LZ 算法族是\"通用无损压缩\"——对任意遍历信源渐近达到熵率。"
+      },
+      {
+        "id": "info-theory-ch02-q13",
+        "question": "Context mixing（如 PAQ 压缩器）的核心思想是什么？",
+        "options": [
+          "组合多个上下文模型的预测，自适应加权  B) 使用单一模型  C) 仅 Huffman 编码  D) 不使用概率模型"
+        ],
+        "answer": 0,
+        "explanation": "PAQ 等压缩器使用多个上下文模型（不同阶的 Markov 模型、match 模型等），每个模型产生下一符号的概率预测。通过 logistic mixing 或线性加权组合这些预测，送入算术编码器。自适应权重在压缩过程中在线更新（类似在线学习）。PAQ 系列在多个压缩竞赛中获胜，逼近人类可感知的压缩极限。"
+      },
+      {
+        "id": "info-theory-ch02-q14",
+        "question": "渐近等分性（AEP）：随机变量 \\(X_1,...,X_n\\) i.i.d.，\\(-\\frac{1}{n}\\log P(X_1,...,X_n)\\xrightarrow{P} H(X)\\)。这意味着什么？",
+        "options": [
+          "大部分序列的概率接近 \\(2^{-nH}\\)——典型集中有 \\(\\approx2^{nH}\\) 个序列  B) 所有序列等概  C) 概率趋于 0  D) 仅适用于均匀分布"
+        ],
+        "answer": 0,
+        "explanation": "典型集 \\(\\mathcal{A}_\\epsilon^{(n)}=\\{x^n:2^{-n(H+\\epsilon)}\\leq P(x^n)\\leq2^{-n(H-\\epsilon)}\\}\\)。三个关键性质：(1)\\(P(\\mathcal{A}_\\epsilon^{(n)})\\to1\\)；(2)\\(|\\mathcal{A}_\\epsilon^{(n)}|\\leq2^{n(H+\\epsilon)}\\)；(3)\\(|\\mathcal{A}_\\epsilon^{(n)}|\\geq(1-\\epsilon)2^{n(H-\\epsilon)}\\)。AEP 是信源编码和信道编码的核心工具——只需为典型序列分配码字。"
+      },
+      {
+        "id": "info-theory-ch02-q15",
+        "question": "Shannon-Fano 编码与 Huffman 编码的区别是什么？",
+        "options": [
+          "Shannon-Fano 从顶向下分割概率，不一定最优；Huffman 从底向上合并，保证最优  B) Shannon-Fano 更优  C) 两者相同  D) Huffman 从顶向下"
+        ],
+        "answer": 0,
+        "explanation": "Shannon-Fano：按概率分两组使两组总概率尽量接近，递归切分。这是贪心策略但不保证全局最优。Huffman：每步合并两个最小概率节点，可证明全局最优。例外：当概率分布使得 SF 的分割恰好匹配 Huffman 结构时两者相同。实践中 Huffman 总是首选（或直接用算术编码）。"
+      },
+      {
+        "id": "info-theory-ch02-q16",
+        "question": "LZ78/LZW 算法维护一个逐步增长的字典。gzip 和 PNG 分别使用哪种 LZ 变体？",
+        "options": [
+          "gzip 使用 LZ77（DEFLATE），PNG 使用 LZ77（DEFLATE）  B) gzip 使用 LZW，PNG 使用 LZ77  C) 都使用 LZW  D) 都使用 LZ78"
+        ],
+        "answer": 0,
+        "explanation": "DEFLATE = LZ77 + Huffman，被 gzip、zip、PNG 使用。LZW（Lempel-Ziv-Welch）被 GIF 和早期 Unix compress 使用，因 Unisys 专利问题一度引发争议（1994-2004）。现代：zstd（Facebook）使用改进的 LZ77 + 有限状态熵编码，压缩率和速度都优于 DEFLATE。"
+      },
+      {
+        "id": "info-theory-ch02-q17",
+        "question": "\\(n\\) 个 i.i.d. 二元符号（\\(P(0)=p=0.3\\)），典型集大小约为 \\(2^{nH(0.3)}\\)。\\(H(0.3)\\approx?\\)",
+        "options": [
+          "\\(\\approx0.881\\) bit  B) \\(\\approx0.5\\) bit  C) \\(\\approx1.0\\) bit  D) \\(\\approx0.3\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(0.3)=-0.3\\log_2 0.3-0.7\\log_2 0.7=0.3\\times1.737+0.7\\times0.515=0.521+0.360=0.881\\) bit。\\(n=100\\) 时典型集约 \\(2^{88.1}\\approx3\\times10^{26}\\)，而总序列 \\(2^{100}\\approx1.27\\times10^{30}\\)。典型集仅占 \\(2^{-11.9}\\approx0.026\\%\\) 的序列却占近 100% 的概率——这就是 AEP 的惊人结论。"
+      },
+      {
+        "id": "info-theory-ch02-q18",
+        "question": "对 \\(P=(0.3,0.3,0.2,0.1,0.1)\\) 分别用 Huffman 和 Shannon 编码（\\(l_i=\\lceil-\\log_2 p_i\\rceil\\)）。比较两者平均码长。",
+        "options": [
+          "Huffman \\(\\bar{L}=2.3\\)，Shannon \\(\\bar{L}=2.5\\)  B) 两者相同  C) Shannon 更好  D) Huffman \\(=2.0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Shannon 码长：\\(l_1=l_2=\\lceil1.737\\rceil=2,l_3=\\lceil2.322\\rceil=3,l_4=l_5=\\lceil3.322\\rceil=4\\)。\\(\\bar{L}_S=0.3\\times2+0.3\\times2+0.2\\times3+0.1\\times4+0.1\\times4=0.6+0.6+0.6+0.4+0.4=2.6\\)。Huffman：合并 \\(0.1,0.1\\to0.2\\)，合并 \\(0.2,0.2\\to0.4\\)，合并 \\(0.3,0.3\\to0.6\\)，合并 \\(0.4,0.6\\)。码长 \\(\\{2,2,2,3,3\\}\\)。\\(\\bar{L}_H=2\\times0.3+2\\times0.3+2\\times0.2+3\\times0.1+3\\times0.1=0.6+0.6+0.4+0.3+0.3=2.2\\)。\\(H\\approx2.17\\)。"
+      },
+      {
+        "id": "info-theory-ch02-q19",
+        "question": "自适应 Huffman 编码（如 Vitter 算法）在编码过程中动态更新码树。其主要挑战是什么？",
+        "options": [
+          "维护 sibling 性质（保持节点按权值和编号排序）以保证实时最优  B) 存储所有历史数据  C) 计算概率  D) 处理大文件"
+        ],
+        "answer": 0,
+        "explanation": "Vitter 算法维护 FGK 树的\"兄弟性质\"：相同深度的节点按权值排序，权值相同时按编号排序。每次新符号后更新受影响节点（可能涉及交换和重新排序），保证当前码树在当前频率下是 Huffman 最优。复杂度 \\(O(L)\\)（\\(L\\) 是当前码字长度）每符号。实际中自适应算术编码更常用（如 gzip 的方式是两遍：第一遍统计，第二遍编码）。"
+      },
+      {
+        "id": "info-theory-ch02-q20",
+        "question": "\\(n\\) 个二元 i.i.d 符号，使用率 \\(R<H\\) 的固定长码。由信源编码逆定理，\\(P_e\\) 以什么速率趋向 1？",
+        "options": [
+          "指数速率：\\(P_e\\geq1-2^{-n(H-R-\\epsilon)}\\) 对某 \\(\\epsilon>0\\)  B) 线性速率  C) 对数速率  D) 多项式速率"
+        ],
+        "answer": 0,
+        "explanation": "\\(R<H\\) 时码字数 \\(2^{nR}\\) 无法覆盖典型集（\\(\\sim2^{nH}\\)）。未覆盖比例 \\(\\geq1-2^{nR}/2^{n(H-\\epsilon)}\\to1\\)（指数快）。更精确：使用大偏差理论，\\(P_e\\geq1-2^{-nD}\\)，其中 \\(D\\) 是某个 KL 散度。指数速率意味着即使略低于 \\(H\\)，错误也迅速累积——无损压缩不存在\"接近熵\"的模糊地带。"
+      },
+      {
+        "id": "info-theory-ch02-q21",
+        "question": "对长度 \\(n=1000\\) 的 i.i.d 二元源 \\(P(0)=0.9\\)，典型集大小约为 \\(2^{1000\\times H(0.9)}=2^{469}\\)。非典型序列（全 0 序列）的概率是？",
+        "options": [
+          "\\(0.9^{1000}\\approx2^{-152}\\)（极小但该序列是最可能的单一序列）  B) 近似 0  C) \\(1\\)  D) \\(0.5\\)"
+        ],
+        "answer": 0,
+        "explanation": "全 0 序列 \\(P=0.9^{1000}=2^{1000\\log_2 0.9}\\approx2^{-152}\\)。典型序列概率 \\(\\approx2^{-469}\\)。全 0 序列比任何单个典型序列可能 \\(2^{317}\\) 倍！但它是一个非典型序列（偏离 \\(p=0.9\\) 的\"期望频率\"\\(900:100\\)）。单个序列最可能，但典型集中有 \\(2^{469}\\) 个典型序列，集合概率 \\(\\to1\\)。这就是\"典型 vs 最可能\"的直觉张力。"
+      },
+      {
+        "id": "info-theory-ch02-q22",
+        "question": "Huffman 编码的最优性证明中，关键引理是什么？",
+        "options": [
+          "最优前缀码中概率最小的两个符号的码字长度相同且为最长  B) 概率最大的符号码字最长  C) 所有码字等长  D) 码树必须完全二叉"
+        ],
+        "answer": 0,
+        "explanation": "引理：存在最优前缀码使得概率最小的两个符号 \\(x_1,x_2\\) 的码字长度相同（\\(l_1=l_2=l_{\\max}\\)）且仅在最后一位不同（即它们是码树中最深叶节点的兄弟）。证明：若不然，交换使其成立不增加 \\(\\bar{L}\\)。此引理使 Huffman 贪心（合并最小两个→ 递归）正确性可归纳证明。"
+      },
+      {
+        "id": "info-theory-ch02-q23",
+        "question": "Range coding 和算术编码的区别是什么？",
+        "options": [
+          "Range coding 用整数运算替代算术编码的小数运算，实现更简单  B) Range coding 更精确  C) 两者完全不同  D) Range coding 不使用概率"
+        ],
+        "answer": 0,
+        "explanation": "算术编码操作 \\([L,H)\\) 区间的精确有理数（理论上需无限精度）。Range coding 用有限位整数（如 32 位）表示区间，通过\"归一化\"（renormalization）在进位/下溢时输出比特并放大区间。效率几乎等同（损失 \\(<0.01\\%\\)），但不涉及算术编码的专利（2004 年前 IBM 持有相关专利）。zstd、LZMA 都使用 range coding。"
+      },
+      {
+        "id": "info-theory-ch02-q24",
+        "question": "冗余度 \\(r=\\bar{L}-H(X)\\)。对 3 元等概率源（\\(P=1/3\\)），Huffman 编码的冗余度是？",
+        "options": [
+          "\\(\\approx0.415\\) bit  B) \\(0\\) bit  C) \\(1\\) bit  D) \\(\\approx0.082\\) bit"
+        ],
+        "answer": 3,
+        "explanation": "\\(H=\\log_2 3\\approx1.585\\) bit。Huffman 码：\\(\\{0,10,11\\}\\)，\\(\\bar{L}=\\frac{1}{3}(1+2+2)=\\frac{5}{3}\\approx1.667\\)。\\(r=1.667-1.585=0.082\\) bit。冗余来自整数码长限制。对 2 符号块编码（9 种联合符号），\\(\\bar{L}_2/2\\) 更接近 \\(H\\)，但字母表从 3 增到 9。算术编码可直接达 \\(r\\approx0\\)。"
+      },
+      {
+        "id": "info-theory-ch02-q25",
+        "question": "Kraft 不等式的证明中，将二进制码树看作 \\([0,1)\\) 上的区间分割。长度为 \\(l_i\\) 的码字对应宽度为 \\(2^{-l_i}\\) 的区间。前缀无关条件等价于什么？",
+        "options": [
+          "所有码字区间互不重叠——前缀码 \\(\\Leftrightarrow\\) 区间不交集  B) 区间必须覆盖整个 \\([0,1)\\)  C) 区间宽度相同  D) 区间排列有序"
+        ],
+        "answer": 0,
+        "explanation": "码字 \\(w\\) 对应区间 \\([0.w,0.w+2^{-|w|})\\)。前缀无关 \\(\\Leftrightarrow\\) 这些区间互不包含（不重叠）。不交区间的宽度之和 \\(\\leq1\\)（\\([0,1)\\) 总宽度），即 \\(\\sum 2^{-l_i}\\leq1\\)。这个几何直觉使 Kraft 不等式的证明变得透明。反过来，给定满足 Kraft 的 \\(\\{l_i\\}\\)，可贪心从左到右分配不重叠区间——构造性证明前缀码存在。"
+      },
+      {
+        "id": "info-theory-ch02-q26",
+        "question": "JPEG 图像压缩中 DCT 系数经量化后使用 Huffman 编码（baseline JPEG）或算术编码（JPEG arithmetic）。为什么大多数 JPEG 文件使用 Huffman？",
+        "options": [
+          "历史原因（算术编码曾有专利限制）和实现简单性，尽管算术编码压缩率好 5-10%  B) Huffman 压缩率更好  C) 算术编码不适用于图像  D) JPEG 标准不支持算术编码"
+        ],
+        "answer": 0,
+        "explanation": "JPEG 标准自 1992 年起就支持算术编码，但 IBM 持有相关专利到 2004 年。因此所有软件默认 Huffman。专利过期后 libjpeg-turbo 等实现了算术模式，压缩率提升约 5-10%（因为算术编码不受 1 bit 整数限制）。JPEG 2000 使用算术编码（EBCOT），H.265/HEVC 也使用 CABAC（上下文自适应二进制算术编码）。"
+      },
+      {
+        "id": "info-theory-ch02-q27",
+        "question": "Zip 压缩文件夹包含 100 个相同的 1MB 文件。Zip 的压缩效果如何？Tar+gzip 呢？",
+        "options": [
+          "Zip 各文件独立压缩，不利用重复；tar+gzip 将所有文件连接后压缩，可利用文件间重复  B) 两者效果相同  C) Zip 更好  D) 都无法压缩"
+        ],
+        "answer": 0,
+        "explanation": "Zip 对每个文件独立 DEFLATE 压缩——100 个相同文件各自压缩为（约）同样大小，总文件 \\(\\approx100\\times\\)单文件压缩大小。tar 先归档（无压缩），然后 gzip 整体压缩——LZ77 发现巨量重复（滑动窗口 32KB 足以匹配前一复本），压缩率远高。对 100 个 1MB 相同文件：Zip \\(\\approx60\\) MB，tar.gz \\(\\approx0.6\\) MB（100 倍差距）。"
+      },
+      {
+        "id": "info-theory-ch02-q28",
+        "question": "视频通话（Zoom/Teams）使用的视频编码 H.264/H.265 中信源编码的角色是什么？",
+        "options": [
+          "在预测残差经变换+量化后，对量化系数进行熵编码（CAVLC/CABAC）——这是最终的无损压缩步骤  B) 直接压缩原始像素  C) 仅用于音频  D) 不使用信源编码"
+        ],
+        "answer": 0,
+        "explanation": "视频编码流水线：帧间/帧内预测 → 残差 → DCT/DST 变换 → 量化（有损）→ 熵编码（无损）。熵编码是最后一步，将量化后的稀疏系数矩阵压缩到接近其熵的比特数。H.264 支持 CAVLC（基于上下文的可变长码）和 CABAC（算术编码），CABAC 压缩率高约 10% 但计算量更大。4K 实时编码中 CABAC 是性能瓶颈之一。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="info-theory"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/info-theory.html" class="module-name">信息论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 无损编码与前缀码</a></li>
+      <li><a href="#kp2">02 · Shannon 第一定理（信源编码定理）</a></li>
+      <li><a href="#kp3">03 · Huffman 编码</a></li>
+      <li><a href="#kp4">04 · 算术编码与 Lempel-Ziv</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>信源编码</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>无损编码与前缀码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何用最少的比特数无损表示消息？这是信源编码的核心问题。前缀码 （任何码字不是另一个的前缀）保证了唯一可解码性，是实用编码的 基础。理解前缀码的结构是学习 Huffman 和算术编码的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>编码 = 符号 \(\to\) 二进制串的映射。前缀码的结构等价于完全二叉树， 每个叶子对应一个符号。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>唯一可解码码</strong>：对任意密文串，解码结果唯一。 <strong>前缀码</strong>：没有码字是另一个的前缀。前缀码 \(\Rightarrow\) 唯一可解码。 <strong>Kraft 不等式</strong>：存在码字长度为 \(l_1, \ldots, l_n\) 的前缀码 的充要条件： \[\sum_{i=1}^n 2^{-l_i} \leq 1\] 证明（必要性）：将码字视为 \([0,1)\) 上的不相交区间， \(l_i\) 位码字对应长度 \(2^{-l_i}\) 的区间。不相交： \(\sum 2^{-l_i} \leq 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 所有实用压缩算法（gzip, PNG, FLAC）都基于前缀码或其变体</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(l_1=1, l_2=2, l_3=3, l_4=3\)，是否存在前缀码？ 解答：Kraft 和 \(= 2^{-1}+2^{-2}+2^{-3}+2^{-3} = 0.5+0.25+0.125+0.125 = 1 \leq 1\)。✓ 可构造：\(\{0, 10, 110, 111\}\)。 易错点：Kraft 不等式仅说明「存在性」，不保证任意分配都是前缀码。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个码为前缀码？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。A 中 0 是 01 的前缀；C 中 1 是 10 的前缀；D 中 0 是 00/01 的前缀。')">A. \(\{0, 01, 011\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！A 中 0 是 01 的前缀；C 中 1 是 10 的前缀；D 中 0 是 00/01 的前缀。')">B. \(\{0, 10, 110, 111\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。A 中 0 是 01 的前缀；C 中 1 是 10 的前缀；D 中 0 是 00/01 的前缀。')">C. \(\{1, 10, 100\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。A 中 0 是 01 的前缀；C 中 1 是 10 的前缀；D 中 0 是 00/01 的前缀。')">D. \(\{00, 01, 0, 1\}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Shannon 第一定理（信源编码定理）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>数据压缩的理论极限是什么？Shannon 第一定理给出了明确答案： 平均码长不可能低于熵 \(H(X)\)，且存在逼近熵的编码方案。 这一定理将熵的抽象概念与实际编码连接起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>熵 = 压缩的理论极限，这是信息论最核心的运算意义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Shannon 第一定理</strong>：对于离散无记忆信源 \(X \sim p\)， 任何唯一可解码编码的平均码长满足 \[H(X) \leq \bar{L} = \sum p(x) l(x)\] 下界证明：由 Gibbs 不等式，设 \(q(x) = 2^{-l(x)}/\sum 2^{-l(x)}\)， \[\bar{L} - H(X) = \bar{L} - H(X) \geq D_{KL}(p \| q) - \log\sum 2^{-l(x)} \geq 0 - 0 = 0\] （利用 Kraft 不等式 \(\sum 2^{-l(x)} \leq 1\)） 上界：取 \(l(x) = \lceil -\log_2 p(x) \rceil\) 得 \[H(X) \leq \bar{L} < H(X) + 1\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 压缩率 = 实际编码率 / 熵，越接近 1 越好</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：信源 \(P(A)=1/2, P(B)=1/4, P(C)=1/8, P(D)=1/8\)。 Shannon 码长 \(l(x) = \lceil -\log p(x) \rceil\)，求平均码长。 解答：\(l(A)=1, l(B)=2, l(C)=3, l(D)=3\)。 \(\bar{L} = 1/2 \cdot 1 + 1/4 \cdot 2 + 2 \cdot 1/8 \cdot 3 = 0.5+0.5+0.75 = 1.75\)。 \(H = 1.75\)。本例 \(\bar{L} = H\)，已达到极限！这因为概率都是 2 的幂次。 易错点：当概率不是 2 的幂次时， \(\bar{L} > H\)，间隙可达接近 1 bit。 可通过分块编码——将 \(n\) 个符号联合编码——缩小间隙。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Shannon 第一定理说明无损压缩的平均码长极限是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\bar{L} \\geq H(X)\\) 且存在方案使 \\(\\bar{L} < H(X)+1\\)。')">A. 1 bit/ 符号</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\bar{L} \\geq H(X)\\) 且存在方案使 \\(\\bar{L} < H(X)+1\\)。')">B. \(\log_2 |\mathcal{X}|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\bar{L} \\geq H(X)\\) 且存在方案使 \\(\\bar{L} < H(X)+1\\)。')">C. \(H(X)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\bar{L} \\geq H(X)\\) 且存在方案使 \\(\\bar{L} < H(X)+1\\)。')">D. \(H(X) + 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Huffman 编码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何构造最优前缀码（平均码长最短）？Huffman 编码是一种贪心算法， 可证明在所有前缀码中达到最短平均码长。这是信源编码实践中最经典 的算法，也是理解「各符号编码」(symbol code)局限性的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>贪心策略：每次合并概率最小的两个符号，自底向上构建二叉树。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Huffman 算法</strong>： (1) 将每个符号视为叶子节点，权重 = 概率 (2) 取权重最小的两个节点合并，新节点权重 = 两者之和 (3) 重复直到只剩一个根节点 (4) 从根到叶，左分支赋 0，右分支赋 1 <strong>最优性</strong>：Huffman 码的平均码长满足 \[H(X) \leq \bar{L}_{\text{Huff}} \leq H(X) + 1\] 且在所有前缀码中最优（平均码长最短）。 <strong>局限性</strong>：每个符号码长必须为整数。15 个符号等概率时， \(H = \log_2 15 \approx 3.91\)，但 Huffman 码长必须 \(\geq 4\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- JPEG 的熵编码阶段使用 Huffman - DEFLATE（gzip/PNG）结合 LZ77 + Huffman</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：符号 A(0.4), B(0.3), C(0.2), D(0.1)，构造 Huffman 码。 解答：合并 C+D=0.3; 合并 B+(CD)=0.6; 合并 A+B(CD)=1.0。 A=0, B=10, C=110, D=111。 \(\bar{L} = 0.4 \times 1 + 0.3 \times 2 + 0.2 \times 3 + 0.1 \times 3 = 1.9\) bit。 \(H = 1.846\) bit。\(\bar{L} - H = 0.054\)，非常接近极限。 易错点：Huffman 码不唯一——交换左右子树得到不同码字， 但平均码长相同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Huffman 编码的局限性是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。整数码长约束使得平均码长最多超出 \\(H\\) 一个 bit。')">A. 无法处理连续数据</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！整数码长约束使得平均码长最多超出 \\(H\\) 一个 bit。')">B. 每个符号码长必须为整数，浪费可达 1 bit/符号</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。整数码长约束使得平均码长最多超出 \\(H\\) 一个 bit。')">C. 只能处理二进制数据</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。整数码长约束使得平均码长最多超出 \\(H\\) 一个 bit。')">D. 编码速度太慢</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>算术编码与 Lempel-Ziv</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Huffman 的整数码长限制使其无法完全逼近熵。算术编码将整个消息 编码为一个区间内的实数，可任意逼近熵。而 Lempel-Ziv 类算法 （LZ77/LZ78）不需要概率模型，通过字典自适应实现通用压缩， 是 gzip、zstd 等实用工具的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>算术编码：将消息映射到 \([0,1)\) 的子区间，区间长度 = 消息概率。 LZ：用「已见过的字符串」构建字典，引用代替重复。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>算术编码</strong>：消息 \(x_1 x_2 \ldots x_n\)，维护区间 \([L, H)\)。 初始 \([0, 1)\)，每个符号 \(x_i\) 将区间按概率 \(p(x_i)\) 等比例缩小： \[[L_{\text{new}}, H_{\text{new}}) = [L + p_{<x_i}(H-L),\; L + p_{\leq x_i}(H-L))\] 最终区间长度 \(= \prod p(x_i) = 2^{-n\bar{H}}\)， 编码长度 \(\approx -\log_2 \prod p(x_i) = n\bar{H}\)，逼近熵。 <strong>LZ77</strong>：滑动窗口，编码为 (offset, length, next)。 <strong>LZ78</strong>：显式字典，编码为 (字典索引, 新字符)。 渐近最优性：对平稳遍历信源，LZ 压缩率收敛到熵率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- gzip = LZ77 + Huffman，zstd = LZ77 + Huffman + FSE - PNG 图像压缩使用 DEFLATE（LZ77 + Huffman）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用算术编码编码 "AB"，\(P(A)=0.6, P(B)=0.4\)。 解答：初始 \([0, 1)\)。 A 对应 \([0, 0.6)\)；区间变为 \([0, 0.6)\)。 B 在 \([0, 0.6)\) 中对应后 40%：\([0.36, 0.6)\)。 输出 \([0.36, 0.6)\) 中的任意点，如 0.5，编码为 "1" (二进制)。 编码长度 \(\approx -\log(0.24) \approx 2.06\) bit。 易错点：算术编码需要浮点精度随消息长度增长，实际实现用定点近似。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">算术编码相比 Huffman 编码的主要优势是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。算术编码将整个消息编码为一个区间，不受单符号整数码长限制。')">A. 解码更快</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。算术编码将整个消息编码为一个区间，不受单符号整数码长限制。')">B. 不需要知道符号概率</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！算术编码将整个消息编码为一个区间，不受单符号整数码长限制。')">C. 可逼近熵而不受整数码长限制</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。算术编码将整个消息编码为一个区间，不受单符号整数码长限制。')">D. 更简单</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/discrete/info-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

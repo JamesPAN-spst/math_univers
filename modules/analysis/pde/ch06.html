@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 Green 函数 — 偏微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "pde-ch06-q1",
+        "question": "PDE 中 Green 函数 \\(G(\\mathbf{x},\\mathbf{y})\\) 的定义：在区域 \\(\\Omega\\) 中满足？",
+        "options": [
+          "\\(-\\Delta_x G=\\delta(\\mathbf{x}-\\mathbf{y})\\)，\\(G|_{\\partial\\Omega}=0\\)",
+        "\\(\\Delta G=0\\)",
+        "\\(G=1\\) 在边界",
+        "\\(G\\) 是任意调和函数"
+        ],
+        "answer": 0,
+        "explanation": "Green 函数是点源在 Dirichlet 零边界条件下的响应。\\(G=\\Phi(\\mathbf{x}-\\mathbf{y})+h(\\mathbf{x})\\)，\\(\\Phi\\) 是基本解，\\(h\\) 是校正项使 \\(G=0\\) 在 \\(\\partial\\Omega\\)。知道 \\(G\\) 就能用积分公式给出任意 \\(f\\) 和边界值 \\(g\\) 下 Poisson 方程的解。"
+      },
+      {
+        "id": "pde-ch06-q2",
+        "question": "Green 函数的对称性 \\(G(\\mathbf{x},\\mathbf{y})=G(\\mathbf{y},\\mathbf{x})\\) 是由什么定理保证的？",
+        "options": [
+          "Green 第二恒等式 \\(\\int(u\\Delta v-v\\Delta u)=\\oint(u\\partial_n v-v\\partial_n u)\\)",
+        "分部积分",
+        "Stokes 定理",
+        "无法证明"
+        ],
+        "answer": 0,
+        "explanation": "取 \\(u=G(\\cdot,\\mathbf{x})\\)，\\(v=G(\\cdot,\\mathbf{y})\\)。\\(u\\Delta v-v\\Delta u=u\\delta_y-v\\delta_x\\) → \\(G(\\mathbf{y},\\mathbf{x})-G(\\mathbf{x},\\mathbf{y})=\\oint(u\\partial_n v-v\\partial_n u)=0\\)（边界上 \\(u=v=0\\)）。物理：互易原理。"
+      },
+      {
+        "id": "pde-ch06-q3",
+        "question": "上半平面 \\(\\{y>0\\}\\) 中 Laplace 方程的 Green 函数用镜像法：\\(G(\\mathbf{x},\\mathbf{x}_0)=\\)？",
+        "options": [
+          "\\(\\Phi(\\mathbf{x}-\\mathbf{x}_0)-\\Phi(\\mathbf{x}-\\mathbf{x}_0^*)\\)，\\(\\mathbf{x}_0^*=(x_{01},-x_{02})\\)",
+        "\\(\\Phi+\\Phi^*\\)",
+        "\\(2\\Phi\\)",
+        "\\(\\Phi/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbf{x}_0^*\\) 是 \\(\\mathbf{x}_0\\) 关于 \\(y=0\\) 的镜像。\\(G=\\Phi-\\Phi^*\\)：在 \\(y=0\\) 上 \\(|\\mathbf{x}-\\mathbf{x}_0|=|\\mathbf{x}-\\mathbf{x}_0^*|\\) → \\(G=0\\) ✓。\\(-\\Delta G=\\delta_{\\mathbf{x}_0}\\)（\\(\\Phi^*\\) 奇点在 \\(\\mathbf{x}_0^*\\) 处，不在上半平面）。"
+      },
+      {
+        "id": "pde-ch06-q4",
+        "question": "上半平面的 Poisson 核（二维）\\(P(x,y)\\) 的表达式？",
+        "options": [
+          "\\(P(x,y)=\\frac{y}{\\pi(x^2+y^2)}\\)",
+        "\\(P=\\frac{1}{2\\pi|x|}\\)",
+        "\\(P=e^{-y}\\)",
+        "\\(P=\\delta(x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P=-\\partial_{y_0}G|_{y_0=0}\\)。\\(G=-\\frac{1}{2\\pi}\\ln|\\mathbf{x}-\\mathbf{x}_0|+\\frac{1}{2\\pi}\\ln|\\mathbf{x}-\\mathbf{x}_0^*|\\)。对 \\(y_0\\) 求导并取 \\(y_0=0\\)：\\(P(x-x_0,y)=\\frac{y}{\\pi((x-x_0)^2+y^2)}\\)。\\(y\\to 0^+\\) 时 \\(P\\to\\delta(x-x_0)\\)。"
+      },
+      {
+        "id": "pde-ch06-q5",
+        "question": "用 Green 函数表示 Poisson 方程 \\(-\\Delta u=f\\)（\\(u|_{\\partial\\Omega}=g\\)）的解？",
+        "options": [
+          "\\(u(\\mathbf{x})=\\int_\\Omega G(\\mathbf{x},\\mathbf{y})f(\\mathbf{y})\\,d\\mathbf{y}-\\int_{\\partial\\Omega}g(\\mathbf{y})\\partial_{n_y}G(\\mathbf{x},\\mathbf{y})\\,dS_y\\)",
+        "\\(u=Gf\\)",
+        "\\(u=f/G\\)",
+        "\\(u=\\int fg\\)"
+        ],
+        "answer": 0,
+        "explanation": "Green 表示公式（由 Green 第三恒等式推导）。第一项 = 体源贡献（卷积），第二项 = 边界数据贡献（单层/双层位势）。\\(\\partial_{n_y}G\\) 就是 Poisson 核。一旦 \\(G\\) 已知，PDE 的解是一个积分运算。"
+      },
+      {
+        "id": "pde-ch06-q6",
+        "question": "镜像法适用于什么几何？",
+        "options": [
+          "具有简单对称性的区域（半空间、球、某些楔形域）",
+        "任意区域",
+        "仅正方形",
+        "仅圆盘"
+        ],
+        "answer": 0,
+        "explanation": "镜像法要求能将源点反射到区域外，使反射贡献恰好抵消基本解在边界的值。半空间（平面反射）、球（Kelvin 反演）是经典可解的情况。复杂区域（如 L 形）无法镜像——需要数值方法。"
+      },
+      {
+        "id": "pde-ch06-q7",
+        "question": "\\(u(x,y)=\\int_{-\\infty}^\\infty P(x-\\xi,y)g(\\xi)\\,d\\xi\\)（上半平面 Poisson 积分）。当 \\(y\\to 0^+\\) 时 \\(u\\to\\)？",
+        "options": [
+          "\\(g(x)\\)（恢复边界数据）",
+        "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(\\int g\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\cdot,y)\\to\\delta(\\cdot)\\) as \\(y\\to 0^+\\)（Poisson 核是 delta 的正则化族）。卷积 \\(P*g\\to g\\)。这保证了解满足边界条件。中间层（\\(y>0\\)）的解是边界数据的平滑版本——越远越平滑。"
+      },
+      {
+        "id": "pde-ch06-q8",
+        "question": "三维球 \\(B_R\\) 中 Laplace 方程的 Green 函数由 Kelvin 反演给出。\\(\\mathbf{x}_0\\) 的反演点 \\(\\mathbf{x}_0^*=\\)？",
+        "options": [
+          "\\(\\mathbf{x}_0^*=\\frac{R^2}{|\\mathbf{x}_0|^2}\\mathbf{x}_0\\)",
+        "\\(-\\mathbf{x}_0\\)",
+        "\\(R\\mathbf{x}_0\\)",
+        "\\(\\mathbf{x}_0/R\\)"
+        ],
+        "answer": 0,
+        "explanation": "Kelvin 反演将 \\(\\mathbf{x}_0\\)（球内）映到 \\(\\mathbf{x}_0^*\\)（球外），使得 \\(|\\mathbf{x}_0||\\mathbf{x}_0^*|=R^2\\)。\\(G=\\Phi(\\mathbf{x}-\\mathbf{x}_0)-\\frac{R}{|\\mathbf{x}_0|}\\Phi(\\mathbf{x}-\\mathbf{x}_0^*)\\)。在 \\(|\\mathbf{x}|=R\\) 上 \\(G=0\\) 可精确验证。"
+      },
+      {
+        "id": "pde-ch06-q9",
+        "question": "二维中四分之一平面 \\(\\{x>0,y>0\\}\\) 的 Green 函数需要几个镜像点？",
+        "options": [
+          "3 个镜像点（总共 4 个源/像）",
+        "1",
+        "2",
+        "7"
+        ],
+        "answer": 0,
+        "explanation": "原点 \\((a,b)\\)，关于 \\(x\\) 轴镜像 \\((a,-b)\\)，关于 \\(y\\) 轴 \\((-a,b)\\)，关于原点 \\((-a,-b)\\)。\\(G=\\Phi_{(a,b)}-\\Phi_{(a,-b)}-\\Phi_{(-a,b)}+\\Phi_{(-a,-b)}\\)。\\(x=0\\): \\(\\Phi_{(a,\\cdot)}-\\Phi_{(-a,\\cdot)}\\) 的两组抵消。\\(y=0\\) 类似。"
+      },
+      {
+        "id": "pde-ch06-q10",
+        "question": "单位圆盘的 Poisson 核（极坐标）\\(P_r(\\theta)=\\)？",
+        "options": [
+          "\\(\\frac{1-r^2}{1-2r\\cos\\theta+r^2}\\)",
+        "\\(\\frac{1}{1-r^2}\\)",
+        "\\(r\\cos\\theta\\)",
+        "\\(\\frac{1}{2\\pi}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P_r(\\theta)=\\text{Re}\\frac{1+re^{i\\theta}}{1-re^{i\\theta}}=\\frac{1-r^2}{1-2r\\cos\\theta+r^2}\\)。等价于 \\(\\sum_{n=-\\infty}^\\infty r^{|n|}e^{in\\theta}\\)（绝对收敛 Fourier 级数）。\\(r\\to 1^-\\) 时 \\(P_r\\to 2\\pi\\delta(\\theta)\\)。"
+      },
+      {
+        "id": "pde-ch06-q11",
+        "question": "Green 函数的谱展开：如果 \\(\\{(\\lambda_n,\\phi_n)\\}\\) 是 \\(-\\Delta\\) 在 \\(\\Omega\\) 上 Dirichlet 特征对，则 \\(G(\\mathbf{x},\\mathbf{y})=\\)？",
+        "options": [
+          "\\(\\sum_{n=1}^\\infty\\frac{\\phi_n(\\mathbf{x})\\phi_n(\\mathbf{y})}{\\lambda_n}\\)",
+        "\\(\\sum\\lambda_n\\phi_n\\)",
+        "\\(\\sum\\phi_n^2\\)",
+        "\\(\\prod\\frac{1}{\\lambda_n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "形式上 \\(G=(-\\Delta)^{-1}\\)，在特征基下 \\((-\\Delta)^{-1}\\phi_n=\\phi_n/\\lambda_n\\)。\\(G(\\mathbf{x},\\mathbf{y})=\\sum\\frac{\\phi_n(\\mathbf{x})\\phi_n(\\mathbf{y})}{\\lambda_n}\\)（Mercer 定理型展开）。收敛性由 \\(\\sum 1/\\lambda_n<\\infty\\)（Weyl 渐近 \\(\\lambda_n\\sim cn^{2/d}\\)）保证（\\(d\\geq 2\\)）。"
+      },
+      {
+        "id": "pde-ch06-q12",
+        "question": "热方程的 Green 函数（热核）在全空间中满足什么？",
+        "options": [
+          "\\(G_t-\\Delta_x G=\\delta(\\mathbf{x}-\\mathbf{y})\\delta(t-s)\\)，\\(G=0\\)（\\(t<s\\)）",
+        "\\(\\Delta G=0\\)",
+        "\\(G=\\Phi\\)",
+        "\\(G\\) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(\\mathbf{x},t;\\mathbf{y},s)=\\frac{1}{(4\\pi(t-s))^{n/2}}e^{-|\\mathbf{x}-\\mathbf{y}|^2/(4(t-s))}\\)（\\(t>s\\)）。因果性：\\(G=0\\)（\\(t<s\\)），信息只向前传播。这是热方程的传播子，所有解可用 \\(G\\) 表示。"
+      },
+      {
+        "id": "pde-ch06-q13",
+        "question": "在三维中，球 \\(B_R\\) 的 Green 函数 \\(G(\\mathbf{x},\\mathbf{y})\\) 的显式表达？",
+        "options": [
+          "\\(G=\\frac{1}{4\\pi|\\mathbf{x}-\\mathbf{y}|}-\\frac{R}{4\\pi|\\mathbf{y}||\\mathbf{x}-\\mathbf{y}^*|}\\)，\\(\\mathbf{y}^*=\\frac{R^2}{|\\mathbf{y}|^2}\\mathbf{y}\\)",
+        "\\(G=\\frac{1}{|\\mathbf{x}-\\mathbf{y}|}\\)",
+        "\\(G=\\ln|\\mathbf{x}-\\mathbf{y}|\\)",
+        "\\(G=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Phi(\\mathbf{x}-\\mathbf{y})=\\frac{1}{4\\pi|\\mathbf{x}-\\mathbf{y}|}\\)。校正项利用 Kelvin 反演 \\(\\mathbf{y}^*\\)，系数 \\(R/|\\mathbf{y}|\\) 确保在 \\(|\\mathbf{x}|=R\\) 上 \\(G=0\\)（利用 \\(|\\mathbf{x}-\\mathbf{y}^*|=\\frac{R}{|\\mathbf{y}|}|\\mathbf{x}-\\mathbf{y}|\\) 在球面上成立）。"
+      },
+      {
+        "id": "pde-ch06-q14",
+        "question": "Poisson 核的性质：\\(P(\\mathbf{x},\\mathbf{y})=-\\partial_{n_y}G(\\mathbf{x},\\mathbf{y})\\) 在 \\(\\partial\\Omega\\) 上满足 \\(\\int_{\\partial\\Omega}P\\,dS_y=\\)？",
+        "options": [
+          "\\(1\\)（归一化）",
+        "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(1/(4\\pi)\\)"
+        ],
+        "answer": 0,
+        "explanation": "取 \\(f=0\\)，\\(g=1\\)：\\(u\\equiv 1\\)。代入 Green 表示 \\(u(\\mathbf{x})=-\\int_{\\partial\\Omega}1\\cdot\\partial_{n_y}G\\,dS_y=\\int P\\,dS_y=1\\)。Poisson 核是概率度量——在边界上积分为 1。\\(u(\\mathbf{x})=\\int P g\\,dS\\) 是边界值的加权平均。"
+      },
+      {
+        "id": "pde-ch06-q15",
+        "question": "Green 函数谱展开在一维 \\([0,L]\\) 上：\\(\\phi_n=\\sqrt{2/L}\\sin(n\\pi x/L)\\)，\\(\\lambda_n=(n\\pi/L)^2\\)。则 \\(G(x,y)=\\)？",
+        "options": [
+          "\\(\\frac{2}{L}\\sum_{n=1}^\\infty\\frac{\\sin(n\\pi x/L)\\sin(n\\pi y/L)}{(n\\pi/L)^2}\\)",
+        "\\(\\sum\\sin(n\\pi x)\\sin(n\\pi y)\\)",
+        "\\(\\min(x,y)\\)",
+        "\\(xy/L\\)"
+        ],
+        "answer": 0,
+        "explanation": "直接代入 \\(G=\\sum\\phi_n(x)\\phi_n(y)/\\lambda_n\\)。闭合形式：\\(G(x,y)=\\frac{1}{L}\\min(x,y)(L-\\max(x,y))\\)（分段线性）。可以验证级数求和 = 闭合形式。一维 Green 函数就是弦在点载荷下的静力挠度。"
+      },
+      {
+        "id": "pde-ch06-q16",
+        "question": "Green 函数 \\(G(\\mathbf{x},\\mathbf{y})\\) 在 \\(\\mathbf{x}\\to\\mathbf{y}\\) 时的奇性行为？",
+        "options": [
+          "\\(G\\sim\\Phi(\\mathbf{x}-\\mathbf{y})\\)（基本解的奇性：\\(n=3\\) 时 \\(\\sim 1/|\\mathbf{x}-\\mathbf{y}|\\)）",
+        "\\(G\\to 0\\)",
+        "\\(G\\) 有界",
+        "\\(G\\to\\infty\\) 如 \\(e^{1/r}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(G=\\Phi+h\\)，\\(h\\) 在 \\(\\Omega\\) 中调和（光滑）。奇性完全来自 \\(\\Phi\\)：\\(n=2\\) 时 \\(\\Phi\\sim\\ln(1/r)\\)（对数奇点），\\(n=3\\) 时 \\(\\Phi\\sim 1/r\\)（Coulomb 奇点）。校正项 \\(h\\) 有界，不改变奇性。"
+      },
+      {
+        "id": "pde-ch06-q17",
+        "question": "外部区域 \\(\\{|\\mathbf{x}|>R\\}\\) 的 Green 函数用镜像法。Kelvin 反演将外部源 \\(\\mathbf{x}_0\\)（\\(|\\mathbf{x}_0|>R\\)）映到？",
+        "options": [
+          "\\(\\mathbf{x}_0^*=\\frac{R^2}{|\\mathbf{x}_0|^2}\\mathbf{x}_0\\)（球内）",
+        "\\(-\\mathbf{x}_0\\)",
+        "\\(\\mathbf{x}_0+R\\)",
+        "球面上"
+        ],
+        "answer": 0,
+        "explanation": "外部问题：源在 \\(|\\mathbf{x}_0|>R\\)，镜像在 \\(|\\mathbf{x}_0^*|=R^2/|\\mathbf{x}_0|<R\\)（球内）。\\(G=\\Phi(\\mathbf{x}-\\mathbf{x}_0)-c\\Phi(\\mathbf{x}-\\mathbf{x}_0^*)\\)，\\(c=R/|\\mathbf{x}_0|\\)。还需添加 \\(-\\Phi(|\\mathbf{x}|)/(4\\pi R)\\) 项保证无穷远处条件（\\(n=2\\) 时需要）。"
+      },
+      {
+        "id": "pde-ch06-q18",
+        "question": "利用谱展开计算 Green 函数的迹 \\(\\text{tr}(G)=\\int_\\Omega G(\\mathbf{x},\\mathbf{x})\\,d\\mathbf{x}\\)。结果？",
+        "options": [
+          "\\(\\sum_{n=1}^\\infty\\frac{1}{\\lambda_n}\\)（特征值倒数之和，\\(\\zeta\\)-函数型）",
+        "\\(\\sum\\lambda_n\\)",
+        "\\(0\\)",
+        "\\(|\\Omega|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(\\mathbf{x},\\mathbf{x})=\\sum\\frac{|\\phi_n(\\mathbf{x})|^2}{\\lambda_n}\\)。积分：\\(\\int|\\phi_n|^2=1\\) → \\(\\text{tr}=\\sum 1/\\lambda_n\\)。Weyl 渐近 \\(\\lambda_n\\sim cn^{2/d}\\)，\\(d=2\\) 时 \\(\\sum n^{-1}\\) 发散，\\(d=3\\) 时 \\(\\sum n^{-2/3}\\) 也发散——\\(G(\\mathbf{x},\\mathbf{x})\\) 本身有奇点，需正则化。"
+      },
+      {
+        "id": "pde-ch06-q19",
+        "question": "Schwarz-Christoffel 映射在 Green 函数中的作用？",
+        "options": [
+          "将多边形区域共形映射为上半平面，然后用已知的上半平面 Green 函数",
+        "直接给出 Green 函数",
+        "仅适用于圆盘",
+        "不相关"
+        ],
+        "answer": 0,
+        "explanation": "（仅二维）共形映射 \\(w=f(z)\\) 保持 Laplace 方程。\\(G_\\Omega(z,z_0)=G_{\\mathbb{H}}(f(z),f(z_0))=-\\frac{1}{2\\pi}\\ln\\left|\\frac{f(z)-f(z_0)}{f(z)-\\overline{f(z_0)}}\\right|\\)。Schwarz-Christoffel 映射处理多边形 → 获得精确 Green 函数（但映射本身可能只有隐式表达）。"
+      },
+      {
+        "id": "pde-ch06-q20",
+        "question": "Neumann 函数 \\(N(\\mathbf{x},\\mathbf{y})\\)（也称第二类 Green 函数）满足？",
+        "options": [
+          "\\(-\\Delta N=\\delta_\\mathbf{y}-1/|\\Omega|\\)，\\(\\partial_n N|_{\\partial\\Omega}=0\\)",
+        "\\(\\Delta N=\\delta\\)，\\(N|_{\\partial\\Omega}=0\\)",
+        "\\(N=G\\)",
+        "\\(\\Delta N=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Neumann 边界条件下，\\(\\delta_\\mathbf{y}\\) 不满足相容条件（\\(\\int\\delta=1\\neq\\int_{\\partial\\Omega}0=0\\)），因此源项修正为 \\(\\delta_\\mathbf{y}-1/|\\Omega|\\)。\\(N\\) 满足对称性，且解的表示 \\(u(\\mathbf{x})=\\int N f+\\int_{\\partial\\Omega}N h\\,dS+C\\)（差一个常数）。"
+      },
+      {
+        "id": "pde-ch06-q21",
+        "question": "在半球面 \\(\\{|\\mathbf{x}|<R,x_3>0\\}\\) 上构造 Green 函数需要几个镜像？",
+        "options": [
+          "3 个镜像（关于球面和平面各反射，再组合）",
+        "1",
+        "2",
+        "不可能用镜像法"
+        ],
+        "answer": 0,
+        "explanation": "要同时满足 \\(G=0\\) 在球面和平面 \\(x_3=0\\) 上。关于平面镜像 + 关于球面 Kelvin 反演，再对 Kelvin 像做平面镜像。\\(G=\\Phi_0-\\Phi_{\\text{平面像}}-c_1\\Phi_{\\text{球像}}+c_2\\Phi_{\\text{双像}}\\)。4 个源/像组合。"
+      },
+      {
+        "id": "pde-ch06-q22",
+        "question": "Poisson 核 \\(P\\geq 0\\) 的证明？（单位圆盘情形）",
+        "options": [
+          "\\(P=\\frac{1-r^2}{1-2r\\cos\\theta+r^2}\\)，分母 \\(=(1-r)^2+2r(1-\\cos\\theta)\\geq(1-r)^2>0\\)（\\(r<1\\)），分子 \\(=1-r^2>0\\)",
+        "不成立",
+        "需要极大值原理",
+        "只在特殊点成立"
+        ],
+        "answer": 0,
+        "explanation": "分母 \\(=1-2r\\cos\\theta+r^2\\)。当 \\(r<1\\) 时 \\(1+r^2>2r\\geq 2r\\cos\\theta\\) → 分母 \\(>0\\)。分子 \\(1-r^2>0\\)。\\(P>0\\) 保证了 Poisson 积分是边界值的（正的）加权平均 → 满足极大值原理。"
+      },
+      {
+        "id": "pde-ch06-q23",
+        "question": "用谱展开计算矩形 \\([0,a]\\times[0,b]\\) 上 Poisson 方程 \\(-\\Delta u=f\\) 的解。",
+        "options": [
+          "\\(u=\\sum_{m,n}\\frac{\\hat f_{mn}}{(m\\pi/a)^2+(n\\pi/b)^2}\\sin(m\\pi x/a)\\sin(n\\pi y/b)\\)",
+        "\\(u=\\sum\\hat f_{mn}\\)",
+        "\\(u=f\\)",
+        "级数不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat f_{mn}=\\frac{4}{ab}\\int\\int f\\sin(m\\pi x/a)\\sin(n\\pi y/b)\\)。代入 \\(G=\\sum\\phi_{mn}\\phi_{mn}/\\lambda_{mn}\\) 后 \\(u=\\int G f=\\sum\\hat f_{mn}/\\lambda_{mn}\\cdot\\phi_{mn}\\)。这是 Fourier 级数法和 Green 函数法的统一视角。"
+      },
+      {
+        "id": "pde-ch06-q24",
+        "question": "Robin 边界条件 \\(\\partial_n u+\\alpha u=0\\)（\\(\\alpha>0\\)）下的 Green 函数与 Dirichlet Green 函数的主要区别？",
+        "options": [
+          "边界条件变为 \\(\\partial_n G+\\alpha G=0\\) 在 \\(\\partial\\Omega\\)（而非 \\(G=0\\)）",
+        "无区别",
+        "Robin 无 Green 函数",
+        "\\(G\\) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "Robin Green 函数满足 \\(-\\Delta G=\\delta\\)，\\((\\partial_n+\\alpha)G=0\\) 在边界。对称性仍成立（自伴算子）。镜像法通常不直接适用——需要更复杂的校正。唯一性仍由极大值原理（或能量方法）保证。"
+      },
+      {
+        "id": "pde-ch06-q25",
+        "question": "为什么镜像法在三维球中需要 Kelvin 变换而不是简单反射？",
+        "options": [
+          "球面不是平面——简单反射不保持 \\(\\Delta\\)，Kelvin 反演 \\(\\mathbf{x}\\mapsto R^2\\mathbf{x}/|\\mathbf{x}|^2\\) 将 \\(\\Delta\\) 变换为自身的倍数",
+        "反射也可以",
+        "数学上无区别",
+        "Kelvin 变换是人为选择"
+        ],
+        "answer": 0,
+        "explanation": "Kelvin 变换 \\(v(\\mathbf{x})=\\frac{R^{n-2}}{|\\mathbf{x}|^{n-2}}u(R^2\\mathbf{x}/|\\mathbf{x}|^2)\\) 保持调和性。在球面 \\(|\\mathbf{x}|=R\\) 上 \\(v(\\mathbf{x})=u(\\mathbf{x})\\)。因此可以用变换后的函数精确抵消 \\(\\Phi\\) 在球面上的值。平面反射是 Kelvin 变换 \\(R\\to\\infty\\) 的极限。"
+      },
+      {
+        "id": "pde-ch06-q26",
+        "question": "静电学中，导体腔内点电荷 \\(q\\) 在位置 \\(\\mathbf{x}_0\\) 产生的电位用什么求解？",
+        "options": [
+          "Green 函数：\\(V(\\mathbf{x})=qG(\\mathbf{x},\\mathbf{x}_0)\\)（\\(V=0\\) 在导体表面）",
+        "\\(V=kq/r\\)",
+        "\\(V=0\\)",
+        "不可求解"
+        ],
+        "answer": 0,
+        "explanation": "导体表面接地 → Dirichlet \\(V=0\\)。\\(-\\Delta V=q\\delta(\\mathbf{x}-\\mathbf{x}_0)/\\varepsilon_0\\)。\\(V=\\frac{q}{\\varepsilon_0}G(\\mathbf{x},\\mathbf{x}_0)\\)。感应电荷密度 \\(\\sigma=-\\varepsilon_0\\partial_n V|_{\\partial\\Omega}=-q\\partial_n G|_{\\partial\\Omega}\\)。"
+      },
+      {
+        "id": "pde-ch06-q27",
+        "question": "稳态热传导中，平板一侧温度为 \\(g(x)\\)，另一侧绝热。解用什么给出？",
+        "options": [
+          "Neumann Green 函数或 Poisson 核（取决于具体边界条件类型）",
+        "仅 Fourier 变换",
+        "无解",
+        "数值方法"
+        ],
+        "answer": 0,
+        "explanation": "一侧 Dirichlet（\\(u=g\\)），另一侧 Neumann（\\(\\partial_n u=0\\)）→ 混合 Green 函数。\\(u(\\mathbf{x})=-\\int g\\partial_n G\\,dS\\)。Poisson 核 \\(P=-\\partial_n G\\) 在 Dirichlet 边界有效。工程中常用有限元或有限差分代替解析解。"
+      },
+      {
+        "id": "pde-ch06-q28",
+        "question": "量子力学中的 propagator \\(K(x,t;y,0)\\) 就是 Schrödinger 方程的 Green 函数。其谱展开？",
+        "options": [
+          "\\(K=\\sum_n\\psi_n(x)\\psi_n^*(y)e^{-iE_n t/\\hbar}\\)（\\(\\psi_n\\) 能量本征态，\\(E_n\\) 能量）",
+        "\\(K=e^{-Ht}\\)",
+        "\\(K=\\sum 1/E_n\\)",
+        "不可展开"
+        ],
+        "answer": 0,
+        "explanation": "\\(i\\hbar\\partial_t K=HK\\)，\\(K(0)=\\delta(x-y)\\)。\\(K=e^{-iHt/\\hbar}\\delta=\\sum|\\psi_n\\rangle\\langle\\psi_n|e^{-iE_n t/\\hbar}\\)。这是 Feynman 路径积分的谱表示对偶。\\(t\\to-i\\tau\\)（Wick rotation）后 \\(K\\) 变为热核 \\(\\sum\\psi_n\\psi_n^*e^{-E_n\\tau/\\hbar}\\)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="pde"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/pde.html" class="module-name">偏微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Green 函数的定义与物理意义</a></li>
+      <li><a href="#kp2">02 · 镜像法（反射法）</a></li>
+      <li><a href="#kp3">03 · Green 函数的性质与 Poisson 核</a></li>
+      <li><a href="#kp4">04 · Green 函数与谱展开</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>Green 函数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Green 函数的定义与物理意义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Green 函数 \(G(x,y)\) 描述在 \(y\) 点施加单位点源时系统在 \(x\) 处的 响应。一旦求出 Green 函数，任意源 \(f\) 的解可通过卷积 \(u(x) = \int G(x,y)f(y)\,dy\) 一次性写出。Green 函数是线性 PDE 最强大的求解框架：解的存在性、正则性、渐近行为都可从 \(G\) 读出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Green 函数是微分算子 \(L\) 的逆算子的积分核：\(L^{-1}f(x) = \int G(x,y)f(y)\,dy\)。 在分布论中，\(G\) 是方程 \(LG = \delta_y\) 的解。将 PDE 问题转化为 积分方程，是泛函分析「算子理论」的核心思想。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：设 \(\Omega\) 是有界域，\(G(x,y)\) 满足 \[-\Delta_x G(x,y) = \delta(x-y), \quad x \in \Omega\] \(G(x,y) = 0\)（\(x \in \partial\Omega\)，Dirichlet 情况）。 <strong>分解</strong>：\(G(x,y) = \Phi(x-y) + H(x,y)\)，其中 \(\Phi\) 是基本解（自由空间 Green 函数），\(H\) 是调和修正项 \(\Delta_x H = 0\)（\(x \in \Omega\)），\(H(x,y) = -\Phi(x-y)\)（\(x \in \partial\Omega\)）。 <strong>用 Green 函数求解 Poisson 方程</strong>：\(-\Delta u = f\) in \(\Omega\)，\(u|_{\partial\Omega} = g\)。 Green 第二恒等式得： \[u(y) = \int_\Omega G(x,y)f(x)\,dx + \int_{\partial\Omega} g(x)\frac{\partial G}{\partial \nu_x}(x,y)\,dS_x\] <strong>Green 函数的对称性</strong>（重要！）：\(G(x,y) = G(y,x)\)。 证明：令 \(u = G(\cdot,y)\)，\(v = G(\cdot,z)\)，Green 第二恒等式 → \(\int_\Omega(u\Delta v - v\Delta u) = 0\)，而 \(\Delta u = -\delta_y\)，\(\Delta v = -\delta_z\)， 得 \(u(z) - v(y) = 0\)，即 \(G(z,y) = G(y,z)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 电磁学中的「像电荷法」就是 Green 函数的物理实现 - 结构力学中的影响函数就是 Green 函数</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(\mathbb{R}^3\) 中 Laplace 方程的基本解（自由空间 Green 函数）。 解答：对 \(-\Delta\Phi = \delta\) 在以 \(0\) 为心的球面 \(B_r\) 上积分： \(\int_{B_r}-\Delta\Phi = 1\)，即 \(-\Phi'(r)\cdot 4\pi r^2 = 1\)， \(\Phi'(r) = -1/(4\pi r^2)\)，\(\Phi(r) = 1/(4\pi r)\)。 三维基本解：\(\Phi(x) = \frac{1}{4\pi|x|}\)。 易错点：二维基本解是 \(\Phi = -\frac{1}{2\pi}\ln|x|\)（注意负号）， 归一化常数随维数不同。别把二维和三维的公式搞混。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Dirichlet Green 函数的对称性 \(G(x,y) = G(y,x)\) 是由什么保证的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(-\\Delta\\) 在 \\(H^1_0\\) 上是自伴算子，Green 第二恒等式')">A. 边界条件的齐次性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(-\\Delta\\) 在 \\(H^1_0\\) 上是自伴算子，Green 第二恒等式')">B. Laplace 算子的自伴性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(-\\Delta\\) 在 \\(H^1_0\\) 上是自伴算子，Green 第二恒等式')">C. 基本解的径向对称性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(-\\Delta\\) 在 \\(H^1_0\\) 上是自伴算子，Green 第二恒等式')">D. 极大值原理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>镜像法（反射法）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>对特殊几何区域（半空间、球、楔形域），可以用「虚拟像源」 的方法巧妙地构造 Green 函数，不需要求解 Laplace 方程。 镜像法是物理直觉（电像法）与数学严格性的完美结合，也是 数值方法 BEM 的理论基础之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>镜像法利用 Laplace 方程的对称性：像源放在域外， 使 \(G|_{\partial\Omega} = 0\) 自动满足。本质上是找到 使修正项 \(H\) 具有解析表达式的几何配置。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>半空间 \(\{x_3 > 0\}\) 的 Green 函数</strong>： 对源点 \(y = (y_1, y_2, y_3)\)（\(y_3 > 0\)），取像点 \(y^* = (y_1, y_2, -y_3)\)。 \[G(x,y) = \Phi(x-y) - \Phi(x-y^*) = \frac{1}{4\pi|x-y|} - \frac{1}{4\pi|x-y^*|}\] 当 \(x_3 = 0\) 时 \(|x-y| = |x-y^*|\)，故 \(G = 0\) ✓。 \(-\Delta_x G = \delta(x-y)\)（\(x_3 > 0\)）因为 \(y^*\) 不在域内。 <strong>球域的 Green 函数</strong>（Kelvin 反演）：设域为 \(B_R(0)\)，源点 \(y\)。 像点 \(y^* = \frac{R^2}{|y|^2}y\)（关于球的反演点），像强度修正为 \(R/|y|\)： \[G(x,y) = \Phi(x-y) - \frac{R}{|y|}\Phi(x-y^*)\] 验证 \(x \in \partial B_R\) 时 \(|x-y^*|/|x-y| = R/|y|\) → \(G = 0\)。 <strong>Poisson 积分公式</strong>（球的 Dirichlet 问题的显式解）： \[u(y) = \frac{R^2 - |y|^2}{4\pi R}\int_{|x|=R}\frac{g(x)}{|x-y|^3}\,dS_x\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 静电学中的像电荷法（接地导体平面/球面附近的点电荷） - 计算流体力学中壁面附近的涡像</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求上半平面 \(\{y > 0\}\)（二维）中 Laplace 方程的 Green 函数。 解答：源点 \((a,b)\)（\(b > 0\)），像点 \((a,-b)\)。 \(G(x,y;a,b) = -\frac{1}{2\pi}\ln\sqrt{(x-a)^2+(y-b)^2} + \frac{1}{2\pi}\ln\sqrt{(x-a)^2+(y+b)^2}\) \(= \frac{1}{4\pi}\ln\frac{(x-a)^2+(y+b)^2}{(x-a)^2+(y-b)^2}\)。 验证 \(y = 0\) 时分子 = 分母，\(G = 0\)。✓ 易错点：像点必须在域外，否则 \(\delta\) 项会出现在域内， Green 函数就不满足原方程。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">半空间 Green 函数中像点 \(y^*\) 放在哪里？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。像点在域外（关于边界的镜像位置），保证')">A. 域内与 \(y\) 对称的点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！像点在域外（关于边界的镜像位置），保证')">B. 域外关于边界的对称点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。像点在域外（关于边界的镜像位置），保证')">C. 边界上离 \(y\) 最近的点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。像点在域外（关于边界的镜像位置），保证')">D. 域的中心</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Green 函数的性质与 Poisson 核</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Green 函数不仅是求解工具，它本身蕴含丰富的信息： 法向导数 \(\partial G/\partial\nu\) 就是 Poisson 核，给出了 Dirichlet 问题 解的边界积分表示。Green 函数的性质（正性、对称性、奇异性） 直接反映了 PDE 解的定性行为。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Green 函数将 PDE 问题完全转化为边界积分问题（BIE）， 降低了一维。这是边界元方法（BEM）的理论基础，也是 位势论的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Green 表示公式</strong>：\(u \in C^2(\bar\Omega)\)，\(-\Delta u = f\)，则 \[u(y) = \int_\Omega G(x,y)f(x)\,dx + \int_{\partial\Omega} g(x)\frac{\partial G}{\partial\nu_x}(x,y)\,dS_x\] <strong>Poisson 核</strong>：\(P(x,y) = \frac{\partial G}{\partial\nu_x}(x,y)\)（\(x \in \partial\Omega\)）。 性质：\(P(x,y) > 0\)，\(\int_{\partial\Omega}P(x,y)\,dS_x = 1\)。 直观：Poisson 核是边界上的概率权重。 <strong>球的 Poisson 核</strong>（三维）： \[P(x,y) = \frac{R^2 - |y|^2}{4\pi R|x-y|^3}, \quad |x| = R\] 当 \(y \to x_0 \in \partial B_R\) 时，\(P\) 趋于 \(\delta_{x_0}\) → \(u(y) \to g(x_0)\)（连续性）。 <strong>Green 函数的正性</strong>：\(G(x,y) > 0\)（\(x,y \in \Omega\)，\(x \neq y\)）。 证明用极大值原理：\(G - \Phi \geq 0\) 在边界上（\(G = 0\)，\(\Phi < 0\) 当 \(|x| = R\) 足够大）， \(\Delta(G - \Phi) = 0\)，极大值原理 → \(G \geq \Phi > 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 概率论中 Green 函数与 Brown 运动首次离开时间分布的关系 - 热方程中 Green 函数给出温度场的时空传播规律</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：利用 Poisson 积分公式求解单位圆盘上的 Dirichlet 问题。 \(\Delta u = 0\)（\(r < 1\)），\(u(1,\theta) = \cos\theta\)。 解答：二维 Poisson 核 \(P(r,\theta-\phi) = \frac{1-r^2}{2\pi(1-2r\cos(\theta-\phi)+r^2)}\)。 \(u(r,\theta) = \frac{1}{2\pi}\int_0^{2\pi}\frac{(1-r^2)\cos\phi}{1-2r\cos(\theta-\phi)+r^2}\,d\phi = r\cos\theta\)。 (因为调和函数 \(r\cos\theta\) 在边界上恰好等于 \(\cos\theta\)) 易错点：Poisson 核的归一化 \(\int P = 1\) 在 2D 是对角度积分 \(\frac{1}{2\pi}\int_0^{2\pi}\)， 不要漏掉 \(1/(2\pi)\) 因子。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Poisson 核 \(P(x,y)\) 在 \(y\) 趋向边界点 \(x_0\) 时表现如何？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(P(x,y) \\to \\delta_{x_0}(x)\\) 保证了 Poisson 积分公式给出的解')">A. 趋向 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(P(x,y) \\to \\delta_{x_0}(x)\\) 保证了 Poisson 积分公式给出的解')">B. 趋向作为 \(x_0\) 的 Dirac delta</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(P(x,y) \\to \\delta_{x_0}(x)\\) 保证了 Poisson 积分公式给出的解')">C. 趋向常数 \(1/|\partial\Omega|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(P(x,y) \\to \\delta_{x_0}(x)\\) 保证了 Poisson 积分公式给出的解')">D. 趋向无穷但不可积</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Green 函数与谱展开</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Green 函数还有一种完全不同的表达方式：用 Laplace 算子的 特征函数展开。这建立了 Green 函数与 Sturm-Liouville 理论、 Fourier 方法之间的深刻联系，也为估计 Green 函数的渐近 行为提供了谱论工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Green 函数的谱展开 \(G = \sum \phi_n(x)\phi_n(y)/\lambda_n\) 是 算子 \((-\Delta)^{-1}\) 在特征基下的矩阵表示（无穷维对角矩阵）。 特征值与 Green 函数的奇异性之间存在精确的渐近关系（Weyl 定律）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>谱展开</strong>：设 \(\{(\lambda_n, \phi_n)\}\) 是 \(-\Delta\) 在 \(\Omega\)（Dirichlet BC）的特征系统， \(-\Delta\phi_n = \lambda_n\phi_n\)，\(\{\phi_n\}\) 正交归一。则 \[G(x,y) = \sum_{n=1}^\infty \frac{\phi_n(x)\phi_n(y)}{\lambda_n}\] <strong>推导</strong>：\(-\Delta_x G = \delta(x-y) = \sum_n \phi_n(x)\phi_n(y)\)（完备性）， 令 \(G = \sum a_n(y)\phi_n(x)\)，代入得 \(\lambda_n a_n(y) = \phi_n(y)\)， 故 \(a_n = \phi_n(y)/\lambda_n\)。 <strong>例：矩形 \([0,a]\times[0,b]\) 的 Green 函数</strong>： \(\phi_{mn} = \frac{2}{\sqrt{ab}}\sin\frac{m\pi x}{a}\sin\frac{n\pi y}{b}\)， \(\lambda_{mn} = \pi^2(m^2/a^2 + n^2/b^2)\)。 \[G = \frac{4}{ab}\sum_{m,n=1}^\infty \frac{\sin\frac{m\pi x_1}{a}\sin\frac{n\pi y_1}{b}\sin\frac{m\pi x_2}{a}\sin\frac{n\pi y_2}{b}}{\pi^2(m^2/a^2+n^2/b^2)}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 量子力学中的「传播子」\(K(x,y;t) = \sum_n \phi_n(x)\phi_n(y)e^{-\lambda_n t}\) 是含时 Green 函数 - Weyl 渐近公式 \(N(\lambda) \sim C_d\text{Vol}(\Omega)\lambda^{d/2}\) 连接特征值分布与几何</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：写出区间 \([0,\pi]\)（Dirichlet BC）上 \(-u'' = f\) 的 Green 函数谱展开。 解答：\(\phi_n = \sqrt{2/\pi}\sin nx\)，\(\lambda_n = n^2\)。 \(G(x,y) = \frac{2}{\pi}\sum_{n=1}^\infty \frac{\sin nx\sin ny}{n^2}\)。 验证：\(-G_{xx} = \frac{2}{\pi}\sum \sin nx\sin ny = \delta(x-y)\)。 也可直接构造：\(G(x,y) = \begin{cases}x(π-y)/\pi,& x \leq y\\ y(\pi-x)/\pi,& x > y\end{cases}\)。 两种表达等价！ 易错点：谱展开收敛可能很慢（特别在 \(x=y\) 附近，\(G\) 有对数奇异性）， 数值计算时直接用解析公式效率更高。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Green 函数的谱展开 \(G = \sum \phi_n(x)\phi_n(y)/\lambda_n\) 中，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/\\lambda_n\\) 的衰减率决定级数的收敛速度。\\(\\lambda_n \\sim cn^{2/d}\\)（Weyl 定律），')">A. 边界条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(1/\\lambda_n\\) 的衰减率决定级数的收敛速度。\\(\\lambda_n \\sim cn^{2/d}\\)（Weyl 定律），')">B. 特征值 \(\lambda_n\) 的增长速率</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/\\lambda_n\\) 的衰减率决定级数的收敛速度。\\(\\lambda_n \\sim cn^{2/d}\\)（Weyl 定律），')">C. 源项 \(f\) 的光滑性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/\\lambda_n\\) 的衰减率决定级数的收敛速度。\\(\\lambda_n \\sim cn^{2/d}\\)（Weyl 定律），')">D. 域的维数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/analysis/pde.html" class="nav-overview">📋 概览</a>
+      <a href="ch07.html" class="nav-next">Ch.7 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

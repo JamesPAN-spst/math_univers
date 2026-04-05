@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 联络与测地线 — 黎曼几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "riemannian-ch02-q1",
+        "question": "仿射联络 \\(\\nabla\\) 的作用？",
+        "options": [
+          "定义向量场沿曲线的平行移动（\\(\\nabla_{\\dot\\gamma} V = 0\\)）",
+        "定义曲率",
+        "定义协变导数 \\(\\nabla_X Y\\)（向量场 \\(Y\\) 沿 \\(X\\) 的\"方向导数\"）",
+        "A 和 C"
+        ],
+        "answer": 3,
+        "explanation": "仿射联络 \\(\\nabla: \\mathfrak{X}(M) \\times \\mathfrak{X}(M) \\to \\mathfrak{X}(M)\\)。\\(\\nabla_X Y\\) = \"\\(Y\\) 沿 \\(X\\) 的协变导数\"。公理：\\(C^\\infty\\)-线性于 \\(X\\), \\(\\mathbb{R}\\)-线性于 \\(Y\\), Leibniz 律 \\(\\nabla_X(fY) = (Xf)Y + f\\nabla_X Y\\)。平行移动：\\(\\nabla_{\\dot\\gamma} V = 0\\) 沿 \\(\\gamma\\)——\"不变\"的向量场。联络不由流形结构唯一决定——需要额外选择（黎曼几何选 Levi-Civita）。"
+      },
+      {
+        "id": "riemannian-ch02-q2",
+        "question": "Levi-Civita 联络的两个定义性质？",
+        "options": [
+          "无挠 \\(\\nabla_X Y - \\nabla_Y X = [X,Y]\\) 且度量兼容 \\(\\nabla g = 0\\)",
+        "无挠且平坦",
+        "度量兼容且平坦",
+        "A（唯一存在——黎曼几何基本定理）"
+        ],
+        "answer": 3,
+        "explanation": "Levi-Civita 联络：(1) 无挠 \\(T(X,Y) = \\nabla_X Y - \\nabla_Y X - [X,Y] = 0\\)。(2) 度量兼容 \\(Xg(Y,Z) = g(\\nabla_X Y, Z) + g(Y, \\nabla_X Z)\\)。Koszul 公式唯一确定 \\(\\nabla\\)：\\(2g(\\nabla_X Y, Z) = Xg(Y,Z) + Yg(X,Z) - Zg(X,Y) + g([X,Y],Z) - g([X,Z],Y) - g([Y,Z],X)\\)。"
+      },
+      {
+        "id": "riemannian-ch02-q3",
+        "question": "Christoffel 符号 \\(\\Gamma^k_{ij}\\) 的公式？",
+        "options": [
+          "\\(\\Gamma^k_{ij} = \\frac{1}{2} g^{kl}(\\partial_i g_{jl} + \\partial_j g_{il} - \\partial_l g_{ij})\\)",
+        "\\(\\Gamma^k_{ij} = \\partial_i g_{jk}\\)",
+        "A（\\(\\nabla_{\\partial_i} \\partial_j = \\Gamma^k_{ij} \\partial_k\\)——Levi-Civita 联络的坐标表达）",
+        "\\(\\Gamma^k_{ij} = 0\\) 总成立"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\nabla_{\\partial_i}\\partial_j = \\Gamma^k_{ij}\\partial_k\\)。由 Koszul 公式和度量兼容性推出 \\(\\Gamma^k_{ij} = \\frac{1}{2}g^{kl}(\\partial_i g_{jl} + \\partial_j g_{il} - \\partial_l g_{ij})\\)。\\(\\Gamma\\) 对称（\\(\\Gamma^k_{ij} = \\Gamma^k_{ji}\\), 无挠）。欧氏坐标 \\(\\Gamma = 0\\)。极坐标 \\(\\Gamma\\) 非零（\\(\\Gamma^r_{\\theta\\theta} = -r\\) 等）。\\(\\Gamma\\) 不是张量（坐标变换不美）。"
+      },
+      {
+        "id": "riemannian-ch02-q4",
+        "question": "测地线方程的坐标形式？",
+        "options": [
+          "\\(\\ddot x^k + \\Gamma^k_{ij} \\dot x^i \\dot x^j = 0\\)",
+        "\\(\\ddot x^k = 0\\)",
+        "A（\\(\\nabla_{\\dot\\gamma}\\dot\\gamma = 0\\) 的坐标展开）",
+        "\\(\\dot x^k = \\text{const}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\nabla_{\\dot\\gamma}\\dot\\gamma = 0\\)：\\(\\frac{d^2x^k}{dt^2} + \\Gamma^k_{ij}\\frac{dx^i}{dt}\\frac{dx^j}{dt} = 0\\)。ODE 系统（二阶），给定初始点和初始速度唯一确定。欧氏空间 \\(\\Gamma = 0\\)：\\(\\ddot x = 0\\)（直线）。\\(S^2\\)：大圆。\\(\\mathbb{H}^2\\)：半圆和垂直线。测地线是\"局部最短路径\"且\"零加速度\"曲线。"
+      },
+      {
+        "id": "riemannian-ch02-q5",
+        "question": "指数映射 \\(\\exp_p: T_pM \\to M\\), \\(v \\mapsto \\gamma_v(1)\\)（\\(\\gamma_v\\) = 初速为 \\(v\\) 的测地线）。\\(\\exp_p\\) 在 \\(0\\) 附近的性质？",
+        "options": [
+          "局部微分同胚",
+        "全局微分同胚",
+        "A（\\(d(\\exp_p)_0 = \\mathrm{id}_{T_pM}\\), 由反函数定理）",
+        "恒等映射"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\exp_p(0) = p\\)。\\(\\frac{d}{dt}|_0 \\exp_p(tv) = \\dot\\gamma_v(0) = v\\)，\\(d(\\exp_p)_0 = \\mathrm{id}\\)。反函数定理 \\(\\Rightarrow\\) 存在 \\(T_pM\\) 中 \\(0\\) 的邻域 \\(U\\) 使 \\(\\exp_p|_U\\) 是微分同胚。但全局不一定——共轭点和割点限制。\\(\\exp_p\\) 的像 = 测地线的\"扇形\"。"
+      },
+      {
+        "id": "riemannian-ch02-q6",
+        "question": "法坐标（normal coordinates）在点 \\(p\\) 处有什么性质？",
+        "options": [
+          "\\(g_{ij}(p) = \\delta_{ij}\\), \\(\\Gamma^k_{ij}(p) = 0\\)",
+        "\\(g_{ij} = \\delta_{ij}\\) 处处",
+        "A（法坐标 = 通过 \\(\\exp_p\\) 将 \\(T_pM\\) 的正交基拉回为坐标）",
+        "Christoffel 符号处处为零"
+        ],
+        "answer": 2,
+        "explanation": "法坐标 \\((x^1, \\ldots, x^n)\\)：选 \\(T_pM\\) 正交基 \\(e_1, \\ldots, e_n\\), \\(\\exp_p(\\sum x^i e_i) \\leftrightarrow (x^1, \\ldots, x^n)\\)。在 \\(p\\) 处：\\(g_{ij}(0) = g(e_i, e_j) = \\delta_{ij}\\), \\(\\partial_k g_{ij}(0) = 0\\)（\\(\\Gamma(0) = 0\\)）。但二阶导 \\(\\neq 0\\)（与曲率有关：\\(g_{ij} = \\delta_{ij} - \\frac{1}{3}R_{ikjl}x^kx^l + O(|x|^3)\\)）。"
+      },
+      {
+        "id": "riemannian-ch02-q7",
+        "question": "平行移动依赖路径吗？",
+        "options": [
+          "一般依赖路径（曲率 \\(\\neq 0\\) 时）",
+        "不依赖",
+        "A（球面上将向量绕三角形平行移动一圈 \\(\\to\\) 旋转角 = 曲率 × 面积）",
+        "只依赖端点"
+        ],
+        "answer": 2,
+        "explanation": "平坦流形（\\(R = 0\\)）：平行移动与路径无关（和乐群是平凡的）。曲率 \\(\\neq 0\\)：依赖路径。\\(S^2\\) 经典例子：北极出发向赤道平移，沿赤道走 \\(90°\\)，返回北极——向量旋转 \\(90°\\)。旋转角 \\(= \\int_{\\text{enclosed}} K \\, dA = K \\cdot \\text{Area}\\)（\\(K = 1\\), \\(\\text{Area} = \\pi/2\\), 旋转 \\(\\pi/2\\)）。和乐角 = 曲率积分。"
+      },
+      {
+        "id": "riemannian-ch02-q8",
+        "question": "Levi-Civita 联络唯一性的证明核心？",
+        "options": [
+          "Koszul 公式从无挠 + 度量兼容唯一确定 \\(\\nabla_X Y\\)",
+        "直接构造",
+        "A（展开 \\(Xg(Y,Z), Yg(X,Z), Zg(X,Y)\\) 三个等式，利用无挠消去——得到 \\(2g(\\nabla_X Y, Z) = \\ldots\\)）",
+        "不需要证唯一性"
+        ],
+        "answer": 2,
+        "explanation": "度量兼容：\\(Xg(Y,Z) = g(\\nabla_XY,Z) + g(Y,\\nabla_XZ)\\), \\(Yg(X,Z) = g(\\nabla_YX,Z) + g(X,\\nabla_YZ)\\), \\(Zg(X,Y) = g(\\nabla_ZX,Y) + g(X,\\nabla_ZY)\\)。取 \\((1)+(2)-(3)\\), 用无挠 \\(\\nabla_XY-\\nabla_YX=[X,Y]\\) 消项 \\(\\Rightarrow\\) \\(2g(\\nabla_XY,Z)\\) 用 \\(g, [,], X,Y,Z\\) 表达。\\(g\\) 非退化 \\(\\Rightarrow \\nabla_XY\\) 唯一。存在性同理验证。"
+      },
+      {
+        "id": "riemannian-ch02-q9",
+        "question": "\\(S^2(r)\\) 上从北极到赤道的测地线长度？",
+        "options": [
+          "\\(\\pi r/2\\)（四分之一大圆）",
+        "\\(\\pi r\\)",
+        "\\(r\\)",
+        "A（经线是测地线，从 \\(\\theta=0\\) 到 \\(\\theta=\\pi/2\\), \\(L = r\\pi/2\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(S^2(r)\\)：度量 \\(ds^2 = r^2(d\\theta^2 + \\sin^2\\theta \\, d\\phi^2)\\)。经线 \\(\\phi = \\text{const}\\)：\\(\\dot\\phi = 0\\), 测地线方程自动满足。\\(L = \\int_0^{\\pi/2} r \\, d\\theta = r\\pi/2\\)。北极到南极 \\(L = \\pi r\\)（半大圆）。直径 = \\(\\pi r\\)（测地距离，非 \\(2r\\)——弯曲空间距离 \\(>\\) 弦长）。"
+      },
+      {
+        "id": "riemannian-ch02-q10",
+        "question": "在机器人路径规划中，构型空间上的测地线代表什么？",
+        "options": [
+          "关节角空间上最短/最自然的运动路径",
+        "直线运动",
+        "A（配置空间 \\((M, g)\\) 的度量由动力学/惯性张量决定，测地线 = 最小能量运动）",
+        "随机路径"
+        ],
+        "answer": 2,
+        "explanation": "机器人 \\(n\\) 自由度 \\(\\to\\) 构型空间 \\(M = T^n\\) 或 \\(SO(3)^k\\) 等。度量 \\(g_{ij}\\) =质量/惯性矩阵——动能 \\(T = \\frac{1}{2}g_{ij}\\dot q^i\\dot q^j\\)。无外力时运动 = 测地线（\\(\\nabla_{\\dot q}\\dot q = 0\\)）。黎曼几何提供了路径规划的自然框架——最短测地线 = 最节能运动。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="riemannian"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/riemannian.html" class="module-name">黎曼几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Levi-Civita 联络回顾</a></li>
+      <li><a href="#kp2">02 · 测地线方程与指数映射</a></li>
+      <li><a href="#kp3">03 · 测地线的变分与能量泛函</a></li>
+      <li><a href="#kp4">04 · 测地线完备性与 Hopf-Rinow 定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>联络与测地线</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Levi-Civita 联络回顾</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在微分几何模块中已初步介绍了 Levi-Civita 联络——无挠 + 度量兼容 唯一确定的联络。在黎曼几何中，它是一切计算的起点：测地线、曲率、 Jacobi 场都基于它。这里从黎曼几何的视角重新审视 Christoffel 符号 和协变导数的计算技巧。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Levi-Civita 联络是黎曼度量"内在确定"的微分结构—— 度量不仅量化距离，还规定了"平行搬运"的方式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Koszul 公式</strong>（决定 \(\nabla\)）： \[2g(\nabla_X Y, Z) = Xg(Y,Z) + Yg(X,Z) - Zg(X,Y) + g([X,Y],Z) - g([X,Z],Y) - g([Y,Z],X)\] <strong>Christoffel 符号</strong>： \[\Gamma^k_{ij} = \frac{1}{2}g^{kl}\left(\frac{\partial g_{il}}{\partial x^j} + \frac{\partial g_{jl}}{\partial x^i} - \frac{\partial g_{ij}}{\partial x^l}\right)\] <strong>协变导数</strong>：沿 \(\gamma\) 的向量场 \(V\)， \[\frac{DV^k}{dt} = \frac{dV^k}{dt} + \Gamma^k_{ij}\dot{\gamma}^i V^j\] <strong>法坐标 (Normal Coordinates)</strong>：在 \(p\) 处选标准正交基 \(\{e_i\}\)， \(\exp_p: T_pM \to M\)。法坐标中 \(g_{ij}(0) = \delta_{ij}\)， \(\Gamma^k_{ij}(0) = 0\)（但 \(\partial \Gamma \neq 0\)——这就是曲率）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 法坐标简化了张量方程的局部验证（在一点处 \(\Gamma = 0\)）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：双曲平面 \(\mathbb{H}^2\)：\(ds^2 = (dx^2 + dy^2)/y^2\)（上半平面模型）。 求 \(\Gamma^y_{xx}\)。 解答：\(g_{xx} = g_{yy} = 1/y^2\)，\(g_{xy} = 0\)。 \(\Gamma^y_{xx} = \frac{1}{2}g^{yy}\left(\partial_x g_{xy} + \partial_x g_{xy} - \partial_y g_{xx}\right)\) \(= \frac{1}{2} y^2 \left(0 + 0 - (-2/y^3)\right) = \frac{1}{2} y^2 \cdot \frac{2}{y^3} = \frac{1}{y}\)。 易错点：\(\partial_y g_{xx} = \partial_y(1/y^2) = -2/y^3\)，不是 \(-2y\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">法坐标下 \(\Gamma^k_{ij}(p) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。法坐标的定义特性之一就是 \\(\\Gamma^k_{ij}(p) = 0\\)。')">A. \(\delta^k_{ij}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。法坐标的定义特性之一就是 \\(\\Gamma^k_{ij}(p) = 0\\)。')">B. \(g_{ij}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！法坐标的定义特性之一就是 \\(\\Gamma^k_{ij}(p) = 0\\)。')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。法坐标的定义特性之一就是 \\(\\Gamma^k_{ij}(p) = 0\\)。')">D. 取决于曲率</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>测地线方程与指数映射</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>测地线是黎曼流形上的"最短路径"（更准确地：临界路径）。它推广 了欧式空间中的直线和球面上的大圆。测地线方程是二阶 ODE， 指数映射 \(\exp_p\) 将切空间射入流形——法坐标正是由指数映射定义的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>测地线 = "加速度为零"的曲线（\(\nabla_{\gamma'}\gamma' = 0\)）。 指数映射是切空间到流形的"最自然"的映射。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>测地线方程</strong>：\(\gamma: I \to M\) 是测地线 \(\iff\) \[\nabla_{\gamma'}\gamma' = 0 \iff \ddot{\gamma}^k + \Gamma^k_{ij}\dot{\gamma}^i\dot{\gamma}^j = 0\] 二阶 ODE 系统。初始条件 \(\gamma(0) = p\)，\(\gamma'(0) = v \in T_pM\) 唯一确定测地线。 <strong>指数映射</strong>：\(\exp_p: T_pM \supset U \to M\)， \(\exp_p(v) = \gamma_v(1)\)（\(\gamma_v\) 是初始速度 \(v\) 的测地线）。 \(d(\exp_p)_0 = \mathrm{id}_{T_pM}\)（局部微分同胚）。 <strong>测地线的性质</strong>： (1) 保速率：\(|\gamma'(t)|\) 恒定（度量兼容） (2) 等参数：\(\gamma\) 可以用弧长参数化 (3) 局部最短：足够短的测地段是两端点间的最短路径 <strong>Gauss 引理</strong>：\(\exp_p\) 将射线映为径向测地线，且径向方向 正交于测地球面。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 卫星轨道（弯曲时空中的测地线）是广义相对论中自由粒子的轨迹</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2\)（单位球面）上从 \((\pi/2, 0)\)（赤道上点）出发， 初速 \(v = \partial/\partial\theta\) 的测地线是什么？ 解答：测地线方程（\(\ddot{\theta} + \Gamma^\theta_{\varphi\varphi}\dot{\varphi}^2 = 0\) 等）。 初始 \(\dot{\varphi} = 0\)，故 \(\ddot{\theta} = 0\)，\(\theta(t) = \pi/2 + t\)， \(\varphi(t) = 0\)。这是通过该点的经线（大圆）。 易错点：球面上所有测地线都是大圆——但不是所有曲线在球面上 最短（只有长度 \(\leq \pi R\) 的测地段是最短的）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">测地线 \(\gamma\) 满足什么方程？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\nabla_{\\gamma\\'}\\gamma\\' = 0\\) 是"协变加速度为零"。')">A. \(\gamma'' = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\nabla_{\\gamma\\'}\\gamma\\' = 0\\) 是"协变加速度为零"。')">B. \(\nabla_{\gamma'}\gamma' = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\nabla_{\\gamma\\'}\\gamma\\' = 0\\) 是"协变加速度为零"。')">C. \(\gamma' = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\nabla_{\\gamma\\'}\\gamma\\' = 0\\) 是"协变加速度为零"。')">D. \(R(\gamma', \gamma')\gamma' = 0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>测地线的变分与能量泛函</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>为什么测地线是"最短路径"？这通过变分法证明：测地线是长度泛函 \(L(\gamma)\) 或能量泛函 \(E(\gamma)\) 的临界点。能量泛函在技术上更 方便（它是 \(L^2\) 而非 \(L^1\)，更容易求变分），其临界点方程正是 测地线方程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>测地线 = 能量泛函的 "Euler-Lagrange 方程"的解。 \(E\) 的第二变分涉及 Jacobi 场和曲率——这是曲率如何影响测地线 稳定性的数学框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>能量泛函</strong>：\(E(\gamma) = \frac{1}{2}\int_a^b g(\gamma', \gamma')\,dt\)。 长度泛函：\(L(\gamma) = \int_a^b |\gamma'|\,dt\)。 \(E\) 的临界点（在固定端点的变分下）满足： \[\nabla_{\gamma'}\gamma' = 0 \quad (\text{测地线方程})\] <strong>第一变分</strong>：\(\gamma_s(t)\) 是 \(\gamma = \gamma_0\) 的变分， \(V(t) = \partial_s \gamma_s|_{s=0}\)（变分场）。 \[\frac{d}{ds}\Big|_{s=0} E(\gamma_s) = -\int_a^b g(\nabla_{\gamma'}\gamma', V)\,dt + g(\gamma', V)\Big|_a^b\] 固定端点 \(V(a) = V(b) = 0\)，\(E'(0) = 0 \iff \nabla_{\gamma'}\gamma' = 0\)。 <strong>\(E\) vs \(L\)</strong>：由 Cauchy-Schwarz，\(L(\gamma)^2 \leq 2(b-a)E(\gamma)\)， 等号在等速参数化时成立。\(E\) 的极值点自动等速，因此也是 \(L\) 的极值点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 计算机图形学中的测地线插值（流形上的"直线"插值）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}^n\) 中，选 \(\gamma_0(t) = (1-t)p + tq\)（直线）， 变分 \(\gamma_s(t) = \gamma_0(t) + sV(t)\)，\(V(0) = V(1) = 0\)。 验证 \(E'(0) = 0\)。 解答：\(\gamma_0'(t) = q - p\)，\(\nabla_{\gamma_0'}\gamma_0' = 0\) （因 \(\mathbb{R}^n\) 平坦，常速直线是测地线）。 \(E'(0) = -\int_0^1 g(0, V)\,dt = 0\)。✓ 易错点：\(L\) 的变分在非等速参数化时更复杂（含 \(|\gamma'|\) 在分母）， 所以通常用 \(E\) 而非 \(L\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">能量泛函的临界点一定是长度最小值吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。临界点 = 测地线，但不一定最短（球面上"绕远路"的大圆弧也是测地线）。')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！临界点 = 测地线，但不一定最短（球面上"绕远路"的大圆弧也是测地线）。')">B. 不一定，可能是鞍点</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。临界点 = 测地线，但不一定最短（球面上"绕远路"的大圆弧也是测地线）。')">C. 只在正曲率空间成立</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。临界点 = 测地线，但不一定最短（球面上"绕远路"的大圆弧也是测地线）。')">D. 只在紧流形上成立</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>测地线完备性与 Hopf-Rinow 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>测地线何时可以无限延伸？黎曼流形何时"完备"？Hopf-Rinow 定理 给出了几个等价条件——测地完备性等价于度量完备性（Cauchy 列 收敛），也等价于闭有界集紧致。对完备流形，任意两点之间存在 最短测地线——这是黎曼几何中最基本的存在性定理之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Hopf-Rinow 定理连接了微分几何（测地线延伸）、度量空间理论 （完备性）和拓扑（紧致性）三个不同层面的完备性概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Hopf-Rinow 定理</strong>：\((M, g)\) 连通黎曼流形。以下等价： (1) \((M, d_g)\) 作为度量空间完备（Cauchy 列收敛） (2) \(M\) 的闭有界子集是紧致的 (3) \(\exists\, p \in M\)，\(\exp_p\) 定义在整个 \(T_pM\) 上 (4) \(\forall\, p \in M\)，\(\exp_p\) 定义在整个 \(T_pM\) 上 （测地完备：所有测地线可延伸到 \(\mathbb{R}\)） 若以上成立，则 \(\forall\, p, q \in M\)，存在最短测地线 \(\gamma: [0,1] \to M\)，\(\gamma(0) = p\)，\(\gamma(1) = q\)，\(L(\gamma) = d(p,q)\)。 <strong>注意</strong>：(1)-(4) 不蕴含 \(M\) 紧致（如 \(\mathbb{R}^n\) 完备但非紧致）。 但 (2) 说"有界 \(\Rightarrow\) 紧致"——对非紧致流形是因为有界集 本身不是整个 \(M\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中测地不完备性暗示"奇点"的存在（Penrose 奇点定理）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(M = (0, 1)\)（开区间，标准度量）是否测地完备？ 解答：否。测地线 \(\gamma(t) = a + vt\) 可能在有限时间离开 \((0,1)\)。 例如 \(\gamma(0) = 1/2\)，\(\gamma'(0) = 1\)：\(\gamma(t) = 1/2 + t\)， \(t = 1/2\) 时 \(\gamma = 1 \notin (0,1)\)。 也是度量不完备的：\(\{1-1/n\}\) 是 Cauchy 列但不收敛于 \((0,1)\) 中的点。 易错点：\([0,1]\) 不是流形（有边界），\((0,1)\) 是流形但不完备。 \(\mathbb{R}\) 是完备的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hopf-Rinow 定理说完备连通黎曼流形上？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。存在最短测地线但不一定唯一（如球面上对径点有无穷多条最短测地线）。')">A. 任意两点间存在唯一测地线</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！存在最短测地线但不一定唯一（如球面上对径点有无穷多条最短测地线）。')">B. 任意两点间存在最短测地线</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。存在最短测地线但不一定唯一（如球面上对径点有无穷多条最短测地线）。')">C. 所有测地线都是闭的</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。存在最短测地线但不一定唯一（如球面上对径点有无穷多条最短测地线）。')">D. 流形一定紧致</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/geometry/riemannian.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

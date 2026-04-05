@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 金融数学应用 — 随机微积分 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-calc-ch06-q1",
+        "question": "Black-Scholes 欧式看涨期权公式 \\(C=S_0\\Phi(d_1)-Ke^{-rT}\\Phi(d_2)\\) 中 \\(d_1\\) 和 \\(d_2=\\)？",
+        "options": [
+          "\\(d_1=\\frac{\\ln(S_0/K)+(r+\\sigma^2/2)T}{\\sigma\\sqrt{T}}\\), \\(d_2=d_1-\\sigma\\sqrt{T}\\)",
+        "\\(d_1=\\frac{\\ln(S_0/K)}{\\sigma}\\)",
+        "\\(d_1=d_2\\)",
+        "\\(d_1=\\frac{S_0-K}{\\sigma\\sqrt{T}}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(d_1\\): 标准正态下 \\(S_T>K\\) 的\"距离\"（以 \\(S\\) 加权）。\\(d_2\\): 无权重下的距离。\\(\\Phi(d_2)=Q(S_T>K)\\)（风险中性执行概率）。\\(S_0\\Phi(d_1)=E^Q[e^{-rT}S_T\\mathbf{1}_{S_T>K}]\\) 的折现。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q2",
+        "question": "Delta \\(\\Delta=\\frac{\\partial C}{\\partial S}\\) 的值域和金融意义？",
+        "options": [
+          "\\(\\Delta \\in (0,1)\\)（看涨），表示对冲所需持有的标的股数",
+        "\\(\\Delta \\in (-\\infty, \\infty)\\)",
+        "\\(\\Delta=0.5\\) 恒成立",
+        "\\(\\Delta<0\\)（看涨）"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Delta=\\Phi(d_1) \\in (0,1)\\)。ATM: \\(\\Delta \\approx 0.5\\)。深度 ITM: \\(\\Delta \\to 1\\)（期权 → 股票）。OTM: \\(\\Delta \\to 0\\)。看跌 \\(\\Delta=\\Phi(d_1)-1 \\in (-1,0)\\)。Delta 对冲：持有 \\(\\Delta\\) 股消除一阶价格风险。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q3",
+        "question": "Put-Call Parity（欧式，无股息）？",
+        "options": [
+          "\\(C-P=S_0-Ke^{-rT}\\)（看涨 - 看跌 = 现货 - 折现行权价）",
+        "\\(C+P=S_0\\)",
+        "\\(C=P\\)",
+        "\\(C-P=K\\)"
+        ],
+        "answer": 0,
+        "explanation": "构造两组合——(1) \\(C+Ke^{-rT}\\) cash；(2) \\(P+S_0\\)。到期都值 \\(\\max(S_T,K)\\)。无套利 ⟹ 当前价等。不依赖模型（只需无套利）。做市商用 parity 报价：只需一个 BS 价，另一个由 parity 得到。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q4",
+        "question": "Gamma \\(\\Gamma=\\frac{\\partial^2 C}{\\partial S^2}\\) 在 ATM 附近最大，意味什么？",
+        "options": [
+          "ATM 期权的 Delta 对标的价格最敏感——需要最频繁的再平衡对冲",
+        "ATM 期权最便宜",
+        "Gamma 在 OTM 最大",
+        "无实际意义"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Gamma=\\frac{\\phi(d_1)}{S\\sigma\\sqrt{T}}>0\\)。\\(\\phi\\) 在 \\(d_1 \\approx 0\\)（ATM）最大。Gamma risk: \\(\\text{P\\&L} \\approx \\frac{1}{2}\\Gamma(\\Delta S)^2\\)（非线性风险）。Gamma 交易：买入 ATM 期权赚波动，付出 Theta 时间衰减。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q5",
+        "question": "隐含波动率微笑 (volatility smile) 的存在说明什么？",
+        "options": [
+          "市场期权价格偏离 BS 模型（BS 假设恒定 \\(\\sigma\\)），实际低行权价 IV 高于 ATM → \"偏斜\"",
+        "BS 完全正确",
+        "所有期权 IV 相同",
+        "IV 随到期日不变"
+        ],
+        "answer": 0,
+        "explanation": "低 \\(K\\): 保护性看跌需求 + 负偏态 ⟹ IV ↑。高 \\(K\\): 投机需求 ⟹ IV 略高于 ATM。解释模型：随机波动率 (Heston)、跳扩散 (Merton)、局部波动率 (Dupire)。Smile 形态因资产类别而异（股票偏斜、外汇微笑）。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q6",
+        "question": "Dupire 局部波动率公式？",
+        "options": [
+          "\\(\\sigma_{\\text{loc}}^2(K,T)=\\frac{\\partial C/\\partial T+rK\\partial C/\\partial K}{\\frac{1}{2}K^2\\partial^2 C/\\partial K^2}\\)——从期权市场价格\"提取\"局部波动率",
+        "\\(\\sigma_{\\text{loc}}=\\) 常数",
+        "需要真实测度",
+        "\\(\\sigma_{\\text{loc}}=\\) 隐含波动率"
+        ],
+        "answer": 0,
+        "explanation": "\\(C(K,T)\\) 市场数据 → 数值求偏导 → 局部波动率面。\\(\\sigma_{\\text{loc}}(S,t)\\) 使模型精确复制所有香草期权价格。是完备模型（对冲唯一）。缺点：动态性差（smile dynamics 不准确），需频繁重校准。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q7",
+        "question": "方差互换 (variance swap) 的公正执行价？",
+        "options": [
+          "\\(K_{\\text{var}}=\\frac{2e^{rT}}{T}\\left[\\int_0^F \\frac{P(K)}{K^2}dK+\\int_F^\\infty \\frac{C(K)}{K^2}dK\\right]\\)（期权组合复制已实现方差）",
+        "\\(\\sigma^2\\)（BS 波动率）",
+        "\\(\\text{VIX}^2\\)",
+        "历史方差"
+        ],
+        "answer": 0,
+        "explanation": "payoff \\(=\\sigma_{\\text{realized}}^2-K_{\\text{var}}\\)。静态对冲：对数合约 \\(-2\\ln(S_T/F)\\) 可分解为 OTM put 和 call 的连续体。\\(\\text{VIX}^2 \\approx K_{\\text{var}}\\)（30天）。连接期权市场和波动率市场的桥梁。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q8",
+        "question": "BS Delta 对冲为什么在实际中不完美（模型风险）？",
+        "options": [
+          "假设恒定 \\(\\sigma\\) / 连续交易 / 无跳跃——真实市场违背所有三条，对冲有残余风险",
+        "对冲总是完美的",
+        "只有交易成本的问题",
+        "Delta 公式有误"
+        ],
+        "answer": 0,
+        "explanation": "(1) \\(\\sigma\\) 随机 ⟹ Vega 风险未对冲。(2) 离散交易 ⟹ Gamma 误差 \\(\\propto \\Gamma(\\Delta S)^2\\)。(3) 跳跃 ⟹ 无法连续调整。(4) 交易成本 / 流动性。对冲残余 P&L 的分布 → \"对冲 slippage\"。实务中用 Gamma/Vega 对冲补充。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q9",
+        "question": "Heston 模型下欧式期权价格的半封闭解形式？",
+        "options": [
+          "通过特征函数 \\(\\phi(u)=E^Q[e^{iu\\ln S_T}]\\)（封闭解）+ Fourier 反变换（数值积分）",
+        "BS 公式替换 \\(\\sigma\\)",
+        "蒙特卡洛",
+        "二叉树"
+        ],
+        "answer": 0,
+        "explanation": "\\(C=S_0 P_1-Ke^{-rT}P_2\\), \\(P_j=\\frac{1}{2}+\\frac{1}{\\pi}\\int_0^\\infty \\text{Re}[\\frac{e^{-iu\\ln K}\\phi_j(u)}{iu}]du\\)。\\(\\phi\\) 有解析解（Riccati ODE）。FFT 或 COS 方法高效计算。校准：最小化市场 IV 与模型 IV 的距离。"
+      },
+      {
+        "id": "stochastic-calc-ch06-q10",
+        "question": "xVA (CVA/DVA/FVA/KVA) 框架的数学本质？",
+        "options": [
+          "衍生品价值 \\(=\\) \"无违约价\" \\(-\\) CVA \\(+\\) DVA \\(-\\) FVA \\(-\\) KVA，每一项是条件期望的测度变换积分",
+        "只是一个会计调整",
+        "无需随机微积分",
+        "只影响银行不影响客户"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{CVA}=E^Q[\\text{LGD}\\int_0^T D(t)\\max(V_t,0)\\lambda_C(t)dt]\\)。需模拟 \\(V_t\\) 在每个违约时间的分布（exposure profile）。FVA 涉及融资成本，KVA 涉及资本占用。全面定价需求推动了 Monte Carlo + AD (algorithmic differentiation) 等计算技术发展。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic-calc"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic-calc.html" class="module-name">随机微积分</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Black-Scholes 公式</a></li>
+      <li><a href="#kp2">02 · Feynman-Kac 公式</a></li>
+      <li><a href="#kp3">03 · Score-based 扩散模型初步</a></li>
+      <li><a href="#kp4">04 · 随机最优控制与粗糙路径展望</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>金融数学应用</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Black-Scholes 公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Black-Scholes 公式是金融数学的最著名结果，给出了欧式期权的 无套利价格。它将前几章的所有工具综合运用：GBM + Itô 公式 + Girsanov + 鞅表示。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>期权价格 = 风险中性测度下的折现期望 \(e^{-rT}E_Q[\text{payoff}]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>欧式看涨期权：payoff = \((S_T - K)^+\)。 在 \(Q\) 下 \(S_T = S_0 e^{(r-\sigma^2/2)T + \sigma\tilde{B}_T}\)。 \[C = e^{-rT} E_Q[(S_T - K)^+] = S_0 \Phi(d_1) - Ke^{-rT}\Phi(d_2)\] 其中 \[d_1 = \frac{\ln(S_0/K) + (r + \sigma^2/2)T}{\sigma\sqrt{T}}, \quad d_2 = d_1 - \sigma\sqrt{T}\] 推导要点：\(S_T > K \Leftrightarrow \tilde{B}_T > -d_2 \sigma \sqrt{T}\)。 分拆 \(E_Q[S_T \mathbf{1}_{S_T>K}]\) 使用测度变换得到 \(\Phi(d_1)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>期权交易、风险管理、波动率曲面。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S_0=100, K=105, r=0.05, \sigma=0.2, T=1\)。求看涨期权价格。 解答：\(d_1 = (\ln(100/105)+(0.05+0.02) \times 1)/(0.2) = (-0.0488+0.07)/0.2 = 0.106\)。 \(d_2 = 0.106 - 0.2 = -0.094\)。 \(C = 100\Phi(0.106) - 105e^{-0.05}\Phi(-0.094) \approx 100 \times 0.542 - 99.88 \times 0.463 \approx 8.0\)。 易错点：\(d_1\) 和 \(d_2\) 中的 \(r + \sigma^2/2\) 不能写成 \(r - \sigma^2/2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Black-Scholes 公式中未出现的参数是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mu\\) 在转到 \\(Q\\) 后已被市场风险价格消除。期权价格只依赖')">A. 股价 \(S_0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mu\\) 在转到 \\(Q\\) 后已被市场风险价格消除。期权价格只依赖')">B. 波动率 \(\sigma\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\mu\\) 在转到 \\(Q\\) 后已被市场风险价格消除。期权价格只依赖')">C. 股票的真实漂移 \(\mu\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Feynman-Kac 公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Feynman-Kac 定理将 PDE 和 SDE 连接起来：某些 PDE 的解可以表示为 随机过程的期望，反之亦然。这是随机分析与 PDE 的桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>PDE 解 = 随机期望。这个“SDE-PDE 对偶”是现代数学的深刻联系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Feynman-Kac：设 \(u(t,x)\) 解 PDE \[\frac{\partial u}{\partial t} + b(x)\frac{\partial u}{\partial x} + \frac{1}{2}\sigma^2(x)\frac{\partial^2 u}{\partial x^2} - r u = 0\] \(u(T,x) = f(x)\)。则 \[u(t,x) = E\!\left[e^{-r(T-t)} f(X_T) \;\big|\; X_t = x\right]\] 其中 \(dX = b(X) dt + \sigma(X) dB\)。 证明要点：对 \(e^{-rt}u(t,X_t)\) 用 Itô 公式， PDE 条件保证 \(dt\) 项为零，故它是鞅。 \(e^{-rt}u(t,x) = E[e^{-rT}f(X_T) | X_t=x]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>期权定价（BS PDE 的概率解释）；扩散模型的分数生成。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：热方程 \(u_t = \frac{1}{2}u_{xx}\)，\(u(0,x) = f(x)\)。 用 Feynman-Kac 写出解。 解答：\(b=0, \sigma=1, r=0\)。\(u(0,x) = E[f(x + B_T)]\)。 即 \(u(0,x) = \int f(x+y) \frac{e^{-y^2/(2T)}}{\sqrt{2\pi T}} dy\)。 这就是热核卷积。 易错点：FK 公式中的 \(b, \sigma\) 必须与 PDE 的系数匹配。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Feynman-Kac 公式建立了什么联系？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。FK 公式说：PDE 的解 = SDE 的条件期望。')">A. SDE 与 ODE</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！FK 公式说：PDE 的解 = SDE 的条件期望。')">B. PDE 与 SDE 的期望</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。FK 公式说：PDE 的解 = SDE 的条件期望。')">C. 鞅 与 Markov 链</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Score-based 扩散模型初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>近年最热门的 AI 应用：扩散生成模型（DDPM/Score SDE）将数据加噪 再去噪，用 SDE 的反转实现生成。这是随机微积分在 AI 中的 最前沿应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>前向过程 = 加噪 SDE，反向过程 = 去噪 SDE。 网络学习的是 score \(\nabla_x \log p_t(x)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>前向 SDE：\(dX_t = f(X_t, t) dt + g(t) dB_t\)。 将数据 \(X_0 \sim p_{\text{data}}\) 驱动至噪声 \(X_T \sim N(0, I)\)。 Anderson 反转 SDE： \[dX_t = [f(X_t, t) - g(t)^2 \nabla_x \log p_t(X_t)] dt + g(t) d\bar{B}_t\] 其中 \(\bar{B}_t\) 是反向 BM，\(\nabla_x \log p_t\) 是 score 函数。 训练：用神经网络拟合 score： \[\min_{s_\theta} E_{t, X_0, X_t}\left[\|s_\theta(X_t, t) - \nabla \log p_{t|0}(X_t|X_0)\|^2\right]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>图像生成（Stable Diffusion）、视频/音频生成、蛋白质结构预测。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：最简单情形：OU 前向过程 \(dX = -X dt + \sqrt{2} dB\)。 \(p_\infty(x) = N(0,1)\)。Score: \(\nabla \log p_\infty(x) = -x\)。 反向 SDE: \(dX = (-X + 2 \cdot (-X))(-dt) + \sqrt{2} d\bar{B}\) \(= (X + 2X) dt + \sqrt{2} d\bar{B} = 3X dt + \sqrt{2} d\bar{B}\)（简化）。 易错点：反向 SDE 的时间方向相反，符号处理要细心。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">扩散生成模型中网络学习的目标是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。网络拟合 score，然后用反向 SDE 由噪声生成数据。')">A. 数据分布 \(p(x)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！网络拟合 score，然后用反向 SDE 由噪声生成数据。')">B. Score 函数 \(\nabla \log p_t(x)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。网络拟合 score，然后用反向 SDE 由噪声生成数据。')">C. 似然函数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>随机最优控制与粗糙路径展望</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>随机微积分的两个现代前沿方向：随机最优控制（HJB 方程）和 粗糙路径理论（处理比 BM 更不规则的路径）。仅简要介绍思想。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>随机控制 = “在不确定性下做最优决策”。 粗糙路径 = “超越 BM 的”随机积分理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>随机控制：最小化 \(E[\int_0^T L(X_t, u_t) dt + g(X_T)]\)， 其中 \(dX = b(X, u) dt + \sigma dB\)，\(u_t\) 是控制策略。 HJB 方程： \[-V_t + \sup_u \left[-L(x,u) - b(x,u)V_x - \frac{1}{2}\sigma^2 V_{xx}\right] = 0\] \(V(T,x) = g(x)\)。\(V\) 是值函数。 粗糙路径理论（展望）：对 Hölder 约束的路径 \(\gamma: [0,T] \to \mathbb{R}^d\)，定义 \(p\)-变差，用代数结构建立 随机积分，超越经典 Itô 框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>HJB 用于金融组合优化（Merton 问题）、机器人控制。 粗糙路径用于非鞅模型、机器学习中的签名方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题（展望）：Merton 问题简化：财富 \(dW = (rW + (\mu-r)\pi W) dt + \sigma \pi W dB\)。\(\pi\) 是股票比例。最大化 \(E[\ln W_T]\)。 最优 \(\pi^* = (\mu - r)/\sigma^2\)（Merton 线）。 易错点：这些是高级话题，此处仅作“展望”，不做深入发展。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">HJB 方程是哪个领域的核心工具？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！HJB 方程是动态规划原理在连续时间随机控制中的体现。')">A. 随机最优控制</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。HJB 方程是动态规划原理在连续时间随机控制中的体现。')">B. 贝叶斯推断</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。HJB 方程是动态规划原理在连续时间随机控制中的体现。')">C. 假设检验</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/probability/stochastic-calc.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

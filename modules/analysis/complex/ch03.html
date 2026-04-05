@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 Taylor 与 Laurent 展开 — 复分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "complex-ch03-q1",
+        "question": "幂级数 \\(\\sum_{n=0}^\\infty a_n (z - z_0)^n\\) 的收敛半径 \\(R\\) 由什么确定？",
+        "options": [
+          "\\(1/R = \\limsup_{n \\to \\infty} |a_n|^{1/n}\\)（Cauchy-Hadamard 公式）",
+        "\\(R = \\lim |a_n|\\)",
+        "\\(R = 1/|a_0|\\)",
+        "\\(R\\) 总是 \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy-Hadamard：\\(1/R = \\limsup |a_n|^{1/n}\\)。\\(|z - z_0| < R\\)：绝对收敛。\\(|z - z_0| > R\\)：发散。\\(|z - z_0| = R\\)：不确定。也可用比值判别法：\\(R = \\lim |a_n/a_{n+1}|\\)（当极限存在时）。收敛区域是圆盘——这是复分析特有的几何。"
+      },
+      {
+        "id": "complex-ch03-q2",
+        "question": "\\(\\sum_{n=0}^\\infty z^n\\) 的收敛半径和和函数？",
+        "options": [
+          "\\(R = 1\\)，\\(f(z) = \\frac{1}{1-z}\\)（\\(|z| < 1\\)）",
+        "\\(R = \\infty\\)，\\(f(z) = e^z\\)",
+        "\\(R = 0\\)",
+        "\\(R = 2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a_n = 1\\)，\\(|a_n|^{1/n} = 1\\)，\\(R = 1\\)。几何级数：\\(\\sum z^n = 1/(1-z)\\)（\\(|z| < 1\\)）。\\(z = 1\\)：发散。\\(z = -1\\)：\\(\\sum(-1)^n\\) 发散。\\(|z| = 1\\) 上行为因点而异——收敛边界复杂。"
+      },
+      {
+        "id": "complex-ch03-q3",
+        "question": "\\(f(z) = e^z\\) 在 \\(z_0 = 0\\) 的 Taylor 展开？",
+        "options": [
+          "\\(\\sum_{n=0}^\\infty \\frac{z^n}{n!}\\)（\\(R = \\infty\\)）",
+        "\\(\\sum_{n=0}^\\infty z^n\\)",
+        "\\(\\sum_{n=1}^\\infty \\frac{z^n}{n}\\)",
+        "\\(1 + z\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f^{(n)}(0) = e^0 = 1\\)。\\(a_n = f^{(n)}(0)/n! = 1/n!\\)。\\(R = \\infty\\)（整函数）。这是最基本的 Taylor 展开——所有初等函数展开的模板。"
+      },
+      {
+        "id": "complex-ch03-q4",
+        "question": "\\(f(z) = \\frac{1}{1+z^2}\\) 在 \\(z_0 = 0\\) 的 Taylor 展开收敛半径 \\(R = ?\\)",
+        "options": [
+          "\\(R = 1\\)（最近奇点 \\(z = \\pm i\\)，\\(|z_0 - (\\pm i)| = 1\\)）",
+        "\\(R = \\infty\\)",
+        "\\(R = 2\\)",
+        "\\(R = \\pi\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{1+z^2} = \\sum_{n=0}^\\infty (-1)^n z^{2n}\\)（\\(|z| < 1\\)）。\\(R = 1\\)——被 \\(z = \\pm i\\)（奇点）阻止。收敛半径 = 到最近奇点的距离。实函数在 \\(\\mathbb{R}\\) 上无穷光滑但 Taylor 展开收敛有限——奇点\"隐藏\"在复平面。"
+      },
+      {
+        "id": "complex-ch03-q5",
+        "question": "Laurent 展开与 Taylor 展开的区别？",
+        "options": [
+          "Laurent 展开允许负幂次：\\(f(z) = \\sum_{n=-\\infty}^{\\infty} a_n (z-z_0)^n\\)，在环域 \\(r < |z-z_0| < R\\) 收敛",
+        "Laurent 展开只有正幂次",
+        "Laurent 展开仅对整函数",
+        "两者等价"
+        ],
+        "answer": 0,
+        "explanation": "Taylor：\\(f\\) 在圆盘 \\(|z-z_0| < R\\) 全纯，\\(\\sum_{n \\geq 0}\\)。Laurent：\\(f\\) 在环域 \\(r < |z-z_0| < R\\) 全纯（圆心处可能有奇点），\\(\\sum_{n \\in \\mathbb{Z}}\\)。负幂部分（主要部分）编码奇点信息。\\(a_{-1}\\) = 留数。"
+      },
+      {
+        "id": "complex-ch03-q6",
+        "question": "\\(f(z) = \\frac{1}{z(z-1)}\\) 在 \\(0 < |z| < 1\\) 的 Laurent 展开？",
+        "options": [
+          "\\(-\\frac{1}{z} \\sum_{n=0}^\\infty z^n = -\\frac{1}{z} - 1 - z - z^2 - ...\\)",
+        "\\(\\frac{1}{z} + 1 + z + ...\\)",
+        "\\(\\sum z^n\\)",
+        "\\(-1/z\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{z(z-1)} = \\frac{1}{z} \\cdot \\frac{1}{z-1} = \\frac{1}{z} \\cdot \\frac{-1}{1-z} = -\\frac{1}{z} \\cdot \\sum_{n=0}^\\infty z^n\\)（\\(|z| < 1\\)）。\\(= -z^{-1} - 1 - z - z^2 - ...\\)。主要部分 \\(= -z^{-1}\\)，留数 \\(a_{-1} = -1\\)。"
+      },
+      {
+        "id": "complex-ch03-q7",
+        "question": "孤立奇点 \\(z_0\\) 的三种分类？",
+        "options": [
+          "可去奇点（无负幂次）、极点（有限个负幂次）、本性奇点（无穷多负幂次）",
+        "零点、极点、分支点",
+        "奇点、正则点、临界点",
+        "简单、重、本性"
+        ],
+        "answer": 0,
+        "explanation": "Laurent 展开 \\(\\sum_{n=-\\infty}^\\infty a_n(z-z_0)^n\\)。可去：\\(a_n = 0\\)（\\(n < 0\\)）——\\(f\\) 可补充定义为全纯。\\(m\\) 阶极点：\\(a_{-m} \\neq 0\\)，\\(a_n = 0\\)（\\(n < -m\\)）——\\(f(z) \\sim c/(z-z_0)^m\\)。本性：无穷多非零 \\(a_n\\)（\\(n < 0\\)）——\\(e^{1/z}\\) 的典型。"
+      },
+      {
+        "id": "complex-ch03-q8",
+        "question": "\\(\\sum_{n=0}^\\infty n! z^n\\) 的收敛半径？",
+        "options": [
+          "\\(R = 0\\)（仅在 \\(z = 0\\) 收敛）",
+        "\\(R = 1\\)",
+        "\\(R = \\infty\\)",
+        "\\(R = 1/e\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|a_n|^{1/n} = (n!)^{1/n} \\to \\infty\\)（Stirling：\\((n!)^{1/n} \\sim n/e\\)）。\\(1/R = \\infty\\)，\\(R = 0\\)。\\(n!\\) 增长太快。这个幂级数定义的\"函数\"仅在原点收敛——在渐近分析中出现，可通过 Borel 求和赋予意义。"
+      },
+      {
+        "id": "complex-ch03-q9",
+        "question": "\\(f(z) = \\frac{1}{z-1}\\) 在 \\(z_0 = 0\\) 的 Taylor 系数 \\(a_n = ?\\)（\\(|z| < 1\\)）",
+        "options": [
+          "\\(a_n = -1\\)（\\(f = -\\frac{1}{1-z} = -\\sum z^n\\)）",
+        "\\(a_n = 1\\)",
+        "\\(a_n = (-1)^n\\)",
+        "\\(a_n = 1/n!\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{z-1} = \\frac{-1}{1-z} = -\\sum_{n=0}^\\infty z^n\\)（\\(|z| < 1\\)）。\\(a_n = -1\\)。\\(R = 1\\)（\\(z = 1\\) 是极点）。在 \\(|z| > 1\\) 需另一个 Laurent/Taylor 展开：\\(\\frac{1}{z-1} = \\frac{1}{z} \\cdot \\frac{1}{1 - 1/z} = \\sum_{n=0}^\\infty z^{-n-1}\\)。"
+      },
+      {
+        "id": "complex-ch03-q10",
+        "question": "\\(f(z) = e^{1/z}\\) 在 \\(z = 0\\) 的 Laurent 展开？",
+        "options": [
+          "\\(\\sum_{n=0}^\\infty \\frac{1}{n! z^n} = 1 + \\frac{1}{z} + \\frac{1}{2!z^2} + ...\\)（无穷多负幂次——本性奇点）",
+        "\\(1 + z + z^2/2 + ...\\)",
+        "\\(1/z\\)",
+        "不存在 Laurent 展开"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^w = \\sum w^n/n!\\)，\\(w = 1/z\\)：\\(e^{1/z} = \\sum_{n=0}^\\infty z^{-n}/n!\\)。无穷多负幂次 \\(\\Rightarrow\\) \\(z = 0\\) 是本性奇点。留数 \\(a_{-1} = 1\\)。\\(e^{1/z}\\) 在 \\(z \\to 0\\) 时振荡剧烈——Picard 大定理：在本性奇点附近取遍（至多一个例外值外的）所有复数值。"
+      },
+      {
+        "id": "complex-ch03-q11",
+        "question": "\\(f(z) = \\frac{\\sin z}{z}\\) 在 \\(z = 0\\) 是什么类型的奇点？",
+        "options": [
+          "可去奇点（\\(\\lim_{z \\to 0} \\sin z/z = 1\\)，补充定义 \\(f(0) = 1\\) 即全纯）",
+        "一阶极点",
+        "本性奇点",
+        "不是奇点"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sin z = z - z^3/6 + ...\\)。\\(\\sin z / z = 1 - z^2/6 + ...\\)。Laurent 展开无负幂次 \\(\\Rightarrow\\) 可去奇点。\\(f(0)\\) 未定义但极限存在 \\(= 1\\)。补充后 \\(f\\) 全纯。等价判据：\\(\\lim_{z \\to z_0} f(z)\\) 存在有限 \\(\\Leftrightarrow\\) 可去。"
+      },
+      {
+        "id": "complex-ch03-q12",
+        "question": "\\(\\cos z\\) 在 \\(z_0 = 0\\) 的 Taylor 展开和收敛半径？",
+        "options": [
+          "\\(\\sum_{n=0}^\\infty \\frac{(-1)^n z^{2n}}{(2n)!}\\)，\\(R = \\infty\\)",
+        "\\(\\sum z^n / n!\\)，\\(R = \\infty\\)",
+        "\\(1 - z + z^2\\)，\\(R = 1\\)",
+        "\\(\\sum z^{2n}/(2n)!\\)，\\(R = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f^{(2k)}(0) = (-1)^k\\)，\\(f^{(2k+1)}(0) = 0\\)。\\(\\cos z = 1 - z^2/2! + z^4/4! - ...\\)。整函数，\\(R = \\infty\\)。\\(\\cos z = \\text{Re}(e^{iz}) = (e^{iz} + e^{-iz})/2\\)——通过 \\(e^z\\) 的展开导出。"
+      },
+      {
+        "id": "complex-ch03-q13",
+        "question": "\\(f(z) = \\frac{1}{(z-1)^2}\\) 在 \\(z = 1\\) 是几阶极点？留数？",
+        "options": [
+          "2 阶极点，\\(\\text{Res}(f, 1) = 0\\)",
+        "1 阶极点，\\(\\text{Res} = 1\\)",
+        "2 阶极点，\\(\\text{Res} = 1\\)",
+        "可去奇点"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(z) = (z-1)^{-2}\\)。Laurent 展开在 \\(z = 1\\)：仅有 \\((z-1)^{-2}\\) 项。\\(a_{-2} = 1\\)，\\(a_{-1} = 0\\)。留数 = \\(a_{-1}\\) 系数 \\(= 0\\)。2 阶极点但留数为零——留数是 \\((z-z_0)^{-1}\\) 的系数，不是最高阶负幂次的系数。"
+      },
+      {
+        "id": "complex-ch03-q14",
+        "question": "\\(f(z) = \\frac{1}{z^2 - 1}\\) 在 \\(1 < |z| < \\infty\\) 的 Laurent 展开？",
+        "options": [
+          "\\(\\sum_{n=0}^\\infty \\frac{1}{z^{2n+2}}\\)（\\(= \\frac{1}{z^2} + \\frac{1}{z^4} + ...\\)）",
+        "\\(-1 - z^2 - z^4 - ...\\)",
+        "\\(\\frac{1}{z^2}\\)",
+        "\\(\\sum z^{2n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{z^2 - 1} = \\frac{1}{z^2} \\cdot \\frac{1}{1 - 1/z^2} = \\frac{1}{z^2} \\sum_{n=0}^\\infty z^{-2n}\\)（\\(|1/z^2| < 1\\)，即 \\(|z| > 1\\)）。\\(= \\sum_{n=0}^\\infty z^{-2n-2} = z^{-2} + z^{-4} + ...\\)。在不同环域中展开形式不同。"
+      },
+      {
+        "id": "complex-ch03-q15",
+        "question": "Abel 定理：幂级数在收敛圆内内闭一致收敛。若 \\(\\sum a_n R^n\\) 收敛，则？",
+        "options": [
+          "\\(f(z) = \\sum a_n z^n\\) 在 \\(z = R\\) 处左极限 \\(= \\sum a_n R^n\\)（Abel 连续性）",
+        "\\(f\\) 在 \\(|z| = R\\) 上处处收敛",
+        "\\(f\\) 在 \\(|z| > R\\) 收敛",
+        "\\(R\\) 不是最佳的"
+        ],
+        "answer": 0,
+        "explanation": "Abel 定理：\\(\\sum a_n R^n\\) 收敛 \\(\\Rightarrow\\) \\(\\lim_{r \\to R^-} \\sum a_n r^n = \\sum a_n R^n\\)（沿半径向边界趋近时连续）。不要求在 \\(z = R\\) 全方向收敛。推广：沿 Stolz 角收敛。这是 Tauber 型定理的起点。"
+      },
+      {
+        "id": "complex-ch03-q16",
+        "question": "\\(z = 0\\) 是 \\(f(z) = z/(e^z - 1)\\) 的什么类型的奇点？",
+        "options": [
+          "可去奇点（\\(\\lim_{z \\to 0} z/(e^z-1) = 1\\)）",
+        "一阶极点",
+        "二阶极点",
+        "本性奇点"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^z - 1 = z + z^2/2 + ...\\)。\\(z/(e^z-1) = z/(z(1 + z/2 + ...)) = 1/(1 + z/2 + ...) = 1 - z/2 + ...\\)。无负幂次，可去奇点。补充 \\(f(0) = 1\\)。\\(z/(e^z-1) = \\sum B_n z^n/n!\\)（\\(B_n\\) 是 Bernoulli 数）——数论中的重要生成函数。"
+      },
+      {
+        "id": "complex-ch03-q17",
+        "question": "\\(\\frac{1}{1-z}\\) 在 \\(z_0 = 2\\) 处展开（\\(|z-2| < 1\\) 内收敛）？",
+        "options": [
+          "\\(\\frac{-1}{1-(z-2)} \\cdot \\frac{1}{1} = \\frac{1}{z-1} = \\frac{1}{(z-2)+1} = \\sum_{n=0}^\\infty (-1)^n (z-2)^n\\)（不对）。修正：\\(\\frac{1}{1-z} = \\frac{-1}{z-1} = \\frac{-1}{(z-2)+1} = -\\sum_{n=0}^\\infty (-1)^n (z-2)^n\\)",
+        "\\(\\sum (z-2)^n\\)",
+        "\\(-1/(z-2)\\)",
+        "不可展开"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{1-z} = \\frac{-1}{(z-2)+1} = -\\frac{1}{1+(z-2)} = -\\sum_{n=0}^\\infty (-1)^n (z-2)^n = \\sum_{n=0}^\\infty (-1)^{n+1}(z-2)^n\\)（\\(|z-2|<1\\)）。\\(R = 1\\)（最近奇点 \\(z = 1\\)，\\(|2-1| = 1\\)）。展开中心不同 \\(\\Rightarrow\\) 展开式不同但代表同一函数。"
+      },
+      {
+        "id": "complex-ch03-q18",
+        "question": "\\(\\sum_{n=1}^\\infty z^n/n\\) 的收敛半径和在收敛圆上的行为？",
+        "options": [
+          "\\(R = 1\\)。\\(z = 1\\)：\\(\\sum 1/n\\) 发散。\\(z = -1\\)：\\(\\sum(-1)^n/n\\) 收敛（\\(= -\\ln 2\\)）",
+        "\\(R = \\infty\\)",
+        "\\(R = 1\\)，圆上处处收敛",
+        "\\(R = 1\\)，圆上处处发散"
+        ],
+        "answer": 0,
+        "explanation": "\\(|a_n|^{1/n} = n^{-1/n} \\to 1\\)，\\(R = 1\\)。和函数：\\(-\\ln(1-z)\\)（\\(|z| < 1\\)）。\\(z = 1\\)：调和级数发散。\\(z = -1\\)：交错调和级数收敛 \\(= -\\ln 2\\)（Abel 定理）。收敛圆上的行为逐点不同——复分析与实分析的精妙交界。"
+      },
+      {
+        "id": "complex-ch03-q19",
+        "question": "\\(f(z) = \\frac{1}{z(z-1)(z-2)}\\) 在 \\(0 < |z| < 1\\) 的 Laurent 展开的主要部分？",
+        "options": [
+          "\\(\\frac{1}{2z}\\)（留数 \\(a_{-1} = 1/2\\)）",
+        "\\(\\frac{1}{z}\\)",
+        "\\(\\frac{-1}{z}\\)",
+        "\\(\\frac{2}{z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "部分分式：\\(\\frac{1}{z(z-1)(z-2)} = \\frac{A}{z} + \\frac{B}{z-1} + \\frac{C}{z-2}\\)。\\(A = \\frac{1}{(-1)(-2)} = 1/2\\)，\\(B = \\frac{1}{1 \\cdot (-1)} = -1\\)，\\(C = \\frac{1}{2 \\cdot 1} = 1/2\\)。在 \\(0 < |z| < 1\\)：\\(1/z\\) 项已是 Laurent 主要部分。\\(1/(z-1)\\)、\\(1/(z-2)\\) 在 \\(|z|<1\\) 展为 Taylor。留数 \\(= A = 1/2\\)。"
+      },
+      {
+        "id": "complex-ch03-q20",
+        "question": "Casorati-Weierstrass 定理：\\(z_0\\) 是本性奇点 \\(\\Rightarrow\\) \\(f(D^*(z_0, r))\\) 在 \\(\\mathbb{C}\\) 中稠密。\\(e^{1/z}\\) 在 \\(z \\to 0\\) 时？",
+        "options": [
+          "取遍所有非零复数值（\\(e^{1/z} \\neq 0\\) 始终，但靠近 \\(0\\) 的像稠密于 \\(\\mathbb{C}\\)）",
+        "有界",
+        "趋于 \\(0\\)",
+        "趋于 \\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^{1/z}\\)（\\(z \\neq 0\\)）：\\(z = 1/(a + 2k\\pi i)\\) 时 \\(e^{1/z} = e^a\\)（\\(a \\in \\mathbb{R}\\)）——取遍所有正实数。\\(z = 1/(a + bi)\\)（适当选 \\(a, b\\)）可使 \\(e^{1/z}\\) 接近任意非零值。\\(e^w\\) 不取 \\(0\\)（唯一缺值），Picard 大定理：本性奇点附近取遍所有值（至多一个例外）。"
+      },
+      {
+        "id": "complex-ch03-q21",
+        "question": "\\(f(z) = \\tan z\\) 在 \\(z = \\pi/2\\) 处：Taylor 展开还是 Laurent 展开？奇点阶数？",
+        "options": [
+          "Laurent 展开，\\(z = \\pi/2\\) 是一阶极点（\\(\\sin z\\) 在 \\(\\pi/2\\) 非零，\\(\\cos z\\) 一阶零点 \\(\\Rightarrow\\) \\(\\tan z\\) 一阶极点）",
+        "Taylor 展开",
+        "二阶极点",
+        "本性奇点"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tan z = \\sin z / \\cos z\\)。\\(\\cos(\\pi/2) = 0\\)，\\(\\cos'(\\pi/2) = -\\sin(\\pi/2) = -1 \\neq 0\\)：\\(\\cos z\\) 在 \\(\\pi/2\\) 有一阶零点。\\(\\sin(\\pi/2) = 1 \\neq 0\\)。\\(\\tan z\\) 有一阶极点。\\(\\text{Res}(\\tan z, \\pi/2) = \\sin(\\pi/2)/\\cos'(\\pi/2) = 1/(-1) = -1\\)。"
+      },
+      {
+        "id": "complex-ch03-q22",
+        "question": "幂级数的 Hadamard 乘积：\\(f = \\sum a_n z^n\\)（\\(R_f\\)），\\(g = \\sum b_n z^n\\)（\\(R_g\\)）。\\(h = \\sum a_n b_n z^n\\) 的收敛半径 \\(R_h \\geq ?\\)",
+        "options": [
+          "\\(R_h \\geq R_f \\cdot R_g\\)（Hadamard 乘积定理）",
+        "\\(R_h = R_f + R_g\\)",
+        "\\(R_h = \\min(R_f, R_g)\\)",
+        "\\(R_h = R_f / R_g\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\limsup |a_n b_n|^{1/n} \\leq \\limsup |a_n|^{1/n} \\cdot \\limsup |b_n|^{1/n} = 1/(R_f R_g)\\)。\\(R_h \\geq R_f R_g\\)。Hadamard 乘积有积分表示：\\(h(z) = \\frac{1}{2\\pi i}\\oint f(w) g(z/w) \\frac{dw}{w}\\)——在组合数学和分析中有应用。"
+      },
+      {
+        "id": "complex-ch03-q23",
+        "question": "Weierstrass-Casorati 的加强：Picard 大定理。\\(z_0\\) 本性奇点 \\(\\Rightarrow\\) \\(f\\) 在 \\(z_0\\) 的邻域取遍所有复数值，至多除去？",
+        "options": [
+          "一个例外值",
+        "两个例外值",
+        "无例外",
+        "可数个例外"
+        ],
+        "answer": 0,
+        "explanation": "Picard 大定理：\\(f\\) 在本性奇点附近取所有复数值无穷多次，至多一个例外。\\(e^{1/z}\\)：唯一缺值 \\(= 0\\)（\\(e^w \\neq 0\\)，\\(\\forall w\\)）。\\(\\sin(1/z)\\)：无缺值。这是比 Casorati-Weierstrass（稠密）极大地强化。证明深刻（需正规族理论/模函数）。"
+      },
+      {
+        "id": "complex-ch03-q24",
+        "question": "\\(f(z) = \\frac{z}{(z-1)^3}\\)。\\(z = 1\\) 的极点阶数和留数？",
+        "options": [
+          "三阶极点，\\(\\text{Res} = 0\\)（非！\\(\\frac{z}{(z-1)^3} = \\frac{(z-1)+1}{(z-1)^3} = (z-1)^{-2} + (z-1)^{-3}\\)，\\(a_{-1} = 0\\)）",
+        "三阶极点，\\(\\text{Res} = 1\\)",
+        "二阶极点",
+        "一阶极点"
+        ],
+        "answer": 0,
+        "explanation": "\\(z = (z-1)+1\\)。\\(\\frac{z}{(z-1)^3} = \\frac{1}{(z-1)^2} + \\frac{1}{(z-1)^3}\\)。Laurent：\\(a_{-3} = 1\\)，\\(a_{-2} = 1\\)，\\(a_{-1} = 0\\)。留数（\\(a_{-1}\\)）\\(= 0\\)。公式法：\\(\\text{Res} = \\frac{1}{2!}\\lim_{z \\to 1} \\frac{d^2}{dz^2}[(z-1)^3 \\cdot z/(z-1)^3] = \\frac{1}{2}\\frac{d^2}{dz^2}(z)|_{z=1} = 0\\)。"
+      },
+      {
+        "id": "complex-ch03-q25",
+        "question": "\\(f(z) = \\sum_{n=1}^\\infty z^{n!}\\)（间隙级数/lacunary series）的收敛半径 \\(R = ?\\)，边界行为？",
+        "options": [
+          "\\(R = 1\\)，\\(|z| = 1\\) 是自然边界（不可解析延拓）",
+        "\\(R = \\infty\\)",
+        "\\(R = 1\\)，可延拓到更大区域",
+        "\\(R = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a_{n!} = 1\\)，其余 \\(= 0\\)。\\(\\limsup |a_k|^{1/k} = 1\\)（稀疏 \\(1\\) 的贡献），\\(R = 1\\)。Fabry 间隙定理：系数指标的密度趋零（\\(n!/n \\to \\infty\\)）\\(\\Rightarrow\\) 收敛圆是自然边界。这意味着函数只在 \\(|z| < 1\\) \"存在\"——没有更大的定义域。"
+      },
+      {
+        "id": "complex-ch03-q26",
+        "question": "在数值计算中，用 Taylor 展开近似 \\(\\sin z\\)：\\(\\sin z \\approx z - z^3/6 + z^5/120\\)。误差上界（\\(|z| \\leq 1\\)）？",
+        "options": [
+          "\\(|R_5(z)| \\leq |z|^7/7! = 1/5040 \\approx 2 \\times 10^{-4}\\)",
+        "\\(|R| \\leq 1/6\\)",
+        "\\(|R| \\leq 1\\)",
+        "无法估计"
+        ],
+        "answer": 0,
+        "explanation": "Taylor 余项：\\(|R_n(z)| \\leq M \\cdot |z|^{n+1}/(n+1)!\\)。\\(n = 5\\)（保留到 \\(z^5\\)），\\(M = \\sup |\\sin^{(6)}(z)| = | - \\sin z| \\leq \\sinh 1 \\approx 1.175\\)。精确：\\(\\leq |z^7/7!| \\leq 1/5040\\)。复分析的 Cauchy 估计给更优美的误差界。"
+      },
+      {
+        "id": "complex-ch03-q27",
+        "question": "在量子场论中，传播子 \\(G(z) = \\frac{1}{z^2 - m^2}\\) 的极点位于 \\(z = \\pm m\\)。Laurent 展开在物理中的意义？",
+        "options": [
+          "极点 = 粒子质量，留数 = 场强归一化常数，Laurent 主要部分描述粒子的传播行为",
+        "Taylor 部分描述质量",
+        "无物理意义",
+        "本性奇点"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(z) = \\frac{1}{(z-m)(z+m)}\\)。\\(z = m\\)：\\(\\text{Res} = 1/(2m)\\)。\\(G \\approx \\frac{1}{2m(z-m)}\\)（\\(z \\to m\\)）。极点位置 = 粒子质量（或能量），留数 = 耦合强度。\"pole ↔ particle\" 是量子场论的基本原则。散射振幅的奇点结构编码物理信息。"
+      },
+      {
+        "id": "complex-ch03-q28",
+        "question": "在 z-变换（数字信号处理）中，\\(H(z) = \\sum_{n=0}^\\infty h[n] z^{-n}\\)。收敛域（ROC）的形状？",
+        "options": [
+          "环域 \\(r < |z| < R\\)（Laurent 级数的收敛域总是环域或圆盘）",
+        "半平面",
+        "条带",
+        "任意形状"
+        ],
+        "answer": 0,
+        "explanation": "\\(z^{-n}\\) 的 Laurent 级数。收敛域总是以 \\(z = 0\\) 为圆心的环域（可能退化为圆盘或 \\(|z| > r\\)）。因果信号 \\(h[n] = 0\\)（\\(n < 0\\)）：ROC = \\(|z| > r\\)（包含 \\(\\infty\\)）。稳定 \\(\\Leftrightarrow\\) ROC 包含单位圆。z-变换 = Laurent 级数在工程中的化身。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="complex"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/complex.html" class="module-name">复分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Taylor 展开与解析性</a></li>
+      <li><a href="#kp2">02 · Laurent 展开与奇点分类</a></li>
+      <li><a href="#kp3">03 · 零点与极点的代数计数</a></li>
+      <li><a href="#kp4">04 · 半纯函数与级数展开技巧</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>Taylor 与 Laurent 展开</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Taylor 展开与解析性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>前面提到全纯函数可以幂级数展开，现在用 Cauchy 积分公式给出 严格证明。Taylor 定理不仅确立了"全纯 = 解析"，还给出了 系数的积分表示和收敛半径的精确计算，是复分析的基础工程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Taylor 展开是全纯函数的"坐标化"——在每个圆盘上， 函数由系数序列唯一确定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>：\(f\) 在 \(|z - z_0| < R\) 上全纯。则 \[f(z) = \sum_{n=0}^{\infty} a_n (z - z_0)^n, \quad a_n = \frac{f^{(n)}(z_0)}{n!} = \frac{1}{2\pi i} \oint \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} d\zeta\] 级数在每个紧子集上绝对一致收敛。 <strong>证明</strong>：由 Cauchy 公式 \(f(z) = \frac{1}{2\pi i}\oint \frac{f(\zeta)}{\zeta - z} d\zeta\)。 \(\frac{1}{\zeta - z} = \frac{1}{(\zeta - z_0)(1 - (z-z_0)/(\zeta - z_0))} = \sum_{n=0}^\infty \frac{(z - z_0)^n}{(\zeta - z_0)^{n+1}}\)。 交换求和与积分（一致收敛），得 Taylor 展开。 <strong>收敛半径 = \(z_0\) 到最近奇点的距离</strong>。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = \frac{1}{2-z}\) 在 \(z_0 = 0\) 展开。 解答：\(\frac{1}{2-z} = \frac{1}{2} \cdot \frac{1}{1 - z/2} = \sum \frac{z^n}{2^{n+1}}\)，\(R = 2\)（奇点 \(z=2\)）。✓ 在 \(z_0 = 1\) 展开：\(\frac{1}{2-%z} = \frac{1}{1-(z-1)} = \sum (z-1)^n\)，\(R = 1\)（到 \(z=2\) 距离 1）。✓ 易错点：展开中心不同，收敛半径不同。 不要默认 \(R\) 不变。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">全纯函数的 Taylor 级数收敛半径由什么决定？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Hadamard 公式 \\(R = 1/\\limsup |a_n|^{1/n}\\) 和')">A. 函数的最大模</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Hadamard 公式 \\(R = 1/\\limsup |a_n|^{1/n}\\) 和')">B. 到最近奇点的距离</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Hadamard 公式 \\(R = 1/\\limsup |a_n|^{1/n}\\) 和')">C. 系数的增长率</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Hadamard 公式 \\(R = 1/\\limsup |a_n|^{1/n}\\) 和')">D. B 和 C 等价</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Laurent 展开与奇点分类</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Taylor 展开只对没有奇点的区域有效。奇点附近怎么办？Laurent 展开将幂级数推广为"双向级数"（包含负幂项 \((z-z_0)^{-n}\)）， 能够精确描述函数在奇点附近的行为。负幂部分（主部）完全 决定了奇点的类型——可去奇点、极点或本性奇点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Laurent 展开在环形区域 \(r < |z - z_0| < R\) 成立， 将函数分解为"正则部分"（解析）和"主部"（含奇点信息）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Laurent 定理</strong>：\(f\) 在环形区域 \(r < |z - z_0| < R\) 上全纯。则 \[f(z) = \sum_{n=-\infty}^{\infty} a_n (z - z_0)^n\] \(a_n = \frac{1}{2\pi i} \oint \frac{f(\zeta)}{(\zeta - z_0)^{n+1}} d\zeta\)。 <strong>奇点分类</strong>（\(z_0\) 为孤立奇点）： - <strong>可去奇点</strong>：主部 = 0（\(a_n = 0\)，\(n < 0\)）。\(\lim_{z \to z_0} f\) 存在有限。 - <strong>\(m\) 阶极点</strong>：\(a_{-m} \neq 0\)，\(a_n = 0\)（\(n < -m\)）。 等价于 \(f(z) = g(z)/(z - z_0)^m\)（\(g\) 全纯, \(g(z_0) \neq 0\)）。 - <strong>本性奇点</strong>：主部有无穷多非零项。\(\lim_{z \to z_0} f\) 不存在。 <strong>Riemann 可去奇点定理</strong>：\(f\) 在 \(z_0\) 附近有界 ⇒ 可去奇点。 <strong>Casorati-Weierstrass 定理</strong>：本性奇点附近 \(f\) 的像在 \(\mathbb{C}\) 中稠密（大 Picard：甚至取到除至多一个值外的所有值）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = \frac{e^z - 1}{z^2}\) 在 \(z = 0\) 的奇点类型。 解答：\(e^z - 1 = z + z^2/2 + z^3/6 + \cdots\)。 \(f(z) = 1/z + 1/2 + z/6 + \cdots\)。 主部 \(= 1/z\)（一项），故 \(z = 0\) 是一阶极点。 例题：\(e^{1/z}\) 在 \(z = 0\) 的奇点类型。 解答：\(e^{1/z} = 1 + 1/z + 1/(2z^2) + \cdots\)——无穷多负幂项。 本性奇点。 易错点：\(\sin z / z\) 在 \(z = 0\) 看似有奇点，实际是可去的 （\(\lim = 1\)）。不要看到 \(1/z\) 就说是极点。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(z = 0\) 是 \((\cos z - 1)/z^3\) 的什么类型奇点？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\cos z - 1 = -z^2/2 + z^4/24 - \\cdots\\)。')">A. 可去奇点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\cos z - 1 = -z^2/2 + z^4/24 - \\cdots\\)。')">B. 一阶极点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\cos z - 1 = -z^2/2 + z^4/24 - \\cdots\\)。')">C. 二阶极点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\cos z - 1 = -z^2/2 + z^4/24 - \\cdots\\)。')">D. 本性奇点</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>零点与极点的代数计数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>全纯函数的零点有确定的"阶"（重数），极点也有阶。零点和极点 的阶数在围道积分中体现为"绕数"。辐角原理将零点和极点的 计数转化为积分，这是复分析独有的计数工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>零点的阶</strong>：\(f(z_0) = 0\)，\(f(z) = (z - z_0)^m g(z)\)（\(g(z_0) \neq 0\)）， 则 \(z_0\) 是 \(m\) 阶零点。 <strong>极点的阶</strong>：\(z_0\) 是 \(m\) 阶极点 ⇔ \((z - z_0)^m f(z)\) 在 \(z_0\) 全纯非零。 <strong>辐角原理</strong>：\(f\) 在区域 \(D\) 内亚纯，\(\gamma = \partial D\)。 \[\frac{1}{2\pi i} \oint_\gamma \frac{f'(z)}{f(z)}\, dz = N - P\] \(N\) = \(D\) 内零点数（计重数），\(P\) = \(D\) 内极点数（计阶数）。 <strong>证明</strong>：\(f'/f\) 在零点 \(z_0\)（\(m\) 阶）处： \(f'/f = m/(z - z_0) + \) holomorphic，留数 \(= m\)。 在极点处类似获得留数 \(= -\) 阶数。 <strong>Rouché 定理</strong>：若 \(|f - g| < |g|\) 在 \(\gamma\) 上， 则 \(f\) 和 \(g\) 在 \(\gamma\) 内有相同数目的零点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>控制论中 Nyquist 稳定性判据基于辐角原理—— 系统稳定 ⇔ 闭环传递函数在右半平面无零点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = z^5 + 3z + 1\) 在 \(|z| < 1\) 内有几个零点？ 解答（Rouché）：取 \(g(z) = 3z\)，\(f - g = z^5 + 1\)。 在 \(|z| = 1\)：\(|f - g| = |z^5 + 1| \leq 2\)，\(|g| = 3\)。 \(|f - g| < |g|\)。\(g\) 有 1 个零点（\(z = 0\)），故 \(f\) 也有 1 个零点。 易错点：Rouché 定理中 \(|f - g| < |g|\) 必须在<strong>曲线上</strong> 而非曲线内部成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">辐角原理中 \(\frac{1}{2\pi i}\oint f'/f\, dz\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(N - P\\)，零点贡献正留数，极点贡献负留数。')">A. \(f\) 的零点数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(N - P\\)，零点贡献正留数，极点贡献负留数。')">B. \(f\) 的极点数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(N - P\\)，零点贡献正留数，极点贡献负留数。')">C. 零点数 − 极点数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(N - P\\)，零点贡献正留数，极点贡献负留数。')">D. 零点数 + 极点数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>半纯函数与级数展开技巧</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Laurent 展开是局部的——仅在一个环形区域成立。实际计算中， 我们经常需要在不同区域做不同的展开，或对有多个奇点的函数 做部分分式分解。掌握这些展开技巧是计算留数、反 Laplace 变换 和渐近分析的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>亚纯函数</strong>：仅有极点作为奇点的函数。在 \(\hat{\mathbb{C}}\) 上 亚纯函数 = 有理函数。 <strong>部分分式</strong>：\(f(z) = \sum_k \sum_{j=1}^{m_k} \frac{c_{k,j}}{(z - z_k)^j} + g(z)\) （\(g\) 整函数）。 <strong>不同区域的 Laurent 展开</strong>：\(f(z) = 1/((z-1)(z-2))\)。 - \(|z| < 1\)：\(\frac{-1}{z-1} + \frac{1}{z-2} = \sum z^n - \frac{1}{2}\sum (z/2)^n = \sum (1 - 2^{-n-1})z^n\) - \(1 < |z| < 2\)：\(\frac{1}{z} \cdot \frac{1}{1-1/z} - \frac{1}{2}\sum (z/2)^n = \sum_{n=0}^\infty z^{-n-1} - \sum_{n=0}^\infty z^n/2^{n+1}\) - \(|z| > 2\)：展开两项为 \(1/z\) 的幂级数 <strong>展开技巧</strong>：根据 \(|z|\) 与奇点距离的大小关系选择 \(1/(1-w) = \sum w^n\)（\(|w| < 1\)）或 \(-1/(w-1) = -\sum 1/w^n\)（\(|w| > 1\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>信号处理中 Z 变换的收敛域和部分分式分解直接对应 不同区域的 Laurent 展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = \frac{1}{z(z-1)}\) 在 \(0 < |z| < 1\) 的 Laurent 展开。 解答：部分分式 \(= -1/z + 1/(z-1) = -1/z - 1/(1-z) = -1/z - \sum_{n=0}^\infty z^n = -z^{-1} - 1 - z - z^2 - \cdots\)。 易错点：不同环形区域给出不同的 Laurent 展开！ 同一函数的展开不唯一——取决于环形区域。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(1/((z-1)(z-3))\) 在 \(1 < |z| < 3\) 中的 Laurent 展开含？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/(z-1)\\) 贡献负幂项（展开为 \\(z^{-1}\\) 的级数），')">A. 仅正幂项</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/(z-1)\\) 贡献负幂项（展开为 \\(z^{-1}\\) 的级数），')">B. 仅负幂项</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(1/(z-1)\\) 贡献负幂项（展开为 \\(z^{-1}\\) 的级数），')">C. 正负幂项都有</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/(z-1)\\) 贡献负幂项（展开为 \\(z^{-1}\\) 的级数），')">D. 仅常数项</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/analysis/complex.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

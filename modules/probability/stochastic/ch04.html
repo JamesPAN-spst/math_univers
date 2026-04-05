@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 Brown 运动 — 随机过程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-ch04-q1",
+        "question": "标准 Brown 运动 \\(B_t\\) 的定义性质？",
+        "options": [
+          "\\(B_0=0\\)，独立增量，\\(B_t-B_s \\sim N(0,t-s)\\)，路径连续",
+        "\\(B_t\\) 是 Poisson 过程",
+        "\\(B_t\\) 独立同分布",
+        "\\(B_t\\) 路径处处可微"
+        ],
+        "answer": 0,
+        "explanation": "四条公理：(i) \\(B_0=0\\)；(ii) 独立增量；(iii) 正态增量 \\(N(0,t-s)\\)；(iv) 连续路径。D 错误——Brown 运动路径处处不可微（a.s.）。这是概率论中最重要的连续时间过程。"
+      },
+      {
+        "id": "stochastic-ch04-q2",
+        "question": "Brown 运动的存在性由什么保证？",
+        "options": [
+          "Kolmogorov 连续性定理（有限维分布 + 连续修正）",
+        "大数定律",
+        "中心极限定理的直接推论",
+        "构造性定义（不需要证明）"
+        ],
+        "answer": 0,
+        "explanation": "Kolmogorov 一致性定理给有限维分布的存在（Gaussian 过程）。连续修正（Kolmogorov 或 Lévy）保证路径可以取连续版本。经典构造：Lévy-Ciesielski（Haar/Schauder 基展开）或 Donsker 定理（随机游走缩放极限）。"
+      },
+      {
+        "id": "stochastic-ch04-q3",
+        "question": "\\(\\text{Cov}(B_s, B_t)=\\)？（\\(s \\leq t\\)）",
+        "options": [
+          "\\(s\\)（\\(=\\min(s,t)\\)）",
+        "\\(t\\)",
+        "\\(st\\)",
+        "\\(t-s\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Cov}(B_s,B_t)=E[B_s B_t]=E[B_s(B_t-B_s+B_s)]=E[B_s^2]+E[B_s(B_t-B_s)]=s+0=s\\)。独立增量：\\(B_s \\perp (B_t-B_s)\\)。\\(\\min(s,t)\\) 是 Brown 运动的协方差核。"
+      },
+      {
+        "id": "stochastic-ch04-q4",
+        "question": "Brown 运动路径的 Hölder 连续性指数？",
+        "options": [
+          "对 \\(\\alpha<1/2\\) 是 \\(\\alpha\\)-Hölder 连续（a.s.），但 \\(\\alpha=1/2\\) 时不是",
+        "Lipschitz 连续",
+        "\\(\\alpha=1\\) Hölder 连续",
+        "不连续"
+        ],
+        "answer": 0,
+        "explanation": "\\(|B_t-B_s| \\sim |t-s|^{1/2}\\)（典型尺度），Hölder \\(\\alpha<1/2\\) a.s.。不 Lipschitz（否则可微——矛盾）。分形维数 \\(=3/2\\)（图的 Hausdorff 维数 \\(=3/2\\)）。路径极度不规则但连续。"
+      },
+      {
+        "id": "stochastic-ch04-q5",
+        "question": "Brown 运动在 \\([0,T]\\) 上的二次变差 \\([B]_T=\\)？",
+        "options": [
+          "\\(T\\)",
+        "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(\\sqrt{T}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([B]_T=\\lim_{\\|\\Pi\\|\\to 0}\\sum (B_{t_{k+1}}-B_{t_k})^2=T\\)（\\(L^2\\) 和 a.s. 收敛）。非零二次变差是 Brown 运动与光滑函数的本质区别（光滑路径二次变差 \\(=0\\)）。这是 Itô 积分理论的基础。"
+      },
+      {
+        "id": "stochastic-ch04-q6",
+        "question": "\\(B_t\\) 是关于自然滤的鞅吗？",
+        "options": [
+          "是（\\(E[B_t|\\mathcal{F}_s]=B_s\\)，\\(s \\leq t\\)）",
+        "否，是下鞅",
+        "否，是上鞅",
+        "取决于 \\(t\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[B_t|\\mathcal{F}_s]=E[B_t-B_s+B_s|\\mathcal{F}_s]=0+B_s=B_s\\)。\\(B_t^2-t\\) 也是鞅。\\(e^{\\theta B_t-\\theta^2 t/2}\\) 是指数鞅。Brown 运动是连续鞅的\"原型\"。"
+      },
+      {
+        "id": "stochastic-ch04-q7",
+        "question": "Brown 运动的标度不变性 (scaling property)？",
+        "options": [
+          "\\(c B_{t/c^2} \\overset{d}{=} B_t\\)（\\(\\forall c>0\\)）",
+        "\\(B_{ct}=cB_t\\)",
+        "\\(B_t+c \\overset{d}{=} B_{t+c}\\)",
+        "\\(B_t/t \\to 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{cB_{t/c^2}\\}_{t \\geq 0}\\) 是 Brown 运动（验证四条公理）。推论：\\(B_t\\) 的图在任何尺度下\"看起来一样\"（自相似，指数 \\(H=1/2\\)）。分式 Brown 运动推广到 \\(H \\neq 1/2\\)。"
+      },
+      {
+        "id": "stochastic-ch04-q8",
+        "question": "\\(P(B_1>0, B_2>0)\\) 的精确值？",
+        "options": [
+          "\\(3/8\\)",
+        "\\(1/4\\)",
+        "\\(1/2\\)",
+        "\\(1/3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((B_1,B_2)\\) 是二元正态，均值 \\(0\\)，协方差矩阵 \\(\\begin{pmatrix}1&1\\\\1&2\\end{pmatrix}\\)。\\(P(B_1>0,B_2>0)=1/4+\\arcsin(\\rho)/(2\\pi)\\)，\\(\\rho=1/\\sqrt{2}\\)。\\(=1/4+\\arcsin(1/\\sqrt{2})/(2\\pi)=1/4+(\\pi/4)/(2\\pi)=1/4+1/8=3/8\\)。"
+      },
+      {
+        "id": "stochastic-ch04-q9",
+        "question": "Brown 运动的一次变差 \\(\\sum |B_{t_{k+1}}-B_{t_k}|\\) 在 \\([0,T]\\) 上等于？",
+        "options": [
+          "\\(+\\infty\\)（a.s.）",
+        "\\(T\\)",
+        "\\(\\sqrt{T}\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "一次变差无穷 = 路径\"无界变差\"。\\(\\sum|B_{t_{k+1}}-B_{t_k}| \\geq \\max|\\Delta B|^{-1}\\sum(\\Delta B)^2 \\to \\infty\\)（因二次变差 \\(=T>0\\)）。这再次说明 Brown 路径不可微、不可作为 Riemann-Stieltjes 积分的积分器。"
+      },
+      {
+        "id": "stochastic-ch04-q10",
+        "question": "反射原理：\\(P(\\max_{s \\leq t}B_s \\geq a)=\\)？（\\(a>0\\)）",
+        "options": [
+          "\\(2P(B_t \\geq a)=2\\Phi(-a/\\sqrt{t})\\)",
+        "\\(P(B_t \\geq a)\\)",
+        "\\(1-\\Phi(a/\\sqrt{t})\\)",
+        "\\(P(B_t=a)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tau_a=\\inf\\{t:B_t=a\\}\\)。\\(P(M_t \\geq a)=P(\\tau_a \\leq t)\\)。反射：在 \\(\\tau_a\\) 处翻转路径，\\(P(B_t \\geq a|\\tau_a \\leq t)=1/2\\)。\\(P(M_t \\geq a)=2P(B_t \\geq a)\\)。首达时的分布可由此推导。"
+      },
+      {
+        "id": "stochastic-ch04-q11",
+        "question": "\\(\\tau_a=\\inf\\{t:B_t=a\\}\\)（\\(a>0\\)）。\\(E[\\tau_a]=\\)？",
+        "options": [
+          "\\(+\\infty\\)",
+        "\\(a^2\\)",
+        "\\(a\\)",
+        "\\(\\sqrt{a}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\tau_a<\\infty)=1\\)（Brown 运动常返于区间），但 \\(E[\\tau_a]=\\infty\\)。\\(\\tau_a\\) 的分布为 Lévy 分布（逆高斯分布）：\\(f(t)=\\frac{a}{\\sqrt{2\\pi t^3}}e^{-a^2/(2t)}\\)，尾部 \\(\\sim t^{-3/2}\\)（重尾），均值无穷。"
+      },
+      {
+        "id": "stochastic-ch04-q12",
+        "question": "Brown 桥 \\(B^0_t=B_t-tB_1\\)（\\(0 \\leq t \\leq 1\\)）。\\(E[B^0_t]\\) 和 \\(\\text{Var}(B^0_t)\\)？",
+        "options": [
+          "\\(E=0\\), \\(\\text{Var}=t(1-t)\\)",
+        "\\(E=0\\), \\(\\text{Var}=t\\)",
+        "\\(E=t\\), \\(\\text{Var}=t\\)",
+        "\\(E=0\\), \\(\\text{Var}=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[B^0_t]=0\\)。\\(\\text{Var}(B^0_t)=\\text{Var}(B_t)-2t\\text{Cov}(B_t,B_1)+t^2\\text{Var}(B_1)=t-2t^2+t^2=t(1-t)\\)。\\(B^0_0=B^0_1=0\\)。\\(\\max_{t}\\)Var \\( =1/4\\)（\\(t=1/2\\)）。"
+      },
+      {
+        "id": "stochastic-ch04-q13",
+        "question": "Donsker 定理（不变性原理）的内容？",
+        "options": [
+          "缩放后的随机游走 \\(S_{\\lfloor nt \\rfloor}/\\sqrt{n}\\) 弱收敛到 Brown 运动",
+        "\\(S_n/n \\to \\mu\\)",
+        "\\(S_n\\) 的分布收敛到正态",
+        "随机游走路径可微"
+        ],
+        "answer": 0,
+        "explanation": "\\(W^{(n)}(t)=S_{\\lfloor nt \\rfloor}/\\sqrt{n} \\Rightarrow B_t\\)（在 \\(C[0,1]\\) 上弱收敛）。这是 CLT 的函数空间版本。D 错误。应用：随机游走的路径性质可以从 Brown 运动推断。"
+      },
+      {
+        "id": "stochastic-ch04-q14",
+        "question": "标度不变性推论：\\(tB_{1/t}\\)（\\(t>0\\)）是？",
+        "options": [
+          "Brown 运动（需定义 \\(t=0\\) 时为 \\(0\\)）",
+        "Poisson 过程",
+        "常数过程",
+        "非 Markov 过程"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tilde{B}_t=tB_{1/t}\\)：Gaussian，\\(E[\\tilde{B}_t]=0\\)，\\(\\text{Cov}(\\tilde{B}_s,\\tilde{B}_t)=st \\cdot \\min(1/s,1/t)=\\min(s,t)\\)。连续（\\(t>0\\)），\\(\\lim_{t \\to 0}tB_{1/t}=0\\) a.s.（大数定律）。时间反演变换。"
+      },
+      {
+        "id": "stochastic-ch04-q15",
+        "question": "\\(E[\\int_0^T B_t^2 dt]=\\)？",
+        "options": [
+          "\\(T^2/2\\)",
+        "\\(T\\)",
+        "\\(T^2\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[\\int_0^T B_t^2 dt]=\\int_0^T E[B_t^2]dt=\\int_0^T t\\,dt=T^2/2\\)。Fubini 交换积分和期望（\\(B_t^2 \\geq 0\\)）。类似地 \\(E[\\int_0^T B_t dt]=0\\)，\\(\\text{Var}(\\int_0^T B_t dt)=T^3/3\\)。"
+      },
+      {
+        "id": "stochastic-ch04-q16",
+        "question": "\\(P(B_t=a)\\)（\\(a\\) 为任意确定值）？",
+        "options": [
+          "\\(0\\)（连续分布取特定值概率为零）",
+        "正数",
+        "\\(e^{-a^2/(2t)}\\)",
+        "\\(1\\) 若 \\(a=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(B_t \\sim N(0,t)\\)——连续分布，\\(P(B_t=a)=0\\)。但 \\(P(B_t \\in [a,a+\\varepsilon]) \\approx \\varepsilon \\cdot \\phi(a/\\sqrt{t})/\\sqrt{t}\\)。D 错误：\\(P(B_t=0)=0\\)（不要混淆 \\(B_0=0\\) a.s.）。"
+      },
+      {
+        "id": "stochastic-ch04-q17",
+        "question": "Ornstein-Uhlenbeck 过程 \\(dX_t=-\\theta X_t dt+\\sigma dB_t\\) 的平稳分布？",
+        "options": [
+          "\\(N(0, \\sigma^2/(2\\theta))\\)",
+        "\\(N(0, \\sigma^2)\\)",
+        "\\(\\text{Exp}(\\theta)\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "解 \\(X_t=X_0 e^{-\\theta t}+\\sigma \\int_0^t e^{-\\theta(t-s)}dB_s\\)。\\(t \\to \\infty\\)：\\(\\text{Var}(X_t) \\to \\sigma^2/(2\\theta)\\)。OU 过程是均值回复的连续时间 AR(1)。\\(\\theta>0\\) 保证平稳。"
+      },
+      {
+        "id": "stochastic-ch04-q18",
+        "question": "几何 Brown 运动 \\(S_t=S_0 e^{(\\mu-\\sigma^2/2)t+\\sigma B_t}\\)。\\(E[S_t]=\\)？",
+        "options": [
+          "\\(S_0 e^{\\mu t}\\)",
+        "\\(S_0 e^{(\\mu-\\sigma^2/2)t}\\)",
+        "\\(S_0\\)",
+        "\\(S_0 \\mu t\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[e^{\\sigma B_t}]=e^{\\sigma^2 t/2}\\)（正态的矩母函数）。\\(E[S_t]=S_0 e^{(\\mu-\\sigma^2/2)t} \\cdot e^{\\sigma^2 t/2}=S_0 e^{\\mu t}\\)。B 是中位数（不是均值）。\\(\\mu-\\sigma^2/2\\) 是对数收益率的漂移。"
+      },
+      {
+        "id": "stochastic-ch04-q19",
+        "question": "Brown 运动路径处处不可微的证明思路？",
+        "options": [
+          "二次变差 \\(=T>0\\)（若路径在某处可微则局部二次变差 \\(=0\\)），矛盾",
+        "大数定律",
+        "中心极限定理",
+        "直接构造"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(B\\) 在 \\(t_0\\) 可微：\\(|B_{t_0+h}-B_{t_0}| \\leq C|h|\\)，局部贡献为 \\(O(h^2)\\) 对二次变差 → \\(0\\)。但 \\([B]_T=T>0\\)。更精确：\\(\\limsup_{h \\to 0}|B_{t+h}-B_t|/\\sqrt{2h\\ln\\ln(1/h)}=1\\) a.s.（Lévy 的重对数律）。"
+      },
+      {
+        "id": "stochastic-ch04-q20",
+        "question": "\\(M_t=B_t^2-t\\)。\\(M_t\\) 的二次变差 \\([M]_t=\\)？",
+        "options": [
+          "\\(4\\int_0^t B_s^2 ds\\)",
+        "\\(4t\\)",
+        "\\(t\\)",
+        "\\(B_t^4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(dM_t=2B_t dB_t\\)（Itô 公式），\\([M]_t=\\int_0^t (2B_s)^2 ds=4\\int_0^t B_s^2 ds\\)。\\(E[[M]_t]=4 \\cdot t^2/2=2t^2\\)。鞅 \\(M_t\\) 的二次变差等于其 Itô 积分表示的系数平方积分。"
+      },
+      {
+        "id": "stochastic-ch04-q21",
+        "question": "Lévy 的重对数律：\\(\\limsup_{t \\to \\infty}B_t/\\sqrt{2t\\ln\\ln t}=\\)？",
+        "options": [
+          "\\(1\\)（a.s.）",
+        "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(1/\\sqrt{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "LIL 精确刻画 Brown 运动的波动范围。\\(B_t\\) 大约在 \\(\\pm\\sqrt{2t\\ln\\ln t}\\) 的包络内起伏。\\(\\liminf=-1\\)。比 CLT（\\(B_t \\sim \\sqrt{t}\\)）更精确。对称性：\\(t \\to 0^+\\) 版本也成立。"
+      },
+      {
+        "id": "stochastic-ch04-q22",
+        "question": "Brown 桥的条件分布：\\(B_t|B_T=x\\) 的分布？",
+        "options": [
+          "\\(N(xt/T, t(T-t)/T)\\)",
+        "\\(N(x, t)\\)",
+        "\\(N(0, t(1-t))\\)",
+        "\\(N(xt/T, t)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((B_t, B_T)\\) 是二元正态。条件高斯：\\(E[B_t|B_T=x]=\\frac{\\text{Cov}(B_t,B_T)}{\\text{Var}(B_T)}x=\\frac{t}{T}x\\)。\\(\\text{Var}=t-t^2/T=t(T-t)/T\\)。\\(T=1,x=0\\) 退化为 Brown 桥。"
+      },
+      {
+        "id": "stochastic-ch04-q23",
+        "question": "Lévy-Ciesielski 构造 Brown 运动的思想？",
+        "options": [
+          "用 Schauder 基（三角帽函数）+ iid \\(N(0,1)\\) 系数展开",
+        "从 Poisson 过程缩放",
+        "用 Fourier 变换",
+        "直接定义路径"
+        ],
+        "answer": 0,
+        "explanation": "\\(B_t=\\sum_{n,k}\\xi_{n,k}\\phi_{n,k}(t)\\)（\\(\\xi_{n,k}\\) iid \\(N(0,1)\\)，\\(\\phi_{n,k}\\) Schauder 函数）。\\(L^2\\) 收敛 + 路径连续性。构造性证明给出了 Brown 运动的具体表示。级数一致收敛（Kolmogorov 三级数定理）。"
+      },
+      {
+        "id": "stochastic-ch04-q24",
+        "question": "\\(\\int_0^T B_t dB_t=\\)？（Itô 积分）",
+        "options": [
+          "\\((B_T^2-T)/2\\)",
+        "\\(B_T^2/2\\)",
+        "\\(T/2\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Itô 公式 \\(f(x)=x^2/2\\)：\\(d(B_t^2/2)=B_t dB_t+dt/2\\)。\\(\\int_0^T B_t dB_t=B_T^2/2-T/2\\)。与 Stratonovich 积分（\\(=B_T^2/2\\)）差 \\(T/2\\)，正是 Itô 修正项。"
+      },
+      {
+        "id": "stochastic-ch04-q25",
+        "question": "\\(d\\) 维 Brown 运动 \\(\\mathbf{B}_t=(B_t^{(1)},...,B_t^{(d)})\\)。各分量之间的关系？",
+        "options": [
+          "独立的一维 Brown 运动",
+        "完全相关",
+        "\\(\\text{Cov}(B_t^{(i)},B_t^{(j)})=t\\)",
+        "不可分解"
+        ],
+        "answer": 0,
+        "explanation": "分量独立：\\(\\text{Cov}(B_t^{(i)},B_s^{(j)})=\\min(s,t)\\delta_{ij}\\)。\\(d \\geq 3\\) 时暂态（Pólya）。\\(d=2\\)：共形不变性——Brown 运动的经过集几乎确定填满平面（Lévy）。"
+      },
+      {
+        "id": "stochastic-ch04-q26",
+        "question": "物理中 Brown 运动描述什么现象？",
+        "options": [
+          "花粉粒子在液体中的随机运动（Einstein 1905）",
+        "电子在晶体中的有序传导",
+        "天体运行轨道",
+        "声波传播"
+        ],
+        "answer": 0,
+        "explanation": "Einstein-Smoluchowski 理论：\\(\\langle x^2 \\rangle=2Dt\\)（\\(D\\) 扩散系数）。\\(D=k_BT/(6\\pi\\eta r)\\)（Einstein 关系）。Perrin 用实验验证，确认分子存在。扩散方程 \\(\\partial_t u=D\\nabla^2 u\\) 的概率解释。"
+      },
+      {
+        "id": "stochastic-ch04-q27",
+        "question": "KS 检验统计量基于 Brown 桥：\\(D_n=\\sup_x |F_n(x)-F(x)|\\)。为什么？",
+        "options": [
+          "\\(\\sqrt{n}(F_n-F) \\Rightarrow B^0 \\circ F\\)（经验过程弱收敛到 Brown 桥）",
+        "\\(F_n\\) 是 Brown 运动",
+        "KS 统计量是正态分布",
+        "只是巧合"
+        ],
+        "answer": 0,
+        "explanation": "Donsker 定理的函数空间版本：经验过程 \\(\\sqrt{n}(F_n(x)-F(x))\\) 弱收敛到 \\(B^0(F(x))\\)（Brown 桥复合 CDF）。\\(\\sqrt{n}D_n\\) 极限分布为 \\(\\sup|B^0|\\) 的分布（Kolmogorov 分布）。"
+      },
+      {
+        "id": "stochastic-ch04-q28",
+        "question": "金融中 Black-Scholes 模型假设股价服从？",
+        "options": [
+          "几何 Brown 运动 \\(dS_t=\\mu S_t dt+\\sigma S_t dB_t\\)",
+        "普通 Brown 运动",
+        "Poisson 过程",
+        "确定性增长 \\(S_t=S_0 e^{\\mu t}\\)"
+        ],
+        "answer": 0,
+        "explanation": "GBM 保证 \\(S_t>0\\)（对数正态）。\\(\\ln S_t \\sim N(\\ln S_0+(\\mu-\\sigma^2/2)t, \\sigma^2 t)\\)。B 可取负值（不合理）。D 无随机性。局限：实际中有厚尾、波动率聚集等偏离。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic.html" class="module-name">随机过程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Brown 运动的定义与存在性</a></li>
+      <li><a href="#kp2">02 · 路径性质与二次变差</a></li>
+      <li><a href="#kp3">03 · Brown 运动的鞅性与反射原理</a></li>
+      <li><a href="#kp4">04 · 标度不变性与 Brown 桥</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>Brown 运动</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Brown 运动的定义与存在性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Brown 运动（标准 Wiener 过程）是整个随机分析的基石。它最初 用于描述花粉在水中的不规则运动(1827)，后被 Einstein(1905) 和 Wiener(1923) 严格化。它是随机积分、随机微分方程和金融 数学的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Brown 运动是随机游走的连续极限（Donsker 定理）， 也是 Gauss 过程中最核心的例子。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：\(\{B_t\}_{t \geq 0}\) 为标准 Brown 运动 iff (B1) \(B_0 = 0\) (B2) 独立增量：\(B_t - B_s \perp\!\!\!\perp B_u - B_v\)（无重叠区间） (B3) 正态增量：\(B_t - B_s \sim N(0, t-s)\)（\(t > s\)） (B4) 连续路径：\(t \mapsto B_t(\omega)\) a.s. 连续 存在性（概念）：可通过 Kolmogorov 延拓定理或 Lévy-Ciesielski 构造（用 Schauder 基展开为级数）证明存在性。 协方差结构：\(E[B_s B_t] = \min(s, t)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融学中，股价模型的核心随机驱动力；物理中，扩散过程的 基本模型；机器学习中，score-based 扩散模型的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(E[B_3 \cdot B_5]\)。 解答：\(E[B_3 B_5] = \min(3,5) = 3\)。 验证：\(B_3 B_5 = B_3(B_3 + (B_5-B_3))\)，\(E[B_3^2] = 3\)， \(E[B_3(B_5-B_3)] = 0\)（独立增量）。 易错点：认为 \(E[B_s B_t] = st\)。实际是 \(\min(s,t)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Brown 运动的增量 \(B_t - B_s\)（\(t > s\)）服从</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。增量的方差等于时间间隔 \\(t - s\\)，不是 \\(t\\) 或 \\(t+s\\)。')">A. \(N(0, t+s)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！增量的方差等于时间间隔 \\(t - s\\)，不是 \\(t\\) 或 \\(t+s\\)。')">B. \(N(0, t-s)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。增量的方差等于时间间隔 \\(t - s\\)，不是 \\(t\\) 或 \\(t+s\\)。')">C. \(N(0, ts)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。增量的方差等于时间间隔 \\(t - s\\)，不是 \\(t\\) 或 \\(t+s\\)。')">D. \(N(0, t)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>路径性质与二次变差</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Brown 运动的路径极其“粗糙”：连续但处处不可微。这不仅是 数学奇异，更是随机微积分存在的根本原因：因为 \(B_t\) 有 无界变差，经典 Riemann-Stieltjes 积分失效，必须引入 Itô 积分。二次变差 \([B]_t = t\) 是这一切的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>二次变差是随机微积分中 \((dB)^2 = dt\) 的严格版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>a.s. 处处不可微：\(\lim_{h \to 0} (B_{t+h} - B_t)/h\) a.s. 不存在。 直觉：\((B_{t+h}-B_t)/h \sim N(0, 1/h) \to \infty\)。 无界变差：在 \([0,T]\) 上，一次变差 \(\sum |B_{t_{i+1}} - B_{t_i}| = \infty\) a.s. 二次变差： \[[B]_T = \lim_{\|\Pi\| \to 0} \sum_i (B_{t_{i+1}} - B_{t_i})^2 = T \quad \text{(in \(L^2\) and a.s.)}\] 证明要点：\(E[(B_{t_{i+1}}-B_{t_i})^2] = \Delta t_i\)， \(\text{Var}[(B_{t_{i+1}}-B_{t_i})^2] = 2(\Delta t_i)^2\)。 总方差 = \(2\sum (\Delta t_i)^2 \leq 2 \max \Delta t_i \cdot T \to 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>二次变差 \([B]_t = t\) 是 Itô 公式中额外 \(\frac{1}{2}f'' dt\) 项的来源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(B_t^2 - t\) 是鞅。 解答：\(E[B_{t+s}^2 - (t+s)|\mathcal{F}_t] = E[(B_t + (B_{t+s}-B_t))^2|\mathcal{F}_t] - t - s = B_t^2 + 2B_t \cdot 0 + s - t - s = B_t^2 - t\) ✓ 易错点：\(B_t^2\) 不是鞅（\(E[B_t^2] = t\) 递增），但 \(B_t^2 - t\) 才是鞅（扣除了二次变差）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Brown 运动路径的一次变差是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。一次变差无界是因为路径处处不可微。二次变差 = \\(T\\) 有限。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。一次变差无界是因为路径处处不可微。二次变差 = \\(T\\) 有限。')">B. \(T\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！一次变差无界是因为路径处处不可微。二次变差 = \\(T\\) 有限。')">C. \(+\infty\) a.s.</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。一次变差无界是因为路径处处不可微。二次变差 = \\(T\\) 有限。')">D. \(\sqrt{T}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Brown 运动的鞅性与反射原理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Brown 运动是连续时间鞅的典范。反射原理则利用路径对称性将 “首达时间”问题转化为简单的尾部概率计算，是计算 Brown 运动首达时分布的优雅方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(B_t\) 是鞅：\(E[B_{t+s}|\mathcal{F}_t] = B_t + E[B_{t+s}-B_t] = B_t\)。 反射原理：设 \(\tau_a = \inf\{t: B_t = a\}\)（\(a > 0\)）。 定义反射过程 \(\tilde{B}_t = B_t \mathbf{1}_{t < \tau_a} + (2a - B_t)\mathbf{1}_{t \geq \tau_a}\)。 由对称性，\(\tilde{B}\) 也是 Brown 运动。 因此： \[P(\max_{0 \leq s \leq t} B_s \geq a) = 2 P(B_t \geq a) = 2(1 - \Phi(a/\sqrt{t}))\] 首达时分布：\(f_{\tau_a}(t) = \frac{a}{\sqrt{2\pi t^3}} e^{-a^2/(2t)}\)，\(t > 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融中的障碍期权（股价首次触及障碍的时间分布）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(B_t\) 标准 Brown 运动。求 \(P(\max_{0 \leq s \leq 1} B_s \geq 2)\)。 解答：\(P(\max B_s \geq 2) = 2P(B_1 \geq 2) = 2(1 - \Phi(2)) \approx 2 \times 0.0228 = 0.0456\)。 易错点：误以为 \(P(\max B_s \geq a) = P(B_t \geq a)\)（少了系数 2）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">反射原理利用了 Brown 运动的哪个性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。反射原理的核心是：Brown 运动在首达 \\(a\\) 后的部分，')">A. 独立增量</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！反射原理的核心是：Brown 运动在首达 \\(a\\) 后的部分，')">B. 路径关于称轴的对称性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。反射原理的核心是：Brown 运动在首达 \\(a\\) 后的部分，')">C. 正态增量的对称性</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>标度不变性与 Brown 桥</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Brown 运动具有美妙的自相似性：放大或缩小时间尺度后，统计 特征不变。而 Brown 桥是「确定起点和终点」的 Brown 运动， 在统计检验（如 KS 检验）中扮演关键角色。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>标度不变性是 Brown 运动作为分形对象的体现： Hurst 指数 \(H = 1/2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>标度不变性：对任意 \(c > 0\)， \[\{c^{-1/2} B_{ct}\}_{t \geq 0} \overset{d}{=} \{B_t\}_{t \geq 0}\] 证明：只需验证两边的有限维分布相同。\(c^{-1/2}B_{ct}\) 是 Gauss 过程，均值 0，协方差 \(c^{-1}\min(cs,ct)=\min(s,t)\) ✓ Brown 桥：\(B_t^0 = B_t - tB_1\)（\(0 \leq t \leq 1\)）。 性质：\(B_0^0 = B_1^0 = 0\)，\(B_t^0\) 是 Gauss 过程， \[E[B_s^0 B_t^0] = \min(s,t) - st \qquad (0 \leq s,t \leq 1)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>KS 检验统计量的极限分布由 Brown 桥的最大值决定； 隐含波动率模型中用到 Brown 桥。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 Brown 桥在 \(t = 1/2\) 的方差。 解答：\(\text{Var}(B_{1/2}^0) = \min(1/2, 1/2) - (1/2)^2 = 1/2 - 1/4 = 1/4\)。 易错点：认为 Brown 桥的方差与 Brown 运动相同。 实际 \(\text{Var}(B_t^0) = t(1-t) \leq t = \text{Var}(B_t)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Brown 运动的标度不变性 \(c^{-1/2}B_{ct} \overset{d}{=} B_t\) 中，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\text{Var}(c^{-1/2}B_{ct}) = c^{-1} \\cdot ct = t\\)，恰好保持')">A. \(E[B_t] = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\text{Var}(c^{-1/2}B_{ct}) = c^{-1} \\cdot ct = t\\)，恰好保持')">B. \(\text{Var}(B_t) = t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\text{Var}(c^{-1/2}B_{ct}) = c^{-1} \\cdot ct = t\\)，恰好保持')">C. 路径连续性</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/probability/stochastic.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

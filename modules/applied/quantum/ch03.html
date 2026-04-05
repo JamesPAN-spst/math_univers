@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 量子纠缠与 Bell 不等式 — 量子计算 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "quantum-ch03-q1",
+        "question": "Bell 态 \\(|\\Phi^+\\rangle=\\frac{1}{\\sqrt{2}}(|00\\rangle+|11\\rangle)\\) 是纠缠态。\"纠缠\"意味着什么？",
+        "options": [
+          "不能写成 \\(|\\psi_A\\rangle\\otimes|\\psi_B\\rangle\\) 的张量积形式——测量一个粒子会瞬时确定另一个粒子的状态(非局域关联)",
+        "两个粒子物理上连接",
+        "可以用来超光速通信",
+        "任何两粒子态都纠缠"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\Phi^+\\rangle=\\frac{1}{\\sqrt{2}}(|00\\rangle+|11\\rangle)\\): 若 Alice 测得 \\(|0\\rangle\\), Bob 必然 \\(|0\\rangle\\); 测得 \\(|1\\rangle\\), Bob 必然 \\(|1\\rangle\\)——100% 关联。但不能超光速通信: Alice 的边际概率 \\(\\text{tr}_B(\\rho)=I/2\\) 不依赖 Bob 的操作(无信号定理)。判据: \\(|\\psi\\rangle\\) 纠缠 \\(\\Leftrightarrow\\) Schmidt 秩 \\(>1\\)。\\(|\\Phi^+\\rangle\\) 的 Schmidt 分解已经是标准形式, 秩=2。四个 Bell 态构成 \\(\\mathbb{C}^2\\otimes\\mathbb{C}^2\\) 的正交基。"
+      },
+      {
+        "id": "quantum-ch03-q2",
+        "question": "CHSH 不等式 \\(|S|=|\\langle AB\\rangle-\\langle AB'\\rangle+\\langle A'B\\rangle+\\langle A'B'\\rangle|\\leq 2\\) 在经典(局域隐变量)理论中成立。量子力学的上界？",
+        "options": [
+          "量子上界 \\(S_{max}=2\\sqrt{2}\\) (Tsirelson 界)——Bell 态在特定测量基下达到, 证明量子关联强于经典",
+        "量子也 \\(\\leq 2\\)",
+        "量子可以 \\(=4\\)",
+        "CHSH 与量子无关"
+        ],
+        "answer": 0,
+        "explanation": "局域隐变量: 每变量有预定值→\\(|S|\\leq 2\\)。量子: Alice 测 \\(Z, X\\); Bob 测 \\((Z+X)/\\sqrt{2}, (Z-X)/\\sqrt{2}\\) → \\(S=2\\sqrt{2}\\approx 2.83>2\\)。Tsirelson (1980): 这是量子允许的最大值。\\(2\\sqrt{2}\\) 里面的数学: 每个算子本征值 \\(\\pm 1\\), 关键是不对易(\\([A,A']\\neq 0\\))——互补性。实验验证: Aspect (1982), Hensen (2015, 无漏洞), 2022 诺贝尔奖(Aspect, Clauser, Zeilinger)。"
+      },
+      {
+        "id": "quantum-ch03-q3",
+        "question": "纠缠度量: 对纯态 \\(|\\psi\\rangle_{AB}\\), 纠缠熵(entanglement entropy)如何计算？",
+        "options": [
+          "\\(E(|\\psi\\rangle)=S(\\rho_A)=-\\sum_i\\lambda_i\\log\\lambda_i\\), 其中 \\(\\lambda_i\\) 是 Schmidt 系数的平方——即约化密度矩阵的 von Neumann 熵",
+        "用全局态的熵",
+        "纠缠没有量化指标",
+        "用互信息"
+        ],
+        "answer": 0,
+        "explanation": "Schmidt 分解: \\(|\\psi\\rangle_{AB}=\\sum_i\\sqrt{\\lambda_i}|i_A\\rangle|i_B\\rangle\\), \\(\\lambda_i\\geq 0\\), \\(\\sum\\lambda_i=1\\)。\\(\\rho_A=\\text{tr}_B(|\\psi\\rangle\\langle\\psi|)=\\sum_i\\lambda_i|i_A\\rangle\\langle i_A|\\)。\\(E=S(\\rho_A)=-\\sum\\lambda_i\\log\\lambda_i\\)。\\(E=0\\): 乘积态(无纠缠)。\\(E=\\log d\\): 最大纠缠(\\(d\\)维系统)。Bell 态: \\(\\lambda_1=\\lambda_2=1/2\\), \\(E=\\log 2=1\\) ebit。混合态纠缠度量更复杂: concurrence, negativity, 纠缠形成(formation)/蒸馏(distillation)。"
+      },
+      {
+        "id": "quantum-ch03-q4",
+        "question": "量子隐形传态(Quantum Teleportation): Alice 如何将未知量子态 \\(|\\psi\\rangle\\) 传给 Bob？需要什么资源？",
+        "options": [
+          "共享 Bell 对 + Alice 做 Bell 测量 + 经典通信 2 bits → Bob 做 Pauli 修正得到 \\(|\\psi\\rangle\\); 需要 1 ebit + 2 cbits",
+        "直接发送量子态",
+        "不需要经典通信",
+        "只需要 1 cbit"
+        ],
+        "answer": 0,
+        "explanation": "协议: (1) Alice-Bob 共享 \\(|\\Phi^+\\rangle_{23}\\); Alice 有 \\(|\\psi\\rangle_1=\\alpha|0\\rangle+\\beta|1\\rangle\\)。(2) Alice 对 qubit 1,2 做 Bell 测量→4 种结果之一(\\(|\\Phi^\\pm\\rangle,|\\Psi^\\pm\\rangle\\)), 传 2 bits 给 Bob。(3) Bob 根据结果做 \\(I/X/Z/XZ\\) 修正→得到 \\(|\\psi\\rangle\\)。数学: \\(|\\psi\\rangle_1|\\Phi^+\\rangle_{23}=\\frac{1}{2}\\sum_{ij}|\\beta_{ij}\\rangle_{12}(\\sigma_{ij}|\\psi\\rangle)_3\\)。不违反不可克隆(Alice 的态被破坏), 不超光速(需经典通信)。是量子中继、量子网络的基础。"
+      },
+      {
+        "id": "quantum-ch03-q5",
+        "question": "超密编码(Superdense Coding): 一个 qubit 可以传递多少经典信息？",
+        "options": [
+          "在共享纠缠的情况下, 传 1 qubit 可携带 2 bits 经典信息——纠缠使信道容量翻倍",
+        "1 qubit = 1 bit",
+        "1 qubit = 无穷信息",
+        "不需要纠缠"
+        ],
+        "answer": 0,
+        "explanation": "Holevo 界: 无纠缠辅助时, 1 qubit 最多传 1 cbit。超密编码: Alice-Bob 共享 \\(|\\Phi^+\\rangle\\)。Alice 对她的 qubit 施加 \\(\\{I,X,Z,XZ\\}\\) 之一(编码 00,01,10,11)→得到 4 个 Bell 态之一。发送给 Bob→Bob 做 Bell 测量→读出 2 bits。资源: 1 ebit 预共享 + 1 qubit 通信 → 2 cbits。与隐形传态对偶: 传态用 1 ebit+2 cbits→传 1 qubit; 超密用 1 ebit+1 qubit→传 2 cbits。"
+      },
+      {
+        "id": "quantum-ch03-q6",
+        "question": "不可克隆定理(No-Cloning Theorem): 为什么不存在酉操作 \\(U\\) 使 \\(U|\\psi\\rangle|0\\rangle=|\\psi\\rangle|\\psi\\rangle\\) 对所有 \\(|\\psi\\rangle\\)？",
+        "options": [
+          "假设对 \\(|\\psi\\rangle,|\\phi\\rangle\\) 都成立, 则内积 \\(\\langle\\psi|\\phi\\rangle=\\langle\\psi|\\phi\\rangle^2\\) → \\(\\langle\\psi|\\phi\\rangle=0\\) 或 \\(1\\)——只能克隆正交态",
+        "量子态可以完美克隆",
+        "不可克隆只是技术限制",
+        "证明需要相对论"
+        ],
+        "answer": 0,
+        "explanation": "假设 \\(U|\\psi\\rangle|0\\rangle=|\\psi\\rangle|\\psi\\rangle\\), \\(U|\\phi\\rangle|0\\rangle=|\\phi\\rangle|\\phi\\rangle\\)。内积: \\(\\langle\\psi|\\phi\\rangle\\langle 0|0\\rangle=\\langle\\psi|\\psi\\rangle\\langle\\phi|\\phi\\rangle\\cdot\\langle\\psi|\\phi\\rangle\\) → \\(\\langle\\psi|\\phi\\rangle=\\langle\\psi|\\phi\\rangle^2\\)。解: \\(c=0\\) 或 \\(c=1\\)。所以只能克隆已知为正交的态集合。推论: 不能完美区分非正交量子态。QKD 安全性的基础。近似克隆: Bužek-Hillery 最优克隆机, 保真度 \\(F=5/6\\)(对称)。"
+      },
+      {
+        "id": "quantum-ch03-q7",
+        "question": "纠缠在量子计算中的角色: 没有纠缠的量子计算能提供加速吗？",
+        "options": [
+          "纯态量子计算需要纠缠才能超越经典——纠缠量(如纠缠熵)需要随 \\(n\\) 增长; 但混合态模型(DQC1)可能在低纠缠下仍有量子优势",
+        "不需要纠缠",
+        "所有量子态都纠缠",
+        "纠缠越多越好"
+        ],
+        "answer": 0,
+        "explanation": "Vidal (2003): MPS(矩阵乘积态)模拟纠缠有限的线路成本 \\(2^{O(E)}\\)——若纠缠熵 \\(E=O(\\log n)\\), 经典可模拟。Shor/Grover 需要 \\(E=\\Omega(n)\\) 的纠缠。但: DQC1(一个干净 qubit + 最大混合态)可计算 Jones 多项式——纠缠很小但不能经典模拟。资源理论: 纠缠是必要资源但不充分——还需要\"magic\"(Wigner 负性)。实际: 保持多体纠缠是量子计算机工程的核心挑战。"
+      },
+      {
+        "id": "quantum-ch03-q8",
+        "question": "纠缠见证(Entanglement Witness): 如何实验检测纠缠？",
+        "options": [
+          "找 Hermitian 算子 \\(W\\) 使 \\(\\text{tr}(W\\rho_{sep})\\geq 0\\) 对所有可分态, 但 \\(\\text{tr}(W\\rho_{ent})<0\\) 对目标纠缠态——只需测量少数可观测量",
+        "必须做完整态层析",
+        "无法实验检测纠缠",
+        "只看对角元"
+        ],
+        "answer": 0,
+        "explanation": "Hahn-Banach 分离定理: 可分态集合是凸闭的→任何纠缠态可被超平面分离——即存在 witness \\(W\\)。例: Bell 态 \\(|\\Phi^+\\rangle\\), \\(W=\\frac{1}{2}I-|\\Phi^+\\rangle\\langle\\Phi^+|\\)。\\(\\text{tr}(W\\rho_{sep})\\geq 0\\), \\(\\text{tr}(W|\\Phi^+\\rangle)=-1/2<0\\)。实际操作: 将 \\(W\\) 分解为 Pauli 基测量 \\(W=\\sum_i c_iP_i\\), 测量各 \\(\\langle P_i\\rangle\\) 后加权求和。比态层析(\\(4^n\\) 测量)高效得多。PPT 准则: \\(\\rho^{T_B}\\geq 0\\) 对可分态成立; 违反→纠缠(低维充要条件)。"
+      },
+      {
+        "id": "quantum-ch03-q9",
+        "question": "多体纠缠(Multipartite Entanglement)中, GHZ 态 \\(\\frac{1}{\\sqrt{2}}(|000\\rangle+|111\\rangle)\\) 与 W 态 \\(\\frac{1}{\\sqrt{3}}(|001\\rangle+|010\\rangle+|100\\rangle)\\) 有什么本质区别？",
+        "options": [
+          "它们属于不同的 SLOCC(随机局域操作+经典通信)等价类——不能通过局域操作+经典通信互相转换; GHZ 丢失一个粒子后完全退纠缠, W 态仍保留两体纠缠",
+        "只是相位不同",
+        "可以互相转换",
+        "多体纠缠只有一种类型"
+        ],
+        "answer": 0,
+        "explanation": "GHZ: \\(\\text{tr}_C(|\\text{GHZ}\\rangle\\langle\\text{GHZ}|)=\\frac{1}{2}(|00\\rangle\\langle 00|+|11\\rangle\\langle 11|)\\)——可分混合态, 无二体纠缠。W: \\(\\text{tr}_C(|W\\rangle\\langle W|)=\\frac{1}{3}(|01\\rangle\\langle 01|+|10\\rangle\\langle 10|+|00\\rangle\\langle 00|+|01\\rangle\\langle 10|+|10\\rangle\\langle 01|)\\)——仍有二体纠缠。Dür et al. (2000): 3-qubit 纯态在 SLOCC 下: 6 类(含乘积态、双可分态、W、GHZ)。GHZ 适合量子密钥、量子误差检测; W 适合需要鲁棒性的量子网络。多体纠缠分类在 \\(n>3\\) 时极其复杂。"
+      },
+      {
+        "id": "quantum-ch03-q10",
+        "question": "量子纠缠与热力学第二定律的联系: 纠缠蒸馏(Entanglement Distillation)和纠缠稀释(Dilution)的关系？",
+        "options": [
+          "蒸馏: 多个低质量纠缠态 → 少量 Bell 对(LOCC 操作); 稀释: Bell 对 → 多个目标态; 渐近极限: 蒸馏率 = 稀释率 = \\(E(|\\psi\\rangle)\\)——可逆(但混合态下不可逆→类似热力学)",
+        "蒸馏和稀释无关",
+        "纠缠可以无中生有",
+        "LOCC 可以增加纠缠"
+        ],
+        "answer": 0,
+        "explanation": "蒸馏: \\(n\\) 份 \\(|\\psi\\rangle\\) → \\(k\\) 份 \\(|\\Phi^+\\rangle\\) (LOCC), 率 \\(k/n\\to E_D(|\\psi\\rangle)\\)。稀释: \\(k\\) 份 \\(|\\Phi^+\\rangle\\) → \\(n\\) 份 \\(|\\psi\\rangle\\), 率 \\(k/n\\to E_C(|\\psi\\rangle)\\)。纯态: \\(E_D=E_C=S(\\rho_A)\\)——可逆。混合态: \\(E_D\\leq E_C\\) (一般严格)——不可逆(类似热力学熵增)。束缚纠缠(bound entanglement): \\(E_D=0\\) 但 \\(E_C>0\\)——有纠缠但不能蒸馏出 Bell 对！Horodecki 发现。纠缠理论是量子信息的资源理论框架, 与热力学资源理论深度类比。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="quantum"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/quantum.html" class="module-name">量子计算</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Bell 态与纠缠的数学描述</a></li>
+      <li><a href="#kp2">02 · CHSH 不等式与非定域性</a></li>
+      <li><a href="#kp3">03 · 量子隐形传态与超密编码</a></li>
+      <li><a href="#kp4">04 · 不可克隆定理与量子信息基本限制</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>量子纠缠与 Bell 不等式</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Bell 态与纠缠的数学描述</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子纠缠是量子力学最深刻的特性——纠缠粒子之间的关联无法用经典 概率解释。四个 Bell 态构成 2-qubit 最大纠缠态的完备基，是量子隐 形传态、超密编码和量子密钥分发的资源。数学上需要精确刻画"怎样 的态是纠缠的"以及"纠缠度有多少"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>可分态 vs 纠缠态是张量积结构下的核心二分法。纠缠度量 （entropy of entanglement）给出了量化理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>四个 Bell 态（2-qubit 最大纠缠态的正交基）： \[|\Phi^{\pm}\rangle = \frac{1}{\sqrt{2}}(|00\rangle \pm |11\rangle), \quad |\Psi^{\pm}\rangle = \frac{1}{\sqrt{2}}(|01\rangle \pm |10\rangle)\] Schmidt 分解：任意 2-qubit 纯态可写为 \(|\psi\rangle = \sum_i \lambda_i |a_i\rangle|b_i\rangle\)，\(\lambda_i \geq 0\), \(\sum \lambda_i^2 = 1\)。 可分 \(\Leftrightarrow\) 只有一个非零 Schmidt 系数。 纠缠熵：\(E(|\psi\rangle) = S(\rho_A) = -\sum_i \lambda_i^2 \log \lambda_i^2\)。 Bell 态：\(\lambda_1 = \lambda_2 = 1/\sqrt{2}\)，\(E = \log 2 = 1\) ebit（最大纠缠）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子隐形传态：Alice 利用 Bell 态和经典通信将未知量子态传给 Bob， 不违反不可克隆定理。超密编码：一个量子比特传递 2 bit 经典信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(|\psi\rangle = \frac{\sqrt{3}}{2}|00\rangle + \frac{1}{2}|11\rangle\) 的纠缠熵。 解答：Schmidt 系数 \(\lambda_1 = \sqrt{3}/2, \lambda_2 = 1/2\)。 \(E = -\frac{3}{4}\log_2\frac{3}{4} - \frac{1}{4}\log_2\frac{1}{4}\) \(= -\frac{3}{4}(\log_2 3 - 2) - \frac{1}{4}(-2) = \frac{3}{2} - \frac{3}{4}\log_2 3 + \frac{1}{2} = 2 - \frac{3}{4}\log_2 3 \approx 0.811\) ebit。 易错点：Shannon 熵用 \(\lambda_i^2\)（概率），不是 \(\lambda_i\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|00\rangle + |01\rangle\)（未归一化）是纠缠态吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。能写成张量积 \\(|0\\rangle \\otimes (|0\\rangle+|1\\rangle)\\) 即可分。项数多不等于纠缠。')">A. 是，因为有两项</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！能写成张量积 \\(|0\\rangle \\otimes (|0\\rangle+|1\\rangle)\\) 即可分。项数多不等于纠缠。')">B. 否，因为 \(= |0\rangle(|0\rangle+|1\rangle)\) 可分解</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。能写成张量积 \\(|0\\rangle \\otimes (|0\\rangle+|1\\rangle)\\) 即可分。项数多不等于纠缠。')">C. 无法判断</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。能写成张量积 \\(|0\\rangle \\otimes (|0\\rangle+|1\\rangle)\\) 即可分。项数多不等于纠缠。')">D. 是，因为包含 \(|01\rangle\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>CHSH 不等式与非定域性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Einstein-Podolsky-Rosen(EPR)在 1935 年质疑量子力学完备性，提出 "隐变量"解释。Bell 在 1964 年证明：任何经典隐变量理论必须满足 Bell 不等式，而量子力学可以违反它。CHSH 不等式是 Bell 不等式最 常用的实验可检验形式，已被多次实验确认。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>CHSH 不等式将物理问题转化为代数不等式：经典相关函数有界 \(\leq 2\)， 量子力学允许 \(\leq 2\sqrt{2}\)（Tsirelson 界）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>CHSH 设置：Alice 选测量 \(A_1\) 或 \(A_2\)（结果 \(\pm 1\)），Bob 选 \(B_1\) 或 \(B_2\)。 CHSH 量：\(S = \langle A_1 B_1 \rangle + \langle A_1 B_2 \rangle + \langle A_2 B_1 \rangle - \langle A_2 B_2 \rangle\)。 经典（隐变量）上界： \[|S_{\text{classical}}| \leq 2\] 量子上界（Tsirelson 界）：选择 \(|\Phi^+\rangle\) 和最优测量方向， \[S_{\text{quantum}} = 2\sqrt{2} \approx 2.828\] 证明：取 \(A_1 = Z, A_2 = X, B_1 = (Z+X)/\sqrt{2}, B_2 = (Z-X)/\sqrt{2}\)。 每项 \(\langle A_i B_j \rangle = \cos\theta_{ij}/\sqrt{2}\)，优化后得 \(2\sqrt{2}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>设备无关量子密钥分发(DI-QKD)：Bell 不等式违反保证安全性，不依赖设备信任。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Alice 测 \(Z\)，Bob 测 \((Z+X)/\sqrt{2}\)，共享 \(|\Phi^+\rangle\)。 求 \(\langle A_1 B_1 \rangle\)。 解答：\(\langle \Phi^+| Z \otimes \frac{Z+X}{\sqrt{2}} |\Phi^+\rangle = \frac{1}{\sqrt{2}}(\langle \Phi^+|Z \otimes Z|\Phi^+\rangle + \langle \Phi^+|Z \otimes X|\Phi^+\rangle)\)。 计算：\(\langle Z \otimes Z \rangle = 1\)（因 \(|\Phi^+\rangle\) 总给相同 \(Z\) 结果）， \(\langle Z \otimes X \rangle = 0\)（对称性）。结果 \(= 1/\sqrt{2}\)。 易错点：Bell 态上不同算子的关联需要逐项计算，不能直接用经典直觉。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">经典隐变量理论中 CHSH 量 \(|S|\) 的上界是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|S| \\leq 2\\) 是经典上界。\\(2\\sqrt{2}\\) 是量子上界（Tsirelson 界）。4 是代数最大值。')">A. \(\sqrt{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(|S| \\leq 2\\) 是经典上界。\\(2\\sqrt{2}\\) 是量子上界（Tsirelson 界）。4 是代数最大值。')">B. \(2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|S| \\leq 2\\) 是经典上界。\\(2\\sqrt{2}\\) 是量子上界（Tsirelson 界）。4 是代数最大值。')">C. \(2\sqrt{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(|S| \\leq 2\\) 是经典上界。\\(2\\sqrt{2}\\) 是量子上界（Tsirelson 界）。4 是代数最大值。')">D. \(4\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>量子隐形传态与超密编码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子隐形传态(teleportation)和超密编码(superdense coding)是纠缠 作为资源的两大标志性协议。传态用 1 ebit + 2 cbit 传送 1 qubit； 超密编码用 1 ebit + 1 qubit 传送 2 cbit。它们完美体现了量子信 息论中经典和量子资源的互换关系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>量子隐形传态的本质：Bell 基测量 + 经典通信 + 酉纠正。不需要直 接传送量子比特——打破了"物理传输"的直觉。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>量子隐形传态协议：Alice 持 \(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)， Alice 和 Bob 共享 \(|\Phi^+\rangle_{AB}\)。 初始态：\(|\psi\rangle_1 |\Phi^+\rangle_{23} = (\alpha|0\rangle+\beta|1\rangle)\frac{1}{\sqrt{2}}(|00\rangle+|11\rangle)\) Bell 基测量（qubit 1,2）后，展开为四个 Bell 态的叠加： \[\frac{1}{2}[|\Phi^+\rangle_{12}(\alpha|0\rangle+\beta|1\rangle)_3 + |\Phi^-\rangle_{12}(\alpha|0\rangle-\beta|1\rangle)_3\] \[+ |\Psi^+\rangle_{12}(\alpha|1\rangle+\beta|0\rangle)_3 + |\Psi^-\rangle_{12}(\alpha|1\rangle-\beta|0\rangle)_3]\] Alice 测量得到 2 bit 结果，告诉 Bob。Bob 对 qubit 3 施加相应 Pauli 纠正 (\(I, Z, X, XZ\)) 恢复 \(|\psi\rangle\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子中继器网络中传态是远距离量子通信的核心操作（结合纠缠蒸馏）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Alice 测量得到 \(|\Psi^+\rangle\)，Bob 的 qubit 状态和纠正操作？ 解答：Bob 的态为 \(\alpha|1\rangle + \beta|0\rangle = X(\alpha|0\rangle+\beta|1\rangle)\)。 纠正：\(X \cdot (\alpha|1\rangle+\beta|0\rangle) = \alpha|0\rangle + \beta|1\rangle = |\psi\rangle\)。 易错点：传态不违反不可克隆——原始量子态在 Alice 侧被测量破坏了。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">量子隐形传态需要的资源是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。纠缠对本身不能传信息，必须加经典通信。不涉及超光速。')">A. 1 ebit（纠缠对）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！纠缠对本身不能传信息，必须加经典通信。不涉及超光速。')">B. 1 ebit + 2 cbit（经典比特）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。纠缠对本身不能传信息，必须加经典通信。不涉及超光速。')">C. 仅 2 cbit</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。纠缠对本身不能传信息，必须加经典通信。不涉及超光速。')">D. 超光速通信</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>不可克隆定理与量子信息基本限制</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不可克隆定理(No-Cloning Theorem)是量子信息论最基本的约束之一： 不存在通用的量子复制机。这看似限制实则保护——它是量子密码学安 全性的根基。同时还有不可删除定理、不可通信定理等一系列基本限制 构成量子信息的公理框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不可克隆 \(\Leftrightarrow\) 线性性与酉性的直接推论。 量子信息论的基本限制来自 Hilbert 空间的线性结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>不可克隆定理证明：假设存在酉算子 \(U\) 使得对所有 \(|\psi\rangle\)： \(U(|\psi\rangle|0\rangle) = |\psi\rangle|\psi\rangle\)。 取 \(|\psi\rangle = |0\rangle\)：\(U(|0\rangle|0\rangle) = |0\rangle|0\rangle\)。 取 \(|\psi\rangle = |1\rangle\)：\(U(|1\rangle|0\rangle) = |1\rangle|1\rangle\)。 取 \(|\psi\rangle = (|0\rangle+|1\rangle)/\sqrt{2}\)： \[U(|+\rangle|0\rangle) = \frac{1}{\sqrt{2}}(U|00\rangle + U|10\rangle) = \frac{1}{\sqrt{2}}(|00\rangle+|11\rangle)\] 但要求 \(|+\rangle|+\rangle = \frac{1}{2}(|00\rangle+|01\rangle+|10\rangle+|11\rangle)\)。矛盾！</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>QKD 安全性：窃听者无法完美复制传输中的量子态，窃听必留痕迹。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：能否克隆一组已知的正交态 \(\{|0\rangle, |1\rangle\}\)？ 解答：可以！\(\text{CNOT}(|b\rangle|0\rangle) = |b\rangle|b\rangle\) 对 \(b \in \{0,1\}\)。 不可克隆只禁止克隆任意未知态。 易错点：不可克隆说的是"不存在对所有态都适用的克隆机"，正交基可以复制。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">不可克隆定理的证明核心利用了什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。线性性使得叠加态的克隆结果与逐项克隆后叠加不一致——矛盾。')">A. 测不准原理</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！线性性使得叠加态的克隆结果与逐项克隆后叠加不一致——矛盾。')">B. 量子酉演化的线性性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。线性性使得叠加态的克隆结果与逐项克隆后叠加不一致——矛盾。')">C. Bell 不等式</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。线性性使得叠加态的克隆结果与逐项克隆后叠加不一致——矛盾。')">D. 量子退相干</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/applied/quantum.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

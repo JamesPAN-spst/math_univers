@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 核方法与再生核 Hilbert 空间 — 机器学习数学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "ml-math-ch02-q1",
+        "question": "核函数 \\(K(x,x')=\\phi(x)^T\\phi(x')\\) 的\"核技巧\"本质上避免了什么？",
+        "options": [
+          "避免显式计算高维/无穷维特征映射 \\(\\phi\\)——只需内积即可在特征空间中操作",
+        "避免收集数据",
+        "避免使用线性代数",
+        "避免正则化"
+        ],
+        "answer": 0,
+        "explanation": "RBF 核 \\(K(x,x')=e^{-\\gamma\\|x-x'\\|^2}\\) 对应无穷维 \\(\\phi\\)。直接算 \\(\\phi(x)\\) 不可行，但 \\(K\\) 只需 \\(O(d)\\) 操作。SVM 对偶、核 PCA、高斯过程都只需 Gram 矩阵 \\(K_{ij}=K(x_i,x_j)\\)——\\(O(n^2)\\) 存储和 \\(O(n^2d)\\) 计算，不涉及 \\(\\phi\\) 的维度。"
+      },
+      {
+        "id": "ml-math-ch02-q2",
+        "question": "正定核(positive definite kernel)的定义是什么？为什么核函数必须正定？",
+        "options": [
+          "对任意 \\(n\\) 个点，Gram 矩阵 \\(K_{ij}=K(x_i,x_j)\\) 半正定; 保证 RKHS 存在且优化问题凸",
+        "\\(K(x,x')>0\\) 对所有 \\(x,x'\\)",
+        "\\(K\\) 是正值函数",
+        "正定性不重要"
+        ],
+        "answer": 0,
+        "explanation": "PD 核：\\(\\sum_{i,j}\\alpha_i\\alpha_j K(x_i,x_j)\\geq 0\\) 对任意 \\(\\alpha\\)。Moore-Aronszajn 定理：PD 核 \\(\\Leftrightarrow\\) 存在唯一的 RKHS \\(\\mathcal{H}\\) 使 \\(K(x,\\cdot)\\in\\mathcal{H}\\) 且 \\(f(x)=\\langle f,K(x,\\cdot)\\rangle_\\mathcal{H}\\)（再生性质）。非 PD \"核\"的 SVM 可能非凸——不保证全局最优。"
+      },
+      {
+        "id": "ml-math-ch02-q3",
+        "question": "表示定理(Representer Theorem)说正则化学习 \\(\\min_{f\\in\\mathcal{H}}\\sum L(y_i,f(x_i))+\\lambda\\|f\\|^2_\\mathcal{H}\\) 的解总有什么形式？",
+        "options": [
+          "\\(f^*(x)=\\sum_{i=1}^n\\alpha_i K(x_i,x)\\)——解是训练数据处核函数的线性组合",
+        "\\(f^*\\) 是多项式",
+        "\\(f^*\\) 是神经网络",
+        "解不一定有有限表示"
+        ],
+        "answer": 0,
+        "explanation": "表示定理：RKHS 正则化最优解 \\(f^*\\) 只依赖 \\(n\\) 个训练点（尽管 \\(\\mathcal{H}\\) 可能无穷维）。\\(\\alpha=(\\alpha_1,...,\\alpha_n)\\) 由 \\(n\\times n\\) 线性系统决定：\\((K+\\lambda nI)\\alpha=y\\)（核 Ridge）。这将无穷维优化降为 \\(n\\) 维。但 \\(n\\) 大时 \\(O(n^3)\\) 核矩阵求逆是瓶颈——随机特征/Nyström 近似。"
+      },
+      {
+        "id": "ml-math-ch02-q4",
+        "question": "高斯过程(GP)回归中，预测均值 \\(\\mu_*=K_{*n}(K_{nn}+\\sigma^2I)^{-1}y\\)。\\(\\sigma^2\\to 0\\) 时 GP 预测变成什么？",
+        "options": [
+          "核插值——恰好通过所有训练点，\\(\\mu_*=K_{*n}K_{nn}^{-1}y\\)",
+        "常数函数",
+        "零函数",
+        "GP 不适用"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma^2=0\\) 意味着观测无噪声。\\(\\mu_*=K_{*n}K_{nn}^{-1}y\\) 是精确核插值（\\(\\mu(x_i)=y_i\\) 恰好通过训练点）。预测不确定性 \\(\\sigma_*^2=K_{**}-K_{*n}K_{nn}^{-1}K_{n*}\\) 在训练点处为零，远离时增大。有噪声时 \\(\\sigma^2>0\\) 是正则化——预测不精确通过训练点但更光滑。GP 的超参数（\\(\\sigma^2\\), 核带宽）通过边际似然优化。"
+      },
+      {
+        "id": "ml-math-ch02-q5",
+        "question": "核 SVM 在 \\(n=10000\\) 训练样本上训练的主要计算瓶颈？以及解决方案？",
+        "options": [
+          "\\(n\\times n\\) Gram 矩阵存储 \\(O(n^2)\\) 和 QP 求解 \\(O(n^3)\\)；解决：SMO 分解法、随机特征近似",
+        "无计算瓶颈",
+        "特征数 \\(d\\) 太大",
+        "核函数计算太慢"
+        ],
+        "answer": 0,
+        "explanation": "\\(n=10000\\): Gram 矩阵 \\(10^8\\) 元素 (\\(\\sim\\)800MB)，QP 朴素 \\(O(n^3)\\sim 10^{12}\\)。SMO(Sequential Minimal Optimization): 每次只优化 2 个 \\(\\alpha\\)——\\(O(n^2)\\) 实际中。随机 Fourier 特征(Rahimi-Recht): \\(\\hat{\\phi}(x)\\in\\mathbb{R}^D\\)(\\(D\\ll n\\)) 使 \\(\\hat{\\phi}(x)^T\\hat{\\phi}(x')\\approx K(x,x')\\)——变回线性 SVM！\\(D=1000\\) 常足够。"
+      },
+      {
+        "id": "ml-math-ch02-q6",
+        "question": "核 PCA 将 PCA 推广到非线性降维。其关键步骤是什么？",
+        "options": [
+          "在核矩阵 \\(K_{ij}=K(x_i,x_j)\\) 上做特征分解——特征向量定义在特征空间中的主方向",
+        "对原始数据做线性 PCA",
+        "不需要核函数",
+        "先做非线性映射再做 SVD"
+        ],
+        "answer": 0,
+        "explanation": "标准 PCA: 协方差矩阵 \\(X^TX/n\\) 的特征分解。核 PCA: \\((1/n)K\\) 的特征分解（\\(K\\) 是 \\(n\\times n\\) 核矩阵，先进行中心化 \\(\\tilde{K}=K-\\mathbf{1}_nK-K\\mathbf{1}_n+\\mathbf{1}_nK\\mathbf{1}_n\\)）。新数据投影：\\(\\alpha^{(k)T}\\tilde{K}_{*n}\\)。应用：流形学习——Swiss roll 等非线性结构的降维。局限：\\(O(n^3)\\) 和 \\(O(n^2)\\) 存储。"
+      },
+      {
+        "id": "ml-math-ch02-q7",
+        "question": "Mercer 定理的实际应用意义——不是每个对称函数都能做核。如何验证一个函数是有效核？",
+        "options": [
+          "验证对任意有限点集 Gram 矩阵半正定; 或利用核的封闭性：PD核的和/积/极限仍是PD核",
+        "只需 \\(K(x,x')>0\\)",
+        "无法验证",
+        "任何对称函数都是核"
+        ],
+        "answer": 0,
+        "explanation": "直接验证 \\(\\sum\\alpha_i\\alpha_jK(x_i,x_j)\\geq 0\\) 对所有配置——理论上困难。实际：(1) 知名核（RBF, 多项式, Laplace）已证明 PD；(2) 封闭性：\\(K_1+K_2\\) PD, \\(K_1\\cdot K_2\\) PD, \\(e^{K_1}\\) PD, \\(aK_1\\)(\\(a>0\\)) PD。用这些规则组合构造新核。Bochner 定理：平移不变核 \\(K(x-y)\\) PD \\(\\Leftrightarrow\\) 其 Fourier 变换非负。"
+      },
+      {
+        "id": "ml-math-ch02-q8",
+        "question": "RKHS 范数 \\(\\|f\\|_\\mathcal{H}\\) 在光滑性控制中的角色？以 Sobolev 核为例。",
+        "options": [
+          "\\(\\|f\\|_\\mathcal{H}^2=\\int|\\hat{f}(\\omega)|^2/\\hat{K}(\\omega)d\\omega\\)——核的频谱衰减越快，RKHS 中的函数越光滑",
+        "\\(\\|f\\|_\\mathcal{H}\\) 只度量函数值大小",
+        "与光滑性无关",
+        "RKHS 范数总是为 1"
+        ],
+        "answer": 0,
+        "explanation": "RBF 核 \\(\\hat{K}(\\omega)\\propto e^{-\\|\\omega\\|^2/(4\\gamma)}\\)——高频衰减极快→RKHS 中函数非常光滑（\\(C^\\infty\\)）。Matérn 核 \\(\\hat{K}(\\omega)\\sim(1+\\|\\omega\\|^2)^{-(\\nu+d/2)}\\)——\\(\\nu\\) 控制光滑度（\\(\\nu=1/2\\): 连续不可微; \\(\\nu\\to\\infty\\): RBF)。\\(\\lambda\\|f\\|_\\mathcal{H}^2\\) 正则化限制高频分量——防止过拟合。GP 中核选择=先验光滑性假设。"
+      },
+      {
+        "id": "ml-math-ch02-q9",
+        "question": "随机 Fourier 特征(RFF) 将 RBF 核 \\(K(x,y)=e^{-\\gamma\\|x-y\\|^2}\\) 近似为内积。其原理基于什么定理？",
+        "options": [
+          "Bochner 定理: 平移不变 PD 核是正 Fourier 测度 → 蒙特卡洛采样 \\(\\omega\\sim p(\\omega)\\) 近似",
+        "大数定律",
+        "泰勒展开",
+        "中心极限定理"
+        ],
+        "answer": 0,
+        "explanation": "Bochner: \\(K(x-y)=\\int e^{i\\omega^T(x-y)}p(\\omega)d\\omega=\\mathbb{E}_\\omega[\\cos(\\omega^Tx+b)\\cos(\\omega^Ty+b)]\\)（\\(b\\) 均匀分布)。采 \\(D\\) 个 \\(\\omega_j\\sim\\mathcal{N}(0,2\\gamma I)\\), \\(\\hat{\\phi}(x)=\\sqrt{2/D}[\\cos(\\omega_1^Tx+b_1),...,\\cos(\\omega_D^Tx+b_D)]\\)。\\(\\hat{\\phi}(x)^T\\hat{\\phi}(y)\\approx K(x,y)\\)（误差 \\(O(1/\\sqrt{D})\\)）。将 \\(O(n^2)\\) 核方法变为 \\(O(nD)\\) 线性方法！"
+      },
+      {
+        "id": "ml-math-ch02-q10",
+        "question": "在生物信息学中，蛋白质序列分类使用字符串核(string kernel)。这相比手工特征有什么优势？",
+        "options": [
+          "字符串核直接定义在序列空间上，不需要特征工程; 核矩阵编码了所有子序列的相似性——捕获进化关系",
+        "手工特征总是更好",
+        "字符串核只适用于 NLP",
+        "核方法无法处理序列数据"
+        ],
+        "answer": 0,
+        "explanation": "\\(k\\)-spectrum 核: \\(K(s,t)=\\sum_u \\#(u,s)\\cdot\\#(u,t)\\)（\\(u\\) 是长度 \\(k\\) 子串出现次数的内积）。特征空间=\\(4^k\\) 维（DNA alphabet, \\(k=6\\): \\(4096\\) 维），但核可 \\(O(|s|+|t|)\\) 高效计算。Mismatch 核允许突变→捕获进化距离。Leslie et al. 蛋白质远程同源检测:核 SVM 显著优于 BLAST。深度学习前核方法在序列分类中领先。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="ml-math"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/ml-math.html" class="module-name">机器学习数学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 特征映射与核函数</a></li>
+      <li><a href="#kp2">02 · 正定核与 RKHS</a></li>
+      <li><a href="#kp3">03 · 表示定理与核 SVM</a></li>
+      <li><a href="#kp4">04 · 高斯过程与核 PCA</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>核方法与再生核 Hilbert 空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>特征映射与核函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性模型太弱，无法处理非线性关系。一个想法是将数据映射到更高维 空间再做线性分类——但显式计算高维特征代价巨大。核函数提供了一 个优雅的解决方案：只需计算内积 \(k(x,y) = \langle\phi(x),\phi(y)\rangle\) 而 无需显式构造 \(\phi\)。这就是"核技巧"的本质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象：从"在特征空间中工作"到"只需计算内积"——任何只依赖 内积的算法都可以"核化"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>特征映射：\(\phi: \mathcal{X} \to \mathcal{H}\)（将输入映到高维空间）。 核函数：\(k(x,y) = \langle\phi(x), \phi(y)\rangle_{\mathcal{H}}\)。 例：多项式核 \(k(x,y) = (x^Ty + 1)^2\) 对应 \(\phi(x) = (x_1^2, x_2^2, \sqrt{2}x_1x_2, \sqrt{2}x_1, \sqrt{2}x_2, 1)^T\)。 显式 \(\phi\) 将 2D 映到 6D，但核只需 \(O(d)\) 计算。 高斯核（RBF）：\(k(x,y) = \exp(-\|x-y\|^2/(2\sigma^2))\) 对应无穷维特征空间——无法显式计算 \(\phi\)，但核可以。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>核 SVM、核 PCA、核 Ridge 回归——所有线性方法都可核化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(k(x,y) = (x^Ty)^2\) 在 \(\mathbb{R}^2\) 上对应的 \(\phi\)。 解答：\((x^Ty)^2 = (x_1y_1+x_2y_2)^2 = x_1^2y_1^2 + x_2^2y_2^2 + 2x_1x_2y_1y_2\) \(= \langle(x_1^2, x_2^2, \sqrt{2}x_1x_2), (y_1^2, y_2^2, \sqrt{2}y_1y_2)\rangle\)。 故 \(\phi(x) = (x_1^2, x_2^2, \sqrt{2}x_1x_2)^T\)。 易错点：不是所有函数都是合法核——必须满足正定性（Mercer 条件）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">高斯核 \(k(x,y)=e^{-\|x-y\|^2/(2\sigma^2)}\) 对应的特征空间维度是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。高斯核的 Taylor 展开包含所有阶的多项式，对应无穷维特征空间。')">A. \(d\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。高斯核的 Taylor 展开包含所有阶的多项式，对应无穷维特征空间。')">B. \(d^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。高斯核的 Taylor 展开包含所有阶的多项式，对应无穷维特征空间。')">C. \(2d\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！高斯核的 Taylor 展开包含所有阶的多项式，对应无穷维特征空间。')">D. 无穷维</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>正定核与 RKHS</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>什么函数可以作为核？Mercer 定理回答了这个问题：核函数必须是正 定的。正定核与再生核 Hilbert 空间(RKHS)一一对应——RKHS 为核方 法提供了严格的函数空间框架，保证了优化问题的良定义性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>RKHS 是一个函数的 Hilbert 空间，其中"点评估"是连续线性泛函。 再生性质：\(f(x) = \langle f, k(\cdot, x)\rangle_{\mathcal{H}}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>正定核：\(k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}\) 正定 iff 对任意 \(n\) 个点 \(x_1,\ldots,x_n\)，Gram 矩阵 \(K_{ij} = k(x_i,x_j)\) 半正定。 Mercer 定理：\(k\) 正定 \(\Leftrightarrow\) 存在特征映射 \(\phi\) 使 \(k(x,y) = \langle\phi(x),\phi(y)\rangle\)。 RKHS 构造（Moore-Aronszajn）：每个正定核唯一确定一个 RKHS \(\mathcal{H}_k\)： \[\mathcal{H}_k = \overline{\mathrm{span}\{k(\cdot, x) \mid x \in \mathcal{X}\}}\] 再生性质：\(f(x) = \langle f, k(\cdot, x)\rangle_{\mathcal{H}_k}\)。 RKHS 范数 \(\|f\|_{\mathcal{H}_k}\) 控制函数的"光滑度"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RKHS 框架使核方法的泛化分析严格化——RKHS 范数作为复杂度度量 出现在泛化界中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(k(x,y)=\min(x,y)\)（\(x,y > 0\)）是正定核。 解答：取 \(x_1 < x_2\)，Gram 矩阵 \(K = \begin{pmatrix}x_1&x_1\\x_1&x_2\end{pmatrix}\)。 特征值 \((x_1+x_2 \pm \sqrt{(x_2-x_1)^2})/2 = x_2, 0\)（半正定）。 一般情形可通过 \(k(x,y)=\int_0^\infty \mathbb{1}_{[0,x]}(t)\mathbb{1}_{[0,y]}(t)dt\) 验证。 易错点：Gram 矩阵半正定 \(\neq\) 对称正定。半正定允许零特征值。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">RKHS 的"再生性质"是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。再生性意味着"点评估可用与核函数的内积表示"。')">A. \(\|f\| = \|g\|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！再生性意味着"点评估可用与核函数的内积表示"。')">B. \(f(x) = \langle f, k(\cdot,x)\rangle\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。再生性意味着"点评估可用与核函数的内积表示"。')">C. \(k(x,y) = k(y,x)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。再生性意味着"点评估可用与核函数的内积表示"。')">D. 所有函数可微</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>表示定理与核 SVM</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>核化后在无穷维空间中优化，解是否有限表示？表示定理给出肯定回 答：RKHS 中正则化优化问题的解总可以写成训练数据核函数的线性 组合。这将无穷维问题化为有限维，使核方法在实践中可行。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>表示定理(Representer Theorem)：对 \[\min_{f \in \mathcal{H}_k} \sum_{i=1}^n L(y_i, f(x_i)) + \lambda\|f\|_{\mathcal{H}_k}^2\] 最优解形如 \(f^*(x) = \sum_{i=1}^n \alpha_i k(x, x_i)\)。 证明思路：将 \(f\) 分解为 \(f = f_\parallel + f_\perp\)， 其中 \(f_\parallel \in \mathrm{span}\{k(\cdot,x_i)\}\)。 由再生性 \(f(x_i) = f_\parallel(x_i)\)，且 \(\|f\|^2 = \|f_\parallel\|^2 + \|f_\perp\|^2\)， 故 \(f_\perp = 0\) 最优。 核 SVM 对偶：\(\max_\alpha \sum \alpha_i - \frac{1}{2}\sum \alpha_i\alpha_j y_iy_j k(x_i,x_j)\)， s.t. \(0 \leq \alpha_i \leq C\), \(\sum \alpha_i y_i = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>核 SVM 在小样本高维数据（如生物信息学、文本分类）中表现优异。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：核 Ridge 回归，\(K_{ij}=k(x_i,x_j)\)，求 \(\alpha^*\)。 解答：代入表示定理后，优化变为 \(\min_\alpha \|K\alpha-y\|^2+\lambda\alpha^TK\alpha\)。 梯度为零：\(2K(K\alpha-y)+2\lambda K\alpha=0\), \((K+\lambda I)\alpha=y\), \(\alpha^* = (K+\lambda I)^{-1}y\)。预测：\(f^*(x_{new}) = k^T_{new}(K+\lambda I)^{-1}y\)。 易错点：表示定理只保证最优解有限表示，不是所有 RKHS 函数都有。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">表示定理保证最优解 \(f^*\) 可以写成？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f^*(x) = \\sum_i \\alpha_i k(x, x_i)\\)，只需 \\(n\\) 个系数。')">A. 任意基函数的组合</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(f^*(x) = \\sum_i \\alpha_i k(x, x_i)\\)，只需 \\(n\\) 个系数。')">B. 训练数据处核函数的线性组合</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f^*(x) = \\sum_i \\alpha_i k(x, x_i)\\)，只需 \\(n\\) 个系数。')">C. 多项式函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f^*(x) = \\sum_i \\alpha_i k(x, x_i)\\)，只需 \\(n\\) 个系数。')">D. 有限维向量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>高斯过程与核 PCA</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>核方法不仅用于分类——高斯过程(GP)是核方法的贝叶斯版本，不仅 给出预测还给出不确定性估计。核 PCA 则将 PCA 推广到非线性降维。 这些应用展示了核方法框架的强大统一性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>GP 的核心抽象：函数本身是随机变量，由核函数决定其协方差结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>高斯过程：\(f \sim \mathcal{GP}(m(\cdot), k(\cdot,\cdot))\)。 有限维投影：\((f(x_1),\ldots,f(x_n)) \sim N(\mu, K)\)，\(K_{ij}=k(x_i,x_j)\)。 GP 回归（后验预测）： \[f^*|X,y,x^* \sim N(k_*^T(K+\sigma^2I)^{-1}y,\; k_{**}-k_*^T(K+\sigma^2I)^{-1}k_*)\] 其中 \(k_*\) 是测试-训练核向量。均值 \(=\) 核 Ridge 回归的解。 核 PCA：在特征空间中做 PCA，等价于对中心化 Gram 矩阵 \(\tilde{K}\) 做特征分解。投影：\(f_j(x) = \sum_i \alpha_i^{(j)} k(x, x_i)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>GP 在贝叶斯优化（超参数调优）中是标准代理模型；核 PCA 用于 流形学习和非线性降维。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：GP 回归，\(n=1\) 个观测 \((x_1, y_1)=(0, 1)\)，\(k(x,y)=e^{-(x-y)^2}\)， \(\sigma^2=0.1\)。预测 \(x^*=1\) 处的均值和方差。 解答：\(K=[1]\), \(k_*=[e^{-1}]\), \(k_{**}=1\)。 均值 \(= e^{-1} \cdot (1+0.1)^{-1} \cdot 1 \approx 0.334\)。 方差 \(= 1 - e^{-2}/(1.1) \approx 0.877\)。远离观测点不确定性增大。 易错点：GP 的计算瓶颈是 \(O(n^3)\) 的矩阵求逆，大规模需近似方法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">GP 回归的预测均值等价于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。GP 预测均值 \\(= k_*^T(K+\\sigma^2I)^{-1}y\\)，与核 Ridge 完全相同。')">A. 线性回归</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！GP 预测均值 \\(= k_*^T(K+\\sigma^2I)^{-1}y\\)，与核 Ridge 完全相同。')">B. 核 Ridge 回归</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。GP 预测均值 \\(= k_*^T(K+\\sigma^2I)^{-1}y\\)，与核 Ridge 完全相同。')">C. LASSO</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。GP 预测均值 \\(= k_*^T(K+\\sigma^2I)^{-1}y\\)，与核 Ridge 完全相同。')">D. 决策树</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/applied/ml-math.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

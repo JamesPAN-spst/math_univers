@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 域扩张 — 环与域论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "rings-ch04-q1",
+        "question": "\\([\\mathbb{Q}(\\sqrt{2}):\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(1\\)",
+        "\\(\\sqrt{2}\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sqrt{2}\\) 的最小多项式为 \\(x^2-2\\)（在 \\(\\mathbb{Q}\\) 上不可约），故 \\([\\mathbb{Q}(\\sqrt{2}):\\mathbb{Q}]=\\deg(x^2-2)=2\\)。基为 \\(\\{1,\\sqrt{2}\\}\\)。任何元素形如 \\(a+b\\sqrt{2}\\)，\\(a,b\\in\\mathbb{Q}\\)。"
+      },
+      {
+        "id": "rings-ch04-q2",
+        "question": "\\([\\mathbb{Q}(\\sqrt[3]{5}):\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(5\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sqrt[3]{5}\\) 的最小多项式为 \\(x^3-5\\)（Eisenstein \\(p=5\\) 不可约），\\([\\mathbb{Q}(\\sqrt[3]{5}):\\mathbb{Q}]=3\\)。基为 \\(\\{1,\\sqrt[3]{5},\\sqrt[3]{25}\\}\\)。选 A 混淆了三次根与平方根。"
+      },
+      {
+        "id": "rings-ch04-q3",
+        "question": "\\(\\pi\\) 在 \\(\\mathbb{Q}\\) 上是代数元还是超越元？",
+        "options": [
+          "代数元",
+        "超越元",
+        "既不是代数也不是超越",
+        "取决于定义"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\pi\\) 不满足任何非零有理系数多项式（Lindemann 1882 证明）。\\([\\mathbb{Q}(\\pi):\\mathbb{Q}]=\\infty\\)，\\(\\mathbb{Q}(\\pi)\\cong\\mathbb{Q}(x)\\)（有理函数域）。超越数的存在说明 \\(\\bar{\\mathbb{Q}}\\subsetneq\\mathbb{C}\\)（代数闭包严格小于 \\(\\mathbb{C}\\)）。"
+      },
+      {
+        "id": "rings-ch04-q4",
+        "question": "\\(\\sqrt{2}\\) 在 \\(\\mathbb{Q}\\) 上的最小多项式是什么？",
+        "options": [
+          "\\(x^2-2\\)",
+        "\\(x-\\sqrt{2}\\)",
+        "\\(x^4-4\\)",
+        "\\(x^2-4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\sqrt{2})^2-2=0\\)，故 \\(\\sqrt{2}\\) 是 \\(x^2-2\\) 的根。\\(x^2-2\\) 在 \\(\\mathbb{Q}\\) 上不可约（无有理根），故为最小多项式。B 的系数 \\(\\sqrt{2}\\notin\\mathbb{Q}\\)。C 次数过高。D 的根是 \\(\\pm2\\) 不是 \\(\\pm\\sqrt{2}\\)。"
+      },
+      {
+        "id": "rings-ch04-q5",
+        "question": "\\(x^2+1\\) 在 \\(\\mathbb{R}\\) 上的分裂域是什么？",
+        "options": [
+          "\\(\\mathbb{R}\\)",
+        "\\(\\mathbb{C}\\)",
+        "\\(\\mathbb{Q}(i)\\)",
+        "\\(\\mathbb{R}[x]\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(x^2+1=(x-i)(x+i)\\)，需添加 \\(i\\) 到 \\(\\mathbb{R}\\)。\\(\\mathbb{R}(i)=\\mathbb{C}\\)。\\([\\mathbb{C}:\\mathbb{R}]=2\\)。C 错：\\(\\mathbb{Q}(i)\\) 不包含所有实数，不是 \\(\\mathbb{R}\\) 的扩域。分裂域是包含所有根的最小域。"
+      },
+      {
+        "id": "rings-ch04-q6",
+        "question": "\\(x^2-2\\) 在 \\(\\mathbb{Q}\\) 上的分裂域是？",
+        "options": [
+          "\\(\\mathbb{Q}(\\sqrt{2})\\)",
+        "\\(\\mathbb{Q}\\)",
+        "\\(\\mathbb{R}\\)",
+        "\\(\\mathbb{Q}(\\sqrt{2}, \\sqrt{3})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^2-2=(x-\\sqrt{2})(x+\\sqrt{2})\\)，\\(-\\sqrt{2}\\in\\mathbb{Q}(\\sqrt{2})\\)，故 \\(\\mathbb{Q}(\\sqrt{2})\\) 已包含所有根。\\([\\mathbb{Q}(\\sqrt{2}):\\mathbb{Q}]=2\\)。D 多余：\\(\\sqrt{3}\\) 与此无关。"
+      },
+      {
+        "id": "rings-ch04-q7",
+        "question": "\\(\\mathbb{Q}\\) 是完美域吗？",
+        "options": [
+          "是",
+        "不是",
+        "取决于扩张",
+        "仅在有限扩张时"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{char}(\\mathbb{Q})=0\\)，特征 \\(0\\) 域均完美。完美域中每个不可约多项式都可分（无重根）。有限域也是完美域。不完美域的例子：\\(\\mathbb{F}_p(t)\\)（无穷域，特征 \\(p\\)）。"
+      },
+      {
+        "id": "rings-ch04-q8",
+        "question": "\\([\\mathbb{Q}(\\sqrt{2},\\sqrt{3}):\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt{2}):\\mathbb{Q}]=2\\)。\\(\\sqrt{3}\\notin\\mathbb{Q}(\\sqrt{2})\\)（\\(\\sqrt{3}=a+b\\sqrt{2}\\) 无有理解），\\([\\mathbb{Q}(\\sqrt{2},\\sqrt{3}):\\mathbb{Q}(\\sqrt{2})]=2\\)。塔定理：\\(2\\times2=4\\)。基 \\(\\{1,\\sqrt{2},\\sqrt{3},\\sqrt{6}\\}\\)。易错：用加法 \\(2+2=4\\) 恰好正确，但塔定理是乘法。"
+      },
+      {
+        "id": "rings-ch04-q9",
+        "question": "\\(\\alpha=\\sqrt{2}+\\sqrt{3}\\) 在 \\(\\mathbb{Q}\\) 上的最小多项式次数是？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\alpha-\\sqrt{2}=\\sqrt{3}\\)，\\((\\alpha-\\sqrt{2})^2=3\\)，\\(\\alpha^2-2\\sqrt{2}\\alpha+2=3\\)，\\(\\alpha^2-1=2\\sqrt{2}\\alpha\\)，\\((\\alpha^2-1)^2=8\\alpha^2\\)，\\(\\alpha^4-10\\alpha^2+1=0\\)。\\(m_\\alpha=x^4-10x^2+1\\) 不可约（\\([\\mathbb{Q}(\\alpha):\\mathbb{Q}]=4\\)）。"
+      },
+      {
+        "id": "rings-ch04-q10",
+        "question": "\\(x^4-2\\) 在 \\(\\mathbb{Q}\\) 上的分裂域的扩张次数 \\([L:\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "根为 \\(\\sqrt[4]{2},-\\sqrt[4]{2},i\\sqrt[4]{2},-i\\sqrt[4]{2}\\)。\\(L=\\mathbb{Q}(\\sqrt[4]{2},i)\\)。\\([\\mathbb{Q}(\\sqrt[4]{2}):\\mathbb{Q}]=4\\)，\\([\\mathbb{Q}(\\sqrt[4]{2},i):\\mathbb{Q}(\\sqrt[4]{2})]=2\\)（\\(i\\notin\\mathbb{R}\\supseteq\\mathbb{Q}(\\sqrt[4]{2})\\)）。\\([L:\\mathbb{Q}]=4\\times2=8\\)。"
+      },
+      {
+        "id": "rings-ch04-q11",
+        "question": "塔定理：若 \\(K\\subseteq L\\subseteq M\\)，\\([M:L]=3\\)，\\([L:K]=4\\)，则 \\([M:K] = \\) ？",
+        "options": [
+          "\\(7\\)",
+        "\\(12\\)",
+        "\\(1\\)",
+        "\\(3/4\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([M:K]=[M:L]\\times[L:K]=3\\times4=12\\)。塔定理是乘法关系。\\(M\\) 作为 \\(K\\)-向量空间的维数\\(=\\)中间扩张的维数之积。选 A 用了加法——这是常见错误。"
+      },
+      {
+        "id": "rings-ch04-q12",
+        "question": "\\(\\sqrt[4]{2}\\) 在 \\(\\mathbb{Q}(\\sqrt{2})\\) 上的最小多项式是什么？",
+        "options": [
+          "\\(x^2-\\sqrt{2}\\)",
+        "\\(x^4-2\\)",
+        "\\(x-\\sqrt[4]{2}\\)",
+        "\\(x^2-2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\sqrt[4]{2})^2=\\sqrt{2}\\in\\mathbb{Q}(\\sqrt{2})\\)，故 \\(\\sqrt[4]{2}\\) 是 \\(x^2-\\sqrt{2}\\) 的根。\\(x^2-\\sqrt{2}\\) 在 \\(\\mathbb{Q}(\\sqrt{2})\\) 上不可约（\\(\\sqrt[4]{2}\\notin\\mathbb{Q}(\\sqrt{2})\\)）。\\([\\mathbb{Q}(\\sqrt[4]{2}):\\mathbb{Q}(\\sqrt{2})]=2\\)。B 是在 \\(\\mathbb{Q}\\) 上的最小多项式。"
+      },
+      {
+        "id": "rings-ch04-q13",
+        "question": "\\(\\mathbb{F}_p(t)\\) 中 \\(x^p-t\\) 是否可分？",
+        "options": [
+          "可分",
+        "不可分，\\(x^p-t=(x-\\alpha)^p\\)",
+        "取决于 \\(p\\)",
+        "可分当 \\(p=2\\)"
+        ],
+        "answer": 1,
+        "explanation": "设 \\(\\alpha^p=t\\)。在特征 \\(p\\) 中 \\(x^p-\\alpha^p=(x-\\alpha)^p\\)。\\(x^p-t\\) 只有一个根 \\(\\alpha\\)（\\(p\\) 重），不可分。\\(\\mathbb{F}_p(t)\\) 不是完美域（无穷域，特征 \\(p\\)）。这是可分性失效的经典例子。"
+      },
+      {
+        "id": "rings-ch04-q14",
+        "question": "\\(\\overline{\\mathbb{Q}}\\)（\\(\\mathbb{Q}\\) 的代数闭包）包含 \\(\\sqrt[n]{2}\\)（\\(\\forall n\\)）吗？",
+        "options": [
+          "是",
+        "否",
+        "仅当 \\(n\\) 为偶数",
+        "仅当 \\(n\\) 为素数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sqrt[n]{2}\\) 是 \\(x^n-2\\in\\mathbb{Q}[x]\\) 的根，故 \\(\\sqrt[n]{2}\\) 在 \\(\\mathbb{Q}\\) 上代数，\\(\\sqrt[n]{2}\\in\\overline{\\mathbb{Q}}\\)。\\(\\overline{\\mathbb{Q}}\\) 包含所有代数数。但 \\(\\pi,e\\notin\\overline{\\mathbb{Q}}\\)（超越数）。\\(\\overline{\\mathbb{Q}}\\) 是可数集而 \\(\\mathbb{C}\\) 不可数。"
+      },
+      {
+        "id": "rings-ch04-q15",
+        "question": "\\([\\mathbb{Q}(\\pi):\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(1\\)",
+        "有限",
+        "\\(\\infty\\)",
+        "\\(\\pi\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\pi\\) 是超越元，不满足任何非零有理系数多项式。\\(\\mathbb{Q}(\\pi)\\cong\\mathbb{Q}(x)\\)（有理函数域），作为 \\(\\mathbb{Q}\\)-向量空间无穷维。\\([\\mathbb{Q}(\\alpha):\\mathbb{Q}]<\\infty\\) \\(\\Leftrightarrow\\) \\(\\alpha\\) 在 \\(\\mathbb{Q}\\) 上代数。"
+      },
+      {
+        "id": "rings-ch04-q16",
+        "question": "\\([\\mathbb{Q}(\\sqrt[3]{2},\\omega):\\mathbb{Q}] = \\) ？（\\(\\omega=e^{2\\pi i/3}\\)）",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(9\\)",
+        "\\(4\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt[3]{2}):\\mathbb{Q}]=3\\)。\\(\\omega\\) 满足 \\(x^2+x+1=0\\)，\\([\\mathbb{Q}(\\omega):\\mathbb{Q}]=2\\)。\\(\\gcd(3,2)=1\\)，故 \\([\\mathbb{Q}(\\sqrt[3]{2},\\omega):\\mathbb{Q}]=6\\)。这是 \\(x^3-2\\) 的分裂域，\\(\\mathrm{Gal}\\cong S_3\\)（\\(|S_3|=6\\)）。"
+      },
+      {
+        "id": "rings-ch04-q17",
+        "question": "有限域 \\(\\mathbb{F}_q\\) 是完美域吗？",
+        "options": [
+          "是",
+        "不是",
+        "仅当 \\(q\\) 是素数",
+        "仅当 \\(\\mathrm{char}=2\\)"
+        ],
+        "answer": 0,
+        "explanation": "有限域总是完美的。Frobenius \\(\\phi(x)=x^p\\) 在有限域上是满射（有限域上单射 \\(\\Rightarrow\\) 满射），故每个元素有 \\(p\\) 次根，\\(\\mathbb{F}_q\\) 完美。完美域：\\(\\mathrm{char}=0\\) 或有限域。"
+      },
+      {
+        "id": "rings-ch04-q18",
+        "question": "\\([\\mathbb{Q}(\\sqrt{2}+\\sqrt[3]{3}):\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(5\\)",
+        "\\(6\\)",
+        "\\(4\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt{2}):\\mathbb{Q}]=2\\)，\\([\\mathbb{Q}(\\sqrt[3]{3}):\\mathbb{Q}]=3\\)，\\(\\gcd(2,3)=1\\)，故 \\([\\mathbb{Q}(\\sqrt{2},\\sqrt[3]{3}):\\mathbb{Q}]=6\\)。\\(\\mathbb{Q}(\\sqrt{2}+\\sqrt[3]{3})=\\mathbb{Q}(\\sqrt{2},\\sqrt[3]{3})\\)（原始元素定理），故扩张次数为 \\(6\\)。"
+      },
+      {
+        "id": "rings-ch04-q19",
+        "question": "\\(\\alpha=\\sqrt{2}+i\\) 在 \\(\\mathbb{Q}\\) 上的最小多项式？",
+        "options": [
+          "\\(x^4-2x^2+9\\)",
+        "\\(x^2-2x-1\\)",
+        "\\(x^4+2x^2+9\\)",
+        "\\(x^4-6x^2+1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\alpha=\\sqrt{2}+i\\)，\\(\\alpha-\\sqrt{2}=i\\)，\\((\\alpha-\\sqrt{2})^2=-1\\)，\\(\\alpha^2-2\\sqrt{2}\\alpha+2=-1\\)，\\(\\alpha^2+3=2\\sqrt{2}\\alpha\\)，\\((\\alpha^2+3)^2=8\\alpha^2\\)，\\(\\alpha^4+6\\alpha^2+9=8\\alpha^2\\)，\\(\\alpha^4-2\\alpha^2+9=0\\)。验证不可约：\\([\\mathbb{Q}(\\sqrt{2},i):\\mathbb{Q}]=4\\)。"
+      },
+      {
+        "id": "rings-ch04-q20",
+        "question": "\\(x^3-2\\) 在 \\(\\mathbb{Q}\\) 上的分裂域的 Galois 群同构于？",
+        "options": [
+          "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(S_3\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(A_3\\)"
+        ],
+        "answer": 1,
+        "explanation": "分裂域 \\(L=\\mathbb{Q}(\\sqrt[3]{2},\\omega)\\)，\\([L:\\mathbb{Q}]=6\\)。\\(|\\mathrm{Gal}(L/\\mathbb{Q})|=6\\)。Galois 群将根 \\(\\{\\sqrt[3]{2},\\omega\\sqrt[3]{2},\\omega^2\\sqrt[3]{2}\\}\\) 置换，嵌入 \\(S_3\\)。\\(|S_3|=6=|\\mathrm{Gal}|\\)，故 \\(\\mathrm{Gal}\\cong S_3\\)。A 和 D 阶 \\(3\\)，C 交换但 \\(S_3\\) 非交换。"
+      },
+      {
+        "id": "rings-ch04-q21",
+        "question": "\\(\\mathbb{F}_2(t)\\) 中 \\(x^2-t\\) 的根 \\(\\alpha\\) 满足 \\([\\mathbb{F}_2(t)(\\alpha):\\mathbb{F}_2(t)] = \\) ？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(x^2-t\\) 在 \\(\\mathbb{F}_2(t)\\) 上不可约（\\(t\\) 在 \\(\\mathbb{F}_2(t)\\) 中无平方根）。\\([\\mathbb{F}_2(t)(\\alpha):\\mathbb{F}_2(t)]=\\deg(x^2-t)=2\\)。但 \\(x^2-t=(x-\\alpha)^2\\)（特征 \\(2\\)），不可分。这是不可分扩张的典型例子，\\(\\mathbb{F}_2(t)\\) 不完美。"
+      },
+      {
+        "id": "rings-ch04-q22",
+        "question": "\\(x^8-1\\) 在 \\(\\mathbb{Q}\\) 上的分裂域 \\(L\\) 中 \\([L:\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(8\\)",
+        "\\(4\\)",
+        "\\(2\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(x^8-1\\) 的本原 \\(8\\) 次单位根 \\(\\zeta_8=e^{2\\pi i/8}=\\frac{1+i}{\\sqrt{2}}\\)。\\(L=\\mathbb{Q}(\\zeta_8)\\)。\\([L:\\mathbb{Q}]=\\varphi(8)=4\\)。\\(\\Phi_8(x)=x^4+1\\) 是最小多项式。不是 \\(8\\)（那是 \\(|\\) 根 \\(|\\)），而是 \\(\\varphi(8)\\)。"
+      },
+      {
+        "id": "rings-ch04-q23",
+        "question": "两个代数数之和仍是代数数吗？\\(\\sqrt{2}+\\sqrt{3}\\) 的次数？",
+        "options": [
+          "是，次数 \\(4\\)",
+        "是，次数 \\(2\\)",
+        "不一定是代数数",
+        "是，次数 \\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "代数数的和仍是代数数（\\(\\overline{\\mathbb{Q}}\\) 是域）。\\(\\sqrt{2}+\\sqrt{3}\\) 的最小多项式为 \\(x^4-10x^2+1\\)（前面已推导），次数 \\(4\\)。\\([\\mathbb{Q}(\\sqrt{2}+\\sqrt{3}):\\mathbb{Q}]=[\\mathbb{Q}(\\sqrt{2},\\sqrt{3}):\\mathbb{Q}]=4\\)。"
+      },
+      {
+        "id": "rings-ch04-q24",
+        "question": "\\([\\mathbb{F}_{p^6}:\\mathbb{F}_{p^2}] = \\) ？",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(4\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{F}_{p^n}:\\mathbb{F}_{p^m}]=n/m\\)（当 \\(m\\mid n\\)）。\\([\\mathbb{F}_{p^6}:\\mathbb{F}_{p^2}]=6/2=3\\)。\\(\\mathbb{F}_{p^2}\\subseteq\\mathbb{F}_{p^6}\\) 因为 \\(2\\mid6\\)。有限域上的扩张次数是指数之比。"
+      },
+      {
+        "id": "rings-ch04-q25",
+        "question": "可分扩张 \\(L/K\\) 的定义中，\\(L\\) 中每个元素的最小多项式必须满足什么？",
+        "options": [
+          "无重根（可分）",
+        "次数为素数",
+        "系数为整数",
+        "在 \\(L\\) 中完全分裂"
+        ],
+        "answer": 0,
+        "explanation": "可分扩张：\\(L\\) 中每个元素在 \\(K\\) 上的最小多项式无重根。等价条件：\\(\\gcd(m_\\alpha,m_\\alpha')=1\\)。特征 \\(0\\) 域上一切代数扩张自动可分，因为不可约多项式必可分。特征 \\(p\\) 域可能出现不可分性。"
+      },
+      {
+        "id": "rings-ch04-q26",
+        "question": "尺规作图问题：倍立方（\\(\\sqrt[3]{2}\\)）为何不可能？",
+        "options": [
+          "\\([\\mathbb{Q}(\\sqrt[3]{2}):\\mathbb{Q}]=3\\)，非 \\(2\\) 的幂",
+        "\\(\\sqrt[3]{2}\\) 是无理数",
+        "\\(\\sqrt[3]{2}\\) 不存在",
+        "需要折纸而非尺规"
+        ],
+        "answer": 0,
+        "explanation": "尺规可构造的点对应次数为 \\(2\\) 的幂的域扩张塔。\\([\\mathbb{Q}(\\sqrt[3]{2}):\\mathbb{Q}]=3\\)，\\(3\\) 不是 \\(2\\) 的幂，故无法尺规作图。将几何问题转化为域扩张的次数问题是 Galois 理论的经典应用。"
+      },
+      {
+        "id": "rings-ch04-q27",
+        "question": "计算机代数中判断 \\(\\alpha=\\sqrt{2}+\\sqrt{3}\\) 是否为代数数。以下哪种方法有效？",
+        "options": [
+          "计算 \\(\\alpha\\) 的十进制展开",
+        "用逐步消元法构造零化多项式",
+        "证明 \\(\\alpha\\) 可用分数表示",
+        "验证 \\(\\alpha<10\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\alpha-\\sqrt{2}=\\sqrt{3}\\)，平方得 \\(\\alpha^2-2\\sqrt{2}\\alpha+2=3\\)，移项平方消去 \\(\\sqrt{2}\\) 得 \\(\\alpha^4-10\\alpha^2+1=0\\)。计算机代数系统用类似的 resultant 或 Gröbner 基方法自动构造零化多项式。十进制展开无法证明代数性。"
+      },
+      {
+        "id": "rings-ch04-q28",
+        "question": "密码学中 \\(\\mathbb{F}_{2^{128}}\\) 的构造需要 \\(\\mathbb{F}_2[x]\\) 上 \\(128\\) 次不可约多项式。\\(\\mathbb{F}_{2^{128}}\\) 的乘法群阶为？",
+        "options": [
+          "\\(2^{128}-1\\)",
+        "\\(2^{128}\\)",
+        "\\(128\\)",
+        "\\(2^{127}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\mathbb{F}_{2^{128}}^\\times|=2^{128}-1\\)（有限域去掉零元素）。AES-128 和 GCM 认证使用 \\(\\mathbb{F}_{2^{128}}\\) 上的运算。\\(\\mathbb{F}_q^\\times\\) 是 \\(q-1\\) 阶循环群，离散对数问题在密码学中是核心难题。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="rings"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/rings.html" class="module-name">环与域论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 域扩张的基本概念</a></li>
+      <li><a href="#kp2">02 · 代数元与超越元</a></li>
+      <li><a href="#kp3">03 · 分裂域与代数闭包</a></li>
+      <li><a href="#kp4">04 · 可分扩张与完美域</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>域扩张</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>域扩张的基本概念</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\mathbb{Q}\) 中无法解 \(x^2 - 2 = 0\)，但可以「扩充」得到 \(\mathbb{Q}(\sqrt{2})\)。 域扩张的理论精确描述了「添加新元素后域如何变大」， 是 Galois 理论的基础，也是理解「为什么五次方程无根式解」的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>域扩张是「向域中添加新元素」的代数框架。 它将方程求解问题转化为理想和商环的结构问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>域扩张</strong>: \(K \subseteq L\) 为域的包含关系，记 \(L/K\)。 \(L\) 是 \(K\)-向量空间，\([L:K] = \dim_K L\) 称为扩张次数。 <strong>单扩张</strong>: \(K(\alpha) = K[\alpha] = K[x]/(m_\alpha(x))\)， 其中 \(m_\alpha\) 是 \(\alpha\) 在 \(K\) 上的最小多项式。 \[[K(\alpha):K] = \deg m_\alpha\] <strong>塔定理</strong>: \([M:K] = [M:L][L:K]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>尺规作图不可能性: 倽立方不可能因为 \([\mathbb{Q}(\sqrt[3]{2}):\mathbb{Q}] = 3\)， 而尺规作图只能构造次数为 2 的幂的扩张。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \([\mathbb{Q}(\sqrt{2}, \sqrt{3}):\mathbb{Q}]\)。 解答: \([\mathbb{Q}(\sqrt{2}):\mathbb{Q}] = 2\)（\(m_{\sqrt{2}} = x^2-2\)）。 \(\sqrt{3} \notin \mathbb{Q}(\sqrt{2})\)（可证），故 \([\mathbb{Q}(\sqrt{2}, \sqrt{3}):\mathbb{Q}(\sqrt{2})] = 2\)。 由塔定理: \([\mathbb{Q}(\sqrt{2}, \sqrt{3}):\mathbb{Q}] = 4\)。 基: \(\{1, \sqrt{2}, \sqrt{3}, \sqrt{6}\}\)。 易错点: 以为 \([\mathbb{Q}(\sqrt{2}, \sqrt{3}):\mathbb{Q}] = 2 + 2 = 4\)。 结果恰好正确，但推理错误。塔定理是乘法不是加法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\([\mathbb{Q}(\sqrt[3]{5}):\mathbb{Q}] = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(m_{\\sqrt[3]{5}} = x^3 - 5\\)（Eisenstein，\\(p=5\\)），\\(\\deg = 3\\)。')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(m_{\\sqrt[3]{5}} = x^3 - 5\\)（Eisenstein，\\(p=5\\)），\\(\\deg = 3\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(m_{\\sqrt[3]{5}} = x^3 - 5\\)（Eisenstein，\\(p=5\\)），\\(\\deg = 3\\)。')">C. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(m_{\\sqrt[3]{5}} = x^3 - 5\\)（Eisenstein，\\(p=5\\)），\\(\\deg = 3\\)。')">D. 6</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>代数元与超越元</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\sqrt{2}\) 是 \(x^2-2\) 的根——它是代数元。\(\pi\) 和 \(e\) 不满足任何 有理系数多项式——它们是超越元。区分这两类元素是数论和域扩张 理论的基本问题，类似于区分「精确」和「混沌」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>代数元 \(\Leftrightarrow K(\alpha)/K\) 有限 \(\Leftrightarrow K[\alpha]\) 已是域。 超越元 \(\Leftrightarrow K(\alpha) \cong K(x)\)（纯超越扩张）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>代数元</strong>: \(\alpha\) 在 \(K\) 上代数 \(\Leftrightarrow\) \(\exists f \in K[x], f \neq 0: f(\alpha) = 0\)。 最小多项式 \(m_\alpha\) 不可约，\(K(\alpha) \cong K[x]/(m_\alpha)\)。 \([K(\alpha):K] = \deg m_\alpha < \infty\)。 <strong>超越元</strong>: \(\alpha\) 在 \(K\) 上超越 \(\Leftrightarrow\) 无非零多项式零化它。 \(K(\alpha) \cong K(x)\)（有理函数域），\([K(\alpha):K] = \infty\)。 <strong>代数闭包</strong>: 代数元的和、积、商仍是代数元。 \[\bar{\mathbb{Q}} = \{\alpha \in \mathbb{C} : \alpha \text{ 在 } \mathbb{Q} \text{ 上代数}\}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Lindemann-Weierstrass 定理: \(e^\alpha\) 对代数数 \(\alpha \neq 0\) 是超越的。 推论: \(\pi\) 是超越的（因 \(e^{i\pi} = -1\)，若 \(\pi\) 代数则 \(e^{i\pi}\) 超越）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\alpha = \sqrt{2} + \sqrt{3}\)。求 \(m_\alpha\) over \(\mathbb{Q}\)。 解答: \(\alpha - \sqrt{2} = \sqrt{3}\)，\((\alpha - \sqrt{2})^2 = 3\)， \(\alpha^2 - 2\sqrt{2}\alpha + 2 = 3\)，\(\alpha^2 - 1 = 2\sqrt{2}\alpha\)， \((\alpha^2 - 1)^2 = 8\alpha^2\)，\(\alpha^4 - 2\alpha^2 + 1 = 8\alpha^2\)， \(m_\alpha = x^4 - 10x^2 + 1\)。 易错点: 以为 \((x^2-2)(x^2-3)\) 是最小多项式。 \(\sqrt{2}+\sqrt{3}\) 不是它的根。最小多项式必须不可约。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\([\mathbb{Q}(\pi):\mathbb{Q}] = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\pi\\) 是超越元，\\(\\mathbb{Q}(\\pi) \\cong \\mathbb{Q}(x)\\)，无限维。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\pi\\) 是超越元，\\(\\mathbb{Q}(\\pi) \\cong \\mathbb{Q}(x)\\)，无限维。')">B. 有限但未知</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\pi\\) 是超越元，\\(\\mathbb{Q}(\\pi) \\cong \\mathbb{Q}(x)\\)，无限维。')">C. \(\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\pi\\) 是超越元，\\(\\mathbb{Q}(\\pi) \\cong \\mathbb{Q}(x)\\)，无限维。')">D. \(\pi\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>分裂域与代数闭包</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>单扩张 \(K(\alpha)\) 只添加了一个根。但很多时候我们需要一个多项式的 <strong>所有</strong>根都在其中。分裂域是包含给定多项式所有根的最小域扩张， 是 Galois 理论的核心对象。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>分裂域是使多项式「完全分解」的最小环境。 不同于单扩张（只加一个根），分裂域加入了所有根。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分裂域</strong>: \(f \in K[x]\) 的分裂域是最小的域 \(L \supseteq K\)， 使 \(f\) 在 \(L[x]\) 中完全分解为一次因子: \[f(x) = c(x - \alpha_1) \cdots (x - \alpha_n) \in L[x]\] \(L = K(\alpha_1, \ldots, \alpha_n)\)。 <strong>存在性与唯一性</strong>: 分裂域总存在，且在同构意义下唯一。 <strong>代数闭包</strong>: \(\bar{K}\) 是所有 \(K[x]\) 中多项式的分裂域的并。 \(\bar{K}\) 上每个非常多项式都有根。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(x^4 - 2\) 在 \(\mathbb{Q}\) 上的分裂域。 解答: 根: \(\sqrt[4]{2}, -\sqrt[4]{2}, i\sqrt[4]{2}, -i\sqrt[4]{2}\)。 分裂域 \(= \mathbb{Q}(\sqrt[4]{2}, i)\)。 \([\mathbb{Q}(\sqrt[4]{2}):\mathbb{Q}] = 4\)，\([\mathbb{Q}(\sqrt[4]{2}, i):\mathbb{Q}(\sqrt[4]{2})] = 2\)。 \([\mathbb{Q}(\sqrt[4]{2}, i):\mathbb{Q}] = 8\)。 易错点: 以为 \(\mathbb{Q}(\sqrt[4]{2})\) 就是分裂域。 \(\mathbb{Q}(\sqrt[4]{2}) \subset \mathbb{R}\)，不含复数根。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(x^2 + 1\) 在 \(\mathbb{R}\) 上的分裂域是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。需添加 \\(i\\)，\\(\\mathbb{R}(i) = \\mathbb{C}\\)。')">A. \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。需添加 \\(i\\)，\\(\\mathbb{R}(i) = \\mathbb{C}\\)。')">B. \(\mathbb{C}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。需添加 \\(i\\)，\\(\\mathbb{R}(i) = \\mathbb{C}\\)。')">C. \(\mathbb{Q}(i)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！需添加 \\(i\\)，\\(\\mathbb{R}(i) = \\mathbb{C}\\)。')">D. \(\mathbb{R}(i) = \mathbb{C}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>可分扩张与完美域</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>并非所有域扩张都行为良好。「可分」扩张是 Galois 理论成立的条件。 在特征 0 域（如 \(\mathbb{Q}, \mathbb{R}\)）中，每个代数扩张都是可分的。 但在特征 \(p\) 域中可能出现不可分性，需要完美域的概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>可分性确保了最小多项式无重根——这是 Galois 对应的前提。 完美域是「自动可分」的域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>可分元</strong>: \(\alpha\) 在 \(K\) 上可分 \(\Leftrightarrow\) \(m_\alpha\) 无重根。 等价: \(\gcd(m_\alpha, m_\alpha') = 1\)。 <strong>可分扩张</strong>: \(L/K\) 可分 \(\Leftrightarrow\) \(L\) 中每个元素在 \(K\) 上可分。 等价: \(L\) 是某个可分多项式的分裂域。 <strong>完美域</strong>: 每个不可约多项式都可分。 包括: 特征 0 域、有限域。 \[\mathrm{char}(K) = 0 \text{ 或 } K \text{ 有限} \Rightarrow K \text{ 完美}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{F}_p(t)\) 中 \(x^p - t\) 的根是否可分？ 解答: \(x^p - t\) 在 \(\mathbb{F}_p(t)\) 上不可约。 设 \(\alpha^p = t\)，则 \(x^p - t = (x - \alpha)^p\)（特征 \(p\)）。 只有一个根 \(\alpha\)（重数 \(p\)），不可分。 \(\mathbb{F}_p(t)\) 不是完美域。 易错点: 以为所有域都是完美的。 \(\mathbb{F}_p(t)\)（无限域，特征 \(p\)）是不完美域的典型例子。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{Q}\) 是完美域吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\mathrm{char}(\\mathbb{Q}) = 0\\)，特征 0 域均完美。')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{char}(\\mathbb{Q}) = 0\\)，特征 0 域均完美。')">B. 不是</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{char}(\\mathbb{Q}) = 0\\)，特征 0 域均完美。')">C. 取决于扩张</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{char}(\\mathbb{Q}) = 0\\)，特征 0 域均完美。')">D. 无法确定</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/algebra/rings.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 群作用 — 群论 Groupes — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "groups-ch05-q1",
+        "question": "\\(D_3\\) 作用于正三角形顶点集 \\(\\{1,2,3\\}\\)。顶点 \\(1\\) 的稳定子 \\(G_1\\) 的阶为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|G_1| = |G|/|\\mathrm{Orb}(1)| = 6/3 = 2\\)（轨道-稳定子定理）。\\(G_1 = \\{e, s_1\\}\\)，\\(s_1\\) 是过顶点 \\(1\\) 的反射。\\(\\mathrm{Orb}(1) = \\{1,2,3\\}\\)（任何顶点可到任何其他顶点），故 \\(|\\mathrm{Orb}(1)| = 3\\)。"
+      },
+      {
+        "id": "groups-ch05-q2",
+        "question": "设 \\(|G| = 12\\)，\\(G\\) 作用于集合 \\(X\\)，\\(x \\in X\\) 且 \\(|\\mathrm{Orb}(x)| = 4\\)。则 \\(|G_x|\\) 为？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "轨道-稳定子定理：\\(|G_x| = |G|/|\\mathrm{Orb}(x)| = 12/4 = 3\\)。稳定子的阶必须整除群阶，且等于群阶除以轨道长度。"
+      },
+      {
+        "id": "groups-ch05-q3",
+        "question": "设 \\(|G| = 8 = 2^3\\)（\\(p\\)-群）。\\(|Z(G)|\\) 至少为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "类方程：\\(|G| \\equiv |Z(G)| \\pmod{2}\\)。\\(|Z(G)| \\geq 1\\)（含 \\(e\\)）且 \\(2 \\mid |Z(G)|\\)，故 \\(|Z(G)| \\geq 2\\)。这是 \\(p\\)-群中心非平凡的直接推论。"
+      },
+      {
+        "id": "groups-ch05-q4",
+        "question": "设 \\(|G| = 9 = 3^2\\)。\\(G\\) 一定是什么类型的群？",
+        "options": [
+          "循环群",
+        "交换群",
+        "单群",
+        "非交换群"
+        ],
+        "answer": 1,
+        "explanation": "\\(|G| = p^2\\) 时 \\(|Z(G)| \\geq p = 3\\)。若 \\(|Z(G)| = 9\\) 则 \\(G\\) 交换。若 \\(|Z(G)| = 3\\) 则 \\(G/Z(G)\\) 阶 \\(3\\)（循环），由 \\(G/Z(G)\\) 循环 \\(\\Rightarrow G\\) 交换，矛盾。故 \\(|Z(G)| = 9\\)，\\(G\\) 交换。\\(G \\cong \\mathbb{Z}/9\\) 或 \\((\\mathbb{Z}/3)^2\\)。"
+      },
+      {
+        "id": "groups-ch05-q5",
+        "question": "用 \\(2\\) 种颜色涂染正三角形的 \\(3\\) 个顶点。旋转群 \\(C_3 = \\{e, r, r^2\\}\\) 下本质不同的染色方案有多少种？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "Burnside 引理：\\(|X/G| = \\frac{1}{3}(|\\mathrm{Fix}(e)| + |\\mathrm{Fix}(r)| + |\\mathrm{Fix}(r^2)|)\\)。\\(|\\mathrm{Fix}(e)| = 2^3 = 8\\)；\\(|\\mathrm{Fix}(r)| = 2\\)（三顶点颜色全同）；\\(|\\mathrm{Fix}(r^2)| = 2\\)。\\(|X/G| = (8+2+2)/3 = 4\\)。"
+      },
+      {
+        "id": "groups-ch05-q6",
+        "question": "Burnside 引理中 \\(|X/G| = \\frac{1}{|G|}\\sum_{g \\in G} |\\mathrm{Fix}(g)|\\)。\\(|\\mathrm{Fix}(e)|\\) 总是等于什么？",
+        "options": [
+          "\\(|G|\\)",
+        "\\(|X|\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "恒等元 \\(e\\) 固定 \\(X\\) 中的所有元素：\\(e \\cdot x = x\\) 对全部 \\(x \\in X\\) 成立。故 \\(|\\mathrm{Fix}(e)| = |X|\\)。忘记 \\(e\\) 的贡献是 Burnside 计算中的常见错误。"
+      },
+      {
+        "id": "groups-ch05-q7",
+        "question": "Cayley 定理用的是哪种群作用？",
+        "options": [
+          "\\(G\\) 通过共轭作用于自身",
+        "\\(G\\) 通过左乘作用于自身",
+        "\\(G\\) 作用于子群集合",
+        "\\(G\\) 作用于正规子群集合"
+        ],
+        "answer": 1,
+        "explanation": "Cayley 定理：\\(G\\) 通过左正则作用 \\(g \\cdot x = gx\\) 嵌入 \\(S_G\\)。共轭作用用于类方程；作用于子群或陪集集合则用于其他结论。"
+      },
+      {
+        "id": "groups-ch05-q8",
+        "question": "\\(S_4\\) 作用于 \\(\\{1,2,3,4\\}\\)（自然作用）。元素 \\((1\\;2\\;3)\\) 的不动点集 \\(\\mathrm{Fix}((1\\;2\\;3))\\) 是？",
+        "options": [
+          "\\(\\{4\\}\\)",
+        "\\(\\{1,2,3\\}\\)",
+        "\\(\\emptyset\\)",
+        "\\(\\{1,2,3,4\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((1\\;2\\;3)\\) 将 \\(1 \\to 2 \\to 3 \\to 1\\)，4 不动。因此 \\(\\mathrm{Fix}((1\\;2\\;3)) = \\{4\\}\\)。不动点是不被置换移动的元素。"
+      },
+      {
+        "id": "groups-ch05-q9",
+        "question": "\\(G = S_3\\) 共轭作用于自身。\\(\\mathrm{Orb}((1\\;2))\\)（\\((1\\;2)\\) 的共轭类）的元素个数为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathrm{Orb}((1\\;2)) = \\mathrm{Cl}((1\\;2))\\)。\\(S_3\\) 中所有对换共轭（轮换类型相同）：\\(\\{(1\\;2), (1\\;3), (2\\;3)\\}\\)，共 \\(3\\) 个。\\(|\\mathrm{Cl}| = |G|/|C_G((1\\;2))| = 6/2 = 3\\)。"
+      },
+      {
+        "id": "groups-ch05-q10",
+        "question": "\\(S_4\\) 的类方程为 \\(24 = ?\\)。已知共轭类大小分别为 \\(1, 3, 6, 8, 6\\)（按轮换类型排列）。\\(|Z(S_4)|\\) 为？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)"
+        ],
+        "answer": 0,
+        "explanation": "类方程 \\(24 = |Z(S_4)| + 3 + 6 + 8 + 6\\)。\\(3+6+8+6 = 23\\)。\\(|Z(S_4)| = 24 - 23 = 1\\)。\\(Z(S_4) = \\{e\\}\\)，\\(S_4\\) 的中心平凡（\\(n \\geq 3\\) 时 \\(Z(S_n) = \\{e\\}\\)）。"
+      },
+      {
+        "id": "groups-ch05-q11",
+        "question": "设 \\(|G| = 125 = 5^3\\)。由类方程推导，\\(|Z(G)|\\) 的可能值中最小的是？",
+        "options": [
+          "\\(1\\)",
+        "\\(5\\)",
+        "\\(25\\)",
+        "\\(125\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|Z(G)| \\equiv 0 \\pmod{5}\\) 且 \\(|Z(G)| \\geq 1\\)，故 \\(|Z(G)| \\geq 5\\)。最小值为 \\(5\\)（例如 Heisenberg 群模 \\(5\\) 的中心阶为 \\(5\\)）。若中心阶为 \\(25\\) 或 \\(125\\)，群更接近交换。"
+      },
+      {
+        "id": "groups-ch05-q12",
+        "question": "用 \\(3\\) 种颜色涂染正方形的 \\(4\\) 个顶点，旋转群 \\(C_4\\) 下本质不同的方案数为？（\\(|C_4|=4\\)）",
+        "options": [
+          "\\(18\\)",
+        "\\(21\\)",
+        "\\(24\\)",
+        "\\(81\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|\\mathrm{Fix}(e)| = 3^4 = 81\\)；\\(|\\mathrm{Fix}(r)| = 3\\)（全同色）；\\(|\\mathrm{Fix}(r^2)| = 3^2 = 9\\)（对角颜色相同）；\\(|\\mathrm{Fix}(r^3)| = 3\\)。\\(|X/G| = (81+3+9+3)/4 = 96/4 = 24\\)。"
+      },
+      {
+        "id": "groups-ch05-q13",
+        "question": "用 \\(2\\) 种颜色涂染正方形的 \\(4\\) 条边。旋转群 \\(C_4\\) 下共有多少种本质不同的方案？",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\mathrm{Fix}(e)| = 2^4 = 16\\)；\\(|\\mathrm{Fix}(r)| = 2\\)（全同色）；\\(|\\mathrm{Fix}(r^2)| = 2^2 = 4\\)（相对边同色）；\\(|\\mathrm{Fix}(r^3)| = 2\\)。\\(|X/G| = (16+2+4+2)/4 = 24/4 = 6\\)。"
+      },
+      {
+        "id": "groups-ch05-q14",
+        "question": "\\(G\\) 左乘作用于陪集集 \\(G/H\\)。若 \\(|G| = 12\\)，\\(|H| = 3\\)，此作用给出同态 \\(\\varphi: G \\to S_k\\)，\\(k\\) 等于多少？",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(k = [G:H] = 12/3 = 4\\)。\\(G\\) 作用于 \\(4\\) 个左陪集，诱导同态 \\(\\varphi: G \\to S_4\\)。\\(\\ker\\varphi\\) 是包含在 \\(H\\) 中的最大正规子群。"
+      },
+      {
+        "id": "groups-ch05-q15",
+        "question": "设 \\(|G| = 10\\)，\\(H \\leq G\\)，\\([G:H] = 2\\)。则 \\(H \\trianglelefteq G\\)，因为？",
+        "options": [
+          "\\([G:H] = 2\\) 是 \\(|G|\\) 的最小素因子",
+        "\\(|H| = 5\\) 是素数",
+        "\\(H\\) 是交换的",
+        "\\(G\\) 是交换的"
+        ],
+        "answer": 0,
+        "explanation": "\\([G:H] = 2\\) 意味着只有两个陪集 \\(H\\) 和 \\(G \\setminus H\\)，左右陪集自动相等。等价地，\\(2\\) 是 \\(|G| = 10\\) 的最小素因子，由群作用于陪集的论证可得 \\(H \\trianglelefteq G\\)。B 虽然 \\(|H| = 5\\) 为素数但这不是正规的原因。"
+      },
+      {
+        "id": "groups-ch05-q16",
+        "question": "\\(G = \\mathbb{Z}/12\\mathbb{Z}\\) 通过加法作用于自身（\\(g \\cdot x = g + x\\)）。元素 \\(\\overline{3}\\) 的轨道是什么？",
+        "options": [
+          "\\(\\{\\overline{3}\\}\\)",
+        "\\(\\{\\overline{0}, \\overline{3}, \\overline{6}, \\overline{9}\\}\\)",
+        "\\(\\mathbb{Z}/12\\mathbb{Z}\\)",
+        "\\(\\{\\overline{3}, \\overline{6}\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathrm{Orb}(\\overline{3}) = \\{g + \\overline{3} : g \\in G\\} = G\\)（加上任意 \\(g\\) 后可到达任何元素）。左乘（加法）作用总是传递的，只有一个轨道。\\(G_{\\overline{3}} = \\{\\overline{0}\\}\\)（只有零元素固定 \\(\\overline{3}\\)），\\(|G|/|G_{\\overline{3}}| = 12\\)。"
+      },
+      {
+        "id": "groups-ch05-q17",
+        "question": "设 \\(G\\) 不是单群，\\(|G| = 24\\)，\\(H \\leq G\\)，\\(|H| = 4\\)。\\(G\\) 作用于 \\(G/H\\) 给出同态 \\(\\varphi: G \\to S_6\\)。\\(|\\ker\\varphi|\\) 可能整除以下哪个数？",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(7\\)",
+        "\\(24\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker\\varphi \\subseteq H\\)，\\(|\\ker\\varphi| \\mid |H| = 4\\)，可能值 \\(1, 2, 4\\)。同时 \\(\\ker\\varphi \\trianglelefteq G\\)。因此 \\(|\\ker\\varphi| \\mid 4\\)。选 B：\\(|\\ker\\varphi|\\) 可以是 \\(1, 2, 4\\)，这些都整除 \\(4\\)。"
+      },
+      {
+        "id": "groups-ch05-q18",
+        "question": "\\(G = S_5\\) 共轭作用于自身。\\((1\\;2)(3\\;4)\\) 的稳定子（即中心化子 \\(C_G((1\\;2)(3\\;4))\\)）的阶为？",
+        "options": [
+          "\\(4\\)",
+        "\\(8\\)",
+        "\\(12\\)",
+        "\\(24\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((1\\;2)(3\\;4)\\) 的共轭类大小 = 具有轮换类型 \\((2,2,1)\\) 的置换数 = \\(\\binom{5}{2}\\binom{3}{2}/2 = 10 \\times 3/2 = 15\\)。\\(|C_G| = |S_5|/15 = 120/15 = 8\\)。中心化子由保持 \\(\\{1,2\\}\\) 和 \\(\\{3,4\\}\\) 不变或交换这两个集合的置换组成。"
+      },
+      {
+        "id": "groups-ch05-q19",
+        "question": "设 \\(|G| = p^2 q\\)（\\(p < q\\) 素数且 \\(q \\not\\equiv 1 \\pmod{p}\\)）。由类方程和 Sylow 分析，\\(|Z(G)|\\) 至少为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(p\\)",
+        "\\(q\\)",
+        "\\(pq\\)"
+        ],
+        "answer": 0,
+        "explanation": "这不是 \\(p\\)-群，类方程不直接给出中心的下界。\\(|Z(G)| \\geq 1\\)（含 \\(e\\)），但可能 \\(Z(G) = \\{e\\}\\)（如 \\(S_3\\)，\\(|S_3| = 2 \\cdot 3\\)）。\\(p\\)-群中心非平凡的结论不直接推广到一般群。"
+      },
+      {
+        "id": "groups-ch05-q20",
+        "question": "用 \\(2\\) 种颜色涂正六边形 \\(6\\) 个顶点，旋转群 \\(C_6\\) 下不同方案数为？",
+        "options": [
+          "\\(13\\)",
+        "\\(14\\)",
+        "\\(18\\)",
+        "\\(64\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\text{Fix}(e)|=2^6=64\\)；\\(|\\text{Fix}(r)|=|\\text{Fix}(r^5)|=2\\)（全同色）；\\(|\\text{Fix}(r^2)|=|\\text{Fix}(r^4)|=2^2=4\\)（每隔两个一组）；\\(|\\text{Fix}(r^3)|=2^3=8\\)（交替分组）。\\(|X/G|=(64+2+4+8+4+2)/6=84/6=14\\)。"
+      },
+      {
+        "id": "groups-ch05-q21",
+        "question": "立方体 \\(6\\) 个面用 \\(2\\) 种颜色涂染，旋转群（\\(|G|=24\\)）下 \\(|\\mathrm{Fix}(e)|\\) 等于多少？",
+        "options": [
+          "\\(6\\)",
+        "\\(12\\)",
+        "\\(32\\)",
+        "\\(64\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(|\\mathrm{Fix}(e)| = 2^6 = 64\\)（\\(6\\) 个面各选 \\(2\\) 种颜色）。恒等元固定所有染色方案，这是 Burnside 求和中最大的项。完整 Burnside 计算需要对旋转群全部 \\(24\\) 个元素求和。"
+      },
+      {
+        "id": "groups-ch05-q22",
+        "question": "设 \\(|G| = 24\\)，\\(H \\leq G\\)，\\(|H| = 8\\)。\\(G\\) 作用于 \\(G/H\\)，得同态 \\(\\varphi: G \\to S_3\\)。若 \\(\\varphi\\) 非平凡且 \\(G\\) 非交换，\\(|\\ker\\varphi|\\) 可能为？",
+        "options": [
+          "\\(1\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(24\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker\\varphi \\trianglelefteq G\\)，\\(\\ker\\varphi \\subseteq H\\)（\\(|H|=8\\)），\\(|\\ker\\varphi| \\mid 8\\)。\\(G/\\ker\\varphi \\hookrightarrow S_3\\)（\\(|S_3|=6\\)），故 \\(|G/\\ker\\varphi| \\mid 6\\)，即 \\(24/|\\ker\\varphi| \\mid 6\\)。\\(|\\ker\\varphi| \\in \\{4, 8, 12, 24\\}\\)（使 \\(24/k\\) 整除 \\(6\\)）。结合 \\(|\\ker\\varphi| \\mid 8\\)：\\(|\\ker\\varphi| \\in \\{4, 8\\}\\)。\\(\\varphi\\) 非平凡排除 \\(24\\)，选 \\(4\\) 或 \\(8\\)。"
+      },
+      {
+        "id": "groups-ch05-q23",
+        "question": "\\(G\\) 作用于集合 \\(X\\)，\\(|X| = 10\\)，\\(|G| = 6\\)。轨道分解中不可能出现的轨道长度组合是？",
+        "options": [
+          "\\(4 + 2 + 1\\)",
+        "\\(4 + 1 + 1 + 1\\)",
+        "\\(2 + 2 + 2 + 1\\)",
+        "\\(4 + 3\\)"
+        ],
+        "answer": 3,
+        "explanation": "轨道长度必须整除 \\(|G| = 4\\)（轨道-稳定子定理），可能值为 \\(\\{1, 2, 4\\}\\)。\\(3 \\nmid 4\\)，因此长度 \\(3\\) 的轨道不可能出现。D 中 \\(4+3=7\\) 包含长度 \\(3\\)，不合法。A(\\(4+2+1=7\\))、B(\\(4+1+1+1=7\\))、C(\\(2+2+2+1=7\\)) 均合法。"
+      },
+      {
+        "id": "groups-ch05-q24",
+        "question": "设 \\(|G|=p^2\\)（\\(p\\) 素数）。\\(G/Z(G)\\) 的阶和结构是？",
+        "options": [
+          "阶 \\(p^2\\)，\\(\\cong G\\)",
+        "阶 \\(1\\)，\\(\\cong \\{e\\}\\)",
+        "阶 \\(p\\)，\\(\\cong \\mathbb{Z}/p\\mathbb{Z}\\)",
+        "B 或 C 均可能"
+        ],
+        "answer": 1,
+        "explanation": "\\(|G|=p^2\\) 时 \\(|Z(G)| \\geq p\\)。若 \\(|Z(G)|=p\\) 则 \\(G/Z(G) \\cong \\mathbb{Z}/p\\mathbb{Z}\\)（\\(p\\) 阶循环），但 \\(G/Z(G)\\) 循环 \\(\\Rightarrow G\\) 交换 \\(\\Rightarrow Z(G)=G\\)，矛盾。故 \\(|Z(G)|=p^2\\)，\\(G/Z(G)\\) 平凡。"
+      },
+      {
+        "id": "groups-ch05-q25",
+        "question": "设 \\(|G| = 30\\)，\\(H \\leq G\\)，\\([G:H] = 5\\)。\\(G\\) 作用于 \\(G/H\\) 得同态 \\(\\varphi: G \\to S_5\\)。\\(|G/\\ker\\varphi|\\) 整除什么？",
+        "options": [
+          "\\(30\\)",
+        "\\(120\\)",
+        "\\(5\\)",
+        "A 和 B 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(G/\\ker\\varphi \\hookrightarrow S_5\\)，故 \\(|G/\\ker\\varphi| \\mid |S_5| = 120\\)。同时 \\(|G/\\ker\\varphi| \\mid |G| = 30\\)。因此 \\(|G/\\ker\\varphi| \\mid \\gcd(30, 120) = 30\\)。A 和 B 都成立。"
+      },
+      {
+        "id": "groups-ch05-q26",
+        "question": "在化学中，甲烷 \\(\\text{CH}_4\\) 的对称群是旋转群 \\(T\\)（\\(|T|=12\\)），\\(4\\) 个氢原子的一个轨道包含全部 \\(4\\) 个。某个氢原子 \\(H_1\\) 的稳定子阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "轨道-稳定子定理：\\(|G_{H_1}| = |T|/|\\mathrm{Orb}(H_1)| = 12/4 = 3\\)。\\(G_{H_1} \\cong C_3\\)（绕 \\(H_1\\)-\\(C\\) 轴的 \\(3\\) 次旋转），对应甲烷的 \\(C_3\\) 局部对称性。"
+      },
+      {
+        "id": "groups-ch05-q27",
+        "question": "一条项链有 \\(4\\) 颗珠子，可用 \\(3\\) 种颜色。旋转群 \\(C_4\\) 下本质不同的项链有多少种？",
+        "options": [
+          "\\(18\\)",
+        "\\(21\\)",
+        "\\(24\\)",
+        "\\(81\\)"
+        ],
+        "answer": 2,
+        "explanation": "同 Q12 计算：\\(|\\mathrm{Fix}(e)| = 3^4 = 81\\)，\\(|\\mathrm{Fix}(r)| = 3\\)，\\(|\\mathrm{Fix}(r^2)| = 9\\)，\\(|\\mathrm{Fix}(r^3)| = 3\\)。\\((81+3+9+3)/4 = 96/4 = 24\\)。这是珠宝设计和组合化学中的实际计数问题。"
+      },
+      {
+        "id": "groups-ch05-q28",
+        "question": "Rubik 魔方的旋转群 \\(G\\) 作用于魔方配置集合 \\(X\\)。若初始状态 \\(x_0\\) 的轨道 \\(\\mathrm{Orb}(x_0) = X\\)（即每个配置都可达），这种作用称为？",
+        "options": [
+          "忠实作用",
+        "传递作用",
+        "自由作用",
+        "平凡作用"
+        ],
+        "answer": 1,
+        "explanation": "轨道等于整个集合 \\(X\\) 的作用称为传递作用。忠实作用指核为 \\(\\{e\\}\\)（不同群元素给出不同变换）；自由作用指所有稳定子平凡。Rubik 魔方群的传递性意味着任何合法配置都可以从初始状态通过旋转达到。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="groups"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/groups.html" class="module-name">群论 Groupes</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 群作用的定义与轨道-稳定子定理</a></li>
+      <li><a href="#kp2">02 · 类方程与 p-群的中心</a></li>
+      <li><a href="#kp3">03 · Burnside 引理与计数应用</a></li>
+      <li><a href="#kp4">04 · 群作用的综合应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>群作用</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>群作用的定义与轨道-稳定子定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群的元素不仅能与彼此运算，还能「作用」于其他集合——如旋转群作用 于平面中的点，置换群作用于集合元素。群作用是群论最强大的工具： 它将群的抽象结构与具体的组合、几何问题联系起来。轨道-稳定子定理 是群作用的核心结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>群作用将群的抽象元素“实体化”为集合上的变换。 轨道分解是集合按对称性的「粗粒化」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: 群作用 \(G \times X \to X\)，\((g, x) \mapsto g \cdot x\)，满足: - \(e \cdot x = x\) - \((gh) \cdot x = g \cdot (h \cdot x)\) <strong>轨道</strong>: \(\mathrm{Orb}(x) = \{g \cdot x : g \in G\}\)。 <strong>稳定子</strong>: \(\mathrm{Stab}(x) = G_x = \{g \in G : g \cdot x = x\}\)， \(G_x \leq G\)。 <strong>轨道-稳定子定理</strong>: \[|\mathrm{Orb}(x)| = [G : G_x] = |G| / |G_x|\] 证明: 建立双射 \(gG_x \leftrightarrow g \cdot x\)。 \(g_1 \cdot x = g_2 \cdot x \Leftrightarrow g_2^{-1}g_1 \in G_x \Leftrightarrow g_1 G_x = g_2 G_x\)。 <strong>轨道分解</strong>: \(X = \bigsqcup_{\text{orbits}} \mathrm{Orb}(x_i)\)， 故 \(|X| = \sum_i [G : G_{x_i}]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>分子的空间构型由旋转群作用下的轨道结构确定； Rubik 魔方的状态空间是群作用的典型实例。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(D_3\) 作用于正三角形的顶点集 \(\{1,2,3\}\)。 求顶点 1 的轨道和稳定子。 解答: \(\mathrm{Orb}(1) = \{1,2,3\}\)（任何顶点可转到任何其他顶点）。 \(G_1 = \{e, s_1\}\) 其中 \(s_1\) 是关于顶点 1 的反射。 验证: \(|\mathrm{Orb}(1)| = 3 = |D_3|/|G_1| = 6/2\)。✓ 易错点: 混淆轨道与稳定子的角色——轨道是集合 \(X\) 的子集， 稳定子是群 \(G\) 的子群。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(|G| = 12\)，\(G\) 作用于 \(X\)，\(x \in X\) 且 \(|G_x| = 4\)，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|\\mathrm{Orb}(x)| = |G|/|G_x| = 12/4 = 3\\)。')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(|\\mathrm{Orb}(x)| = |G|/|G_x| = 12/4 = 3\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|\\mathrm{Orb}(x)| = |G|/|G_x| = 12/4 = 3\\)。')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|\\mathrm{Orb}(x)| = |G|/|G_x| = 12/4 = 3\\)。')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>类方程与 p-群的中心</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当群 \(G\) 通过共轭作用于自身时，轨道就是共轭类。类方程将群的 阶分解为中心元素与非平凡共轭类的贡献，这是研究 \(p\)-群的关键工具， 直接推出 \(p\)-群的中心非平凡这一深刻结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>类方程是轨道分解公式应用于共轭作用的特殊情形。 它把群的规模信息转化为模算条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(G\) 通过共轭作用于自身: \(g \cdot x = gxg^{-1}\)。 不动点: \(g \cdot x = x \Leftrightarrow gx = xg\)，即不动点集 = \(Z(G)\)。 轨道 = 共轭类 \(\mathrm{Cl}(x)\)。 <strong>类方程</strong>: \[|G| = |Z(G)| + \sum_{i} [G : C_G(g_i)]\] 其中求和遍历所有大小 \(>1\) 的共轭类的代表元 \(g_i\)。 <strong>\(p\)-群的中心非平凡</strong>: 设 \(|G| = p^n\)，\(p\) 素数。 类方程中每个 \([G:C_G(g_i)]\) 整除 \(p^n\) 且 \(>1\)， 故 \([G:C_G(g_i)]\) 是 \(p\) 的倍数。由此 \(|Z(G)| = |G| - \sum [G:C_G(g_i)] \equiv 0 \pmod{p}\)， 且 \(|Z(G)| \geq 1\)（含 \(e\)），故 \(|Z(G)| \geq p\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(p\)-群中心非平凡的结论直接用于 Sylow 定理的证明； 也推出 \(|G| = p^2\) 的群必为交换群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证明阶为 \(p^2\) 的群是交换群。 解答: 由类方程，\(|Z(G)| \geq p\)。 若 \(|Z(G)| = p^2\)，则 \(G = Z(G)\) 交换。 若 \(|Z(G)| = p\)，则 \(G/Z(G)\) 阶为 \(p\)，是循环群。 但 \(G/Z(G)\) 循环 \(\Rightarrow\) \(G\) 交换（标准结论）， 与 \(|Z(G)| = p < p^2 = |G|\) 矛盾。故 \(|Z(G)| = p^2\)。 易错点: 忘记「\(G/Z(G)\) 循环 \(\Rightarrow\) \(G\) 交换」这个关键 引理。它的证明：若 \(G/Z(G) = \langle \bar{a} \rangle\)， 则任意 \(g = a^i z\)（\(z \in Z(G)\)），从而 \(gh = hg\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 \(|G| = 27 = 3^3\)，下列哪个一定成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p\\)-群的中心非平凡，故 \\(|Z(G)| \\geq 3\\)。')">A. \(G\) 是交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(p\\)-群的中心非平凡，故 \\(|Z(G)| \\geq 3\\)。')">B. \(|Z(G)| \geq 3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p\\)-群的中心非平凡，故 \\(|Z(G)| \\geq 3\\)。')">C. \(G\) 是循环群</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p\\)-群的中心非平凡，故 \\(|Z(G)| \\geq 3\\)。')">D. \(G\) 是单群</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Burnside 引理与计数应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>用 \(n\) 种颜色涂染一条有 \(k\) 个珠子的项链，旋转后相同的方案算一种， 有多少种本质不同的染色？Burnside 引理用不动点计数解决这类 「在对称性下的计数」问题，广泛应用于组合学。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Burnside 引理将「轨道个数」转化为「平均不动点数」， 把难以直接计算的“本质不同的配置”转为可管理的求和。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Burnside 引理</strong>（也称 Cauchy-Frobenius）: 设 \(G\) 作用于有限集 \(X\)，则轨道个数为 \[|X/G| = \frac{1}{|G|} \sum_{g \in G} |\mathrm{Fix}(g)|\] 其中 \(\mathrm{Fix}(g) = \{x \in X : g \cdot x = x\}\)。 证明: 统计集合 \(\{(g,x) : g \cdot x = x\}\) 的大小。 按 \(g\) 求和: \(\sum_g |\mathrm{Fix}(g)|\)。 按 \(x\) 求和: \(\sum_x |G_x| = \sum_x |G|/|\mathrm{Orb}(x)|\)。 后者 \(= |G| \cdot\)(\u6bcf个轨道贡献 1) \(= |G| \cdot |X/G|\)。 两边相等即得引理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>化学中分子式相同但空间结构不同的异构体计数； 编码理论中循环码的等价类计数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用 2 种颜色涂染正方形的 4 个顶点，旋转下本质不同的 染色方案有多少种？ 解答: 旋转群 \(C_4 = \{e, r, r^2, r^3\}\)，\(|C_4| = 4\)。 \(|\mathrm{Fix}(e)| = 2^4 = 16\)，\(|\mathrm{Fix}(r)| = 2\)（全同色）， \(|\mathrm{Fix}(r^2)| = 2^2 = 4\)，\(|\mathrm{Fix}(r^3)| = 2\)。 \(|X/G| = (16+2+4+2)/4 = 6\)。 易错点: 忘记包含恒等变换 \(e\) 的贡献，或错误计算某个 轮转的不动点数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Burnside 引理计算的是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Burnside 引理给出的是轨道个数 \\(|X/G|\\)，')">A. 群的元素个数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Burnside 引理给出的是轨道个数 \\(|X/G|\\)，')">B. 不动点的总数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Burnside 引理给出的是轨道个数 \\(|X/G|\\)，')">C. 作用下的轨道个数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Burnside 引理给出的是轨道个数 \\(|X/G|\\)，')">D. 稳定子的阶</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>群作用的综合应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群作用的视角统一了许多看似不相关的结果。Cayley 定理是 \(G\) 通过 左乘作用于自身的特例；类方程是共轭作用的轨道分解；Lagrange 定理可由轨道-稳定子定理推出。这个​视角体现了群作用的统一力量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不同类型的群作用（左乘、共轭、作用于陪集集）统一在群作用的 抽象框架下，每种作用提供不同的结构信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cayley 定理作为群作用</strong>: \(G\) 左乘作用于 \(X = G\)： \(g \cdot x = gx\)。轨道只有一个（\(X\) 本身）， \(G_x = \{e\}\)（忠实作用）。 由此 \(G \hookrightarrow S_G\)。 <strong>\(G\) 作用于陪集集</strong>: \(G\) 左乘作用于 \(G/H\)： \(g \cdot aH = gaH\)。左乘作用给出同态 \(\varphi: G \to S_{[G:H]}\)，\(\ker\varphi \subseteq H\)。 应用: 若 \([G:H] = n\)，则 \(G/\ker\varphi\) 嵌入 \(S_n\)， 由此 \(|G/\ker\varphi|\) 整除 \(n!\)。 特别地，若 \([G:H] = p\)（\(G\) 的最小素因子）， 则 \(\ker\varphi = H\)，即 \(H \trianglelefteq G\)。 \[[G:H] = p_{\min}(|G|) \Rightarrow H \trianglelefteq G\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>“最小素因子指数的子群正规”用于 Sylow 分析中快速判断正规性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 设 \(|G| = 30\)，\(H \leq G\)，\(|H| = 15\)。证明 \(H \trianglelefteq G\)。 解答: \([G:H] = 2\)，2 是最小素因子（也是 \(|G|\) 的素因子）。 指数为 2 的子群必定正规。更一般地，指数等于最小 素因子时子群正规。 易错点: 以为“指数为任意素数的子群都正规”。 必须是 \(|G|\) 的<strong>最小</strong>素因子才行。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪种群作用用于证明 Cayley 定理？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cayley 定理用的是左正则作用 \\(g \\cdot x = gx\\)。')">A. \(G\) 通过共轭作用于自身</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Cayley 定理用的是左正则作用 \\(g \\cdot x = gx\\)。')">B. \(G\) 通过左乘作用于自身</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cayley 定理用的是左正则作用 \\(g \\cdot x = gx\\)。')">C. \(G\) 作用于子群集合</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cayley 定理用的是左正则作用 \\(g \\cdot x = gx\\)。')">D. \(G\) 作用于陪集集合</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/algebra/groups.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

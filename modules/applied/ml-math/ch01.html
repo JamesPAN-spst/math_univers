@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 线性模型 — 机器学习数学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "ml-math-ch01-q1",
+        "question": "在监督学习框架中，偏差-方差分解 \\(\\mathbb{E}[(y-\\hat{f})^2]=\\text{Bias}^2+\\text{Var}+\\sigma^2\\)。为什么增加模型复杂度会减少偏差但增大方差？",
+        "options": [
+          "复杂模型更灵活——能拟合更多真实结构(偏差↓)但对训练数据波动更敏感(方差↑)",
+        "复杂模型总是更好",
+        "偏差和方差同时下降",
+        "\\(\\sigma^2\\) 可以消除"
+        ],
+        "answer": 0,
+        "explanation": "偏差=模型假设空间与真实函数的距离（模型限制力）。方差=不同训练集上模型预测的波动。线性模型偏差可能高（欠拟合）但方差低（稳定）；高次多项式偏差低但方差高（过拟合）。最优复杂度在偏差-方差折中点——正则化通过人为增加偏差换取更大的方差下降。"
+      },
+      {
+        "id": "ml-math-ch01-q2",
+        "question": "线性回归 \\(\\hat{w}=(X^TX)^{-1}X^Ty\\) 在 \\(X\\) 列近似共线时（如两个特征高度相关），\\(\\hat{w}\\) 会怎样？",
+        "options": [
+          "\\(X^TX\\) 接近奇异，\\(\\hat{w}\\) 的分量变得很大且不稳定——小数据扰动导致 \\(\\hat{w}\\) 剧烈变化",
+        "\\(\\hat{w}\\) 不受影响",
+        "\\(\\hat{w}\\) 变为零向量",
+        "无法计算 \\(\\hat{w}\\)"
+        ],
+        "answer": 0,
+        "explanation": "共线性使 \\(X^TX\\) 条件数 \\(\\kappa\\to\\infty\\)。\\((X^TX)^{-1}\\) 中小特征值的倒数极大 → \\(\\hat{w}\\) 分量膨胀。实际表现：两个相关特征系数一正一负且绝对值很大——互相\"抵消\"。解决：Ridge 回归加 \\(\\lambda I\\) 将 \\(\\kappa\\) 从 \\(\\sigma_1/\\sigma_n\\) 降为 \\((\\sigma_1+\\lambda)/(\\sigma_n+\\lambda)\\)。"
+      },
+      {
+        "id": "ml-math-ch01-q3",
+        "question": "逻辑回归用 sigmoid \\(\\sigma(z)=1/(1+e^{-z})\\) 将线性输出映射为概率。为什么不直接用线性回归做分类？",
+        "options": [
+          "线性回归预测值可超出 \\([0,1]\\), 且对离群点敏感；逻辑回归的 log-odds 线性模型有概率解释",
+        "线性回归也可以用于分类",
+        "逻辑回归不是线性模型",
+        "Sigmoid 只是为了美观"
+        ],
+        "answer": 0,
+        "explanation": "线性回归 \\(\\hat{y}=w^Tx+b\\) 可输出 \\(>1\\) 或 \\(<0\\)，无法解释为概率。且 MSE 损失对远离决策边界的离群类别点过度惩罚。逻辑回归：\\(P(y=1|x)=\\sigma(w^Tx+b)\\), 损失是交叉熵 \\(-y\\ln p-(1-y)\\ln(1-p)\\)——凸且有最大似然解释。GLM框架下逻辑回归=Bernoulli分布+logit链接函数。"
+      },
+      {
+        "id": "ml-math-ch01-q4",
+        "question": "Ridge 回归的有效自由度 \\(\\text{df}(\\lambda)=\\sum_i \\sigma_i^2/(\\sigma_i^2+\\lambda)\\)（\\(\\sigma_i\\) 是 \\(X\\) 的奇异值）。当 \\(\\lambda\\to 0\\) 和 \\(\\lambda\\to\\infty\\) 时分别趋向什么？",
+        "options": [
+          "\\(\\lambda\\to 0\\): \\(\\text{df}\\to\\text{rank}(X)\\)（无正则化=全自由度）；\\(\\lambda\\to\\infty\\): \\(\\text{df}\\to 0\\)（完全收缩=零自由度）",
+        "两个极限都趋向 \\(p\\)",
+        "\\(\\lambda\\to 0\\): \\(\\text{df}\\to 0\\)",
+        "\\(\\text{df}\\) 不变"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma_i^2/(\\sigma_i^2+\\lambda)\\): \\(\\lambda=0\\) 时每项=1, 总和=rank(\\(X\\))。\\(\\lambda\\to\\infty\\) 时每项\\(\\to 0\\)。有效自由度在 0 和 rank(\\(X\\)) 之间连续调节——比 subset selection（离散选择特征）更平滑。AIC/BIC 用 \\(\\text{df}(\\lambda)\\) 替代参数数来选择 \\(\\lambda\\)。"
+      },
+      {
+        "id": "ml-math-ch01-q5",
+        "question": "在医疗预测中用逻辑回归：100个特征、1000个样本。发现训练AUC=0.95但测试AUC=0.60。最可能的原因和解决方案？",
+        "options": [
+          "过拟合——特征/样本比高；用 \\(L_1\\)/\\(L_2\\) 正则化、特征选择、或交叉验证减少有效复杂度",
+        "欠拟合",
+        "数据没问题",
+        "需要更复杂模型"
+        ],
+        "answer": 0,
+        "explanation": "\\(p/n=0.1\\) 已不小；如果特征中有噪声/共线的，有效维度可能更高→过拟合。\\(L_1\\) 正则化(LASSO)选出稀疏子集（如10个关键生物标志物），\\(L_2\\) 缩小所有系数。5-fold CV选 \\(\\lambda\\)。医疗中模型可解释性也重要——稀疏模型更受临床欢迎。AUC差距大说明训练/测试分布shift也要检查。"
+      },
+      {
+        "id": "ml-math-ch01-q6",
+        "question": "广义线性模型(GLM)用什么统一了线性回归、逻辑回归和泊松回归？",
+        "options": [
+          "指数族分布 + 链接函数 \\(g(\\mu)=w^Tx\\): 高斯→恒等链接, Bernoulli→logit, Poisson→log",
+        "都用 MSE 损失",
+        "都是非参数方法",
+        "无统一框架"
+        ],
+        "answer": 0,
+        "explanation": "GLM 三要素：(1)响应变量分布属指数族 \\(p(y|\\theta)=h(y)\\exp(\\theta^T T(y)-A(\\theta))\\)；(2)线性预测 \\(\\eta=w^Tx\\)；(3)链接函数 \\(g\\) 使 \\(g(\\mathbb{E}[y])=\\eta\\)。MLE 通过 IRLS(迭代加权最小二乘)求解。统一框架还允许：Gamma 分布→保险理赔, 负二项分布→计数数据(过分散)。"
+      },
+      {
+        "id": "ml-math-ch01-q7",
+        "question": "LASSO 的正则化路径：从 \\(\\lambda_{max}\\)（所有系数为零）到 \\(\\lambda=0\\)（OLS），系数如何变化？",
+        "options": [
+          "\\(\\lambda_{max}=\\max_j|X_j^Ty|/n\\); 逐步降低 \\(\\lambda\\)，系数逐个\"进入\"非零——正则化路径是分段线性的",
+        "所有系数同时变为非零",
+        "路径是随机的",
+        "\\(\\lambda_{max}\\) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\lambda\\geq\\lambda_{max}\\) 时 KKT: \\(|X_j^T(y-0)/n|\\leq\\lambda\\) 对所有 \\(j\\) → 全零。\\(\\lambda\\) 减小时第一个违反的 \\(j\\) 的系数从零变非零。LARS 算法精确追踪此分段线性路径——每个\"拐点\"新变量进入或离开活跃集。路径图（\\(\\lambda\\) vs 系数）帮助理解特征重要性的层级。"
+      },
+      {
+        "id": "ml-math-ch01-q8",
+        "question": "在推荐系统中，用户-物品评分矩阵 \\(R\\) 有大量缺失值。为什么不能直接用线性回归？通常用什么替代？",
+        "options": [
+          "缺失值使 OLS 不适用；矩阵分解 \\(R\\approx UV^T\\) + \\(L_2\\) 正则化用 ALS 或 SGD 在已知元素上训练",
+        "直接将缺失填 0 用 OLS",
+        "不需要处理缺失值",
+        "用决策树"
+        ],
+        "answer": 0,
+        "explanation": "\\(R_{m\\times n}\\) 中 \\(>95\\%\\) 值缺失。填 0 做 OLS：\\(0\\) 不是\"不喜欢\"而是\"未观测\"——引入严重偏差。矩阵分解 \\(\\min_{U,V}\\sum_{(i,j)\\in\\Omega}(R_{ij}-u_i^Tv_j)^2+\\lambda(\\|U\\|^2+\\|V\\|^2)\\)——只在已知元素上拟合。ALS交替凸优化。Netflix Prize 经典方法，现在常加bias项和时间效应。"
+      },
+      {
+        "id": "ml-math-ch01-q9",
+        "question": "当 \\(p>n\\)（特征数超过样本数）时，OLS \\(X^TX\\) 不可逆。但 LASSO 仍然有效解。为什么？最多能选多少个非零特征？",
+        "options": [
+          "\\(L_1\\) 惩罚使解稀疏，绕过不可逆问题；纯 LASSO 最多选 \\(\\min(n,p)\\) 个非零特征",
+        "LASSO 也不能用于 \\(p>n\\)",
+        "可以选所有 \\(p\\) 个",
+        "需要先做 PCA"
+        ],
+        "answer": 0,
+        "explanation": "\\(p>n\\) 时 OLS 有无穷多解。LASSO \\(\\min\\|Xw-y\\|^2/2+\\lambda\\|w\\|_1\\) 仍定义良好——\\(L_1\\) 从无穷多解中选最稀疏的。KKT 分析：活跃集大小 \\(\\leq n\\)（因为 \\(n\\) 个方程约束 \\(n\\) 个自由度）。Elastic Net 无此限制。高维统计(\\(p\\gg n\\))：LASSO 在 RIP/不相关条件下正确恢复稀疏支撑。"
+      },
+      {
+        "id": "ml-math-ch01-q10",
+        "question": "在基因组学中，\\(p=20000\\) 基因, \\(n=200\\) 样本的癌症分类问题。偏差-方差角度上，为什么 Elastic Net 优于 Ridge 和 LASSO？",
+        "options": [
+          "Ridge 不做特征选择(所有系数非零→不可解释), LASSO 不稳定(高相关基因随机选一个); Elastic Net 兼顾稀疏性(可解释)+稳定性(grouping)",
+        "三者效果相同",
+        "Ridge 总是最好",
+        "LASSO 总是最好"
+        ],
+        "answer": 0,
+        "explanation": "基因间高度相关（共调控网络）。Ridge: \\(R^2\\) 不错但 20000 系数无法解释。LASSO: 可能选 gene A 而忽略同样重要的 gene B（不稳定）。Elastic Net: \\(L_1\\) 产生稀疏（\\(\\sim\\)50 基因），\\(L_2\\) 使共表达基因组获得相近系数(grouping effect)。生物学家需要基因列表→稀疏。重复实验需稳定→grouping。\\(\\lambda_1/\\lambda_2\\) 比率由CV选择。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="ml-math"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/ml-math.html" class="module-name">机器学习数学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 监督学习的数学框架与经验风险</a></li>
+      <li><a href="#kp2">02 · 线性回归与最小二乘</a></li>
+      <li><a href="#kp3">03 · 逻辑回归与广义线性模型</a></li>
+      <li><a href="#kp4">04 · 正则化与模型选择</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>线性模型</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>监督学习的数学框架与经验风险</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>机器学习的核心问题是从有限数据中学习一个泛化良好的预测函数。 将此问题形式化为期望风险最小化，然后用经验风险近似，是理解所 有 ML 算法的统一起点。偏差-方差分解揭示了模型复杂度的双刃剑 效应，指导模型选择。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从"拟合数据"到"期望风险最小化"是关键抽象：我们优化的真正 目标是在未见数据上的表现，经验风险只是它的有限样本近似。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>期望风险：\(R(f) = \mathbb{E}_{(X,Y) \sim P}[\ell(f(X), Y)]\)。 经验风险：\(\hat{R}_n(f) = \frac{1}{n}\sum_{i=1}^n \ell(f(x_i), y_i)\)。 偏差-方差分解（平方损失）： \[\mathbb{E}[(Y-\hat{f}(X))^2] = \mathrm{Bias}^2 + \mathrm{Var} + \sigma^2\] 其中 \(\mathrm{Bias} = \mathbb{E}[\hat{f}(X)] - f^*(X)\)， \(\mathrm{Var} = \mathbb{E}[(\hat{f}(X)-\mathbb{E}[\hat{f}(X)])^2]\)。 偏差-方差权衡：模型复杂度增加 \(\Rightarrow\) 偏差下降、方差上升。 最优复杂度在两者平衡处。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>交叉验证(CV)是偏差-方差权衡的实践工具：\(k\)-fold CV 估计测试误差， 选择最优模型复杂度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：多项式回归 \(y = \sum_{j=0}^d w_j x^j\)。\(d=1\) (线性), \(d=10\), \(d=100\) 在 \(n=20\) 个数据点上分别表现如何？ 解答：\(d=1\) 高偏差低方差（欠拟合），\(d=100\) 低偏差高方差（过拟合）， \(d \approx 3-5\) 通常最优。 易错点：训练误差总随模型复杂度下降，但测试误差先降后升（U 型曲线）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">增加模型复杂度通常导致？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。高复杂度模型拟合能力强（低偏差）但对数据敏感（高方差）。')">A. 偏差和方差都下降</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！高复杂度模型拟合能力强（低偏差）但对数据敏感（高方差）。')">B. 偏差下降，方差上升</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。高复杂度模型拟合能力强（低偏差）但对数据敏感（高方差）。')">C. 偏差上升，方差下降</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。高复杂度模型拟合能力强（低偏差）但对数据敏感（高方差）。')">D. 偏差和方差都上升</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>线性回归与最小二乘</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性回归是最简单的参数化模型，也是最重要的基线。它不仅自身应 用广泛，更是理解所有参数化方法（从 Ridge 到神经网络）的起点。 最小二乘的闭式解揭示了线性代数在 ML 中的核心地位。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>模型：\(y = X w + \epsilon\)，\(X \in \mathbb{R}^{n \times d}\)。 最小二乘：\(\min_w \|Xw - y\|^2\)。 正规方程（令梯度为零）： \[X^TX w = X^Ty \quad \Rightarrow \quad w^* = (X^TX)^{-1}X^Ty\] （\(X^TX\) 可逆时）。 几何解释：\(\hat{y} = Xw^* = X(X^TX)^{-1}X^Ty\) 是 \(y\) 在 \(\mathrm{Col}(X)\) 上的正交投影。投影矩阵 \(H = X(X^TX)^{-1}X^T\)（帽子矩阵）。 概率解释：假设 \(\epsilon \sim N(0,\sigma^2I)\)，MLE \(= \) 最小二乘。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>经济学回归分析、工程系统辨识、信号处理中的参数估计。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：3 个数据点 \((1,2),(2,3),(3,5)\)，求线性拟合 \(y=w_0+w_1 x\)。 解答：\(X = \begin{pmatrix}1&1\\1&2\\1&3\end{pmatrix}\), \(y=(2,3,5)^T\)。 \(X^TX = \begin{pmatrix}3&6\\6&14\end{pmatrix}\), \(X^Ty = (10,24)^T\)。 \(w^* = (X^TX)^{-1}X^Ty = \frac{1}{6}\begin{pmatrix}14&-6\\-6&3\end{pmatrix}(10,24)^T = (-1/3, 3/2)^T\)。 拟合线：\(y = -1/3 + 3/2 x\)。 易错点：\(X^TX\) 不可逆（共线性）时正规方程无唯一解，需正则化。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">最小二乘解的几何含义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\hat{y}=Xw^*\\) 是 \\(y\\) 在列空间上的正交投影，残差 \\(y-\\hat{y} \\perp \\mathrm{Col}(X)\\)。')">A. \(y\) 到 \(\mathrm{Col}(X)\) 的正交投影</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\hat{y}=Xw^*\\) 是 \\(y\\) 在列空间上的正交投影，残差 \\(y-\\hat{y} \\perp \\mathrm{Col}(X)\\)。')">B. \(y\) 的最大范数解</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\hat{y}=Xw^*\\) 是 \\(y\\) 在列空间上的正交投影，残差 \\(y-\\hat{y} \\perp \\mathrm{Col}(X)\\)。')">C. \(w\) 的最小范数解</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\hat{y}=Xw^*\\) 是 \\(y\\) 在列空间上的正交投影，残差 \\(y-\\hat{y} \\perp \\mathrm{Col}(X)\\)。')">D. \(X\) 的特征分解</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>逻辑回归与广义线性模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性回归处理连续输出，但分类问题需要输出概率。逻辑回归通过 sigmoid 函数将线性组合映射到 \([0,1]\)，是二分类的基本模型。它 属于广义线性模型(GLM)家族，连接了线性模型与指数族分布。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>GLM 的统一框架：响应变量的分布属于指数族，链接函数(link function) 将均值参数与线性预测器联系：\(g(\mathbb{E}[Y]) = w^Tx\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>逻辑回归：\(P(Y=1|x) = \sigma(w^Tx+b)\)，其中 \(\sigma(z) = 1/(1+e^{-z})\)。 负对数似然（交叉熵损失）： \[\ell(w) = -\sum_{i=1}^n [y_i \log \hat{p}_i + (1-y_i)\log(1-\hat{p}_i)]\] 梯度：\(\nabla \ell = X^T(\hat{p} - y)\)（形式与线性回归相同）。 Hessian：\(\nabla^2 \ell = X^T \mathrm{diag}(\hat{p}_i(1-\hat{p}_i)) X \succeq 0\)， 故 \(\ell\) 凸，梯度下降保证全局最优。 没有闭式解，需迭代求解（梯度下降或 Newton-Raphson/IRLS）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>医学诊断（疾病概率预测）、信用评分、广告点击率预测等。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：1D 数据，\(w^*=2, b^*=-3\)。对 \(x=2\) 预测 \(P(Y=1)\)。 解答：\(z = 2\times 2 - 3 = 1\)。\(P(Y=1|x=2) = \sigma(1) = e/(1+e) \approx 0.731\)。 易错点：逻辑回归的决策边界是线性的（\(w^Tx+b=0\)），模型本身不能 学习非线性边界。需配合特征工程或核方法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">逻辑回归的损失函数（交叉熵）是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Hessian \\(X^T\\mathrm{diag}(\\hat{p}(1-\\hat{p}))X\\) 半正定，故损失凸。')">A. 凸函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Hessian \\(X^T\\mathrm{diag}(\\hat{p}(1-\\hat{p}))X\\) 半正定，故损失凸。')">B. 非凸函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Hessian \\(X^T\\mathrm{diag}(\\hat{p}(1-\\hat{p}))X\\) 半正定，故损失凸。')">C. 线性函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Hessian \\(X^T\\mathrm{diag}(\\hat{p}(1-\\hat{p}))X\\) 半正定，故损失凸。')">D. 在某些情况下凸，某些不凸</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>正则化与模型选择</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当特征维度高于样本数（\(d > n\)）或特征间共线，最小二乘过拟合或 无唯一解。正则化通过惩罚模型复杂度来控制过拟合——\(L_2\) (Ridge) 收缩参数，\(L_1\) (LASSO) 选择特征。信息准则（AIC/BIC）提供了 不依赖验证集的模型选择方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Ridge 回归： \[\min_w \|Xw-y\|^2 + \lambda\|w\|^2 \quad \Rightarrow \quad w^* = (X^TX+\lambda I)^{-1}X^Ty\] \(\lambda > 0\) 保证可逆。偏差-方差视角：\(\lambda\) 增大 \(\Rightarrow\) 偏差↑方差↓。 贝叶斯解释：\(\lambda\|w\|^2\) 等价于先验 \(w \sim N(0, \sigma^2/\lambda \cdot I)\)， Ridge 解 \(=\) MAP 估计。 AIC/BIC：\(\mathrm{AIC} = 2k - 2\ln\hat{L}\)，\(\mathrm{BIC} = k\ln n - 2\ln\hat{L}\)。 BIC 对大样本惩罚更重，倾向选更简单模型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Elastic Net（\(\lambda_1\|w\|_1 + \lambda_2\|w\|^2\)）结合 LASSO 的稀疏性 和 Ridge 的稳定性，在基因组学(GWAS)中广泛使用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(d=100\) 特征，\(n=50\) 样本。最小二乘 \(X^TX\) 不可逆。 Ridge（\(\lambda=1\)）解 \(w^*=(X^TX+I)^{-1}X^Ty\) 总存在。 验证：\(X^TX+I\) 最小特征值 \(\geq 1 > 0\)，必定可逆。 易错点：\(\lambda\) 的选择需要交叉验证，不能凭"感觉"设定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Ridge 回归的贝叶斯解释是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\lambda\\|w\\|^2\\) 等价于高斯先验 \\(w \\sim N(0,\\sigma^2/\\lambda \\cdot I)\\)，')">A. \(w\) 的 MLE</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\lambda\\|w\\|^2\\) 等价于高斯先验 \\(w \\sim N(0,\\sigma^2/\\lambda \\cdot I)\\)，')">B. \(w\) 服从高斯先验时的 MAP 估计</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\lambda\\|w\\|^2\\) 等价于高斯先验 \\(w \\sim N(0,\\sigma^2/\\lambda \\cdot I)\\)，')">C. \(w\) 的后验均值</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\lambda\\|w\\|^2\\) 等价于高斯先验 \\(w \\sim N(0,\\sigma^2/\\lambda \\cdot I)\\)，')">D. 与贝叶斯无关</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/applied/ml-math.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

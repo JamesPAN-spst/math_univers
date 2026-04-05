@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 比较定理 — 黎曼几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "riemannian-ch05-q1",
+        "question": "Jacobi 场 \\(J\\) 的方程？",
+        "options": [
+          "\\(J'' + R(\\dot\\gamma, J)\\dot\\gamma = 0\\)（沿测地线 \\(\\gamma\\) 的二阶 ODE）",
+        "\\(J' = 0\\)",
+        "A（\\(J\\) 描述\"相邻测地线的偏差\"——测地变分的向量场）",
+        "\\(J = 0\\)"
+        ],
+        "answer": 2,
+        "explanation": "设 \\(\\gamma_s(t)\\) 是测地线族, \\(J(t) = \\frac{\\partial}{\\partial s}|_0 \\gamma_s(t)\\)。由 \\(\\nabla_{\\dot\\gamma}\\nabla_{\\dot\\gamma}J + R(\\dot\\gamma, J)\\dot\\gamma = 0\\)。\\(R = 0\\)（平坦）：\\(J'' = 0\\), \\(J\\) 线性增长。\\(K > 0\\)：\\(J\\) 振荡（测地线聚焦）。\\(K < 0\\)：\\(J\\) 指数增长（测地线发散）。\\(\\|J\\|\\) 的增长率直接反映曲率的正负。"
+      },
+      {
+        "id": "riemannian-ch05-q2",
+        "question": "Rauch 比较定理的直觉？",
+        "options": [
+          "截面曲率 \\(K_M \\leq K_N\\) \\(\\Rightarrow\\) \\(M\\) 的 Jacobi 场 \\(\\|J_M\\| \\geq \\|J_N\\|\\)",
+        "\\(K\\) 更小 \\(\\Rightarrow\\) Jacobi 场增长更快（空间更\"展开\"）",
+        "A 和 B",
+        "无关系"
+        ],
+        "answer": 2,
+        "explanation": "Rauch 定理：\\(M, N\\) 测地线同初始条件, \\(K_M \\leq K_N\\) \\(\\Rightarrow\\) \\(\\|J_M(t)\\| \\geq \\|J_N(t)\\|\\)（在第一共轭点前）。直觉：曲率越正 \\(\\to\\) 测地线聚焦越快 \\(\\to\\) Jacobi 场越小。\\(K < 0\\)：测地线发散, Jacobi 场大。比较参照：常曲率空间 \\(M^n_K\\)。"
+      },
+      {
+        "id": "riemannian-ch05-q3",
+        "question": "Bonnet-Myers 定理的结论？",
+        "options": [
+          "\\(\\text{Ric} \\geq (n-1)\\kappa > 0\\) \\(\\Rightarrow\\) \\(\\text{diam}(M) \\leq \\pi/\\sqrt{\\kappa}\\) 且 \\(M\\) 紧致",
+        "\\(\\pi_1(M)\\) 有限",
+        "A 和 B",
+        "只说直径有限"
+        ],
+        "answer": 2,
+        "explanation": "Bonnet-Myers：Ricci 曲率下界 \\(\\text{Ric} \\geq (n-1)\\kappa > 0\\) \\(\\Rightarrow\\) (1) 直径 \\(\\leq \\pi/\\sqrt\\kappa\\), (2) \\(M\\) 紧致（完备时）, (3) \\(\\pi_1(M)\\) 有限。\\(S^n(r)\\)：\\(\\text{Ric} = (n-1)/r^2\\), \\(\\kappa = 1/r^2\\), \\(\\text{diam} = \\pi r = \\pi/\\sqrt\\kappa\\) ✓（等号）。正 Ricci 曲率严格约束全局拓扑。"
+      },
+      {
+        "id": "riemannian-ch05-q4",
+        "question": "常曲率 \\(K\\) 空间中, 初始 \\(\\|J(0)\\| = 0, \\|J'(0)\\| = 1\\) 的 Jacobi 场 \\(\\|J(t)\\| = ?\\)",
+        "options": [
+          "\\(K > 0\\): \\(\\sin(\\sqrt{K}t)/\\sqrt{K}\\); \\(K = 0\\): \\(t\\); \\(K < 0\\): \\(\\sinh(\\sqrt{|K|}t)/\\sqrt{|K|}\\)",
+        "\\(t\\) 总成立",
+        "A（\\(J'' + KJ = 0\\), \\(J(0) = 0, J'(0) = 1\\) 的解）",
+        "\\(e^{Kt}\\)"
+        ],
+        "answer": 2,
+        "explanation": "常曲率：\\(R(\\dot\\gamma, J)\\dot\\gamma = KJ\\)（法向分量）。\\(J'' + KJ = 0\\)。\\(K > 0\\)：\\(J = \\frac{\\sin\\sqrt{K}t}{\\sqrt{K}}\\), 在 \\(t = \\pi/\\sqrt{K}\\) 处为零（共轭点）。\\(K = 0\\)：\\(J = t\\)（线性增长）。\\(K < 0\\)：\\(J = \\frac{\\sinh\\sqrt{|K|}t}{\\sqrt{|K|}}\\)（指数增长, 无共轭点）。这是所有比较定理的参照函数。"
+      },
+      {
+        "id": "riemannian-ch05-q5",
+        "question": "Toponogov 比较定理（三角形版本）的陈述？",
+        "options": [
+          "下界 \\(K \\geq \\kappa\\)：\\(M\\) 中测地三角形的角 \\(\\geq \\) 常曲率 \\(\\kappa\\) 空间中相同边长三角形的对应角",
+        "直接给出距离比较",
+        "A（\\(K \\geq \\kappa \\Rightarrow\\) 三角形\"更胖\"）",
+        "只对 \\(K = \\) const"
+        ],
+        "answer": 2,
+        "explanation": "Toponogov：\\(K_M \\geq \\kappa\\)。\\(M\\) 中测地三角形 \\(\\Delta(p,q,r)\\)，常曲率 \\(\\kappa\\) 空间中\"对照\"三角形 \\(\\bar\\Delta(\\bar p, \\bar q, \\bar r)\\)（相同边长）。\\(\\angle_p \\geq \\bar\\angle_{\\bar p}\\)。\\(K\\) 越大 \\(\\to\\) 空间越\"弯\" \\(\\to\\) 三角形内角和越大 \\(\\to\\) 每个角更大。\\(S^2\\)：三角形角之和 \\(> \\pi\\)。\\(\\mathbb{H}^2\\)：角之和 \\(< \\pi\\)。Alexandrov 几何推广到度量空间。"
+      },
+      {
+        "id": "riemannian-ch05-q6",
+        "question": "Bonnet-Myers 的证明思路？",
+        "options": [
+          "第二变分公式：测地线长度 \\(> \\pi/\\sqrt\\kappa\\) 时不是局部最短（\\(E'' < 0\\)）",
+        "第一变分",
+        "A（选择适当变分场 \\(W\\), Ricci 下界保证 \\(E''(\\gamma + sW) < 0\\)）",
+        "比较定理"
+        ],
+        "answer": 2,
+        "explanation": "设 \\(\\gamma\\) 最短测地线, \\(L(\\gamma) = l\\)。构造变分 \\(W_i = \\sin(\\pi t/l) E_i\\)（\\(E_i\\) = 平行正交标架）。第二变分 \\(E''(W_i) = \\int_0^l (\\|W_i'\\|^2 - \\langle R(\\dot\\gamma, W_i)\\dot\\gamma, W_i\\rangle) dt\\)。\\(\\sum E''(W_i) = (n-1)\\frac{\\pi^2}{l^2} - \\frac{1}{l}\\int \\text{Ric}(\\dot\\gamma)\\)。\\(\\text{Ric} \\geq (n-1)\\kappa\\)：\\(l > \\pi/\\sqrt\\kappa \\Rightarrow \\sum E'' < 0 \\Rightarrow\\) 某 \\(E'' < 0 \\Rightarrow\\) 非最短。矛盾。"
+      },
+      {
+        "id": "riemannian-ch05-q7",
+        "question": "Bishop-Gromov 体积比较定理的结论？",
+        "options": [
+          "\\(\\text{Ric} \\geq (n-1)\\kappa\\) \\(\\Rightarrow\\) \\(\\frac{\\text{Vol}(B_r(p))}{\\text{Vol}_\\kappa(r)}\\) 关于 \\(r\\) 单调递减",
+        "\\(\\text{Vol}(B_r) \\leq \\text{Vol}_\\kappa(r)\\)",
+        "A（\\(\\text{Vol}_\\kappa(r)\\) = 常曲率 \\(\\kappa\\) 空间的 \\(r\\)-球体积）",
+        "体积不变"
+        ],
+        "answer": 2,
+        "explanation": "Bishop-Gromov：\\(\\frac{\\text{Vol}(B_r(p))}{\\text{Vol}_{M^n_\\kappa}(B_r)}\\) 是 \\(r\\) 的单调递减函数。推论：\\(\\text{Vol}(B_r) \\leq \\text{Vol}_\\kappa(r)\\)（\\(r \\leq \\text{diam}\\)）。\\(\\kappa > 0\\)：\\(\\text{Vol}(M) \\leq \\text{Vol}(S^n(1/\\sqrt\\kappa))\\)（有限体积 \\(\\Rightarrow\\) 紧致）。倍增条件和测度论推论是几何分析的基础。"
+      },
+      {
+        "id": "riemannian-ch05-q8",
+        "question": "Cartan-Hadamard 定理：\\(K \\leq 0\\) 完备 \\(\\Rightarrow \\exp_p\\) 是覆盖映射。推论？",
+        "options": [
+          "\\(M\\) 的万有覆叠 = \\(\\mathbb{R}^n\\)（微分同胚）",
+        "\\(\\pi_k(M) = 0\\)（\\(k \\geq 2\\)）——高阶同伦群消失",
+        "A 和 B",
+        "\\(M\\) 紧致"
+        ],
+        "answer": 2,
+        "explanation": "\\(K \\leq 0\\)：无共轭点 \\(\\Rightarrow \\exp_p: T_pM \\to M\\) 是局部微分同胚和覆盖映射。\\(T_pM \\cong \\mathbb{R}^n\\) 单连通 \\(\\Rightarrow\\) 万有覆叠 \\(\\tilde M = \\mathbb{R}^n\\)。\\(\\pi_k(\\tilde M) = 0\\)（\\(k \\geq 1\\)）\\(\\Rightarrow \\pi_k(M) = 0\\)（\\(k \\geq 2\\)）。\\(M\\) 的拓扑完全由 \\(\\pi_1\\) 决定。非正曲率流形的拓扑相对简单（\"双曲型\"）。"
+      },
+      {
+        "id": "riemannian-ch05-q9",
+        "question": "\\(\\text{Ric} \\geq (n-1)\\kappa > 0\\) 的完备流形 \\(M^n\\), \\(|\\pi_1(M)|\\) 有什么约束？",
+        "options": [
+          "\\(|\\pi_1| < \\infty\\)（有限群）",
+        "\\(|\\pi_1| = 1\\)（单连通）",
+        "A（Bonnet-Myers + 覆叠理论：万有覆叠也紧致, 纤维 = \\(\\pi_1\\), 有限体积 \\(\\Rightarrow |\\pi_1| < \\infty\\)）",
+        "无约束"
+        ],
+        "answer": 2,
+        "explanation": "Bonnet-Myers：\\(M\\) 紧致。万有覆叠 \\(\\tilde M \\to M\\)：\\(\\tilde M\\) 也满足 \\(\\text{Ric} \\geq (n-1)\\kappa\\)（局部等距）\\(\\Rightarrow \\tilde M\\) 紧致。\\(|\\pi_1| = \\text{Vol}(\\tilde M)/\\text{Vol}(M) \\leq \\text{Vol}(S^n)/\\text{Vol}(M) < \\infty\\)。Synge 定理更强：\\(n\\) 偶 + \\(K > 0\\) + 有向 \\(\\Rightarrow\\) 单连通。"
+      },
+      {
+        "id": "riemannian-ch05-q10",
+        "question": "Gromov 的预紧性定理在什么领域有应用？",
+        "options": [
+          "黎曼流形的收敛理论（Gromov-Hausdorff 收敛）—— Ricci 下界流形族的极限是什么？",
+        "只是纯数学",
+        "A（Perelman 证 Poincaré 猜想用了 Ricci flow + 几何化，比较定理控制塌缩和奇点）",
+        "无应用"
+        ],
+        "answer": 2,
+        "explanation": "Gromov 预紧性：\\(\\text{Ric} \\geq (n-1)\\kappa, \\text{diam} \\leq D\\) 的 \\(n\\)-流形族在 Gromov-Hausdorff 距离下预紧（有收敛子列）。极限可以是奇异的度量空间（Cheeger-Colding 理论研究极限结构）。Perelman 的 Ricci flow 证明中，比较定理（Bishop-Gromov, Toponogov）是控制几何退化的核心工具。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="riemannian"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/riemannian.html" class="module-name">黎曼几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Rauch 比较定理</a></li>
+      <li><a href="#kp2">02 · Toponogov 比较定理</a></li>
+      <li><a href="#kp3">03 · Bishop-Gromov 体积比较</a></li>
+      <li><a href="#kp4">04 · Synge 定理与正曲率拓扑</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>比较定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Rauch 比较定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如果流形的截面曲率有上界或下界，测地线的行为如何与常曲率空间 比较？Rauch 比较定理说：曲率越大，相邻测地线聚焦越快—— Jacobi 场的长度被常曲率空间中的 Jacobi 场所控制。这是 所有比较几何定理的出发点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>比较几何的核心思想：用简单模型空间（常曲率）作为参照， 通过曲率界控制几何量（距离、体积、角度等）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Rauch 比较定理</strong>：\(\gamma: [0, L] \to M\) 测地线，\(\tilde{\gamma}: [0, L] \to \tilde{M}\) 对应方向的测地线（\(\tilde{M}\) 是常曲率 \(\kappa\) 空间）。 \(J, \tilde{J}\) 分别是 Jacobi 场，\(J(0) = \tilde{J}(0) = 0\)， \(|J'(0)| = |\tilde{J}'(0)|\)。 若 \(K_M \leq \kappa\)（\(M\) 的截面曲率 \(\leq\) 模型曲率）， 则（在无共轭点范围内）： \[|J(t)| \geq |\tilde{J}(t)|, \quad \forall t \in [0, L]\] （\(M\) 中测地线比模型中发散得更快。） 若 \(K_M \geq \kappa\)：不等号反向，\(|J(t)| \leq |\tilde{J}(t)|\) （\(M\) 中测地线聚焦更快）。 <strong>证明要点</strong>：比较 \(f(t) = |J(t)|^2\) 和 \(\tilde{f}(t) = |\tilde{J}(t)|^2\) 的 微分不等式（Sturm 比较定理）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Rauch 是 Toponogov 和 Bishop-Gromov 比较定理的基础</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\((M^2, g)\)，\(K \leq 0\)。从 \(p\) 出发的两条测地线初始夹角 \(\alpha\)。 距离 \(p\) 为 \(t\) 处两条测地线的距离 \(d(t)\) 与 \(\mathbb{R}^2\) 相比如何？ 解答：\(\mathbb{R}^2\) 中 \(\tilde{d}(t) \approx t\alpha\)（小 \(t\) 时）。 \(K \leq 0 = \kappa\)，Rauch 比较：\(|J(t)| \geq |\tilde{J}(t)|\)。 所以 \(d(t) \geq t\alpha\)——负曲率空间中测地线发散更快。 易错点：这是"小范围"行为。全局上负曲率空间的测地线可能再次靠近 （如果流形紧致且基本群非平凡）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(K \geq 1\)（截面曲率下界为 1），Jacobi 场与 \(S^n(1)\) 比较？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。曲率更大（\\(\\geq 1\\)），测地线聚焦更快或相同，\\(|J| \\leq |\\tilde{J}|\\)。')">A. \(|J(t)| \geq |\tilde{J}(t)|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！曲率更大（\\(\\geq 1\\)），测地线聚焦更快或相同，\\(|J| \\leq |\\tilde{J}|\\)。')">B. \(|J(t)| \leq |\tilde{J}(t)|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。曲率更大（\\(\\geq 1\\)），测地线聚焦更快或相同，\\(|J| \\leq |\\tilde{J}|\\)。')">C. \(|J(t)| = |\tilde{J}(t)|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。曲率更大（\\(\\geq 1\\)），测地线聚焦更快或相同，\\(|J| \\leq |\\tilde{J}|\\)。')">D. 无法比较</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Toponogov 比较定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Rauch 比较作用在"无穷小"层面（Jacobi 场），Toponogov 比较定理 则是"全局"版本——它比较的是测地三角形的边长和角度。曲率 下界 \(K \geq \kappa\) 意味着三角形"更胖"（角度更大），曲率上界 意味着三角形"更瘦"。这是整体几何学的强大工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Toponogov = Rauch 的全局化。它通过比较三角形将曲率信息 转化为距离估计——这是 Alexandrov 几何的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Toponogov 比较定理</strong>（三角形版本）： \((M, g)\) 完备，\(K \geq \kappa\)。\(\Delta pqr\) 为 \(M\) 中的测地三角形。 \(\tilde{\Delta}\tilde{p}\tilde{q}\tilde{r}\) 为常曲率 \(\kappa\) 空间中 对应边长相同的三角形。 \[\angle_p \leq \tilde{\angle}_{\tilde{p}}, \quad \angle_q \leq \tilde{\angle}_{\tilde{q}}, \quad \angle_r \leq \tilde{\angle}_{\tilde{r}}\] （\(K \geq \kappa\) 时角度比模型空间小或相等。） <strong>铰链版本</strong>：给定两边 \(a, b\) 和夹角 \(\alpha\)。 \(K \geq \kappa\)：\(c \leq \tilde{c}\)（第三边更短或相等）。 \(K \leq \kappa\)：\(c \geq \tilde{c}\)。 <strong>推论</strong>：\(K \geq 0\) 时，与 \(\mathbb{R}^n\)（\(\kappa = 0\)）比较： 三角形地不等式取"胖"方向。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Alexandrov 空间（度量空间中的曲率界）用 Toponogov 的不等式作为定义</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(1)\)（\(K = 1\)）上等边测地三角形，边长 \(a = \pi/3\)。 求每个角 \(\alpha\)。 解答：球面余弦律：\(\cos a = \cos^2 a + \sin^2 a \cos \alpha\)， \(\cos(\pi/3) = \cos^2(\pi/3) + \sin^2(\pi/3)\cos\alpha\)， \(1/2 = 1/4 + (3/4)\cos\alpha\)，\(\cos\alpha = 1/3\)， \(\alpha = \arccos(1/3) \approx 70.5°\)。 \(\mathbb{R}^2\) 中等边三角形每角 \(60°\)。\(70.5° > 60°\)（更胖），符合 \(K > 0\)。 易错点：球面余弦律不同于欧式余弦律——别直接用欧式公式。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(K \geq \kappa > 0\) 流形中测地三角形内角和与常曲率 \(\kappa\) 空间比较？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。每个角 \\(\\leq\\) 模型空间对应角，所以内角和 \\(\\leq\\) 模型空间的内角和。')">A. 内角和更大</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。每个角 \\(\\leq\\) 模型空间对应角，所以内角和 \\(\\leq\\) 模型空间的内角和。')">B. 内角和更小</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。每个角 \\(\\leq\\) 模型空间对应角，所以内角和 \\(\\leq\\) 模型空间的内角和。')">C. 相同</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！每个角 \\(\\leq\\) 模型空间对应角，所以内角和 \\(\\leq\\) 模型空间的内角和。')">D. 内角和 \(\leq\) 模型空间的内角和</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Bishop-Gromov 体积比较</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Ricci 曲率下界如何影响测地球的体积？Bishop-Gromov 定理说： 如果 \(\mathrm{Ric} \geq (n-1)\kappa\)，则测地球 \(B(p,r)\) 的体积 不超过常曲率 \(\kappa\) 空间中同半径球的体积——且体积比 \(\mathrm{Vol}(B(p,r))/V_\kappa(r)\) 关于 \(r\) 单调递减。这是 Gromov 预紧性定理和几何分析中大量结果的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Ricci 曲率 \(\geq (n-1)\kappa\) 控制体积增长率——比较几何从 "线性"（Jacobi 场/距离）推广到"体积"层面。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Bishop 不等式</strong>：\(\mathrm{Ric} \geq (n-1)\kappa\)， \[\mathrm{Vol}(B(p,r)) \leq V_\kappa^n(r)\] \(V_\kappa^n(r)\) 是 \(n\) 维常曲率 \(\kappa\) 空间中半径 \(r\) 球的体积。 <strong>Gromov 体积比较（单调性）</strong>： \[\frac{\mathrm{Vol}(B(p, r))}{V_\kappa^n(r)} \text{ 关于 } r \text{ 单调递减}\] 且 \(\lim_{r \to 0} = 1\)。 <strong>推论</strong>： - <strong>加倍不等式</strong>：\(\mathrm{Vol}(B(p, 2r)) \leq C \cdot \mathrm{Vol}(B(p, r))\)（\(C\) 依赖于 \(n, \kappa\)） - <strong>有限基本群</strong>（\(\kappa > 0\)）：\(\mathrm{Vol}(M)\) 有限 \(\Rightarrow\) \(M\) 紧致 <strong>\(\kappa = 0\) 特例</strong>：\(\mathrm{Ric} \geq 0\)， \(\mathrm{Vol}(B(p,r)) \leq \omega_n r^n\)（\(\omega_n\) = \(\mathbb{R}^n\) 中单位球体积）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Gromov 预紧性定理（Ricci 下界 + 直径上界 \(\Rightarrow\) 度量空间的紧致序列有收敛子列）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^3(1)\)（\(\mathrm{Ric} = 2\)，即 \(\kappa = 1\)）。 \(V_1^3(r)\) = \(S^3(1)\) 中半径 \(r\) 球的体积。 求 \(\mathrm{Vol}(S^3(1))\) 并验证 Bishop-Gromov。 解答：\(\mathrm{Vol}(S^3(1)) = 2\pi^2\)。 \(V_1^3(\pi) = \mathrm{Vol}(S^3(1)) = 2\pi^2\)（半径 \(\pi\) 覆盖整个球面）。 \(\mathrm{Vol}(B(p, r)) / V_1^3(r) = 1\)（常数，因为 \(S^3\) 本身是模型空间）。 单调递减退化为常数——等号情形。 易错点：Bishop-Gromov 中 \(V_\kappa^n(r)\) 是模型空间的体积，不是欧式体积。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{Ric} \geq 0\) 蕴含 \(\mathrm{Vol}(B(p,r))\) 至多以何种速率增长？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{Ric} \\geq 0\\) 对应 \\(\\kappa = 0\\)，')">A. \(r\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{Ric} \\geq 0\\) 对应 \\(\\kappa = 0\\)，')">B. \(r^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathrm{Ric} \\geq 0\\) 对应 \\(\\kappa = 0\\)，')">C. \(r^n\)（\(n = \dim M\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{Ric} \\geq 0\\) 对应 \\(\\kappa = 0\\)，')">D. \(e^r\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Synge 定理与正曲率拓扑</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>正截面曲率对流形拓扑的约束极为强烈。Synge 定理说：偶数维 紧致正曲率流形是单连通的！这是纯粹的曲率-拓扑联系： 通过第二变分论证闭测地线可以"缩短"来得到矛盾。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Synge 的关键观察：正曲率使"平行移动绕一圈"后产生旋转， 这个旋转可以用来"缩短"闭测地线。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Synge 定理</strong>：\(M^n\) 紧致定向，\(K > 0\)。 (1) \(n\) 偶数 \(\Rightarrow\) \(M\) 单连通 (2) \(n\) 奇数 \(\Rightarrow\) \(M\) 可定向 <strong>证明思路（\(n\) 偶数）</strong>：若 \(\pi_1(M) \neq 0\)，取最短非可缩 闭测地线 \(\gamma\)。沿 \(\gamma\) 平行移动一个正交向量场 \(E(t)\)。 \(n\) 偶数 \(\Rightarrow\) \(\gamma\) 正交补空间是奇数维 \(\Rightarrow\) 平行移动后 \(E\) 被保定向的正交变换作用——奇数维正交变换 有不动方向 \(\Rightarrow\) 存在 \(E(0) = E(L)\)（周期性）。 用 \(E\) 做第二变分：\(E''(0) = -\int K(\gamma', E)|\gamma'|^2 dt < 0\) （\(K > 0\)，\(E\) 平行 \(\Rightarrow\) 没有 \(D^2E\) 项）。 \(\gamma\) 不是能量最小——矛盾。 <strong>推论</strong>：\(S^{2n}\) 上 \(K > 0\) \(\Rightarrow\) 单连通（\(S^{2n}\) 本身当然单连通）。 偶数维紧致正曲率流形 \(\cong S^n\) 或 \(\cong \mathbb{C}P^{n/2}\)（\(1/4\)-pinching 条件下）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Synge 排除了 \(K > 0\) 的偶维紧致流形有非平凡基本群的可能性</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{C}P^2\) 是 4 维紧致正曲率流形。\(\pi_1(\mathbb{C}P^2) = ?\) 解答：Synge 定理：\(\dim = 4\)（偶数），\(K > 0\)（Fubini-Study 度量， \(K \in [1/4, 1]\)）。 \(\Rightarrow\) \(\mathbb{C}P^2\) 单连通，\(\pi_1 = 0\)。✓ 易错点：\(\mathbb{R}P^3\)（3 维，\(K > 0\)）的 \(\pi_1 = \mathbb{Z}/2\)—— 奇数维不保证单连通。Synge 仅给出"可定向"。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(M^4\) 紧致，\(K > 0\)。以下哪个一定成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Synge 定理：偶维紧致 \\(K > 0\\) \\(\\Rightarrow\\) 单连通。')">A. \(M\) 同胚于 \(S^4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Synge 定理：偶维紧致 \\(K > 0\\) \\(\\Rightarrow\\) 单连通。')">B. \(\pi_1(M) = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Synge 定理：偶维紧致 \\(K > 0\\) \\(\\Rightarrow\\) 单连通。')">C. \(M\) 是 Einstein 流形</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Synge 定理：偶维紧致 \\(K > 0\\) \\(\\Rightarrow\\) 单连通。')">D. \(\chi(M) = 2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/geometry/riemannian.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

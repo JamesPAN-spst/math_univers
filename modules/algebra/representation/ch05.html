@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 对称群的表示 — 表示论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "representation-ch05-q1",
+        "question": "\\(4\\) 的分拆个数为？",
+        "options": [
+          "\\(4\\)",
+        "\\(5\\)",
+        "\\(3\\)",
+        "\\(7\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(4\\) 的分拆：\\((4),(3,1),(2,2),(2,1,1),(1,1,1,1)\\)，共 \\(5\\) 个。分拆个数 \\(p(n)\\)：\\(p(1)=1,p(2)=2,p(3)=3,p(4)=5,p(5)=7\\)。\\(S_4\\) 有 \\(5\\) 个不可约表示（与分拆一一对应）。"
+      },
+      {
+        "id": "representation-ch05-q2",
+        "question": "\\(\\lambda = (3,2) \\vdash 5\\) 的 Young 图有多少个框？",
+        "options": [
+          "\\(3\\)",
+        "\\(5\\)",
+        "\\(2\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\lambda \\vdash n\\) 表示 \\(|\\lambda| = \\lambda_1+\\lambda_2+\\cdots = n\\)。\\((3,2) \\vdash 5\\)：第一行 3 个框，第二行 2 个框，共 \\(5\\) 个。Young 图的框数 \\(=\\) 被分拆的自然数 \\(n\\)。"
+      },
+      {
+        "id": "representation-ch05-q3",
+        "question": "\\(\\lambda = (2,1) \\vdash 3\\)。标准 Young 表的个数 \\(= \\dim S^{(2,1)} = \\) ？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "标准 Young 表要求行列均递增。\\((2,1)\\)：\\(\\begin{smallmatrix}1&2\\\\3\\end{smallmatrix}\\) 和 \\(\\begin{smallmatrix}1&3\\\\2\\end{smallmatrix}\\)，共 2 个。\\(\\dim S^{(2,1)} = 2\\)。钩子公式验证：\\(h(1,1)=3, h(1,2)=1, h(2,1)=1\\)，\\(\\frac{3!}{3 \\cdot 1 \\cdot 1} = 2\\) ✓。"
+      },
+      {
+        "id": "representation-ch05-q4",
+        "question": "\\(S_5\\) 有多少个不可约表示？",
+        "options": [
+          "\\(5\\)",
+        "\\(7\\)",
+        "\\(10\\)",
+        "\\(120\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(p(5) = 7\\)：\\((5),(4,1),(3,2),(3,1,1),(2,2,1),(2,1,1,1),(1,1,1,1,1)\\)。\\(S_5\\) 有 \\(7\\) 个不可约表示。\\(\\sum d_i^2 = 120 = |S_5|\\)。"
+      },
+      {
+        "id": "representation-ch05-q5",
+        "question": "分支规则 \\(\\mathrm{Res}^{S_{n+1}}_{S_n} S^\\lambda\\) 的结果是？",
+        "options": [
+          "\\(\\bigoplus_\\mu S^\\mu\\)（\\(\\mu\\) 从 \\(\\lambda\\) 删一个框得到）",
+        "\\(S^\\lambda\\) 不变",
+        "\\(0\\)",
+        "正则表示"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{Res}^{S_{n+1}}_{S_n} S^\\lambda = \\bigoplus_{\\mu} S^\\mu\\)，\\(\\mu\\) 遍历从 \\(\\lambda\\) 删去一个可删框（删后仍为合法 Young 图）得到的所有分拆。这是 \\(S_n\\) 表示论特有的美丽组合规则。"
+      },
+      {
+        "id": "representation-ch05-q6",
+        "question": "Frobenius 特征标映射 \\(\\mathrm{ch}(S^{(n)}) = \\) ？",
+        "options": [
+          "\\(e_n\\)",
+        "\\(h_n\\)（完全齐次对称函数）",
+        "\\(p_n\\)",
+        "\\(s_{(1^n)}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(S^{(n)}\\) 是 \\(S_n\\) 的平凡表示（分拆 \\((n)\\) 对应 1 维平凡表示）。\\(\\mathrm{ch}(S^{(n)}) = s_{(n)} = h_n\\)。Schur 多项式 \\(s_{(n)}\\) 恰好等于完全齐次对称函数 \\(h_n\\)。"
+      },
+      {
+        "id": "representation-ch05-q7",
+        "question": "\\(\\lambda = (n)\\)（单行分拆）对应的 Specht 模 \\(S^{(n)}\\) 是什么表示？",
+        "options": [
+          "平凡表示（\\(\\dim = 1\\)）",
+        "符号表示",
+        "正则表示",
+        "标准表示"
+        ],
+        "answer": 0,
+        "explanation": "\\((n)\\) 的 Young 图只有一行，标准 Young 表只有一个（\\(1,2,\\ldots,n\\) 从左到右递增）。\\(\\dim S^{(n)} = 1\\)。\\(S^{(n)}\\) 是平凡表示。类似地 \\(S^{(1^n)}\\) 是符号表示。"
+      },
+      {
+        "id": "representation-ch05-q8",
+        "question": "\\(\\dim S^{(3,1)}\\)（钩子公式）。\\((3,1) \\vdash 4\\)。",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "钩长：\\(h(1,1)=4, h(1,2)=2, h(1,3)=1, h(2,1)=1\\)。\\(\\dim = \\frac{4!}{4 \\cdot 2 \\cdot 1 \\cdot 1} = \\frac{24}{8} = 3\\)。标准 Young 表：\\(\\begin{smallmatrix}1&2&3\\\\4\\end{smallmatrix}, \\begin{smallmatrix}1&2&4\\\\3\\end{smallmatrix}, \\begin{smallmatrix}1&3&4\\\\2\\end{smallmatrix}\\)，共 3 个 ✓。"
+      },
+      {
+        "id": "representation-ch05-q9",
+        "question": "\\(\\dim S^{(2,2)}\\)（钩子公式）。\\((2,2) \\vdash 4\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)"
+        ],
+        "answer": 1,
+        "explanation": "钩长：\\(h(1,1)=3, h(1,2)=1, h(2,1)=2, h(2,2)=1\\)。\\(\\dim = \\frac{4!}{3 \\cdot 1 \\cdot 2 \\cdot 1} = \\frac{24}{6} = 4\\)。等等：\\(24/6=4\\)。但选项中无4。让我重验：Box (1,1): arm=1, leg=1, h=3. Box (1,2): arm=0, leg=1, h=2. Box (2,1): arm=1, leg=0, h=2. Box (2,2): arm=0, leg=0, h=1. \\(\\frac{24}{3 \\cdot 2 \\cdot 2 \\cdot 1} = \\frac{24}{12} = 2\\) ✓。答案 B。"
+      },
+      {
+        "id": "representation-ch05-q10",
+        "question": "\\(\\lambda = (2,1)\\)，\\(T = \\begin{smallmatrix}1&2\\\\3\\end{smallmatrix}\\)。行稳定子 \\(R(T) = \\) ？",
+        "options": [
+          "\\(\\{e, (12)\\}\\)",
+        "\\(\\{e, (13)\\}\\)",
+        "\\(S_3\\)",
+        "\\(\\{e\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(T)\\) 保持每行的集合。第一行 \\(\\{1,2\\}\\)，第二行 \\(\\{3\\}\\)。保持 \\(\\{1,2\\}\\) 的置换：\\(e\\) 和 \\((12)\\)。保持 \\(\\{3\\}\\)：\\(e\\) 和 \\((12)\\)。\\(R(T) = \\{e, (12)\\}\\)。"
+      },
+      {
+        "id": "representation-ch05-q11",
+        "question": "\\(\\lambda = (2,1)\\)，\\(T = \\begin{smallmatrix}1&2\\\\3\\end{smallmatrix}\\)。列稳定子 \\(C(T) = \\) ？",
+        "options": [
+          "\\(\\{e, (12)\\}\\)",
+        "\\(\\{e, (13)\\}\\)",
+        "\\(\\{e, (23)\\}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(C(T)\\) 保持每列的集合。第一列 \\(\\{1,3\\}\\)，第二列 \\(\\{2\\}\\)。保持 \\(\\{1,3\\}\\)：\\(e\\) 和 \\((13)\\)。\\(C(T) = \\{e, (13)\\}\\)。"
+      },
+      {
+        "id": "representation-ch05-q12",
+        "question": "\\(\\mathrm{Res}^{S_3}_{S_2} S^{(2,1)}\\) 分解为？",
+        "options": [
+          "\\(S^{(2)} \\oplus S^{(1,1)}\\)",
+        "\\(S^{(2)}\\)",
+        "\\(S^{(1,1)}\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "从 \\((2,1)\\) 删一个框：删 \\((1,2)\\) 得 \\((1,1)\\)，删 \\((2,1)\\) 得 \\((2)\\)。\\(\\mathrm{Res}^{S_3}_{S_2}S^{(2,1)} = S^{(2)} \\oplus S^{(1,1)}\\)。即平凡 \\(\\oplus\\) 符号（\\(S_2\\) 的两个不可约）。\\(\\dim = 1+1 = 2\\) ✓。"
+      },
+      {
+        "id": "representation-ch05-q13",
+        "question": "Schur 多项式 \\(s_{(1)}(x_1) = \\) ？",
+        "options": [
+          "\\(x_1\\)",
+        "\\(1\\)",
+        "\\(x_1^2\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(s_{(1)}\\) 是 1 变量时 \\(= x_1\\)（单变量 Schur 函数）。\\((1)\\) 的半标准 Young 表只有一个：填入 \\(1\\)。\\(s_{(1)}(x_1) = x_1^1 = x_1\\)。"
+      },
+      {
+        "id": "representation-ch05-q14",
+        "question": "LR 系数 \\(c^\\lambda_{\\mu\\nu}\\) 出现在什么分解中？",
+        "options": [
+          "\\(S^\\mu \\otimes S^\\nu \\cong \\bigoplus c^\\lambda_{\\mu\\nu} S^\\lambda\\)",
+        "\\(S^\\mu \\oplus S^\\nu\\)",
+        "\\(\\mathrm{Res} S^\\lambda\\)",
+        "\\(\\mathbb{C}[S_n]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c^\\lambda_{\\mu\\nu}\\) 是 \\(S^\\lambda\\) 在 \\(S^\\mu \\otimes S^\\nu\\) 分解中的重数。Littlewood-Richardson 规则给出组合计算方法（通过 skew 表填充计数）。LR 系数也出现在 Schur 函数乘积 \\(s_\\mu s_\\nu = \\sum c^\\lambda_{\\mu\\nu} s_\\lambda\\) 中。"
+      },
+      {
+        "id": "representation-ch05-q15",
+        "question": "\\(\\lambda = (2,1,1) \\vdash 4\\)。\\(\\dim S^{(2,1,1)}\\)？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "钩长：\\(h(1,1)=4, h(1,2)=1, h(2,1)=2, h(3,1)=1\\)。\\(\\dim = \\frac{4!}{4 \\cdot 1 \\cdot 2 \\cdot 1} = \\frac{24}{8} = 3\\)。\\((2,1,1)\\) 是 \\((3,1)\\) 的共轭分拆，\\(\\dim S^{(2,1,1)} = \\dim S^{(3,1)} = 3\\)。"
+      },
+      {
+        "id": "representation-ch05-q16",
+        "question": "\\(s_{(2,1)}(x_1, x_2) = \\) ？",
+        "options": [
+          "\\(x_1^2 x_2 + x_1 x_2^2\\)",
+        "\\(x_1^2 + x_2^2\\)",
+        "\\(x_1 x_2\\)",
+        "\\(x_1^3 + x_2^3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((2,1)\\) 的半标准 Young 表（2 变量）：\\(\\begin{smallmatrix}1&1\\\\2\\end{smallmatrix}\\)（\\(x_1^2 x_2\\)）和 \\(\\begin{smallmatrix}1&2\\\\2\\end{smallmatrix}\\)（\\(x_1 x_2^2\\)）。\\(s_{(2,1)} = x_1^2 x_2 + x_1 x_2^2 = x_1 x_2(x_1+x_2)\\)。"
+      },
+      {
+        "id": "representation-ch05-q17",
+        "question": "Young 对称子 \\(c_T = a_T \\cdot b_T\\)。\\(c_T^2 = \\) ？",
+        "options": [
+          "\\(c_T\\)",
+        "\\(\\frac{n!}{d_\\lambda} c_T\\)",
+        "\\(0\\)",
+        "\\(n! \\cdot c_T\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(c_T^2 = \\frac{n!}{\\dim S^\\lambda} c_T\\)。\\(c_T\\) 不是幂等元，但 \\(\\frac{d_\\lambda}{n!} c_T\\) 是。这是 Specht 模构造的关键：\\(S^\\lambda = \\mathbb{C}[S_n] c_T\\)。"
+      },
+      {
+        "id": "representation-ch05-q18",
+        "question": "\\(S_4\\) 的不可约表示维数。\\(p(4) = 5\\)，分拆 \\((4),(3,1),(2,2),(2,1,1),(1^4)\\)。验证 \\(\\sum d_i^2 = 24\\)。",
+        "options": [
+          "\\((1,3,2,3,1)\\)，\\(\\sum = 1+9+4+9+1 = 24\\) ✓",
+        "\\((1,2,3,2,1)\\)，\\(\\sum = 1+4+9+4+1 = 19\\)",
+        "\\((1,4,4,4,1)\\)，\\(\\sum = 1+16+16+16+1 = 50\\)",
+        "\\((1,3,3,3,1)\\)，\\(\\sum = 1+9+9+9+1 = 29\\)"
+        ],
+        "answer": 0,
+        "explanation": "用钩子公式：\\(\\dim S^{(4)}=1, \\dim S^{(3,1)}=3, \\dim S^{(2,2)}=2, \\dim S^{(2,1,1)}=3, \\dim S^{(1^4)}=1\\)。\\(1+9+4+9+1=24=|S_4|\\) ✓。注意共轭分拆给出相同维数：\\(\\dim S^{(3,1)} = \\dim S^{(2,1,1)} = 3\\)。"
+      },
+      {
+        "id": "representation-ch05-q19",
+        "question": "\\(\\lambda = (3,2) \\vdash 5\\)，\\(T = \\begin{smallmatrix}1&2&3\\\\4&5\\end{smallmatrix}\\)。\\(a_T = \\) ？",
+        "options": [
+          "\\(e+(12)+(13)+(23)+(123)+(132)\\)",
+        "\\((e+(12)+(13)+(123)+(132)+(23)) \\cdot (e+(45))\\)",
+        "\\(\\sum_{\\sigma \\in S_{\\{1,2,3\\}} \\times S_{\\{4,5\\}}} \\sigma\\)",
+        "B 和 C 相同"
+        ],
+        "answer": 3,
+        "explanation": "\\(R(T)\\) 保持行集：第一行 \\(\\{1,2,3\\}\\)，第二行 \\(\\{4,5\\}\\)。\\(R(T) = S_{\\{1,2,3\\}} \\times S_{\\{4,5\\}}\\)。\\(a_T = \\sum_{\\sigma \\in R(T)} \\sigma\\)。B 展开后 \\(= \\sum_{\\sigma \\in S_3} \\sigma \\cdot (e+(45))\\)，与 C 相同。"
+      },
+      {
+        "id": "representation-ch05-q20",
+        "question": "\\(\\mathrm{Res}^{S_4}_{S_3} S^{(2,2)}\\) 分解为？",
+        "options": [
+          "\\(S^{(2,1)}\\)",
+        "\\(S^{(2,1)} \\oplus S^{(1,1,1)}\\)",
+        "\\(S^{(3)} \\oplus S^{(1,1,1)}\\)",
+        "\\(S^{(2,1)}\\)（唯一项）"
+        ],
+        "answer": 0,
+        "explanation": "从 \\((2,2)\\) 删一个框（可删位置：\\((2,2)\\)），得 \\((2,1)\\)。只有一个可删角框，故 \\(\\mathrm{Res}S^{(2,2)} = S^{(2,1)}\\)。\\(\\dim = 2\\) 而 \\(\\dim S^{(2,1)} = 2\\) ✓。"
+      },
+      {
+        "id": "representation-ch05-q21",
+        "question": "\\(s_{(1^n)} = e_n\\)（初等对称多项式）。\\(e_2(x_1,x_2,x_3) = \\) ？",
+        "options": [
+          "\\(x_1 x_2 + x_1 x_3 + x_2 x_3\\)",
+        "\\(x_1^2 + x_2^2 + x_3^2\\)",
+        "\\(x_1 + x_2 + x_3\\)",
+        "\\(x_1 x_2 x_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_2 = \\sum_{i<j}x_i x_j = x_1 x_2+x_1 x_3+x_2 x_3\\)。\\(s_{(1,1)} = e_2\\)。\\(S^{(1,1)}\\) 是 \\(S_2\\) 的符号表示，\\(\\mathrm{ch}(S^{(1,1)}) = s_{(1,1)} = e_1 \\cdot e_1 - e_2\\)...不对。实际上 \\(s_{(1^n)} = e_n\\)（直接定义）。"
+      },
+      {
+        "id": "representation-ch05-q22",
+        "question": "\\(\\lambda' = (3,2,1)\\) 是 \\(\\lambda = (3,2,1)\\) 的共轭分拆吗？",
+        "options": [
+          "是（自共轭）",
+        "否，共轭为 \\((3,2,1)\\) 自身",
+        "否，共轭为 \\((3,3)\\)",
+        "A 和 B 相同"
+        ],
+        "answer": 0,
+        "explanation": "共轭分拆：转置 Young 图（行列互换）。\\((3,2,1)\\)：第1列3个框，第2列2个框，第3列1个框，即 \\((3,2,1)\\)。自共轭！\\(S^{(3,2,1)}\\) 的特征标取实值（自共轭分拆对应实表示）。"
+      },
+      {
+        "id": "representation-ch05-q23",
+        "question": "Specht 模 \\(S^{(1^n)}\\)（列分拆）是什么表示？",
+        "options": [
+          "平凡表示",
+        "符号表示（\\(\\dim = 1\\)）",
+        "标准表示",
+        "正则表示"
+        ],
+        "answer": 1,
+        "explanation": "\\((1^n)\\) 的 Young 图是一列，标准 Young 表只有一个。\\(\\dim S^{(1^n)} = 1\\)。\\(c_T = a_T b_T\\)，\\(a_T = e\\)，\\(b_T = \\sum \\mathrm{sgn}(\\sigma)\\sigma\\)（\\(C(T) = S_n\\)）。\\(S^{(1^n)}\\) 是符号表示。"
+      },
+      {
+        "id": "representation-ch05-q24",
+        "question": "\\(S^{(n-1,1)}\\) 是 \\(S_n\\) 的什么表示？\\(\\dim = \\) ？",
+        "options": [
+          "标准表示，\\(\\dim = n-1\\)",
+        "平凡表示，\\(\\dim = 1\\)",
+        "符号表示，\\(\\dim = 1\\)",
+        "正则表示，\\(\\dim = n!\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((n-1,1)\\)：钩长 \\(h(1,1)=n, h(1,k)=n-k\\)（\\(k=2,\\ldots,n-1\\)），\\(h(2,1)=1\\)。\\(\\dim = \\frac{n!}{n(n-2)!\\cdot1} = n-1\\)。\\(S^{(n-1,1)} = \\{(x_1,\\ldots,x_n):\\sum x_i=0\\}\\) 即标准/自然表示。"
+      },
+      {
+        "id": "representation-ch05-q25",
+        "question": "\\(h_2(x_1,x_2) = x_1^2+x_1 x_2+x_2^2\\)。\\(s_{(2)}(x_1,x_2) = h_2(x_1,x_2)\\)？",
+        "options": [
+          "是",
+        "否，\\(s_{(2)} = x_1^2+x_2^2\\)",
+        "否，\\(s_{(2)} = x_1 x_2\\)",
+        "否，\\(s_{(2)} = e_2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((2)\\) 的半标准 Young 表（2变量）：\\(\\begin{smallmatrix}1&1\\end{smallmatrix}(x_1^2), \\begin{smallmatrix}1&2\\end{smallmatrix}(x_1 x_2), \\begin{smallmatrix}2&2\\end{smallmatrix}(x_2^2)\\)。\\(s_{(2)} = x_1^2+x_1 x_2+x_2^2 = h_2\\) ✓。"
+      },
+      {
+        "id": "representation-ch05-q26",
+        "question": "RSK 对应（Robinson-Schensted-Knuth）将 \\(S_n\\) 的置换双射到标准 Young 表对 \\((P,Q)\\)。这给出 \\(|S_n| = \\) ？",
+        "options": [
+          "\\(\\sum_\\lambda (f^\\lambda)^2\\)（\\(f^\\lambda = \\dim S^\\lambda\\)）",
+        "\\(n^2\\)",
+        "\\(2^n\\)",
+        "\\(p(n)\\)"
+        ],
+        "answer": 0,
+        "explanation": "RSK 给出双射 \\(S_n \\leftrightarrow \\bigsqcup_{\\lambda \\vdash n}\\mathrm{SYT}(\\lambda) \\times \\mathrm{SYT}(\\lambda)\\)。\\(|S_n| = n! = \\sum_\\lambda (f^\\lambda)^2 = \\sum d_\\lambda^2\\)。这恰好是 \\(\\sum d_i^2 = |G|\\) 的组合证明。"
+      },
+      {
+        "id": "representation-ch05-q27",
+        "question": "量子信息中，\\(n\\) 个量子比特的 Hilbert 空间 \\((\\mathbb{C}^2)^{\\otimes n}\\) 在 \\(S_n\\) 的置换作用下的分解（Schur-Weyl 对偶）。哪个分拆对应对称子空间？",
+        "options": [
+          "\\(\\lambda = (n)\\)",
+        "\\(\\lambda = (1^n)\\)",
+        "\\(\\lambda = (n-1,1)\\)",
+        "所有分拆"
+        ],
+        "answer": 0,
+        "explanation": "\\((n)\\) 对应 \\(S_n\\) 的平凡表示，即完全对称。\\(S^{(n)}\\) 作用在 \\((\\mathbb{C}^2)^{\\otimes n}\\) 的对称子空间上。\\((1^n)\\) 对应完全反对称。Schur-Weyl 对偶将 \\(S_n \\times GL(2)\\) 表示分解为 \\(\\bigoplus S^\\lambda \\otimes V_\\lambda\\)。"
+      },
+      {
+        "id": "representation-ch05-q28",
+        "question": "化学中 \\(n\\) 个等价电子构型的能级分类需要 \\(S_n\\) 的表示。Specht 模的构造在此的作用是？",
+        "options": [
+          "提供具体的对称性适配波函数",
+        "计算能量本征值",
+        "确定分子几何构型",
+        "与化学无关"
+        ],
+        "answer": 0,
+        "explanation": "Young 对称子 \\(c_T\\) 作用于 \\(n\\) 电子波函数 \\(\\psi\\)，投影出属于分拆 \\(\\lambda\\) 的对称性分量。\\(c_T \\psi\\) 具有确定的交换对称性，满足 Pauli 原理（自旋-轨道配对）。Specht 模提供具体投影算子。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="representation"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/representation.html" class="module-name">表示论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Young 图与 Young 表</a></li>
+      <li><a href="#kp2">02 · Young 对称子与 Specht 模</a></li>
+      <li><a href="#kp3">03 · 分支规则与 Littlewood-Richardson</a></li>
+      <li><a href="#kp4">04 · 对称函数与表示论的联系</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>对称群的表示</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Young 图与 Young 表</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(S_n\) 是最重要的有限群之一，其表示论与组合学深度交织。 Young 图（\(n\) 的分拆）参数化了 \(S_n\) 的所有不可约表示。这是 组合数学和代数最美丽的交叉之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(n\) 的分拆 \(\lambda \vdash n\) \(\longleftrightarrow\) \(S_n\) 的不可约表示 \(S^\lambda\)。 分拆的组合结构编码了表示的代数结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分拆</strong>: \(\lambda = (\lambda_1, \ldots, \lambda_k)\)，\(\lambda_1 \geq \cdots \geq \lambda_k > 0\)， \(\sum \lambda_i = n\)。 <strong>Young 图</strong>: \(\lambda\) 对应一个框图（行长 \(\lambda_i\)）。 <strong>标准 Young 表</strong>: 将 \(1, \ldots, n\) 填入 Young 图， 使行和列均递增。标准 Young 表的个数 \(= \dim S^\lambda\)。 <strong>钩子公式</strong>: \[\dim S^\lambda = \frac{n!}{\prod_{\text{box } (i,j)} h(i,j)}\] 其中 \(h(i,j)\) 是钩子长度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\lambda = (2, 1) \vdash 3\)。求 \(\dim S^{(2,1)}\)。 解答: 钩子长度: 位置 (1,1) 钩 3, (1,2) 钩 1, (2,1) 钩 1。 \(\dim = \frac{3!}{3 \cdot 1 \cdot 1} = \frac{6}{3} = 2\)。 或直接列举: \(\begin{Young}13\\2\end{Young}\) 和 \(\begin{Young}12\\3\end{Young}\)，2 个标准 Young 表。 易错点: 混淆「Young 表」和「标准 Young 表」。 标准 Young 表要求行列均递增，普通 Young 表只要行递增。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(S_4\) 有多少个不可约表示？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。4 的分拆数为 5: \\((4), (3,1), (2,2), (2,1,1), (1,1,1,1)\\)。')">A. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！4 的分拆数为 5: \\((4), (3,1), (2,2), (2,1,1), (1,1,1,1)\\)。')">B. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。4 的分拆数为 5: \\((4), (3,1), (2,2), (2,1,1), (1,1,1,1)\\)。')">C. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。4 的分拆数为 5: \\((4), (3,1), (2,2), (2,1,1), (1,1,1,1)\\)。')">D. 24</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Young 对称子与 Specht 模</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>知道了分拆参数化不可约表示，但如何具体构造它们？Specht 模通过 Young 对称子给出了明确构造。这将抽象的分类变为具体的表示空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Young 对称子 \(c_\lambda\)（行对称 + 列反对称）是群代数中的幂等元（up to scalar）， 它切出的子空间就是 Specht 模。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>行稳定/列稳定</strong>: 对标准 Young 表 \(T\)， \(R(T) = \{\sigma \in S_n : \sigma \text{ 保持每行集合}\}\)， \(C(T) = \{\sigma \in S_n : \sigma \text{ 保持每列集合}\}\)。 <strong>Young 对称子</strong>: \[c_T = a_T \cdot b_T, \quad a_T = \sum_{\sigma \in R(T)} \sigma, \quad b_T = \sum_{\tau \in C(T)} \mathrm{sgn}(\tau) \tau\] \(c_T^2 = \frac{n!}{\dim S^\lambda} c_T\)。 <strong>Specht 模</strong>: \(S^\lambda = \mathbb{C}[S_n] c_T\)，\(\dim S^\lambda\) 由钩子公式给出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\lambda = (2, 1)\)，\(T = \begin{matrix}1&2\\3&\end{matrix}\)。求 \(c_T\)。 解答: \(R(T) = \{e, (12)\}\)，\(C(T) = \{e, (13)\}\)。 \(a_T = e + (12)\)，\(b_T = e - (13)\)。 \(c_T = (e + (12))(e - (13)) = e + (12) - (13) - (12)(13) = e + (12) - (13) - (132)\)。 易错点: \(c_T\) 不是幂等元（\(c_T^2 = \frac{n!}{d_\lambda} c_T\)）， 但 \(\frac{d_\lambda}{n!} c_T\) 是。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Specht 模 \(S^\lambda\) 的维数等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim S^\\lambda\\) = 形状 \\(\\lambda\\) 的标准 Young 表数。')">A. \(n!\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim S^\\lambda\\) = 形状 \\(\\lambda\\) 的标准 Young 表数。')">B. \(\lambda_1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\dim S^\\lambda\\) = 形状 \\(\\lambda\\) 的标准 Young 表数。')">C. 标准 Young 表的个数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim S^\\lambda\\) = 形状 \\(\\lambda\\) 的标准 Young 表数。')">D. 分拆的部分数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>分支规则与 Littlewood-Richardson</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当我们将两个 Specht 模张量积（或限制/诱导）时，结果分解为哪些 不可约表示？分支规则给出了答案。Littlewood-Richardson 系数 是组合数学中的重要常数，连接表示论、对称函数和代数几何。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>LR 系数 \(c^\nu_{\mu\lambda}\) 统一了多个不同领域的结构常数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分支规则</strong>: \(S_n \hookrightarrow S_{n+1}\)， \(\mathrm{Res}^{S_{n+1}}_{S_n} S^\lambda = \bigoplus_{\mu} S^\mu\)， 求和遍历从 \(\lambda\) 删去一个框得到的分拆 \(\mu\)。 <strong>Littlewood-Richardson 规则</strong>: \[S^\mu \otimes S^\nu \cong \bigoplus_\lambda c^\lambda_{\mu\nu} S^\lambda\] 其中 \(c^\lambda_{\mu\nu}\) 是 LR 系数，等于 \(\lambda/\mu\) 的满足格子条件的 反标准 Young 表填充数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>代数几何: Grassmann 簇的上同调环 = 对称多项式环， Schur 多项式的乘积由 LR 系数描述。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathrm{Res}^{S_3}_{S_2} S^{(2,1)}\)。 解答: 从 \((2,1)\) 删一个框: \((2)\) 或 \((1,1)\)。 \(\mathrm{Res}^{S_3}_{S_2} S^{(2,1)} = S^{(2)} \oplus S^{(1,1)}\)。 即平凡表示 \(\oplus\) 符号表示。 易错点: 分支规则只删一个框，且结果必须仍是 Young 图。 不能删掉使图不合法的框。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(S_5\) 有多少个不可约表示？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。5 的分拆数 = 7: \\((5),(4,1),(3,2),(3,1,1),(2,2,1),(2,1,1,1),(1^5)\\)。')">A. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！5 的分拆数 = 7: \\((5),(4,1),(3,2),(3,1,1),(2,2,1),(2,1,1,1),(1^5)\\)。')">B. 7</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。5 的分拆数 = 7: \\((5),(4,1),(3,2),(3,1,1),(2,2,1),(2,1,1,1),(1^5)\\)。')">C. 10</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。5 的分拆数 = 7: \\((5),(4,1),(3,2),(3,1,1),(2,2,1),(2,1,1,1),(1^5)\\)。')">D. 120</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>对称函数与表示论的联系</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Schur 多项式 \(s_\lambda\) 是对称函数理论的核心对象，而它恰好对应 \(S_n\) 的 不可约表示的特征标。这个联系（Frobenius 特征标公式）是组合数学和 代数的深层桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>表示环 \(R(S_\bullet) = \bigoplus_n R(S_n)\) 同构于对称函数环 \(\Lambda\)。 这种同构保持了乘法（张量积 \(\leftrightarrow\) 乘积）等结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Frobenius 特征标公式</strong>: \[\mathrm{ch}(S^\lambda) = s_\lambda\] 其中 \(\mathrm{ch}\) 是特征标映射（特征标 \(\to\) 对称函数）。 \(s_\lambda\) 是 Schur 多项式。 <strong>Schur 多项式</strong>: \[s_\lambda(x_1, \ldots, x_n) = \sum_T x^T\] 求和遍历形状 \(\lambda\) 的半标准 Young 表。 <strong>主要对应</strong>: - \(\mathrm{Ind} \leftrightarrow\) Pieri 规则 - \(\mathrm{Res} \leftrightarrow\) 分支规则 - \(\otimes \leftrightarrow\) LR 规则</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>代数组合学: 计数问题可翻译为表示论问题，反之亦然。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(s_{(2,1)}(x_1, x_2)\) 的展开式。 解答: \(s_{(2,1)}(x_1, x_2) = x_1^2 x_2 + x_1 x_2^2\)。 （对应两个半标准 Young 表）。 易错点: 将 Schur 多项式与单项式/初等对称多项式混淆。 \(s_\lambda\) 是特定的对称多项式，不同于 \(e_\lambda\) 或 \(h_\lambda\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{ch}(S^{(n)}) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(S^{(n)}\\) 是平凡表示，\\(s_{(n)} = h_n\\)（完全齐次对称函数）。')">A. \(e_n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(S^{(n)}\\) 是平凡表示，\\(s_{(n)} = h_n\\)（完全齐次对称函数）。')">B. \(h_n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(S^{(n)}\\) 是平凡表示，\\(s_{(n)} = h_n\\)（完全齐次对称函数）。')">C. \(p_n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(S^{(n)}\\) 是平凡表示，\\(s_{(n)} = h_n\\)（完全齐次对称函数）。')">D. \(s_{(1^n)}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/algebra/representation.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 测度空间 — 实分析/测度论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "real-analysis-ch01-q1",
+        "question": "设 \\(\\mathcal{F}\\) 是集合 \\(X\\) 上的 \\(\\sigma\\)-代数。以下哪个是 \\(\\sigma\\)-代数的公理之一？",
+        "options": [
+          "对有限交封闭",
+        "对可数并封闭",
+        "包含所有单点集",
+        "包含所有开集"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sigma\\)-代数的三条公理为：(i) \\(X \\in \\mathcal{F}\\)；(ii) 对补运算封闭；(iii) 对可数并封闭。A 是推论而非公理；C 和 D 对一般 \\(\\sigma\\)-代数不成立，例如平凡 \\(\\sigma\\)-代数 \\(\\{\\emptyset, X\\}\\) 不含单点集也不含一般开集。"
+      },
+      {
+        "id": "real-analysis-ch01-q2",
+        "question": "设 \\(X = \\{1,2,3\\}\\)，\\(\\mathcal{F} = \\{\\emptyset, \\{1\\}, \\{2,3\\}, X\\}\\)。问 \\(\\mathcal{F}\\) 是否为 \\(\\sigma\\)-代数？若是，\\(|\\mathcal{F}|\\) 等于多少？",
+        "options": [
+          "不是 \\(\\sigma\\)-代数",
+        "是，\\(|\\mathcal{F}| = 3\\)",
+        "是，\\(|\\mathcal{F}| = 4\\)",
+        "是，\\(|\\mathcal{F}| = 8\\)"
+        ],
+        "answer": 2,
+        "explanation": "验证：\\(X \\in \\mathcal{F}\\) ✓；\\(\\{1\\}^c = \\{2,3\\} \\in \\mathcal{F}\\)，\\(\\{2,3\\}^c = \\{1\\} \\in \\mathcal{F}\\)，\\(\\emptyset^c = X \\in \\mathcal{F}\\) ✓；可数并：\\(\\{1\\} \\cup \\{2,3\\} = X \\in \\mathcal{F}\\) ✓。故是 \\(\\sigma\\)-代数，共有 4 个元素。选 D 是 \\(\\mathcal{P}(X)\\) 的大小。"
+      },
+      {
+        "id": "real-analysis-ch01-q3",
+        "question": "设 \\((X, \\mathcal{F}, \\mu)\\) 为测度空间，\\(A, B \\in \\mathcal{F}\\)，\\(A \\subseteq B\\)，\\(\\mu(A) = 3\\)，\\(\\mu(B) = 7\\)。求 \\(\\mu(B \\setminus A)\\)。",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(7\\)",
+        "\\(10\\)"
+        ],
+        "answer": 1,
+        "explanation": "由测度的可加性，\\(B = A \\cup (B \\setminus A)\\)，\\(A \\cap (B \\setminus A) = \\emptyset\\)，故 \\(\\mu(B) = \\mu(A) + \\mu(B \\setminus A)\\)，得 \\(\\mu(B \\setminus A) = 7 - 3 = 4\\)。这要求 \\(\\mu(A) < \\infty\\)（单调性和差集公式的前提）。选 D 是误用 \\(\\mu(A) + \\mu(B)\\)。"
+      },
+      {
+        "id": "real-analysis-ch01-q4",
+        "question": "设 \\(\\mu\\) 是测度，\\(A_1 \\subseteq A_2 \\subseteq A_3 \\subseteq \\cdots\\)，\\(\\mu(A_n) = 1 - 1/n\\)。求 \\(\\mu\\bigl(\\bigcup_{n=1}^\\infty A_n\\bigr)\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+        ],
+        "answer": 2,
+        "explanation": "递增集列的测度连续性：\\(\\mu(\\bigcup A_n) = \\lim_{n \\to \\infty} \\mu(A_n) = \\lim_{n \\to \\infty} (1 - 1/n) = 1\\)。这是测度的下连续性，来自 \\(\\sigma\\)-可加性。常见错误是不取极限直接代入某个特定 \\(n\\)。"
+      },
+      {
+        "id": "real-analysis-ch01-q5",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}\\)。若 \\(f\\) Borel 可测，则以下哪个集合一定是 Borel 集？",
+        "options": [
+          "\\(\\{x : f(x) > 0\\}\\)",
+        "\\(\\{x : f(x) = \\pi\\}\\)",
+        "\\(f(\\mathbb{R})\\)（\\(f\\) 的值域）",
+        "A 和 B 都是"
+        ],
+        "answer": 3,
+        "explanation": "Borel 可测函数的定义：对任意 Borel 集 \\(B\\)，\\(f^{-1}(B) \\in \\mathcal{B}(\\mathbb{R})\\)。\\((0, +\\infty)\\) 和 \\(\\{\\pi\\}\\) 都是 Borel 集，故其原像 \\(\\{f > 0\\}\\) 和 \\(\\{f = \\pi\\}\\) 都是 Borel 集。但 \\(f(\\mathbb{R})\\)（像集）不一定是 Borel 集——连续函数的像集可以是解析集（非 Borel）。"
+      },
+      {
+        "id": "real-analysis-ch01-q6",
+        "question": "设 \\(f_n: \\mathbb{R} \\to \\mathbb{R}\\) 为可测函数序列。则 \\(g(x) = \\sup_n f_n(x)\\) 是否可测？",
+        "options": [
+          "一定可测",
+        "不一定可测",
+        "仅当 \\(f_n\\) 连续时可测",
+        "仅当上确界有限时可测"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{g > a\\} = \\{x : \\sup_n f_n(x) > a\\} = \\bigcup_{n=1}^\\infty \\{x : f_n(x) > a\\}\\)。每个 \\(\\{f_n > a\\}\\) 可测，可数并仍可测（\\(\\sigma\\)-代数对可数并封闭），故 \\(g\\) 可测。类似地 \\(\\inf\\)、\\(\\limsup\\)、\\(\\liminf\\) 也保持可测性。"
+      },
+      {
+        "id": "real-analysis-ch01-q7",
+        "question": "设 \\((\\Omega, \\mathcal{F}, P)\\) 为概率空间。若 \\(P(A) = 0.3\\)，\\(P(B) = 0.5\\)，\\(P(A \\cap B) = 0.1\\)，求 \\(P(A \\cup B)\\)。",
+        "options": [
+          "\\(0.7\\)",
+        "\\(0.8\\)",
+        "\\(0.9\\)",
+        "\\(0.6\\)"
+        ],
+        "answer": 0,
+        "explanation": "容斥公式：\\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = 0.3 + 0.5 - 0.1 = 0.7\\)。此公式对任何测度均成立，不要求事件独立。选 B 是忘记减去交集的常见错误。"
+      },
+      {
+        "id": "real-analysis-ch01-q8",
+        "question": "Borel \\(\\sigma\\)-代数 \\(\\mathcal{B}(\\mathbb{R})\\) 可由哪类集合生成？",
+        "options": [
+          "仅由开区间 \\((a, b)\\) 生成",
+        "仅由闭集生成",
+        "可由 \\(\\{(-\\infty, a] : a \\in \\mathbb{Q}\\}\\) 生成",
+        "以上都可以"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathcal{B}(\\mathbb{R})\\) 有多种等价的生成方式：开集、闭集、开区间、半开区间 \\((-\\infty, a]\\)（\\(a \\in \\mathbb{R}\\) 或 \\(a \\in \\mathbb{Q}\\)）。因为每种都可以用可数次集合运算相互表达。例如 \\((a,b) = \\bigcup_{n=1}^\\infty [a+1/n, b-1/n]\\)，而 \\((-\\infty, a] = \\bigcap_{n=1}^\\infty (-\\infty, a + 1/n)\\)。用 \\(\\mathbb{Q}\\) 即可，因 \\(\\mathbb{R}\\) 中每个实数可被有理数列逼近。"
+      },
+      {
+        "id": "real-analysis-ch01-q9",
+        "question": "设 \\(\\mathcal{C}_1\\) 和 \\(\\mathcal{C}_2\\) 是 \\(X\\) 上两个集合族，且 \\(\\sigma(\\mathcal{C}_1) = \\sigma(\\mathcal{C}_2)\\)。若 \\(\\mathcal{C}_1 \\subseteq \\sigma(\\mathcal{C}_2)\\) 且 \\(\\mathcal{C}_2 \\subseteq \\sigma(\\mathcal{C}_1)\\)，则以下哪个成立？",
+        "options": [
+          "\\(\\mathcal{C}_1 = \\mathcal{C}_2\\)",
+        "\\(\\sigma(\\mathcal{C}_1) = \\sigma(\\mathcal{C}_2)\\)",
+        "\\(\\mathcal{C}_1 \\subseteq \\mathcal{C}_2\\)",
+        "\\(|\\mathcal{C}_1| = |\\mathcal{C}_2|\\)"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(\\mathcal{C}_1 \\subseteq \\sigma(\\mathcal{C}_2)\\)，则 \\(\\sigma(\\mathcal{C}_1) \\subseteq \\sigma(\\mathcal{C}_2)\\)（因生成的 \\(\\sigma\\)-代数是包含 \\(\\mathcal{C}_1\\) 的最小 \\(\\sigma\\)-代数）。对称地，\\(\\sigma(\\mathcal{C}_2) \\subseteq \\sigma(\\mathcal{C}_1)\\)。故二者相等。这是证明两个 \\(\\sigma\\)-代数相等的标准方法。A、C、D 均不必然成立。"
+      },
+      {
+        "id": "real-analysis-ch01-q10",
+        "question": "设 \\(\\mu\\) 为测度，\\(A_1 \\supseteq A_2 \\supseteq \\cdots\\)，\\(\\mu(A_1) = 10\\)，\\(\\mu(A_n) = 5 + 1/n\\)。求 \\(\\mu\\bigl(\\bigcap_{n=1}^\\infty A_n\\bigr)\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(5\\)",
+        "\\(10\\)",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "递减集列的测度连续性（需 \\(\\mu(A_1) < \\infty\\)）：\\(\\mu(\\bigcap A_n) = \\lim_{n \\to \\infty} \\mu(A_n) = \\lim (5 + 1/n) = 5\\)。若 \\(\\mu(A_1) = \\infty\\) 则此公式可能不成立（需要至少一个 \\(A_n\\) 测度有限）。易错：忘记检查 \\(\\mu(A_1) < \\infty\\) 这一前提条件。"
+      },
+      {
+        "id": "real-analysis-ch01-q11",
+        "question": "设 \\(\\mu\\) 为有限测度（\\(\\mu(X) < \\infty\\)），\\(A, B \\in \\mathcal{F}\\)。已知 \\(\\mu(A) = 4\\)，\\(\\mu(B) = 6\\)，\\(\\mu(X) = 8\\)。求 \\(\\mu(A \\cap B)\\) 的最小可能值。",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "由容斥公式 \\(\\mu(A \\cup B) = \\mu(A) + \\mu(B) - \\mu(A \\cap B) \\leq \\mu(X) = 8\\)，得 \\(\\mu(A \\cap B) \\geq 4 + 6 - 8 = 2\\)。取等号当 \\(A \\cup B = X\\) 时。最大值为 \\(\\min(\\mu(A), \\mu(B)) = 4\\)（当 \\(A \\subseteq B\\) 时）。选 A 是忘记测度空间有限的约束。"
+      },
+      {
+        "id": "real-analysis-ch01-q12",
+        "question": "设 \\(f, g: \\mathbb{R} \\to \\mathbb{R}\\) 都是 Borel 可测函数。以下哪个函数不一定可测？",
+        "options": [
+          "\\(f + g\\)",
+        "\\(f \\cdot g\\)",
+        "\\(f \\circ g\\)",
+        "以上都可测"
+        ],
+        "answer": 3,
+        "explanation": "可测函数的四则运算 \\(f + g\\)、\\(f \\cdot g\\)、\\(f/g\\)（\\(g \\neq 0\\)）以及复合 \\(f \\circ g\\) 均保持 Borel 可测性。对于 \\(f + g\\)：\\(\\{f + g > a\\} = \\bigcup_{r \\in \\mathbb{Q}} (\\{f > r\\} \\cap \\{g > a - r\\})\\)，可数并可测。对于 \\(f \\circ g\\)：\\((f \\circ g)^{-1}(B) = g^{-1}(f^{-1}(B))\\)，\\(f^{-1}(B)\\) Borel 故 \\(g^{-1}(f^{-1}(B))\\) Borel。"
+      },
+      {
+        "id": "real-analysis-ch01-q13",
+        "question": "设 \\(f_n \\to f\\) 逐点收敛，每个 \\(f_n\\) Lebesgue 可测。则 \\(f\\) 是否 Lebesgue 可测？",
+        "options": [
+          "一定可测",
+        "不一定可测",
+        "仅当收敛一致时可测",
+        "仅当 \\(f\\) 有界时可测"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = \\lim_{n \\to \\infty} f_n(x) = \\liminf_{n \\to \\infty} f_n(x)\\)，而 \\(\\liminf f_n = \\sup_n \\inf_{k \\geq n} f_k\\)。\\(\\inf_{k \\geq n} f_k\\) 可测（可数下确界），\\(\\sup_n\\) 可测（可数上确界），故 \\(f\\) 可测。这是 Lebesgue 积分优于 Riemann 积分的关键之一：可测函数类在逐点极限下封闭。"
+      },
+      {
+        "id": "real-analysis-ch01-q14",
+        "question": "在概率空间 \\((\\Omega, \\mathcal{F}, P)\\) 中，设 \\(A_n\\) 为事件序列，\\(\\sum_{n=1}^\\infty P(A_n) < \\infty\\)。由 Borel-Cantelli 引理，\\(P(\\limsup A_n)\\) 等于多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\sum P(A_n)\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\limsup A_n = \\bigcap_{n=1}^\\infty \\bigcup_{k=n}^\\infty A_k\\) 表示\"无穷多个 \\(A_n\\) 发生\"。Borel-Cantelli 第一引理：若 \\(\\sum P(A_n) < \\infty\\)，则 \\(P(\\limsup A_n) = 0\\)。证明：\\(P(\\bigcup_{k \\geq n} A_k) \\leq \\sum_{k=n}^\\infty P(A_k) \\to 0\\)（级数尾部趋零），由递减集列连续性得 \\(P(\\limsup A_n) = 0\\)。"
+      },
+      {
+        "id": "real-analysis-ch01-q15",
+        "question": "设 \\(\\mu\\) 为 \\(\\sigma\\)-有限测度。若 \\(\\mu(A_n) = 0\\) 对所有 \\(n\\)，则 \\(\\mu\\bigl(\\bigcup_{n=1}^\\infty A_n\\bigr)\\) 等于多少？",
+        "options": [
+          "\\(0\\)",
+        "可能为正",
+        "\\(\\infty\\)",
+        "取决于 \\(\\sigma\\)-有限性"
+        ],
+        "answer": 0,
+        "explanation": "由 \\(\\sigma\\)-可加性（或可数次可加性）：\\(\\mu(\\bigcup A_n) \\leq \\sum \\mu(A_n) = \\sum 0 = 0\\)。又 \\(\\mu \\geq 0\\)，故 \\(\\mu(\\bigcup A_n) = 0\\)。零测集的可数并仍为零测集——这不需要集合互不相交，因为次可加性对任意可数并成立。"
+      },
+      {
+        "id": "real-analysis-ch01-q16",
+        "question": "设 \\(\\mu\\) 是 \\(\\mathbb{R}\\) 上的 Borel 测度，\\(\\mu(\\{a\\}) = 0\\) 对所有 \\(a \\in \\mathbb{R}\\)。则 \\(\\mu(\\mathbb{Q})\\) 一定等于多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(1\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Q}\\) 是可数集，\\(\\mathbb{Q} = \\bigcup_{q \\in \\mathbb{Q}} \\{q\\}\\)。由 \\(\\sigma\\)-可加性，\\(\\mu(\\mathbb{Q}) = \\sum_{q \\in \\mathbb{Q}} \\mu(\\{q\\}) = \\sum_{q \\in \\mathbb{Q}} 0 = 0\\)。注意：这对任何无原子测度（每个单点测度为零）都成立。可数集在无原子测度下必为零测集。"
+      },
+      {
+        "id": "real-analysis-ch01-q17",
+        "question": "设 \\(\\mathcal{F}_1\\) 和 \\(\\mathcal{F}_2\\) 是 \\(X\\) 上的两个 \\(\\sigma\\)-代数。则 \\(\\mathcal{F}_1 \\cap \\mathcal{F}_2\\)（交集）是否为 \\(\\sigma\\)-代数？",
+        "options": [
+          "一定是",
+        "一定不是",
+        "仅当 \\(\\mathcal{F}_1 \\subseteq \\mathcal{F}_2\\) 时才是",
+        "取决于 \\(X\\) 是否有限"
+        ],
+        "answer": 0,
+        "explanation": "验证三公理：(i) \\(X \\in \\mathcal{F}_1\\) 且 \\(X \\in \\mathcal{F}_2\\)，故 \\(X \\in \\mathcal{F}_1 \\cap \\mathcal{F}_2\\)；(ii) 若 \\(A \\in \\mathcal{F}_1 \\cap \\mathcal{F}_2\\)，则 \\(A^c \\in \\mathcal{F}_1\\) 且 \\(A^c \\in \\mathcal{F}_2\\)；(iii) 若 \\(A_n \\in \\mathcal{F}_1 \\cap \\mathcal{F}_2\\)，则 \\(\\bigcup A_n \\in \\mathcal{F}_1\\) 且 \\(\\in \\mathcal{F}_2\\)。注意：\\(\\sigma\\)-代数的并 \\(\\mathcal{F}_1 \\cup \\mathcal{F}_2\\) 一般不是 \\(\\sigma\\)-代数！"
+      },
+      {
+        "id": "real-analysis-ch01-q18",
+        "question": "证明 \\(\\mathcal{B}(\\mathbb{R})\\) 的基数等于 \\(\\mathfrak{c} = 2^{\\aleph_0}\\)，而 \\(\\mathcal{P}(\\mathbb{R})\\) 的基数为 \\(2^{\\mathfrak{c}}\\)。由此可知存在多少个 Lebesgue 不可测集？",
+        "options": [
+          "不存在不可测集",
+        "可数多个",
+        "\\(\\mathfrak{c} = 2^{\\aleph_0}\\) 个",
+        "\\(2^{\\mathfrak{c}}\\) 个"
+        ],
+        "answer": 3,
+        "explanation": "\\(|\\mathcal{B}(\\mathbb{R})| = \\mathfrak{c}\\)（Borel 集通过可数次运算从可数基生成）。Lebesgue 可测集 \\(\\mathcal{L}\\) 包含所有零测集，零测集有 \\(2^{\\mathfrak{c}}\\) 个（Cantor 集的子集），故 \\(|\\mathcal{L}| = 2^{\\mathfrak{c}} = |\\mathcal{P}(\\mathbb{R})|\\)。但 Lebesgue 可测集族严格包含在 \\(\\mathcal{P}(\\mathbb{R})\\) 中（Vitali 集不可测），故不可测集也有 \\(2^{\\mathfrak{c}}\\) 个。"
+      },
+      {
+        "id": "real-analysis-ch01-q19",
+        "question": "设 \\(\\mu\\) 为有限测度（\\(\\mu(X) < \\infty\\)），\\(A_1 \\supseteq A_2 \\supseteq \\cdots\\)，\\(\\bigcap A_n = \\emptyset\\)。以下哪个成立？",
+        "options": [
+          "\\(\\lim \\mu(A_n) = 0\\) 且不需要 \\(\\mu(X) < \\infty\\)",
+        "\\(\\lim \\mu(A_n) = 0\\) 但需要 \\(\\mu(A_1) < \\infty\\)",
+        "\\(\\lim \\mu(A_n)\\) 可能不为零",
+        "\\(\\lim \\mu(A_n) = \\mu(X)\\)"
+        ],
+        "answer": 1,
+        "explanation": "递减集列连续性要求至少 \\(\\mu(A_1) < \\infty\\)。反例：在 \\((\\mathbb{N}, \\mathcal{P}(\\mathbb{N}), \\#)\\)（计数测度）上，\\(A_n = \\{n, n+1, \\ldots\\}\\)，则 \\(\\bigcap A_n = \\emptyset\\) 但 \\(\\#(A_n) = \\infty\\) 不趋于 0。有限性条件不可或缺。常见错误是认为递减到空集时测度一定趋于零而忽略有限性假设。"
+      },
+      {
+        "id": "real-analysis-ch01-q20",
+        "question": "设 \\(\\mu\\) 是 \\([0,1]\\) 上的 Lebesgue 测度，\\(A_n = [0, 1/2] \\cup [1/2 + 1/n, 1]\\)。求 \\(\\mu(\\liminf A_n)\\)。",
+        "options": [
+          "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(3/4\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\liminf A_n = \\bigcup_{n=1}^\\infty \\bigcap_{k \\geq n} A_k\\)。对 \\(x \\in [0, 1/2]\\)，\\(x \\in A_k\\) 对所有 \\(k\\)。对 \\(x \\in (1/2, 1]\\)，当 \\(k\\) 足够大时 \\(1/2 + 1/k < x\\)，故 \\(x \\in A_k\\)。因此 \\(\\liminf A_n = [0, 1/2] \\cup (1/2, 1] = [0,1]\\)，\\(\\mu = 1\\)。唯一可能的\"遗漏点\"是 \\(x = 1/2\\)，但 \\(1/2 \\in [0, 1/2] \\subseteq A_n\\)。"
+      },
+      {
+        "id": "real-analysis-ch01-q21",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}\\) 单调递增。则 \\(f\\) 的不连续点集的测度性质是？",
+        "options": [
+          "不连续点集可能不可数",
+        "不连续点集至多可数，Lebesgue 测度为零",
+        "不连续点集可以有正 Lebesgue 测度",
+        "单调函数一定连续"
+        ],
+        "answer": 1,
+        "explanation": "单调函数的不连续点只能是跳跃不连续。在每个不连续点 \\(x\\)，左极限 \\(f(x^-) < f(x^+)\\)，开区间 \\((f(x^-), f(x^+))\\) 互不相交。每个开区间包含一个有理数，而 \\(\\mathbb{Q}\\) 可数，故不连续点至多可数。可数集的 Lebesgue 测度为零。因此单调函数几乎处处连续。"
+      },
+      {
+        "id": "real-analysis-ch01-q22",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}\\) 连续。以下哪个关于 \\(f^{-1}(\\mathcal{B}(\\mathbb{R}))\\) 的陈述正确？",
+        "options": [
+          "\\(f^{-1}(\\mathcal{B}(\\mathbb{R})) = \\mathcal{B}(\\mathbb{R})\\)",
+        "\\(f^{-1}(\\mathcal{B}(\\mathbb{R})) \\subseteq \\mathcal{B}(\\mathbb{R})\\) 但可能严格包含",
+        "\\(f^{-1}(\\mathcal{B}(\\mathbb{R})) \\supseteq \\mathcal{B}(\\mathbb{R})\\)",
+        "\\(f^{-1}(\\mathcal{B}(\\mathbb{R}))\\) 是 \\(\\sigma\\)-代数但可能不含所有 Borel 集"
+        ],
+        "answer": 1,
+        "explanation": "连续函数将开集的原像映为开集，故 \\(f^{-1}(开集) \\in \\mathcal{B}(\\mathbb{R})\\)。由此 \\(f^{-1}(\\mathcal{B}(\\mathbb{R})) \\subseteq \\mathcal{B}(\\mathbb{R})\\)（因 \\(\\mathcal{B}\\) 由开集生成）。但如果 \\(f\\) 不是单射，\\(f^{-1}(\\mathcal{B})\\) 可能是 \\(\\mathcal{B}\\) 的真子 \\(\\sigma\\)-代数。例如常数函数 \\(f \\equiv c\\) 的 \\(f^{-1}(\\mathcal{B}) = \\{\\emptyset, \\mathbb{R}\\}\\)。"
+      },
+      {
+        "id": "real-analysis-ch01-q23",
+        "question": "设 \\((\\Omega, \\mathcal{F}, P)\\) 为概率空间，\\(A_n\\) 独立，\\(\\sum P(A_n) = \\infty\\)。由 Borel-Cantelli 第二引理，\\(P(\\limsup A_n)\\) 等于？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "Borel-Cantelli 第二引理：若事件 \\(A_n\\) 互相独立且 \\(\\sum P(A_n) = \\infty\\)，则 \\(P(\\limsup A_n) = 1\\)。证明要点：\\(P(\\bigcap_{k=n}^{N} A_k^c) = \\prod_{k=n}^{N} (1 - P(A_k)) \\leq \\exp(-\\sum_{k=n}^{N} P(A_k)) \\to 0\\)，故 \\(P(\\bigcup_{k \\geq n} A_k) = 1\\) 对所有 \\(n\\)，从而 \\(P(\\limsup A_n) = 1\\)。独立性条件不可缺省。"
+      },
+      {
+        "id": "real-analysis-ch01-q24",
+        "question": "设 \\(X = \\mathbb{R}\\)，\\(\\mathcal{C} = \\{(-n, n) : n \\in \\mathbb{N}\\}\\)。求 \\(\\sigma(\\mathcal{C})\\)。",
+        "options": [
+          "\\(\\mathcal{B}(\\mathbb{R})\\)",
+        "\\(\\{\\emptyset, \\mathbb{R}\\}\\)",
+        "\\(\\{\\emptyset, \\mathbb{R}, (-n,n), (-n,n)^c : n \\in \\mathbb{N}\\}\\) 及其可数并、交",
+        "比 \\(\\mathcal{B}(\\mathbb{R})\\) 严格小的 \\(\\sigma\\)-代数"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathcal{C}\\) 中的集合都关于原点对称，且 \\(\\sigma(\\mathcal{C})\\) 中的所有集合也继承此对称性：若 \\(A \\in \\sigma(\\mathcal{C})\\) 则 \\(-A := \\{-x : x \\in A\\} \\in \\sigma(\\mathcal{C})\\)（可验证）。因此像 \\((0,1)\\) 这样的非对称开区间不在 \\(\\sigma(\\mathcal{C})\\) 中。所以 \\(\\sigma(\\mathcal{C}) \\subsetneq \\mathcal{B}(\\mathbb{R})\\)。"
+      },
+      {
+        "id": "real-analysis-ch01-q25",
+        "question": "若 \\(\\mu\\) 是 \\(\\sigma\\)-有限测度且 \\(\\mu(A) > 0\\)，则 \\(A\\) 是否一定包含一个可测子集 \\(B\\) 满足 \\(0 < \\mu(B) < \\infty\\)？",
+        "options": [
+          "是，对任意 \\(\\sigma\\)-有限测度",
+        "否，可能 \\(A\\) 的所有可测子集测度为 \\(0\\) 或 \\(\\infty\\)",
+        "仅当 \\(\\mu\\) 有限时",
+        "仅当 \\(A\\) 有限测度时"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma\\)-有限意味 \\(X = \\bigcup E_n\\)，\\(\\mu(E_n) < \\infty\\)。若 \\(\\mu(A) > 0\\)，则存在某个 \\(n\\) 使 \\(\\mu(A \\cap E_n) > 0\\)（否则 \\(\\mu(A) = \\mu(\\bigcup A \\cap E_n) \\leq \\sum \\mu(A \\cap E_n) = 0\\)，矛盾）。取 \\(B = A \\cap E_n\\)，则 \\(0 < \\mu(B) \\leq \\mu(E_n) < \\infty\\)。\\(\\sigma\\)-有限性是保证此性质的关键。"
+      },
+      {
+        "id": "real-analysis-ch01-q26",
+        "question": "在信号检测中，某传感器的噪声 \\(X\\) 服从概率测度 \\(P\\)，事件 \\(A_n = \\{|X| > n\\}\\) 满足 \\(P(A_n) = 1/n^2\\)。传感器无限次超出阈值（\\(\\limsup A_n\\) 发生）的概率是多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\pi^2/6\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum P(A_n) = \\sum 1/n^2 = \\pi^2/6 < \\infty\\)。由 Borel-Cantelli 第一引理，\\(P(\\limsup A_n) = 0\\)，即几乎必然只有有限次超出阈值。这在工程中意味着传感器噪声虽然偶尔会大，但\"无限次爆表\"的概率为零——系统设计可以容忍有限次异常。"
+      },
+      {
+        "id": "real-analysis-ch01-q27",
+        "question": "某放射性样品的衰变计数 \\(N(t)\\) 服从 Poisson 过程。测量区间 \\([0, t]\\) 对应的事件 \\(\\sigma\\)-代数 \\(\\mathcal{F}_t\\) 在物理上表示什么？以下关于 \\(\\mathcal{F}_s \\subseteq \\mathcal{F}_t\\)（\\(s < t\\)）的陈述中正确的是？",
+        "options": [
+          "\\(\\mathcal{F}_t\\) 中的事件只涉及时刻 \\(t\\) 的状态",
+        "\\(\\mathcal{F}_t\\) 包含到时刻 \\(t\\) 为止所有可观测的信息",
+        "\\(\\mathcal{F}_s\\) 和 \\(\\mathcal{F}_t\\) 总是相等的",
+        "\\(\\sigma\\)-代数的嵌套不影响概率计算"
+        ],
+        "answer": 1,
+        "explanation": "滤波（filtration）\\(\\{\\mathcal{F}_t\\}\\) 是递增的 \\(\\sigma\\)-代数族，\\(\\mathcal{F}_t\\) 代表\"到时刻 \\(t\\) 为止可获得的全部信息\"。\\(\\mathcal{F}_s \\subseteq \\mathcal{F}_t\\) 表示过去的信息是现在信息的子集。在放射性衰变中，\\(\\mathcal{F}_t\\) 包含了 \\([0,t]\\) 期间所有计数事件的信息，用于条件概率和预测。"
+      },
+      {
+        "id": "real-analysis-ch01-q28",
+        "question": "在医学影像中，一幅灰度图像可视为 \\([0,1]^2 \\to [0,255]\\) 的函数。若图像处理算法对像素灰度值做阈值分割 \\(\\{f > 128\\}\\)，该操作在测度论中对应什么？",
+        "options": [
+          "计算 \\(f\\) 的积分",
+        "取 \\(f\\) 的原像（level set），利用 \\(f\\) 的可测性",
+        "对 \\(f\\) 做 Fourier 变换",
+        "计算 \\(f\\) 的导数"
+        ],
+        "answer": 1,
+        "explanation": "阈值分割 \\(\\{f > 128\\}\\) 即 \\(f^{-1}((128, 255])\\)，这是可测函数原像操作的实例。若 \\(f\\) 关于某 \\(\\sigma\\)-代数可测，则 \\(\\{f > 128\\}\\) 是可测集。医学影像中，可测性保证了阈值分割产生的区域具有良好定义的面积（测度），可用于定量分析肿瘤面积等指标。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="real-analysis"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/real-analysis.html" class="module-name">实分析/测度论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · σ-代数与可测空间</a></li>
+      <li><a href="#kp2">02 · 测度的定义与基本性质</a></li>
+      <li><a href="#kp3">03 · 可测函数与简单函数逼近</a></li>
+      <li><a href="#kp4">04 · 测度空间的完备化与零测集</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>测度空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>σ-代数与可测空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>19世纪末，数学家们发现 Riemann 积分无法处理许多极限交换问题： 例如逐点收敛的函数序列，其极限函数可能不 Riemann 可积。Lebesgue 意识到，问题根源在于"哪些集合可以被赋予大小"。为此需要一套严格 的框架来指定"可测集"——这就是 σ-代数的概念。σ-代数为测度论、 概率论和现代分析提供了统一的集合论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象：将"可以度量大小的集合"公理化。σ-代数 \(\mathcal{F}\) 是对补运算和可数并运算封闭的集合族。这种封闭性确保我们可以对 可测集进行无穷次集合运算而不离开可测集的范畴。生成 σ-代数 \(\sigma(\mathcal{C})\) 则是"最经济地"将一族集合扩充为 σ-代数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：设 \(X\) 为非空集，\(\mathcal{F} \subseteq \mathcal{P}(X)\) 称为 σ-代数，若满足： (i) \(X \in \mathcal{F}\)； (ii) \(A \in \mathcal{F} \Rightarrow A^c \in \mathcal{F}\)； (iii) \(A_1, A_2, \ldots \in \mathcal{F} \Rightarrow \bigcup_{n=1}^{\infty} A_n \in \mathcal{F}\)。 由 (ii)(iii) 可导出对可数交也封闭： \[\bigcap_{n=1}^{\infty} A_n = \left(\bigcup_{n=1}^{\infty} A_n^c\right)^c \in \mathcal{F}\] <strong>Borel σ-代数</strong>：\(\mathcal{B}(\mathbb{R}) = \sigma(\{\text{开集}\})\)。 等价地，\(\mathcal{B}(\mathbb{R})\) 可由半开区间 \(\{(-\infty, a] : a \in \mathbb{R}\}\) 生成，因为每个开集是可数个开区间之并。 <strong>可测空间</strong> \((X, \mathcal{F})\)：集合配上 σ-代数。 <strong>测度空间</strong> \((X, \mathcal{F}, \mu)\)：可测空间配上测度 \(\mu\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>概率论中，样本空间 \(\Omega\) 上的事件 σ-代数 \(\mathcal{F}\) 精确刻画了"哪些事件可以被赋予概率"；金融数学中，σ-代数 \(\mathcal{F}_t\) 表示到时刻 \(t\) 为止可获得的信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\{(-\infty, a] : a \in \mathbb{Q}\}\) 生成 \(\mathcal{B}(\mathbb{R})\)。 解答：对任意 \(a \in \mathbb{R}\)，取有理数列 \(q_n \downarrow a\)，则 \((-\infty, a] = \bigcap_{n=1}^{\infty} (-\infty, q_n]\)， 属于 \(\sigma(\{(-\infty, q] : q \in \mathbb{Q}\})\)。 因此 \(\{(-\infty, a] : a \in \mathbb{R}\}\) 中所有集合都在此 σ-代数中，故两个生成的 σ-代数相同。 易错点：误以为 σ-代数只需对有限并封闭。 反例：有限并封闭的集合族 \(\{\emptyset, \mathbb{R}\} \cup \{\text{有限集}\}\) 不对可数并封闭（如 \(\bigcup \{n\} = \mathbb{N}\) 不一定在其中）。σ-代数要求的是<strong>可数并</strong>封闭。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个是 σ-代数的必要条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。σ-代数的三条公理之一要求对可数并封闭。A 是 B 的推论')">A. 对有限并封闭</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！σ-代数的三条公理之一要求对可数并封闭。A 是 B 的推论')">B. 对可数并封闭</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。σ-代数的三条公理之一要求对可数并封闭。A 是 B 的推论')">C. 包含所有单点集</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。σ-代数的三条公理之一要求对可数并封闭。A 是 B 的推论')">D. 包含所有开集</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>测度的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了可测空间后，下一步是给可测集赋予"大小"。直觉上，测度推广了 长度、面积、体积的概念。关键难点在于：如何确保对可数多个不相交 集合赋大小时满足"可加性"？Lebesgue 和 Carathéodory 的工作表明， σ-可加性（而非仅有限可加性）是保证极限运算合法的根本条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>测度是从集合族到 \([0, +\infty]\) 的σ-可加函数。σ-可加性是有限 可加性到无穷的推广，它确保测度与可数极限运算相容——这正是 Lebesgue 积分优于 Riemann 积分的根源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：测度 \(\mu: \mathcal{F} \to [0, +\infty]\) 满足： (M1) \(\mu(\emptyset) = 0\)； (M2) σ-可加性：若 \(\{A_n\}\) 两两不交，则 \[\mu\left(\bigcup_{n=1}^{\infty} A_n\right) = \sum_{n=1}^{\infty} \mu(A_n)\] <strong>基本性质</strong>（由 σ-可加性推出）： - 单调性：\(A \subseteq B \Rightarrow \mu(A) \leq \mu(B)\) - 次可加性：\(\mu(\bigcup A_n) \leq \sum \mu(A_n)\) - 连续性（自下）：\(A_n \uparrow A \Rightarrow \mu(A_n) \to \mu(A)\) - 连续性（自上）：\(A_n \downarrow A\) 且 \(\mu(A_1) < \infty \Rightarrow \mu(A_n) \to \mu(A)\) 自下连续性证明：令 \(B_1 = A_1\), \(B_n = A_n \setminus A_{n-1}\)， 则 \(\{B_n\}\) 两两不交且 \(\bigcup B_n = A\)， \[\mu(A) = \sum_{n=1}^{\infty} \mu(B_n) = \lim_{N \to \infty} \sum_{n=1}^{N} \mu(B_n) = \lim_{N \to \infty} \mu(A_N)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>计数测度 \(\mu(A) = |A|\) 用于将求和统一到积分框架中； Dirac 测度 \(\delta_x(A) = \mathbf{1}_A(x)\) 是集中在一点的 概率测度，在信号处理中模拟脉冲。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(\mu\) 是 \((\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 上的 测度，\(A_n = (0, 1/n)\)。若 \(\mu((0,1)) = 1\)，求 \(\lim_{n \to \infty} \mu(A_n)\)。 解答：\(A_n \downarrow \emptyset\)，且 \(\mu(A_1) = \mu((0,1)) = 1 < \infty\)， 由测度自上连续性，\(\mu(A_n) \to \mu(\emptyset) = 0\)。 易错点：忘记自上连续性需要 \(\mu(A_1) < \infty\) 的条件。 反例：\(\mu = \) 计数测度，\(A_n = \{n, n+1, \ldots\}\)， \(\mu(A_n) = \infty\) 对所有 \(n\)，但 \(\mu(\bigcap A_n) = \mu(\emptyset) = 0\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">测度的 σ-可加性蕴含以下哪个性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。自下连续性由 σ-可加性直接推出，无需附加条件。')">A. 对任意递减序列 \(A_n \downarrow A\)，\(\mu(A_n) \to \mu(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！自下连续性由 σ-可加性直接推出，无需附加条件。')">B. 对任意递增序列 \(A_n \uparrow A\)，\(\mu(A_n) \to \mu(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。自下连续性由 σ-可加性直接推出，无需附加条件。')">C. \(\mu(A \cup B) = \mu(A) + \mu(B)\)（无需不交）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。自下连续性由 σ-可加性直接推出，无需附加条件。')">D. \(\mu(A) \leq \mu(B)\) 当且仅当 \(A \subseteq B\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>可测函数与简单函数逼近</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>测度空间建立后，要在上面做"积分"，首先要确定哪些函数可以被积分。 可测函数是"与 σ-代数相容"的函数——它的原像将可测集映回可测集。 更深层的问题是：如何用最简单的函数（简单函数）来逐步逼近任意可测 函数？这个逼近定理是 Lebesgue 积分构造的关键一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>可测函数将一个可测空间上的"信息结构"拉回到另一个可测空间。 简单函数逼近定理体现了"从有限到无穷"的分析学核心思想： 先对有限情形（简单函数）定义积分，再通过单调极限过渡到一般。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>可测函数定义</strong>：\(f: (X, \mathcal{F}) \to (\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 可测，若 \(\forall B \in \mathcal{B}(\mathbb{R})\)， \(f^{-1}(B) \in \mathcal{F}\)。等价地，只需验证 \(\{x : f(x) > a\} \in \mathcal{F}\) 对所有 \(a \in \mathbb{R}\)。 <strong>运算封闭性</strong>：若 \(f, g\) 可测，则 \(f + g\), \(fg\), \(\sup_n f_n\), \(\limsup_n f_n\) 均可测。证明关键： \[\{f + g > a\} = \bigcup_{r \in \mathbb{Q}} (\{f > r\} \cap \{g > a - r\})\] <strong>简单函数</strong>：\(\varphi = \sum_{i=1}^{n} a_i \mathbf{1}_{A_i}\)， 其中 \(A_i \in \mathcal{F}\)，\(a_i \in \mathbb{R}\)。 <strong>逼近定理</strong>：若 \(f \geq 0\) 可测，存在简单函数序列 \(0 \leq \varphi_1 \leq \varphi_2 \leq \cdots\) 使 \(\varphi_n(x) \uparrow f(x)\) \(\forall x\)。 构造：令 \(\varphi_n(x) = \begin{cases} k/2^n & \text{if } k/2^n \leq f(x) < (k+1)/2^n,\; k = 0,1,\ldots,n2^n - 1 \\ n & \text{if } f(x) \geq n \end{cases}\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(f(x) = x^2\) 在 \(([0,2], \mathcal{B}([0,2]))\) 上， 写出 \(\varphi_1\)（即 \(n=1\) 时的逼近简单函数）。 解答：\(n=1\) 时，划分值域为 \([0,1/2), [1/2,1), [1,3/2), [3/2,2), [2,\infty)\)。 但 \(n=1\) 意味着截断在 1，故 \(\varphi_1(x) = 0 \cdot \mathbf{1}_{[0, 1/\sqrt{2})} + \frac{1}{2} \cdot \mathbf{1}_{[1/\sqrt{2}, 1)} + 1 \cdot \mathbf{1}_{[1, 2]}\)。 易错点：混淆"可测函数"与"连续函数"。 Dirichlet 函数 \(\mathbf{1}_{\mathbb{Q}}\) 处处不连续但 Borel 可测（因为 \(\mathbb{Q} \in \mathcal{B}(\mathbb{R})\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(f_n\) 均为可测函数，则 \(g(x) = \limsup_{n \to \infty} f_n(x)\) 是否可测？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\limsup f_n = \\inf_n \\sup_{k \\geq n} f_k\\)，而可数个')">A. 一定可测</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\limsup f_n = \\inf_n \\sup_{k \\geq n} f_k\\)，而可数个')">B. 不一定，需要额外条件</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\limsup f_n = \\inf_n \\sup_{k \\geq n} f_k\\)，而可数个')">C. 仅当 \(f_n\) 连续时可测</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\limsup f_n = \\inf_n \\sup_{k \\geq n} f_k\\)，而可数个')">D. 仅当 \(f_n\) 有界时可测</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>测度空间的完备化与零测集</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在实际分析中，我们经常遇到"几乎处处"成立的性质——即一个性质 在零测集之外成立。但 Borel σ-代数中，零测集的子集不一定是 Borel 集！这意味着"几乎处处"的概念在 Borel 框架下不够 自洽。完备化过程解决这个问题：将所有零测集的子集纳入可测 集族，使"几乎处处"操作不会导致可测性问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完备化是将测度空间"补全"的过程，使零测集的任意子集都可测 （且测度为零）。这与度量空间的完备化精神一致——补充"缺失" 的元素使结构更自洽。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>零测集</strong>：\(N \in \mathcal{F}\)，\(\mu(N) = 0\)。 <strong>完备测度空间</strong>：若 \(\mu(N) = 0\) 且 \(E \subseteq N\)，则 \(E \in \mathcal{F}\)（且 \(\mu(E) = 0\)）。 <strong>完备化构造</strong>：定义 \[\overline{\mathcal{F}} = \{A \cup E : A \in \mathcal{F},\; E \subseteq N \text{ for some } N \in \mathcal{F} \text{ with } \mu(N) = 0\}\] 并令 \(\overline{\mu}(A \cup E) = \mu(A)\)。 可验证 \(\overline{\mathcal{F}}\) 是 σ-代数，\(\overline{\mu}\) 是完备测度。 <strong>Lebesgue σ-代数</strong> \(\mathcal{L}\) 严格大于 Borel σ-代数 \(\mathcal{B}(\mathbb{R})\)。存在 Lebesgue 可测但非 Borel 的集合 （如 Cantor 集的子集）。 <strong>"几乎处处"(a.e.)</strong>：性质 \(P(x)\) 几乎处处成立，若 \(\mu(\{x : P(x) \text{ 不成立}\}) = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>概率论中，随机变量的"几乎必然(a.s.)"性质依赖于完备概率 空间；在 \(L^p\) 空间中，函数等价类的定义依赖于将 a.e. 相等 的函数视为同一元素。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Cantor 集 \(C\) 是零测集，\(|C| = 2^{\aleph_0}\)（不可数）。 证明存在 \(C\) 的子集不是 Borel 集但是 Lebesgue 可测的。 解答：\(|\mathcal{B}(\mathbb{R})| = 2^{\aleph_0}\)（可数生成元 生成的 σ-代数基数为连续统），而 \(|\mathcal{P}(C)| = 2^{2^{\aleph_0}} > 2^{\aleph_0}\)。因此 \(C\) 的子集中存在非 Borel 集。 但由于 \(C\) 零测且 Lebesgue 测度完备，\(C\) 的所有子集都 Lebesgue 可测（测度为 0）。 易错点：误以为"Lebesgue 可测集 = Borel 集"。实际上 \(\mathcal{B}(\mathbb{R}) \subsetneq \mathcal{L}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Cantor 集的测度是多少？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cantor 集在每一步移除的区间总长度为')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cantor 集在每一步移除的区间总长度为')">B. \(2/3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Cantor 集在每一步移除的区间总长度为')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cantor 集在每一步移除的区间总长度为')">D. 不可定义（不可测）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/analysis/real-analysis.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

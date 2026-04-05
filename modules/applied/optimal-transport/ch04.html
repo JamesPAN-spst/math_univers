@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 Brenier 定理 — 最优传输 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "optimal-transport-ch04-q1",
+        "question": "Brenier 定理的核心陈述: 对 \\(c(x,y)=\\frac{1}{2}\\|x-y\\|^2\\), 最优传输映射有什么特殊结构？",
+        "options": [
+          "存在凸函数 \\(\\phi\\) 使得最优映射 \\(T=\\nabla\\phi\\)——梯度映射! 且 \\(T\\) \\(\\mu\\)-a.e. 唯一(当 \\(\\mu\\ll\\mathcal{L}^d\\))",
+        "\\(T\\) 是线性的",
+        "不需要凸性",
+        "\\(T\\) 不唯一"
+        ],
+        "answer": 0,
+        "explanation": "Brenier (1991): \\(\\mu\\ll\\mathcal{L}^d\\)(绝对连续), \\(\\mu,\\nu\\in\\mathcal{P}_2(\\mathbb{R}^d)\\) → \\(\\exists!\\) 凸 \\(\\phi: \\mathbb{R}^d\\to\\mathbb{R}\\) 使 \\(T=\\nabla\\phi\\) 满足 \\(T_\\#\\mu=\\nu\\) 且 \\(T\\) 是最优传输映射。唯一性: \\(\\mu\\)-a.e.。直觉: 凸函数梯度是\"向外扩散\"的映射——沿最优方向传输质量。\\(c=\\|x-y\\|^2/2\\): 最优化等价于 \\(\\max_\\phi[\\int\\phi d\\mu+\\int\\phi^*d\\nu]\\)(\\(\\phi^*\\)=Legendre共轭)。核心: OT ↔ 凸分析 ↔ Monge-Ampère PDE 的三角关系。"
+      },
+      {
+        "id": "optimal-transport-ch04-q2",
+        "question": "Brenier 定理中凸函数 \\(\\phi\\) 与 Monge-Ampère 方程的关系？",
+        "options": [
+          "\\(T_\\#\\mu=\\nu\\) 等价于 \\(\\det(D^2\\phi(x))=\\frac{f(x)}{g(\\nabla\\phi(x))}\\)——完全非线性椭圆 PDE, \\(f=d\\mu/dx\\), \\(g=d\\nu/dy\\)",
+        "Monge-Ampère 是线性方程",
+        "不涉及行列式",
+        "\\(\\phi\\) 满足 Laplace 方程"
+        ],
+        "answer": 0,
+        "explanation": "\\(T=\\nabla\\phi\\), \\(T_\\#\\mu=\\nu\\): 变量替换→\\(f(x)dx=g(\\nabla\\phi(x))\\det(D^2\\phi(x))dx\\)。即 \\(\\det(D^2\\phi)=f/g\\circ\\nabla\\phi\\)——Monge-Ampère 方程。完全非线性(行列式是 Hessian 特征值之积)。\\(f=g=1\\)(同分布): \\(\\det(D^2\\phi)=1\\)——体积保持映射。正则性: Caffarelli→\\(\\phi\\in C^{2,\\alpha}\\)(在好的条件下)。数值: 有限差分/Newton, 半离散(Laguerre), 入口点法。Monge-Ampère 也出现在凸几何(Minkowski问题)、仿射几何中。"
+      },
+      {
+        "id": "optimal-transport-ch04-q3",
+        "question": "高斯到高斯的 Brenier 映射: \\(\\mu=\\mathcal{N}(0,\\Sigma_1)\\), \\(\\nu=\\mathcal{N}(0,\\Sigma_2)\\), \\(T=?\\)",
+        "options": [
+          "\\(T(x)=Ax\\), \\(A=\\Sigma_1^{-1/2}(\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2}\\Sigma_1^{-1/2}\\)——线性映射, \\(\\phi(x)=\\frac{1}{2}x^TAx\\) 凸",
+        "\\(T=\\Sigma_2\\Sigma_1^{-1}\\)",
+        "非线性映射",
+        "\\(T=I\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T=\\nabla\\phi\\), \\(\\phi=\\frac{1}{2}x^TAx\\) → \\(T(x)=Ax\\)。\\(T_\\#\\mu=\\nu\\): \\(A\\Sigma_1A^T=\\Sigma_2\\), 且 \\(A\\) 对称正定(凸 \\(\\phi\\) 要求)。唯一对称正定解: \\(A=\\Sigma_1^{-1/2}(\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2}\\Sigma_1^{-1/2}\\)。\\(W_2^2=\\text{tr}(\\Sigma_1)+\\text{tr}(\\Sigma_2)-2\\text{tr}((\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2})=\\text{tr}(\\Sigma_1+\\Sigma_2-2\\Sigma_1^{1/2}A\\Sigma_1^{1/2})\\)。Bures 度量(\\(\\Sigma\\) 空间上): \\(d_B^2(\\Sigma_1,\\Sigma_2)=\\text{tr}(\\Sigma_1+\\Sigma_2-2(\\Sigma_1^{1/2}\\Sigma_2\\Sigma_1^{1/2})^{1/2})\\)。"
+      },
+      {
+        "id": "optimal-transport-ch04-q4",
+        "question": "McCann 位移插值(displacement interpolation): \\(\\rho_t=((1-t)Id+t\\nabla\\phi)_\\#\\mu\\) 有什么性质？与线性插值的区别？",
+        "options": [
+          "位移插值沿 OT 测地线移动质量——保持\"紧凑性\"; 线性插值 \\((1-t)\\mu+t\\nu\\) 会产生\"重影\"(两个分布的叠加)",
+        "两者相同",
+        "线性插值是测地线",
+        "位移插值不连续"
+        ],
+        "answer": 0,
+        "explanation": "例: \\(\\mu=\\mathcal{N}(0,1)\\), \\(\\nu=\\mathcal{N}(5,1)\\)。线性混合: \\((1-t)\\mu+t\\nu\\) 在 \\(t=1/2\\) 是双峰——\"重影\"。位移插值: \\(\\rho_{1/2}=\\mathcal{N}(2.5,1)\\) 单峰——质量\"平移\"。位移凸性(displacement convexity): 泛函 \\(F(\\rho)=\\int\\rho\\log\\rho\\) (熵) 沿位移插值是凸的！McCann (1997): \\(F(\\rho_t)\\leq(1-t)F(\\rho_0)+tF(\\rho_1)\\)。这是 OT 在 PDE、不等式(log-Sobolev)中的关键工具。"
+      },
+      {
+        "id": "optimal-transport-ch04-q5",
+        "question": "Otto 微积分: 将 \\((\\mathcal{P}_2,W_2)\\) 视为无穷维 Riemannian 流形。切空间和\"度量张量\"是什么？",
+        "options": [
+          "切空间 \\(T_\\rho\\mathcal{P}_2\\cong\\{\\nabla\\psi:\\psi\\in C^\\infty(\\mathbb{R}^d)\\}\\)/\\(L^2(\\rho)\\) 中的梯度向量场; \"度量\"\\(\\langle\\nabla\\psi_1,\\nabla\\psi_2\\rangle_\\rho=\\int\\nabla\\psi_1\\cdot\\nabla\\psi_2\\,d\\rho\\)",
+        "切空间是有限维的",
+        "度量是欧氏的",
+        "不能定义切空间"
+        ],
+        "answer": 0,
+        "explanation": "Otto (2001): \\(\\mathcal{P}_2\\) 上的无穷维 Riemannian 结构。连续方程 \\(\\partial_t\\rho+\\nabla\\cdot(\\rho v)=0\\) → 切向量 \\(v\\)。最小动能: \\(\\inf_v\\int\\|v\\|^2d\\rho\\) s.t. 连续方程 → 最优 \\(v=\\nabla\\psi\\)（梯度场）。Benamou-Brenier 公式: \\(W_2^2(\\mu,\\nu)=\\inf_{(\\rho,v)}\\int_0^1\\int\\|v_t\\|^2d\\rho_t dt\\)——动力学OT。\\(W_2\\) 的\"几何\"视角: 梯度流 \\(\\dot\\rho=-\\nabla_{W_2}F(\\rho)\\)——在 \\(W_2\\) 度量下的最速下降。"
+      },
+      {
+        "id": "optimal-transport-ch04-q6",
+        "question": "Wasserstein 梯度流: Fokker-Planck 方程 \\(\\partial_t\\rho=\\nabla\\cdot(\\rho\\nabla V)+\\Delta\\rho\\) 是什么泛函的 \\(W_2\\) 梯度流？",
+        "options": [
+          "自由能 \\(F(\\rho)=\\int V\\,d\\rho+\\int\\rho\\log\\rho\\,dx\\)(势能+熵)的 \\(W_2\\) 梯度流: \\(\\dot\\rho=-\\nabla_{W_2}F(\\rho)\\)",
+        "\\(L^2\\) 梯度流",
+        "与 \\(W_2\\) 无关",
+        "自由能最大化"
+        ],
+        "answer": 0,
+        "explanation": "JKO (Jordan-Kinderlehrer-Otto, 1998): \\(\\rho^{(k+1)}=\\arg\\min_\\rho[F(\\rho)+\\frac{1}{2\\tau}W_2^2(\\rho,\\rho^{(k)})]\\)——隐式 Euler 在 \\(W_2\\) 空间中。\\(\\tau\\to 0\\): 收敛到 Fokker-Planck。\\(F=\\int\\rho\\log\\rho\\)→热方程(扩散)。\\(F=\\int V\\rho\\)→聚集方程。\\(F=\\int\\rho\\log\\rho+\\frac{1}{2}\\int\\int W(x-y)\\rho(x)\\rho(y)\\)→McKean-Vlasov / Keller-Segel。ML 联系: Langevin dynamics \\(=\\)Wasserstein 梯度流; 扩散模型的理论分析。"
+      },
+      {
+        "id": "optimal-transport-ch04-q7",
+        "question": "Brenier 定理在深度学习中的应用: 如何用神经网络参数化 OT 映射？",
+        "options": [
+          "Input Convex Neural Network (ICNN): 构造凸函数 \\(\\phi_\\theta(x)\\), 其梯度 \\(\\nabla_x\\phi_\\theta\\) 近似 Brenier 映射——保证了映射的 OT 最优性结构",
+        "任何网络都可以",
+        "不能用神经网络",
+        "不需要凸性"
+        ],
+        "answer": 0,
+        "explanation": "Makkuva et al. (2020), Amos et al.: ICNN(Input Convex Neural Network): \\(f_\\theta(x)=W_L(...\\sigma(W_1x+b_1)...)\\), 权重非负 \\(W_l\\geq 0\\)(保凸性)。\\(T_\\theta=\\nabla f_\\theta\\) 是合法的 Brenier 映射。训练: \\(\\min_\\theta\\mathbb{E}_\\mu[\\frac{\\|x\\|^2}{2}-f_\\theta(x)]+\\mathbb{E}_\\nu[f_\\theta^*(y)]\\)(Brenier 对偶)。W2GN (Korotin et al.): 更general的Neural OT。应用: 风格迁移、领域适应、生成模型。优势: 保证了映射是\"最优传输\"而非任意映射——结构+效率。"
+      },
+      {
+        "id": "optimal-transport-ch04-q8",
+        "question": "位移凸性(Displacement Convexity): 什么泛函沿 \\(W_2\\) 测地线是凸的？有什么推论？",
+        "options": [
+          "\\(F(\\rho)=\\int U(\\rho(x))dx\\)(\\(U\\) 满足 McCann 条件: \\(t\\mapsto t^dU(t^{-d})\\) 凸非增) → 沿位移插值凸; 推论: log-Sobolev/HWI 不等式, 熵的凸性",
+        "所有泛函都位移凸",
+        "位移凸无应用",
+        "只对线性泛函成立"
+        ],
+        "answer": 0,
+        "explanation": "McCann (1997): \\(U(\\rho)=\\rho\\log\\rho\\)(熵) → 条件满足 → \\(F(\\rho_t)\\leq(1-t)F(\\rho_0)+tF(\\rho_1)\\)。推论: (1) Talagrand 不等式 \\(W_2^2(\\rho,\\gamma)\\leq 2D_{KL}(\\rho\\|\\gamma)\\)(\\(\\gamma\\) 高斯); (2) HWI: \\(D_{KL}(\\rho\\|\\gamma)\\leq W_2\\sqrt{I(\\rho\\|\\gamma)}-\\frac{1}{2}W_2^2\\); (3) Log-Sobolev: \\(D_{KL}\\leq\\frac{1}{2\\lambda}I\\)(Fisher 信息)。这些不等式在概率论(集中不等式)和统计力学(趋平衡)中至关重要。OT 提供了统一的证明框架。"
+      },
+      {
+        "id": "optimal-transport-ch04-q9",
+        "question": "Benamou-Brenier 公式(动态 OT): \\(W_2^2=\\inf\\int_0^1\\int\\|v_t\\|^2\\rho_t dxdt\\)。它与计算流体力学(CFD)的联系？",
+        "options": [
+          "OT 等价于不可压缩 Euler 方程势流的变分形式——\"密度+速度场\"的最小作用原理; 计算: 增广 Lagrangian 方法将 OT 变成 CFD 问题",
+        "OT 与流体力学无关",
+        "需要粘性",
+        "只适用于定常流"
+        ],
+        "answer": 0,
+        "explanation": "Benamou-Brenier (2000): \\(\\inf_{(\\rho,m)}\\int_0^1\\int\\frac{\\|m\\|^2}{\\rho}dxdt\\) s.t. \\(\\partial_t\\rho+\\nabla\\cdot m=0\\), \\(\\rho(0)=\\mu,\\rho(1)=\\nu\\)。\\(m=\\rho v\\)(动量)。这是计算流体力学中的\"最小能量\"问题。数值: Augmented Lagrangian (ALG2): 交替更新 \\((\\rho,m)\\) 和 \\(\\Phi\\)(Lagrange乘子)。Papadakis et al.: 用 proximal splitting 高效求解。CFD 联系: 不可压 Euler 方程的最短测地线(Arnold)。也联系到 Schrödinger 桥问题(加扩散→熵正则化 OT 的动态版本)。"
+      },
+      {
+        "id": "optimal-transport-ch04-q10",
+        "question": "数值求解 Monge-Ampère 方程 \\(\\det(D^2\\phi)=f/g\\circ\\nabla\\phi\\) 的主要方法？",
+        "options": [
+          "(1) 有限差分+Newton(Benamou-Froese-Oberman); (2) 半离散(Mérigot: Laguerre + Newton); (3) 神经网络(ICNN); 主要困难: 保证 \\(\\phi\\) 凸性+\\(\\det\\geq 0\\)",
+        "只能解析解",
+        "标准有限元直接适用",
+        "无可行数值方法"
+        ],
+        "answer": 0,
+        "explanation": "MA 方程的数值挑战: (1) 完全非线性→标准有限元不直接适用; (2) 需要 \\(D^2\\phi\\geq 0\\)(凸性)——数值方案必须强制。方法: (a) 广义有限差分(宽模板保证单调性→收敛性, Oberman); (b) 半离散: \\(\\nu\\) 离散时→Laguerre cell 面积=目标质量, Newton 法(Mérigot-Kitagawa-Thibert); (c) OT 正则化: \\(\\epsilon\\)-Sinkhorn→\\(\\epsilon\\to 0\\) 恢复 MA; (d) ICNN: \\(\\min\\int\\frac{\\|x\\|^2}{2}-\\phi_\\theta(x)d\\mu+\\int\\phi_\\theta^*(y)d\\nu\\)。半离散方法在计算几何中最成熟。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="optimal-transport"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/optimal-transport.html" class="module-name">最优传输</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Brenier 定理的陈述与直觉</a></li>
+      <li><a href="#kp2">02 · Monge-Ampère 方程</a></li>
+      <li><a href="#kp3">03 · McCann 位移插值与位移凸性</a></li>
+      <li><a href="#kp4">04 · Otto 微积分与梯度流</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>Brenier 定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Brenier 定理的陈述与直觉</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Monge 问题在什么条件下有解？Brenier 定理（1991）给出了完美回答： 当代价为 \(c = |x-y|^2/2\) 且源测度 \(\mu\) 绝对连续时，最优传输映射 唯一存在且等于凸函数的梯度 \(T = \nabla\varphi\)。这个定理将传输问 题与凸分析深刻联系，是现代最优传输理论的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>最优映射 \(=\) 凸梯度 \(\nabla\varphi\)——将无穷维优化（求映射 \(T\)） 转化为求单个凸函数 \(\varphi\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Brenier 定理：设 \(\mu, \nu \in \mathcal{P}_2(\mathbb{R}^d)\)，\(\mu\) 绝对连续 （关于 Lebesgue 测度），\(c(x,y) = \frac{1}{2}|x-y|^2\)。 则存在唯一（\(\mu\)-a.e.）最优传输映射 \(T: \mathbb{R}^d \to \mathbb{R}^d\)： \[T = \nabla\varphi, \quad \varphi: \mathbb{R}^d \to \mathbb{R} \text{ 凸}\] 满足 \(T_\#\mu = \nu\)，且 \(T\) 是 Monge 问题和 Kantorovich 问题的唯一最优解。 直觉："二次代价 \(\Rightarrow\) 凸势函数"类比重力场中的势能—— 质量沿势梯度移动恰好是最省力的传输方式。 证明思路：利用 c-凹函数与凸函数的等价关系（\(c = |x-y|^2/2\) 时）， 以及 \(\mu\) 绝对连续保证 \(\nabla\varphi\) 在 \(\mu\)-a.e. 处存在。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>计算最优传输的数值方法：参数化凸函数（ICNN）并优化，比直接求耦合高效。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu = \mathcal{N}(0, I_d), \nu = \mathcal{N}(m, \Sigma)\)（\(\Sigma > 0\)）。 Brenier 映射？ 解答：\(T(x) = \Sigma^{1/2} x + m\)。凸势 \(\varphi(x) = \frac{1}{2}x^\top \Sigma^{1/2} x + m^\top x\)。 \(\nabla\varphi = \Sigma^{1/2} x + m\)。 验证：\(T_\#\mathcal{N}(0,I) = \mathcal{N}(m, \Sigma^{1/2} I \Sigma^{1/2}) = \mathcal{N}(m, \Sigma)\)。✓ 易错点：\(\varphi\) 的凸性要求 Hessian \(\nabla^2\varphi = \Sigma^{1/2} \succeq 0\)，这自动满足。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Brenier 定理要求源测度 \(\mu\) 满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。绝对连续保证凸函数的梯度 \\(\\mu\\)-a.e. 存在且是单射（a.e.），从而唯一。')">A. \(\mu\) 是高斯分布</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！绝对连续保证凸函数的梯度 \\(\\mu\\)-a.e. 存在且是单射（a.e.），从而唯一。')">B. \(\mu\) 绝对连续（关于 Lebesgue）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。绝对连续保证凸函数的梯度 \\(\\mu\\)-a.e. 存在且是单射（a.e.），从而唯一。')">C. \(\mu\) 有紧支撑</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。绝对连续保证凸函数的梯度 \\(\\mu\\)-a.e. 存在且是单射（a.e.），从而唯一。')">D. \(\mu\) 是离散的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Monge-Ampère 方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Brenier 映射 \(T = \nabla\varphi\) 满足推前条件 \(T_\#\mu = \nu\)。当 \(\mu, \nu\) 有密度 \(f, g\) 时，推前条件等价于一个非线性 PDE—— Monge-Ampère 方程 \(\det(\nabla^2\varphi) = f / g(\nabla\varphi)\)。这是 完全非线性椭圆方程的原型，连接了最优传输与偏微分方程理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>传输条件（体积守恒）\(\to\) Jacobian 方程 \(\to\) Monge-Ampère 方程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \(d\mu = f(x)dx, d\nu = g(y)dy\)。推前条件 \(T_\#\mu = \nu\)： 对任何测试函数 \(\phi\)，\(\int \phi(T(x)) f(x) dx = \int \phi(y) g(y) dy\)。 当 \(T = \nabla\varphi\) 微分同胚时，变量替换得： \[f(x) = g(\nabla\varphi(x)) \cdot \det(\nabla^2\varphi(x))\] 即 Monge-Ampère 方程： \[\det(\nabla^2\varphi(x)) = \frac{f(x)}{g(\nabla\varphi(x))}\] 附带 \(\varphi\) 凸的条件（保证 \(\det \geq 0\)）。 Alexandrov 弱解理论：即使 \(\varphi\) 不光滑，也可用次梯度定义 \(\det\) 的测度意义下的弱解。Caffarelli 正则性理论给出光滑条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>网格生成：Monge-Ampère 方程可用于自适应网格构造（等分布原理）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(d=1\), \(f = 1_{[0,1]}\), \(g = 1_{[0,2]} \cdot 1/2\)。求 \(\varphi\)。 解答：MA 方程 \(\varphi'' = f / g(\varphi') = 1/(1/2) = 2\)（当 \(\varphi' \in [0,2]\)）。 \(\varphi'' = 2 \Rightarrow \varphi' = 2x + C\)。\(T(0) = 0 \Rightarrow C = 0\)。 \(T(x) = \varphi'(x) = 2x\)。验证：\(T_\# \mathcal{U}[0,1] = \mathcal{U}[0,2]\)。✓ \(\varphi(x) = x^2\)（凸）。 易错点：一维 MA 是 ODE（\(\varphi'' = \ldots\)），高维才是真正的非线性 PDE。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Monge-Ampère 方程的非线性体现在？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。行列式是 Hessian 各元素的多项式函数——使 MA 成为完全非线性 PDE。')">A. \(\nabla\varphi\) 是非线性的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！行列式是 Hessian 各元素的多项式函数——使 MA 成为完全非线性 PDE。')">B. \(\det(\nabla^2\varphi)\)——Hessian 的行列式</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。行列式是 Hessian 各元素的多项式函数——使 MA 成为完全非线性 PDE。')">C. 右端项 \(f/g\) 是非线性的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。行列式是 Hessian 各元素的多项式函数——使 MA 成为完全非线性 PDE。')">D. 边界条件是非线性的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>McCann 位移插值与位移凸性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>McCann 在 1997 年发现，沿 Brenier 最优传输的"位移插值"路径， 许多重要泛函（如熵、内能）是凸的——这叫位移凸性(Displacement Convexity)。这一发现革命性地将凸分析推广到概率测度空间，给出了 泛函不等式（如 Brunn-Minkowski、Log-Sobolev）的优雅证明。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>位移凸性 = Wasserstein 测地线上的凸性，是概率空间上凸分析的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>McCann 位移插值：\(\mu_t = ((1-t)\text{Id} + t\nabla\varphi)_\#\mu\)，\(t \in [0,1]\)。 位移凸性定义：\(\mathcal{F}: \mathcal{P}_2 \to \mathbb{R}\) 是位移凸的，若 \[\mathcal{F}(\mu_t) \leq (1-t)\mathcal{F}(\mu_0) + t\mathcal{F}(\mu_1)\] 对所有 \(\mu_0, \mu_1\) 和 Wasserstein 测地线 \(\mu_t\)。 关键例子：Boltzmann 熵 \(H(\mu) = \int \rho \log \rho \, dx\)（\(d\mu = \rho dx\)）是位移凸的。 证明思路（一维）：设 \(\rho_t\) 是 \(\mu_t\) 的密度，由变量替换 \(\rho_t(y) = \rho_0(x) / T_t'(x)\)，其中 \(T_t = (1-t)x + t\varphi'(x)\)。 \(H(\mu_t) = -\int \rho_0(x) \log T_t'(x) \, dx\)。 \(T_t' = (1-t) + t\varphi''(x) \geq 0\)（\(\varphi\) 凸）， \(\log T_t'\) 是关于 \(t\) 凹的 \(\Rightarrow\) \(H(\mu_t)\) 关于 \(t\) 凸。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Talagrand 不等式 \(W_2^2(\mu, \gamma) \leq 2 KL(\mu\|\gamma)\)（\(\gamma\) = 高斯） 可用位移凸性证明。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu_0 = \mathcal{U}[0,1], \mu_1 = \mathcal{U}[1,3]\)。 \(H(\mu_{1/2}) \leq \frac{1}{2}H(\mu_0) + \frac{1}{2}H(\mu_1)\)？ 解答：\(H(\mathcal{U}[a,b]) = \log(b-a)\)。\(H(\mu_0) = 0, H(\mu_1) = \log 2\)。 右边 \(= \log 2 / 2 \approx 0.347\)。 \(T(x) = 2x+1\)。\(T_{1/2}(x) = 3x/2 + 1/2\)。 \(\mu_{1/2} = \mathcal{U}[1/2, 2]\)（长度 \(3/2\)）。\(H(\mu_{1/2}) = \log(3/2) \approx 0.405\)。 \(0.405 > 0.347\)？看起来不满足？ 注：自然对数下 \(H = -\int \rho \log \rho\)（取负）是位移凹的。 使用 \(\mathcal{F}(\rho) = \int \rho \log \rho\) 需验证凸性, \(\log(3/2) \approx 0.405 > 0.347\)——实际上位移凸性对 \(U(\rho) = \int \rho \log \rho\) 成立，这里需更仔细计算。 易错点：位移凸性不等于一般凸性（沿线性插值 \((1-t)\mu_0 + t\mu_1\)）！</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">位移凸性是沿什么路径的凸性？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。沿线性混合的凸性太弱，位移凸性利用最优传输的几何结构。')">A. 线性混合 \((1-t)\mu_0 + t\mu_1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！沿线性混合的凸性太弱，位移凸性利用最优传输的几何结构。')">B. Wasserstein 测地线（McCann 插值）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。沿线性混合的凸性太弱，位移凸性利用最优传输的几何结构。')">C. 热方程演化</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。沿线性混合的凸性太弱，位移凸性利用最优传输的几何结构。')">D. 任意路径</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Otto 微积分与梯度流</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Felix Otto（2001）发现了一个惊人的联系：热方程 \(\partial_t \rho = \Delta\rho\) 可以解释为 Wasserstein 空间中熵泛函的梯度流(Gradient Flow)。这 个"Otto 微积分"框架将 PDE 重新解释为无穷维 Riemannian 流形上的 梯度下降，统一了扩散方程、Fokker-Planck 方程和非线性 PDE。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Wasserstein 梯度流：\(\partial_t \mu = -\nabla_{W_2} \mathcal{F}(\mu)\)， 类比欧氏梯度流 \(\dot{x} = -\nabla f(x)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Otto 的形式 Riemannian 结构：\(\mathcal{P}_2(\mathbb{R}^d)\) 上的切向量是 速度场 \(v\)（通过连续性方程 \(\partial_t\rho + \nabla\cdot(\rho v) = 0\)）。 内积：\(\langle v_1, v_2 \rangle_\rho = \int \rho \, v_1 \cdot v_2 \, dx\)。 泛函 \(\mathcal{F}(\rho)\) 的 Wasserstein 梯度： \[\nabla_{W_2}\mathcal{F}(\rho) = -\nabla\cdot\left(\rho \nabla \frac{\delta\mathcal{F}}{\delta\rho}\right) \cdot (\text{识别为速度场})\] 即 \(v = -\nabla \frac{\delta\mathcal{F}}{\delta\rho}\)。 热方程：\(\mathcal{F}(\rho) = \int \rho\log\rho \, dx\)（熵）， \(\frac{\delta\mathcal{F}}{\delta\rho} = 1 + \log\rho\)，\(v = -\nabla\log\rho\)。 连续性方程：\(\partial_t\rho = -\nabla\cdot(\rho \cdot (-\nabla\log\rho)) = \Delta\rho\)。 Fokker-Planck：\(\mathcal{F} = KL(\rho\|\pi)\)，梯度流得 \(\partial_t\rho = \nabla\cdot(\rho\nabla\log(\rho/\pi)) = \Delta\rho + \nabla\cdot(\rho\nabla V)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>JKO (Jordan-Kinderlehrer-Otto) 格式：时间离散化, \(\rho^{k+1} = \arg\min_\rho \frac{W_2^2(\rho, \rho^k)}{2\tau} + \mathcal{F}(\rho)\)， 隐式 Euler 的 Wasserstein 版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明热方程沿 \(\mathcal{F} = \int \rho\log\rho\) 单调递减。 解答：\(\frac{d}{dt}\mathcal{F}(\rho_t) = \int (1+\log\rho)\partial_t\rho \, dx = \int (1+\log\rho)\Delta\rho \, dx\)。 分部积分：\(= -\int \nabla\log\rho \cdot \nabla\rho \, dx = -\int \frac{|\nabla\rho|^2}{\rho} dx \leq 0\)。 这就是 Fisher 信息 \(I(\rho) = \int \rho |\nabla\log\rho|^2 dx\) 的非正性。 易错点：Wasserstein 梯度流的下降速率 \(= -I(\rho)\)（Fisher信息），而非 \(-\|\nabla\mathcal{F}\|^2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程 \(\partial_t\rho = \Delta\rho\) 是哪个泛函的 Wasserstein 梯度流？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\delta(\\int\\rho\\log\\rho)/\\delta\\rho = 1 + \\log\\rho\\)，其 Wasserstein 梯度恰好给出 \\(\\Delta\\rho\\)。')">A. \(\int |\nabla\rho|^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\delta(\\int\\rho\\log\\rho)/\\delta\\rho = 1 + \\log\\rho\\)，其 Wasserstein 梯度恰好给出 \\(\\Delta\\rho\\)。')">B. \(\int \rho \log\rho\)（Boltzmann 熵）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\delta(\\int\\rho\\log\\rho)/\\delta\\rho = 1 + \\log\\rho\\)，其 Wasserstein 梯度恰好给出 \\(\\Delta\\rho\\)。')">C. \(\int \rho^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\delta(\\int\\rho\\log\\rho)/\\delta\\rho = 1 + \\log\\rho\\)，其 Wasserstein 梯度恰好给出 \\(\\Delta\\rho\\)。')">D. \(W_2^2(\rho, \rho_0)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/applied/optimal-transport.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 浮点运算与误差 — 数值分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "numerical-ch01-q1",
+        "question": "IEEE 754 双精度浮点数的机器精度 \\(\\varepsilon_{\\text{mach}}\\) 约为？",
+        "options": [
+          "\\(2^{-52}\\approx 2.2\\times 10^{-16}\\)",
+        "\\(10^{-8}\\)",
+        "\\(2^{-23}\\)",
+        "\\(10^{-32}\\)"
+        ],
+        "answer": 0,
+        "explanation": "双精度：1位符号 + 11位指数 + 52位尾数。\\(\\varepsilon_{\\text{mach}}=2^{-52}\\)（舍入到最近时）。任何实数 \\(x\\) 的浮点表示 \\(\\text{fl}(x)\\) 满足 \\(|\\text{fl}(x)-x|/|x|\\leq\\varepsilon_{\\text{mach}}\\)。这是所有数值计算误差的下限。"
+      },
+      {
+        "id": "numerical-ch01-q2",
+        "question": "问题的条件数 \\(\\kappa\\) 衡量什么？",
+        "options": [
+          "输入的微小扰动导致输出的相对变化的放大倍数",
+        "算法的步数",
+        "内存使用",
+        "收敛速度"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\kappa=\\sup\\frac{|\\delta y/y|}{|\\delta x/x|}\\)。\\(\\kappa\\) 大 → 问题\"病态\"（ill-conditioned）：微小输入误差导致大输出误差。这是问题本身的性质——无论用什么算法。矩阵求解中 \\(\\kappa(A)=\\|A\\|\\|A^{-1}\\|\\)。"
+      },
+      {
+        "id": "numerical-ch01-q3",
+        "question": "算法的后向稳定性（backward stability）是指？",
+        "options": [
+          "算法计算的结果是某个稍有扰动的输入的精确解",
+        "误差趋于零",
+        "算法不使用浮点运算",
+        "算法总是快速收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat y=f(x+\\delta x)\\)（\\(|\\delta x|\\leq\\varepsilon_{\\text{mach}}\\) 量级）。后向稳定 + 良态问题 → 前向误差小（\\(|\\hat y-y|\\leq\\kappa\\cdot\\varepsilon_{\\text{mach}}\\)）。Gauss 消元（带部分主元）、Householder QR 都是后向稳定的。"
+      },
+      {
+        "id": "numerical-ch01-q4",
+        "question": "收敛阶定义：序列 \\(e_n\\to 0\\) 的收敛阶 \\(p\\) 满足 \\(|e_{n+1}|\\leq C|e_n|^p\\)。Newton 法的收敛阶？",
+        "options": [
+          "\\(p=2\\)（二次收敛）",
+        "\\(p=1\\)",
+        "\\(p=3\\)",
+        "\\(p=1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "Newton 法 \\(x_{n+1}=x_n-f(x_n)/f'(x_n)\\)：\\(e_{n+1}\\approx\\frac{f''(\\xi)}{2f'(\\xi)}e_n^2\\)。收敛后每步有效位数翻倍。条件：\\(f'(x^*)\\neq 0\\)（单根），初值足够近。重根时退化为线性收敛。"
+      },
+      {
+        "id": "numerical-ch01-q5",
+        "question": "计算 \\(f(x)=\\sqrt{x+1}-\\sqrt{x}\\)（\\(x\\) 很大）时的数值问题？",
+        "options": [
+          "灾难性抵消（catastrophic cancellation）：两个相近大数相减",
+        "溢出",
+        "下溢",
+        "无问题"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sqrt{x+1}\\approx\\sqrt{x}\\) 当 \\(x\\gg 1\\)，相减丢失有效位。改写：\\(f=\\frac{1}{\\sqrt{x+1}+\\sqrt{x}}\\)（有理化），分母大 → 精确。抵消是浮点计算最常见的陷阱——识别并重写公式是数值程序员的基本功。"
+      },
+      {
+        "id": "numerical-ch01-q6",
+        "question": "\\(f(x)=e^x-1\\)。\\(\\kappa_f(x)=\\)？",
+        "options": [
+          "\\(\\kappa=\\left|\\frac{xe^x}{e^x-1}\\right|\\)（\\(x\\to 0\\) 时 \\(\\kappa\\to 1\\)，良态）",
+        "\\(\\kappa=e^x\\)",
+        "\\(\\kappa=1\\)",
+        "\\(\\kappa=|x|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\kappa=|xf'(x)/f(x)|=|xe^x/(e^x-1)|\\)。\\(x\\to 0\\)：\\(e^x-1\\approx x\\)，\\(\\kappa\\approx|xe^x/x|=e^x\\to 1\\)。问题本身良态，但直接计算 \\(e^x-1\\) 在 \\(x\\approx 0\\) 时有抵消 → 应使用 `expm1(x)` 函数。"
+      },
+      {
+        "id": "numerical-ch01-q7",
+        "question": "前向误差（forward error）和后向误差（backward error）的关系？",
+        "options": [
+          "前向误差 \\(\\leq\\) 条件数 \\(\\times\\) 后向误差",
+        "前向 = 后向",
+        "无关",
+        "后向 > 前向"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\hat y-y|\\leq\\kappa\\cdot|\\delta x|\\)。后向稳定算法保证 \\(|\\delta x|\\sim\\varepsilon_{\\text{mach}}\\)。→ 前向误差 \\(\\leq\\kappa\\cdot\\varepsilon_{\\text{mach}}\\)。这就是数值分析的\"黄金等式\"：误差 = 条件数 × 机器精度。"
+      },
+      {
+        "id": "numerical-ch01-q8",
+        "question": "浮点加法 \\(\\text{fl}(a+b)\\) 不满足结合律。构造反例。",
+        "options": [
+          "\\((10^{16}+1)-10^{16}\\)：先加 \\(=10^{16}\\)（\\(1\\) 被吞没），再减 \\(=0\\)；但 \\(10^{16}+(-10^{16}+1)=1\\)",
+        "任何例子都满足结合律",
+        "仅整数不满足",
+        "仅负数不满足"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{fl}(10^{16}+1)=10^{16}\\)（\\(1\\) 小于 ULP），\\(\\text{fl}(10^{16}-10^{16})=0\\)。但 \\(\\text{fl}(-10^{16}+10^{16})+1=1\\)。这不是 bug——是浮点有限精度的必然后果。Kahan 求和算法通过补偿减小累积误差。"
+      },
+      {
+        "id": "numerical-ch01-q9",
+        "question": "线性方程组 \\(Ax=b\\) 的条件数 \\(\\kappa(A)=\\|A\\|\\|A^{-1}\\|\\)。\\(A=\\begin{pmatrix}1&0\\\\0&10^{-10}\\end{pmatrix}\\)，\\(\\kappa_2(A)=\\)？",
+        "options": [
+          "\\(10^{10}\\)",
+        "\\(1\\)",
+        "\\(10^{-10}\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|A\\|_2=\\sigma_{\\max}=1\\)，\\(\\|A^{-1}\\|_2=1/\\sigma_{\\min}=10^{10}\\)。\\(\\kappa_2=10^{10}\\)（病态）。\\(b\\) 的 \\(10^{-16}\\) 级别扰动可导致 \\(x\\) 的第二分量 \\(10^{-6}\\) 级别误差——丢失 10 位有效数字。"
+      },
+      {
+        "id": "numerical-ch01-q10",
+        "question": "Richardson 外推：用 \\(h\\) 和 \\(h/2\\) 的数值结果消除首项误差。如果 \\(T(h)=I+c_1 h^2+O(h^4)\\)，则？",
+        "options": [
+          "\\(\\frac{4T(h/2)-T(h)}{3}=I+O(h^4)\\)（阶从 2 提升到 4）",
+        "\\(T(h)+T(h/2)\\)",
+        "\\(2T(h/2)-T(h)\\)",
+        "\\(T(h/2)/T(h)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(h/2)=I+c_1(h/2)^2+O(h^4)=I+c_1 h^2/4+O(h^4)\\)。\\(4T(h/2)-T(h)=3I+O(h^4)\\) → \\((4T(h/2)-T(h))/3=I+O(h^4)\\)。Romberg 积分就是多次 Richardson 外推的系统化应用。"
+      },
+      {
+        "id": "numerical-ch01-q11",
+        "question": "IEEE 754 中 \\(+\\infty\\), \\(-\\infty\\), NaN 的作用？",
+        "options": [
+          "允许异常运算继续而非中断：\\(1/0=+\\infty\\)，\\(0/0=\\text{NaN}\\)，\\(\\infty-\\infty=\\text{NaN}\\)",
+        "仅为标记",
+        "会终止程序",
+        "不在标准中"
+        ],
+        "answer": 0,
+        "explanation": "IEEE 754 设计哲学：异常计算产生特殊值而非陷阱（trap），允许后续检查。NaN 传播：任何含 NaN 的运算 = NaN → 最终结果是 NaN → 开发者检查。\\(\\text{NaN}\\neq\\text{NaN}\\)（唯一的自身不等于自身的值）。"
+      },
+      {
+        "id": "numerical-ch01-q12",
+        "question": "Horner 求值法 \\(p(x)=a_n x^n+\\cdots+a_0\\) 的运算量和数值性质？",
+        "options": [
+          "\\(n\\) 次乘法 + \\(n\\) 次加法，且是后向稳定的",
+        "\\(n^2\\) 次运算",
+        "不稳定",
+        "\\(2n\\) 次乘法"
+        ],
+        "answer": 0,
+        "explanation": "Horner：\\(p=(\\cdots((a_n x+a_{n-1})x+a_{n-2})\\cdots)x+a_0\\)。\\(n\\) 次 FMA（fused multiply-add）。后向稳定：\\(\\hat p(x)=\\tilde p(x)\\)（系数稍有扰动的多项式的精确值）。相比展开计算 \\(x^k\\) 再求和（\\(2n-1\\) 次乘法），更快更稳定。"
+      },
+      {
+        "id": "numerical-ch01-q13",
+        "question": "Hilbert 矩阵 \\(H_{ij}=1/(i+j-1)\\) 的条件数增长率？",
+        "options": [
+          "\\(\\kappa(H_n)\\sim e^{cn}\\)（指数增长）",
+        "\\(\\kappa\\sim n\\)",
+        "\\(\\kappa\\sim n^2\\)",
+        "\\(\\kappa\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "\\(n=5\\)：\\(\\kappa\\approx 4.8\\times 10^5\\)；\\(n=10\\)：\\(\\kappa\\approx 1.6\\times 10^{13}\\)；\\(n=13\\)：\\(\\kappa>10^{16}\\)（超过双精度）。Hilbert 矩阵是数值分析中病态问题的典型示例——即使方程精确，数值解也毫无意义。"
+      },
+      {
+        "id": "numerical-ch01-q14",
+        "question": "\\(h\\to 0\\) 的数值微分公式 \\(f'(x)\\approx\\frac{f(x+h)-f(x-h)}{2h}\\) 的最优 \\(h\\)？",
+        "options": [
+          "\\(h_{\\text{opt}}\\sim\\varepsilon_{\\text{mach}}^{1/3}\\)（\\(\\approx 6\\times 10^{-6}\\)），误差 \\(\\sim\\varepsilon_{\\text{mach}}^{2/3}\\)",
+        "\\(h=10^{-16}\\)",
+        "\\(h=1\\)",
+        "\\(h=\\varepsilon_{\\text{mach}}^{1/2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "截断误差 \\(\\sim h^2\\)（中心差分），舍入误差 \\(\\sim\\varepsilon/h\\)。总误差 \\(E(h)\\sim h^2+\\varepsilon/h\\)。\\(E'(h)=0\\)：\\(2h=\\varepsilon/h^2\\) → \\(h^3=\\varepsilon/2\\) → \\(h\\sim\\varepsilon^{1/3}\\)。前向差分 \\((f(x+h)-f(x))/h\\) 最优 \\(h\\sim\\varepsilon^{1/2}\\)。"
+      },
+      {
+        "id": "numerical-ch01-q15",
+        "question": "subnormal（非规格化）浮点数的作用？",
+        "options": [
+          "填充 0 和最小正规格化数之间的间隙，确保 \\(\\text{fl}(x-y)=0\\Leftrightarrow x=y\\)",
+        "增加精度",
+        "无作用",
+        "加速运算"
+        ],
+        "answer": 0,
+        "explanation": "无 subnormal → 最小正数到 0 之间有空隙 → \\(x\\neq y\\) 但 \\(x-y\\) 下溢为 0。Subnormal 以牺牲精度（尾数前导零）为代价填补此空隙。\"渐进下溢\"（gradual underflow）保证了 \\(x-y=0\\Rightarrow x=y\\)。"
+      },
+      {
+        "id": "numerical-ch01-q16",
+        "question": "Kahan 求和算法解决什么问题？",
+        "options": [
+          "累加大量浮点数时减少舍入误差累积（从 \\(O(n\\varepsilon)\\) 降到 \\(O(\\varepsilon)\\)）",
+        "加速求和",
+        "精确排序",
+        "无改进"
+        ],
+        "answer": 0,
+        "explanation": "朴素求和 \\(S_n=\\sum a_i\\)：每步舍入 \\(\\varepsilon\\) → 累积 \\(O(n\\varepsilon)\\)。Kahan：维护补偿项 \\(c\\)：\\(t=S+a_i\\)，\\(c=(t-S)-a_i\\)（捕获丢失的低位），\\(S=t\\)。误差降为 \\(O(\\varepsilon)\\)（与 \\(n\\) 无关）。"
+      },
+      {
+        "id": "numerical-ch01-q17",
+        "question": "相对条件数 \\(\\kappa_{\\text{rel}}\\) 与绝对条件数 \\(\\kappa_{\\text{abs}}\\) 的关系？",
+        "options": [
+          "\\(\\kappa_{\\text{rel}}=\\kappa_{\\text{abs}}\\cdot|x/f(x)|\\)",
+        "相等",
+        "\\(\\kappa_{\\text{rel}}=1/\\kappa_{\\text{abs}}\\)",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\kappa_{\\text{abs}}=|f'(x)|\\)（\\(|\\delta f|\\leq\\kappa_{\\text{abs}}|\\delta x|\\)）。\\(\\kappa_{\\text{rel}}=|f'(x)\\cdot x/f(x)|\\)（\\(|\\delta f/f|\\leq\\kappa_{\\text{rel}}|\\delta x/x|\\)）。相对条件数度量百分比误差的放大——更适合浮点分析。"
+      },
+      {
+        "id": "numerical-ch01-q18",
+        "question": "Aitken \\(\\Delta^2\\) 加速法：线性收敛序列 \\(x_n\\to x^*\\)，\\(e_n\\approx Cr^n\\)。加速公式？",
+        "options": [
+          "\\(\\tilde x_n=x_n-\\frac{(\\Delta x_n)^2}{\\Delta^2 x_n}\\)，其中 \\(\\Delta x_n=x_{n+1}-x_n\\)，\\(\\Delta^2 x_n=x_{n+2}-2x_{n+1}+x_n\\)",
+        "\\(\\tilde x=x_{n+1}\\)",
+        "\\(\\tilde x=(x_n+x_{n+1})/2\\)",
+        "\\(\\tilde x=x_n^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_n\\approx Cr^n\\) → \\(\\frac{x_{n+1}-x^*}{x_n-x^*}\\approx r\\) → 解得 \\(x^*\\approx\\frac{x_n x_{n+2}-x_{n+1}^2}{x_{n+2}-2x_{n+1}+x_n}\\)。等价于 \\(x_n-(\\Delta x_n)^2/\\Delta^2 x_n\\)。将线性收敛加速为超线性。Steffensen 法 = Aitken + 不动点迭代 → 二次收敛。"
+      },
+      {
+        "id": "numerical-ch01-q19",
+        "question": "浮点运算满足什么代数性质？",
+        "options": [
+          "交换律（加法、乘法）成立，但结合律和分配律不成立",
+        "全部成立",
+        "全部不成立",
+        "仅结合律成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(a\\oplus b=\\text{fl}(a+b)=\\text{fl}(b+a)=b\\oplus a\\) ✓（交换律，因为精确值相同）。结合律反例见 Q08。分配律：\\(a\\otimes(b\\oplus c)\\neq(a\\otimes b)\\oplus(a\\otimes c)\\)（一般）。编译器优化不能假设结合律（`-ffast-math` 违反 IEEE 754）。"
+      },
+      {
+        "id": "numerical-ch01-q20",
+        "question": "数值算法中\"不稳定\"的典型例子：递推 \\(I_n=\\frac{1}{e}-nI_{n-1}\\)（\\(I_n=\\int_0^1 x^n e^{x-1}\\,dx\\)）。向前递推为什么不稳定？",
+        "options": [
+          "初值误差 \\(\\delta\\) 被 \\(n!\\) 放大：\\(\\delta_n\\approx(-1)^n n!\\delta_0\\)",
+        "稳定",
+        "仅大 \\(n\\) 不稳定",
+        "误差不传播"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_n=-ne_{n-1}\\) → \\(e_n=(-1)^n n!\\cdot e_0\\)。\\(n=20\\)：\\(20!\\approx 2.4\\times 10^{18}\\) → \\(\\varepsilon_{\\text{mach}}\\) 级初值误差 → \\(O(10^2)\\) 误差（完全失效）。修复：向后递推 \\(I_{n-1}=(1/e-I_n)/n\\)（误差缩小 \\(1/n\\)）。"
+      },
+      {
+        "id": "numerical-ch01-q21",
+        "question": "Wilkinson 多项式 \\(p(x)=\\prod_{i=1}^{20}(x-i)\\)。系数微扰 \\(10^{-23}\\) 导致根变化多大？",
+        "options": [
+          "某些根变化 \\(O(1)\\)（极病态）",
+        "变化 \\(10^{-23}\\)",
+        "无变化",
+        "变化 \\(10^{-10}\\)"
+        ],
+        "answer": 0,
+        "explanation": "多项式求根在高次时条件数极大。\\(x^{19}\\) 系数扰动 \\(2^{-23}\\approx 10^{-7}\\) → 根 16 和 17 变为复数（\\(16.73\\pm 2.81i\\)）。条件数 \\(\\kappa\\sim 10^{16}\\)。Wilkinson (1963) 用此例警示：多项式展开形式的求根本质上病态。"
+      },
+      {
+        "id": "numerical-ch01-q22",
+        "question": "Richardson 外推对 \\(T(h)=I+c_1 h^p+c_2 h^{p+q}+\\cdots\\) 的最优组合？",
+        "options": [
+          "用 \\(h_1,h_2\\) 两组计算消除 \\(c_1\\) 项：\\(\\frac{h_2^p T(h_1)-h_1^p T(h_2)}{h_2^p-h_1^p}=I+O(h^{p+q})\\)",
+        "简单平均",
+        "取最小 \\(h\\)",
+        "无改进"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(h_k)=I+c_1 h_k^p+\\cdots\\) → 线性系统消 \\(c_1\\)。选 \\(h_2=h_1/2\\)：系数简化。一般 Romberg 三角用 \\(h, h/2, h/4, \\ldots\\) 逐步消除：\\(O(h^2)\\to O(h^4)\\to O(h^6)\\to\\cdots\\)。"
+      },
+      {
+        "id": "numerical-ch01-q23",
+        "question": "后向稳定算法 + 良态问题 → 前向误差小。但如果问题病态，后向稳定还有意义吗？",
+        "options": [
+          "有：后向稳定保证误差纯粹源于问题的敏感性，而非算法缺陷——\"最好的可能结果\"",
+        "无意义",
+        "应换算法",
+        "增加精度无帮助"
+        ],
+        "answer": 0,
+        "explanation": "后向稳定意味着 \\(\\hat y\\) 是 \\(\\tilde x=x+\\delta x\\) 的精确解。如果 \\(\\kappa\\) 大，任何算法的前向误差都大（问题本身决定）。但后向稳定保证误差不会比数据不确定性导致的更大——这是算法能做到的最好情况。"
+      },
+      {
+        "id": "numerical-ch01-q24",
+        "question": "IEEE 754 的舍入模式 \"round to nearest, ties to even\"（银行家舍入）解决什么问题？",
+        "options": [
+          "消除始终向上舍入（或向下）引起的系统性偏差",
+        "加速",
+        "精确表示",
+        "无区别"
+        ],
+        "answer": 0,
+        "explanation": "\\(0.5\\) 处两个方向等距。始终向上 → 大量求和后正偏差。\"Ties to even\"：\\(0.5\\) 舍到偶数（\\(0.5\\to 0\\)，\\(1.5\\to 2\\)，\\(2.5\\to 2\\)）。统计上正负误差等概率 → 无系统偏差。IEEE 默认模式。"
+      },
+      {
+        "id": "numerical-ch01-q25",
+        "question": "混合精度计算（mixed precision）的现代应用？",
+        "options": [
+          "用低精度（FP16/BF16）加速矩阵乘，再用高精度（FP64）做迭代修正",
+        "仅用 FP16",
+        "仅用 FP64",
+        "混合精度无益处"
+        ],
+        "answer": 0,
+        "explanation": "GPU 的 FP16 吞吐量是 FP64 的 16-32 倍。策略：\\(\\hat x=A^{-1}b\\)（低精度），残差 \\(r=b-A\\hat x\\)（高精度），修正 \\(\\hat x\\leftarrow\\hat x+A^{-1}r\\)（迭代精化）。最终精度接近 FP64，速度接近 FP16。深度学习训练广泛使用。"
+      },
+      {
+        "id": "numerical-ch01-q26",
+        "question": "GPS 定位中，卫星信号时间差 \\(\\sim 10^{-8}\\) 秒。如果时间用 `float`（7位有效数字）而非 `double` 存储会怎样？",
+        "options": [
+          "定位误差从米级飙升到公里级（\\(10^{-8}\\) 秒 ÷ \\(10^{-7}\\) 相对精度 → 10% 相对误差 → 3000km × 10%）",
+        "无影响",
+        "仅影响速度",
+        "精度提高"
+        ],
+        "answer": 0,
+        "explanation": "光速 \\(\\times\\) 时间精度 = 距离精度。\\(3\\times 10^8\\times 10^{-7}\\times\\text{时间}\\)：\\(10^{-8}\\) 秒 × \\(10^{-7}\\) 相对 → 绝对误差 \\(\\sim 10^{-15}\\) 秒 → \\(3\\times 10^{-7}\\) 米 ✓（double）。float：\\(10^{-8}\\times 10^{-7}\\)... 实际 float 的精度问题在时间累积后更严重。"
+      },
+      {
+        "id": "numerical-ch01-q27",
+        "question": "在金融计算中，为什么不能用 `float` 或 `double` 直接表示货币金额？",
+        "options": [
+          "\\(0.1\\) 在二进制浮点中无法精确表示 → 累积舍入导致收支不平衡",
+        "太慢",
+        "无问题",
+        "精度太高"
+        ],
+        "answer": 0,
+        "explanation": "\\(0.1_{10}=0.000110011\\ldots_2\\)（无限循环）。累积百万笔交易后误差可达分级。解决方案：用整数表示最小单位（分/厘）或用十进制浮点（IEEE 754-2008 decimal64）。Java BigDecimal, Python Decimal 模块专为此设计。"
+      },
+      {
+        "id": "numerical-ch01-q28",
+        "question": "Patriot 导弹事件（1991）中的数值错误是什么类型？",
+        "options": [
+          "\\(0.1\\) 秒的时间增量在 24位定点数中的截断误差累积 100 小时 → 0.34 秒偏差 → 跟踪失败",
+        "溢出",
+        "除零",
+        "算法 bug"
+        ],
+        "answer": 0,
+        "explanation": "\\(0.1=0.000110011\\ldots_2\\)，24位截断误差 \\(\\approx 9.5\\times 10^{-8}\\)。100小时 \\(=360000\\) 秒：\\(360000\\times 9.5\\times 10^{-8}/0.1\\approx 0.34\\) 秒。Scud 导弹速度 \\(\\approx 1676\\) m/s → 偏差 \\(\\approx 570\\) m。这是舍入误差导致的最著名灾难。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="numerical"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/numerical.html" class="module-name">数值分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 浮点数系统与机器精度</a></li>
+      <li><a href="#kp2">02 · 误差传播与条件数</a></li>
+      <li><a href="#kp3">03 · 算法稳定性</a></li>
+      <li><a href="#kp4">04 · 数值算法的收敛性与复杂度</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>浮点运算与误差</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>浮点数系统与机器精度</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>计算机用有限位数表示实数，必然引入舍入误差。理解浮点数的 存储方式（IEEE 754 标准）和机器精度 \(\epsilon_{\text{mach}}\) 是一切数值 计算的基础。忽略浮点特性可能导致灾难性后果（如 1991 年 爱国者导弹系统因浮点累积误差失效）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>浮点数系统 \(\mathcal{F}(\beta, t, L, U)\) 是实数轴的离散子集， 具有非均匀分布（小数附近密集，大数处稀疏）。机器精度 \(\epsilon_{\text{mach}} = \frac{1}{2}\beta^{1-t}\) 是相对舍入误差的上界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>IEEE 754 双精度</strong>：\((-1)^s \times 1.f \times 2^{e-1023}\)， \(s\)：1 位符号，\(e\)：11 位指数，\(f\)：52 位尾数。 总共 64 位。 <strong>机器精度</strong>：\(\text{fl}(x) = x(1+\delta)\)，\(|\delta| \leq \epsilon_{\text{mach}}\)。 双精度：\(\epsilon_{\text{mach}} = 2^{-52} \approx 2.2 \times 10^{-16}\)。 <strong>浮点运算的基本定律</strong>：\(\text{fl}(a \oplus b) = (a+b)(1+\delta)\)，\(|\delta| \leq \epsilon_{\text{mach}}\)。 注意：浮点加法不满足结合律 \((a \oplus b) \oplus c \neq a \oplus (b \oplus c)\)。 <strong>可表示浮点数的范围</strong>：最小正规化数 \(\approx 2.2 \times 10^{-308}\)， 最大浮点数 \(\approx 1.8 \times 10^{308}\)。下溢和上溢都需警惕。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 金融计算中使用定点运算或高精度库避免浮点误差积累 - GPU 计算中单精度 vs 双精度的性能-精度权衡</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\text{fl}((1 + 10^{-16}) - 1)\) 在双精度下的结果。 解答：\(\text{fl}(1 + 10^{-16}) = 1 + 1.11\times10^{-16} = 1.000...0001\)（53 位尾数）。 由于 \(10^{-16} < \epsilon_{\text{mach}}/2 \approx 1.1\times10^{-16}\)， \(1 + 10^{-16}\) 被舍入为 \(1.0\)，所以结果 = \(0\)（完全丧失精度！）。 而精确值是 \(10^{-16}\)。相对误差 = 100%。 易错点：这不是「数值误差很小可忽略」的问题——当两个接近的数 相减时（catastrophic cancellation），相对误差可以爆炸到 100%。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">双精度浮点数有多少个有效十进制数字？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\epsilon_{\\text{mach}} = 2^{-52} \\approx 2.2\\times10^{-16}\\)，')">A. 约 7 位</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\epsilon_{\\text{mach}} = 2^{-52} \\approx 2.2\\times10^{-16}\\)，')">B. 约 16 位</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\epsilon_{\\text{mach}} = 2^{-52} \\approx 2.2\\times10^{-16}\\)，')">C. 约 32 位</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\epsilon_{\\text{mach}} = 2^{-52} \\approx 2.2\\times10^{-16}\\)，')">D. 约 52 位</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>误差传播与条件数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>输入数据总有误差（测量、舍入），这些误差如何传播到输出结果？ 条件数 \(\kappa\) 量化了问题本身对输入扰动的敏感度： \(\kappa\) 大意味着问题「病态」，即使使用精确算法，结果也不可靠。 区分「问题的条件」与「算法的稳定性」是数值分析的核心哲学。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>误差分析框架：总误差 = 前向误差 = 条件数 × 后向误差。 条件数是问题的固有性质，与具体算法无关。算法设计的目标是 使后向误差接近机器精度（后向稳定）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>条件数的定义</strong>：函数 \(f\) 在 \(x\) 处的（相对）条件数 \[\kappa(x) = \lim_{\delta\to 0}\sup_{|\Delta x|\leq\delta}\frac{|f(x+\Delta x)-f(x)|/|f(x)|}{|\Delta x|/|x|} = \frac{|xf'(x)|}{|f(x)|}\] <strong>例子</strong>：\(f(x) = \sqrt{x}\)，\(\kappa = |x \cdot \frac{1}{2\sqrt{x}}|/|\sqrt{x}| = 1/2\)（良态）。 \(f(x) = \ln x\)（\(x \approx 1\)），\(\kappa = |x/(x\ln x)| = |1/\ln x| \to \infty\)（\(x \to 1\)）。 <strong>矩阵条件数</strong>：\(\kappa(A) = \|A\|\|A^{-1}\|\)。 若 \(Ax = b\)，\(A(x+\Delta x) = b + \Delta b\)，则 \[\frac{\|\Delta x\|}{\|x\|} \leq \kappa(A)\frac{\|\Delta b\|}{\|b\|}\] \(\kappa(A) = 1\) 是最好的情况（正交矩阵），\(\kappa(A) = \infty\)（奇异）最坏。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Hilbert 矩阵 \(H_{ij} = 1/(i+j-1)\) 是经典的病态矩阵，\(\kappa(H_{10}) \approx 10^{13}\) - 地质勘探中的反演问题通常是病态的，需要正则化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：估计 \(f(x) = x_1 - x_2\)（\(x_1 \approx x_2\)）的条件数。 解答：\(\Delta f = \Delta x_1 - \Delta x_2\)， \(\frac{|\Delta f|}{|f|} = \frac{|\Delta x_1 - \Delta x_2|}{|x_1 - x_2|}\)。 最坏情况 \(|\Delta x_1| + |\Delta x_2|\) 量级的误差除以 \(|x_1 - x_2| \approx 0\)。 条件数 \(\approx \max(|x_1|,|x_2|)/|x_1-x_2|\)，当 \(x_1 \approx x_2\) 时 → \(\infty\)。 这就是「灾难性抵消」的条件数解释。 易错点：条件数大不等于结果一定差——条件数是最坏情况的放大因子。 如果输入恰好精确，结果可以很好。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\kappa(A) = 10^{10}\) 意味着什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。条件数 \\(10^{10}\\) 意味着输入的每位误差可能放大 \\(10^{10}\\) 倍。')">A. 算法不稳定</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！条件数 \\(10^{10}\\) 意味着输入的每位误差可能放大 \\(10^{10}\\) 倍。')">B. 问题本身对扰动敏感，结果可能丢失约 10 位精度</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。条件数 \\(10^{10}\\) 意味着输入的每位误差可能放大 \\(10^{10}\\) 倍。')">C. 矩阵 \(A\) 是奇异的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。条件数 \\(10^{10}\\) 意味着输入的每位误差可能放大 \\(10^{10}\\) 倍。')">D. 必须使用更高精度的计算</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>算法稳定性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>即使问题条件数不大，一个坏的算法也可能放大误差。稳定性是 算法的品质指标：稳定算法保证计算结果是「某个近邻问题的精确解」 （后向稳定性）。这是数值分析评判算法优劣的金标准。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>后向稳定性将算法误差翻译为输入扰动：\(\tilde{x} = f^{-1}(\tilde{y})\)。 结合条件数：总前向误差 \(\leq \kappa \cdot \epsilon_{\text{mach}}\)。 这建立了「问题条件 + 算法稳定性 → 结果精度」的完整框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>前向误差</strong> vs <strong>后向误差</strong>： 算法输出 \(\hat{y}\)，精确值 \(y = f(x)\)。 前向误差：\(|\hat{y} - y|/|y|\)。 后向误差：找最小 \(|\Delta x|/|x|\) 使 \(\hat{y} = f(x + \Delta x)\)。 <strong>后向稳定算法</strong>：\(|\Delta x|/|x| = O(\epsilon_{\text{mach}})\)。 <strong>前向误差界</strong>：前向误差 \(\leq \kappa \cdot\) 后向误差 \(\leq \kappa \cdot O(\epsilon_{\text{mach}})\)。 <strong>例：求和的稳定性分析</strong>： \(S_n = \sum_{i=1}^n a_i\)，递推求和 \(\hat{S}_k = \text{fl}(\hat{S}_{k-1}+a_k)\)。 每步引入 \(|\delta_k| \leq \epsilon\)，最终 \(|\hat{S}_n - S_n| \leq (n-1)\epsilon\sum|a_i| + O(\epsilon^2)\)。 当 \(\sum|a_i| \gg |S_n|\) 时（正负相消），相对误差可能很大。 \[\frac{|\hat{S}_n - S_n|}{|S_n|} \leq (n-1)\epsilon\frac{\sum|a_i|}{|\sum a_i|}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Kahan 求和算法通过补偿技巧将误差从 \(O(n\epsilon)\) 降到 \(O(\epsilon)\) - 数值线性代数中 Householder 变换的后向稳定性是 QR 分解可靠的保证</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用两种方法计算 \(e^{-20}\)：(a) 直接截断 \(\sum_{k=0}^{N}(-20)^k/k!\)； (b) 先算 \(e^{20}\) 再取倒数。哪个稳定？ 解答：(a) 级数中 \((-20)^k/k!\) 的绝对值先增后减，最大项 \(\approx 20^{20}/20! \approx 4\times10^7\)。 正负交替求和，\(\sum|a_k| \gg e^{-20} \approx 2\times10^{-9}\)。 条件数 \(\approx 10^{16}\)，双精度完全无法胜任。 (b) \(e^{20}\) 的级数全正，条件数 \(\approx 1\)，\(1/e^{20}\) 也是良态运算。稳定！ 易错点：数学上等价的两种计算方式可能有完全不同的数值稳定性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">后向稳定的算法保证什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。后向稳定 = \\(\\hat{y} = f(x+\\Delta x)\\)，\\(|\\Delta x|/|x| = O(\\epsilon_{\\text{mach}})\\)。')">A. 前向误差为零</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！后向稳定 = \\(\\hat{y} = f(x+\\Delta x)\\)，\\(|\\Delta x|/|x| = O(\\epsilon_{\\text{mach}})\\)。')">B. 计算结果是略微扰动的输入对应的精确解</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。后向稳定 = \\(\\hat{y} = f(x+\\Delta x)\\)，\\(|\\Delta x|/|x| = O(\\epsilon_{\\text{mach}})\\)。')">C. 条件数不超过某个界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。后向稳定 = \\(\\hat{y} = f(x+\\Delta x)\\)，\\(|\\Delta x|/|x| = O(\\epsilon_{\\text{mach}})\\)。')">D. 算法的时间复杂度最优</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>数值算法的收敛性与复杂度</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>数值方法通过离散化（步长 \(h\)、网格数 \(n\)）逼近精确解。 收敛性回答「\(h \to 0\) 时逼近是否趋于精确」，收敛阶说明 逼近的速度，复杂度决定计算代价。这三者共同决定了方法的 实用性：高阶方法用更少的计算量达到相同精度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>收敛性 + 稳定性 = 一致性（Lax 等价定理的直觉版）。 Richardson 外推和 Romberg 方法利用误差的渐近展开 系统地提升收敛阶——「用低阶方法组合出高阶方法」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>收敛阶</strong>：若 \(|y - y_h| = Ch^p + O(h^{p+1})\)，称方法是 \(p\) 阶收敛。 "\(h\) 减半误差除以 \(2^p\)"是实用的检验准则。 <strong>Richardson 外推</strong>：设 \(y_h = y + Ch^p + O(h^{p+1})\)。 取 \(h\) 和 \(h/2\)：\(y_{h/2} = y + C(h/2)^p + O(h^{p+1})\)。 \[y_{\text{ext}} = \frac{2^p y_{h/2} - y_h}{2^p - 1} = y + O(h^{p+1})\] 收敛阶从 \(p\) 提升到 \(p+1\)（或更高）。 <strong>计算复杂度</strong>：\(n\) 个数的排序 \(O(n\log n)\)，矩阵乘法 \(O(n^3)\)（朴素）， Gauss 消元 \(O(n^3)\)，FFT \(O(n\log n)\)，迭代法每步 \(O(n)\)（稀疏）。 权衡精度与代价：\(p\) 阶方法达到误差 \(\epsilon\) 需要 \(h \sim \epsilon^{1/p}\)， 工作量 \(\sim h^{-d} \sim \epsilon^{-d/p}\)（\(d\) 维问题）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Romberg 积分 = Richardson 外推 + 梯形法，达到任意高阶精度 - 自适应方法利用误差估计自动选择 \(h\)（自适应步长控制）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Richardson 外推提升梯形法（\(p=2\)）的精度。 \(I = \int_0^1 e^x dx = e-1\)。\(T_h\) 和 \(T_{h/2}\) 已知，求外推值。 解答：\(T_1 = (f(0)+f(1))/2 = (1+e)/2 \approx 1.8591\)，\(T_{1/2} = (T_1 + f(0.5))/2 = 1.7539\)。 外推：\(I_{\text{ext}} = (4T_{1/2} - T_1)/3 = (4\times1.7539 - 1.8591)/3 = 1.7189\)。 精确值 \(e - 1 = 1.71828...\)，外推值误差 \(\approx 6\times10^{-4}\)（vs \(T_{1/2}\) 误差 \(0.036\)）。 易错点：Richardson 外推要求误差具有 \(Ch^p\) 的渐近展开形式。 如果被积函数不光滑，误差展开不规则，外推可能失效。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(p\) 阶方法中 \(h\) 减半，误差大约变为原来的多少？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(p\\) 阶误差 \\(\\sim h^p\\)，\\(h\\) 减半 → 误差 \\(\\sim (h/2)^p = h^p/2^p\\)。')">A. \(1/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(p\\) 阶误差 \\(\\sim h^p\\)，\\(h\\) 减半 → 误差 \\(\\sim (h/2)^p = h^p/2^p\\)。')">B. \(1/2^p\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(p\\) 阶误差 \\(\\sim h^p\\)，\\(h\\) 减半 → 误差 \\(\\sim (h/2)^p = h^p/2^p\\)。')">C. \(1/p\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(p\\) 阶误差 \\(\\sim h^p\\)，\\(h\\) 减半 → 误差 \\(\\sim (h/2)^p = h^p/2^p\\)。')">D. \(1/e\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/applied/numerical.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

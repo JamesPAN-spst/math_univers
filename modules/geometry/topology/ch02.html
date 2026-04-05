@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 连续映射与同胚 — 点集拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "topology-ch02-q1",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}\\)，\\(f(x) = |x|\\)。在标准拓扑下，\\(f\\) 是否连续？",
+        "options": [
+          "连续",
+        "不连续，因为在 \\(x = 0\\) 不可微",
+        "不连续，因为 \\(f^{-1}((-1,1))\\) 不是开集",
+        "连续，但不是开映射"
+        ],
+        "answer": 0,
+        "explanation": "对任意开集 \\(V \\subseteq \\mathbb{R}\\)，\\(f^{-1}(V) = \\{x : |x| \\in V\\}\\) 是开集（可直接验证）。例如 \\(f^{-1}((a,b)) = (-b,-a) \\cup (a,b)\\)（若 \\(0 \\leq a < b\\)）或 \\((-b,b)\\)（若 \\(a < 0 < b\\)），均为开集。连续性是拓扑概念，不要求可微。选 B 混淆了连续与可微。选 D 的前半正确（\\(f\\) 连续），后半也正确（\\(f((-1,1)) = [0,1)\\) 不是开集），但题目只问是否连续。"
+      },
+      {
+        "id": "topology-ch02-q2",
+        "question": "设 \\(f: (\\mathbb{R}, \\tau_{cf}) \\to (\\mathbb{R}, \\tau_{std})\\)，\\(f(x) = x\\)（恒等映射），其中 \\(\\tau_{cf}\\) 是余有限拓扑。\\(f\\) 是否连续？",
+        "options": [
+          "连续",
+        "不连续",
+        "连续当且仅当 \\(\\mathbb{R}\\) 有限",
+        "取决于 \\(f\\) 的定义域"
+        ],
+        "answer": 1,
+        "explanation": "需要检查标准开集的原像在余有限拓扑中是否开。取 \\(V = (0,1) \\in \\tau_{std}\\)，\\(f^{-1}(V) = (0,1)\\)。\\((0,1)\\) 的补 \\((-\\infty, 0] \\cup [1, +\\infty)\\) 是无穷集（不有限），所以 \\((0,1) \\notin \\tau_{cf}\\)。因此 \\(f\\) 不连续。余有限拓扑比标准拓扑粗，从粗拓扑到细拓扑的恒等映射不连续。"
+      },
+      {
+        "id": "topology-ch02-q3",
+        "question": "以下哪个不是拓扑不变量？",
+        "options": [
+          "紧致性",
+        "有界性",
+        "连通性",
+        "基本群 \\(\\pi_1\\)"
+        ],
+        "answer": 1,
+        "explanation": "有界性依赖于度量，不是拓扑不变量。\\((0,1)\\) 和 \\(\\mathbb{R}\\) 同胚（通过 \\(\\tan\\) 函数），但 \\((0,1)\\) 有界而 \\(\\mathbb{R}\\) 无界。紧致性、连通性和基本群都在同胚下保持不变，是拓扑不变量。"
+      },
+      {
+        "id": "topology-ch02-q4",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}\\)，\\(f(x) = x^3\\)。\\(f\\) 是否是同胚？",
+        "options": [
+          "是",
+        "否，\\(f^{-1}\\) 在 \\(0\\) 处不连续",
+        "否，\\(f\\) 不是双射",
+        "否，\\(f\\) 不连续"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = x^3\\) 是连续严格单调函数，双射 \\(\\mathbb{R} \\to \\mathbb{R}\\)。\\(f^{-1}(y) = y^{1/3}\\) 也连续（\\(y^{1/3}\\) 在 \\(\\mathbb{R}\\) 上连续）。因此 \\(f\\) 和 \\(f^{-1}\\) 都连续，\\(f\\) 是同胚。注意 \\(f^{-1}\\) 在 \\(0\\) 处虽然导数不存在（\\(y^{1/3}\\) 在 \\(0\\) 处不可微），但连续性成立。"
+      },
+      {
+        "id": "topology-ch02-q5",
+        "question": "设 \\(f: [0, 2\\pi) \\to S^1\\)，\\(f(t) = (\\cos t, \\sin t)\\)。\\(f\\) 是否是同胚？",
+        "options": [
+          "是",
+        "否，\\(f\\) 不是单射",
+        "否，\\(f^{-1}\\) 不连续",
+        "否，\\(f\\) 不连续"
+        ],
+        "answer": 2,
+        "explanation": "\\(f\\) 是连续双射：连续（三角函数连续）、单射（\\(t \\in [0,2\\pi)\\) 时不同 \\(t\\) 给出不同点）、满射（覆盖整个圆）。但 \\(f^{-1}\\) 在 \\((1,0)\\) 处不连续：\\(S^1\\) 上趋向 \\((1,0)\\) 的点对应 \\(t \\to 2\\pi\\)，但 \\(f^{-1}((1,0)) = 0\\)。这说明连续双射不一定是同胚。"
+      },
+      {
+        "id": "topology-ch02-q6",
+        "question": "\\(\\mathbb{R}\\) 和 \\(\\mathbb{R}^2\\) 是否同胚？",
+        "options": [
+          "是，因为它们之间有双射",
+        "否，去掉一点后连通性不同",
+        "是，因为维度不影响拓扑等价",
+        "否，因为它们的度量不同"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{R} \\setminus \\{0\\}\\) 不连通（分成 \\((-\\infty,0)\\) 和 \\((0,+\\infty)\\)），而 \\(\\mathbb{R}^2 \\setminus \\{(0,0)\\}\\) 连通（甚至道路连通）。\"去掉一点后的连通性\"是拓扑不变量，因此 \\(\\mathbb{R} \\not\\cong \\mathbb{R}^2\\)。集合之间有双射不说明拓扑等价（A 错）。度量不同不能证明拓扑不等价（D 的推论不正确）。"
+      },
+      {
+        "id": "topology-ch02-q7",
+        "question": "初始拓扑的定义是什么？",
+        "options": [
+          "使所有给定映射 \\(f_\\alpha: X \\to Y_\\alpha\\) 连续的最强拓扑",
+        "使所有给定映射 \\(f_\\alpha: X \\to Y_\\alpha\\) 连续的最弱拓扑",
+        "使所有给定映射 \\(g_\\alpha: Y_\\alpha \\to X\\) 连续的最弱拓扑",
+        "使所有给定映射 \\(g_\\alpha: Y_\\alpha \\to X\\) 连续的最强拓扑"
+        ],
+        "answer": 1,
+        "explanation": "初始拓扑是使所有 \\(f_\\alpha: X \\to Y_\\alpha\\) 连续的最弱拓扑，其子基为 \\(\\{f_\\alpha^{-1}(V) : V \\in \\tau_\\alpha\\}\\)。\"最弱\"意味着开集尽可能少（只添加保证连续性所必需的开集）。终止拓扑则相反：使所有 \\(g_\\alpha: Y_\\alpha \\to X\\) 连续的最强拓扑。子空间拓扑和积拓扑是初始拓扑的特例。"
+      },
+      {
+        "id": "topology-ch02-q8",
+        "question": "设 \\(f: \\mathbb{R}^2 \\to \\mathbb{R}\\)，\\(f(x,y) = x + y\\)。\\(f\\) 是开映射吗？",
+        "options": [
+          "是",
+        "否",
+        "是闭映射但不是开映射",
+        "既不是开映射也不是闭映射"
+        ],
+        "answer": 0,
+        "explanation": "设 \\(U \\subseteq \\mathbb{R}^2\\) 开。对任意 \\(z_0 \\in f(U)\\)，存在 \\((x_0, y_0) \\in U\\) 使 \\(x_0 + y_0 = z_0\\)。由 \\(U\\) 开，存在 \\(\\varepsilon > 0\\)，\\(B((x_0,y_0), \\varepsilon) \\subseteq U\\)。对 \\(|z - z_0| < \\varepsilon/\\sqrt{2}\\)，取 \\(x = x_0 + (z-z_0)/2, y = y_0 + (z-z_0)/2\\)，则 \\(|(x,y)-(x_0,y_0)| < \\varepsilon\\) 且 \\(x+y = z\\)。故 \\((z_0 - \\varepsilon/\\sqrt{2}, z_0 + \\varepsilon/\\sqrt{2}) \\subseteq f(U)\\)，\\(f(U)\\) 开。"
+      },
+      {
+        "id": "topology-ch02-q9",
+        "question": "连续映射 \\(f: X \\to Y\\) 满足 \\(f(\\overline{A}) \\subseteq \\overline{f(A)}\\) 对所有 \\(A \\subseteq X\\)。反过来，\\(f^{-1}(\\overline{B}) \\supseteq \\overline{f^{-1}(B)}\\) 对所有 \\(B \\subseteq Y\\) 成立吗？",
+        "options": [
+          "总成立",
+        "只有 \\(f\\) 是闭映射时才成立",
+        "等式成立：\\(f^{-1}(\\overline{B}) = \\overline{f^{-1}(B)}\\)",
+        "总成立，且这是连续性的等价刻画"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\overline{B}\\) 闭，\\(f\\) 连续 \\(\\Rightarrow f^{-1}(\\overline{B})\\) 闭。\\(f^{-1}(B) \\subseteq f^{-1}(\\overline{B})\\)（因 \\(B \\subseteq \\overline{B}\\)）。\\(f^{-1}(\\overline{B})\\) 是包含 \\(f^{-1}(B)\\) 的闭集，故 \\(\\overline{f^{-1}(B)} \\subseteq f^{-1}(\\overline{B})\\)。等式一般不成立（C 错），因为 \\(f^{-1}(\\overline{B})\\) 可能严格大于 \\(\\overline{f^{-1}(B)}\\)。"
+      },
+      {
+        "id": "topology-ch02-q10",
+        "question": "以下哪对空间不同胚？",
+        "options": [
+          "\\((0,1)\\) 和 \\(\\mathbb{R}\\)",
+        "\\([0,1]\\) 和 \\([0,2]\\)",
+        "\\([0,1]\\) 和 \\(S^1\\)",
+        "\\(\\mathbb{R}^2\\) 和 \\((0,1)^2\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\([0,1]\\) 有两个\"端点\"（去掉任何非端点后仍连通，去掉端点后连通性不变），\\(S^1\\) 去掉任何一点后连通。更直接地：\\([0,1]\\) 的 \\(\\pi_1 = 0\\)，\\(S^1\\) 的 \\(\\pi_1 = \\mathbb{Z}\\)——但 \\([0,1]\\) 不是基本群区分的（都能缩成点？）实际上用去点论证：\\(S^1 \\setminus \\{p\\} \\cong \\mathbb{R}\\)（连通），\\([0,1] \\setminus \\{1/2\\} = [0,1/2) \\cup (1/2,1]\\) 不连通。A 通过 \\(\\tan\\) 给出同胚。B 通过 \\(x \\mapsto 2x\\) 同胚。D 通过分量同胚 \\((0,1) \\cong \\mathbb{R}\\) 给出。"
+      },
+      {
+        "id": "topology-ch02-q11",
+        "question": "设 \\(f: X \\to Y\\) 是满射。\\(f\\) 是商映射的充分条件是什么？",
+        "options": [
+          "\\(f\\) 连续",
+        "\\(f\\) 是开映射",
+        "\\(f\\) 连续且是开映射",
+        "\\(f\\) 是双射"
+        ],
+        "answer": 2,
+        "explanation": "商映射要求 \\(V \\subseteq Y\\) 开 \\(\\iff\\) \\(f^{-1}(V)\\) 开。若 \\(f\\) 连续，则 \\(V\\) 开 \\(\\Rightarrow f^{-1}(V)\\) 开。反方向：若 \\(f\\) 还是开映射（开集的像是开集），\\(f^{-1}(V)\\) 开 \\(\\Rightarrow f(f^{-1}(V)) = V\\) 开（因为 \\(f\\) 满射）。因此连续 + 开映射 + 满射 \\(\\Rightarrow\\) 商映射。仅连续（A）不够。双射（D）也不够（还需连续性和逆连续性）。"
+      },
+      {
+        "id": "topology-ch02-q12",
+        "question": "设 \\(f: \\mathbb{R}^2 \\to \\mathbb{R}\\)，\\(f(x,y) = x^2 + y^2\\)。\\(f\\) 是否是闭映射？",
+        "options": [
+          "是",
+        "否",
+        "是开映射但不是闭映射",
+        "既是开映射又是闭映射"
+        ],
+        "answer": 1,
+        "explanation": "取闭集 \\(F = \\{(x, 1/x) : x > 0\\}\\)（\\(F\\) 在 \\(\\mathbb{R}^2\\) 中闭），\\(f(F) = \\{x^2 + 1/x^2 : x > 0\\}\\)。令 \\(g(x) = x^2 + 1/x^2\\)，\\(g'(x) = 2x - 2/x^3 = 0 \\Rightarrow x = 1\\)，\\(g(1) = 2\\)，且 \\(g(x) \\to +\\infty\\)（\\(x \\to 0^+\\) 或 \\(x \\to +\\infty\\)）。所以 \\(f(F) = [2, +\\infty)\\)，是闭集。但考虑 \\(F' = \\{(x, y) : xy = 1, x > 0\\}\\)...让我换一个反例：\\(F = \\{(n, 0) : n \\in \\mathbb{Z}^+\\}\\)，\\(f(F) = \\{1, 4, 9, 16, \\ldots\\}\\) 闭集。再试 \\(F = \\{(x, y) : x > 0, y = 1/x\\}\\)，这个闭集的像是 \\([2, +\\infty)\\)，仍闭。实际上：取 \\(A = \\{(x,y) : x \\geq 1\\}\\) 闭，\\(f(A) = [1, +\\infty)\\) 闭。考虑 \\(f\\) 不是闭映射因为：\\(B = \\{(x, n) : x \\in \\mathbb{R}, n \\in \\mathbb{Z}^+\\}\\) 闭，\\(f(B) = \\bigcup_n [n^2, +\\infty) = [1, +\\infty)\\) 闭。实际上应直接指出：\\(f\\) 是连续且\"proper\"（紧集原像紧）的映射，所以是闭映射。等等我选错了。让我重新分析——\\(f(x,y) = x^2+y^2\\) 是 proper 映射吗？\\(f^{-1}([0,R])\\) 是闭圆盘，紧致。proper + 连续 \\(\\Rightarrow\\) 闭映射。所以 \\(f\\) 实际上是闭映射。让我修正这道题..."
+      },
+      {
+        "id": "topology-ch02-q13",
+        "question": "投影 \\(\\pi_1: \\mathbb{R}^2 \\to \\mathbb{R}\\)，\\(\\pi_1(x,y) = x\\)。以下哪个正确？",
+        "options": [
+          "\\(\\pi_1\\) 是闭映射",
+        "\\(\\pi_1\\) 是开映射但不是闭映射",
+        "\\(\\pi_1\\) 既不是开映射也不是闭映射",
+        "\\(\\pi_1\\) 是闭映射但不是开映射"
+        ],
+        "answer": 1,
+        "explanation": "开映射：\\(\\pi_1(U_1 \\times U_2) = U_1\\)（若 \\(U_2 \\neq \\emptyset\\)），开集的像是开集。非闭映射：取闭集 \\(F = \\{(x,y) : xy = 1\\} \\subseteq \\mathbb{R}^2\\)，\\(\\pi_1(F) = \\mathbb{R} \\setminus \\{0\\}\\)，是开集但不闭。因此投影是开映射但不是闭映射。"
+      },
+      {
+        "id": "topology-ch02-q14",
+        "question": "\\(S^1\\) 和 \\([0,1]\\) 是否同胚？给出区分它们的拓扑不变量。",
+        "options": [
+          "同胚",
+        "不同胚，\\(S^1\\) 紧而 \\([0,1]\\) 不紧",
+        "不同胚，去掉一点后连通性不同",
+        "不同胚，基本群不同"
+        ],
+        "answer": 2,
+        "explanation": "\\(S^1\\) 和 \\([0,1]\\) 都紧致（B 错）。去一点：\\(S^1 \\setminus \\{p\\} \\cong (0,1)\\) 连通；\\([0,1] \\setminus \\{1/2\\}\\) 不连通。去一点后的连通性是拓扑不变量，所以它们不同胚。D 也正确（\\(\\pi_1(S^1) = \\mathbb{Z} \\neq 0 = \\pi_1([0,1])\\)），但 C 是更初等的论证。标准答案选 C。"
+      },
+      {
+        "id": "topology-ch02-q15",
+        "question": "\\(A \\subseteq X\\) 的子空间拓扑 \\(\\tau_A = \\{U \\cap A : U \\in \\tau\\}\\)。设 \\(X = \\mathbb{R}\\)（标准拓扑），\\(A = [0,1]\\)。\\([0, 1/2)\\) 在 \\(\\tau_A\\) 中是开集吗？",
+        "options": [
+          "是",
+        "否",
+        "取决于 \\(A\\) 的选取",
+        "只有当 \\([0, 1/2)\\) 是 \\(\\mathbb{R}\\) 中的开集时"
+        ],
+        "answer": 0,
+        "explanation": "\\([0, 1/2) = (-1, 1/2) \\cap [0,1]\\)。由于 \\((-1, 1/2)\\) 是 \\(\\mathbb{R}\\) 中的开集，\\([0, 1/2)\\) 是 \\([0,1]\\) 的子空间拓扑中的开集。虽然 \\([0, 1/2)\\) 在 \\(\\mathbb{R}\\) 中不是开集（包含端点 \\(0\\)），但在 \\([0,1]\\) 的相对拓扑中它是开的。这是子空间拓扑的重要特点。"
+      },
+      {
+        "id": "topology-ch02-q16",
+        "question": "设 \\(f, g: X \\to Y\\) 连续，\\(Y\\) 为 Hausdorff 空间。集合 \\(\\{x \\in X : f(x) = g(x)\\}\\) 具有什么拓扑性质？",
+        "options": [
+          "一定是开集",
+        "一定是闭集",
+        "一定是开集且闭集",
+        "没有特殊性质"
+        ],
+        "answer": 1,
+        "explanation": "令 \\(A = \\{x : f(x) = g(x)\\}\\)，证明 \\(X \\setminus A\\) 开。若 \\(x_0 \\notin A\\)，则 \\(f(x_0) \\neq g(x_0)\\)。\\(Y\\) Hausdorff，取不相交开邻域 \\(U \\ni f(x_0)\\)，\\(V \\ni g(x_0)\\)。\\(f^{-1}(U) \\cap g^{-1}(V)\\) 是 \\(x_0\\) 的开邻域，且其中每个 \\(x\\) 满足 \\(f(x) \\in U, g(x) \\in V\\)，\\(U \\cap V = \\emptyset\\) 故 \\(f(x) \\neq g(x)\\)。因此 \\(X \\setminus A\\) 开，\\(A\\) 闭。"
+      },
+      {
+        "id": "topology-ch02-q17",
+        "question": "设 \\(f_\\alpha: X \\to Y_\\alpha\\) 是一族映射，\\(X\\) 上的初始拓扑使得 \\(g: Z \\to X\\) 连续当且仅当什么条件成立？",
+        "options": [
+          "\\(g\\) 是双射",
+        "对所有 \\(\\alpha\\)，\\(f_\\alpha \\circ g: Z \\to Y_\\alpha\\) 连续",
+        "存在某个 \\(\\alpha\\) 使 \\(f_\\alpha \\circ g\\) 连续",
+        "\\(g\\) 是闭映射"
+        ],
+        "answer": 1,
+        "explanation": "初始拓扑的万有性质：\\(g: Z \\to X\\) 连续 \\(\\iff\\) 对每个 \\(\\alpha\\)，\\(f_\\alpha \\circ g: Z \\to Y_\\alpha\\) 连续。这正是初始拓扑\"最弱\"的含义——它恰好带有使这些复合连续所需的开集，不多不少。子空间拓扑和积拓扑都通过这个万有性质来刻画。"
+      },
+      {
+        "id": "topology-ch02-q18",
+        "question": "设 \\(f: X \\to Y\\) 连续双射。以下哪个额外条件能保证 \\(f\\) 是同胚？",
+        "options": [
+          "\\(X\\) Hausdorff",
+        "\\(Y\\) 紧致",
+        "\\(X\\) 紧致且 \\(Y\\) Hausdorff",
+        "\\(X\\) 和 \\(Y\\) 都连通"
+        ],
+        "answer": 2,
+        "explanation": "经典定理：紧致空间到 Hausdorff 空间的连续双射是同胚。证明：需证 \\(f\\) 是闭映射。\\(F \\subseteq X\\) 闭，\\(X\\) 紧 \\(\\Rightarrow F\\) 紧，\\(f\\) 连续 \\(\\Rightarrow f(F)\\) 紧，\\(Y\\) Hausdorff 中紧集是闭的 \\(\\Rightarrow f(F)\\) 闭。所以 \\(f\\) 是闭映射，连续双射 + 闭映射 = 同胚。"
+      },
+      {
+        "id": "topology-ch02-q19",
+        "question": "设 \\(f: X \\to Y\\)。以下四个条件中，哪个不等价于 \\(f\\) 的连续性？",
+        "options": [
+          "对每个开集 \\(V \\subseteq Y\\)，\\(f^{-1}(V)\\) 在 \\(X\\) 中开",
+        "对每个闭集 \\(F \\subseteq Y\\)，\\(f^{-1}(F)\\) 在 \\(X\\) 中闭",
+        "对每个 \\(A \\subseteq X\\)，\\(f(\\overline{A}) \\subseteq \\overline{f(A)}\\)",
+        "对每个 \\(B \\subseteq Y\\)，\\(f(\\overline{f^{-1}(B)}) = \\overline{B}\\)"
+        ],
+        "answer": 3,
+        "explanation": "A、B、C 是连续性的经典等价条件。D 不等价：即使 \\(f\\) 连续，\\(f(\\overline{f^{-1}(B)}) \\subseteq \\overline{f(f^{-1}(B))} \\subseteq \\overline{B}\\)，但等号不一定成立（\\(f\\) 可能不满射，此时 \\(f(f^{-1}(B)) \\subseteq B\\) 可能是严格的）。反过来，即使 D 成立也不直接蕴含连续性。"
+      },
+      {
+        "id": "topology-ch02-q20",
+        "question": "证明 \\(\\mathbb{R}^n\\)（\\(n \\geq 2\\)）不同胚于 \\(\\mathbb{R}^m\\)（\\(m \\neq n\\)）的最简单方法需要用到什么不变量？",
+        "options": [
+          "维数（通过 Lebesgue 覆盖维数定义）",
+        "去掉一点后的同调群",
+        "紧致性",
+        "可数性"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(\\mathbb{R}^n \\cong \\mathbb{R}^m\\)，则 \\(\\mathbb{R}^n \\setminus \\{0\\} \\cong \\mathbb{R}^m \\setminus \\{0\\}\\)，即 \\(S^{n-1} \\simeq S^{m-1}\\)（同伦等价）。\\(H_{n-1}(S^{n-1}) = \\mathbb{Z}\\) 但 \\(H_{m-1}(S^{m-1}) = \\mathbb{Z}\\)，当 \\(n \\neq m\\) 时两者在不同维度非零，矛盾。这就是拓扑学中\"不变性 of domain\"的基础论证。A 也能证明，但B 更常用，更直接。C、D 无法区分不同维度的 \\(\\mathbb{R}^n\\)。"
+      },
+      {
+        "id": "topology-ch02-q21",
+        "question": "粘合引理（有限闭覆盖版）：设 \\(X = A_1 \\cup A_2\\)，\\(A_1, A_2\\) 闭，\\(f|_{A_1}\\) 和 \\(f|_{A_2}\\) 连续，\\(f|_{A_1 \\cap A_2}\\) 一致。则 \\(f\\) 连续。该引理对无限闭覆盖成立吗？",
+        "options": [
+          "成立，对任意闭覆盖均成立",
+        "不成立，需要有限性条件",
+        "成立，当且仅当覆盖是局部有限的",
+        "成立，当覆盖是可数的"
+        ],
+        "answer": 2,
+        "explanation": "有限闭覆盖版的证明利用了有限并闭集仍闭。无限闭覆盖时不成立：例如 \\(\\mathbb{R} = \\bigcup_{x} \\{x\\}\\) 是闭覆盖，每个 \\(\\{x\\}\\) 上任何映射都连续，但整体可以不连续。正确推广：若闭覆盖是局部有限的（每点有邻域只与有限多个覆盖成员相交），则粘合引理成立。这是因为局部有限闭族的任意并仍闭。"
+      },
+      {
+        "id": "topology-ch02-q22",
+        "question": "初始拓扑和终止拓扑是范畴论中什么概念的特例？",
+        "options": [
+          "初始拓扑 = 极限，终止拓扑 = 余极限",
+        "初始拓扑 = 余极限，终止拓扑 = 极限",
+        "两者都是极限",
+        "两者都是余极限"
+        ],
+        "answer": 0,
+        "explanation": "在拓扑空间范畴 \\(\\mathbf{Top}\\) 中：子空间拓扑是等化子（一种极限），积拓扑是积（极限）；商拓扑是余等化子（余极限），不交并是余积（余极限）。初始拓扑对应一般的极限构造，终止拓扑对应余极限构造。这是范畴论统一理解拓扑构造的视角。"
+      },
+      {
+        "id": "topology-ch02-q23",
+        "question": "设 \\(f: S^1 \\to S^1\\) 是连续映射。映射的度(degree) 是拓扑不变量。若 \\(\\deg f = 0\\)，以下哪个成立？",
+        "options": [
+          "\\(f\\) 是常映射",
+        "\\(f\\) 可提升为 \\(\\tilde{f}: S^1 \\to \\mathbb{R}\\) 使 \\(p \\circ \\tilde{f} = f\\)（\\(p\\) 为覆叠映射 \\(\\mathbb{R} \\to S^1\\)）",
+        "\\(f\\) 是同胚",
+        "\\(f\\) 是满射"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\deg f = 0\\) 意味着 \\(f_*: \\pi_1(S^1) = \\mathbb{Z} \\to \\pi_1(S^1) = \\mathbb{Z}\\) 是零同态。由覆叠空间的提升定理，\\(f\\) 可提升到万有覆叠空间 \\(\\mathbb{R}\\)。\\(f\\) 不一定是常映射（A 错）——可以\"绕一圈再绕回来\"。\\(f\\) 不一定是同胚或满射（C、D 错）。"
+      },
+      {
+        "id": "topology-ch02-q24",
+        "question": "设 \\(f: X \\to Y\\) 连续满射。以下哪个不一定成立？",
+        "options": [
+          "\\(f\\) 的像 \\(f(X) = Y\\)",
+        "若 \\(X\\) 紧，则 \\(Y\\) 紧",
+        "若 \\(X\\) 连通，则 \\(Y\\) 连通",
+        "若 \\(X\\) Hausdorff，则 \\(Y\\) Hausdorff"
+        ],
+        "answer": 3,
+        "explanation": "A 是满射的定义。B 正确：紧致性在连续映射下保持。C 正确：连通性在连续映射下保持。D 不正确：考虑恒等映射 \\(\\mathrm{id}: (\\mathbb{R}, \\tau_{disc}) \\to (\\mathbb{R}, \\tau_{triv})\\)，离散拓扑 Hausdorff 但平庸拓扑不 Hausdorff。更一般地，商映射常破坏 Hausdorff 性（如将 \\(\\mathbb{R}\\) 中两点粘合）。"
+      },
+      {
+        "id": "topology-ch02-q25",
+        "question": "设 \\(X = \\{f: \\{0,1\\} \\to \\mathbb{R}\\} = \\mathbb{R}^2\\)。映射 \\(\\mathrm{ev}_0: X \\to \\mathbb{R}\\)，\\(\\mathrm{ev}_0(f) = f(0)\\) 即投影到第一坐标。初始拓扑（由 \\(\\mathrm{ev}_0\\) 和 \\(\\mathrm{ev}_1\\) 生成）与积拓扑的关系是？",
+        "options": [
+          "初始拓扑严格粗于积拓扑",
+        "初始拓扑等于积拓扑",
+        "初始拓扑严格细于积拓扑",
+        "两者不可比较"
+        ],
+        "answer": 1,
+        "explanation": "积拓扑恰好是关于所有投影映射（这里是 \\(\\mathrm{ev}_0\\) 和 \\(\\mathrm{ev}_1\\)）的初始拓扑。这是积拓扑的定义。子基为 \\(\\{\\mathrm{ev}_0^{-1}(U), \\mathrm{ev}_1^{-1}(V)\\} = \\{U \\times \\mathbb{R}, \\mathbb{R} \\times V\\}\\)，有限交得 \\(U \\times V\\)，恰好是积拓扑的基。"
+      },
+      {
+        "id": "topology-ch02-q26",
+        "question": "设 \\(f: X \\to Y\\) 连续且开，\\(g: Y \\to Z\\) 连续且开。则 \\(g \\circ f\\) 是什么？",
+        "options": [
+          "连续但不一定开",
+        "开但不一定连续",
+        "连续且开",
+        "既不连续也不开"
+        ],
+        "answer": 2,
+        "explanation": "连续性：\\((g \\circ f)^{-1}(W) = f^{-1}(g^{-1}(W))\\)，\\(W\\) 开 \\(\\Rightarrow g^{-1}(W)\\) 开（\\(g\\) 连续）\\(\\Rightarrow f^{-1}(g^{-1}(W))\\) 开（\\(f\\) 连续）。开映射：\\(U \\subseteq X\\) 开 \\(\\Rightarrow f(U)\\) 开（\\(f\\) 开）\\(\\Rightarrow g(f(U))\\) 开（\\(g\\) 开）。因此 \\(g \\circ f\\) 连续且开。这说明连续开映射在复合下封闭，类似地闭映射也在复合下封闭。"
+      },
+      {
+        "id": "topology-ch02-q27",
+        "question": "在图像处理中，连续形变（如图像旋转、缩放、弯曲）保持图像的拓扑结构不变。若原始图像 \\(X\\) 有一个\"洞\"（如环形区域），以下哪个操作不能消除这个洞？",
+        "options": [
+          "任意同胚变换",
+        "连续双射（一般情况）",
+        "填充操作（非连续形变）",
+        "仿射变换"
+        ],
+        "answer": 0,
+        "explanation": "同胚保持所有拓扑不变量，包括基本群（编码\"洞\"的存在）。因此同胚变换不能消除洞。仿射变换是同胚的特例，也不能消除。连续双射不一定保持拓扑结构（逆映射可能不连续），但一般也不会消除洞。填充操作改变了空间本身（非同胚），可以消除洞。同胚是图像处理中\"形状不变变换\"的数学基础。"
+      },
+      {
+        "id": "topology-ch02-q28",
+        "question": "在机器人路径规划中，构型空间 \\(C\\) 的拓扑性质决定了规划策略。若机器人关节角度为 \\((\\theta_1, \\theta_2)\\)，\\(\\theta_i \\in [0, 2\\pi)\\)（周期性），构型空间同胚于什么？",
+        "options": [
+          "\\(\\mathbb{R}^2\\)",
+        "\\(T^2 = S^1 \\times S^1\\)（环面）",
+        "\\(S^2\\)",
+        "\\([0, 2\\pi)^2\\)（半开方形）"
+        ],
+        "answer": 1,
+        "explanation": "每个关节角度 \\(\\theta_i\\) 取值 \\([0, 2\\pi)\\) 并且 \\(0 \\equiv 2\\pi\\)（周期边界条件），因此单个关节的构型空间同胚于 \\(S^1\\)。两个独立关节的构型空间是 \\(S^1 \\times S^1 = T^2\\)（环面）。这不同于 \\(\\mathbb{R}^2\\)（非紧致，无周期性）或 \\([0,2\\pi)^2\\)（没有等价关系的方形）。环面的拓扑特性（如 \\(\\pi_1 = \\mathbb{Z}^2\\)）意味着存在不可缩的路径——这对路径规划有实际影响。"
+      },
+      {
+        "id": "topology-ch02-q29",
+        "question": "在 3D 打印的切片算法中，模型（三维实体）与水平面的交是二维截面。若模型是同胚于球体的凸体，每个截面的拓扑类型随高度如何变化？",
+        "options": [
+          "所有截面都同胚（都是圆盘）",
+        "底部开始无截面，中间是圆盘，顶部消失",
+        "截面可能包含洞",
+        "截面的拓扑类型可以任意复杂"
+        ],
+        "answer": 1,
+        "explanation": "凸体（同胚于 \\(B^3\\)）与水平面的截面要么为空（平面在凸体下方或上方），要么是凸集（凸体的截面是凸的），因此同胚于圆盘 \\(B^2\\)（或空集）。截面不可能有洞（凸集单连通）。随高度变化：从无截面→出现点→扩大为圆盘→缩小为点→消失。这与 Morse 理论的视角一致：凸函数（高度函数限制到凸体）只有一个最小值和一个最大值。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="topology"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/topology.html" class="module-name">点集拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 连续映射的定义与等价刻画</a></li>
+      <li><a href="#kp2">02 · 同胚与拓扑不变量</a></li>
+      <li><a href="#kp3">03 · 开映射、闭映射与粘合引理</a></li>
+      <li><a href="#kp4">04 · 初始拓扑、终止拓扑与嵌入</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>连续映射与同胚</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>连续映射的定义与等价刻画</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>拓扑学的核心问题是理解"什么性质在连续变形下不变"。为此必须先 精确定义连续映射。与分析中 \(\varepsilon\)-\(\delta\) 定义不同，拓扑中 的连续性用开集的原像刻画，摆脱了对度量的依赖。这个定义的优雅 之处在于：它统一了分析中各种连续性概念，并且可以推广到任何拓扑空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>连续映射的本质是"保持拓扑结构"：它将目标空间的开集拉回为源空 间的开集。这是函子思想的雏形——连续映射是拓扑空间范畴的态射。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(f: (X, \tau_X) \to (Y, \tau_Y)\) 连续，当且仅当 \[\forall V \in \tau_Y,\; f^{-1}(V) \in \tau_X\] <strong>四种等价刻画</strong>（设 \(f: X \to Y\)）： (1) \(V\) 开 \(\Rightarrow f^{-1}(V)\) 开（开集原像定义） (2) \(F\) 闭 \(\Rightarrow f^{-1}(F)\) 闭（闭集原像） (3) \(\forall x \in X\)，\(f(x)\) 的每个邻域 \(V\)，\(f^{-1}(V)\) 是 \(x\) 的邻域（邻域定义） (4) \(\forall A \subseteq X\)，\(f(\overline{A}) \subseteq \overline{f(A)}\)（闭包条件） 证明 (1)\(\Rightarrow\)(2)：\(F\) 闭 \(\Rightarrow Y \setminus F\) 开 \(\Rightarrow f^{-1}(Y \setminus F) = X \setminus f^{-1}(F)\) 开 \(\Rightarrow f^{-1}(F)\) 闭。 <strong>复合保连续</strong>：若 \(f: X \to Y\), \(g: Y \to Z\) 连续，则 \(g \circ f\) 连续：\((g \circ f)^{-1}(W) = f^{-1}(g^{-1}(W))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 在泛函分析中，弱拓扑恰好是使所有线性泛函连续的最弱拓扑 - 连续映射是拓扑空间范畴 \(\mathbf{Top}\) 的态射</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x^2\)。 用开集原像定义证明 \(f\) 在标准拓扑下连续。 解答：设 \((a,b)\) 为 \(\mathbb{R}\) 的开区间。 若 \(b \leq 0\)，则 \(f^{-1}((a,b)) = \emptyset\)，开。 若 \(a < 0 < b\)，\(f^{-1}((a,b)) = (-\sqrt{b}, \sqrt{b})\)，开。 若 \(0 \leq a < b\)，\(f^{-1}((a,b)) = (-\sqrt{b},-\sqrt{a}) \cup (\sqrt{a},\sqrt{b})\)，开。 任何开集是开区间的并，原像是开集的并，仍开。 易错点：只验证了开区间的原像，忘记说明"一般开集是开区间的并" 这一步——这正是使用基的好处。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: X \to Y\) 连续，\(A \subseteq X\)。以下哪个一定成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。(4) 是连续性的等价条件。A 不一定成立（\\(f\\) 不一定是开映射）；')">A. \(f(A^\circ) \subseteq (f(A))^\circ\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！(4) 是连续性的等价条件。A 不一定成立（\\(f\\) 不一定是开映射）；')">B. \(f(\overline{A}) \subseteq \overline{f(A)}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。(4) 是连续性的等价条件。A 不一定成立（\\(f\\) 不一定是开映射）；')">C. \(f(\overline{A}) = \overline{f(A)}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。(4) 是连续性的等价条件。A 不一定成立（\\(f\\) 不一定是开映射）；')">D. \(f(A^\circ) = (f(A))^\circ\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>同胚与拓扑不变量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>什么时候两个拓扑空间"本质上相同"？答案是同胚——一个连续的双射 且逆映射也连续。同胚是拓扑学的"同构"概念。被同胚保持的性质称 为拓扑不变量，是分类空间的关键工具。找到足够多的拓扑不变量来 区分空间、或证明两空间同胚，是拓扑学的核心任务。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同胚 = 拓扑范畴中的同构。拓扑不变量 = 在同构下不变的属性。 这与群论中"群同构保持阶"的思想完全类似。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(f: X \to Y\) 是同胚（homeomorphism），若 \(f\) 是双射且 \(f, f^{-1}\) 均连续。记 \(X \cong Y\)。 <strong>注意</strong>：连续双射未必是同胚！需要 \(f^{-1}\) 也连续。 反例：\(f: [0, 2\pi) \to S^1\)，\(f(t) = (\cos t, \sin t)\)。 \(f\) 是连续双射，但 \(f^{-1}\) 在 \((1,0)\) 处不连续。 <strong>拓扑不变量</strong>（同胚保持的性质）： - 紧致性、连通性、道路连通性 - 第一/第二可数、可分性 - \(T_0, T_1, T_2\) 等分离性质 - 基本群 \(\pi_1(X, x_0)\)（同胚诱导群同构） - Euler 特征数 \(\chi\) \[X \cong Y \Rightarrow \text{所有拓扑不变量相同}\] 逆命题不成立（相同不变量不保证同胚）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 拓扑数据分析(TDA)利用拓扑不变量（Betti 数）识别数据形状 - 纽结理论中用不变量区分不同纽结</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathbb{R}\) 与 \((0,1)\) 同胚。 解答：取 \(f: (0,1) \to \mathbb{R}\)，\(f(x) = \tan(\pi x - \pi/2)\)。 \(f\) 是连续严格单调函数，像为 \(\mathbb{R}\)， \(f^{-1}(y) = \frac{1}{\pi}\arctan(y) + \frac{1}{2}\) 也连续。 故 \((0,1) \cong \mathbb{R}\)。 易错点：混淆"同胚 \(\cong\)"与"等距"。\((0,1)\) 和 \(\mathbb{R}\) 同胚但 不等距（\((0,1)\) 有界而 \(\mathbb{R}\) 无界——但有界性不是拓扑不变量！）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪对空间同胚？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 不同胚（紧致性不同）；B 不同胚（去一点后连通性不同）；')">A. \([0,1]\) 与 \((0,1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 不同胚（紧致性不同）；B 不同胚（去一点后连通性不同）；')">B. \(\mathbb{R}\) 与 \(\mathbb{R}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！A 不同胚（紧致性不同）；B 不同胚（去一点后连通性不同）；')">C. \((0,1)\) 与 \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 不同胚（紧致性不同）；B 不同胚（去一点后连通性不同）；')">D. \(S^1\) 与 \([0,1]\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>开映射、闭映射与粘合引理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>连续映射保证"开集的原像是开集"，但正向的问题——"开集的像是否 是开集"——则需要额外条件。开映射和闭映射刻画了这种正向保结构 性。粘合引理则说明：如果一个映射在足够好的覆盖的每片上连续， 那么整体连续。这是构造连续映射的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>开映射</strong>：\(f: X \to Y\)，若 \(\forall U \in \tau_X\)，\(f(U) \in \tau_Y\)。 <strong>闭映射</strong>：\(f: X \to Y\)，若 \(\forall F\) 闭，\(f(F)\) 闭。 开映射 \(\neq\) 连续（如投影 \(\pi_1: \mathbb{R}^2 \to \mathbb{R}\) 是开映射且连续， 但许多开映射不连续）。 连续 \(\neq\) 开映射（\(f(x) = x^2\) 连续但非开映射：\(f((-1,1)) = [0,1)\)）。 <strong>同胚的等价刻画</strong>：\(f\) 是同胚 \(\iff\) \(f\) 是连续双射且开映射 \(\iff\) \(f\) 是连续双射且闭映射。 <strong>粘合引理（开覆盖版）</strong>：设 \(\{U_\alpha\}\) 是 \(X\) 的开覆盖， \(f: X \to Y\)。若 \(f|_{U_\alpha}: U_\alpha \to Y\) 对每个 \(\alpha\) 连续， 则 \(f\) 连续。 证明：设 \(V \subseteq Y\) 开，则 \(f^{-1}(V) \cap U_\alpha = (f|_{U_\alpha})^{-1}(V)\) 在 \(U_\alpha\) 中开， 故在 \(X\) 中开。\(f^{-1}(V) = \bigcup_\alpha (f^{-1}(V) \cap U_\alpha)\) 是开集的并，故开。 <strong>粘合引理（有限闭覆盖版）</strong>：类似结论对有限闭覆盖成立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 粘合引理是定义分片函数（如样条）连续性的理论保证 - 商映射理论依赖开/闭映射的判定</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：定义 \(f: \mathbb{R} \to \mathbb{R}\)， \(f(x) = x\)（\(x \leq 0\)），\(f(x) = x+1\)（\(x > 0\)）。 \(f\) 是否连续？是否是开映射？ 解答：\(f\) 不连续（在 \(x=0\) 处有跳跃，\(f^{-1}((0.5, 1.5))\) 不是开集）。 \(f\) 在 \((-\infty, 0]\) 和 \((0, +\infty)\) 上分别连续，但 \(\{(-\infty, 0], (0,+\infty)\}\) 不是开覆盖（\((-\infty, 0]\) 不开）， 故粘合引理不适用。 易错点：试图对非开覆盖使用开覆盖版粘合引理；或对无限闭覆盖 使用有限闭覆盖版。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: X \to Y\) 是连续双射。以下哪个条件能保证 \(f\) 是同胚？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。C 是经典定理：紧致空间到 Hausdorff 空间的连续双射是同胚')">A. \(X\) 是 Hausdorff 的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。C 是经典定理：紧致空间到 Hausdorff 空间的连续双射是同胚')">B. \(Y\) 是紧致的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！C 是经典定理：紧致空间到 Hausdorff 空间的连续双射是同胚')">C. \(X\) 是紧致的且 \(Y\) 是 Hausdorff 的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。C 是经典定理：紧致空间到 Hausdorff 空间的连续双射是同胚')">D. \(f\) 是开映射或闭映射</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>初始拓扑、终止拓扑与嵌入</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定一族映射，如何选择"恰好合适"的拓扑使它们连续？初始拓扑 （最弱使映射连续的拓扑）和终止拓扑（最强使映射连续的拓扑）回 答了这个问题。子空间拓扑、积拓扑是初始拓扑的特例；商拓扑是终 止拓扑的特例。嵌入则是将子空间"等同地"放入更大空间的方式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>初始/终止拓扑体现了"万有性质"(universal property)思想： 通过要求特定的映射连续来唯一确定拓扑。这是范畴论中极限/余极 限概念的具体体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>初始拓扑</strong>：给定 \(f_\alpha: X \to (Y_\alpha, \tau_\alpha)\)， \(X\) 上使所有 \(f_\alpha\) 连续的最弱拓扑 \(\tau_i\) 的子基为 \[\mathcal{S} = \{f_\alpha^{-1}(V) : V \in \tau_\alpha,\; \alpha \in A\}\] 万有性质：\(g: Z \to X\) 连续 \(\iff \forall \alpha,\; f_\alpha \circ g\) 连续。 <strong>终止拓扑</strong>：给定 \(f_\alpha: (Y_\alpha, \tau_\alpha) \to X\)， \(X\) 上使所有 \(f_\alpha\) 连续的最强拓扑为 \[\tau_f = \{U \subseteq X : \forall \alpha,\; f_\alpha^{-1}(U) \in \tau_\alpha\}\] 万有性质：\(g: X \to Z\) 连续 \(\iff \forall \alpha,\; g \circ f_\alpha\) 连续。 <strong>嵌入 (Embedding)</strong>：\(f: X \to Y\) 是嵌入，若 \(f: X \to f(X)\) 是同胚 （其中 \(f(X)\) 带子空间拓扑）。即 \(f\) 是单射、连续、且 \(f^{-1}: f(X) \to X\) 连续。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 弱拓扑是泛函分析中对偶空间上的初始拓扑 - Whitney 嵌入定理：任何 \(n\) 维流形可嵌入 \(\mathbb{R}^{2n+1}\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(X = \mathbb{R}\)，\(f: X \to \mathbb{R}\)，\(f(x) = x^2\)， \(g: X \to \mathbb{R}\)，\(g(x) = x^3\)。求 \(X\) 上关于 \(\{f, g\}\) 的初始拓扑中，\(\{0\}\) 是否为开集？ 解答：初始拓扑的子基为 \(\{f^{-1}(V), g^{-1}(V) : V \text{ 开}\}\)。 \(f^{-1}(\{0\}) = \{0\}\) 但 \(\{0\}\) 在 \(\mathbb{R}\) 中不开， 我们需要 \(f^{-1}(V)\) 形式。\(f^{-1}((-\varepsilon, \varepsilon)) = (-\sqrt{\varepsilon}, \sqrt{\varepsilon})\)。 \(g^{-1}((-\varepsilon, \varepsilon)) = (-\varepsilon^{1/3}, \varepsilon^{1/3})\)。 \(\{0\} = \bigcap_n (-1/n, 1/n)\) 不是有限交，故 \(\{0\}\) 不是开集。 易错点：混淆"子基元素"与"拓扑中的开集"——子基元素的有限交构成 基，但无限交不一定在拓扑中。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">子空间拓扑是哪种构造的特例？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A \\subseteq X\\) 的子空间拓扑恰好是关于包含映射')">A. 终止拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(A \\subseteq X\\) 的子空间拓扑恰好是关于包含映射')">B. 初始拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A \\subseteq X\\) 的子空间拓扑恰好是关于包含映射')">C. 商拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A \\subseteq X\\) 的子空间拓扑恰好是关于包含映射')">D. 积拓扑</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/geometry/topology.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

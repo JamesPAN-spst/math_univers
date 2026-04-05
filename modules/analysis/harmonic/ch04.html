@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 Sobolev 空间 — 调和分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "harmonic-ch04-q1",
+        "question": "Sobolev 空间 \\(W^{k,p}(\\Omega)\\) 的定义？",
+        "options": [
+          "\\(\\{u \\in L^p(\\Omega): D^\\alpha u \\in L^p(\\Omega),\\, |\\alpha| \\leq k\\}\\)（\\(D^\\alpha\\) 为弱导数），范数 \\(\\|u\\|_{W^{k,p}} = \\sum_{|\\alpha|\\leq k}\\|D^\\alpha u\\|_{L^p}\\)",
+        "\\(C^k(\\Omega)\\)",
+        "\\(L^p(\\Omega)\\)",
+        "Schwartz 空间"
+        ],
+        "answer": 0,
+        "explanation": "弱导数 \\(D^\\alpha u\\)：分布导数恰好是 \\(L^p\\) 函数。\\(W^{k,p}\\) 是 Banach 空间（\\(L^p\\) 范数的直和完备）。\\(H^k := W^{k,2}\\) 是 Hilbert 空间。\\(k\\) 控制可微阶数，\\(p\\) 控制可积性。Sobolev 空间 = PDE 弱解的自然栖息地。"
+      },
+      {
+        "id": "harmonic-ch04-q2",
+        "question": "弱导数定义：\\(u \\in L^1_{\\text{loc}}\\) 的弱导数 \\(D^\\alpha u = v\\) 当且仅当？",
+        "options": [
+          "\\(\\int v\\varphi = (-1)^{|\\alpha|}\\int u D^\\alpha\\varphi\\)（\\(\\forall \\varphi \\in C_c^\\infty\\)）",
+        "\\(v = u'\\)（经典导数）",
+        "\\(\\int v = \\int u\\)",
+        "\\(v \\in C^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "将分布导数的定义\"翻译\"：\\(\\langle D^\\alpha u, \\varphi\\rangle = (-1)^{|\\alpha|}\\langle u, D^\\alpha\\varphi\\rangle\\)。若 \\(u \\in C^k\\)：弱导数 = 经典导数。\\(u = |x|\\)：弱导数 \\(= \\text{sgn}(x)\\)（a.e.）。弱导数不唯一性：仅 a.e. 确定（\\(L^p\\) 等价类）。"
+      },
+      {
+        "id": "harmonic-ch04-q3",
+        "question": "Sobolev 嵌入定理（\\(\\mathbb{R}^n\\)，\\(kp < n\\)）：\\(W^{k,p}(\\mathbb{R}^n) \\hookrightarrow L^{p^*}\\)，\\(p^* = ?\\)",
+        "options": [
+          "\\(\\frac{np}{n - kp}\\)（Sobolev 共轭指数——可积性的提升）",
+        "\\(p + k\\)",
+        "\\(np\\)",
+        "\\(p\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(k\\) 阶弱可微性 + \\(L^p\\) 可积性 \\(\\Rightarrow\\) 更好的可积性 \\(L^{p^*}\\)。\\(k = 1\\)：\\(p^* = np/(n-p)\\)（\\(p < n\\)）。\\(n = 3\\)，\\(p = 2\\)：\\(p^* = 6\\)（\\(H^1 \\hookrightarrow L^6\\)）。\\(kp = n\\)：\\(W^{k,p} \\hookrightarrow L^q\\)（\\(\\forall q < \\infty\\)）但不 \\(\\hookrightarrow L^\\infty\\)。\\(kp > n\\)：\\(W^{k,p} \\hookrightarrow C^0\\)（连续性！）。"
+      },
+      {
+        "id": "harmonic-ch04-q4",
+        "question": "Morrey 不等式（\\(kp > n\\)）：\\(W^{k,p}(\\mathbb{R}^n) \\hookrightarrow C^{0,\\alpha}\\)（\\(\\alpha = k - n/p\\)）。\\(C^{0,\\alpha}\\) 是？",
+        "options": [
+          "Hölder 连续函数空间（\\(|u(x)-u(y)| \\leq C|x-y|^\\alpha\\)）",
+        "\\(C^\\infty\\)",
+        "\\(L^\\infty\\)",
+        "Lipschitz（\\(\\alpha = 1\\)）"
+        ],
+        "answer": 0,
+        "explanation": "\\(kp > n\\)：Sobolev 函数不仅连续，而且 Hölder 连续。\\(k = 1\\)，\\(p > n\\)：\\(\\alpha = 1 - n/p\\)。\\(n = 1\\)，\\(p = 2\\)：\\(H^1(0,1) \\hookrightarrow C^{0,1/2}\\)（\\(1/2\\)-Hölder）。维数 \\(n\\) 越高，需更多导数或更高 \\(p\\) 才能保证连续性。"
+      },
+      {
+        "id": "harmonic-ch04-q5",
+        "question": "迹定理：\\(u \\in W^{1,p}(\\Omega)\\)（\\(\\Omega\\) 有 \\(C^1\\) 边界）。\\(u|_{\\partial\\Omega}\\) 如何理解？",
+        "options": [
+          "存在有界线性算子 \\(\\gamma: W^{1,p}(\\Omega) \\to L^p(\\partial\\Omega)\\)（迹算子），使光滑函数 \\(\\gamma u = u|_{\\partial\\Omega}\\)（限制），对一般 \\(W^{1,p}\\) 函数由连续延拓定义",
+        "直接取边界值",
+        "恒为零",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(W^{1,p}\\) 函数不是处处有定义的——边界是零测集，直接取值无意义。迹算子通过逼近光滑函数定义：\\(u_j \\in C^\\infty(\\bar\\Omega)\\)，\\(u_j \\to u\\) 在 \\(W^{1,p}\\)。\\(\\gamma u := \\lim \\gamma u_j\\)（\\(L^p(\\partial\\Omega)\\) 极限）。有界性：\\(\\|\\gamma u\\|_{L^p(\\partial\\Omega)} \\leq C\\|u\\|_{W^{1,p}}\\)。"
+      },
+      {
+        "id": "harmonic-ch04-q6",
+        "question": "\\(H^1_0(\\Omega) = ?\\)（带下标 0 的 Sobolev 空间）",
+        "options": [
+          "\\(C_c^\\infty(\\Omega)\\) 在 \\(H^1\\) 范数下的闭包——\"边界值为零\"的 \\(H^1\\) 函数",
+        "\\(H^1(\\Omega)\\)",
+        "\\(\\{u \\in H^1: u = 0\\}\\)",
+        "\\(\\{u \\in H^1: \\nabla u = 0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^1_0 = \\overline{C_c^\\infty}^{H^1}\\)：这些函数\"在边界上消失\"（迹 \\(\\gamma u = 0\\)）。Dirichlet 边条件的自然空间。\\(H^1_0 \\subsetneq H^1\\)（例：\\(\\Omega\\) 有界时常数函数 \\(1 \\in H^1 \\setminus H^1_0\\)）。Poincaré 不等式在 \\(H^1_0\\) 上成立。"
+      },
+      {
+        "id": "harmonic-ch04-q7",
+        "question": "弱形式：\\(-\\Delta u = f\\)（\\(\\Omega\\)），\\(u|_{\\partial\\Omega} = 0\\)。弱解 \\(u \\in H^1_0(\\Omega)\\) 满足？",
+        "options": [
+          "\\(\\int_\\Omega \\nabla u \\cdot \\nabla v\\, dx = \\int_\\Omega fv\\, dx\\)（\\(\\forall v \\in H^1_0\\)）",
+        "\\(-\\Delta u = f\\)（逐点）",
+        "\\(\\int u = \\int f\\)",
+        "\\(u = f\\)"
+        ],
+        "answer": 0,
+        "explanation": "两边乘 \\(v\\)，积分，分部积分：\\(\\int(-\\Delta u)v = \\int \\nabla u \\cdot \\nabla v - \\int_{\\partial\\Omega}(\\partial_n u)v = \\int \\nabla u\\cdot\\nabla v\\)（\\(v|_{\\partial\\Omega} = 0\\)）\\(= \\int fv\\)。双线性形式 \\(a(u,v) = \\int\\nabla u\\cdot\\nabla v\\)。Lax-Milgram 给出唯一弱解。"
+      },
+      {
+        "id": "harmonic-ch04-q8",
+        "question": "\\(n = 1\\)：\\(H^1(0,1) \\hookrightarrow C[0,1]\\)（连续函数）。证明关键步骤？",
+        "options": [
+          "\\(|u(x) - u(y)| = |\\int_y^x u'| \\leq |x-y|^{1/2}\\|u'\\|_{L^2}\\)（Cauchy-Schwarz）——\\(1/2\\)-Hölder",
+        "用 Parseval 等式",
+        "用紧性",
+        "用 Hahn-Banach"
+        ],
+        "answer": 0,
+        "explanation": "基本积分不等式：\\(|u(x)-u(y)| \\leq \\int_y^x |u'(t)|\\, dt \\leq |x-y|^{1/2}(\\int |u'|^2)^{1/2}\\)。\\(u\\) 是 \\(1/2\\)-Hölder 连续。\\(\\sup|u| \\leq \\|u\\|_{L^2} + \\|u'\\|_{L^2} \\leq C\\|u\\|_{H^1}\\)。\\(n = 1\\)，\\(p = 2 > n = 1\\)：Morrey 条件满足。"
+      },
+      {
+        "id": "harmonic-ch04-q9",
+        "question": "Sobolev 空间用 Fourier 变换刻画（\\(\\mathbb{R}^n\\)）：\\(H^s(\\mathbb{R}^n) = ?\\)（\\(s > 0\\) 任意实数）",
+        "options": [
+          "\\(\\{u \\in \\mathcal{S}': (1+|\\xi|^2)^{s/2}\\hat u \\in L^2\\}\\)（范数 \\(\\|u\\|_{H^s} = \\|(1+|\\xi|^2)^{s/2}\\hat u\\|_{L^2}\\)）",
+        "\\(W^{s,2}\\)（仅 \\(s\\) 整数有意义）",
+        "\\(\\{u: |\\hat u| \\in L^s\\}\\)",
+        "\\(L^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(s \\in \\mathbb{N}\\)：\\(\\|u\\|_{H^s}^2 \\approx \\sum_{|\\alpha|\\leq s}\\|D^\\alpha u\\|_{L^2}^2 = \\int (1+|\\xi|^2)^s |\\hat u|^2\\, d\\xi\\)（Plancherel + \\(\\widehat{D^\\alpha u} = (2\\pi i\\xi)^\\alpha \\hat u\\)）。\\(s\\) 非整数：用 \\((1+|\\xi|^2)^{s/2}\\) 直接定义——分数阶 Sobolev 空间。\\(H^{-s} = (H^s_0)'\\)（对偶）。"
+      },
+      {
+        "id": "harmonic-ch04-q10",
+        "question": "迹算子的精确范围：\\(\\gamma: W^{1,p}(\\Omega) \\to W^{1-1/p, p}(\\partial\\Omega)\\)（\\(p > 1\\)）。\\(W^{1-1/p,p}\\) 是？",
+        "options": [
+          "分数阶 Sobolev 空间（Sobolev-Slobodeckij 空间）——边界上\"损失 \\(1/p\\) 阶\"正则性",
+        "\\(L^p\\)",
+        "\\(C^\\infty\\)",
+        "\\(W^{1,p}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(W^{s,p}\\)（\\(0 < s < 1\\)）：\\(\\|u\\|_{W^{s,p}}^p = \\|u\\|_{L^p}^p + \\int\\int\\frac{|u(x)-u(y)|^p}{|x-y|^{n-1+sp}}\\, dS_x\\, dS_y\\)（Gagliardo 半范数）。迹定理：\\(\\gamma\\) 满射且有右逆（延拓算子）。\\(p = 2\\)：\\(H^1(\\Omega) \\xrightarrow{\\gamma} H^{1/2}(\\partial\\Omega)\\)。"
+      },
+      {
+        "id": "harmonic-ch04-q11",
+        "question": "Lax-Milgram 定理：\\(a(u,v)\\) 是 \\(H\\)（Hilbert 空间）上的连续、强制双线性形式（\\(a(u,u) \\geq \\alpha\\|u\\|^2\\)）。\\(F \\in H'\\)。则 \\(\\exists!\\) \\(u\\)：\\(a(u,v) = F(v)\\)（\\(\\forall v\\)）。\\(\\|u\\| \\leq ?\\)",
+        "options": [
+          "\\(\\|F\\|_{H'}/\\alpha\\)（强制常数 \\(\\alpha\\) 给出稳定性估计）",
+        "\\(\\|F\\|\\)",
+        "\\(\\alpha\\|F\\|\\)",
+        "\\(\\|F\\|^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\alpha\\|u\\|^2 \\leq a(u,u) = F(u) \\leq \\|F\\|\\|u\\| \\Rightarrow \\|u\\| \\leq \\|F\\|/\\alpha\\)。Lax-Milgram 推广 Riesz 表示（\\(a = \\langle\\cdot,\\cdot\\rangle\\) 时简化为 Riesz）。应用：\\(-\\Delta u = f\\) 的弱解存在唯一性——\\(a(u,v) = \\int\\nabla u\\cdot\\nabla v\\)，\\(F(v) = \\int fv\\)。"
+      },
+      {
+        "id": "harmonic-ch04-q12",
+        "question": "Rellich-Kondrachov 紧嵌入：\\(\\Omega\\) 有界，\\(kp < n\\)。\\(W^{k,p}(\\Omega) \\hookrightarrow\\hookrightarrow L^q(\\Omega)\\)（\\(q < p^*\\)）。\"紧嵌入\"意味？",
+        "options": [
+          "\\(W^{k,p}\\) 中有界序列在 \\(L^q\\) 中有收敛子列（嵌入算子是紧算子）",
+        "嵌入连续但不紧",
+        "每个 Cauchy 列收敛",
+        "恒等映射"
+        ],
+        "answer": 0,
+        "explanation": "连续嵌入 \\(W^{k,p} \\hookrightarrow L^{p^*}\\)。紧嵌入 \\(\\hookrightarrow\\hookrightarrow L^q\\)（\\(q < p^*\\)）——更强：有界集→预紧集。\\(q = p^*\\)：一般不紧（Aubin 等的反例）。紧嵌入是椭圆 PDE 谱论的核心工具——保证特征值离散。"
+      },
+      {
+        "id": "harmonic-ch04-q13",
+        "question": "Poincaré 不等式：\\(u \\in H^1_0(\\Omega)\\)（\\(\\Omega\\) 有界）。\\(\\|u\\|_{L^2} \\leq ?\\)",
+        "options": [
+          "\\(C_\\Omega \\|\\nabla u\\|_{L^2}\\)（常数 \\(C_\\Omega\\) 依赖于 \\(\\Omega\\) 的直径）",
+        "\\(\\|u\\|_{H^1}\\)",
+        "\\(\\|\\Delta u\\|_{L^2}\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u|_{\\partial\\Omega} = 0\\)（\\(H^1_0\\)）\\(\\Rightarrow u\\) 不能是非零常数 \\(\\Rightarrow \\nabla u\\) 控制 \\(u\\)。\\(n = 1\\)：\\(|u(x)| = |\\int_0^x u'| \\leq \\sqrt{x}\\|u'\\|\\)。\\(\\|u\\|_{L^2}^2 \\leq d^2\\|u'\\|^2/4\\)（\\(d\\) = 区间长度）。Poincaré 使 \\(\\|\\nabla u\\|\\) 成为 \\(H^1_0\\) 的等价范数。"
+      },
+      {
+        "id": "harmonic-ch04-q14",
+        "question": "迹定理的逆：\\(g \\in W^{1-1/p,p}(\\partial\\Omega)\\)。存在 \\(u \\in W^{1,p}(\\Omega)\\) 使 \\(\\gamma u = g\\)？",
+        "options": [
+          "是——存在连续延拓算子 \\(E: W^{1-1/p,p}(\\partial\\Omega) \\to W^{1,p}(\\Omega)\\)（右逆）",
+        "一般不存在",
+        "仅 \\(p = 2\\)",
+        "需 \\(g \\in C^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "迹算子满射：\\(\\gamma\\) 有连续右逆。构造方法：局部展平边界后用一维延拓（\\(g\\) 在法方向上用 Poisson 或其他核延拓）。\\(\\|Eg\\|_{W^{1,p}(\\Omega)} \\leq C\\|g\\|_{W^{1-1/p,p}(\\partial\\Omega)}\\)。应用：非齐次 Dirichlet 问题 \\(u|_{\\partial\\Omega} = g\\) 可先延拓再求差。"
+      },
+      {
+        "id": "harmonic-ch04-q15",
+        "question": "椭圆正则性：\\(-\\Delta u = f \\in L^2(\\Omega)\\)（弱解 \\(u \\in H^1_0\\)）。\\(u\\) 的正则性？",
+        "options": [
+          "\\(u \\in H^2(\\Omega)\\)（提升 2 阶），\\(\\|u\\|_{H^2} \\leq C\\|f\\|_{L^2}\\)（\\(\\Omega\\) 附加光滑性条件）",
+        "\\(u \\in C^\\infty\\)",
+        "\\(u \\in H^1\\)（无提升）",
+        "\\(u \\in L^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "弱解先验只在 \\(H^1\\)。椭圆正则性：\\(f \\in L^2 \\Rightarrow u \\in H^2\\)（差分商方法或 Fourier 分析）。\\(f \\in H^k \\Rightarrow u \\in H^{k+2}\\)。\\(f \\in C^\\infty \\Rightarrow u \\in C^\\infty\\)（内正则性）。边界正则性需 \\(\\partial\\Omega\\) 光滑——非光滑域（角点）正则性降低。"
+      },
+      {
+        "id": "harmonic-ch04-q16",
+        "question": "Gagliardo-Nirenberg-Sobolev 不等式（\\(n \\geq 2\\)，\\(1 \\leq p < n\\)）：\\(\\|u\\|_{L^{p^*}} \\leq C \\|\\nabla u\\|_{L^p}\\)（\\(u \\in C_c^\\infty\\)）。\\(p^* = ?\\)",
+        "options": [
+          "\\(np/(n-p)\\)",
+        "\\(p + 1\\)",
+        "\\(2p\\)",
+        "\\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "GNS 不等式是 Sobolev 嵌入 \\(W^{1,p} \\hookrightarrow L^{p^*}\\) 的核心。\\(n = 3\\)，\\(p = 1\\)：\\(p^* = 3/2\\)。\\(p = 2\\)：\\(p^* = 6\\)。极值函数：\\(u^* = (1+|x|^{p/(p-1)})^{(p-n)/p}\\)（Aubin-Talenti，确定最佳常数 \\(C\\)）。\\(p \\to n\\)：\\(p^* \\to \\infty\\)（但极限情况需 BMO/Trudinger）。"
+      },
+      {
+        "id": "harmonic-ch04-q17",
+        "question": "\\(u \\in H^1(\\Omega)\\) 在 \\(\\partial\\Omega\\) 上的法向导数 \\(\\partial u/\\partial n\\) 如何理解？需要额外条件。",
+        "options": [
+          "一般 \\(H^1\\) 函数法向导数无迹定义——需 \\(u \\in H^2\\)（\\(\\nabla u \\in H^1\\)）或满足 PDE（如 \\(\\Delta u \\in L^2\\)：Green 公式给出 \\(\\partial_n u \\in H^{-1/2}(\\partial\\Omega)\\)）",
+        "取经典法向导数",
+        "总是 \\(L^2\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "迹定理：\\(H^1 \\to H^{1/2}(\\partial\\Omega)\\)（迹有定义）。但 \\(\\nabla u \\in L^2\\)：\\(\\nabla u|_{\\partial\\Omega}\\) 的法向分量需 \\(\\nabla u \\in H^1\\) 的迹——即 \\(u \\in H^2\\)。弱化：\\(\\Delta u \\in L^2\\) 时，\\(\\partial_n u\\) 作为 \\(H^{-1/2}(\\partial\\Omega)\\) 的元素由 Green 公式定义。"
+      },
+      {
+        "id": "harmonic-ch04-q18",
+        "question": "\\(H^s(\\mathbb{R}^n)\\)（\\(s > n/2\\)）嵌入到什么空间？",
+        "options": [
+          "\\(C_b(\\mathbb{R}^n) \\cap L^\\infty\\)（有界连续函数——Sobolev 嵌入的 Hilbert 空间版本）",
+        "\\(L^2\\)",
+        "\\(\\mathcal{S}\\)",
+        "\\(L^1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u \\in H^s\\)，\\(s > n/2\\)：\\(\\hat u \\in L^1\\)（因 \\(|\\hat u| = (1+|\\xi|^2)^{-s/2}(1+|\\xi|^2)^{s/2}|\\hat u|\\)，\\((1+|\\xi|^2)^{-s/2} \\in L^2\\)（\\(2s>n\\)），Cauchy-Schwarz）。\\(u = \\mathcal{F}^{-1}\\hat u\\)，\\(\\|u\\|_\\infty \\leq \\|\\hat u\\|_1 \\leq C\\|u\\|_{H^s}\\)。连续性由 \\(\\hat u \\in L^1\\) 保证（Riemann-Lebesgue 反面）。"
+      },
+      {
+        "id": "harmonic-ch04-q19",
+        "question": "临界情况 \\(kp = n\\)（\\(k = 1\\)，\\(p = n\\)）：\\(W^{1,n}(\\Omega) \\not\\hookrightarrow L^\\infty\\)。但有什么替代？",
+        "options": [
+          "Trudinger 不等式：\\(\\int e^{\\alpha|u|^{n/(n-1)}}\\, dx \\leq C\\)（\\(\\|u\\|_{W^{1,n}} \\leq 1\\) 时，某 \\(\\alpha > 0\\)）——指数可积性",
+        "\\(W^{1,n} \\hookrightarrow C^0\\)",
+        "无结果",
+        "\\(L^p\\)（\\(\\forall p\\)）但无指数可积"
+        ],
+        "answer": 0,
+        "explanation": "\\(W^{1,n}(\\Omega) \\hookrightarrow L^q\\)（\\(\\forall q < \\infty\\)），但不嵌入 \\(L^\\infty\\)。反例：\\(u = \\log\\log(1/|x|)\\)（\\(n\\) 维，\\(\\Omega = B_1\\)）。Trudinger-Moser 不等式给出指数型可积性——这是最佳结果。\\(n = 2\\)：\\(H^1 = W^{1,2}\\) 时 \\(\\int e^{4\\pi u^2} \\leq C\\)。"
+      },
+      {
+        "id": "harmonic-ch04-q20",
+        "question": "\\(H^1_0(\\Omega) = \\{u \\in H^1: \\gamma u = 0\\}\\)？（\\(\\gamma\\) 是迹算子）",
+        "options": [
+          "是（迹为零 \\(\\Leftrightarrow\\) 可被 \\(C_c^\\infty\\) 逼近）——这正是 \\(H^1_0\\) 的两种等价刻画",
+        "\\(\\gamma u = 0\\) 不够",
+        "需 \\(u = 0\\) （逐点）",
+        "不等价"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^1_0 := \\overline{C_c^\\infty}^{H^1}\\)（定义）。\\(\\gamma: H^1 \\to H^{1/2}(\\partial\\Omega)\\) 连续 \\(\\Rightarrow\\) \\(C_c^\\infty\\) 上 \\(\\gamma\\varphi = 0 \\Rightarrow \\gamma u = 0\\)（\\(H^1_0 \\subset \\ker\\gamma\\)）。反向：\\(\\gamma u = 0 \\Rightarrow u \\in H^1_0\\)——证明用截断+磨光逼近。\\(H^1_0 = \\ker\\gamma\\)。"
+      },
+      {
+        "id": "harmonic-ch04-q21",
+        "question": "特征值问题 \\(-\\Delta u = \\lambda u\\)（\\(\\Omega\\) 有界，\\(u \\in H^1_0\\)）。紧嵌入 \\(H^1_0 \\hookrightarrow\\hookrightarrow L^2\\) 保证？",
+        "options": [
+          "特征值离散：\\(0 < \\lambda_1 \\leq \\lambda_2 \\leq \\cdots \\to \\infty\\)，特征函数构成 \\(L^2\\) 的 ONB",
+        "连续谱",
+        "有限个特征值",
+        "\\(\\lambda = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((-\\Delta)^{-1}: L^2 \\to H^1_0 \\hookrightarrow\\hookrightarrow L^2\\) 是紧自伴算子。谱定理(紧)：特征值 \\(\\mu_k = 1/\\lambda_k \\to 0\\)，\\(\\lambda_k \\to \\infty\\)。\\(\\lambda_1\\)（最小特征值）= Rayleigh 商的最小值：\\(\\lambda_1 = \\inf_{u \\in H^1_0\\setminus\\{0\\}}\\|\\nabla u\\|^2/\\|u\\|^2\\)。Weyl 渐近：\\(\\lambda_k \\sim C_n(k/|\\Omega|)^{2/n}\\)。"
+      },
+      {
+        "id": "harmonic-ch04-q22",
+        "question": "\\(u \\in W^{1,p}(\\mathbb{R}^n)\\)（\\(1 \\leq p < \\infty\\)）。\\(u\\) 可以被 \\(C_c^\\infty\\) 函数在 \\(W^{1,p}\\) 范数下逼近？",
+        "options": [
+          "是（Meyers-Serrin 定理：\\(W^{k,p} = H^{k,p}\\)，即 \\(C^\\infty \\cap W^{k,p}\\) 在 \\(W^{k,p}\\) 中稠密）",
+        "一般不能",
+        "仅 \\(p = 2\\)",
+        "需 \\(\\Omega\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "Meyers-Serrin（1964）：\\(\\mathbb{R}^n\\) 上或一般开集上，\\(C^\\infty(\\Omega) \\cap W^{k,p}(\\Omega)\\) 在 \\(W^{k,p}\\) 中稠密。磨光/mollification：\\(u * \\rho_\\epsilon \\to u\\) 在 \\(W^{k,p}\\)（局部）。整体需截断+分割覆盖。\\(\\Omega\\) 上的逼近：\\(C^\\infty(\\Omega)\\) 稠密；\\(C^\\infty(\\bar\\Omega)\\) 稠密需要边界正则性。"
+      },
+      {
+        "id": "harmonic-ch04-q23",
+        "question": "\\(\\Omega^c \\neq \\emptyset\\)。\\(u \\in W^{1,p}(\\Omega)\\)。延拓到 \\(\\mathbb{R}^n\\)：\\(Eu \\in W^{1,p}(\\mathbb{R}^n)\\) 满足 \\(Eu|_\\Omega = u\\)。什么条件保证延拓？",
+        "options": [
+          "\\(\\Omega\\) 满足锥条件或 Lipschitz 边界——则存在有界延拓算子 \\(E: W^{1,p}(\\Omega) \\to W^{1,p}(\\mathbb{R}^n)\\)",
+        "任何 \\(\\Omega\\) 都可以",
+        "仅凸域",
+        "需 \\(C^\\infty\\) 边界"
+        ],
+        "answer": 0,
+        "explanation": "经典 Calderón 延拓（Lipschitz域）或 Stein 延拓（统一 \\(C^m\\) 域）。思路：边界附近通过反射 + 修正获得外部值。\\(Eu = u\\)（\\(\\Omega\\) 内），\\(Eu\\) 在 \\(\\Omega^c\\) 由反射构造。\\(\\|Eu\\|_{W^{1,p}(\\mathbb{R}^n)} \\leq C\\|u\\|_{W^{1,p}(\\Omega)}\\)。延拓将有界域结果传递到 \\(\\mathbb{R}^n\\) 结果。"
+      },
+      {
+        "id": "harmonic-ch04-q24",
+        "question": "弱解正则性的 bootstrap：\\(-\\Delta u = f(u)\\)（半线性椭圆方程），\\(f\\) 光滑。若 \\(u \\in H^1\\)，Sobolev 嵌入 + 椭圆正则性可以反复提升正则性吗？",
+        "options": [
+          "是（\\(u \\in H^1 \\hookrightarrow L^{p^*} \\Rightarrow f(u) \\in L^{p^*} \\Rightarrow u \\in W^{2,p^*} \\hookrightarrow L^{q} \\Rightarrow \\ldots\\)）——每步提升，最终 \\(u \\in C^\\infty\\)",
+        "只能提升一步",
+        "不能提升",
+        "需分析解"
+        ],
+        "answer": 0,
+        "explanation": "Bootstrap/regularity lifting：Step 1：\\(u \\in H^1 \\hookrightarrow L^{2^*}\\)。\\(f(u) \\in L^{2^*}\\)。Step 2：\\(-\\Delta u = f(u) \\in L^{2^*}\\)，椭圆正则 \\(\\Rightarrow u \\in W^{2, 2^*} \\hookrightarrow L^q\\)（\\(q > 2^*\\)）。迭代：指数增长直到 \\(kp > n\\)（嵌入 \\(C^\\alpha\\)），然后 Schauder 理论给 \\(C^\\infty\\)。需 \\(f\\) 的增长条件与 Sobolev 指数匹配。"
+      },
+      {
+        "id": "harmonic-ch04-q25",
+        "question": "\\(H^{-1}(\\Omega) = (H^1_0(\\Omega))'\\)（对偶空间）。\\(f \\in H^{-1}\\) 的范数？",
+        "options": [
+          "\\(\\|f\\|_{H^{-1}} = \\sup_{v \\in H^1_0,\\, \\|v\\|_{H^1_0} \\leq 1} |\\langle f, v\\rangle|\\)",
+        "\\(\\|f\\|_{L^2}\\)",
+        "\\(\\int |f|\\)",
+        "\\(\\|f\\|_\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^{-1}\\) 包含 \\(L^2\\)（\\(L^2 \\hookrightarrow H^{-1}\\)）且更大。\\(f = \\text{div}\\, F\\)（\\(F \\in L^2\\)）也在 \\(H^{-1}\\)：\\(\\langle\\text{div}F, v\\rangle = -\\int F\\cdot\\nabla v\\)。\\(\\|f\\|_{H^{-1}} \\leq \\|F\\|_{L^2}\\)。\\(H^{-1}\\) 是 \\(-\\Delta u = f\\) 中 \\(f\\) 的最弱自然空间（\\(u \\in H^1_0\\)）。"
+      },
+      {
+        "id": "harmonic-ch04-q26",
+        "question": "有限元方法求解 \\(-\\Delta u = f\\)（\\(u \\in H^1_0\\)）的基本思路？",
+        "options": [
+          "取 \\(H^1_0\\) 的有限维子空间 \\(V_h\\)（如分段线性函数），在 \\(V_h\\) 中找 \\(u_h\\) 满足 \\(\\int\\nabla u_h\\cdot\\nabla v_h = \\int fv_h\\)（\\(\\forall v_h \\in V_h\\)）",
+        "用差分代替微分",
+        "用 Fourier 展开",
+        "精确求解"
+        ],
+        "answer": 0,
+        "explanation": "Galerkin 方法：将弱形式限制到有限维空间。Céa 引理：\\(\\|u - u_h\\|_{H^1} \\leq C\\inf_{v_h \\in V_h}\\|u - v_h\\|_{H^1}\\)（准最优——误差由最佳逼近决定）。分段线性（\\(P_1\\)）：\\(\\|u-u_h\\|_{H^1} = O(h)\\)（\\(h\\) = 网格尺度）。Sobolev 空间为有限元提供了理论框架。"
+      },
+      {
+        "id": "harmonic-ch04-q27",
+        "question": "图像去噪中的 Sobolev 正则化：最小化 \\(E(u) = \\int|u - f|^2 + \\lambda\\int|\\nabla u|^2\\)（\\(f\\) = 含噪图像）。Euler-Lagrange 方程？",
+        "options": [
+          "\\(u - f - \\lambda\\Delta u = 0\\)（即 \\((I - \\lambda\\Delta)u = f\\)——平滑版 Poisson 方程）",
+        "\\(u = f\\)",
+        "\\(\\Delta u = f\\)",
+        "\\(u = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "变分法：\\(\\frac{d}{d\\epsilon}E(u+\\epsilon v)|_{\\epsilon=0} = 2\\int(u-f)v + 2\\lambda\\int\\nabla u\\cdot\\nabla v = 0\\)。\\(\\Rightarrow u - f - \\lambda\\Delta u = 0\\)（弱形式/分部积分）。\\(\\lambda\\) 大：更光滑（过度平滑）。缺点：边缘模糊——改用 Total Variation（\\(\\int|\\nabla u|\\)）保边缘。"
+      },
+      {
+        "id": "harmonic-ch04-q28",
+        "question": "流体力学 Navier-Stokes 方程的弱解在什么 Sobolev 空间中寻找？",
+        "options": [
+          "\\(u \\in L^\\infty(0,T; L^2) \\cap L^2(0,T; H^1_0)\\)（Leray-Hopf 弱解），\\(\\text{div}\\, u = 0\\)",
+        "\\(u \\in C^\\infty\\)",
+        "\\(u \\in L^2\\)",
+        "\\(u \\in H^3\\)"
+        ],
+        "answer": 0,
+        "explanation": "Leray（1934）：3D 不可压 NS 弱解存在于 \\(L^\\infty(L^2) \\cap L^2(H^1)\\)——能量空间。\\(L^2\\)：动能有界。\\(H^1\\)：耗散（粘性项 \\(\\nu\\Delta u\\) 对 \\(\\nabla u\\) 的控制）。千禧问题：这些弱解是否唯一/光滑？未解决。Sobolev 空间精确刻画了\"弱解存在但正则性不足\"的困境。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="harmonic"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/harmonic.html" class="module-name">调和分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Sobolev 空间的定义与完备性</a></li>
+      <li><a href="#kp2">02 · Sobolev 嵌入与紧嵌入</a></li>
+      <li><a href="#kp3">03 · 迹定理与边界条件</a></li>
+      <li><a href="#kp4">04 · Sobolev 空间的对偶与弱解理论</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>Sobolev 空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Sobolev 空间的定义与完备性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>经典 PDE 理论要求解足够光滑（\(C^2\) 等），但许多物理问题的解 不够光滑——例如弹性膜在外力下的变形。Sobolev 空间允许用 "弱导数"代替经典导数，使得方程在更广的函数类中有解。 \(W^{k,p}\) 的完备性保证了变分方法和弱解理论的可行性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sobolev 空间 = \(L^p\) + 弱可微性。弱导数通过分部积分定义： \(\int D^\alpha f \cdot \varphi = (-1)^{|\alpha|} \int f \cdot D^\alpha\varphi\)。 不需要 \(f\) 经典可微。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>弱导数</strong>：\(g\) 是 \(f\) 的 \(\alpha\)-阶弱导数，若 \[\int_\Omega f \cdot D^\alpha\varphi\, dx = (-1)^{|\alpha|}\int_\Omega g \cdot \varphi\, dx, \quad \forall \varphi \in C_c^\infty(\Omega)\] 记 \(g = D^\alpha f\)。弱导数若存在则唯一（a.e.）。 <strong>\(W^{k,p}(\Omega)\)</strong>：\(f \in L^p\) 且对所有 \(|\alpha| \leq k\)， 弱导数 \(D^\alpha f \in L^p\)。 范数：\(\|f\|_{W^{k,p}} = \left(\sum_{|\alpha| \leq k} \|D^\alpha f\|_p^p\right)^{1/p}\)。 <strong>完备性</strong>：\(W^{k,p}\) 是 Banach 空间。 \(H^k = W^{k,2}\) 是 Hilbert 空间（内积 \(\langle f, g \rangle_{H^k} = \sum \int D^\alpha f \cdot \overline{D^\alpha g}\)）。 <strong>\(W_0^{k,p}(\Omega)\)</strong>：\(C_c^\infty(\Omega)\) 在 \(W^{k,p}\) 范数下的闭包 （零边界条件）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>弹性力学中，膜的位移 \(u \in H_0^1(\Omega)\) 最小化能量 \(\int |\nabla u|^2 - 2fu\)（Dirichlet 问题的弱形式）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x) = |x|\) 在 \((-1, 1)\) 上。弱导数？ 解答：\(f'(x) = \text{sgn}(x)\)（弱意义下）。 \(\int |x| \varphi' dx = -\int \text{sgn}(x) \varphi dx\) （分 \((-1,0)\) 和 \((0,1)\) 分部积分，边界项互消）。 \(f \in W^{1,p}(-1,1)\) 对所有 \(p\)。但 \(f \notin W^{2,p}\) （\(\text{sgn}(x)\) 的弱导数是 \(2\delta(x) \notin L^p\)）。 易错点：\(f(x) = \chi_{(0,1)}(x)\) 在 \((-1,1)\) 上有弱导数吗？ 没有 \(L^1_{\text{loc}}\) 的弱导数（跳跃导致 \(\delta\)）。\(f \notin W^{1,1}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(H^1(\mathbb{R})\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H^k = W^{k,2}\\)，\\(p = 2\\) 时有内积结构，是 Hilbert 空间。')">A. Banach 空间但非 Hilbert</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(H^k = W^{k,2}\\)，\\(p = 2\\) 时有内积结构，是 Hilbert 空间。')">B. Hilbert 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H^k = W^{k,2}\\)，\\(p = 2\\) 时有内积结构，是 Hilbert 空间。')">C. 不完备</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H^k = W^{k,2}\\)，\\(p = 2\\) 时有内积结构，是 Hilbert 空间。')">D. 等于 \(C^1(\mathbb{R})\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Sobolev 嵌入与紧嵌入</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Sobolev 空间中的函数有多"正则"？嵌入定理给出定量回答： 弱可微性 + 可积性 ⇒ 更高的可积性甚至连续性。紧嵌入 （Rellich-Kondrachov）保证有界序列有收敛子列，是变分法 中证明极值存在的关键工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sobolev 嵌入的核心是"导数信息换取可积性"——弱导数的 存在性限制了函数的振荡，迫使函数更加正则。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Sobolev 不等式</strong>（\(kp < n\)）：存在 \(C\) 使 \[\|f\|_{L^{p^*}} \leq C \|f\|_{W^{k,p}}, \quad p^* = \frac{np}{n - kp}\] 即 \(W^{k,p} \hookrightarrow L^{p^*}\)（连续嵌入）。 <strong>Morrey 不等式</strong>（\(kp > n\)）：\(W^{k,p} \hookrightarrow C^{0,\alpha}\) （Hölder 连续, \(\alpha = k - n/p\)）， \[\|f\|_{C^{0,\alpha}} \leq C\|f\|_{W^{k,p}}\] <strong>Rellich-Kondrachov 紧嵌入</strong>：\(\Omega\) 有界，\(kp < n\)： \(W^{k,p}(\Omega) \hookrightarrow\hookrightarrow L^q(\Omega)\) （紧嵌入，\(q < p^*\)）。 即 \(W^{k,p}\) 中有界序列有 \(L^q\) 收敛子列。 <strong>一维特例</strong>：\(W^{1,1}(0,1) \hookrightarrow C([0,1])\)（\(n=1, kp=1=n\)， 临界但一维特殊），且嵌入是紧的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>变分法：最小化 \(E(u) = \int |\nabla u|^2 + V(u)\) 在 \(H_0^1\) 上， Rellich 紧嵌入保证极小化序列有收敛子列。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(n = 2\), \(f \in H^1(\Omega)\)（\(\Omega\) 有界）。 \(f \in L^q\) 对哪些 \(q\)？ 解答：\(k = 1, p = 2, n = 2\)。\(kp = 2 = n\)（临界情形）。 \(p^* = 2 \cdot 2/(2-2)\) 未定义（分母为 0），但 \(f \in L^q\) 对所有有限 \(q\) （Trudinger 不等式：\(\int e^{\alpha|f|^2} < \infty\)）。 易错点：Sobolev 嵌入在有界域和 \(\mathbb{R}^n\) 上有区别。 紧嵌入（Rellich）需要 \(\Omega\) 有界。\(\mathbb{R}^n\) 上无紧嵌入。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Rellich-Kondrachov 定理中"紧嵌入"是指？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。紧嵌入 = 嵌入算子是紧算子 = 有界集映为列紧集')">A. 每个有界序列有范数收敛子列</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。紧嵌入 = 嵌入算子是紧算子 = 有界集映为列紧集')">B. 嵌入算子是紧算子</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！紧嵌入 = 嵌入算子是紧算子 = 有界集映为列紧集')">C. A 和 B 等价</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。紧嵌入 = 嵌入算子是紧算子 = 有界集映为列紧集')">D. 空间是紧致的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>迹定理与边界条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>PDE 的边界值问题需要给函数赋边界条件 \(u|_{\partial\Omega} = g\)。 但 Sobolev 函数是等价类（a.e. 定义），边界是零测集——<br> \(u|_{\partial\Omega}\) 如何定义？迹定理说 \(W^{1,p}\) 函数确实有 良好定义的"边界值"（迹），且迹算子是连续的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>迹算子 \(\gamma: W^{1,p}(\Omega) \to L^p(\partial\Omega)\) 将 体内的弱正则性传递到边界。\(W_0^{1,p}\) 恰好是迹为零的函数集。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>迹定理</strong>：设 \(\Omega \subseteq \mathbb{R}^n\) 有 Lipschitz 边界。 存在唯一有界线性算子（迹算子） \[\gamma: W^{1,p}(\Omega) \to L^p(\partial\Omega)\] 使得 \(\gamma f = f|_{\partial\Omega}\) 当 \(f \in C(\overline{\Omega})\)。 \(\|\gamma f\|_{L^p(\partial\Omega)} \leq C\|f\|_{W^{1,p}(\Omega)}\)。 <strong>更精确</strong>：\(\gamma: W^{1,p}(\Omega) \to W^{1-1/p, p}(\partial\Omega)\) （分数阶 Sobolev 空间）。 <strong>核的刻画</strong>：\(\ker \gamma = W_0^{1,p}(\Omega)\)。 即："弱意义下零边值" = "\(C_c^\infty\) 的闭包"。 <strong>Poincaré 不等式</strong>：\(f \in W_0^{1,p}(\Omega)\)（\(\Omega\) 有界）： \[\|f\|_{L^p} \leq C(\Omega) \|\nabla f\|_{L^p}\] \(\|\nabla f\|_{L^p}\) 是 \(W_0^{1,p}\) 的等价范数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>有限元方法中，边界条件的施加通过迹定理严格化： 试验函数在 \(H_0^1\) 中（零迹），边界数据在 \(H^{1/2}(\partial\Omega)\) 中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\Omega = (0,1)\), \(u(x) = x(1-x) \in W^{1,2}(0,1)\)。 迹 \(\gamma u = (u(0), u(1)) = (0, 0)\)。 \(u \in W_0^{1,2}(0,1)\)？是的。 例题：\(v(x) = 1 \in W^{1,2}(0,1)\)。迹 \(= (1, 1) \neq (0,0)\)。 \(v \notin W_0^{1,2}(0,1)\)。 易错点：\(W^{1,1}(\mathbb{R})\) 的函数有连续代表元（一维嵌入定理）， 此时迹就是普通的限制。但高维 Sobolev 函数不一定连续。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(W_0^{1,p}(\Omega)\) 中的函数满足什么边界条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(W_0^{1,p} = \\ker\\gamma\\)——迹为零——即 Dirichlet 零边值。')">A. 任意边界条件</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(W_0^{1,p} = \\ker\\gamma\\)——迹为零——即 Dirichlet 零边值。')">B. 零 Dirichlet 边界条件（迹 = 0）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(W_0^{1,p} = \\ker\\gamma\\)——迹为零——即 Dirichlet 零边值。')">C. 零 Neumann 条件</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(W_0^{1,p} = \\ker\\gamma\\)——迹为零——即 Dirichlet 零边值。')">D. 周期边界条件</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Sobolev 空间的对偶与弱解理论</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>PDE 的弱解（variational solution）定义在 Sobolev 空间中， 通过双线性形式和 Lax-Milgram 定理得到存在唯一性。 理解 \(H^{-1} = (H_0^1)^*\) 和弱形式的含义是现代 PDE 理论的入门关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lax-Milgram 是 Riesz 表示定理的推广：不要求双线性形式 是内积（对称），但要求强制性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>弱形式</strong>：Poisson 方程 \(-\Delta u = f\) 在 \(\Omega\), \(u = 0\) on \(\partial\Omega\)。 乘以 \(v \in H_0^1\) 并积分： \[\int_\Omega \nabla u \cdot \nabla v\, dx = \int_\Omega fv\, dx, \quad \forall v \in H_0^1\] 记 \(a(u,v) = \int \nabla u \cdot \nabla v\)，\(F(v) = \int fv\)。 求 \(u \in H_0^1\) 使 \(a(u,v) = F(v)\)。 <strong>Lax-Milgram 定理</strong>：\(H\) 为 Hilbert 空间，\(a: H \times H \to \mathbb{R}\) 双线性连续+强制（\(a(u,u) \geq \alpha\|u\|^2\), \(\alpha > 0\)）， \(F \in H^*\)。则存在唯一 \(u \in H\) 使 \[a(u, v) = F(v), \quad \forall v \in H\] 且 \(\|u\| \leq \|F\|/\alpha\)。 <strong>强制性验证</strong>：\(a(u,u) = \int |\nabla u|^2 \geq C\|u\|_{H_0^1}^2\) （Poincaré 不等式）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>有限元方法：在有限维子空间 \(V_h \subseteq H_0^1\) 上求 \(u_h\) 使 \(a(u_h, v_h) = F(v_h)\)。Céa 引理保证 \(\|u - u_h\| \leq C \inf_{v_h \in V_h} \|u - v_h\|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(-u'' = 1\) 在 \((0,1)\), \(u(0) = u(1) = 0\)。 弱形式：\(\int_0^1 u'v' dx = \int_0^1 v dx\), \(\forall v \in H_0^1(0,1)\)。 解：\(u(x) = x(1-x)/2\)。验证：\(u' = (1-2x)/2\)， \(\int u'v' = -\int u''v = \int v\)。✓ 易错点：弱解不一定是经典解。\(f \in L^2\) 时弱解只在 \(H^1\)， 需要正则性理论将弱解提升到 \(H^2\) 再到 \(C^2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Lax-Milgram 与 Riesz 表示定理的区别是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Riesz 表示用内积（对称双线性形式），')">A. Lax-Milgram 不要求双线性形式对称</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Riesz 表示用内积（对称双线性形式），')">B. Riesz 不要求完备性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Riesz 表示用内积（对称双线性形式），')">C. 完全一样</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Riesz 表示用内积（对称双线性形式），')">D. Lax-Milgram 只对有限维</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/analysis/harmonic.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

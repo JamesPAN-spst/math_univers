@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 特征标理论 — 表示论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "representation-ch03-q1",
+        "question": "表示 \\(\\rho\\) 的特征标定义为 \\(\\chi(g) = \\) ？",
+        "options": [
+          "\\(\\det(\\rho(g))\\)",
+        "\\(\\mathrm{tr}(\\rho(g))\\)",
+        "\\(\\|\\rho(g)\\|\\)",
+        "\\(\\rho(g)_{11}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\chi_V(g) = \\mathrm{tr}(\\rho(g))\\)，即表示矩阵的迹。迹的关键性质：基无关（\\(\\mathrm{tr}(ABA^{-1}) = \\mathrm{tr}(B)\\)），故等价表示有相同特征标。A 是行列式特征标（1维表示时与 B 一致），但不是一般定义。"
+      },
+      {
+        "id": "representation-ch03-q2",
+        "question": "\\(\\chi_V(e) = \\) ？（\\(e\\) 为单位元）",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\dim V\\)",
+        "\\(|G|\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\rho(e) = I_{\\dim V}\\)，\\(\\chi_V(e) = \\mathrm{tr}(I) = \\dim V\\)。这是特征标最基本的性质。\\(\\chi_V(e)\\) 直接给出表示的维数。"
+      },
+      {
+        "id": "representation-ch03-q3",
+        "question": "\\(\\chi_{V \\oplus W}(g) = \\) ？",
+        "options": [
+          "\\(\\chi_V(g) \\cdot \\chi_W(g)\\)",
+        "\\(\\chi_V(g) + \\chi_W(g)\\)",
+        "\\(\\chi_V(g) - \\chi_W(g)\\)",
+        "\\(\\max(\\chi_V(g), \\chi_W(g))\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\rho_{V\\oplus W}(g) = \\rho_V(g) \\oplus \\rho_W(g)\\)（分块对角矩阵），\\(\\mathrm{tr} = \\mathrm{tr}(\\rho_V(g)) + \\mathrm{tr}(\\rho_W(g))\\)。直和对应特征标相加，张量积对应特征标相乘。"
+      },
+      {
+        "id": "representation-ch03-q4",
+        "question": "第一正交关系 \\(\\langle\\chi_i, \\chi_j\\rangle = \\) ？",
+        "options": [
+          "\\(|G|\\)",
+        "\\(d_i d_j\\)",
+        "\\(\\delta_{ij}\\)",
+        "\\(0\\)（总是）"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\langle\\chi_i,\\chi_j\\rangle = \\frac{1}{|G|}\\sum_{g \\in G}\\chi_i(g)\\overline{\\chi_j(g)} = \\delta_{ij}\\)。不同不可约表示正交，同一不可约表示自内积为 \\(1\\)。这是判断不可约性和计算分解重数的核心工具。"
+      },
+      {
+        "id": "representation-ch03-q5",
+        "question": "\\(S_3\\) 特征标表的行数等于？",
+        "options": [
+          "\\(6\\)",
+        "\\(3\\)",
+        "\\(2\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "行数 \\(=\\) 不可约表示个数 \\(=\\) 共轭类个数 \\(= 3\\)（\\(S_3\\)）。列数也是 \\(3\\)（共轭类 \\(\\{e\\},\\{(12),(13),(23)\\},\\{(123),(132)\\}\\)）。特征标表是 \\(3 \\times 3\\) 方阵。"
+      },
+      {
+        "id": "representation-ch03-q6",
+        "question": "Abel 群 \\(G\\) 的所有不可约表示维数为 \\(1\\)，等价于说 \\(\\sum d_i^2 = |G|\\) 中？",
+        "options": [
+          "\\(r = |G|\\)（\\(r\\) 个 \\(d_i = 1\\)）",
+        "\\(r = 1\\)",
+        "\\(d_1 = |G|\\)",
+        "\\(r = \\sqrt{|G|}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Abel 群不可约表示全部 1 维。\\(\\sum 1^2 = r = |G|\\)。\\(r =\\) 共轭类个数 \\(= |G|\\)（Abel 群中每个元素自成共轭类）。反之若 \\(r = |G|\\) 则所有 \\(d_i = 1\\)，\\(G\\) Abel。"
+      },
+      {
+        "id": "representation-ch03-q7",
+        "question": "\\(\\langle\\chi_V, \\chi_V\\rangle = 1\\) 意味着？",
+        "options": [
+          "\\(V\\) 不可约",
+        "\\(\\dim V = 1\\)",
+        "\\(V\\) 平凡",
+        "\\(V\\) 可约"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\chi_V,\\chi_V\\rangle = \\sum n_i^2\\)（\\(V \\cong \\bigoplus V_i^{\\oplus n_i}\\)）。\\(= 1\\) 当且仅当恰有一个 \\(n_i = 1\\)，其余为 \\(0\\)，即 \\(V\\) 不可约。\\(\\dim V = 1\\) 不必要（\\(S_3\\) 有 2 维不可约）。"
+      },
+      {
+        "id": "representation-ch03-q8",
+        "question": "\\(S_3\\) 标准表示 \\(\\rho_3\\)（2 维），\\(\\chi_3((12)) = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(0\\)",
+        "\\(-1\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((12)\\) 交换第 1、2 坐标。在 \\(V = \\{x+y+z=0\\}\\) 的基 \\(\\{(1,-1,0),(0,1,-1)\\}\\) 下，\\(\\rho_3((12)) = \\begin{pmatrix}-1&1\\\\0&1\\end{pmatrix}\\)。\\(\\chi_3((12)) = -1+1 = 0\\)。对换的特征标为 \\(0\\)。"
+      },
+      {
+        "id": "representation-ch03-q9",
+        "question": "\\(\\chi_{V \\otimes W}(g) = \\) ？",
+        "options": [
+          "\\(\\chi_V(g) + \\chi_W(g)\\)",
+        "\\(\\chi_V(g) \\cdot \\chi_W(g)\\)",
+        "\\(\\chi_V(g) / \\chi_W(g)\\)",
+        "\\(\\chi_V(g) - \\chi_W(g)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\rho_{V \\otimes W}(g) = \\rho_V(g) \\otimes \\rho_W(g)\\)。Kronecker 积的迹：\\(\\mathrm{tr}(A \\otimes B) = \\mathrm{tr}(A)\\mathrm{tr}(B)\\)。\\(\\chi_{V \\otimes W}(g) = \\chi_V(g)\\chi_W(g)\\)。易错：与直和混淆——直和加法，张量积乘法。"
+      },
+      {
+        "id": "representation-ch03-q10",
+        "question": "验证 \\(S_3\\) 中 \\(\\langle\\chi_1, \\chi_3\\rangle\\)。共轭类大小 \\(1,3,2\\)；\\(\\chi_1 = (1,1,1)\\)，\\(\\chi_3 = (2,0,-1)\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle\\chi_1,\\chi_3\\rangle = \\frac{1}{6}(1 \\cdot 2 \\cdot 1 + 1 \\cdot 0 \\cdot 3 + 1 \\cdot (-1) \\cdot 2) = \\frac{1}{6}(2+0-2) = 0\\)。正交关系验证：\\(\\chi_1 \\perp \\chi_3\\)。注意要乘以每个共轭类的大小。"
+      },
+      {
+        "id": "representation-ch03-q11",
+        "question": "\\(S_3\\) 特征标表中 \\(\\chi_2\\)（符号表示）在 \\((123)\\) 处的值为？",
+        "options": [
+          "\\(-1\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "符号表示 \\(\\varepsilon(\\sigma) = \\mathrm{sgn}(\\sigma)\\)。\\((123)\\) 是偶置换（由两个对换组成），\\(\\mathrm{sgn}((123)) = 1\\)。特征标表：\\(\\chi_2 = (1, -1, 1)\\)。\\(\\chi_2(e)=1, \\chi_2((12))=-1, \\chi_2((123))=1\\)。"
+      },
+      {
+        "id": "representation-ch03-q12",
+        "question": "\\(\\langle\\chi, \\chi\\rangle = 5\\)。\\(\\chi\\) 可能的分解形式？",
+        "options": [
+          "\\(\\chi = 2\\chi_1 + \\chi_2\\)（\\(4+1=5\\)）",
+        "\\(\\chi = \\chi_1 + \\chi_2 + \\chi_3 + \\chi_4 + \\chi_5\\)（\\(5 \\times 1 = 5\\)）",
+        "A 和 B 都可能",
+        "不可能，\\(\\langle\\chi,\\chi\\rangle\\) 不能为 \\(5\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\langle\\chi,\\chi\\rangle = \\sum n_i^2 = 5\\)。可能的平方和分解：\\(4+1 = 5\\)（一个重数 2，一个重数 1）或 \\(1+1+1+1+1 = 5\\)（5 个重数各 1）。两种都合法。"
+      },
+      {
+        "id": "representation-ch03-q13",
+        "question": "列正交关系：\\(\\sum_i \\chi_i(C_j)\\overline{\\chi_i(C_k)} = \\frac{|G|}{|C_j|}\\delta_{jk}\\)。\\(S_3\\) 中 \\(C_1 = \\{e\\}\\)，\\(|C_1| = 1\\)。\\(\\sum_i |\\chi_i(e)|^2 = \\) ？",
+        "options": [
+          "\\(6\\)",
+        "\\(3\\)",
+        "\\(1\\)",
+        "\\(36\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum_i |\\chi_i(e)|^2 = \\sum d_i^2 = |G|/|C_1| = 6/1 = 6\\)。即 \\(1^2+1^2+2^2 = 6\\)。列正交关系在 \\(j = k\\) 时给出 \\(|G|/|C_j|\\)，即共轭类 \\(C_j\\) 的中心化子的阶。"
+      },
+      {
+        "id": "representation-ch03-q14",
+        "question": "\\(d_i \\mid |G|\\) 是不可约表示维数的必要条件。\\(|G| = 60\\)（\\(A_5\\)），\\(d_i = 7\\) 是否可能？",
+        "options": [
+          "可能",
+        "不可能，\\(7 \\nmid 60\\)",
+        "可能，若 \\(\\sum d_i^2 = 60\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(d_i\\) 必须整除 \\(|G|\\)。\\(7 \\nmid 60\\)（\\(60 = 2^2 \\times 3 \\times 5\\)），故 \\(A_5\\) 不可能有 \\(7\\) 维不可约表示。\\(A_5\\) 的不可约表示维数为 \\(1, 3, 3, 4, 5\\)（\\(1+9+9+16+25=60\\)）。"
+      },
+      {
+        "id": "representation-ch03-q15",
+        "question": "幺表示中 \\(\\chi_V(g^{-1}) = \\overline{\\chi_V(g)}\\)。验证 \\(S_3\\) 的 \\(\\chi_3\\)：\\(\\chi_3((123)^{-1}) = \\chi_3((132)) = \\) ？",
+        "options": [
+          "\\(-1\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((123)\\) 和 \\((132)\\) 在同一共轭类。\\(\\chi_3((132)) = \\chi_3((123)) = -1\\)。\\(\\overline{\\chi_3((123))} = \\overline{-1} = -1\\) ✓。（\\(\\chi_3\\) 取实值，共轭等于自身）。"
+      },
+      {
+        "id": "representation-ch03-q16",
+        "question": "\\(|G| = 24, r = 5\\)，\\((d_1,\\ldots,d_5) = (1,1,2,3,3)\\)。验证 \\(\\sum d_i^2 = \\) ？",
+        "options": [
+          "\\(20\\)",
+        "\\(24\\)",
+        "\\(30\\)",
+        "\\(10\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(1+1+4+9+9 = 24 = |G|\\) ✓。这是 \\(S_4\\) 的不可约表示维数。5 个表示：平凡、符号、标准 2 维、一个 3 维、一个 3 维。"
+      },
+      {
+        "id": "representation-ch03-q17",
+        "question": "构造特征标表时，已知第一行（平凡表示）全部为 \\(1\\)。如何确定其余行？",
+        "options": [
+          "随机填写",
+        "利用行正交和列正交关系联立方程",
+        "用 Maschke 定理",
+        "计算 \\(|G|\\) 的素因子分解"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle\\chi_i,\\chi_j\\rangle = \\delta_{ij}\\)（行正交），\\(\\sum_i h_j \\chi_i(C_j)\\overline{\\chi_i(C_k)} = |G|\\delta_{jk}\\)（列正交）。两组关系 + 已知维数 \\(d_i\\) 给出足够约束。加上 \\(\\chi_i(e) = d_i\\)，通常可唯一确定特征标表。"
+      },
+      {
+        "id": "representation-ch03-q18",
+        "question": "\\(\\chi_V = 3\\chi_1 + 2\\chi_2\\)（\\(\\chi_1, \\chi_2\\) 不可约，\\(d_1=1, d_2=2\\)）。\\(\\dim V = \\) ？",
+        "options": [
+          "\\(5\\)",
+        "\\(7\\)",
+        "\\(13\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\dim V = 3d_1 + 2d_2 = 3 \\times 1 + 2 \\times 2 = 7\\)。\\(\\langle\\chi_V,\\chi_V\\rangle = 3^2+2^2 = 13\\)。重数分别为 \\(3\\) 和 \\(2\\)。"
+      },
+      {
+        "id": "representation-ch03-q19",
+        "question": "\\(\\chi_{V^*}(g) = \\overline{\\chi_V(g)}\\)。若 \\(V\\) 是实表示（\\(\\chi_V\\) 取实值），则 \\(V^* \\cong \\) ？",
+        "options": [
+          "\\(V\\)",
+        "\\(V \\oplus V\\)",
+        "不一定",
+        "零空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_{V^*} = \\overline{\\chi_V} = \\chi_V\\)（\\(\\chi_V\\) 取实值）。特征标相同的不可约表示同构（\\(\\mathbb{C}\\) 上特征标确定表示），\\(V^* \\cong V\\)。这种表示称为自对偶的。\\(S_n\\) 的所有不可约表示都是实的。"
+      },
+      {
+        "id": "representation-ch03-q20",
+        "question": "\\(A_4\\)（阶 12，4 个共轭类）的特征标表。已知 \\(A_4/V_4 \\cong \\mathbb{Z}/3\\mathbb{Z}\\)（\\(V_4\\) 为 Klein 四元群）。1 维表示个数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "1 维表示的核包含 \\([G,G]\\)。\\(A_4/[A_4,A_4] \\cong A_4/V_4 \\cong \\mathbb{Z}/3\\mathbb{Z}\\)。1 维表示个数 \\(= |G/[G,G]| = 3\\)。维数 \\((1,1,1,3)\\)，\\(\\sum = 1+1+1+9 = 12\\) ✓。"
+      },
+      {
+        "id": "representation-ch03-q21",
+        "question": "\\(\\chi_V = (4, 0, 1)\\) 在 \\(S_3\\) 上（共轭类大小 \\(1,3,2\\)）。分解 \\(\\chi_V\\) 为不可约之和。",
+        "options": [
+          "\\(\\chi_1 + \\chi_2 + \\chi_3\\)",
+        "\\(2\\chi_1 + \\chi_3\\)",
+        "\\(\\chi_1 + \\chi_3\\)",
+        "\\(4\\chi_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_1 = \\langle\\chi_V,\\chi_1\\rangle = \\frac{1}{6}(4 \\cdot 1 + 0 \\cdot 3 + 1 \\cdot 2) = 1\\)。\\(n_2 = \\frac{1}{6}(4 \\cdot 1 + 0 \\cdot(-1) \\cdot 3 + 1 \\cdot 1 \\cdot 2) = 1\\)。\\(n_3 = \\frac{1}{6}(4 \\cdot 2 + 0 \\cdot 0 \\cdot 3 + 1 \\cdot(-1) \\cdot 2) = 1\\)。\\(\\chi_V = \\chi_1+\\chi_2+\\chi_3 = (1+1+2, 1-1+0, 1+1-1) = (4,0,1)\\) ✓。"
+      },
+      {
+        "id": "representation-ch03-q22",
+        "question": "\\(|G| = 168\\)（\\(PSL(2,7)\\)，单群）。\\(G\\) 有 6 个共轭类。维数 \\((1, d_2, \\ldots, d_6)\\) 中 \\(d_2\\) 最小可能值？",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(7\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum d_i^2 = 168\\)，\\(d_1 = 1\\)。\\(G\\) 是单群，1 维表示只有平凡（\\(G/[G,G] = \\{e\\}\\)）。\\(168-1 = 167\\)。需 5 个 \\(d_i\\)，\\(\\sum = 167\\)。\\(PSL(2,7)\\) 的实际维数：\\((1,3,3,6,7,8)\\)，\\(\\sum = 1+9+9+36+49+64 = 168\\) ✓。最小 \\(d_2 = 3\\)。"
+      },
+      {
+        "id": "representation-ch03-q23",
+        "question": "特征标是类函数。\\(S_4\\) 有 5 个共轭类。类函数空间 \\(\\mathrm{Cl}(S_4)\\) 的维数是？",
+        "options": [
+          "\\(5\\)",
+        "\\(24\\)",
+        "\\(4\\)",
+        "\\(120\\)"
+        ],
+        "answer": 0,
+        "explanation": "类函数是在共轭类上常值的函数 \\(f: G \\to \\mathbb{C}\\)。由共轭类特征函数 \\(\\mathbb{1}_{C_i}\\) 构成基，\\(\\dim \\mathrm{Cl}(G) = \\) 共轭类个数 \\(= 5\\)（\\(S_4\\)）。不可约特征标 \\(\\{\\chi_i\\}\\) 是 \\(\\mathrm{Cl}(G)\\) 的正交基。"
+      },
+      {
+        "id": "representation-ch03-q24",
+        "question": "\\(S_3\\) 特征标表的行列式 \\(\\det X = \\) ？（\\(X_{ij} = \\chi_i(C_j)\\)）",
+        "options": [
+          "\\(0\\)",
+        "\\(6\\)",
+        "\\(12\\)",
+        "非零"
+        ],
+        "answer": 3,
+        "explanation": "特征标表的行列式非零（行线性无关，因为正交假设）。\\(X = \\begin{pmatrix}1&1&1\\\\1&-1&1\\\\2&0&-1\\end{pmatrix}\\)。\\(\\det = 1(1-0)-1(-1-2)+1(0+2) = 1+3+2 = 6\\)。\\(|\\det X|^2 = \\frac{|G|^r}{\\prod |C_j|}\\)。"
+      },
+      {
+        "id": "representation-ch03-q25",
+        "question": "\\(G\\) 有 \\(r\\) 个不可约表示，维数 \\(d_i\\)。\\(\\sum d_i\\) 的最小值（给定 \\(|G| = n\\)）在什么情况下达到？",
+        "options": [
+          "\\(G\\) Abel（\\(\\sum d_i = n\\)）",
+        "\\(G\\) 有一个大维数不可约表示",
+        "B 对，如 \\(S_3\\)（\\(\\sum = 1+1+2 = 4 < 6 = |S_3|\\)）",
+        "\\(\\sum d_i\\) 总等于 \\(|G|\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\sum d_i\\) 非固定量。Abel 群：\\(\\sum = n\\)（\\(n\\) 个 1 维）。非 Abel 群（如 \\(S_3\\)）：\\(\\sum = 4 < 6\\)。\\(\\sum d_i\\) 越小，说明表示越\"集中\"在少数高维表示上。D 错：\\(\\sum d_i^2 = |G|\\)，但 \\(\\sum d_i\\) 不一定等于 \\(|G|\\)。"
+      },
+      {
+        "id": "representation-ch03-q26",
+        "question": "分子光谱学中，振动模式的红外活性由表示分解判断。\\(CO_2\\) 的对称群 \\(D_{\\infty h}\\) 的特征标分析中，只有含平移表示分量的振动模式才是红外活性的。这依赖特征标的什么性质？",
+        "options": [
+          "\\(\\chi(e) = \\dim V\\)",
+        "内积 \\(\\langle\\chi_{\\mathrm{vib}}, \\chi_T\\rangle \\neq 0\\)",
+        "\\(\\chi\\) 取实值",
+        "所有特征标正交"
+        ],
+        "answer": 1,
+        "explanation": "红外活性要求振动模式的特征标与平移表示的特征标内积非零：\\(\\langle\\chi_{\\mathrm{vib}}, \\chi_T\\rangle > 0\\)。这就是检查振动表示分解中是否含平移表示的不可约分量。"
+      },
+      {
+        "id": "representation-ch03-q27",
+        "question": "Burnside \\(p^a q^b\\) 定理的证明用到了特征标理论。该定理是？",
+        "options": [
+          "阶为 \\(p^a q^b\\) 的群可解",
+        "阶为 \\(p^a q^b\\) 的群单纯",
+        "阶为 \\(p^a q^b\\) 的群Abel",
+        "阶为 \\(p^a q^b\\) 的群循环"
+        ],
+        "answer": 0,
+        "explanation": "Burnside 定理：若 \\(|G| = p^a q^b\\)（\\(p,q\\) 素数），则 \\(G\\) 可解。证明用列正交关系和特征标的代数整数性质。这是特征标理论在纯群论中的经典应用——用表示论证明纯群论结论。"
+      },
+      {
+        "id": "representation-ch03-q28",
+        "question": "特征标表在有限群分类中的作用？",
+        "options": [
+          "唯一确定群",
+        "不能唯一确定群，但给出重要不变量",
+        "完全无用",
+        "仅对 Abel 群有用"
+        ],
+        "answer": 1,
+        "explanation": "特征标表不唯一确定群（存在非同构群有相同特征标表，如 \\(D_4\\) 和 \\(Q_8\\)）。但它编码了大量信息：共轭类数、不可约表示维数、中心的阶等。它是群分类的重要工具，但不是完备不变量。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="representation"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/representation.html" class="module-name">表示论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 特征标的定义与基本性质</a></li>
+      <li><a href="#kp2">02 · 特征标的正交关系</a></li>
+      <li><a href="#kp3">03 · 特征标表的构造</a></li>
+      <li><a href="#kp4">04 · 不可约表示的维数关系</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>特征标理论</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>特征标的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>矩阵表示依赖基的选取，但迹不依赖。特征标 \(\chi(g) = \mathrm{tr}(\rho(g))\) 抽取了表示的「基无关」信息，而且惊人地，它<strong>完全确定</strong>了表示 （在 \(\mathbb{C}\) 上）。这使得表示论可以用函数而非矩阵来研究。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特征标是 \(G \to \mathbb{C}\) 的类函数（在共轭类上常值）， 它把表示理论化约为函数的内积理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>特征标</strong>: \(\chi_V(g) = \mathrm{tr}(\rho(g))\)。 \(\chi_V(e) = \dim V\)。 \(\chi_V(g^{-1}) = \overline{\chi_V(g)}\)（幺表示）。 \(\chi_V\) 是类函数: \(\chi_V(hgh^{-1}) = \chi_V(g)\)。 <strong>运算</strong>: \(\chi_{V \oplus W} = \chi_V + \chi_W\)， \(\chi_{V \otimes W} = \chi_V \cdot \chi_W\)， \(\chi_{V^*} = \overline{\chi_V}\)。 \[\chi_{V \otimes W}(g) = \chi_V(g) \chi_W(g)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>分子振动分析: 通过计算振动表示的特征标分解确定红外活性和拉曼活性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \(S_3\) 标准 2 维表示 \(\rho_3\) 的特征标。 解答: \(\rho_3(e) = I_2\)，\(\chi(e) = 2\)。 \((12)\): 交换前两个坐标，\(\mathrm{tr} = 0\)。 \((123)\): 循环置换，\(\mathrm{tr} = -1\)。 特征标表: \(\chi_3 = (2, 0, -1)\)。 易错点: 忘记特征标是类函数，逐元素计算而不是逐共轭类。 计算时只需对每个共轭类的代表元计算即可。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\chi_V(e) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\rho(e) = I\\)，\\(\\mathrm{tr}(I) = \\dim V\\)。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\rho(e) = I\\)，\\(\\mathrm{tr}(I) = \\dim V\\)。')">B. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\rho(e) = I\\)，\\(\\mathrm{tr}(I) = \\dim V\\)。')">C. \(\dim V\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\rho(e) = I\\)，\\(\\mathrm{tr}(I) = \\dim V\\)。')">D. \(|G|\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>特征标的正交关系</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不可约表示的特征标组成了类函数空间的「正交基」。这些正交关系是 计算分解重数、判断不可约性的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>类函数的内积将表示论变为线性代数，特征标是正交基。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>内积</strong>: 类函数 \(f, g: G \to \mathbb{C}\) 的内积: \[\langle f, g \rangle = \frac{1}{|G|} \sum_{g \in G} f(g) \overline{g(g)}\] <strong>第一正交关系</strong>: \(\langle \chi_i, \chi_j \rangle = \delta_{ij}\)。 <strong>推论</strong>: - \(\chi_V\) 不可约 \(\Leftrightarrow\) \(\langle \chi_V, \chi_V \rangle = 1\) - 分解重数: \(n_i = \langle \chi_V, \chi_i \rangle\) \[\langle \chi_i, \chi_j \rangle = \delta_{ij}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 验证 \(S_3\) 的 \(\chi_3 = (2, 0, -1)\) 是不可约的。 解答: \(\langle \chi_3, \chi_3 \rangle = \frac{1}{6}(1 \cdot 4 + 3 \cdot 0 + 2 \cdot 1) = \frac{6}{6} = 1\)。 内积为 1，故不可约。 易错点: 忘记乘以共轭类的大小。 \(\sum\) 中每个共轭类的贡献要乘以该类的元素个数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\langle \chi, \chi \rangle = 3\) 意味着？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\langle \\chi, \\chi \\rangle = \\sum n_i^2\\)。例如 \\(n_1 = 1, n_2 = 1, n_3 = 1\\)。')">A. \(\chi\) 不可约</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\langle \\chi, \\chi \\rangle = \\sum n_i^2\\)。例如 \\(n_1 = 1, n_2 = 1, n_3 = 1\\)。')">B. \(\chi\) 分解为 3 个不同不可约表示之和</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\langle \\chi, \\chi \\rangle = \\sum n_i^2\\)。例如 \\(n_1 = 1, n_2 = 1, n_3 = 1\\)。')">C. \(\chi\) 分解后 \(\sum n_i^2 = 3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\langle \\chi, \\chi \\rangle = \\sum n_i^2\\)。例如 \\(n_1 = 1, n_2 = 1, n_3 = 1\\)。')">D. \(\chi\) 维数为 3</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>特征标表的构造</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>特征标表是一个 \(r \times r\) 的表格（\(r\) = 共轭类/不可约表示的个数）， 它完整编码了群的所有表示信息。构造特征标表是实际计算中的核心技能。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特征标表是一个酉矩阵（适当加权后），行是不可约表示，列是共轭类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>特征标表结构</strong>: 行标签 \(\chi_1, \ldots, \chi_r\)， 列标签 \(C_1, \ldots, C_r\)（共轭类）。 表顯 \(\chi_i(C_j)\)。 <strong>列正交关系</strong>: \(\sum_i \chi_i(C_j) \overline{\chi_i(C_k)} = \frac{|G|}{|C_j|} \delta_{jk}\)。 <strong>构造策略</strong>: 1) 确定 \(r\) 和 \(d_i\)（\(\sum d_i^2 = |G|\)） 2) 第一行全为 1（平凡表示） 3) 用正交关系确定其余表项 \[\sum_i h_j \chi_i(C_j) \overline{\chi_i(C_k)} = |G| \delta_{jk}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(S_3\) 的特征标表。 解答: | | \(e\) | \((12)\) | \((123)\) | |---|---|---|---| | \(\chi_1\) | 1 | 1 | 1 | | \(\chi_2\) | 1 | \(-1\) | 1 | | \(\chi_3\) | 2 | 0 | \(-1\) | 验证行正交: \(\langle \chi_1, \chi_2 \rangle = \frac{1}{6}(1-3+2) = 0\)。✓ 易错点: 忘记检核正交性来验证特征标表的正确性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">特征标表的行数等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。行数 = 不可约表示个数 = 共轭类个数。')">A. \(|G|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！行数 = 不可约表示个数 = 共轭类个数。')">B. 共轭类个数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。行数 = 不可约表示个数 = 共轭类个数。')">C. \(\dim V\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。行数 = 不可约表示个数 = 共轭类个数。')">D. 1</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>不可约表示的维数关系</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\sum d_i^2 = |G|\) 给出了维数的全局约束。更深入地，\(d_i \mid |G|\)。 这些数值约束大大限制了可能的特征标表，是确定表示的重要工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>维数条件体现了群阶与表示维数之间的深层感应。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>平方和公式</strong>: \(\sum_{i=1}^r d_i^2 = |G|\)。 来自: \(\dim \mathbb{C}[G] = |G|\)，\(\mathbb{C}[G] \cong \bigoplus M_{d_i}\)， \(\dim M_{d_i} = d_i^2\)。 <strong>整除性</strong>: \(d_i \mid |G|\)。 <strong>Abel 群特征</strong>: \(G\) Abel \(\Leftrightarrow\) 所有 \(d_i = 1\) \(\Leftrightarrow\) \(r = |G|\)。 \[\sum d_i^2 = |G|, \quad d_i \mid |G|\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(|G| = 24\)，\(G\) 有 5 个共轭类。求可能的 \((d_1, \ldots, d_5)\)。 解答: \(\sum d_i^2 = 24\)，\(d_i \mid 24\)，且必有 \(d_1 = 1\)。 可能解: \((1, 1, 1, 3, 3)\)（\(S_4\) 的情况是 \((1,1,2,3,3)\)）。 \((1, 1, 2, 3, 3)\): \(1+1+4+9+9 = 24\)。✓ 易错点: 忘记 \(d_i \mid |G|\) 的整除条件。 \(d_i = 5\) 当 \(|G| = 24\) 时不可能（\(5 \nmid 24\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Abel 群的所有不可约复表示维数为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Abel 群的所有不可约表示均为 1 维。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Abel 群的所有不可约表示均为 1 维。')">B. \(|G|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Abel 群的所有不可约表示均为 1 维。')">C. 不确定</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Abel 群的所有不可约表示均为 1 维。')">D. \(\sqrt{|G|}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/algebra/representation.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

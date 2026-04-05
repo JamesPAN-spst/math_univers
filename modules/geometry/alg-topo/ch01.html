@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 基本群 — 代数拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "alg-topo-ch01-q1",
+        "question": "两条道路 \\(\\gamma_0, \\gamma_1: [0,1] \\to X\\)（同起点同终点）同伦意味着什么？",
+        "options": [
+          "存在连续映射 \\(H: [0,1] \\times [0,1] \\to X\\)，\\(H(s,0) = \\gamma_0(s)\\), \\(H(s,1) = \\gamma_1(s)\\), 固定端点",
+        "\\(\\gamma_0 = \\gamma_1\\)",
+        "\\(\\gamma_0, \\gamma_1\\) 长度相等",
+        "\\(\\gamma_0, \\gamma_1\\) 像相同"
+        ],
+        "answer": 0,
+        "explanation": "道路同伦 \\(H: [0,1]^2 \\to X\\) 连续满足：\\(H(s,0) = \\gamma_0(s)\\), \\(H(s,1) = \\gamma_1(s)\\), \\(H(0,t) = x_0\\)（起点固定）, \\(H(1,t) = x_1\\)（终点固定）。直觉：\\(\\gamma_0\\) 可以连续变形为 \\(\\gamma_1\\)（不撕裂、不离开空间），端点钉住不动。这是等价关系，记 \\(\\gamma_0 \\simeq \\gamma_1\\ (\\text{rel } \\{0,1\\})\\)。"
+      },
+      {
+        "id": "alg-topo-ch01-q2",
+        "question": "基本群 \\(\\pi_1(X, x_0)\\) 的元素是什么？",
+        "options": [
+          "基于 \\(x_0\\) 的闭道路（环路）的同伦等价类",
+        "\\(X\\) 的所有闭曲线",
+        "\\(x_0\\) 的邻域",
+        "连续函数空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_1(X, x_0) = \\{[\\gamma] : \\gamma(0) = \\gamma(1) = x_0\\}\\)。群运算：\\([\\gamma] \\cdot [\\delta] = [\\gamma * \\delta]\\)（先走 \\(\\gamma\\) 再走 \\(\\delta\\)），单位元 \\([c_{x_0}]\\)（常道路），逆元 \\([\\gamma]^{-1} = [\\bar{\\gamma}]\\)（反向走）。基本群衡量空间中\"不可收缩的环\"。\\(\\pi_1 = 0\\)（平凡）意味着所有环路可缩，即空间单连通。"
+      },
+      {
+        "id": "alg-topo-ch01-q3",
+        "question": "\\(\\pi_1(S^1) = ?\\)",
+        "options": [
+          "\\(0\\)（平凡群）",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "\\(\\mathbb{Z}^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\pi_1(S^1) \\cong \\mathbb{Z}\\)，生成元是绕圆一圈 \\([\\gamma_1]\\)（\\(\\gamma_1(t) = e^{2\\pi it}\\)）。\\(n\\) 次绕行 \\([\\gamma_n]\\) 对应整数 \\(n\\)（正 = 逆时针，负 = 顺时针）。\\(n\\) 称为\"绕数\"（winding number）。证明用覆叠空间 \\(p: \\mathbb{R} \\to S^1\\), \\(p(t) = e^{2\\pi it}\\)。\\(\\pi_1(S^1)\\) 是最基本的非平凡基本群。"
+      },
+      {
+        "id": "alg-topo-ch01-q4",
+        "question": "\\(\\pi_1(\\mathbb{R}^n) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^n\\)",
+        "\\(0\\)（平凡群）",
+        "自由群"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathbb{R}^n\\) 是凸集（因此可缩），任何环路 \\(\\gamma\\) 都可以用直线同伦 \\(H(s,t) = (1-t)\\gamma(s) + t x_0\\) 缩为点。可缩空间的基本群是平凡群。类似地 \\(\\pi_1(D^n) = 0\\), \\(\\pi_1(\\mathbb{R}^n \\setminus \\{0\\}) = 0\\)（\\(n \\geq 3\\)）。"
+      },
+      {
+        "id": "alg-topo-ch01-q5",
+        "question": "van Kampen 定理计算什么？",
+        "options": [
+          "\\(X = U \\cup V\\)（\\(U, V, U \\cap V\\) 道路连通）时 \\(\\pi_1(X)\\) 由 \\(\\pi_1(U), \\pi_1(V), \\pi_1(U \\cap V)\\) 给出的融合积",
+        "同调群",
+        "上同调群",
+        "同伦群 \\(\\pi_n\\)（\\(n \\geq 2\\)）"
+        ],
+        "answer": 0,
+        "explanation": "van Kampen（Seifert-van Kampen）定理：\\(\\pi_1(X) \\cong \\pi_1(U) *_{\\pi_1(U \\cap V)} \\pi_1(V)\\)（融合自由积 / amalgamated free product）。用 \\(U \\cap V\\) 上的关系\"粘合\"两半的基本群。这是计算基本群的最强工具。典型应用：楔和 \\(X \\vee Y\\), 曲面分类, 纽结补空间。"
+      },
+      {
+        "id": "alg-topo-ch01-q6",
+        "question": "\\(\\pi_1(S^n) = ?\\)（\\(n \\geq 2\\)）",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "自由群"
+        ],
+        "answer": 1,
+        "explanation": "\\(n \\geq 2\\) 时 \\(S^n\\) 单连通。直觉：\\(S^2\\) 上的任何环路可以避开一个点（Sard 思想），避开一点后 \\(S^2 \\setminus \\{p\\} \\cong \\mathbb{R}^2\\)（可缩）。严格证明用 van Kampen：\\(S^n = U \\cup V\\)（\\(U, V\\) 是去掉南/北极的区域），\\(U \\cap V \\simeq S^{n-1}\\)（\\(n \\geq 2\\) 时连通）。"
+      },
+      {
+        "id": "alg-topo-ch01-q7",
+        "question": "用 van Kampen 定理计算 \\(\\pi_1(S^1 \\vee S^1)\\)（两圆的楔和）。",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z} \\times \\mathbb{Z}\\)",
+        "\\(\\mathbb{Z} * \\mathbb{Z}\\)（秩 2 自由群）",
+        "\\(0\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(S^1 \\vee S^1 = U \\cup V\\)，\\(U \\simeq S^1\\), \\(V \\simeq S^1\\), \\(U \\cap V\\) 可缩（粘合点邻域）。\\(\\pi_1(U \\cap V) = 0\\)，所以融合积退化为自由积：\\(\\pi_1 = \\mathbb{Z} * \\mathbb{Z} = F_2\\)（秩 2 自由群）。两个生成元 \\(a, b\\) 满足无关系。注意 \\(\\mathbb{Z} * \\mathbb{Z} \\neq \\mathbb{Z} \\times \\mathbb{Z}\\)（自由群非交换）。"
+      },
+      {
+        "id": "alg-topo-ch01-q8",
+        "question": "\\(\\pi_1(T^2) = ?\\)（\\(T^2\\) = 环面）",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^2\\)",
+        "\\(\\mathbb{Z} * \\mathbb{Z}\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(T^2 = S^1 \\times S^1\\)，\\(\\pi_1(T^2) = \\pi_1(S^1) \\times \\pi_1(S^1) = \\mathbb{Z} \\times \\mathbb{Z} = \\mathbb{Z}^2\\)。生成元：经线环 \\(a\\) 和纬线环 \\(b\\)，\\(ab = ba\\)（交换）。也可用 van Kampen：\\(T^2\\) = 正方形边识别 \\(aba^{-1}b^{-1}\\)，\\(\\pi_1 = \\langle a, b \\mid aba^{-1}b^{-1} = 1\\rangle = \\mathbb{Z}^2\\)。"
+      },
+      {
+        "id": "alg-topo-ch01-q9",
+        "question": "\\(\\pi_1(\\mathbb{RP}^2) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{RP}^2 = S^2 / \\{x \\sim -x\\}\\)。覆叠 \\(p: S^2 \\to \\mathbb{RP}^2\\)（二重覆叠）。\\(S^2\\) 单连通 \\(\\Rightarrow\\) \\(\\pi_1(\\mathbb{RP}^2) = \\mathbb{Z}/2\\)（覆叠层数 = \\(|\\pi_1|\\)，对万有覆叠成立）。生成元：连接 \\(x_0\\) 和 \\(-x_0\\) 的半大圆在 \\(\\mathbb{RP}^2\\) 中变成闭环，走两次可缩。"
+      },
+      {
+        "id": "alg-topo-ch01-q10",
+        "question": "Klein 瓶 \\(K\\) 的基本群是什么？",
+        "options": [
+          "\\(\\mathbb{Z}^2\\)",
+        "\\(\\langle a, b \\mid abab^{-1} = 1\\rangle\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "Klein 瓶 = 正方形边识别：上下同向（\\(b\\)），左右反向（\\(a\\)）。\\(\\pi_1(K) = \\langle a, b \\mid abab^{-1} \\rangle\\)（半直积 \\(\\mathbb{Z} \\rtimes \\mathbb{Z}\\)）。\\(ab \\neq ba\\)（非交换），\\(aba^{-1} = b^{-1}\\)。与 \\(T^2\\) 对比：\\(\\pi_1(T^2) = \\langle a,b \\mid aba^{-1}b^{-1}\\rangle\\)（交换）。"
+      },
+      {
+        "id": "alg-topo-ch01-q11",
+        "question": "代数基本定理 (\\(\\mathbb{C}[x]\\) 中 \\(n\\) 次多项式有 \\(n\\) 个根) 可以用 \\(\\pi_1(S^1)\\) 证明。核心思路是什么？",
+        "options": [
+          "构造从 \\(S^1 \\to S^1\\) 的映射，利用绕数非零",
+        "Cauchy 积分公式",
+        "Liouville 定理",
+        "A 是拓扑证明的核心"
+        ],
+        "answer": 3,
+        "explanation": "设 \\(p(z)\\) 无根。\\(p(z)/|p(z)|: \\mathbb{C} \\setminus \\{0\\} \\to S^1\\)。限制到大圆 \\(|z| = R\\)：\\(R\\) 大时绕数 \\(= n\\)（\\(p \\approx z^n\\)）；\\(R = 0\\) 时绕数 \\(= 0\\)。绕数连续变化取整数值 \\(\\Rightarrow\\) 不变，矛盾（\\(n \\neq 0\\)）。这用了 \\(\\pi_1(S^1) = \\mathbb{Z}\\) 非平凡。"
+      },
+      {
+        "id": "alg-topo-ch01-q12",
+        "question": "道路连通空间 \\(X\\) 中，基点改变 \\(x_0 \\to x_1\\) 对基本群有什么影响？",
+        "options": [
+          "\\(\\pi_1(X, x_0) \\cong \\pi_1(X, x_1)\\)（通过任何 \\(x_0\\) 到 \\(x_1\\) 的道路给出同构）",
+        "基本群可能完全不同",
+        "只有 Abel 群时同构",
+        "不相关"
+        ],
+        "answer": 0,
+        "explanation": "道路 \\(\\alpha: x_0 \\to x_1\\) 给出同构 \\(\\hat{\\alpha}: \\pi_1(X, x_1) \\to \\pi_1(X, x_0)\\)，\\([\\gamma] \\mapsto [\\alpha * \\gamma * \\bar{\\alpha}]\\)（共轭）。不同道路 \\(\\alpha\\) 给出不同同构（差一个内自同构）。所以道路连通空间的基本群\"在同构意义下\"不依赖基点，但具体同构不典范。"
+      },
+      {
+        "id": "alg-topo-ch01-q13",
+        "question": "\\(\\pi_1(\\mathbb{R}^2 \\setminus \\{0\\}) = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^2\\)",
+        "自由群"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 形变收缩到 \\(S^1\\)（\\(r: x \\mapsto x/|x|\\)）。\\(\\pi_1(\\mathbb{R}^2 \\setminus \\{0\\}) = \\pi_1(S^1) = \\mathbb{Z}\\)。生成元：绕原点一圈。\\(n\\) 个穿孔：\\(\\pi_1(\\mathbb{R}^2 \\setminus \\{p_1, \\ldots, p_n\\}) = F_n\\)（\\(n\\) 元自由群）。但 \\(\\mathbb{R}^3 \\setminus \\{0\\} \\simeq S^2\\)，\\(\\pi_1 = 0\\)。"
+      },
+      {
+        "id": "alg-topo-ch01-q14",
+        "question": "van Kampen 定理应用：\\(\\pi_1(\\Sigma_g)\\)（亏格 \\(g\\) 的闭有向曲面）= ?",
+        "options": [
+          "\\(\\langle a_1, b_1, \\ldots, a_g, b_g \\mid [a_1,b_1]\\cdots[a_g,b_g] = 1\\rangle\\)",
+        "\\(\\mathbb{Z}^{2g}\\)",
+        "自由群 \\(F_{2g}\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Sigma_g\\) 的标准 CW 分解：1 个 0-胞腔（点），\\(2g\\) 个 1-胞腔（\\(a_i, b_i\\)），1 个 2-胞腔（关系 \\([a_1,b_1]\\cdots[a_g,b_g]\\)，即 \\(a_1b_1a_1^{-1}b_1^{-1}\\cdots a_gb_ga_g^{-1}b_g^{-1}\\)）。van Kampen：\\(\\pi_1 = \\langle 2g \\text{ 生成元} \\mid 1 \\text{ 关系}\\rangle\\)。Abel 化 \\(\\pi_1^{\\text{ab}} = \\mathbb{Z}^{2g}\\)。"
+      },
+      {
+        "id": "alg-topo-ch01-q15",
+        "question": "\\(f: X \\to Y\\) 连续映射诱导群同态 \\(f_*: \\pi_1(X, x_0) \\to \\pi_1(Y, f(x_0))\\)。如果 \\(f\\) 是同伦等价，\\(f_*\\) 是什么？",
+        "options": [
+          "同构",
+        "满射",
+        "单射",
+        "零映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_*([\\gamma]) = [f \\circ \\gamma]\\)。\\(f\\) 同伦等价（\\(\\exists g: fg \\simeq \\mathrm{id}\\), \\(gf \\simeq \\mathrm{id}\\)）\\(\\Rightarrow f_* \\circ g_* = (fg)_* = \\mathrm{id}_*\\)，\\(g_* \\circ f_* = \\mathrm{id}_*\\)。\\(f_*\\) 是同构。\\(\\pi_1\\) 是同伦不变量——同伦等价的空间基本群同构。这是代数拓扑的基本精神：拓扑性质 \\(\\to\\) 代数不变量。"
+      },
+      {
+        "id": "alg-topo-ch01-q16",
+        "question": "Möbius 带 \\(M\\) 的基本群是什么？",
+        "options": [
+          "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "\\(\\mathbb{Z}^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "Möbius 带形变收缩到其中心圆 \\(S^1\\)。\\(\\pi_1(M) = \\pi_1(S^1) = \\mathbb{Z}\\)。注意 Möbius 带不可定向，但基本群不反映定向性——\\(\\pi_1\\) 只看\"洞\"。圆柱体也形变收缩到 \\(S^1\\)，\\(\\pi_1\\) 也是 \\(\\mathbb{Z}\\)。定向性差异体现在第一同调的扭部分或可定向覆叠中。"
+      },
+      {
+        "id": "alg-topo-ch01-q17",
+        "question": "\\(\\mathbb{R}^3\\) 中结（knot）\\(K\\) 的结群定义为什么？",
+        "options": [
+          "\\(\\pi_1(\\mathbb{R}^3 \\setminus K)\\)（结的补空间的基本群）",
+        "\\(\\pi_1(K)\\)",
+        "\\(H_1(\\mathbb{R}^3 \\setminus K)\\)",
+        "\\(\\pi_1(S^3)\\)"
+        ],
+        "answer": 0,
+        "explanation": "结群 \\(\\pi_1(\\mathbb{R}^3 \\setminus K)\\) 是结 \\(K\\) 最重要的不变量之一。平凡结（unknot）：\\(\\pi_1(\\mathbb{R}^3 \\setminus \\text{unknot}) = \\mathbb{Z}\\)。三叶结（trefoil）：\\(\\pi_1 = \\langle a, b \\mid a^2 = b^3\\rangle\\)（非交换，所以三叶结非平凡）。\\(\\pi_1(K) = \\pi_1(S^1) = \\mathbb{Z}\\)（B）对所有结相同，无区分能力。"
+      },
+      {
+        "id": "alg-topo-ch01-q18",
+        "question": "单连通（simply connected）的定义及等价条件？",
+        "options": [
+          "道路连通且 \\(\\pi_1 = 0\\)（任何环路可缩）",
+        "任意两条同端点道路同伦",
+        "A 和 B 等价",
+        "连通且所有同伦群为零"
+        ],
+        "answer": 2,
+        "explanation": "(A) \\(\\pi_1(X, x_0) = 0\\)（所有环路同伦于常道路）。(B) 等价：任意 \\(\\gamma_0, \\gamma_1: x \\to y\\) 同伦（环路 \\(\\gamma_0 * \\bar{\\gamma_1}\\) 可缩）。\\(S^n\\)（\\(n \\geq 2\\)）、\\(\\mathbb{R}^n\\)、\\(D^n\\)、树 单连通。\\(S^1, T^2, \\mathbb{RP}^2\\) 不单连通。\\(D\\) 是\"所有 \\(\\pi_n = 0\\)\"，那是可缩空间（更强）。"
+      },
+      {
+        "id": "alg-topo-ch01-q19",
+        "question": "\\(\\pi_1(SO(3)) = \\mathbb{Z}/2\\)。这个事实在物理中如何体现？",
+        "options": [
+          "自旋 1/2 粒子旋转 \\(2\\pi\\) 变号，\\(4\\pi\\) 回到原态",
+        "旋转 \\(2\\pi\\) 总回到原态",
+        "与物理无关",
+        "所有粒子都是标量"
+        ],
+        "answer": 0,
+        "explanation": "\\(SO(3) \\cong \\mathbb{RP}^3\\)，\\(\\pi_1 = \\mathbb{Z}/2\\)：旋转 \\(2\\pi\\) 的道路不可缩，但旋转 \\(4\\pi\\) 可缩（\"Dirac 带把戏\"）。量子力学中 \\(SU(2)\\)（\\(SO(3)\\) 的万有覆叠）表示自旋 1/2——绕 \\(2\\pi\\) 相位 \\(-1\\)，绕 \\(4\\pi\\) 相位 \\(+1\\)。这是基本群直接影响物理表示的经典例子。"
+      },
+      {
+        "id": "alg-topo-ch01-q20",
+        "question": "van Kampen 定理证明的关键步骤是什么？",
+        "options": [
+          "将环路细分，使每段落入 \\(U\\) 或 \\(V\\)，然后在 \\(U \\cap V\\) 中拼接",
+        "同调论",
+        "上同调论",
+        "微分方程"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gamma\\) 在 \\(X = U \\cup V\\) 中的环路。Lebesgue 数引理：存在细分 \\(0 = t_0 < \\cdots < t_n = 1\\)，每段 \\(\\gamma|_{[t_i,t_{i+1}]}\\) 完全在 \\(U\\) 或 \\(V\\) 中。在交界处插入 \\(U \\cap V\\) 中的道路，将 \\(\\gamma\\) 写成交替在 \\(U, V\\) 中的道路之积。合并在 \\(U\\) 中的段（用 \\(\\pi_1(U)\\) 的关系），在 \\(V\\) 中的段（用 \\(\\pi_1(V)\\) 的关系），\\(U \\cap V\\) 中的等价由 \\(i_*, j_*\\) 的像决定。"
+      },
+      {
+        "id": "alg-topo-ch01-q21",
+        "question": "\\(\\pi_1\\) 有什么局限性？它不能区分哪些空间？",
+        "options": [
+          "\\(S^2\\) 和 \\(S^3\\)（都是 \\(\\pi_1 = 0\\)）",
+        "任何空间都能区分",
+        "\\(S^1\\) 和 \\(T^2\\)",
+        "A 正确，需要高阶同伦群 \\(\\pi_n\\) 或同调群"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\pi_1(S^2) = \\pi_1(S^3) = 0\\)，但 \\(S^2 \\not\\simeq S^3\\)（\\(\\pi_2(S^2) = \\mathbb{Z}\\), \\(\\pi_2(S^3) = 0\\)）。\\(\\pi_1\\) 是最基本但不完全的不变量。更高同伦群 \\(\\pi_n\\) 提供更多信息但极难计算。同调群 \\(H_n\\) 更可计算：\\(H_2(S^2) = \\mathbb{Z}\\), \\(H_2(S^3) = 0\\)，区分了两者。"
+      },
+      {
+        "id": "alg-topo-ch01-q22",
+        "question": "Hawaiian earring（无穷多圆交于一点）的基本群是什么？",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\prod_{n=1}^\\infty \\mathbb{Z}\\)",
+        "不是自由群，也不是可数生成的——非常复杂",
+        "自由群 \\(F_\\infty\\)"
+        ],
+        "answer": 2,
+        "explanation": "Hawaiian earring \\(= \\bigcup_{n=1}^\\infty C_n\\)（\\(C_n\\) = 半径 \\(1/n\\) 的圆，切于原点）。\\(\\pi_1\\) 不是自由群！与 \\(\\bigvee_{n=1}^\\infty S^1\\)（CW 楔和，\\(\\pi_1 = F_\\infty\\)）不同——Hawaiian earring 的拓扑更\"野\"（不是 CW 复形）。\\(\\pi_1\\) 包含不可数多元素，结构极其复杂。有名的反直觉例子。"
+      },
+      {
+        "id": "alg-topo-ch01-q23",
+        "question": "Wirtinger 表示给出结群的什么？",
+        "options": [
+          "\\(\\pi_1(\\mathbb{R}^3 \\setminus K)\\) 的有限表示（从结的投影图读出生成元和关系）",
+        "同调群",
+        "Alexander 多项式",
+        "A，但 Alexander 多项式也是从结群的 Abel 化导出"
+        ],
+        "answer": 3,
+        "explanation": "Wirtinger 表示：结图的每段弧给一个生成元，每个交叉点给一个关系 \\(x_i x_j x_i^{-1} = x_k\\)。生成 \\(\\pi_1(\\mathbb{R}^3 \\setminus K)\\)。Abel 化（令所有生成元交换）总给 \\(\\mathbb{Z}\\)（\\(H_1\\)）。Alexander 多项式是从 \\(\\pi_1\\) 的 Abel 化覆叠空间的 \\(H_1\\) 导出的更精细不变量。"
+      },
+      {
+        "id": "alg-topo-ch01-q24",
+        "question": "Brouwer 不动点定理（\\(D^2\\) 版本）可以用 \\(\\pi_1\\) 证明。假设 \\(f: D^2 \\to D^2\\) 无不动点，推出什么矛盾？",
+        "options": [
+          "构造收缩 \\(r: D^2 \\to S^1\\)，但 \\(\\pi_1(D^2) = 0\\) 而 \\(\\pi_1(S^1) = \\mathbb{Z}\\)，矛盾",
+        "\\(f\\) 不连续",
+        "\\(D^2\\) 不紧致",
+        "\\(f\\) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "假设 \\(f\\) 无不动点。定义 \\(r(x)\\)：从 \\(f(x)\\) 向 \\(x\\) 做射线交 \\(S^1\\) 于 \\(r(x)\\)。\\(r: D^2 \\to S^1\\) 连续，\\(r|_{S^1} = \\mathrm{id}\\)。\\(r_*: \\pi_1(D^2) \\to \\pi_1(S^1)\\)，但 \\(r_* \\circ i_* = \\mathrm{id}_*\\)（\\(i: S^1 \\hookrightarrow D^2\\)）。\\(0 = \\pi_1(D^2) \\twoheadrightarrow \\pi_1(S^1) = \\mathbb{Z}\\)，矛盾。"
+      },
+      {
+        "id": "alg-topo-ch01-q25",
+        "question": "\\(\\pi_1\\) 和 \\(H_1\\) 的关系是什么？",
+        "options": [
+          "\\(H_1(X; \\mathbb{Z}) \\cong \\pi_1(X)^{\\text{ab}}\\)（基本群的 Abel 化）",
+        "\\(H_1 = \\pi_1\\)",
+        "无关系",
+        "\\(H_1 \\subseteq \\pi_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "Hurewicz 定理（\\(n = 1\\)）：\\(H_1(X; \\mathbb{Z}) \\cong \\pi_1(X) / [\\pi_1, \\pi_1]\\)（交换化）。\\(\\pi_1\\) Abel \\(\\Rightarrow H_1 = \\pi_1\\)（如 \\(\\mathbb{Z}, \\mathbb{Z}^n\\)）。\\(\\pi_1\\) 非 Abel（如 \\(F_2 = \\pi_1(S^1 \\vee S^1)\\)）\\(\\Rightarrow H_1 = F_2^{\\text{ab}} = \\mathbb{Z}^2 \\neq F_2\\)。\\(H_1\\) 丢失了非交换信息。"
+      },
+      {
+        "id": "alg-topo-ch01-q26",
+        "question": "在分子拓扑学中，DNA 环分子的打结性质用什么区分？",
+        "options": [
+          "结群 \\(\\pi_1(\\mathbb{R}^3 \\setminus K)\\)",
+        "质量",
+        "温度",
+        "颜色"
+        ],
+        "answer": 0,
+        "explanation": "DNA 可形成结（trefoil knot 等）或链环。结群和 Alexander/Jones 多项式可以区分不同拓扑类型。拓扑异构酶（topoisomerase）改变 DNA 的结型。分子生物学中拓扑不变量帮助理解 DNA 复制和转录中的拓扑约束。基本群给出结的代数\"指纹\"。"
+      },
+      {
+        "id": "alg-topo-ch01-q27",
+        "question": "在机器人运动规划中，构形空间 \\(\\mathcal{C}\\) 的 \\(\\pi_1\\) 有什么意义？",
+        "options": [
+          "\\(\\pi_1(\\mathcal{C}) \\neq 0\\) 意味着存在拓扑上不同的运动路径类",
+        "计算最短路径",
+        "与运动规划无关",
+        "只影响速度"
+        ],
+        "answer": 0,
+        "explanation": "构形空间 \\(\\mathcal{C}\\) = 机器人所有可能配置的空间，障碍物挖去后 \\(\\mathcal{C}_{\\text{free}}\\) 可能有非平凡 \\(\\pi_1\\)。\\(\\pi_1 \\neq 0\\) 说明存在\"绕障碍物\"的不同路径类——不能连续变形到彼此。拓扑运动规划复杂度（Farber）直接由 \\(\\pi_1\\) 等不变量决定。"
+      },
+      {
+        "id": "alg-topo-ch01-q28",
+        "question": "Borsuk-Ulam 定理说连续映射 \\(f: S^n \\to \\mathbb{R}^n\\) 存在 \\(x\\) 使得 \\(f(x) = f(-x)\\)。\\(n = 1\\) 的情况用什么证明？",
+        "options": [
+          "中值定理",
+        "\\(\\pi_1(S^1) = \\mathbb{Z}\\) 和绕数论证",
+        "同调论",
+        "A 和 B 都可以"
+        ],
+        "answer": 3,
+        "explanation": "\\(n = 1\\)：\\(g(x) = f(x) - f(-x): S^1 \\to \\mathbb{R}\\)。\\(g(-x) = -g(x)\\)（奇函数）。若 \\(g\\) 不取零则 \\(g/|g|: S^1 \\to \\{+1,-1\\}\\)，但奇函数 \\(g\\) 取值反号——连续函数从正到负必过零（中值定理/A）。也可用绕数：\\(g/|g|\\) 的绕数和 \\(g(-\\cdot)/|g(-\\cdot)|\\) 绕数奇偶矛盾（B）。\\(n \\geq 2\\) 需要同调论。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="alg-topo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/alg-topo.html" class="module-name">代数拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 同伦与道路同伦</a></li>
+      <li><a href="#kp2">02 · 基本群的定义与性质</a></li>
+      <li><a href="#kp3">03 · van Kampen 定理</a></li>
+      <li><a href="#kp4">04 · 基本群与应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>基本群</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>同伦与道路同伦</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>代数拓扑的核心思想是将拓扑空间中的"形变"关系代数化。两条道路 "同伦"意味着一条可以连续形变为另一条——这比要求道路完全相同 弱得多，但足以区分空间的"洞"。例如在平面去掉原点后，绕原点 的圈不能连续缩成一点——这就是非平凡同伦类的直觉。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同伦是拓扑学中"等价"的正确概念。同伦等价将拓扑空间分类到 比同胚更粗的等价类中（只关注"形状"、不关注精确尺寸）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>同伦</strong>：连续映射 \(f, g: X \to Y\) 同伦（\(f \simeq g\)）\(\iff\) 存在连续映射 \(H: X \times [0,1] \to Y\) 使 \(H(x,0) = f(x)\)，\(H(x,1) = g(x)\)。 <strong>道路同伦</strong>：道路 \(\gamma_0, \gamma_1: [0,1] \to X\) （\(\gamma_0(0) = \gamma_1(0) = a\)，\(\gamma_0(1) = \gamma_1(1) = b\)） 相对端点同伦 \(\iff\) 存在 \(H: [0,1]^2 \to X\)， \(H(s,0) = \gamma_0(s)\)，\(H(s,1) = \gamma_1(s)\)， \(H(0,t) = a\)，\(H(1,t) = b\)。 同伦类 \([\gamma]\) 在道路的连接运算下构成良定义的运算： \[[\gamma] \cdot [\delta] = [\gamma \cdot \delta]\] 其中 \((\gamma \cdot \delta)(s) = \begin{cases}\gamma(2s) & s \in [0,1/2]\\\delta(2s-1) & s \in [1/2,1]\end{cases}\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}^2\) 中，两条从 \((0,0)\) 到 \((1,0)\) 的道路 \(\gamma_0(s) = (s, 0)\) 和 \(\gamma_1(s) = (s, s(1-s))\) 是否同伦？ 解答：是。\(H(s,t) = (s, ts(1-s))\) 是同伦： \(H(s,0) = (s,0) = \gamma_0(s)\)，\(H(s,1) = (s, s(1-s)) = \gamma_1(s)\)， \(H(0,t) = (0,0)\)，\(H(1,t) = (1,0)\)。 \(\mathbb{R}^2\) 是凸的，任何两条同端点道路都同伦。 易错点：\(\mathbb{R}^2 \setminus \{0\}\) 中不是所有同端点道路都同伦！ 绕原点和不绕原点的道路属不同同伦类。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪对空间同伦等价？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 可沿径向收缩到 \\(S^1\\)（形变收缩），')">A. \(S^1\) 和 \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 可沿径向收缩到 \\(S^1\\)（形变收缩），')">B. \(\mathbb{R}^2 \setminus \{0\}\) 和 \(S^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 可沿径向收缩到 \\(S^1\\)（形变收缩），')">C. \(S^2\) 和 \(T^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 可沿径向收缩到 \\(S^1\\)（形变收缩），')">D. \(\{*\}\) 和 \(S^1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>基本群的定义与性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>将基点处所有回路（闭道路）的同伦类收集起来，配上道路连接运算， 得到一个群——基本群 \(\pi_1(X, x_0)\)。这是空间"一维洞"的代数 编码：\(\pi_1(S^1) = \mathbb{Z}\)（绕不同圈数），\(\pi_1(\mathbb{R}^2) = 0\) （无洞可缩），\(\pi_1(T^2) = \mathbb{Z}^2\)（两个独立方向的圈）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>基本群是从拓扑空间范畴（连续映射）到群范畴（同态）的函子。 连续映射 \(f: X \to Y\) 诱导群同态 \(f_*: \pi_1(X) \to \pi_1(Y)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(\pi_1(X, x_0) = \{[\gamma] : \gamma \text{ 是基于 } x_0 \text{ 的回路}\}\)。 <strong>群结构</strong>： - 乘法：\([\gamma][\delta] = [\gamma \cdot \delta]\) - 单位元：\([c_{x_0}]\)（常值回路） - 逆元：\([\gamma]^{-1} = [\bar{\gamma}]\)，\(\bar{\gamma}(s) = \gamma(1-s)\) <strong>基点变更</strong>：若 \(X\) 道路连通，\(\pi_1(X, x_0) \cong \pi_1(X, x_1)\) （通过连接道路的共轭给出同构）。 <strong>函子性</strong>：\(f: (X, x_0) \to (Y, y_0)\) 连续， \(f_*: \pi_1(X, x_0) \to \pi_1(Y, y_0)\)，\(f_*([\gamma]) = [f \circ \gamma]\)。 \[f_*([\gamma][\delta]) = f_*([\gamma]) \cdot f_*([\delta])\] \((g \circ f)_* = g_* \circ f_*\)；\(\mathrm{id}_* = \mathrm{id}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Brouwer 不动点定理可用 \(\pi_1\) 证明（\(n = 2\) 情况）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\pi_1(S^1, 1)\)。 解答（思路）：回路 \(\gamma: [0,1] \to S^1\) 的提升到 \(\mathbb{R}\)： \(\tilde{\gamma}(0) = 0\)，\(\tilde{\gamma}(1) = n \in \mathbb{Z}\)（绕圈数）。 \(n\) 不变于同伦，给出同构 \(\pi_1(S^1) \cong \mathbb{Z}\)。 生成元是"逆时针绕一圈"\([\omega_1]\)，\(\omega_1(s) = e^{2\pi is}\)。 易错点：\(\pi_1\) 中的"乘法"是同伦类的乘法，不是 \(S^1\) 中的点乘法。 \([\omega_n] = [\omega_1]^n\) 代表绕 \(n\) 圈。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\pi_1(T^2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(T^2 = S^1 \\times S^1\\)，基本群 = \\(\\pi_1(S^1) \\times \\pi_1(S^1) = \\mathbb{Z} \\times \\mathbb{Z}\\)')">A. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(T^2 = S^1 \\times S^1\\)，基本群 = \\(\\pi_1(S^1) \\times \\pi_1(S^1) = \\mathbb{Z} \\times \\mathbb{Z}\\)')">B. \(\mathbb{Z}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(T^2 = S^1 \\times S^1\\)，基本群 = \\(\\pi_1(S^1) \\times \\pi_1(S^1) = \\mathbb{Z} \\times \\mathbb{Z}\\)')">C. \(\mathbb{Z}/2\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(T^2 = S^1 \\times S^1\\)，基本群 = \\(\\pi_1(S^1) \\times \\pi_1(S^1) = \\mathbb{Z} \\times \\mathbb{Z}\\)')">D. \(0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>van Kampen 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何从"局部"的基本群拼出"全局"的基本群？van Kampen 定理回答 了这个问题：如果空间 \(X = U_1 \cup U_2\)，\(U_1 \cap U_2\) 道路连通， 那么 \(\pi_1(X)\) 是 \(\pi_1(U_1)\) 和 \(\pi_1(U_2)\) 在 \(\pi_1(U_1 \cap U_2)\) 上 的自由积商——即"融合积 (amalgamated free product)"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>van Kampen 定理是 \(\pi_1\) 函子的一个"余极限性质"——它将 基本群的计算转化为群论中的自由积与商运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>van Kampen 定理</strong>：\(X = U_1 \cup U_2\)，\(U_1, U_2, U_1 \cap U_2\) 开且道路连通，\(x_0 \in U_1 \cap U_2\)。含入 \(i_k: U_1 \cap U_2 \hookrightarrow U_k\) 诱导 \((i_k)_*: \pi_1(U_1 \cap U_2) \to \pi_1(U_k)\)。 \[\pi_1(X) \cong \pi_1(U_1) *_{\pi_1(U_1 \cap U_2)} \pi_1(U_2)\] 即 \(\pi_1(X) = (\pi_1(U_1) * \pi_1(U_2)) / N\)， \(N = \langle (i_1)_*(g) \cdot (i_2)_*(g)^{-1} : g \in \pi_1(U_1 \cap U_2) \rangle\)。 <strong>特例</strong>：\(U_1 \cap U_2\) 单连通（\(\pi_1 = 0\)）时 \(\pi_1(X) = \pi_1(U_1) * \pi_1(U_2)\)（自由积）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 计算 knot group（结的余空间的基本群）——拓扑结理论的核心工具</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 van Kampen 定理计算 \(\pi_1(S^1 \vee S^1)\)。 解答：\(S^1 \vee S^1\) = 两个圆在一点黏合（"花环"或"8"字形）。 取 \(U_1\) = 第一个圈加一小段第二个圈，\(U_2\) = 第二个圈加一小段第一个圈。 \(U_1 \simeq S^1\)，\(U_2 \simeq S^1\)，\(U_1 \cap U_2 \simeq \{*\}\)（可缩）。 \(\pi_1(U_1 \cap U_2) = 0\)。 \(\pi_1(S^1 \vee S^1) = \mathbb{Z} * \mathbb{Z}\)（自由群 \(F_2\)）。 易错点：\(\mathbb{Z} * \mathbb{Z} \neq \mathbb{Z} \times \mathbb{Z}\)！ 自由积中 \(ab \neq ba\)，是非交换群。\(\pi_1(T^2) = \mathbb{Z}^2\)， \(\pi_1(S^1 \vee S^1) = F_2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\pi_1(S^2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2 = U_1 \\cup U_2\\)（两个开半球），\\(U_1 \\cap U_2 \\simeq S^1\\)')">A. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2 = U_1 \\cup U_2\\)（两个开半球），\\(U_1 \\cap U_2 \\simeq S^1\\)')">B. \(\mathbb{Z}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(S^2 = U_1 \\cup U_2\\)（两个开半球），\\(U_1 \\cap U_2 \\simeq S^1\\)')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2 = U_1 \\cup U_2\\)（两个开半球），\\(U_1 \\cap U_2 \\simeq S^1\\)')">D. \(\mathbb{Z}/2\mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>基本群与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>基本群不仅是抽象的代数不变量——它有深刻的几何和拓扑应用。 代数基本定理可以用 \(\pi_1(S^1) = \mathbb{Z}\) 证明，Brouwer 不动点 定理也可以用基本群方法处理（2 维情况），Borsuk-Ulam 定理说明 \(S^2\) 到 \(\mathbb{R}^2\) 的映射必有对径点同值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>基本群作为拓扑不变量，可以用来证明"不可能性"： 若 \(\pi_1(X) \not\cong \pi_1(Y)\) 则 \(X \not\simeq Y\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Brouwer 不动点定理（\(n=2\)）</strong>：每个连续 \(f: D^2 \to D^2\) 有不动点。 证明：反证法。若 \(f(x) \neq x\)，定义收缩 \(r: D^2 \to S^1\)（从 \(f(x)\) 向 \(x\) 方向的射线与 \(S^1\) 的交点）。 \(r|_{S^1} = \mathrm{id}_{S^1}\)，即 \(r \circ i = \mathrm{id}\) （\(i: S^1 \hookrightarrow D^2\)）。 \(r_* \circ i_*: \pi_1(S^1) \to \pi_1(D^2) \to \pi_1(S^1) = \mathrm{id}: \mathbb{Z} \to \mathbb{Z}\)。 但 \(\pi_1(D^2) = 0\)，所以 \(r_* \circ i_*\) 必须通过 \(0\)， 不可能是 \(\mathbb{Z}\) 上的恒等映射。矛盾！ <strong>应用</strong>：若 \(X \simeq Y\) 则 \(\pi_1(X) \cong \pi_1(Y)\)。 \(\pi_1(\mathbb{R}P^2) = \mathbb{Z}/2\mathbb{Z}\)， \(\pi_1(K) = \langle a, b | abab^{-1} \rangle\)（Klein 瓶）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Brouwer 不动点定理在博弈论（Nash 均衡存在性）中是核心工具</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathbb{R}^2\) 和 \(\mathbb{R}^3\) 不同胚。 解答：反证：若 \(f: \mathbb{R}^2 \to \mathbb{R}^3\) 是同胚。 去掉一点：\(f\) 限制为 \(\mathbb{R}^2 \setminus \{p\} \cong \mathbb{R}^3 \setminus \{f(p)\}\)。 \(\pi_1(\mathbb{R}^2 \setminus \{p\}) = \mathbb{Z}\)（\(\simeq S^1\)）， \(\pi_1(\mathbb{R}^3 \setminus \{q\}) = 0\)（\(\simeq S^2\)，单连通）。 \(\mathbb{Z} \neq 0\)，矛盾。 易错点：直接比较 \(\pi_1(\mathbb{R}^2) = \pi_1(\mathbb{R}^3) = 0\) 没有用（都是可缩空间）。必须去掉一点来制造区别。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\pi_1(\mathbb{R}P^2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathbb{R}P^2\\) 是 \\(S^2\\) 对对径等价的商空间。')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathbb{R}P^2\\) 是 \\(S^2\\) 对对径等价的商空间。')">B. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\mathbb{R}P^2\\) 是 \\(S^2\\) 对对径等价的商空间。')">C. \(\mathbb{Z}/2\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathbb{R}P^2\\) 是 \\(S^2\\) 对对径等价的商空间。')">D. \(\mathbb{Z}^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/geometry/alg-topo.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

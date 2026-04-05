@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 概率空间 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch01-q1",
+        "question": "设 \\(P(A) = 0.3\\)，\\(P(B) = 0.5\\)，\\(P(A \\cap B) = 0.1\\)，求 \\(P(A \\cup B)\\)。",
+        "options": [
+          "\\(0.8\\)",
+        "\\(0.7\\)",
+        "\\(0.6\\)",
+        "\\(0.9\\)"
+        ],
+        "answer": 1,
+        "explanation": "容斥公式 \\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B) = 0.3 + 0.5 - 0.1 = 0.7\\)。选 A 是忘记减交集的常见错误，选 D 是粗暴求和再取近似。"
+      },
+      {
+        "id": "probability-ch01-q2",
+        "question": "设 \\(A_1, A_2, A_3\\) 两两不相交，\\(P(A_i)=i/10\\)，求 \\(P(A_1 \\cup A_2 \\cup A_3)\\) 和 \\(P((A_1 \\cup A_2 \\cup A_3)^c)\\)。",
+        "options": [
+          "\\(0.6,\\; 0.4\\)",
+        "\\(0.3,\\; 0.7\\)",
+        "\\(0.6,\\; 0.6\\)",
+        "\\(1.0,\\; 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "两两不相交直接用可加性：\\(P = 0.1+0.2+0.3 = 0.6\\)。补概率 \\(= 1-0.6=0.4\\)。不相交是可列可加性成立的前提。"
+      },
+      {
+        "id": "probability-ch01-q3",
+        "question": "\\(P(A)=0.5\\)，\\(P(B)=0.4\\)，\\(P(A \\cap B)=0.2\\)。求 \\(P(A|B)\\)。",
+        "options": [
+          "\\(0.4\\)",
+        "\\(0.5\\)",
+        "\\(0.2\\)",
+        "\\(0.8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(A|B) = P(A \\cap B)/P(B) = 0.2/0.4 = 0.5\\)。条件概率的分母是条件事件 \\(B\\) 的概率。选 A 是误用了 \\(P(B)/P(A)\\)；选 C 仅取了交集概率。"
+      },
+      {
+        "id": "probability-ch01-q4",
+        "question": "工厂线 A 占产量 \\(70\\%\\)，次品率 \\(1\\%\\)；线 B 占 \\(30\\%\\)，次品率 \\(5\\%\\)。随机取到次品，来自 A 的概率？",
+        "options": [
+          "\\(7/22\\)",
+        "\\(15/22\\)",
+        "\\(1/2\\)",
+        "\\(7/10\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\text{次})=0.01 \\times 0.7+0.05 \\times 0.3=0.022\\)。Bayes: \\(P(A|\\text{次})=0.007/0.022=7/22\\)。B 的高次品率主导了结果，选 D 混淆了先验比例。"
+      },
+      {
+        "id": "probability-ch01-q5",
+        "question": "\\(P(A)=0.3\\)，\\(P(B)=0.4\\)，\\(A \\perp B\\)。求 \\(P(A \\cap B)\\)。",
+        "options": [
+          "\\(0.7\\)",
+        "\\(0.12\\)",
+        "\\(0.1\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(A \\cap B)=P(A)P(B)=0.12\\)。选 A 是误加；选 D 混淆独立与不相交。独立意味着乘法，不相交意味着 \\(P(A \\cap B)=0\\)。"
+      },
+      {
+        "id": "probability-ch01-q6",
+        "question": "若 \\(A \\perp B\\)（独立），下列哪项必成立？",
+        "options": [
+          "\\(A \\cap B = \\emptyset\\)",
+        "\\(P(A|B) = P(A)\\)（\\(P(B)>0\\) 时）",
+        "\\(P(A \\cup B) = P(A)+P(B)\\)",
+        "\\(A^c\\) 与 \\(B^c\\) 不独立"
+        ],
+        "answer": 1,
+        "explanation": "独立性等价于 \\(P(A|B)=P(A)\\)。A 错：不相交≠独立。C 错：缺 \\(-P(A \\cap B)\\)。D 错：\\(A \\perp B\\) 可推出 \\(A^c \\perp B^c\\)（展开验证得 \\(P(A^c \\cap B^c)=P(A^c)P(B^c)\\)）。"
+      },
+      {
+        "id": "probability-ch01-q7",
+        "question": "下列哪项不是 \\(\\sigma\\)-代数必须满足的条件？",
+        "options": [
+          "包含 \\(\\Omega\\)",
+        "对补运算封闭",
+        "对可列并封闭",
+        "元素个数必须是 \\(2\\) 的幂"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\sigma\\)-代数需满足 (1) \\(\\Omega \\in \\mathcal{F}\\)（A），(2) 补封闭（B），(3) 可列并封闭（C）。D 虽对有限 \\(\\sigma\\)-代数是推论，但不是定义要求，且一般 \\(\\sigma\\)-代数可以不可数。"
+      },
+      {
+        "id": "probability-ch01-q8",
+        "question": "CDF \\(F(x)=0\\)（\\(x<0\\)），\\(F(x)=1-e^{-2x}\\)（\\(x \\geq 0\\)）。求密度 \\(f(x)\\) 和 \\(P(X>1)\\)。",
+        "options": [
+          "\\(f(x)=2e^{-2x}\\)，\\(P(X>1)=e^{-2}\\)",
+        "\\(f(x)=e^{-2x}\\)，\\(P=e^{-2}\\)",
+        "\\(f(x)=2e^{-2x}\\)，\\(P=1-e^{-2}\\)",
+        "\\(f(x)=2e^{2x}\\)，\\(P=e^{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x)=F'(x)=2e^{-2x}\\)（\\(x \\geq 0\\)）。\\(P(X>1)=1-F(1)=e^{-2}\\approx 0.135\\)。选 C 把 \\(P(X>1)\\) 与 \\(P(X \\leq 1)\\) 搞反。"
+      },
+      {
+        "id": "probability-ch01-q9",
+        "question": "设 \\(A_n \\uparrow A\\)，\\(P(A_n) = 1-1/(n+1)\\)。求 \\(P(A)\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(1\\)",
+        "不存在"
+        ],
+        "answer": 2,
+        "explanation": "概率的从下连续性：\\(P(A)=\\lim P(A_n)=\\lim(1-1/(n+1))=1\\)。这是可列可加性的重要推论。递增事件列的极限概率等于概率的极限。"
+      },
+      {
+        "id": "probability-ch01-q10",
+        "question": "某疾病患病率 \\(0.1\\%\\)，检测灵敏度 \\(99\\%\\)，假阳性率 \\(2\\%\\)。阳性后真实患病概率？",
+        "options": [
+          "\\(\\approx 4.7\\%\\)",
+        "\\(99\\%\\)",
+        "\\(50\\%\\)",
+        "\\(0.1\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(D|+)=\\frac{0.99 \\times 0.001}{0.99 \\times 0.001+0.02 \\times 0.999}=\\frac{0.00099}{0.02097}\\approx 0.047\\)。这是 Bayes 公式的经典应用，低基率下阳性预测值极低。选 B 犯了\"基率忽略\"谬误。"
+      },
+      {
+        "id": "probability-ch01-q11",
+        "question": "划分 \\(B_1,B_2,B_3\\)，\\(P(B_i)=1/3\\)，\\(P(A|B_1)=0.2\\)，\\(P(A|B_2)=0.5\\)，\\(P(A|B_3)=0.8\\)。求 \\(P(A)\\)。",
+        "options": [
+          "\\(0.5\\)",
+        "\\(1.5\\)",
+        "\\(0.15\\)",
+        "\\(0.45\\)"
+        ],
+        "answer": 0,
+        "explanation": "全概率公式 \\(P(A)=\\sum P(A|B_i)P(B_i)=(0.2+0.5+0.8)/3=1.5/3=0.5\\)。选 B 忘了乘权重。全概率公式是先验加权平均。"
+      },
+      {
+        "id": "probability-ch01-q12",
+        "question": "\\(P(A)=1/2\\)，\\(P(B)=1/3\\)，\\(P(A \\cap B)=1/4\\)。\\(A,B\\) 是否独立？",
+        "options": [
+          "独立",
+        "不独立，\\(P(A)P(B)=1/6 \\neq 1/4\\)",
+        "独立，因为 \\(P(A)+P(B)<1\\)",
+        "无法判断"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(A)P(B)=1/6\\)，\\(P(A \\cap B)=1/4 \\neq 1/6\\)，故不独立。独立性由乘法公式判定，与其他关系无关。\\(1/4>1/6\\) 说明 \\(A,B\\) 正相关。"
+      },
+      {
+        "id": "probability-ch01-q13",
+        "question": "\\(\\Omega=\\{1,2,3,4\\}\\) 等概率。\\(A=\\{1,2\\}\\)，\\(B=\\{1,3\\}\\)，\\(C=\\{1,4\\}\\)。这三个事件是两两独立还是相互独立？",
+        "options": [
+          "两两独立且相互独立",
+        "两两独立但不相互独立",
+        "不两两独立",
+        "相互独立但不两两独立"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(A)=P(B)=P(C)=1/2\\)。\\(P(A \\cap B)=1/4=P(A)P(B)\\) ✓（类同其他对）。但 \\(P(A \\cap B \\cap C)=1/4 \\neq 1/8=P(A)P(B)P(C)\\)。经典 Bernstein 反例。"
+      },
+      {
+        "id": "probability-ch01-q14",
+        "question": "\\(\\Omega=\\{a,b,c,d\\}\\)，\\(X(a)=X(b)=1\\)，\\(X(c)=X(d)=2\\)。求 \\(\\sigma(X)\\)。",
+        "options": [
+          "\\(\\{\\emptyset,\\{a\\},\\{b\\},\\Omega\\}\\)",
+        "\\(\\{\\emptyset,\\{a,b\\},\\{c,d\\},\\Omega\\}\\)",
+        "\\(2^\\Omega\\)",
+        "\\(\\{\\emptyset,\\Omega\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(X^{-1}(\\{1\\})=\\{a,b\\}\\)，\\(X^{-1}(\\{2\\})=\\{c,d\\}\\)。\\(\\sigma(X)=\\{\\emptyset,\\{a,b\\},\\{c,d\\},\\Omega\\}\\)。\\(\\sigma(X)\\) 只能区分 \\(X\\) 取不同值的事件，不能区分 \\(a\\) 和 \\(b\\)。"
+      },
+      {
+        "id": "probability-ch01-q15",
+        "question": "若 \\(X\\) 是 \\(\\mathcal{F}_1=\\{\\emptyset,\\Omega\\}\\)-可测的，则 \\(X\\) 必须是什么？",
+        "options": [
+          "任意函数",
+        "常数函数",
+        "连续函数",
+        "有界函数"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathcal{F}_1=\\{\\emptyset,\\Omega\\}\\) 是平凡 \\(\\sigma\\)-代数，\\(\\{X \\leq x\\}\\) 只能为 \\(\\emptyset\\) 或 \\(\\Omega\\)，迫使 \\(X\\) 对所有 \\(\\omega\\) 取同一值。\"无信息\"等价于\"\\(X\\) 是常数\"。"
+      },
+      {
+        "id": "probability-ch01-q16",
+        "question": "\\(\\mathcal{F}=\\{\\emptyset,\\{1,2\\},\\{3,4\\},\\{1,2,3,4\\}\\}\\)（\\(\\Omega=\\{1,2,3,4\\}\\)）。这是 \\(\\sigma\\)-代数吗？",
+        "options": [
+          "是",
+        "否，缺少单点集",
+        "否，不对并封闭",
+        "否，不对补封闭"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Omega \\in \\mathcal{F}\\) ✓；\\(\\{1,2\\}^c=\\{3,4\\} \\in \\mathcal{F}\\) ✓；\\(\\{1,2\\}\\cup\\{3,4\\}=\\Omega \\in \\mathcal{F}\\) ✓。全部公理满足。\\(\\sigma\\)-代数不要求含所有单点集。"
+      },
+      {
+        "id": "probability-ch01-q17",
+        "question": "Borel \\(\\sigma\\)-代数 \\(\\mathcal{B}(\\mathbb{R})\\) 由何生成？",
+        "options": [
+          "\\(\\mathbb{R}\\) 的所有子集",
+        "所有开区间 \\((a,b)\\)",
+        "所有单点集 \\(\\{x\\}\\)",
+        "所有有限集"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathcal{B}(\\mathbb{R})=\\sigma(\\{(a,b):a<b\\})\\)，包含一切开集、闭集、可数集。A 是 \\(2^{\\mathbb{R}}\\)（含不可测集）；C 和 D 生成的 \\(\\sigma\\)-代数只包含可数/余可数集，严格小于 \\(\\mathcal{B}(\\mathbb{R})\\)。"
+      },
+      {
+        "id": "probability-ch01-q18",
+        "question": "证明次可加性 \\(P(\\bigcup_i A_i) \\leq \\sum_i P(A_i)\\) 的关键一步是？",
+        "options": [
+          "直接由可加性",
+        "不交化 \\(B_i = A_i \\setminus \\bigcup_{j<i} A_j\\)，用 \\(P(B_i) \\leq P(A_i)\\)",
+        "容斥公式截断",
+        "概率的连续性"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\bigcup A_i=\\bigcup B_i\\)（\\(B_i\\) 不交），\\(P(\\bigcup A_i)=\\sum P(B_i)\\)。因 \\(B_i \\subseteq A_i\\)，单调性得 \\(P(B_i) \\leq P(A_i)\\)，故 \\(\\leq \\sum P(A_i)\\)。这是 Boole 不等式（union bound）的标准证法。"
+      },
+      {
+        "id": "probability-ch01-q19",
+        "question": "设 \\(P(A_n)=1/2^n\\)，\\(n=1,2,\\ldots\\)。\\(P(\\bigcup_n A_n)\\) 的上界？",
+        "options": [
+          "\\(\\infty\\)",
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "次可加性给出 \\(P(\\bigcup A_n) \\leq \\sum 1/2^n = 1\\)。概率不超过 1，故上界为 1。若 \\(A_n\\) 不交则精确等于 1。不可能超过 1。"
+      },
+      {
+        "id": "probability-ch01-q20",
+        "question": "甲袋 5 红 3 蓝，乙袋 2 红 6 蓝，等概率选袋。取到红球，来自甲的后验概率？",
+        "options": [
+          "\\(5/8\\)",
+        "\\(5/7\\)",
+        "\\(2/7\\)",
+        "\\(1/2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(\\text{红})=\\frac{1}{2}\\cdot\\frac{5}{8}+\\frac{1}{2}\\cdot\\frac{2}{8}=\\frac{7}{16}\\)。Bayes: \\(P(\\text{甲}|\\text{红})=\\frac{5/16}{7/16}=5/7\\)。选 A 是先验出红概率（未更新）；选 D 是未用数据的先验。"
+      },
+      {
+        "id": "probability-ch01-q21",
+        "question": "在 Bayes 更新中，哪个因素决定了后验概率主要由先验还是由似然主导？",
+        "options": [
+          "样本量大小",
+        "先验是否均匀",
+        "事件是否独立",
+        "\\(\\sigma\\)-代数的大小"
+        ],
+        "answer": 0,
+        "explanation": "样本量越大，似然函数越尖锐（集中在 MLE 附近），后验主要由数据决定；样本量小时先验影响大。这就是 Bayes 一致性的直觉：大样本下先验的影响趋于消失。"
+      },
+      {
+        "id": "probability-ch01-q22",
+        "question": "\\(A \\perp B\\)，证明 \\(A^c \\perp B^c\\)。关键一步等式是？",
+        "options": [
+          "\\(P(A^c \\cap B^c)=P(A^c)+P(B^c)\\)",
+        "\\(P(A^c \\cap B^c)=1-P(A)-P(B)+P(A \\cap B)=(1-P(A))(1-P(B))\\)",
+        "\\(P(A^c \\cap B^c)=P(A)P(B)\\)",
+        "\\(P(A^c \\cap B^c)=1-P(A \\cup B)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(A^c \\cap B^c)=P((A \\cup B)^c)=1-P(A \\cup B)=1-P(A)-P(B)+P(A \\cap B)\\)。代入独立性 \\(P(A \\cap B)=P(A)P(B)\\) 得 \\((1-P(A))(1-P(B))=P(A^c)P(B^c)\\) ✓。D 也正确但不完整。"
+      },
+      {
+        "id": "probability-ch01-q23",
+        "question": "掷两枚公平骰子，\\(A\\)=\"第一枚偶数\"，\\(B\\)=\"和为 7\"。\\(A, B\\) 是否独立？",
+        "options": [
+          "独立",
+        "不独立",
+        "需要更多信息",
+        "仅当骰子公平时独立"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(A)=1/2\\)，\\(P(B)=6/36=1/6\\)。\\(A \\cap B\\)：\\((2,5),(4,3),(6,1)\\)，\\(P=3/36=1/12=P(A)P(B)\\) ✓。独立可以非直觉——\"和为 7\"对第一枚的奇偶性无偏。"
+      },
+      {
+        "id": "probability-ch01-q24",
+        "question": "为何不能对 \\(\\mathbb{R}\\) 上所有子集定义兼容 Lebesgue 测度的概率？",
+        "options": [
+          "\\(\\mathbb{R}\\) 不可数",
+        "存在不可测集（Vitali 集）导致矛盾",
+        "\\(\\sigma\\)-代数太大",
+        "概率测度必须有有限支撑"
+        ],
+        "answer": 1,
+        "explanation": "Vitali 集构造表明：若对所有子集赋予平移不变且可列可加的测度，则得到 \\(0 \\cdot \\aleph = 1\\)（矛盾）或 \\(\\aleph \\cdot c = 1\\)（另一矛盾）。这迫使我们仅在 \\(\\mathcal{B}(\\mathbb{R})\\) 上定义测度。"
+      },
+      {
+        "id": "probability-ch01-q25",
+        "question": "\\(\\sigma(X) \\subseteq \\sigma(Y)\\) 的含义是？",
+        "options": [
+          "\\(X\\) 的方差小于 \\(Y\\)",
+        "\\(Y\\) 携带的信息至少和 \\(X\\) 一样多",
+        "\\(X, Y\\) 独立",
+        "\\(X\\) 和 \\(Y\\) 同分布"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sigma(X) \\subseteq \\sigma(Y)\\) 意味着 \\(X\\) 可确定的事件 \\(Y\\) 也能确定，等价于存在函数 \\(g\\) 使 \\(X=g(Y)\\)。\\(Y\\) 的信息量 \\(\\geq X\\)。这与方差、独立性、同分布均无直接关系。"
+      },
+      {
+        "id": "probability-ch01-q26",
+        "question": "新冠快筛灵敏度 \\(95\\%\\)，特异性 \\(90\\%\\)，社区感染率 \\(2\\%\\)。阳性居民实际感染概率约为？",
+        "options": [
+          "\\(95\\%\\)",
+        "\\(\\approx 16\\%\\)",
+        "\\(50\\%\\)",
+        "\\(2\\%\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(D|+)=\\frac{0.95 \\times 0.02}{0.95 \\times 0.02+0.10 \\times 0.98}=\\frac{0.019}{0.117}\\approx 0.162\\)。低基率下阳性预测值可以很低，这是公共卫生决策的关键考量。"
+      },
+      {
+        "id": "probability-ch01-q27",
+        "question": "保险公司低/中/高风险客户比例 \\(60\\%/30\\%/10\\%\\)，年出险率 \\(1\\%/3\\%/8\\%\\)。出险客户是高风险的概率？",
+        "options": [
+          "\\(8\\%\\)",
+        "\\(10\\%\\)",
+        "\\(\\approx 35\\%\\)",
+        "\\(80\\%\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(P(\\text{出})=0.006+0.009+0.008=0.023\\)。\\(P(\\text{高}|\\text{出})=0.008/0.023 \\approx 0.348\\)。高风险组虽仅 \\(10\\%\\)，但出险率高使后验大幅上升。精算定价的 Bayes 逻辑。"
+      },
+      {
+        "id": "probability-ch01-q28",
+        "question": "密码系统三层独立加密，各层被攻破概率 \\(10\\%,5\\%,2\\%\\)。全部击穿的概率？",
+        "options": [
+          "\\(17\\%\\)",
+        "\\(0.01\\%\\)",
+        "\\(10\\%\\)",
+        "\\(0.1\\%\\)"
+        ],
+        "answer": 1,
+        "explanation": "三层独立，全攻破概率 \\(=0.10 \\times 0.05 \\times 0.02=0.0001=0.01\\%\\)。独立性使多层防护安全性呈乘法提升。选 A 犯了将概率相加的错误。纵深防御的数学基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 概率空间的公理化构造</a></li>
+      <li><a href="#kp2">02 · 条件概率与 Bayes 公式</a></li>
+      <li><a href="#kp3">03 · 事件的独立性</a></li>
+      <li><a href="#kp4">04 · \(\sigma\)-代数与信息的数学表达</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>概率空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>概率空间的公理化构造</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>掷骰子、抽彩票、天气预报——日常生活充满不确定性。如何将含糊的 「可能性」变成严格的数学对象？1933 年 Kolmogorov 用测度论给出了 答案：概率空间 \((\Omega, \mathcal{F}, P)\) 的三条公理统一了整个 概率论的基础，使所有关于随机现象的推理都有坚实的逻辑根基。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象：将「不确定性」编码为三元组 \((\Omega, \mathcal{F}, P)\)。 \(\Omega\) 是所有可能结果的集合，\(\mathcal{F}\)（\(\sigma\)-代数）编码 我们能够「提问」的全部事件，\(P\) 对每个事件给出 \([0,1]\) 中的答案。 这直接推广了 Lebesgue 测度论的框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Kolmogorov 公理：设 \(\Omega \neq \emptyset\)，\(\mathcal{F}\) 为 \(\Omega\) 上的 \(\sigma\)-代数，\(P: \mathcal{F} \to [0,1]\) 满足： (P1) 非负性：\(P(A) \geq 0\)，\(\forall A \in \mathcal{F}\) (P2) 规范性：\(P(\Omega) = 1\) (P3) 可列可加性：若 \(A_1, A_2, \ldots\) 两两不相交， \[P\!\left(\bigcup_{n=1}^{\infty} A_n\right) = \sum_{n=1}^{\infty} P(A_n)\] 基本推论： - 补事件：\(P(A^c) = 1 - P(A)\)（令 \(A_1=A, A_2=A^c\)，由 P2+P3） - 单调性：\(A \subseteq B \Rightarrow P(A) \leq P(B)\) - 容斥：\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\) 概率的连续性：若 \(A_n \uparrow A\)，则 \(P(A_n) \to P(A)\)。 证明：令 \(B_1 = A_1\)，\(B_n = A_n \setminus A_{n-1}\)（不交化），则 \[P(A) = P\!\left(\bigcup_n B_n\right) = \sum_n P(B_n) = \lim_N \sum_{n=1}^{N} P(B_n) = \lim_N P(A_N)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>保险精算中，概率空间是计算保费和理赔风险的基础框架； 量子力学中，Born 规则本质上定义了一个概率测度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\Omega = \{1,2,3,4,5,6\}\)，\(\mathcal{F} = 2^\Omega\)， \(P\) 均匀。求「点数为奇数或大于 4」的概率。 解答：\(A_1 = \{1,3,5\}\)，\(A_2 = \{5,6\}\)。 \(P(A_1 \cup A_2) = 3/6 + 2/6 - 1/6 = 4/6 = 2/3\)。 易错点：忘记减去 \(P(A_1 \cap A_2) = P(\{5\}) = 1/6\)， 直接相加得 \(5/6\)，重复计算了元素 5。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Kolmogorov 公理中的可列可加性能否弱化为有限可加性？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。有限可加性无法保证 \\(P(A_n) \\to P(A)\\)（当 \\(A_n \\uparrow A\\)），')">A. 可以，有限可加性已足够</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！有限可加性无法保证 \\(P(A_n) \\to P(A)\\)（当 \\(A_n \\uparrow A\\)），')">B. 不可以，概率的连续性依赖于可列可加性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。有限可加性无法保证 \\(P(A_n) \\to P(A)\\)（当 \\(A_n \\uparrow A\\)），')">C. 仅当 \(\Omega\) 有限时可弱化</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>条件概率与 Bayes 公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当我们获得部分信息时，需要更新对事件的概率判断。医学检测阳性后， 患病的真实概率是多少？这类「已知证据后更新信念」的问题催生了条件 概率和 Bayes 公式——从垃圾邮件过滤到法医鉴定都依赖于此工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>条件概率定义：设 \(P(B) > 0\)， \[P(A|B) = \frac{P(A \cap B)}{P(B)}\] 全概率公式：若 \(B_1, \ldots, B_n\) 是 \(\Omega\) 的划分（两两不交， 并为 \(\Omega\)），且 \(P(B_i) > 0\)，则 \[P(A) = \sum_{i=1}^{n} P(A|B_i)\,P(B_i)\] 证明：\(A = \bigcup_i (A \cap B_i)\)，由不交性直接展开。 Bayes 公式：将「原因→结果」反转为「结果→原因」： \[P(B_j|A) = \frac{P(A|B_j)\,P(B_j)}{\sum_{i=1}^{n} P(A|B_i)\,P(B_i)}\] 先验 \(P(B_j)\) 经似然 \(P(A|B_j)\) 更新为后验 \(P(B_j|A)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>医学检测：患病率 1%，灵敏度 99%，假阳性率 5%。阳性后真实患病 概率仅约 \(0.99 \times 0.01 / (0.99 \times 0.01 + 0.05 \times 0.99) \approx 16.7\%\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：工厂线 A 占产量 60%，次品率 2%；线 B 占 40%，次品率 5%。 随机取到次品，来自线 A 的概率？ 解答：\(P(\text{次}) = 0.02 \times 0.6 + 0.05 \times 0.4 = 0.032\)。 \(P(A|\text{次}) = 0.012/0.032 = 0.375\)。 易错点：直觉认为「A 产量多故次品多来自 A」，实际 \(P(B|\text{次}) = 0.625\)， B 的高次品率主导了结果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">条件概率 \(P(A|B)\) 的定义要求什么前提？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(P(A|B) = P(A \\cap B)/P(B)\\) 要求分母 \\(P(B) > 0\\)。')">A. \(P(A) > 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(P(A|B) = P(A \\cap B)/P(B)\\) 要求分母 \\(P(B) > 0\\)。')">B. \(P(B) > 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(P(A|B) = P(A \\cap B)/P(B)\\) 要求分母 \\(P(B) > 0\\)。')">C. \(A\) 和 \(B\) 独立</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(P(A|B) = P(A \\cap B)/P(B)\\) 要求分母 \\(P(B) > 0\\)。')">D. \(A \subseteq B\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>事件的独立性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>两个事件「没有关系」到底是什么意思？一枚硬币的正反不影响另一枚， 但如何严格化这种「互不影响」？独立性的数学定义精炼了此直觉。然而 「两两独立」并不等于「相互独立」——Bernstein 的经典反例警示我们 必须对独立性的层次保持警惕。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：事件 \(A, B\) 独立（记 \(A \perp\!\!\!\perp B\)）iff \[P(A \cap B) = P(A) \cdot P(B)\] 等价地（若 \(P(B) > 0\)）：\(P(A|B) = P(A)\)。 相互独立 vs 两两独立：\(A_1, \ldots, A_n\) 相互独立要求对 每个子集 \(S \subseteq \{1,\ldots,n\}\), \[P\!\left(\bigcap_{i \in S} A_i\right) = \prod_{i \in S} P(A_i)\] 两两独立仅要求 \(|S| = 2\) 的情形。 Bernstein 反例：\(\Omega = \{1,2,3,4\}\) 等概率， \(A = \{1,2\}\)，\(B = \{1,3\}\)，\(C = \{1,4\}\)。 \(P(A \cap B) = P(A \cap C) = P(B \cap C) = 1/4\) ✓ 两两独立 但 \(P(A \cap B \cap C) = 1/4 \neq 1/8 = P(A)P(B)P(C)\) ✗</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>密码学中密钥各位需要相互独立（非仅两两独立），否则攻击者可 利用高阶相关性来破解加密方案。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：掷两枚骰子，\(A\) = 第一枚偶数，\(B\) = 第二枚偶数， \(C\) = 两枚之和为偶数。验证是否相互独立。 解答：\(P(A)=P(B)=P(C)=1/2\)。\(P(A \cap B) = 1/4\) ✓ \(A \cap C\)：第一偶+和偶 → 第二也偶，故 \(A \cap C = A \cap B\)， \(P(A \cap C) = 1/4\) ✓。类似 \(P(B \cap C) = 1/4\) ✓。 但 \(P(A \cap B \cap C) = P(A \cap B) = 1/4 \neq 1/8\)。非相互独立。 易错点：只检查了两两条件就断言相互独立，遗漏三重交集的验证。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(A \perp\!\!\!\perp B\)（独立），则下列哪个一定成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(P(A^c \\cap B) = P(B) - P(A)P(B) = P(A^c)P(B)\\)。')">A. \(A\) 和 \(B\) 不相交</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(P(A^c \\cap B) = P(B) - P(A)P(B) = P(A^c)P(B)\\)。')">B. \(A^c \perp\!\!\!\perp B\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(P(A^c \\cap B) = P(B) - P(A)P(B) = P(A^c)P(B)\\)。')">C. \(P(A \cup B) = P(A) + P(B)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>\(\sigma\)-代数与信息的数学表达</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>为什么概率论要用「神秘」的 \(\sigma\)-代数，而非简单取所有子集？ 在不可数 \(\Omega\)（如实数轴）上，并非所有子集都能合理赋予概率 （Vitali 集的教训）。\(\sigma\)-代数精确描述了「可获取的信息」—— 这个视角在条件期望和随机过程中至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\sigma\)-代数 \(\mathcal{G} \subseteq \mathcal{F}\) 表示信息层次： \(\mathcal{G}\) 越大，信息越丰富。\(\sigma(X)\) 恰好编码了「观测 \(X\) 后能确定的所有事件」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(\sigma\)-代数定义：\(\mathcal{F} \subseteq 2^\Omega\) 满足 (F1) \(\Omega \in \mathcal{F}\) (F2) \(A \in \mathcal{F} \Rightarrow A^c \in \mathcal{F}\) (F3) \(A_1, A_2, \ldots \in \mathcal{F} \Rightarrow \bigcup_n A_n \in \mathcal{F}\) 生成 \(\sigma\)-代数：给定集族 \(\mathcal{C}\)， \[\sigma(\mathcal{C}) = \bigcap\{\mathcal{G} : \mathcal{G} \supseteq \mathcal{C},\; \mathcal{G} \text{ 为 } \sigma\text{-代数}\}\] Borel \(\sigma\)-代数：\(\mathcal{B}(\mathbb{R}) = \sigma(\{(a,b): a<b\})\)。 它包含所有开集、闭集、可数集，但不含 Vitali 集等不可测集。 随机变量生成的 \(\sigma\)-代数： \[\sigma(X) = \{X^{-1}(B) : B \in \mathcal{B}(\mathbb{R})\}\] \(\sigma(X)\) 中的事件恰好是「通过观测 \(X\) 即可判断」的事件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融数学中 \(\mathcal{F}_t\) 表示 \(t\) 时刻前市场可获的全部信息， 形成滤(filtration)，是定义适应过程和鞅的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\Omega = \{a,b,c,d\}\)，\(X(a)=X(b)=1\)，\(X(c)=X(d)=2\)。 求 \(\sigma(X)\)。 解答：\(X^{-1}(\{1\}) = \{a,b\}\)，\(X^{-1}(\{2\}) = \{c,d\}\)。 \(\sigma(X) = \{\emptyset, \{a,b\}, \{c,d\}, \Omega\}\)。 易错点：以为 \(\sigma(X)\) 必含所有单点集。实际上 \(\sigma(X)\) 只能 区分 \(X\) 取不同值的事件，无法区分 \(a\) 和 \(b\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个不是 \(\sigma\)-代数必须满足的条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\sigma\\)-代数需满足 A、B、C。D 不正确——虽然有限')">A. 包含 \(\Omega\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\sigma\\)-代数需满足 A、B、C。D 不正确——虽然有限')">B. 对补运算封闭</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\sigma\\)-代数需满足 A、B、C。D 不正确——虽然有限')">C. 对可列并封闭</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\sigma\\)-代数需满足 A、B、C。D 不正确——虽然有限')">D. 元素个数必须是 \(2\) 的幂</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

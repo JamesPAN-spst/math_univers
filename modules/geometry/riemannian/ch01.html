@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 黎曼度量 — 黎曼几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "riemannian-ch01-q1",
+        "question": "黎曼度量 \\(g\\) 在坐标 \\((x^1, \\ldots, x^n)\\) 下的表达？",
+        "options": [
+          "\\(g = g_{ij}(x) \\, dx^i \\otimes dx^j\\)（对称正定矩阵值 \\((0,2)\\)-张量场）",
+        "向量场",
+        "标量函数",
+        "A（每点 \\(p\\) 给出内积 \\(g_p: T_pM \\times T_pM \\to \\mathbb{R}\\)）"
+        ],
+        "answer": 3,
+        "explanation": "黎曼度量是光滑的对称正定 \\((0,2)\\)-张量场。\\(g_{ij} = g(\\partial_i, \\partial_j)\\)，矩阵 \\((g_{ij})\\) 处处正定。\\(ds^2 = g_{ij} dx^i dx^j\\)（线元素）。欧氏度量 \\(g = \\delta_{ij} dx^i dx^j\\)。球面 \\(S^2\\)：\\(g = d\\theta^2 + \\sin^2\\theta \\, d\\phi^2\\)。度量是黎曼几何所有结构的起点。"
+      },
+      {
+        "id": "riemannian-ch01-q2",
+        "question": "黎曼流形 \\((M, g)\\) 上曲线 \\(\\gamma: [a,b] \\to M\\) 的长度公式？",
+        "options": [
+          "\\(L(\\gamma) = \\int_a^b \\sqrt{g_{\\gamma(t)}(\\dot\\gamma(t), \\dot\\gamma(t))} \\, dt\\)",
+        "\\(L = \\int |\\gamma'|\\)（欧氏范数）",
+        "A（\\(\\sqrt{g_{ij} \\dot x^i \\dot x^j}\\) 在坐标中）",
+        "\\(\\int_a^b |\\gamma''| \\, dt\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(L(\\gamma) = \\int_a^b \\|\\dot\\gamma(t)\\|_g \\, dt = \\int_a^b \\sqrt{g_{ij}(\\gamma(t)) \\dot x^i(t) \\dot x^j(t)} \\, dt\\)。\\(d(p,q) = \\inf_\\gamma L(\\gamma)\\)（黎曼距离）。欧氏空间 \\(g_{ij} = \\delta_{ij}\\) 退化为 \\(\\int |\\gamma'| dt\\)。长度积分不依赖参数化（重参数不变性）。"
+      },
+      {
+        "id": "riemannian-ch01-q3",
+        "question": "黎曼体积形式（有向黎曼流形）的表达？",
+        "options": [
+          "\\(\\text{dvol}_g = \\sqrt{\\det(g_{ij})} \\, dx^1 \\wedge \\cdots \\wedge dx^n\\)",
+        "\\(dx^1 \\cdots dx^n\\)",
+        "\\(\\det(g) \\, dx\\)",
+        "A（\\(\\sqrt{g}\\) 保证坐标变换正确——张量密度）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{dvol}_g = \\sqrt{\\det(g_{ij})} \\, dx^1 \\wedge \\cdots \\wedge dx^n\\)。坐标变换下 \\(\\sqrt{\\det g'} = \\sqrt{\\det g} \\cdot |J|\\)（\\(J\\) = Jacobian），恰好补偿 \\(dx\\) 的变换因子 \\(1/|J|\\)。\\(\\text{Vol}(M) = \\int_M \\text{dvol}_g\\)。\\(S^2(r)\\)：\\(\\sqrt{g} = r^2 \\sin\\theta\\), \\(\\text{Vol} = 4\\pi r^2\\)。"
+      },
+      {
+        "id": "riemannian-ch01-q4",
+        "question": "双曲平面 \\(\\mathbb{H}^2\\)（上半平面模型）的度量 \\(g = \\frac{dx^2 + dy^2}{y^2}\\)。计算单位圆弧到 \\((0,1)\\) 处的切向量 \\(v = \\partial_x\\) 的范数？",
+        "options": [
+          "\\(\\|v\\| = 1/y = 1\\)",
+        "\\(\\|v\\| = 1\\)",
+        "\\(\\|v\\| = y = 1\\)",
+        "A（ 因为 \\(g_{11} = 1/y^2\\), \\(\\|v\\|^2 = g_{11} = 1\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\((0,1)\\) 处 \\(y = 1\\)。\\(g_{11} = 1/y^2 = 1\\)。\\(\\|\\partial_x\\|^2 = g(\\partial_x, \\partial_x) = g_{11} = 1\\)。\\(\\|\\partial_x\\| = 1\\)。但在 \\((0, 1/2)\\) 处 \\(\\|\\partial_x\\| = 1/(1/2) = 2\\)——越靠近边界 \\(y = 0\\)，距离被拉伸。这是双曲度量的核心特征：边界无限远。"
+      },
+      {
+        "id": "riemannian-ch01-q5",
+        "question": "黎曼距离 \\(d(p,q)\\) 是否将 \\(M\\) 变成度量空间？",
+        "options": [
+          "是（\\(d \\geq 0\\), \\(d(p,q) = 0 \\iff p = q\\), 三角不等式, 对称性）",
+        "只是伪度量",
+        "不满足三角不等式",
+        "A（且诱导的拓扑 = 流形原有拓扑）"
+        ],
+        "answer": 3,
+        "explanation": "\\(d(p,q) = \\inf\\{L(\\gamma) : \\gamma\\) 连接 \\(p,q\\}\\)。正定性：\\(g\\) 正定 \\(\\Rightarrow L > 0\\)（\\(p \\neq q\\)）。三角：路径拼接 \\(\\Rightarrow d(p,r) \\leq d(p,q) + d(q,r)\\)。对称：反向路径等长。拓扑一致性：\\(d\\)-球 = 流形拓扑的开集。黎曼流形是\"内蕴度量空间\"——距离由内部可行路径决定。"
+      },
+      {
+        "id": "riemannian-ch01-q6",
+        "question": "\\(n\\)-球面 \\(S^n(r)\\)（半径 \\(r\\)）的体积公式？",
+        "options": [
+          "\\(\\text{Vol}(S^n(r)) = \\frac{2\\pi^{(n+1)/2}}{\\Gamma((n+1)/2)} r^n\\)",
+        "\\(4\\pi r^2\\)（仅 \\(n = 2\\)）",
+        "\\(\\frac{\\pi^{n/2}}{\\Gamma(n/2+1)} r^n\\)",
+        "A（\\(S^2(r) = 4\\pi r^2\\), \\(S^3(r) = 2\\pi^2 r^3\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{Vol}(S^n(r)) = \\frac{2\\pi^{(n+1)/2}}{\\Gamma((n+1)/2)} r^n\\)。\\(n=1\\)：\\(2\\pi r\\)（周长）。\\(n=2\\)：\\(4\\pi r^2\\)（面积）。\\(n=3\\)：\\(2\\pi^2 r^3\\)。由递推或 \\(\\Gamma\\) 函数推导。黎曼体积形式的积分。常曲率空间（球面 \\(K = 1/r^2\\)）是比较定理的参照模型。"
+      },
+      {
+        "id": "riemannian-ch01-q7",
+        "question": "等距映射 \\(f: (M, g) \\to (N, h)\\) 满足什么？",
+        "options": [
+          "\\(f^*h = g\\)（拉回度量 = 原度量）",
+        "\\(d_N(f(p), f(q)) = d_M(p,q)\\) 对所有 \\(p, q\\)",
+        "A 和 B 等价（对连通流形）",
+        "只保持距离"
+        ],
+        "answer": 2,
+        "explanation": "\\(f^*h = g\\) 意味着 \\((f^*h)(v,w) = h(f_*v, f_*w) = g(v,w)\\)（保持内积）。微分层面 \\(\\Rightarrow\\) 保持长度 \\(\\Rightarrow\\) 保持距离。反之：距离保持的映射（Myers-Steenrod 定理）自动是光滑等距。等距群 \\(\\text{Isom}(M,g)\\) 是 Lie 群。\\(\\text{Isom}(\\mathbb{R}^n) = O(n) \\ltimes \\mathbb{R}^n\\), \\(\\text{Isom}(S^n) = O(n+1)\\)。"
+      },
+      {
+        "id": "riemannian-ch01-q8",
+        "question": "黎曼度量总存在（任何光滑流形都可赋予黎曼度量）。证明思路？",
+        "options": [
+          "用单位分解将局部定义的度量拼合",
+        "嵌入 \\(\\mathbb{R}^N\\) 再限制标准度量",
+        "A 和 B 都可以",
+        "不一定存在"
+        ],
+        "answer": 2,
+        "explanation": "方法 A：取坐标覆盖 \\(\\{(U_\\alpha, \\phi_\\alpha)\\}\\)，局部度量 \\(g_\\alpha = \\delta_{ij}dx^i_\\alpha dx^j_\\alpha\\)。单位分解 \\(\\{\\rho_\\alpha\\}\\), \\(g = \\sum \\rho_\\alpha g_\\alpha\\)。正定性：\\(g(v,v) = \\sum \\rho_\\alpha g_\\alpha(v,v) \\geq 0\\)，且某项 \\(> 0\\)（\\(v \\neq 0\\)）。方法 B：Whitney 嵌入 + 诱导度量。但 Lorentz 度量不总存在——正定性是关键。"
+      },
+      {
+        "id": "riemannian-ch01-q9",
+        "question": "黎曼流形的能量泛函 \\(E(\\gamma) = \\frac{1}{2}\\int_a^b g(\\dot\\gamma, \\dot\\gamma) \\, dt\\) 的临界点是什么？",
+        "options": [
+          "测地线（常速参数化）",
+        "最短路径",
+        "A（Euler-Lagrange 方程 = 测地线方程）",
+        "直线"
+        ],
+        "answer": 2,
+        "explanation": "\\(E(\\gamma)\\) 的一阶变分：\\(\\frac{d}{ds}|_0 E(\\gamma_s) = 0\\) \\(\\forall\\) 变分 \\(V\\) \\(\\iff\\) \\(\\nabla_{\\dot\\gamma}\\dot\\gamma = 0\\)（测地线方程）。\\(E\\) 比 \\(L\\) 更好用（避免根号不可微）。Cauchy-Schwarz：\\(L^2 \\leq 2(b-a)E\\)，等号 \\(\\iff\\) 常速。最小能量曲线 = 常速最短测地线。"
+      },
+      {
+        "id": "riemannian-ch01-q10",
+        "question": "在广义相对论中，黎曼度量的推广是什么？",
+        "options": [
+          "伪黎曼度量（Lorentz 度量）：\\(g\\) 对称非退化但不正定（符号 \\((-, +, +, +)\\)）",
+        "仍然是黎曼度量",
+        "复度量",
+        "A（时空 \\((M^4, g)\\) 是 Lorentz 流形，光锥结构替代距离函数）"
+        ],
+        "answer": 3,
+        "explanation": "Lorentz 度量：\\(g\\) 对称、非退化、指标 (1,3)。\\(ds^2 = -c^2dt^2 + dx^2 + dy^2 + dz^2\\)（Minkowski 时空）。类时线 \\(g(\\dot\\gamma, \\dot\\gamma) < 0\\)（粒子世界线），类光 \\( = 0\\)（光线），类空 \\(> 0\\)。黎曼几何的全部工具（联络、曲率、测地线）推广到 Lorentz 情况——Einstein 方程 \\(R_{ij} - \\frac{1}{2}Rg_{ij} = 8\\pi T_{ij}\\)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="riemannian"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/riemannian.html" class="module-name">黎曼几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 黎曼度量的定义</a></li>
+      <li><a href="#kp2">02 · 曲线长度、距离与等距</a></li>
+      <li><a href="#kp3">03 · 体积形式与黎曼测度</a></li>
+      <li><a href="#kp4">04 · 等距群与 Killing 向量场</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>黎曼度量</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>黎曼度量的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>光滑流形上可以定义切空间、微分形式，但无法测量长度和角度—— 因为流形自身没有"距离"的概念。黎曼度量 \(g\) 为每点切空间装配 了内积，由此可以定义曲线长度、测地线、面积、体积等所有度量几何 概念。这是从拓扑到几何的关键跨越。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>黎曼度量 = 切丛上的光滑正定对称 \((0,2)\)-张量场。 它将"光滑流形"提升为"黎曼流形"——有了度量才有几何。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：黎曼度量 \(g\) 是 \(M\) 上的光滑 \((0,2)\)-张量场， 对每个 \(p \in M\)，\(g_p: T_pM \times T_pM \to \mathbb{R}\) 是 正定对称双线性形式（内积）。 坐标表示：\(g = g_{ij}(x)\, dx^i \otimes dx^j\)（Einstein 求和）。 矩阵 \((g_{ij}(x))\) 对称正定。 <strong>线元</strong>：\(ds^2 = g_{ij}\, dx^i\, dx^j\)。 <strong>存在性</strong>：任何（第二可数 Hausdorff）光滑流形都有黎曼度量 （用单位分解将局部欧式度量拼合）。 <strong>逆度量</strong>：\(g^{ij}\) 是 \((g_{ij})^{-1}\) 的分量。 升降指标：\(v^i = g^{ij} v_j\)，\(v_i = g_{ij} v^j\)。 \[g(u, v) = g_{ij} u^i v^j, \quad |v|_g = \sqrt{g(v,v)}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中时空度量 \(g_{\mu\nu}\) 是 Lorentz 签名的（不正定） - 机器学习中的信息几何：Fisher 信息矩阵是参数空间上的黎曼度量</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2\) 上球面度量。极坐标 \((\theta, \varphi)\)。 \(ds^2 = d\theta^2 + \sin^2\theta\, d\varphi^2\)。 求 \(\theta = \pi/4, \varphi = 0\) 处 \(v = \partial/\partial\varphi\) 的长度。 解答：\(|v|^2 = g_{\varphi\varphi} = \sin^2(\pi/4) = 1/2\)。 \(|v| = 1/\sqrt{2}\)。 易错点：在极坐标中 \(|\partial/\partial\varphi|\) 依赖于 \(\theta\) （赤道最长，极点为零），这反映了球面的几何。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">黎曼度量 \(g\) 的矩阵 \((g_{ij})\) 满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(g_{ij} = g_{ji}\\)（对称），且 \\(g_{ij} v^i v^j > 0\\)')">A. 正交矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(g_{ij} = g_{ji}\\)（对称），且 \\(g_{ij} v^i v^j > 0\\)')">B. 对称正定</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(g_{ij} = g_{ji}\\)（对称），且 \\(g_{ij} v^i v^j > 0\\)')">C. 反对称</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(g_{ij} = g_{ji}\\)（对称），且 \\(g_{ij} v^i v^j > 0\\)')">D. 幂等</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>曲线长度、距离与等距</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了黎曼度量，就可以测量曲线长度 \(L(\gamma) = \int |\gamma'(t)|\,dt\)， 从而定义黎曼距离 \(d(p,q) = \inf_\gamma L(\gamma)\)。这个距离使 黎曼流形成为度量空间，其拓扑与原始流形拓扑一致。等距映射保持 距离——是黎曼几何的"同构"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>黎曼度量 \(\to\) 曲线长度 \(\to\) 距离函数 \(\to\) 度量空间。 等距 = 保长度 = 保度量张量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>曲线长度</strong>：\(\gamma: [a,b] \to M\)， \[L(\gamma) = \int_a^b \sqrt{g_{\gamma(t)}(\gamma'(t), \gamma'(t))}\, dt = \int_a^b |\gamma'(t)|_g\, dt\] <strong>黎曼距离</strong>： \[d_g(p,q) = \inf\{L(\gamma) : \gamma \text{ 是从 } p \text{ 到 } q \text{ 的分段光滑曲线}\}\] \((M, d_g)\) 是度量空间，\(d_g\) 的诱导拓扑 = \(M\) 的流形拓扑。 <strong>等距 (Isometry)</strong>：\(f: (M,g) \to (N,h)\)，\(f^*h = g\)，即 \(h(df(u), df(v)) = g(u,v)\) \(\forall u, v\)。 等距 \(\Rightarrow\) 保距（\(d_h(f(p), f(q)) = d_g(p,q)\)）。 <strong>局部等距</strong>：\(f^*h = g\)，但 \(f\) 不一定全局双射 （如 \(\mathbb{R} \to S^1\) 的展开映射）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- GPS 定位利用地球表面的黎曼距离（大圆距离）计算</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(R)\)（半径 \(R\)）上从北极到赤道的经线长度。 解答：\(\gamma(\theta) = (\theta, 0)\)，\(\theta \in [0, \pi/2]\)。 \(|\gamma'| = \sqrt{g_{\theta\theta}} = R\)（度量 \(ds^2 = R^2(d\theta^2 + \sin^2\theta\,d\varphi^2)\)）。 \(L = \int_0^{\pi/2} R\,d\theta = \pi R/2\)（球半周的四分之一）。 易错点：黎曼距离 \(d(N, \text{赤道上点})\) 等于 \(\pi R / 2\)（沿经线走最短）， 但欧式距离 \(= R\)。不要混淆内在距离与外在距离。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">平坦环面 \(T^2 = \mathbb{R}^2 / \mathbb{Z}^2\)（标准平坦度量）的直径是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最远对角点距离 = \\((0,0)\\) 到 \\((1/2, 1/2)\\)，')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！最远对角点距离 = \\((0,0)\\) 到 \\((1/2, 1/2)\\)，')">B. \(\sqrt{2}/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最远对角点距离 = \\((0,0)\\) 到 \\((1/2, 1/2)\\)，')">C. \(\sqrt{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最远对角点距离 = \\((0,0)\\) 到 \\((1/2, 1/2)\\)，')">D. \(\pi\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>体积形式与黎曼测度</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>黎曼度量不仅给出长度，还给出面积和体积——通过黎曼体积形式 \(dV_g = \sqrt{\det g}\, dx^1 \wedge \cdots \wedge dx^n\)。这是 在流形上做积分的正确方式，也是定义 Laplace 算子和热方程的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>体积形式 = 度量决定的自然 \(n\)-形式（定向流形上）。 黎曼测度 = 将体积形式变为 Borel 测度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>体积形式</strong>：\((M^n, g)\) 定向黎曼流形。 \[dV_g = \sqrt{\det(g_{ij})}\, dx^1 \wedge \cdots \wedge dx^n\] 在正交标架 \(\{e_i\}\) 下：\(dV_g = e^1 \wedge \cdots \wedge e^n\) （\(e^i\) 对偶余标架）。 <strong>体积</strong>：\(\mathrm{Vol}(M) = \int_M dV_g\)。 <strong>坐标变换不变性</strong>：\(\sqrt{\det g}\) 在坐标变换下的变换律精确 补偿了 \(dx\) 的变换，确保 \(dV_g\) 内在。 <strong>Hodge 星算子</strong>：\(*: \Omega^k(M) \to \Omega^{n-k}(M)\)， \(\alpha \wedge *\beta = g(\alpha, \beta)\, dV_g\)。 \(**\omega = (-1)^{k(n-k)} \omega\)（定向黎曼流形上）。 <strong>Laplacian</strong>：\(\Delta f = \mathrm{div}(\nabla f) = *d*df\) （= Laplace-Beltrami 算子）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 热方程 \(\partial_t u = \Delta_g u\) 和波方程在黎曼流形上的推广 - 谱几何："能否听出鼓的形状？"（\(\Delta_g\) 的特征值 \(\leftrightarrow\) 几何）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(R)\)（半径 \(R\)）的面积。 解答：\(dV = R^2 \sin\theta\, d\theta \wedge d\varphi\)。 \(\mathrm{Area} = \int_0^{2\pi}\int_0^{\pi} R^2 \sin\theta\, d\theta\, d\varphi = R^2 \cdot 2\pi \cdot 2 = 4\pi R^2\)。 易错点：\(\sqrt{\det g} = R^2 \sin\theta\)（不是 \(R \sin\theta\) 或 \(\sin\theta\)）。 忘记 \(R^2\) 因子是常见错误。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hodge 星算子 \(*\) 在 \(n\) 维流形上将 \(k\)-形式映为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(*: \\Omega^k \\to \\Omega^{n-k}\\)。例如 \\(n=3\\) 时')">A. \(k\)-形式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(*: \\Omega^k \\to \\Omega^{n-k}\\)。例如 \\(n=3\\) 时')">B. \((n+k)\)-形式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(*: \\Omega^k \\to \\Omega^{n-k}\\)。例如 \\(n=3\\) 时')">C. \((n-k)\)-形式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(*: \\Omega^k \\to \\Omega^{n-k}\\)。例如 \\(n=3\\) 时')">D. \(0\)-形式</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>等距群与 Killing 向量场</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>黎曼流形的对称性由等距群 \(\mathrm{Isom}(M,g)\) 刻画——它是保持 度量的微分同胚的集合。等距群的无穷小版本是 Killing 向量场： 沿 Killing 场的流是等距变换。球面 \(S^n\) 的等距群是 \(O(n+1)\)， \(\mathbb{R}^n\) 的是欧式运动群——对称性越多几何结构越"规则"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Killing 方程 \(\mathcal{L}_X g = 0\) 将"无穷小对称"线性化。 Killing 场构成 Lie 代数，对应等距群的 Lie 代数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>等距群</strong>：\(\mathrm{Isom}(M, g) = \{\varphi: M \to M \text{ 微分同胚} : \varphi^*g = g\}\)。 它是 Lie 群（Myers-Steenrod 定理）。 <strong>Killing 向量场</strong>：\(X \in \Gamma(TM)\)，\(\mathcal{L}_X g = 0\) （\(g\) 沿 \(X\) 的 Lie 导数为零）。 <strong>Killing 方程</strong>（坐标中）： \[\nabla_i X_j + \nabla_j X_i = 0\] Killing 场的空间是 Lie 代数 \(\mathfrak{isom}(M,g)\)，\(\dim \leq n(n+1)/2\)。 等号在常曲率空间（\(\mathbb{R}^n\), \(S^n\), \(\mathbb{H}^n\)）上成立。 <strong>例</strong>：\(\mathbb{R}^n\) 的 Killing 场 = 平移 + 旋转，\(\dim = n + \binom{n}{2} = n(n+1)/2\)。 \(S^2\) 的 Killing 场：\(\dim = 3\)（\(\mathfrak{so}(3)\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中 Killing 向量场对应守恒量（Noether 定理） - 时间平移 Killing 场 → 能量守恒</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^2\) 上 \(X = -y\partial_x + x\partial_y\) 是 Killing 场吗？ 解答：\(g = dx^2 + dy^2\)（标准度量）。 \(\nabla_i X_j + \nabla_j X_i\)？平坦空间 \(\nabla = \partial\)。 \(X_1 = -y\), \(X_2 = x\)（降指标后）。 \(\partial_1 X_1 + \partial_1 X_1 = 0+0 = 0\)。 \(\partial_1 X_2 + \partial_2 X_1 = 1 + (-1) = 0\)。 \(\partial_2 X_2 + \partial_2 X_2 = 0+0 = 0\)。 所有分量为零，\(X\) 是 Killing 场。（它生成旋转。） 易错点：Killing 方程中用的是协变导数 \(\nabla_i\)（不是偏导数）， 但在平坦空间标准坐标中两者相同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(n\) 维黎曼流形最多有几个独立 Killing 向量场？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(n(n+1)/2\\)，仅在常曲率空间（最大对称空间）上达到。')">A. \(n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(n(n+1)/2\\)，仅在常曲率空间（最大对称空间）上达到。')">B. \(n^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(n(n+1)/2\\)，仅在常曲率空间（最大对称空间）上达到。')">C. \(n(n+1)/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(n(n+1)/2\\)，仅在常曲率空间（最大对称空间）上达到。')">D. \(n(n-1)/2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/geometry/riemannian.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Galois 理论初步 — 环与域论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "rings-ch05-q1",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\sqrt{2})/\\mathbb{Q})\\) 同构于什么群？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(S_2\\)",
+        "\\(\\{e\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt{2}):\\mathbb{Q}]=2\\)，\\(|\\mathrm{Gal}|=2\\)。唯一非平凡自同构 \\(\\sigma:\\sqrt{2}\\mapsto-\\sqrt{2}\\)。\\(\\mathrm{Gal}\\cong\\mathbb{Z}/2\\mathbb{Z}\\)。A 和 C 实际同构（\\(S_2\\cong\\mathbb{Z}/2\\mathbb{Z}\\)），但选 A 更标准。"
+      },
+      {
+        "id": "rings-ch05-q2",
+        "question": "Galois 扩张的充要条件是？",
+        "options": [
+          "有限扩张",
+        "有限 + 可分 + 正规",
+        "任意域扩张",
+        "单扩张"
+        ],
+        "answer": 1,
+        "explanation": "\\(L/K\\) Galois \\(\\Leftrightarrow\\) 有限 + 可分 + 正规。等价于 \\(L\\) 是某个可分多项式在 \\(K\\) 上的分裂域。\\(|\\mathrm{Gal}(L/K)|=[L:K]\\) 当且仅当扩张是 Galois 的。A 不够（不保证可分或正规）。"
+      },
+      {
+        "id": "rings-ch05-q3",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\sqrt{2},\\sqrt{3})/\\mathbb{Q})\\) 的阶是多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt{2},\\sqrt{3}):\\mathbb{Q}]=4\\)，Galois 扩张（\\(\\sqrt{2},\\sqrt{3}\\) 均可分且正规），\\(|\\mathrm{Gal}|=4\\)。\\(\\mathrm{Gal}\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)（Klein 四元群），每个自同构独立地改变 \\(\\sqrt{2},\\sqrt{3}\\) 的符号。"
+      },
+      {
+        "id": "rings-ch05-q4",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\sqrt{2},\\sqrt{3})/\\mathbb{Q})\\) 有多少个子群？",
+        "options": [
+          "\\(3\\)",
+        "\\(5\\)",
+        "\\(4\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{Gal}\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\) 有 \\(5\\) 个子群：\\(\\{e\\}\\)，\\(3\\) 个阶 \\(2\\) 子群，\\(G\\) 本身。由 Galois 基本定理，对应 \\(5\\) 个中间域：\\(L\\)，\\(\\mathbb{Q}(\\sqrt{2}),\\mathbb{Q}(\\sqrt{3}),\\mathbb{Q}(\\sqrt{6})\\)，\\(\\mathbb{Q}\\)。"
+      },
+      {
+        "id": "rings-ch05-q5",
+        "question": "一般五次方程不可根式解的根本原因是什么？",
+        "options": [
+          "没有复数解",
+        "Galois 群 \\(S_5\\) 不可解",
+        "次数太高",
+        "不存在分裂域"
+        ],
+        "answer": 1,
+        "explanation": "根式可解 \\(\\Leftrightarrow\\) Galois 群可解。\\(S_5\\) 的合成列含 \\(A_5\\)（最小非交换单群），\\(A_5\\) 不可解，故 \\(S_5\\) 不可解。五次方程在 \\(\\mathbb{C}\\) 上总有 \\(5\\) 个根（代数基本定理），但无法用根式表达。"
+      },
+      {
+        "id": "rings-ch05-q6",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_5)/\\mathbb{Q}) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(S_4\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_n)/\\mathbb{Q})\\cong(\\mathbb{Z}/n\\mathbb{Z})^\\times\\)。\\((\\mathbb{Z}/5\\mathbb{Z})^\\times\\) 阶 \\(\\varphi(5)=4\\)，且 \\(2\\) 是模 \\(5\\) 原根（\\(\\mathrm{ord}(2)=4\\)），故循环群 \\(\\mathbb{Z}/4\\mathbb{Z}\\)。易错：将 \\((\\mathbb{Z}/n\\mathbb{Z})^\\times\\)（乘法群）与 \\(\\mathbb{Z}/n\\mathbb{Z}\\)（加法群）混淆。"
+      },
+      {
+        "id": "rings-ch05-q7",
+        "question": "\\([\\mathbb{Q}(\\zeta_7):\\mathbb{Q}] = \\) ？",
+        "options": [
+          "\\(7\\)",
+        "\\(6\\)",
+        "\\(3\\)",
+        "\\(49\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{Q}(\\zeta_n):\\mathbb{Q}]=\\varphi(n)\\)。\\(\\varphi(7)=6\\)。\\(\\Phi_7(x)=x^6+x^5+\\cdots+x+1\\) 不可约（Eisenstein 代换）。\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_7)/\\mathbb{Q})\\cong(\\mathbb{Z}/7\\mathbb{Z})^\\times\\cong\\mathbb{Z}/6\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "rings-ch05-q8",
+        "question": "\\(\\mathbb{Q}(\\sqrt[3]{2})/\\mathbb{Q}\\) 是 Galois 扩张吗？",
+        "options": [
+          "是",
+        "不是，不正规",
+        "不是，不可分",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Q}(\\sqrt[3]{2})\\subset\\mathbb{R}\\)，只含 \\(x^3-2\\) 的实数根 \\(\\sqrt[3]{2}\\)，不含复数根 \\(\\omega\\sqrt[3]{2},\\omega^2\\sqrt[3]{2}\\)。\\(x^3-2\\) 未在 \\(\\mathbb{Q}(\\sqrt[3]{2})\\) 中完全分裂，故非正规。可分无问题（\\(\\mathrm{char}=0\\)）。"
+      },
+      {
+        "id": "rings-ch05-q9",
+        "question": "Galois 基本定理中，\\(H\\trianglelefteq G\\) 对应的中间域 \\(M=L^H\\) 满足什么？",
+        "options": [
+          "\\(M/K\\) 不是 Galois 扩张",
+        "\\(M/K\\) 是 Galois 扩张，\\(\\mathrm{Gal}(M/K)\\cong G/H\\)",
+        "\\(M=K\\)",
+        "\\(M=L\\)"
+        ],
+        "answer": 1,
+        "explanation": "正规子群 \\(\\Leftrightarrow\\) 对应中间域给出正规扩张。\\(H\\trianglelefteq G\\) \\(\\Rightarrow\\) \\(M/K\\) 是 Galois 的，且 \\(\\mathrm{Gal}(M/K)\\cong G/H\\)。这是 Galois 基本定理的核心：将域的正规扩张翻译为群的正规子群。"
+      },
+      {
+        "id": "rings-ch05-q10",
+        "question": "\\(A_5\\) 的阶是多少？它是单群吗？",
+        "options": [
+          "\\(|A_5|=60\\)，是单群",
+        "\\(|A_5|=120\\)，不是单群",
+        "\\(|A_5|=60\\)，不是单群",
+        "\\(|A_5|=24\\)，是单群"
+        ],
+        "answer": 0,
+        "explanation": "\\(|A_5|=5!/2=60\\)。\\(A_5\\) 是最小的非交换单群（无非平凡正规子群）。\\(A_5\\) 单 \\(\\Rightarrow\\) \\(S_5\\) 不可解 \\(\\Rightarrow\\) 一般五次方程不可根式解。\\(A_n\\)（\\(n\\geq5\\)）均为单群。"
+      },
+      {
+        "id": "rings-ch05-q11",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_{12})/\\mathbb{Q}) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/12\\mathbb{Z}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{Gal}\\cong(\\mathbb{Z}/12\\mathbb{Z})^\\times\\)。\\(\\varphi(12)=4\\)。\\((\\mathbb{Z}/12\\mathbb{Z})^\\times=\\{\\bar{1},\\bar{5},\\bar{7},\\bar{11}\\}\\)。\\(\\bar{5}^2=\\bar{25}=\\bar{1}\\)，\\(\\bar{7}^2=\\bar{49}=\\bar{1}\\)，每个非单位元阶 \\(2\\)。故 \\(\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)，非循环群。"
+      },
+      {
+        "id": "rings-ch05-q12",
+        "question": "\\(|\\mathrm{Gal}(\\mathbb{Q}(\\sqrt{2},\\sqrt{3},\\sqrt{5})/\\mathbb{Q})| = \\) ？",
+        "options": [
+          "\\(6\\)",
+        "\\(8\\)",
+        "\\(4\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt{2},\\sqrt{3},\\sqrt{5}):\\mathbb{Q}]=8\\)（\\(2\\times2\\times2\\)，每一步均为 \\(2\\) 次扩张）。Galois 扩张，\\(|\\mathrm{Gal}|=8\\)。\\(\\mathrm{Gal}\\cong(\\mathbb{Z}/2\\mathbb{Z})^3\\)。每个自同构独立改变 \\(\\sqrt{2},\\sqrt{3},\\sqrt{5}\\) 的符号。"
+      },
+      {
+        "id": "rings-ch05-q13",
+        "question": "\\(\\mathbb{Q}(\\sqrt{2},\\sqrt{3})/\\mathbb{Q}\\) 的所有中间域有多少个？",
+        "options": [
+          "\\(3\\)",
+        "\\(5\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{Gal}\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)，子群个数 \\(=5\\)。反序对应 \\(5\\) 个中间域：\\(L,\\mathbb{Q}(\\sqrt{2}),\\mathbb{Q}(\\sqrt{3}),\\mathbb{Q}(\\sqrt{6}),\\mathbb{Q}\\)。易错：遗漏 \\(\\mathbb{Q}(\\sqrt{6})\\)——它对应的子群由 \\(\\sigma:\\sqrt{2}\\mapsto-\\sqrt{2},\\sqrt{3}\\mapsto-\\sqrt{3}\\) 生成。"
+      },
+      {
+        "id": "rings-ch05-q14",
+        "question": "\\(x^4-2\\) 的 Galois 群同构于什么？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(D_4\\)（\\(8\\) 阶二面体群）",
+        "\\(S_4\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 1,
+        "explanation": "分裂域 \\(\\mathbb{Q}(\\sqrt[4]{2},i)\\)，\\([L:\\mathbb{Q}]=8\\)，\\(|\\mathrm{Gal}|=8\\)。\\(\\mathrm{Gal}\\) 嵌入 \\(S_4\\)，阶 \\(8\\) 的 \\(S_4\\) 的子群 \\(\\cong D_4\\)。\\(D_4\\) 可解（合成列 \\(D_4\\supset\\mathbb{Z}/4\\supset\\mathbb{Z}/2\\supset\\{e\\}\\)），故 \\(x^4-2\\) 可根式解。"
+      },
+      {
+        "id": "rings-ch05-q15",
+        "question": "正 \\(7\\) 边形可尺规作图吗？",
+        "options": [
+          "可以，\\(7\\) 是 Fermat 素数",
+        "不可以",
+        "取决于尺规精度",
+        "可以，\\(7\\) 是素数"
+        ],
+        "answer": 1,
+        "explanation": "正 \\(n\\) 边形可尺规作图 \\(\\Leftrightarrow\\) \\(n=2^a p_1\\cdots p_k\\)（\\(p_i\\) 两两不同 Fermat 素数）。Fermat 素数形为 \\(2^{2^m}+1\\)：\\(3,5,17,257,65537\\)。\\(7\\) 不是 Fermat 素数（\\(7\\neq2^{2^m}+1\\)），故正 \\(7\\) 边形不可尺规作图。"
+      },
+      {
+        "id": "rings-ch05-q16",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{C}/\\mathbb{R}) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\{e\\}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(S_\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{C}:\\mathbb{R}]=2\\)，Galois 扩张。唯一非平凡自同构是复共轭 \\(\\sigma(z)=\\bar{z}\\)。\\(\\mathrm{Gal}(\\mathbb{C}/\\mathbb{R})=\\{\\mathrm{id},\\sigma\\}\\cong\\mathbb{Z}/2\\mathbb{Z}\\)。\\(\\mathbb{C}=\\mathbb{R}(i)\\)，\\(\\sigma(i)=-i\\)。"
+      },
+      {
+        "id": "rings-ch05-q17",
+        "question": "\\(S_4\\) 可解吗？",
+        "options": [
+          "可解",
+        "不可解",
+        "取决于表示方法",
+        "仅 \\(A_4\\) 可解"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_4\\) 合成列：\\(S_4\\supset A_4\\supset V_4\\supset\\mathbb{Z}/2\\mathbb{Z}\\supset\\{e\\}\\)。商群：\\(S_4/A_4\\cong\\mathbb{Z}/2\\)，\\(A_4/V_4\\cong\\mathbb{Z}/3\\)，\\(V_4/(\\mathbb{Z}/2)\\cong\\mathbb{Z}/2\\)，\\(\\mathbb{Z}/2/\\{e\\}\\cong\\mathbb{Z}/2\\)。均交换 \\(\\Rightarrow\\) \\(S_4\\) 可解。故一般四次方程可根式解。"
+      },
+      {
+        "id": "rings-ch05-q18",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\sqrt[4]{2},i)/\\mathbb{Q}(\\sqrt{2}))\\) 同构于什么？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(D_4\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt[4]{2},i):\\mathbb{Q}(\\sqrt{2})]=4\\)。\\(\\mathbb{Q}(\\sqrt{2})\\) 上有 \\(\\sqrt[4]{2}\\mapsto\\pm\\sqrt[4]{2}\\) 和 \\(i\\mapsto\\pm i\\) 两个独立的阶 \\(2\\) 自同构。Galois 群为 \\(\\mathbb{Z}/2\\times\\mathbb{Z}/2\\)。由 Galois 基本定理，\\(\\mathrm{Gal}(L/\\mathbb{Q}(\\sqrt{2}))\\) 对应 \\(D_4\\) 中固定 \\(\\sqrt{2}\\) 的子群。"
+      },
+      {
+        "id": "rings-ch05-q19",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\sqrt{2},\\sqrt{3})/\\mathbb{Q}(\\sqrt{6}))\\) 的阶是？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{Q}(\\sqrt{2},\\sqrt{3}):\\mathbb{Q}(\\sqrt{6})]=2\\)（\\(\\sqrt{2}\\notin\\mathbb{Q}(\\sqrt{6})\\) 但 \\(\\sqrt{2}\\cdot\\sqrt{3}=\\sqrt{6}\\in\\mathbb{Q}(\\sqrt{6})\\)）。对应 \\(\\mathrm{Gal}\\) 中固定 \\(\\sqrt{6}\\) 的子群 \\(H=\\langle\\sigma\\rangle\\)，\\(\\sigma:\\sqrt{2}\\mapsto-\\sqrt{2},\\sqrt{3}\\mapsto-\\sqrt{3}\\)，\\(|H|=2\\)。"
+      },
+      {
+        "id": "rings-ch05-q20",
+        "question": "\\(x^5-4x+2\\in\\mathbb{Q}[x]\\) 的 Galois 群 \\(\\cong\\) ？（提示：恰有 \\(2\\) 个复根，\\(3\\) 个实根）",
+        "options": [
+          "\\(\\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(D_5\\)",
+        "\\(A_5\\)",
+        "\\(S_5\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(f\\) 不可约（Eisenstein \\(p=2\\)），\\(\\mathrm{Gal}\\) 是 \\(S_5\\) 的传递子群（\\(5\\) 素数，故包含 \\(5\\)-轮换）。恰有 \\(2\\) 个复根 \\(\\Rightarrow\\) 复共轭给出一个对换（\\(2\\)-轮换）。\\(5\\)-轮换 + \\(2\\)-轮换生成 \\(S_5\\)。故 \\(\\mathrm{Gal}\\cong S_5\\)，不可解、不可根式解。"
+      },
+      {
+        "id": "rings-ch05-q21",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_{15})/\\mathbb{Q}) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/8\\mathbb{Z}\\)",
+        "\\((\\mathbb{Z}/3\\mathbb{Z})^\\times\\times(\\mathbb{Z}/5\\mathbb{Z})^\\times\\)",
+        "\\(\\mathbb{Z}/15\\mathbb{Z}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\((\\mathbb{Z}/15\\mathbb{Z})^\\times\\cong(\\mathbb{Z}/3\\mathbb{Z})^\\times\\times(\\mathbb{Z}/5\\mathbb{Z})^\\times\\cong\\mathbb{Z}/2\\mathbb{Z}\\times\\mathbb{Z}/4\\mathbb{Z}\\)。A 和 C 实际同构！\\(\\varphi(15)=8\\)。C 更显式地写出了分解来源，A 是同构的群。两者均正确，但 C 更具体。选 C（题目表述与此匹配）。"
+      },
+      {
+        "id": "rings-ch05-q22",
+        "question": "\\(L=\\mathbb{Q}(\\sqrt{2},\\sqrt{3})\\)，\\(\\sigma:\\sqrt{2}\\mapsto-\\sqrt{2},\\sqrt{3}\\mapsto\\sqrt{3}\\)。\\(L^{\\langle\\sigma\\rangle} = \\) ？",
+        "options": [
+          "\\(\\mathbb{Q}(\\sqrt{3})\\)",
+        "\\(\\mathbb{Q}(\\sqrt{2})\\)",
+        "\\(\\mathbb{Q}(\\sqrt{6})\\)",
+        "\\(\\mathbb{Q}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma\\) 固定 \\(\\sqrt{3}\\) 且反转 \\(\\sqrt{2}\\)。\\(\\sigma(a+b\\sqrt{2}+c\\sqrt{3}+d\\sqrt{6})=a-b\\sqrt{2}+c\\sqrt{3}-d\\sqrt{6}\\)。固定条件：\\(b=d=0\\)，即 \\(a+c\\sqrt{3}\\in\\mathbb{Q}(\\sqrt{3})\\)。较大子群 \\(\\leftrightarrow\\) 较小不动域（反序对应）。"
+      },
+      {
+        "id": "rings-ch05-q23",
+        "question": "\\(|\\mathrm{Gal}(\\mathbb{F}_{p^{12}}/\\mathbb{F}_{p^3})| = \\) ？",
+        "options": [
+          "\\(4\\)",
+        "\\(3\\)",
+        "\\(12\\)",
+        "\\(9\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{F}_{p^{12}}:\\mathbb{F}_{p^3}]=12/3=4\\)。有限域扩张总是 Galois 的（可分 + 正规）。\\(\\mathrm{Gal}(\\mathbb{F}_{p^{12}}/\\mathbb{F}_{p^3})=\\langle\\phi^3\\rangle\\)，\\(\\phi\\) 是 Frobenius \\(x\\mapsto x^p\\)，\\(|\\mathrm{Gal}|=4\\)。\\(\\mathrm{Gal}\\cong\\mathbb{Z}/4\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "rings-ch05-q24",
+        "question": "群 \\(G\\) 可解的充要条件是什么？",
+        "options": [
+          "\\(G\\) 有合成列使得所有商群为交换群",
+        "\\(G\\) 是交换群",
+        "\\(|G|\\) 是素数",
+        "\\(G\\) 有正规子群"
+        ],
+        "answer": 0,
+        "explanation": "\\(G\\) 可解 \\(\\Leftrightarrow\\) 存在子群链 \\(G=G_0\\supset G_1\\supset\\cdots\\supset G_n=\\{e\\}\\)，\\(G_i\\trianglelefteq G_{i-1}\\)，\\(G_{i-1}/G_i\\) 为交换群。B 是特殊情况。C 是特殊情况。D 太弱（\\(S_5\\) 有正规子群 \\(A_5\\) 但不可解）。"
+      },
+      {
+        "id": "rings-ch05-q25",
+        "question": "\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_8)/\\mathbb{Q})\\) 中有多少个中间域？",
+        "options": [
+          "\\(3\\)",
+        "\\(5\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{Gal}\\cong(\\mathbb{Z}/8\\mathbb{Z})^\\times=\\{\\bar{1},\\bar{3},\\bar{5},\\bar{7}\\}\\cong\\mathbb{Z}/2\\times\\mathbb{Z}/2\\)。\\(5\\) 个子群 \\(\\Leftrightarrow\\) \\(5\\) 个中间域。中间域：\\(\\mathbb{Q}(\\zeta_8),\\mathbb{Q}(i),\\mathbb{Q}(\\sqrt{2}),\\mathbb{Q}(\\sqrt{-2}),\\mathbb{Q}\\)。"
+      },
+      {
+        "id": "rings-ch05-q26",
+        "question": "正 \\(17\\) 边形可尺规作图（Gauss 首先证明）。这是因为 \\(17\\) 是什么？",
+        "options": [
+          "Fermat 素数 \\(2^{2^2}+1=17\\)",
+        "素数",
+        "奇数",
+        "Mersenne 素数"
+        ],
+        "answer": 0,
+        "explanation": "正 \\(n\\) 边形可尺规作图 \\(\\Leftrightarrow\\) \\(n=2^a p_1\\cdots p_k\\)（\\(p_i\\) 两两不同 Fermat 素数）。\\(17=2^{2^2}+1\\) 是 Fermat 素数。\\(\\mathrm{Gal}(\\mathbb{Q}(\\zeta_{17})/\\mathbb{Q})\\cong\\mathbb{Z}/16\\mathbb{Z}\\)（\\(2\\) 的幂阶循环群），可通过一系列二次扩张实现。"
+      },
+      {
+        "id": "rings-ch05-q27",
+        "question": "Abel-Ruffini 定理的实际意义：给定一般五次方程 \\(x^5+ax^4+bx^3+cx^2+dx+e=0\\)，以下哪个正确？",
+        "options": [
+          "方程无解",
+        "解存在但无法用加减乘除和根号表示",
+        "只能用数值方法近似",
+        "解可用六次根号表示"
+        ],
+        "answer": 1,
+        "explanation": "代数基本定理保证 \\(5\\) 个复数根存在。Abel-Ruffini 说无法用根式（\\(+,-,\\times,\\div,\\sqrt[n]{\\cdot}\\)）表示**一般**解。特定五次方程可能可根式解（如 \\(x^5-1\\)），但不存在通用公式。数值方法（Newton 法等）可给出任意精度近似。"
+      },
+      {
+        "id": "rings-ch05-q28",
+        "question": "密码协议中利用 Galois 群的结构。\\(\\mathbb{F}_{p^n}/\\mathbb{F}_p\\) 的 Galois 群是循环群，生成元为 Frobenius \\(\\phi(x)=x^p\\)。\\(\\mathbb{F}_{2^4}\\) 上 \\(|\\mathrm{Gal}(\\mathbb{F}_{2^4}/\\mathbb{F}_2)| = \\) ？",
+        "options": [
+          "\\(4\\)",
+        "\\(2\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([\\mathbb{F}_{2^4}:\\mathbb{F}_2]=4\\)，\\(|\\mathrm{Gal}|=4\\)。\\(\\mathrm{Gal}=\\langle\\phi\\rangle=\\{\\mathrm{id},\\phi,\\phi^2,\\phi^3\\}\\)，\\(\\phi(x)=x^2\\)，\\(\\phi^2(x)=x^4\\)，\\(\\phi^3(x)=x^8\\)。\\(\\phi^4(x)=x^{16}=x\\)（\\(\\mathbb{F}_{16}\\) 中 \\(x^{16}=x\\)）。Frobenius 在有限域密码学中的角色类似于复共轭。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="rings"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/rings.html" class="module-name">环与域论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Galois 扩张与 Galois 群</a></li>
+      <li><a href="#kp2">02 · Galois 基本定理</a></li>
+      <li><a href="#kp3">03 · 五次方程不可解性</a></li>
+      <li><a href="#kp4">04 · Galois 理论的计算实例</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Galois 理论初步</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Galois 扩张与 Galois 群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Galois 的天才洞察: 方程的可解性不取决于方程本身，而取决于其根的 「对称性」——即 Galois 群。\(\mathrm{Gal}(L/K)\) 是 \(L\) 中保持 \(K\) 不变的 自同构组成的群，它将域扩张的结构编码为群的结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Galois 理论是「对称性决定结构」思想的典范: 域扩张的性质完全由其对称群决定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Galois 群</strong>: \(\mathrm{Gal}(L/K) = \{\sigma \in \mathrm{Aut}(L) : \sigma|_K = \mathrm{id}\}\)。 元素是 \(L\) 的自同构，固定 \(K\) 的每个元素。 <strong>Galois 扩张</strong>: \(L/K\) 满足 1) \(L/K\) 有限 2) \(L/K\) 可分 3) \(L/K\) 正规（\(\forall \sigma \in \mathrm{Aut}(\bar{K}/K)\)，\(\sigma(L) = L\)） 等价: \(L\) 是某个可分多项式的分裂域。 <strong>关键等式</strong>: \[|\mathrm{Gal}(L/K)| = [L:K]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathrm{Gal}(\mathbb{Q}(\sqrt{2})/\mathbb{Q})\)。 解答: \([\mathbb{Q}(\sqrt{2}):\mathbb{Q}] = 2\)，故 \(|\mathrm{Gal}| = 2\)。 \(\sigma: \sqrt{2} \mapsto -\sqrt{2}\)（唯一非平凡自同构）。 \(\mathrm{Gal} \cong \mathbb{Z}/2\mathbb{Z}\)。 易错点: 以为 \(\mathrm{Gal}(\mathbb{Q}(\sqrt[3]{2})/\mathbb{Q}) \cong \mathbb{Z}/3\mathbb{Z}\)。 \(\mathbb{Q}(\sqrt[3]{2}) \subset \mathbb{R}\)，自同构保持序，故只有恒等。 \(\mathbb{Q}(\sqrt[3]{2})/\mathbb{Q}\) 不是 Galois 扩张（不正规）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Galois 扩张的充要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Galois 扩张 = 有限 + 可分 + 正规。')">A. 有限扩张</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Galois 扩张 = 有限 + 可分 + 正规。')">B. 有限 + 可分 + 正规</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Galois 扩张 = 有限 + 可分 + 正规。')">C. 任意域扩张</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Galois 扩张 = 有限 + 可分 + 正规。')">D. 单扩张</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Galois 基本定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Galois 基本定理是数学中最美丽的对应之一: 它建立了中间域和子群之间 的一一对应，将域扩张问题完全转化为群论问题。 这是「用对称性理解结构」的极致体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>中间域格 \(\longleftrightarrow\) 子群格，反序对应。 这是 Galois 理论的核心思想。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Galois 基本定理</strong>: 设 \(L/K\) 是 Galois 扩张，\(G = \mathrm{Gal}(L/K)\)。 则存在反序双射: \[\{K \subseteq M \subseteq L\} \longleftrightarrow \{H \leq G\}\] \(M \mapsto H = \mathrm{Gal}(L/M)\)，\(H \mapsto M = L^H = \{\alpha : \sigma(\alpha) = \alpha, \forall \sigma \in H\}\)。 <strong>细节</strong>: \([M:K] = [G:H]\)，\([L:M] = |H|\)。 \(M/K\) 正规 \(\Leftrightarrow\) \(H \trianglelefteq G\)，此时 \(\mathrm{Gal}(M/K) \cong G/H\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(L = \mathbb{Q}(\sqrt{2}, \sqrt{3})\)，求所有中间域。 解答: \(G = \mathrm{Gal}(L/\mathbb{Q}) \cong \mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)。 \(|G| = 4\)。子群: \(\{e\}\)，3 个阶 2 子群，\(G\)。 对应中间域: \(L\)，\(\mathbb{Q}(\sqrt{2}), \mathbb{Q}(\sqrt{3}), \mathbb{Q}(\sqrt{6})\)，\(\mathbb{Q}\)。 易错点: 忘记对应是<strong>反序</strong>的。 较大的子群对应较小的域。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(H \trianglelefteq G\)，则对应的中间域 \(M = L^H\) 满足？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正规子群 \\(\\Leftrightarrow\\) 正规扩张，\\(\\mathrm{Gal}(M/K) \\cong G/H\\)。')">A. \(M/K\) 不是 Galois 扩张</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！正规子群 \\(\\Leftrightarrow\\) 正规扩张，\\(\\mathrm{Gal}(M/K) \\cong G/H\\)。')">B. \(M/K\) 是 Galois 扩张，\(\mathrm{Gal}(M/K) \cong G/H\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正规子群 \\(\\Leftrightarrow\\) 正规扩张，\\(\\mathrm{Gal}(M/K) \\cong G/H\\)。')">C. \(M = K\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正规子群 \\(\\Leftrightarrow\\) 正规扩张，\\(\\mathrm{Gal}(M/K) \\cong G/H\\)。')">D. \(M = L\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>五次方程不可解性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>二、三、四次方程都有根式解，但 Abel 和 Galois 证明了一般五次方程 无法用根式解。这是 Galois 理论最著名的应用: 将根式可解性 翻译为群的可解性，而 \(S_5\) 不可解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>「根式可解」\(\Leftrightarrow\) Galois 群可解。 \(S_n\)（\(n \geq 5\)）不可解（因 \(A_n\) 单纯）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>根式可解</strong>: 方程的解可用 \(+, -, \times, \div, \sqrt[n]{\cdot}\) 表示。 等价: 分裂域可通过一系列循环扩张到达。 等价: Galois 群可解（存在合成列使商群均为循环群）。 <strong>\(A_5\) 单纯</strong>: \(A_5\) 是最小的非交换单纯群（\(|A_5| = 60\)）。 \(S_5\) 的合成列: \(S_5 \supset A_5 \supset \{e\}\)，\(A_5/\{e\} = A_5\) 不交换。 \[S_5 \text{ 不可解} \Rightarrow \text{一般五次方程不可根式解}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>具体多项式 \(x^5 - 4x + 2\) 的 Galois 群为 \(S_5\)，不可解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(x^4 - 2\) 的 Galois 群是什么？可根式解吗？ 解答: Galois 群 \(\cong D_4\)（二面体群，阶 8）。 \(D_4\) 可解（合成列 \(D_4 \supset \mathbb{Z}/4 \supset \mathbb{Z}/2 \supset \{e\}\)）。 故可根式解，解为 \(\sqrt[4]{2}, i\sqrt[4]{2}\) 等。 易错点: 以为「五次方程无解」。 是无<strong>根式</strong>解，不是无解。五次方程在 \(\mathbb{C}\) 上总有 5 个根。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">一般五次方程不可根式解因为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。关键是 \\(S_5\\)（也即 \\(A_5\\)）的不可解性。')">A. 没有复数解</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！关键是 \\(S_5\\)（也即 \\(A_5\\)）的不可解性。')">B. Galois 群 \(S_5\) 不可解</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。关键是 \\(S_5\\)（也即 \\(A_5\\)）的不可解性。')">C. 次数太高</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。关键是 \\(S_5\\)（也即 \\(A_5\\)）的不可解性。')">D. 不存在分裂域</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Galois 理论的计算实例</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>推导定理后还要会算。对具体多项式计算 Galois 群、找中间域、判断可解性是 代数考试和研究中的核心技能。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>计算策略</strong>: 1) 确定分裂域 \(L\) 和 \([L:K]\) 2) 找所有 \(K\)-自同构（通过根的置换） 3) 验证 \(|\mathrm{Gal}| = [L:K]\) 4) 识别群结构 <strong>二次扩张 \(K(\sqrt{a})\)</strong>: \(\mathrm{Gal} \cong \mathbb{Z}/2\mathbb{Z}\)， \(\sigma(\sqrt{a}) = -\sqrt{a}\)。 <strong>分圆域</strong>: \(\Phi_n(x)\) 的分裂域 \(\mathbb{Q}(\zeta_n)\)， \(\mathrm{Gal}(\mathbb{Q}(\zeta_n)/\mathbb{Q}) \cong (\mathbb{Z}/n\mathbb{Z})^\times\)。 \[\mathrm{Gal}(\mathbb{Q}(\zeta_n)/\mathbb{Q}) \cong (\mathbb{Z}/n\mathbb{Z})^\times\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>正 \(n\) 边形可尺规作图 \(\Leftrightarrow\) \(n = 2^a p_1 \cdots p_k\)（\(p_i\) 两两不同的费马素数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \(\mathrm{Gal}(\mathbb{Q}(\zeta_7)/\mathbb{Q})\)。 解答: \([\mathbb{Q}(\zeta_7):\mathbb{Q}] = \varphi(7) = 6\)。 \(\mathrm{Gal} \cong (\mathbb{Z}/7\mathbb{Z})^\times \cong \mathbb{Z}/6\mathbb{Z}\)（循环群）。 生成元 \(\sigma: \zeta_7 \mapsto \zeta_7^3\)（\(3\) 是模 7 的原根）。 易错点: 将 \(\mathrm{Gal}(\mathbb{Q}(\zeta_n)/\mathbb{Q})\) 与 \(\mathbb{Z}/n\mathbb{Z}\) 混淆。 应是 \((\mathbb{Z}/n\mathbb{Z})^\times\)（乘法群），不是 \(\mathbb{Z}/n\mathbb{Z}\)（加法群）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{Gal}(\mathbb{Q}(\zeta_5)/\mathbb{Q}) \cong\) ?</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\((\\mathbb{Z}/5\\mathbb{Z})^\\times \\cong \\mathbb{Z}/4\\mathbb{Z}\\)（\\(\\varphi(5)=4\\)，循环）。')">A. \(\mathbb{Z}/5\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\((\\mathbb{Z}/5\\mathbb{Z})^\\times \\cong \\mathbb{Z}/4\\mathbb{Z}\\)（\\(\\varphi(5)=4\\)，循环）。')">B. \(\mathbb{Z}/4\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\((\\mathbb{Z}/5\\mathbb{Z})^\\times \\cong \\mathbb{Z}/4\\mathbb{Z}\\)（\\(\\varphi(5)=4\\)，循环）。')">C. \(S_4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\((\\mathbb{Z}/5\\mathbb{Z})^\\times \\cong \\mathbb{Z}/4\\mathbb{Z}\\)（\\(\\varphi(5)=4\\)，循环）。')">D. \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/algebra/rings.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 双线性形式与二次型 — 线代进阶 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-adv-ch04-q1",
+        "question": "\\(B(u,v)=u^TAv\\)，\\(A=\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}\\)。\\(B(e_1,e_2)=?\\)",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(5\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(B(e_i,e_j)=a_{ij}\\)。\\(B(e_1,e_2)=a_{12}=2\\)。矩阵 \\(A\\) 的第 \\((i,j)\\) 元素就是 \\(B\\) 在基向量上的值。注意 \\(B(e_2,e_1)=a_{21}=3\\neq2\\)，因为 \\(A\\neq A^T\\)，该双线性形式不对称。"
+      },
+      {
+        "id": "linear-adv-ch04-q2",
+        "question": "\\(A=\\begin{pmatrix}0&1\\\\-1&0\\end{pmatrix}\\) 定义的双线性形式 \\(B(u,v)=u^TAv\\) 是什么类型？",
+        "options": [
+          "反对称且非退化",
+        "对称且正定",
+        "反对称且退化",
+        "对称且非退化"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^T=\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}=-A\\)→反对称。\\(\\det A=0-(-1)=1\\neq0\\)→非退化。这是 \\(\\mathbb{R}^2\\) 上的标准辛形式: \\(B(u,v)=u_1 v_2-u_2 v_1\\)（有向面积）。"
+      },
+      {
+        "id": "linear-adv-ch04-q3",
+        "question": "\\(Q(x,y)=x^2+2xy+y^2\\)。秩和符号 \\((p,q)\\) 为？",
+        "options": [
+          "秩 \\(1\\)，符号 \\((1,0)\\)",
+        "秩 \\(2\\)，符号 \\((2,0)\\)",
+        "秩 \\(2\\)，符号 \\((1,1)\\)",
+        "秩 \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q=(x+y)^2\\)，标准形只有一个平方项。秩=1，符号 \\((1,0)\\)→半正定。矩阵 \\(A=\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}\\)，\\(\\det=0\\)，\\(\\mathrm{rank}=1\\) ✓。易错: 看到两个变量就以为秩=2。\\(Q\\) 退化因为 \\(Q(1,-1)=0\\) 对非零向量成立。"
+      },
+      {
+        "id": "linear-adv-ch04-q4",
+        "question": "\\(Q(x,y)=x^2-y^2\\)。已经是标准形。符号为？",
+        "options": [
+          "\\((1,1)\\)（不定）",
+        "\\((2,0)\\)（正定）",
+        "\\((0,2)\\)（负定）",
+        "\\((1,0)\\)（半正定）"
+        ],
+        "answer": 0,
+        "explanation": "一个正系数 (\\(x^2\\))，一个负系数 (\\(-y^2\\))。\\(p=1,q=1\\)→不定。\\(Q(1,0)=1>0\\) 而 \\(Q(0,1)=-1<0\\)，确认不定性。几何: 此二次型的零集 \\(x^2=y^2\\) 是两条直线 \\(y=\\pm x\\)。"
+      },
+      {
+        "id": "linear-adv-ch04-q5",
+        "question": "\\(A=\\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}\\)。用顺序主子式判断正定性。",
+        "options": [
+          "正定: \\(\\Delta_1=2>0\\)，\\(\\Delta_2=5>0\\)",
+        "不定",
+        "半正定",
+        "负定"
+        ],
+        "answer": 0,
+        "explanation": "顺序主子式: \\(\\Delta_1=a_{11}=2>0\\)，\\(\\Delta_2=\\det A=6-1=5>0\\)。所有顺序主子式为正→\\(A\\) 正定。特征值: \\(\\lambda=(5\\pm\\sqrt{5})/2\\)，均为正 ✓。\\(Q(x,y)=2x^2+2xy+3y^2>0\\) 对所有 \\((x,y)\\neq(0,0)\\)。"
+      },
+      {
+        "id": "linear-adv-ch04-q6",
+        "question": "符号 \\((p,q)=(2,1)\\) 的实二次型是？",
+        "options": [
+          "不定",
+        "正定",
+        "半正定",
+        "负定"
+        ],
+        "answer": 0,
+        "explanation": "\\(p=2>0\\)（有正项）且 \\(q=1>0\\)（有负项）→既有正值也有负值→不定。正定要求 \\(q=0\\)；负定要求 \\(p=0\\)；半正定要求 \\(q=0\\)（但也 \\(p\\) 可以\\(<n\\)）。\\((2,1)\\) 的标准形为 \\(u^2+v^2-w^2\\)。"
+      },
+      {
+        "id": "linear-adv-ch04-q7",
+        "question": "\\(v_1=(1,0)\\)，\\(v_2=(1,1)\\)。Gram-Schmidt 正交化后 \\(u_2=?\\)",
+        "options": [
+          "\\((0,1)\\)",
+        "\\((1,1)\\)",
+        "\\((1,-1)\\)",
+        "\\((1/2,1/2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_1=v_1=(1,0)\\)。\\(\\langle v_2,u_1\\rangle=1\\)，\\(\\langle u_1,u_1\\rangle=1\\)。\\(u_2=v_2-\\frac{1}{1}u_1=(1,1)-(1,0)=(0,1)\\)。验证: \\(\\langle u_1,u_2\\rangle=0\\) ✓。这恰好是标准基，因 \\(v_1,v_2\\) 已是上三角形式。"
+      },
+      {
+        "id": "linear-adv-ch04-q8",
+        "question": "\\(B(u,v)=u_1 v_2-u_2 v_1\\)（\\(\\mathbb{R}^2\\)）。\\(B\\) 非退化的含义: \\(\\ker(B)=?\\)",
+        "options": [
+          "\\(\\ker(B)=\\{0\\}\\)，等价于 \\(A\\) 可逆",
+        "\\(\\ker(B)=\\mathbb{R}^2\\)",
+        "\\(\\ker(B)\\) 是一维子空间",
+        "没有核的概念"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ker(B)=\\{v:B(v,w)=0\\;\\forall w\\}\\)。矩阵 \\(A=\\begin{pmatrix}0&1\\\\-1&0\\end{pmatrix}\\)，\\(\\det=1\\neq0\\)→\\(A\\) 可逆→\\(\\ker(B)=\\{0\\}\\)→非退化。非退化意味着没有\"不可见\"方向: 每个非零向量 \\(v\\) 都可以被某个 \\(w\\) 通过 \\(B\\) 检测到。"
+      },
+      {
+        "id": "linear-adv-ch04-q9",
+        "question": "\"对称双线性形式\"等同于\"内积\"吗？",
+        "options": [
+          "不等同：内积还需正定性",
+        "等同：两者定义相同",
+        "对称双线性形式更强",
+        "内积不需要对称性"
+        ],
+        "answer": 0,
+        "explanation": "对称双线性形式只要求 \\(B(u,v)=B(v,u)\\) 和双线性。内积额外要求正定性: \\(B(v,v)>0\\) 对所有 \\(v\\neq0\\)。例如 \\(B(u,v)=u_1 v_1-u_2 v_2\\) 是对称双线性形式但不是内积（\\(B(e_2,e_2)=-1<0\\)）。易错: 将这两个概念混为一谈，尤其在不定度量（如闵可夫斯基空间）中。"
+      },
+      {
+        "id": "linear-adv-ch04-q10",
+        "question": "\\(Q(x,y)=x^2+4xy+3y^2\\)。化为标准形。",
+        "options": [
+          "\\((x+2y)^2-y^2\\)，符号 \\((1,1)\\)",
+        "\\((x+2y)^2+3y^2\\)，符号 \\((2,0)\\)",
+        "\\(x^2+3y^2\\)，符号 \\((2,0)\\)",
+        "\\((x+4y)^2-13y^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "配方: \\(Q=x^2+4xy+3y^2=(x^2+4xy+4y^2)-y^2=(x+2y)^2-y^2\\)。令 \\(u=x+2y\\)，\\(v=y\\)：\\(Q=u^2-v^2\\)，符号 \\((1,1)\\)→不定。易错: 选项B中将 \\(+3y^2\\) 误当成配方后的剩余——正确的剩余是 \\(3y^2-4y^2=-y^2\\)。"
+      },
+      {
+        "id": "linear-adv-ch04-q11",
+        "question": "\\(Q(x,y)=2x^2+2xy+y^2\\)。化为标准形并判断正定性。",
+        "options": [
+          "\\(2(x+y/2)^2+y^2/2\\)，正定",
+        "\\((2x+y)^2-y^2\\)，不定",
+        "\\(2x^2+y^2\\)，正定",
+        "\\((x+y)^2+x^2\\)，正定"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q=2(x^2+xy)+y^2=2(x+y/2)^2-y^2/2+y^2=2(x+y/2)^2+y^2/2\\)。两个正系数→符号 \\((2,0)\\)→正定。矩阵 \\(A=\\begin{pmatrix}2&1\\\\1&1\\end{pmatrix}\\)，\\(\\Delta_1=2>0\\)，\\(\\Delta_2=1>0\\) ✓。选项D也正确展开: \\(Q=(x+y)^2+x^2\\)→\\((1,0)\\) 正定? 验证: \\(=(x+y)^2+x^2=x^2+2xy+y^2+x^2=2x^2+2xy+y^2\\) ✓。两种写法等价。"
+      },
+      {
+        "id": "linear-adv-ch04-q12",
+        "question": "\\(A=\\begin{pmatrix}1&2\\\\2&1\\end{pmatrix}\\)。正定吗？特征值是？",
+        "options": [
+          "不正定。特征值 \\(3\\) 和 \\(-1\\)，不定",
+        "正定。特征值均为正",
+        "半正定",
+        "负定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Delta_1=1>0\\)，\\(\\Delta_2=\\det=1-4=-3<0\\)→不正定。\\(\\chi_A=x^2-2x-3=(x-3)(x+1)\\)，特征值 \\(3,-1\\)→不定，符号 \\((1,1)\\)。\\(Q(1,0)=1>0\\)，\\(Q(1,-1)=1-4+1=-2<0\\)，确认不定。"
+      },
+      {
+        "id": "linear-adv-ch04-q13",
+        "question": "Sylvester 准则判断正定性时需检查的是？",
+        "options": [
+          "所有顺序主子式（左上角 \\(k\\times k\\) 子矩阵的行列式）\\(>0\\)",
+        "所有主子式 \\(> 0\\)",
+        "所有 \\(2\\times2\\) 子式 \\(> 0\\)",
+        "行列式 \\(> 0\\) 即可"
+        ],
+        "answer": 0,
+        "explanation": "正定 \\(\\Leftrightarrow\\) 所有顺序主子式（即 \\(\\Delta_1,\\Delta_2,\\ldots,\\Delta_n\\)）均为正。不是\"所有主子式\"——对于 \\(n\\times n\\) 矩阵共 \\(2^n-1\\) 个主子式，太多了。也不是只看行列式——\\(\\det>0\\) 不保证正定（如 \\(\\mathrm{diag}(-1,-1)\\) 行列式=1>0 但负定）。易错: B中\"所有主子式\"是半正定的充要条件（需 \\(\\geq0\\)），不是正定的。"
+      },
+      {
+        "id": "linear-adv-ch04-q14",
+        "question": "\\(v_1=(1,1,0)\\)，\\(v_2=(1,0,1)\\)。Gram-Schmidt 得 \\(u_2=?\\)",
+        "options": [
+          "\\((\\frac{1}{2},-\\frac{1}{2},1)\\)",
+        "\\((0,-1,1)\\)",
+        "\\((1,0,1)\\)",
+        "\\((1,-1,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_1=(1,1,0)\\)。\\(\\langle v_2,u_1\\rangle=1\\)，\\(\\|u_1\\|^2=2\\)。\\(u_2=v_2-\\frac{1}{2}u_1=(1,0,1)-(\\frac{1}{2},\\frac{1}{2},0)=(\\frac{1}{2},-\\frac{1}{2},1)\\)。验证: \\(\\langle u_1,u_2\\rangle=\\frac{1}{2}-\\frac{1}{2}+0=0\\) ✓。易错: Gram-Schmidt 产生的是正交（非标准正交）向量。归一化需除以 \\(\\|u_2\\|=\\sqrt{3/2}\\)。"
+      },
+      {
+        "id": "linear-adv-ch04-q15",
+        "question": "QR 分解的本质是什么过程？",
+        "options": [
+          "对矩阵列向量做 Gram-Schmidt 正交化",
+        "对矩阵做 LU 分解",
+        "求特征值",
+        "求 SVD"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=QR\\): \\(Q\\) 的列是 \\(A\\) 的列经 Gram-Schmidt 正交归一化后的向量，\\(R\\) 是上三角矩阵（\\(R_{ij}=\\langle a_j,q_i\\rangle\\)）。QR 分解是 Gram-Schmidt 的矩阵表述，是数值线性代数中求特征值（QR 算法）和解最小二乘的基础。"
+      },
+      {
+        "id": "linear-adv-ch04-q16",
+        "question": "极化恒等式: 由二次型 \\(Q\\) 恢复双线性形式 \\(B\\)。\\(B(u,v)=?\\)（\\(\\mathrm{char}\\neq2\\)）",
+        "options": [
+          "\\(\\frac{1}{2}[Q(u+v)-Q(u)-Q(v)]\\)",
+        "\\(Q(u)\\cdot Q(v)\\)",
+        "\\(Q(u+v)\\)",
+        "\\(Q(u)-Q(v)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q(u+v)=B(u+v,u+v)=Q(u)+2B(u,v)+Q(v)\\)→\\(B(u,v)=\\frac{1}{2}[Q(u+v)-Q(u)-Q(v)]\\)。这是\"极化\"——从对角信息恢复完整的双线性信息。前提: \\(\\mathrm{char}K\\neq2\\)（特征≠2），否则 \\(1/2\\) 无意义。"
+      },
+      {
+        "id": "linear-adv-ch04-q17",
+        "question": "基变换矩阵 \\(P\\) 下，双线性形式矩阵 \\(A\\) 变为？",
+        "options": [
+          "\\(P^T A P\\)",
+        "\\(P^{-1}AP\\)",
+        "\\(PAP^T\\)",
+        "\\(PAP^{-1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "新基下 \\(B(u,v)=u'^T A' v'\\)，其中 \\(u=Pu'\\)→\\(u'^T(P^TAP)v'\\)→\\(A'=P^TAP\\)。注意: 这是**合同变换**（\\(P^TAP\\)），不是相似变换（\\(P^{-1}AP\\)）！合同变换保持对称性、秩、符号；相似变换保持特征值。两者一般不同。"
+      },
+      {
+        "id": "linear-adv-ch04-q18",
+        "question": "\\(B\\) 在 \\(\\mathbb{R}^3\\) 上，矩阵 \\(A=\\begin{pmatrix}1&0&2\\\\0&3&0\\\\2&0&5\\end{pmatrix}\\)。\\(B\\) 是否对称？是否非退化？",
+        "options": [
+          "对称且非退化（\\(A=A^T\\)，\\(\\det A=3\\neq0\\)）",
+        "对称但退化",
+        "反对称",
+        "非退化但不对称"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^T=A\\) ✓ 对称。\\(\\det A=1(15-0)-0+2(0-6)=15-12=3\\neq0\\)→非退化。因此 \\(B\\) 是非退化对称双线性形式。其二次型 \\(Q=x^2+3y^2+5z^2+4xz\\) 可经配方化为标准形以确定符号。"
+      },
+      {
+        "id": "linear-adv-ch04-q19",
+        "question": "\\(Q(x,y,z)=x^2+2y^2+z^2+2xy+2yz\\)。化为标准形。",
+        "options": [
+          "\\((x+y)^2+(y+z)^2\\)，秩 \\(2\\)，符号 \\((2,0)\\)",
+        "\\((x+y)^2+2(y+z)^2-z^2\\)，秩 \\(3\\)",
+        "\\(x^2+y^2+z^2\\)",
+        "不可标准化"
+        ],
+        "answer": 0,
+        "explanation": "配方: \\(Q=x^2+2xy+y^2+y^2+2yz+z^2=(x+y)^2+(y+z)^2\\)。令 \\(u=x+y\\)，\\(v=y+z\\)：\\(Q=u^2+v^2\\)。秩=2（第三个方向消失），符号 \\((2,0)\\)→半正定（非正定因退化）。\\(Q(0,0,0)=0\\) 且 \\(Q(-1,1,-1)=0\\)→存在非零零点 ✓。"
+      },
+      {
+        "id": "linear-adv-ch04-q20",
+        "question": "实对称 \\(3\\times3\\) 矩阵 \\(A\\) 的特征值为 \\(5,2,-1\\)。符号 \\((p,q)\\) 为？",
+        "options": [
+          "\\((2,1)\\)",
+        "\\((3,0)\\)",
+        "\\((1,2)\\)",
+        "\\((2,0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "正特征值: \\(5,2\\)（共 \\(p=2\\) 个）。负特征值: \\(-1\\)（共 \\(q=1\\) 个）。\\(p+q=3=\\mathrm{rank}(A)\\) ✓。Sylvester 惯性定理保证: 无论怎样合同对角化，正项个数始终为 2，负项个数始终为 1。"
+      },
+      {
+        "id": "linear-adv-ch04-q21",
+        "question": "\\(A=\\begin{pmatrix}4&2\\\\2&1\\end{pmatrix}\\)。正定、半正定还是不定？",
+        "options": [
+          "半正定（非正定）: \\(\\Delta_1=4>0\\)，\\(\\Delta_2=0\\)",
+        "正定",
+        "不定",
+        "负定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Delta_1=4>0\\)，\\(\\Delta_2=4-4=0\\)→不满足正定条件（需 \\(>0\\)）。特征值: \\(0\\) 和 \\(5\\)→非负→半正定。\\(Q=4x^2+4xy+y^2=(2x+y)^2\\geq0\\)→半正定 ✓。但 \\(Q(1,-2)=0\\)→存在非零零点→非正定。"
+      },
+      {
+        "id": "linear-adv-ch04-q22",
+        "question": "\\(v_1=(1,1,1)\\)，\\(v_2=(1,1,0)\\)，\\(v_3=(1,0,0)\\)。Gram-Schmidt 后 \\(u_2=?\\)",
+        "options": [
+          "\\((\\frac{1}{3},\\frac{1}{3},-\\frac{2}{3})\\)",
+        "\\((0,0,-1)\\)",
+        "\\((1,1,-2)\\)",
+        "\\((-\\frac{1}{3},-\\frac{1}{3},\\frac{2}{3})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_1=(1,1,1)\\)，\\(\\|u_1\\|^2=3\\)。\\(\\langle v_2,u_1\\rangle=2\\)。\\(u_2=v_2-\\frac{2}{3}u_1=(1,1,0)-(\\frac{2}{3},\\frac{2}{3},\\frac{2}{3})=(\\frac{1}{3},\\frac{1}{3},-\\frac{2}{3})\\)。验证: \\(\\langle u_1,u_2\\rangle=\\frac{1}{3}+\\frac{1}{3}-\\frac{2}{3}=0\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch04-q23",
+        "question": "最小二乘法: \\(A\\mathbf{x}\\approx\\mathbf{b}\\)。法方程 (normal equations) 为？",
+        "options": [
+          "\\(A^T A\\hat{x}=A^T b\\)",
+        "\\(A\\hat{x}=b\\)",
+        "\\(A^T\\hat{x}=b\\)",
+        "\\((AA^T)\\hat{x}=Ab\\)"
+        ],
+        "answer": 0,
+        "explanation": "最小化 \\(\\|Ax-b\\|^2\\)。\\(\\nabla_x\\|Ax-b\\|^2=2A^T(Ax-b)=0\\)→\\(A^TAx=A^Tb\\)。当 \\(A^TA\\) 可逆时 \\(\\hat{x}=(A^TA)^{-1}A^Tb\\)。\\(A^TA\\) 是正定/半正定矩阵（Gram 矩阵），与内积、正交投影紧密相关。"
+      },
+      {
+        "id": "linear-adv-ch04-q24",
+        "question": "\\(A=\\begin{pmatrix}1&1\\\\1&3\\end{pmatrix}\\)。求合同变换 \\(P\\) 使 \\(P^TAP=D\\)（对角）。",
+        "options": [
+          "\\(P=\\begin{pmatrix}1&-1\\\\0&1\\end{pmatrix}\\)，\\(D=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}\\)",
+        "\\(P=\\begin{pmatrix}1&0\\\\-1&1\\end{pmatrix}\\)，\\(D=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}\\)",
+        "\\(P=I\\)，\\(D=A\\)",
+        "不存在对角化"
+        ],
+        "answer": 0,
+        "explanation": "配方: \\(Q=x^2+2xy+3y^2=(x+y)^2+2y^2\\)。换元 \\(u=x+y,v=y\\)→\\(x=u-v,y=v\\)→\\(P=\\begin{pmatrix}1&-1\\\\0&1\\end{pmatrix}\\)。验证: \\(P^TAP=\\begin{pmatrix}1&0\\\\-1&1\\end{pmatrix}\\begin{pmatrix}1&1\\\\1&3\\end{pmatrix}\\begin{pmatrix}1&-1\\\\0&1\\end{pmatrix}=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch04-q25",
+        "question": "\\(\\mathbb{R}^4\\) 上反对称非退化双线性形式的矩阵标准形为？",
+        "options": [
+          "\\(\\begin{pmatrix}0&I_2\\\\-I_2&0\\end{pmatrix}\\)",
+        "\\(I_4\\)",
+        "\\(\\mathrm{diag}(1,-1,1,-1)\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "反对称非退化双线性形式必须存在于偶数维空间上（\\(\\det(-A^T)=(-1)^n\\det A\\)，非退化要求 \\(\\det\\neq0\\)→\\(n\\) 偶）。标准形（Darboux 定理）为 \\(\\begin{pmatrix}0&I_k\\\\-I_k&0\\end{pmatrix}\\)（\\(n=2k\\)）。\\(k=2\\) 时给出 \\(4\\times4\\) 辛矩阵。这是辛几何和哈密顿力学的基础结构。"
+      },
+      {
+        "id": "linear-adv-ch04-q26",
+        "question": "优化问题: \\(f(x,y)=x^2+xy+y^2\\) 在 \\((0,0)\\) 处。Hessian \\(H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}\\) 是正定的吗？结论？",
+        "options": [
+          "\\(H\\) 正定（\\(\\Delta_1=2>0\\)，\\(\\Delta_2=3>0\\)）→\\((0,0)\\) 是严格局部极小",
+        "\\(H\\) 不定→鞍点",
+        "\\(H\\) 半正定→无法判断",
+        "\\(H\\) 负定→局部极大"
+        ],
+        "answer": 0,
+        "explanation": "Hessian \\(=\\begin{pmatrix}f_{xx}&f_{xy}\\\\f_{yx}&f_{yy}\\end{pmatrix}=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}\\)。\\(\\Delta_1=2>0\\)，\\(\\Delta_2=3>0\\)→正定→\\((0,0)\\) 严格局部极小。二次规划和机器学习中，Hessian 正定是凸性的二阶条件。"
+      },
+      {
+        "id": "linear-adv-ch04-q27",
+        "question": "用最小二乘拟合 \\(y=ax+b\\)：数据 \\((1,2),(2,3),(3,5)\\)。\\(A=\\begin{pmatrix}1&1\\\\2&1\\\\3&1\\end{pmatrix}\\), \\(b=(2,3,5)^T\\)。\\(A^TA=?\\)",
+        "options": [
+          "\\(\\begin{pmatrix}14&6\\\\6&3\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}3&6\\\\6&14\\end{pmatrix}\\)",
+        "\\(I_2\\)",
+        "\\(\\begin{pmatrix}14&0\\\\0&3\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^TA=\\begin{pmatrix}1&2&3\\\\1&1&1\\end{pmatrix}\\begin{pmatrix}1&1\\\\2&1\\\\3&1\\end{pmatrix}=\\begin{pmatrix}14&6\\\\6&3\\end{pmatrix}\\)。\\(A^Tb=\\begin{pmatrix}1&2&3\\\\1&1&1\\end{pmatrix}\\begin{pmatrix}2\\\\3\\\\5\\end{pmatrix}=\\begin{pmatrix}23\\\\10\\end{pmatrix}\\)。解法方程 \\(A^TA\\hat{x}=A^Tb\\) 得回归系数。\\(A^TA\\) 是 Gram 矩阵（正定因列线性无关）。"
+      },
+      {
+        "id": "linear-adv-ch04-q28",
+        "question": "二次曲线 \\(x^2+4xy+4y^2=1\\) 的类型是？",
+        "options": [
+          "退化（一对平行线），因为判别式 \\(\\Delta=4^2-4\\cdot4=0\\)",
+        "椭圆",
+        "双曲线",
+        "抛物线"
+        ],
+        "answer": 0,
+        "explanation": "矩阵 \\(A=\\begin{pmatrix}1&2\\\\2&4\\end{pmatrix}\\)，\\(\\det=0\\)→退化。\\(Q=(x+2y)^2\\)→\\(Q=1\\Rightarrow x+2y=\\pm1\\)，两条平行线。判别式: \\(b^2-4ac=16-16=0\\)→退化锥曲线而非标准椭圆/双曲线。标准化将二次型化为标准形是曲线分类的第一步。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="linear-adv"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/linear-adv.html" class="module-name">线代进阶</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 双线性形式的定义与矩阵表示</a></li>
+      <li><a href="#kp2">02 · 二次型与标准化</a></li>
+      <li><a href="#kp3">03 · Sylvester 惯性定理与正定性</a></li>
+      <li><a href="#kp4">04 · 内积空间与 Gram-Schmidt 正交化</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>双线性形式与二次型</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>双线性形式的定义与矩阵表示</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>向量的长度、角度、面积等几何量都依赖于两个向量之间的「配对」运算。 双线性形式 \(B(u,v)\) 是内积的推广——它对两个变量分别线性， 但不一定正定也不一定对称。理解它是掌握二次型、内积、辛形式的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>双线性形式是 \(V \times V \to K\) 的双线性映射，等价于 \(V \to V^*\) 的线性映射。 这是对偶空间与线性形式理论的自然延伸。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(B: V \times V \to K\) 满足对两个变量分别线性。 <strong>矩阵表示</strong>: 选基 \(\{e_1, \ldots, e_n\}\)，令 \(a_{ij} = B(e_i, e_j)\)。 则 \(B(u, v) = u^T A v\)，其中 \(A = (a_{ij})\)。 <strong>分类</strong>: - 对称: \(B(u,v) = B(v,u)\)，即 \(A = A^T\) - 反对称: \(B(u,v) = -B(v,u)\)，即 \(A = -A^T\) - 非退化: \(\ker(B) = 0\)，即 \(A\) 可逆 \[B(u,v) = u^T A v, \quad \ker(B) = \{v : B(v,w) = 0, \forall w\}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>辛几何中的辛形式（反对称非退化双线性形式）是哈密顿力学的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(V = \mathbb{R}^2\)，\(B(u,v) = u_1 v_2 - u_2 v_1\)。判断类型。 解答: \(A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}\)。 \(A^T = -A\)，故反对称。\(\det A = 1 \neq 0\)，非退化。 这是标准辛形式。 易错点: 混淆「对称双线性形式」和「内积」。 内积还需要正定性，对称双线性形式不需要。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(B(u,v) = u^T A v\) 非退化意味着？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。非退化 \\(\\Leftrightarrow\\) \\(\\ker(B) = 0\\) \\(\\Leftrightarrow\\) \\(A\\) 可逆。')">A. \(A\) 是正定的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！非退化 \\(\\Leftrightarrow\\) \\(\\ker(B) = 0\\) \\(\\Leftrightarrow\\) \\(A\\) 可逆。')">B. \(A\) 可逆</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。非退化 \\(\\Leftrightarrow\\) \\(\\ker(B) = 0\\) \\(\\Leftrightarrow\\) \\(A\\) 可逆。')">C. \(A\) 是对称的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。非退化 \\(\\Leftrightarrow\\) \\(\\ker(B) = 0\\) \\(\\Leftrightarrow\\) \\(A\\) 可逆。')">D. \(\det A = 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>二次型与标准化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>二次型 \(Q(v) = B(v,v)\) 在几何中描述曲面（椭圆、双曲面等）， 在物理中描述能量。将二次型化为标准形（只有平方项）大大简化分析。 配方法和合同变换是实现标准化的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>二次型与双线性形式的关系</strong>: \(Q(v) = B(v,v)\)。 反过来（\(\mathrm{char} K \neq 2\)）: \[B(u,v) = \frac{1}{2}[Q(u+v) - Q(u) - Q(v)]\] 这是极化恒等式。 <strong>标准化</strong>: 存在基使 \(Q = a_1 x_1^2 + \cdots + a_n x_n^2\)。 方法: - 配方法（逐项消去交叉项） - 矩阵: 找可逆 \(P\) 使 \(P^T A P = D\)（合同对角化） 合同变换保持秩和符号（实数域上）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>曲面分类: \(ax^2 + bxy + cy^2 = 1\) 化为标准形后判断椭圆/双曲线。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(Q(x,y) = x^2 + 4xy + 3y^2\)。化为标准形。 解答: 配方: \(Q = (x+2y)^2 + 3y^2 - 4y^2 = (x+2y)^2 - y^2\)。 令 \(u = x+2y, v = y\)，则 \(Q = u^2 - v^2\)。 标准形为 \(u^2 - v^2\)（符号 \((1, -1)\)）。 易错点: 配方后忘记换元，写成 \((x+2y)^2 - y^2\) 却仍称为「标准形」。 标准形要求变量之间无交叉，应写新变量。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">实二次型 \(Q = x^2 + 2xy + y^2\) 的秩和符号是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Q = (x+y)^2\\)，秩为 1，正惯性指数 1，负惯性指数 0。')">A. 秩 2，符号 (2, 0)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(Q = (x+y)^2\\)，秩为 1，正惯性指数 1，负惯性指数 0。')">B. 秩 1，符号 (1, 0)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Q = (x+y)^2\\)，秩为 1，正惯性指数 1，负惯性指数 0。')">C. 秩 2，符号 (1, 1)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Q = (x+y)^2\\)，秩为 1，正惯性指数 1，负惯性指数 0。')">D. 秩 0</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Sylvester 惯性定理与正定性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>配方法给出的标准形取决于配方顺序，不同方法得到的系数不同。 但 Sylvester 惯性定理保证<strong>正系数的个数和负系数的个数是不变量</strong>。 正定性（所有系数为正）在优化、统计中意味着极小值的存在。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>惯性定理说明实二次型的合同不变量只有 \((p, q)\)——正负惯性指数。 这是合同等价类的完全分类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Sylvester 惯性定理</strong>: 实对称矩阵 \(A\) 的任何合同对角化 \(P^T A P = \mathrm{diag}(d_1, \ldots, d_n)\) 中， 正 \(d_i\) 的个数 \(p\) 和负 \(d_i\) 的个数 \(q\) 不变。\((p, q)\) 称为符号。 <strong>证明思路</strong>: 假设两种标准化给出不同的 \((p,q)\)， 则存在子空间 \(W^+\)（\(Q > 0\)）和 \(W^-\)（\(Q \leq 0\)）， \(\dim W^+ + \dim W^- > n\)，故 \(W^+ \cap W^- \neq 0\)， 矛盾。 \[\text{符号 } (p, q) \text{ 是合同不变量, } p + q = \mathrm{rank}(A)\] <strong>正定</strong>: \(p = n, q = 0\)。等价条件: 1) 所有特征值 > 0 2) 所有顺序主子式 > 0 3) \(Q(v) > 0\)，\(\forall v \neq 0\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>机器学习中 Hessian 矩阵的正定性判定损失函数的局部极小。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}2&1\\1&3\end{pmatrix}\)。判断正定性。 解答: 顺序主子式: \(\Delta_1 = 2 > 0\)，\(\Delta_2 = 6-1 = 5 > 0\)。 所有顺序主子式为正，\(A\) 正定。 或特征值: \(\lambda = \frac{5 \pm \sqrt{5}}{2}\)，均为正。 易错点: 用「所有主子式 > 0」代替「顺序主子式 > 0」。 正定只需检查顺序主子式（左上角子矩阵的行列式）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">符号 \((2, 1)\) 的二次型是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。有正也有负惯性指数（\\(p=2, q=1\\)），故不定。')">A. 正定</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。有正也有负惯性指数（\\(p=2, q=1\\)），故不定。')">B. 负定</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！有正也有负惯性指数（\\(p=2, q=1\\)），故不定。')">C. 不定</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。有正也有负惯性指数（\\(p=2, q=1\\)），故不定。')">D. 半正定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>内积空间与 Gram-Schmidt 正交化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>内积把「长度」和「角度」引入向量空间。Gram-Schmidt 过程将任意基 转化为正交基，是数值计算（QR 分解）和理论分析的基石。 它在傅里叶分析、最小二乘等领域无处不在。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>内积</strong>: \(\langle \cdot, \cdot \rangle: V \times V \to K\) 满足 对称（共轭对称）、线性、正定。 <strong>Gram-Schmidt 过程</strong>: 给定 \(\{v_1, \ldots, v_n\}\)， \[u_1 = v_1, \quad u_k = v_k - \sum_{j=1}^{k-1} \frac{\langle v_k, u_j \rangle}{\langle u_j, u_j \rangle} u_j\] \(\{u_1, \ldots, u_n\}\) 两两正交。归一化得标准正交基。 <strong>QR 分解</strong>: \(A = QR\)，\(Q\) 正交，\(R\) 上三角。 本质就是对 \(A\) 的列向量做 Gram-Schmidt。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>最小二乘法: \(\hat{x} = (A^T A)^{-1} A^T b\) 的推导用到正交投影。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 对 \(v_1 = (1,1,0)\)，\(v_2 = (1,0,1)\) 做 Gram-Schmidt。 解答: \(u_1 = (1,1,0)\)。 \(\langle v_2, u_1 \rangle = 1\)，\(\langle u_1, u_1 \rangle = 2\)。 \(u_2 = (1,0,1) - \frac{1}{2}(1,1,0) = (\frac{1}{2}, -\frac{1}{2}, 1)\)。 验证: \(\langle u_1, u_2 \rangle = \frac{1}{2} - \frac{1}{2} = 0\)。✓ 易错点: Gram-Schmidt 产生的向量只是正交，未必标准正交。 需额外除以 \(\|u_k\|\) 进行归一化。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Gram-Schmidt 的计算复杂度为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。对 \\(n\\) 个 \\(n\\) 维向量进行正交化，每步涉及 \\(O(n)\\) 次投影，')">A. \(O(n)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。对 \\(n\\) 个 \\(n\\) 维向量进行正交化，每步涉及 \\(O(n)\\) 次投影，')">B. \(O(n^2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！对 \\(n\\) 个 \\(n\\) 维向量进行正交化，每步涉及 \\(O(n)\\) 次投影，')">C. \(O(n^3)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。对 \\(n\\) 个 \\(n\\) 维向量进行正交化，每步涉及 \\(O(n)\\) 次投影，')">D. \(O(2^n)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/algebra/linear-adv.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

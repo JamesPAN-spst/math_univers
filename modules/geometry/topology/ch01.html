@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 拓扑空间的定义 — 点集拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "topology-ch01-q1",
+        "question": "设 \\(X = \\{1,2,3\\}\\)，\\(\\tau = \\{\\emptyset, \\{1\\}, \\{1,2\\}, X\\}\\)。判断 \\(\\tau\\) 是否构成 \\(X\\) 上的拓扑。",
+        "options": [
+          "是拓扑，因为满足三条公理",
+        "不是拓扑，因为 \\(\\{2\\} \\notin \\tau\\)",
+        "不是拓扑，因为 \\(\\{1\\} \\cap \\{1,2\\} \\notin \\tau\\)",
+        "不是拓扑，因为缺少 \\(\\{3\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "验证三条公理：(T1) \\(\\emptyset, X \\in \\tau\\)，满足。(T2) 有限交：\\(\\{1\\} \\cap \\{1,2\\} = \\{1\\} \\in \\tau\\)，其余交显然满足。(T3) 任意并：\\(\\{1\\} \\cup \\{1,2\\} = \\{1,2\\} \\in \\tau\\)，其余并均在 \\(\\tau\\) 中。三条公理全部满足，\\(\\tau\\) 是合法拓扑。选 B 的错误在于拓扑不要求所有单点集都是开集。"
+      },
+      {
+        "id": "topology-ch01-q2",
+        "question": "设 \\(X = \\{a,b,c\\}\\)，下列哪个集族不是 \\(X\\) 上的拓扑？",
+        "options": [
+          "\\(\\{\\emptyset, X\\}\\)",
+        "\\(\\{\\emptyset, \\{a\\}, \\{b\\}, X\\}\\)",
+        "\\(\\{\\emptyset, \\{a\\}, \\{a,b\\}, X\\}\\)",
+        "\\(\\mathcal{P}(X)\\)"
+        ],
+        "answer": 1,
+        "explanation": "检验 (T3)：\\(\\{a\\} \\cup \\{b\\} = \\{a,b\\}\\)，但 \\(\\{a,b\\} \\notin \\{\\emptyset, \\{a\\}, \\{b\\}, X\\}\\)，违反任意并封闭性。A 是平庸拓扑，C 可验证满足三条公理，D 是离散拓扑。易错点：只检查交而忘了检查并。"
+      },
+      {
+        "id": "topology-ch01-q3",
+        "question": "在余有限拓扑 \\(\\tau_{cf}\\) 下（\\(X\\) 为无穷集），下列哪个集合是开集？",
+        "options": [
+          "有限集",
+        "补集为有限集的集合",
+        "单点集",
+        "可数集"
+        ],
+        "answer": 1,
+        "explanation": "余有限拓扑的定义：\\(U \\in \\tau_{cf}\\) 当且仅当 \\(X \\setminus U\\) 有限或 \\(U = \\emptyset\\)。因此开集恰好是补为有限集的集合（加上空集）。有限集的补是余有限集（无穷集），本身不一定有有限补集，所以 A 不对。单点集的补在无穷集中是无穷的但不必是有限的——等等，\\(X\\setminus\\{x\\}\\) 在无穷集中是无穷集，所以单点集不开。"
+      },
+      {
+        "id": "topology-ch01-q4",
+        "question": "在 \\(\\mathbb{R}\\) 标准拓扑中，集合 \\(A = [0,1)\\) 的内部 \\(A^\\circ\\) 是什么？",
+        "options": [
+          "\\([0,1)\\)",
+        "\\((0,1)\\)",
+        "\\([0,1]\\)",
+        "\\((0,1]\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(A^\\circ\\) 是 \\(A\\) 中最大的开集。\\((0,1)\\) 是开集且 \\((0,1) \\subseteq [0,1)\\)。\\(0\\) 不是内点：任何含 \\(0\\) 的开区间 \\((-\\varepsilon, \\varepsilon)\\) 包含负数，不全在 \\(A\\) 中。因此 \\(A^\\circ = (0,1)\\)。易错：误以为左端点 \\(0\\) 也是内点。"
+      },
+      {
+        "id": "topology-ch01-q5",
+        "question": "在 \\(\\mathbb{R}\\) 标准拓扑中，集合 \\(A = \\{1/n : n \\in \\mathbb{Z}^+\\}\\) 的闭包 \\(\\overline{A}\\) 是什么？",
+        "options": [
+          "\\(A\\)",
+        "\\(A \\cup \\{0\\}\\)",
+        "\\([0,1]\\)",
+        "\\((0,1]\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(0\\) 是 \\(A\\) 的聚点：对任意 \\(\\varepsilon > 0\\)，取 \\(n > 1/\\varepsilon\\)，则 \\(1/n \\in (0-\\varepsilon, 0+\\varepsilon) \\cap A\\)。\\(A\\) 中没有其他聚点（每个 \\(1/n\\) 是孤立的，因为 \\(1/n - 1/(n+1) > 0\\)）。所以 \\(\\overline{A} = A \\cup \\{0\\}\\)。"
+      },
+      {
+        "id": "topology-ch01-q6",
+        "question": "\\(\\mathbb{R}\\) 标准拓扑的一个基是 \\(\\mathcal{B} = \\{(a,b) : a < b, a,b \\in \\mathbb{Q}\\}\\)。这说明 \\(\\mathbb{R}\\) 满足什么性质？",
+        "options": [
+          "第一可数但不第二可数",
+        "第二可数",
+        "不可分",
+        "离散"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathcal{B}\\) 是可数集（\\(\\mathbb{Q} \\times \\mathbb{Q}\\) 的子集），且每个标准开集是有理端点开区间的并，所以 \\(\\mathcal{B}\\) 是 \\(\\mathbb{R}\\) 标准拓扑的可数基。由定义，\\(\\mathbb{R}\\) 是第二可数 (\\(C_2\\)) 空间。\\(C_2 \\Rightarrow C_1\\)，所以也满足第一可数。"
+      },
+      {
+        "id": "topology-ch01-q7",
+        "question": "下列哪个空间不满足第一可数公理 (\\(C_1\\))？",
+        "options": [
+          "\\(\\mathbb{R}\\)（标准拓扑）",
+        "度量空间",
+        "不可数集上的余可数拓扑",
+        "Sorgenfrey 直线"
+        ],
+        "answer": 2,
+        "explanation": "度量空间和 Sorgenfrey 直线都是 \\(C_1\\) 的（每点有可数邻域基）。不可数集上的余可数拓扑一般不满足 \\(C_1\\)：一个点的邻域需要包含一个补为可数的集合，而这样的邻域不能用可数多个来生成所有邻域。\\(\\mathbb{R}\\) 标准拓扑是 \\(C_2\\) 故也 \\(C_1\\)。"
+      },
+      {
+        "id": "topology-ch01-q8",
+        "question": "设 \\(X = \\mathbb{R}\\)，\\(\\tau = \\{U \\subseteq \\mathbb{R} : 0 \\notin U \\text{ 或 } U = \\mathbb{R}\\} \\cup \\{\\emptyset\\}\\)。\\(\\tau\\) 是否为 \\(X\\) 上的拓扑？",
+        "options": [
+          "是拓扑",
+        "不是，\\(\\tau\\) 对有限交不封闭",
+        "不是，\\(\\tau\\) 对任意并不封闭",
+        "不是，\\(X \\notin \\tau\\)"
+        ],
+        "answer": 0,
+        "explanation": "(T1) \\(\\emptyset \\in \\tau\\)，\\(\\mathbb{R} \\in \\tau\\)。(T2) 若 \\(U_1, U_2 \\in \\tau\\)，若某个等于 \\(\\mathbb{R}\\) 则交等于另一个；若两者都不含 \\(0\\)，则交也不含 \\(0\\)。(T3) 若某个 \\(U_\\alpha = \\mathbb{R}\\) 则并为 \\(\\mathbb{R}\\)；若所有 \\(U_\\alpha\\) 不含 \\(0\\)，则并也不含 \\(0\\)。三条公理均满足。该拓扑的开集要么不含 \\(0\\)，要么是整个 \\(\\mathbb{R}\\)。"
+      },
+      {
+        "id": "topology-ch01-q9",
+        "question": "在 \\(\\mathbb{R}\\) 标准拓扑中，集合 \\(A = \\mathbb{Q} \\cap [0,1]\\) 的边界 \\(\\partial A\\) 是什么？",
+        "options": [
+          "\\(\\{0, 1\\}\\)",
+        "\\([0,1]\\)",
+        "\\(\\mathbb{Q} \\cap [0,1]\\)",
+        "\\(\\emptyset\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\overline{A} = [0,1]\\)（\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密，所以 \\(\\mathbb{Q} \\cap [0,1]\\) 在 \\([0,1]\\) 中稠密），\\(A^\\circ = \\emptyset\\)（\\(A\\) 不含任何开区间，因为任何区间都含无理数）。所以 \\(\\partial A = \\overline{A} \\setminus A^\\circ = [0,1] \\setminus \\emptyset = [0,1]\\)。"
+      },
+      {
+        "id": "topology-ch01-q10",
+        "question": "设 \\((X, \\tau)\\) 为拓扑空间，\\(A \\subseteq X\\)。若 \\(A\\) 是开集，下列哪个等式一定成立？",
+        "options": [
+          "\\(\\overline{A} = A\\)",
+        "\\(A^\\circ = A\\)",
+        "\\(\\partial A = \\emptyset\\)",
+        "\\(A' = A\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(A\\) 是开集当且仅当 \\(A = A^\\circ\\)（\\(A\\) 等于自身的内部）。\\(\\overline{A} = A\\) 当且仅当 \\(A\\) 是闭集，开集不一定闭。\\(\\partial A = \\overline{A} \\setminus A^\\circ = \\overline{A} \\setminus A\\)，当 \\(A\\) 开但不闭时 \\(\\partial A \\neq \\emptyset\\)。\\(A'\\) 是导集，与 \\(A\\) 是否开集无直接关系。"
+      },
+      {
+        "id": "topology-ch01-q11",
+        "question": "设 \\(\\mathcal{S} = \\{(-\\infty, a) : a \\in \\mathbb{R}\\}\\) 为 \\(\\mathbb{R}\\) 上的集族。\\(\\mathcal{S}\\) 作为子基生成的拓扑是什么？",
+        "options": [
+          "标准拓扑",
+        "上限拓扑（Sorgenfrey 拓扑）",
+        "\\(\\{(-\\infty, a) : a \\in \\mathbb{R}\\} \\cup \\{\\emptyset, \\mathbb{R}\\}\\)",
+        "离散拓扑"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathcal{S}\\) 的有限交：\\((-\\infty, a_1) \\cap (-\\infty, a_2) = (-\\infty, \\min(a_1, a_2))\\)，仍在 \\(\\mathcal{S}\\) 中。所以 \\(\\mathcal{S}\\) 本身就是基。生成的拓扑是所有 \\((-\\infty, a)\\) 的任意并加上 \\(\\emptyset\\) 和 \\(\\mathbb{R}\\)。这比标准拓扑严格粗——例如 \\((0,1)\\) 不在该拓扑中（无法用 \\((-\\infty, a)\\) 的并表示）。"
+      },
+      {
+        "id": "topology-ch01-q12",
+        "question": "设 \\(\\mathcal{B}_1\\) 和 \\(\\mathcal{B}_2\\) 分别是 \\(\\mathbb{R}\\) 上标准拓扑和 Sorgenfrey 拓扑的基。已知 \\(\\mathcal{B}_1 = \\{(a,b)\\}\\)，\\(\\mathcal{B}_2 = \\{[a,b)\\}\\)。哪个拓扑更细？",
+        "options": [
+          "标准拓扑更细",
+        "Sorgenfrey 拓扑更细",
+        "两者相同",
+        "不可比较"
+        ],
+        "answer": 1,
+        "explanation": "Sorgenfrey 拓扑更细（开集更多）。每个 \\((a,b) = \\bigcup_{n=1}^{\\infty} [a+1/n, b)\\)，说明标准开集也是 Sorgenfrey 开集。但 \\([0,1)\\) 是 Sorgenfrey 开集却不是标准开集（\\(0\\) 不是标准开集的内点）。因此 Sorgenfrey 拓扑严格细于标准拓扑。"
+      },
+      {
+        "id": "topology-ch01-q13",
+        "question": "设 \\(X\\) 为集合，\\(\\tau_1, \\tau_2\\) 为 \\(X\\) 上两个拓扑。\\(\\tau_1 \\cap \\tau_2\\)（即两个拓扑共有的开集构成的集族）是否一定是 \\(X\\) 上的拓扑？",
+        "options": [
+          "一定是",
+        "不一定，可能不满足有限交条件",
+        "不一定，可能不满足任意并条件",
+        "不一定，可能不包含 \\(\\emptyset\\)"
+        ],
+        "answer": 0,
+        "explanation": "验证三条公理：(T1) \\(\\emptyset, X \\in \\tau_1\\) 且 \\(\\emptyset, X \\in \\tau_2\\)，故 \\(\\emptyset, X \\in \\tau_1 \\cap \\tau_2\\)。(T2) 若 \\(U_1, U_2 \\in \\tau_1 \\cap \\tau_2\\)，则 \\(U_1 \\cap U_2 \\in \\tau_1\\)（因 \\(\\tau_1\\) 是拓扑）且 \\(U_1 \\cap U_2 \\in \\tau_2\\)，故 \\(U_1 \\cap U_2 \\in \\tau_1 \\cap \\tau_2\\)。(T3) 类似，任意并也封闭。所以拓扑的任意交仍是拓扑。"
+      },
+      {
+        "id": "topology-ch01-q14",
+        "question": "Sorgenfrey 直线是否可分？",
+        "options": [
+          "是，\\(\\mathbb{Q}\\) 是可数稠密子集",
+        "否，因为 Sorgenfrey 直线不可度量",
+        "是，但需要一个不同于 \\(\\mathbb{Q}\\) 的稠密子集",
+        "否，因为不满足第二可数公理"
+        ],
+        "answer": 0,
+        "explanation": "对任意 Sorgenfrey 开集 \\([a,b)\\) 和任意非空开集，其中必含有理数（因为 \\((a,b) \\subseteq [a,b)\\) 且 \\(\\mathbb{Q}\\) 在标准拓扑下稠密），因此 \\(\\mathbb{Q}\\) 在 Sorgenfrey 拓扑下也是稠密的。Sorgenfrey 直线可分但不满足 \\(C_2\\)，说明可分不蕴含 \\(C_2\\)。"
+      },
+      {
+        "id": "topology-ch01-q15",
+        "question": "度量空间 \\((X, d)\\) 中，开球 \\(B(x, r) = \\{y \\in X : d(x,y) < r\\}\\) 的全体构成拓扑基。若将 \\(<\\) 改为 \\(\\leq\\)（闭球），所有闭球的并是否构成拓扑？",
+        "options": [
+          "是，且等于度量拓扑",
+        "是，但可能比度量拓扑更粗",
+        "闭球的全体不一定是拓扑的基",
+        "闭球全体的任意并恰好是离散拓扑"
+        ],
+        "answer": 2,
+        "explanation": "闭球不满足基的第二条件 (B2)：若 \\(x \\in \\bar{B}(a, r_1) \\cap \\bar{B}(b, r_2)\\)，不一定存在以 \\(x\\) 为中心的闭球包含在交集中。此外，闭球的有限交不一定能用闭球覆盖。因此闭球全体并不自然地构成一个拓扑基。注意：度量拓扑中闭球确实是闭集，但这不意味着它们能生成拓扑基。"
+      },
+      {
+        "id": "topology-ch01-q16",
+        "question": "在 \\(\\mathbb{R}^2\\) 标准拓扑中，设 \\(A = \\{(x, \\sin(1/x)) : x > 0\\}\\)。\\(\\overline{A}\\) 包含 \\(\\{0\\} \\times [-1,1]\\) 吗？",
+        "options": [
+          "是",
+        "否，\\(\\overline{A}\\) 不包含 \\((0,0)\\)",
+        "否，\\(\\overline{A} = A\\)",
+        "否，\\(\\overline{A}\\) 只包含 \\((0,0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "取任意 \\((0, y_0) \\in \\{0\\} \\times [-1,1]\\)，任何邻域 \\(B((0,y_0), \\varepsilon)\\) 中，对足够小的 \\(x > 0\\)，\\(\\sin(1/x)\\) 遍取 \\([-1,1]\\) 中所有值，故存在 \\(x_n > 0\\) 使 \\((x_n, \\sin(1/x_n)) \\to (0, y_0)\\)。因此 \\((0, y_0) \\in \\overline{A}\\)。这就是拓扑学家正弦曲线的闭包。"
+      },
+      {
+        "id": "topology-ch01-q17",
+        "question": "设 \\(X\\) 是不可数集，\\(\\tau_{cf}\\) 是余有限拓扑。\\((X, \\tau_{cf})\\) 是否满足 \\(C_1\\)（第一可数公理）？",
+        "options": [
+          "是",
+        "否",
+        "当且仅当 \\(|X| = |\\mathbb{R}|\\) 时满足",
+        "取决于 \\(X\\) 的基数"
+        ],
+        "answer": 1,
+        "explanation": "在不可数集上的余有限拓扑中，取一点 \\(x_0\\)，其邻域为包含 \\(x_0\\) 的开集，即 \\(X \\setminus F\\)（\\(F\\) 有限，\\(x_0 \\notin F\\)）。假设有可数邻域基 \\(\\{U_n\\}\\)，令 \\(F_n = X \\setminus U_n\\)（有限），则 \\(\\bigcup F_n\\) 是可数集。取 \\(y \\in X \\setminus (\\{x_0\\} \\cup \\bigcup F_n)\\)（不可数集中可选），则 \\(X \\setminus \\{y\\}\\) 是 \\(x_0\\) 的邻域，但不包含任何 \\(U_n\\)，矛盾。"
+      },
+      {
+        "id": "topology-ch01-q18",
+        "question": "设 \\(\\tau_1\\) 和 \\(\\tau_2\\) 是集合 \\(X\\) 上两个拓扑。\\(\\tau_1 \\cup \\tau_2\\) 一般不是拓扑。求 \\(\\tau_1 \\cup \\tau_2\\) 生成的拓扑 \\(\\tau\\) 与 \\(\\tau_1, \\tau_2\\) 的关系。",
+        "options": [
+          "\\(\\tau = \\tau_1 \\cup \\tau_2\\)",
+        "\\(\\tau\\) 是使 \\(\\tau_1 \\cup \\tau_2 \\subseteq \\tau\\) 的最小拓扑",
+        "\\(\\tau = \\tau_1 \\cap \\tau_2\\)",
+        "\\(\\tau\\) 一定是离散拓扑"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\tau_1 \\cup \\tau_2\\) 一般不满足有限交和任意并的封闭性，所以不是拓扑。以 \\(\\tau_1 \\cup \\tau_2\\) 为子基，取所有有限交得到基，再取任意并得到拓扑 \\(\\tau\\)——这是包含 \\(\\tau_1 \\cup \\tau_2\\) 的最小拓扑（也称为 join 或 supremum）。\\(\\tau\\) 一般严格大于 \\(\\tau_1 \\cup \\tau_2\\)，但不一定是离散拓扑。"
+      },
+      {
+        "id": "topology-ch01-q19",
+        "question": "在拓扑空间 \\((X, \\tau)\\) 中，设 \\(A \\subseteq X\\)。以下哪个关系恒成立？",
+        "options": [
+          "\\(\\overline{A \\cap B} = \\overline{A} \\cap \\overline{B}\\)",
+        "\\((A \\cup B)^\\circ = A^\\circ \\cup B^\\circ\\)",
+        "\\(\\overline{A \\cup B} = \\overline{A} \\cup \\overline{B}\\)",
+        "\\((A \\cap B)^\\circ = A^\\circ \\cap B^\\circ\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\overline{A \\cup B} = \\overline{A} \\cup \\overline{B}\\)：\\(\\supseteq\\) 显然。\\(\\subseteq\\)：\\(\\overline{A} \\cup \\overline{B}\\) 是包含 \\(A \\cup B\\) 的闭集（有限并闭），故包含 \\(\\overline{A \\cup B}\\)。A 不恒成立：\\(A = \\mathbb{Q}, B = \\mathbb{R} \\setminus \\mathbb{Q}\\)，\\(\\overline{A \\cap B} = \\overline{\\emptyset} = \\emptyset\\) 但 \\(\\overline{A} \\cap \\overline{B} = \\mathbb{R}\\)。B 也不恒成立：类似反例。D 只有 \\(\\supseteq\\) 成立。"
+      },
+      {
+        "id": "topology-ch01-q20",
+        "question": "设 \\(\\mathcal{B}\\) 是拓扑空间 \\((X, \\tau)\\) 的基。以下哪个命题正确？",
+        "options": [
+          "\\(\\mathcal{B}\\) 中的任意交属于 \\(\\tau\\)",
+        "对任意 \\(U \\in \\tau\\) 和 \\(x \\in U\\)，存在 \\(B \\in \\mathcal{B}\\) 使 \\(x \\in B \\subseteq U\\)",
+        "\\(\\mathcal{B}\\) 在有限并下封闭",
+        "\\(|\\mathcal{B}| = |\\tau|\\)"
+        ],
+        "answer": 1,
+        "explanation": "这是拓扑基的等价定义：\\(\\mathcal{B} \\subseteq \\tau\\) 且每个开集中每点被基元素\"局部\"覆盖。A 错：基元素的无限交不一定开。C 错：\\(\\{(a,b)\\}\\) 的有限并如 \\((0,1) \\cup (2,3)\\) 不是开区间。D 错：\\(|\\mathcal{B}|\\) 可以远小于 \\(|\\tau|\\)（如可数基 vs 不可数个开集）。"
+      },
+      {
+        "id": "topology-ch01-q21",
+        "question": "设 \\(A = \\{(x,y) \\in \\mathbb{R}^2 : x^2 + y^2 < 1\\} \\cup \\{(1,0)\\}\\)。求 \\(A\\) 在 \\(\\mathbb{R}^2\\) 标准拓扑中的内部 \\(A^\\circ\\)。",
+        "options": [
+          "\\(\\{(x,y) : x^2+y^2 < 1\\}\\)",
+        "\\(\\{(x,y) : x^2+y^2 \\leq 1\\}\\)",
+        "\\(A\\)",
+        "\\(\\{(x,y) : x^2+y^2 < 1\\} \\cup \\{(1,0)\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "开圆盘 \\(D = \\{(x,y) : x^2+y^2 < 1\\}\\) 本身是开集。\\((1,0)\\) 不是 \\(A\\) 的内点：任何含 \\((1,0)\\) 的开球 \\(B((1,0), \\varepsilon)\\) 包含点 \\((1+\\varepsilon/2, 0)\\)，该点距原点 \\(> 1\\) 所以不在 \\(D\\) 中，且 \\(\\neq (1,0)\\)，故不在 \\(A\\) 中。因此 \\(A^\\circ = D\\)。这说明添加\"孤立\"边界点不会增大内部。"
+      },
+      {
+        "id": "topology-ch01-q22",
+        "question": "设 \\(X\\) 为不可数集，\\(\\tau_{cc}\\) 为余可数拓扑（\\(U\\) 开 \\(\\iff X \\setminus U\\) 可数或 \\(U = \\emptyset\\)）。\\((X, \\tau_{cc})\\) 是否可分？",
+        "options": [
+          "是，任何可数子集都稠密",
+        "是，但需要不可数稠密子集",
+        "否",
+        "当且仅当 \\(|X| = |\\mathbb{R}|\\)"
+        ],
+        "answer": 2,
+        "explanation": "设 \\(D \\subseteq X\\) 可数。取 \\(x_0 \\in X \\setminus D\\)（\\(X\\) 不可数），\\(U = X \\setminus D\\) 的补是 \\(D\\)（可数），所以 \\(U\\) 是开集。\\(U \\cap D = (X \\setminus D) \\cap D = \\emptyset\\)。因此 \\(D\\) 不稠密（非空开集 \\(U\\) 与 \\(D\\) 不相交）。所以没有可数稠密子集，\\((X, \\tau_{cc})\\) 不可分。"
+      },
+      {
+        "id": "topology-ch01-q23",
+        "question": "对于余有限拓扑 \\((X, \\tau_{cf})\\)（\\(X\\) 无穷），\\(X\\) 中的无穷子集 \\(A\\) 的闭包 \\(\\overline{A}\\) 是什么？",
+        "options": [
+          "\\(A\\) 本身",
+        "\\(X\\)",
+        "\\(A\\) 的有限补集",
+        "取决于 \\(A\\) 的选取"
+        ],
+        "answer": 1,
+        "explanation": "设 \\(F\\) 是包含 \\(A\\) 的闭集，即 \\(X \\setminus F\\) 是开集，\\(X \\setminus F\\) 有限。\\(A \\subseteq F\\) 意味着 \\(X \\setminus F \\subseteq X \\setminus A\\)。由于 \\(A\\) 无穷，\\(X \\setminus A\\) 可能有限也可能无穷。但任何闭真子集 \\(F \\subsetneq X\\) 的补 \\(X \\setminus F\\) 是有限的，意味着 \\(F = X \\setminus \\{\\text{有限集}\\}\\)。若 \\(A\\) 无穷，\\(A \\cap (X \\setminus F) \\neq \\emptyset\\) 只有有限可能性...实际上：\\(\\overline{A}\\) 是所有含 \\(A\\) 的闭集之交。非空开集补有限，所以闭集要么是 \\(X\\) 要么是有限集。含无穷集 \\(A\\) 的闭集只有 \\(X\\)。故 \\(\\overline{A} = X\\)。"
+      },
+      {
+        "id": "topology-ch01-q24",
+        "question": "证明标准拓扑和 Sorgenfrey 拓扑的子基性质。设 \\(\\mathcal{S} = \\{(-\\infty, a) : a \\in \\mathbb{R}\\} \\cup \\{(b, +\\infty) : b \\in \\mathbb{R}\\}\\)。\\(\\mathcal{S}\\) 生成什么拓扑？",
+        "options": [
+          "标准拓扑",
+        "Sorgenfrey 拓扑",
+        "离散拓扑",
+        "严格比标准拓扑粗的拓扑"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{S}\\) 的有限交包含 \\((-\\infty, a) \\cap (b, +\\infty) = (b, a)\\)（当 \\(b < a\\)）。这些开区间 \\((b, a)\\) 恰好是标准拓扑的基。其他有限交如 \\((-\\infty, a_1) \\cap (-\\infty, a_2) = (-\\infty, \\min(a_1,a_2))\\) 也在生成拓扑中。因此 \\(\\mathcal{S}\\) 生成的拓扑就是标准拓扑。Sorgenfrey 拓扑需要半开区间 \\([a,b)\\)，不能由射线生成。"
+      },
+      {
+        "id": "topology-ch01-q25",
+        "question": "设 \\((X, d)\\) 为度量空间。以下哪个命题正确？",
+        "options": [
+          "度量空间一定满足 \\(C_2\\)",
+        "可分度量空间满足 \\(C_2\\)",
+        "度量空间一定可分",
+        "\\(C_1\\) 度量空间一定 \\(C_2\\)"
+        ],
+        "answer": 1,
+        "explanation": "可分度量空间 \\(\\Rightarrow C_2\\)：设 \\(D = \\{d_n\\}\\) 为可数稠密子集，\\(\\mathcal{B} = \\{B(d_n, 1/m) : n, m \\in \\mathbb{Z}^+\\}\\) 是可数基。对任意 \\(x \\in U\\)（\\(U\\) 开），\\(\\exists \\varepsilon > 0, B(x,\\varepsilon) \\subseteq U\\)。取 \\(d_n\\) 使 \\(d(x, d_n) < \\varepsilon/2\\)，取 \\(m > 2/\\varepsilon\\)，则 \\(x \\in B(d_n, 1/m) \\subseteq U\\)。A、C 不对：不可数离散度量空间不可分也不 \\(C_2\\)。"
+      },
+      {
+        "id": "topology-ch01-q26",
+        "question": "在网络安全中，数据包的合法目的地构成集合 \\(X\\)，网络管理员定义\"被允许路径集族\" \\(\\tau\\)。为保证路由策略的一致性，\\(\\tau\\) 需要满足拓扑公理。如果所有数据包的共同可达路径（交集）也是合法路径，且组合多条合法路径（并集）仍合法，这对应拓扑公理中的哪两条？",
+        "options": [
+          "(T2) 有限交封闭与 (T3) 任意并封闭",
+        "(T1) 空集和全集条件与 (T2) 有限交",
+        "(T3) 任意并与连续性条件",
+        "(T1) 与 (T3)"
+        ],
+        "answer": 0,
+        "explanation": "路由策略一致性要求有限多条合法路径的交集是合法路径（对应有限交封闭，T2），以及任意多条合法路径的合并仍是合法路径（对应任意并封闭，T3）。再加上空路由和全路由的合法性（T1），三条即构成拓扑公理。这是拓扑思想在网络科学中的抽象应用。"
+      },
+      {
+        "id": "topology-ch01-q27",
+        "question": "在传感器网络中，每个传感器有检测范围 \\(B(x_i, r_i)\\)（以位置 \\(x_i\\) 为圆心、\\(r_i\\) 为半径的开球）。这些检测范围的全体是度量拓扑的一个基。如果需要确定是否有某区域未被覆盖，应计算什么拓扑量？",
+        "options": [
+          "覆盖区域的闭包",
+        "未覆盖区域的内部",
+        "覆盖 \\(\\bigcup B(x_i, r_i)\\) 的补集",
+        "检测范围的 Lebesgue 数"
+        ],
+        "answer": 2,
+        "explanation": "未被覆盖的区域就是覆盖区域的补集 \\(X \\setminus \\bigcup B(x_i, r_i)\\)。如果该补集非空，则存在覆盖盲区。这是一个纯粹的集合运算，但理解其拓扑性质（补集是闭集，可能包含边界点）对优化传感器部署很重要。若需要保证每个点的 \\(\\varepsilon\\)-邻域内有传感器，则涉及 Lebesgue 数的概念。"
+      },
+      {
+        "id": "topology-ch01-q28",
+        "question": "在数据库查询优化中，查询条件的索引结构可以看作基（每个索引对应一组满足条件的记录）。如果两个索引的交集仍能被某个索引快速检索（基条件 B2），这种索引系统相当于什么拓扑概念？",
+        "options": [
+          "子基",
+        "拓扑基",
+        "闭包算子",
+        "滤子"
+        ],
+        "answer": 1,
+        "explanation": "基条件 (B2) 要求对任意两个基元素的交集中的每个点，存在更小的基元素包含它且落在交集内。在索引系统中，这意味着复合查询条件（两个条件的\"与\"）仍然能被现有索引高效处理。这正是拓扑基的概念——基的有限交可以被其他基元素\"细化\"。如果不满足 (B2)，则需要先取有限交再取并，对应子基。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="topology"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/topology.html" class="module-name">点集拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 开集公理与拓扑空间的定义</a></li>
+      <li><a href="#kp2">02 · 闭包、内部、边界与邻域</a></li>
+      <li><a href="#kp3">03 · 基与子基</a></li>
+      <li><a href="#kp4">04 · 可数公理与典型拓扑实例</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>拓扑空间的定义</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>开集公理与拓扑空间的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在分析学中，我们习惯于用距离定义"开集"——然而距离并非讨论连续 性和收敛性的唯一方式。19世纪末 Hausdorff 等人发现，许多分析结 论只依赖于开集满足的几条简单性质，而非距离本身。将"开集"作为 基本概念公理化，使我们能在远超度量空间的范围内讨论连续性问题。 这一抽象是现代数学——尤其是代数几何和泛函分析——的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思想：放弃距离，保留开集。从度量空间中开集满足的三条性质 （空集和全集是开的、有限交仍开、任意并仍开）出发，将这三条性质 提升为公理，得到拓扑空间的定义。闭集自然定义为开集的补。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：设 \(X\) 为集合，\(\tau \subseteq \mathcal{P}(X)\) 满足： (T1) \(\emptyset, X \in \tau\)； (T2) 若 \(U_1, U_2 \in \tau\)，则 \(U_1 \cap U_2 \in \tau\)； (T3) 若 \(\{U_\alpha\}_{\alpha \in I} \subseteq \tau\)，则 \(\bigcup_{\alpha \in I} U_\alpha \in \tau\)。 则 \((X, \tau)\) 为<strong>拓扑空间</strong>，\(\tau\) 中的元素称为<strong>开集</strong>。 <strong>闭集</strong>：\(F \subseteq X\) 是闭集，当且仅当 \(X \setminus F \in \tau\)。 由 De Morgan 律：闭集对有限并和任意交封闭。 <strong>度量空间是特例</strong>：度量空间 \((X,d)\) 中，定义 \[U \in \tau_d \iff \forall x \in U,\; \exists \varepsilon > 0,\; B(x,\varepsilon) \subseteq U\] 可以验证 \(\tau_d\) 满足 (T1)-(T3)。这说明度量拓扑是一个合法的拓扑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 函数空间上常需非度量化拓扑（如弱拓扑、弱*拓扑），这在泛函 分析和偏微分方程的变分方法中极为关键 - Zariski 拓扑是代数几何的基础，其开集远比度量拓扑"大"</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证余有限拓扑 \(\tau_{cf} = \{U \subseteq X : X \setminus U \text{ 有限}\} \cup \{\emptyset\}\) 在无穷集 \(X\) 上是拓扑。 解答：(T1) \(X \setminus X = \emptyset\) 有限，故 \(X \in \tau_{cf}\)； \(\emptyset \in \tau_{cf}\) 由定义。 (T2) 设 \(U_1, U_2 \in \tau_{cf} \setminus \{\emptyset\}\)， \(X \setminus (U_1 \cap U_2) = (X \setminus U_1) \cup (X \setminus U_2)\) 是两个有限集的并，仍有限。 (T3) \(X \setminus \bigcup U_\alpha = \bigcap (X \setminus U_\alpha)\)， 只要某个 \(U_{\alpha_0}\) 非空，交就 \(\subseteq X \setminus U_{\alpha_0}\) 是有限集的子集，故有限。 易错点：验证 (T2) 时忘记处理 \(U_1\) 或 \(U_2 = \emptyset\) 的情况。 \(\emptyset \cap U = \emptyset \in \tau_{cf}\)，需单独确认。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个不是拓扑？设 \(X = \{a,b,c\}\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\{a\\} \\cup \\{b\\} = \\{a,b\\} \\notin \\tau\\)，违反 (T3)。')">A. \(\tau = \{\emptyset, X\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\{a\\} \\cup \\{b\\} = \\{a,b\\} \\notin \\tau\\)，违反 (T3)。')">B. \(\tau = \{\emptyset, \{a\}, X\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\{a\\} \\cup \\{b\\} = \\{a,b\\} \\notin \\tau\\)，违反 (T3)。')">C. \(\tau = \{\emptyset, \{a\}, \{b\}, X\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\{a\\} \\cup \\{b\\} = \\{a,b\\} \\notin \\tau\\)，违反 (T3)。')">D. \(\tau = \{\emptyset, \{a\}, \{a,b\}, X\}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>闭包、内部、边界与邻域</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>拓扑空间中，我们需要刻画一个点与一个集合的"亲近程度"。闭包 回答的是"哪些点无限接近于集合"，内部回答"哪些点完全被集合包 围"，边界则是"分界线上的点"。这些概念是讨论收敛、稠密、无处 稠密等分析核心问题的基础，也是后续分离公理的语言基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>将度量空间中 \(\varepsilon\)-邻域的定义推广为邻域系的公理化： 一个点的邻域是包含该点某个开集的任何集合。由此闭包、内部可 用邻域统一描述。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \((X, \tau)\) 为拓扑空间，\(A \subseteq X\)。 <strong>内部</strong>：\(\mathrm{Int}(A) = A^\circ = \bigcup\{U \in \tau : U \subseteq A\}\)， 即 \(A\) 中最大的开集。 <strong>闭包</strong>：\(\overline{A} = \bigcap\{F : F \supseteq A,\; F \text{ 闭}\}\)， 即包含 \(A\) 的最小闭集。等价地： \[x \in \overline{A} \iff \forall U \in \tau,\; x \in U \Rightarrow U \cap A \neq \emptyset\] <strong>边界</strong>：\(\partial A = \overline{A} \setminus A^\circ\)。 <strong>导集</strong>：\(A' = \{x \in X : \forall U \ni x,\; U \text{ 开} \Rightarrow (U \setminus \{x\}) \cap A \neq \emptyset\}\)。 则 \(\overline{A} = A \cup A'\)。 <strong>邻域</strong>：\(V\) 是 \(x\) 的邻域 \(\iff \exists U \in \tau,\; x \in U \subseteq V\)。 基本关系：\(A\) 开 \(\iff A = A^\circ\)；\(A\) 闭 \(\iff A = \overline{A}\)； \(\overline{X \setminus A} = X \setminus A^\circ\)（对偶性）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}\)（标准拓扑）中求 \(A = (0,1) \cup \{2\}\) 的 闭包、内部和边界。 解答：\(\overline{A} = [0,1] \cup \{2\}\)（\(0,1\) 是 \((0,1)\) 的聚点， \(2\) 是孤立点，已在 \(A\) 中）。 \(A^\circ = (0,1)\)（\(\{2\}\) 不包含任何开区间）。 \(\partial A = \{0, 1, 2\}\)。 易错点：误认"\(\{2\}\) 是孤立点所以不在闭包中"。\(2 \in A\)， 故 \(2 \in \overline{A}\)（闭包总包含原集合）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在 \(\mathbb{R}\) 标准拓扑中，\(\overline{\mathbb{Q}}\) 是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密，任何非空开区间都')">A. \(\mathbb{Q}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密，任何非空开区间都')">B. \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密，任何非空开区间都')">C. \(\mathbb{R} \setminus \mathbb{Q}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密，任何非空开区间都')">D. \(\emptyset\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>基与子基</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个拓扑可能包含大量开集，逐一列举不现实。然而，很多拓扑可以 由"少量"集合通过取并生成——正如向量空间可由基生成一样。拓扑基 (base) 提供了一种经济的方式来描述拓扑。子基则更进一步，允许从 有限交再取并来生成拓扑，这在构造积拓扑和弱拓扑时极为有用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>层次结构：子基 → 取有限交得到基 → 取任意并得到拓扑。 这是一种"自下而上"的构造思路，类似代数中由生成元生成群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>基的定义</strong>：\(\mathcal{B} \subseteq \tau\) 是拓扑 \(\tau\) 的基， 若每个 \(U \in \tau\) 都可写为 \(\mathcal{B}\) 中元素的并。 <strong>基的判定</strong>：\(\mathcal{B} \subseteq \mathcal{P}(X)\) 是某个拓扑的基 当且仅当： (B1) \(\bigcup_{B \in \mathcal{B}} B = X\)； (B2) 若 \(x \in B_1 \cap B_2\)（\(B_1, B_2 \in \mathcal{B}\)）， 则 \(\exists B_3 \in \mathcal{B}\)，\(x \in B_3 \subseteq B_1 \cap B_2\)。 由 \(\mathcal{B}\) 生成的拓扑为 \[\tau_{\mathcal{B}} = \Big\{\bigcup_{\alpha} B_\alpha : B_\alpha \in \mathcal{B}\Big\}\] <strong>子基</strong>：\(\mathcal{S} \subseteq \mathcal{P}(X)\) 且 \(\bigcup \mathcal{S} = X\)。 由 \(\mathcal{S}\) 生成的拓扑是使 \(\mathcal{S} \subseteq \tau\) 的最小拓扑： 以 \(\mathcal{S}\) 的有限交构成基，再取任意并。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 积拓扑的标准子基是 \(\pi_\alpha^{-1}(U_\alpha)\) 形式的集合 - 弱拓扑（泛函分析）由一族函数的原像构成子基</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathcal{B} = \{(a,b) : a < b,\; a,b \in \mathbb{R}\}\) 是 \(\mathbb{R}\) 标准拓扑的一个基。 解答：(B1) \(\mathbb{R} = \bigcup_{n} (-n, n)\)。 (B2) \((a_1,b_1) \cap (a_2,b_2) = (\max(a_1,a_2), \min(b_1,b_2))\)， 若非空则本身 \(\in \mathcal{B}\)。 生成的拓扑恰好是标准拓扑（每个标准开集是开区间的并）。 易错点：Sorgenfrey 直线的基是 \(\{[a,b) : a < b\}\)， \([a,b) \cap [c,d) = [\max(a,c), \min(b,d))\) 仍是该形式， 但其拓扑严格细于标准拓扑。不要混淆不同基生成的不同拓扑。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 $\mathcal{S} = \{(-\infty, a) : a \in \mathbb{R}\} \cup</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\((-\\infty,a) \\cap (b,+\\infty) = (b,a)\\)（\\(b<a\\) 时），')">A. 离散拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\((-\\infty,a) \\cap (b,+\\infty) = (b,a)\\)（\\(b<a\\) 时），')">B. 标准拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\((-\\infty,a) \\cap (b,+\\infty) = (b,a)\\)（\\(b<a\\) 时），')">C. 余有限拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\((-\\infty,a) \\cap (b,+\\infty) = (b,a)\\)（\\(b<a\\) 时），')">D. 平庸拓扑</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>可数公理与典型拓扑实例</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>并非所有拓扑空间都"好用"——有些太大、太病态。可数公理（第一 可数与第二可数）限制了拓扑的"尺寸"，使得序列方法有效、空间 可分。理解这些公理有助于区分"好"的空间与"病态"的空间，也是 度量化定理（Urysohn 度量化）的前提条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思想：用可数集合控制拓扑的复杂度。第一可数保证每点的邻 域系有可数基（序列足以刻画拓扑），第二可数保证全空间的拓扑 有可数基（空间"本质上不太大"）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>第一可数 (C₁)</strong>：\(\forall x \in X\)，存在 \(x\) 的可数邻域基 \(\{U_n\}_{n=1}^{\infty}\)，即对任意 \(x\) 的邻域 \(V\)，存在 \(n\) 使 \(U_n \subseteq V\)。 <strong>第二可数 (C₂)</strong>：\(\tau\) 有可数基 \(\mathcal{B}\)。 蕴含关系：\(C_2 \Rightarrow C_1\)（取 \(\{B \in \mathcal{B} : x \in B\}\) 即为 \(x\) 的可数邻域基），\(C_2 \Rightarrow\) 可分。 <strong>可分空间</strong>：\(X\) 含可数稠密子集。\(\mathbb{R}^n\) 可分（\(\mathbb{Q}^n\) 稠密）。 <strong>典型拓扑举例</strong>： - 离散拓扑：\(\tau = \mathcal{P}(X)\)，每个子集都开。\(X\) 可数时 \(C_2\)。 - 平庸拓扑：\(\tau = \{\emptyset, X\}\)，仅有两个开集。\(C_2\)。 - 余可数拓扑：类似余有限，开集的补是可数集或全空间。 - Sorgenfrey 直线：\(C_1\) 但不 \(C_2\)，可分但不 \(C_2\)。 \[C_2 \Rightarrow C_1,\quad C_2 \Rightarrow \text{可分},\quad \text{度量+可分} \Rightarrow C_2\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 在泛函分析中，Hilbert 空间的可分性保证有可数正交基 - 第二可数是 Urysohn 度量化定理的必要条件之一</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 Sorgenfrey 直线是第一可数但不是第二可数的。 解答：C₁：对每个 \(x\)，\(\{[x, x+1/n)\}_{n=1}^{\infty}\) 是 \(x\) 的 可数邻域基。 非 C₂：Sorgenfrey 直线上不可数集 \(\{[x, x+1) : x \in \mathbb{R}\}\) 中每个都含有基元素但互不包含；任何基至少包含不可数多个元素。 （更精确地说，\(\mathbb{R}\) 上每个 \([x, x+\varepsilon)\) 必须被基中元素 "从 \(x\) 开始覆盖"，不同 \(x\) 需要不同基元素。） 易错点：可分不蕴含第二可数（Sorgenfrey 直线是反例：\(\mathbb{Q}\) 稠密，故可分，但不是 C₂）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个空间不满足第二可数公理？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。不可数离散空间中每个单点集 \\(\\{x\\}\\) 都是开集，')">A. \(\mathbb{R}^n\)（标准拓扑）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。不可数离散空间中每个单点集 \\(\\{x\\}\\) 都是开集，')">B. 可数集上的离散拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！不可数离散空间中每个单点集 \\(\\{x\\}\\) 都是开集，')">C. 不可数集上的离散拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。不可数离散空间中每个单点集 \\(\\{x\\}\\) 都是开集，')">D. \(\ell^2\)（可分 Hilbert 空间）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/geometry/topology.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

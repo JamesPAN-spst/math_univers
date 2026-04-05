@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 连续时间 Markov 链 — 随机过程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-ch02-q1",
+        "question": "连续时间 Markov 链的生成矩阵 \\(Q\\) 满足？",
+        "options": [
+          "\\(Q_{ij} \\geq 0\\)（\\(i \\neq j\\)），\\(Q_{ii}=-\\sum_{j \\neq i}Q_{ij}\\)",
+        "行和为 \\(1\\)",
+        "所有元素非负",
+        "\\(Q\\) 是对称矩阵"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q_{ij}\\) 是从 \\(i\\) 到 \\(j\\) 的跳转速率（\\(i \\neq j\\)），\\(Q_{ii}=-q_i\\) 是离开速率的负值。\\(q_i=\\sum_{j \\neq i}Q_{ij}\\)。行和为 \\(0\\)（非 \\(1\\)）。这与离散时间的转移矩阵 \\(P\\)（行和为 \\(1\\)）对应的是 \\(Q=\\lim_{h\\to 0}(P(h)-I)/h\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q2",
+        "question": "在状态 \\(i\\) 的逗留时间 \\(T_i\\) 服从什么分布？",
+        "options": [
+          "\\(\\text{Exp}(q_i)\\)（指数分布，参数为离开速率 \\(q_i\\)）",
+        "\\(\\text{Poisson}(q_i)\\)",
+        "\\(\\text{Uniform}[0, 1/q_i]\\)",
+        "几何分布 \\(\\text{Geo}(q_i)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Markov 性 ⟹ 无记忆性 ⟹ 逗留时间指数分布。\\(P(T_i>t)=e^{-q_i t}\\)，\\(E[T_i]=1/q_i\\)。离散时间中对应的是几何分布（D），但连续时间用指数。Poisson 是计数分布（非时间）。"
+      },
+      {
+        "id": "stochastic-ch02-q3",
+        "question": "\\(P(h)=e^{Qh}\\) 的含义？",
+        "options": [
+          "转移矩阵 \\(P(h)\\) 是生成矩阵 \\(Q\\) 的矩阵指数",
+        "\\(P(h)=I+Qh\\)（精确）",
+        "\\(P(h)=Q^h\\)",
+        "\\(P(h)=(I+Q)^h\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(h)=e^{Qh}=\\sum_{n=0}^\\infty \\frac{(Qh)^n}{n!}\\)。当 \\(h\\) 小：\\(P(h) \\approx I+Qh+O(h^2)\\)（B 只是一阶近似）。矩阵指数保证 \\(P(h)\\) 是随机矩阵（行和 \\(=1\\)，元素非负）。\\(P(t+s)=P(t)P(s)\\)（半群性质）。"
+      },
+      {
+        "id": "stochastic-ch02-q4",
+        "question": "Kolmogorov 前向方程？",
+        "options": [
+          "\\(P'(t)=P(t)Q\\)",
+        "\\(P'(t)=QP(t)\\)",
+        "\\(P'(t)=Q\\)",
+        "\\(P'(t)=P(t)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "前向方程 \\(\\frac{dP_{ij}(t)}{dt}=\\sum_k P_{ik}(t)Q_{kj}\\)，即 \\(P'(t)=P(t)Q\\)。后向方程是 \\(P'(t)=QP(t)\\)（选 B）。有限状态空间时两者等价。无穷状态空间时可能不等价（爆炸问题）。"
+      },
+      {
+        "id": "stochastic-ch02-q5",
+        "question": "Kolmogorov 后向方程为 \\(P'(t)=QP(t)\\)。它与前向方程的关系？",
+        "options": [
+          "有限状态空间时完全等价",
+        "永远不等价",
+        "后向方程更一般",
+        "前向方程是后向方程的近似"
+        ],
+        "answer": 0,
+        "explanation": "有限 \\(S\\)：\\(P'=QP=PQ\\)（因为 \\(P=e^{Qt}\\)，\\(Q\\) 与 \\(e^{Qt}\\) 交换）。无穷 \\(S\\)：可能出现极小过程（最小解不唯一），前向/后向方程的解可能不同。Feller 条件保证唯一性。"
+      },
+      {
+        "id": "stochastic-ch02-q6",
+        "question": "生灭过程 (birth-death process) 中 \\(\\lambda_n\\)（出生率）和 \\(\\mu_n\\)（死亡率）的含义？",
+        "options": [
+          "在状态 \\(n\\) 时，\\(n \\to n+1\\) 的速率为 \\(\\lambda_n\\)，\\(n \\to n-1\\) 的速率为 \\(\\mu_n\\)",
+        "\\(\\lambda_n\\) 是逗留时间",
+        "\\(\\mu_n\\) 是平稳概率",
+        "\\(\\lambda_n+\\mu_n=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "生灭过程只允许跳 \\(\\pm 1\\)。\\(Q_{n,n+1}=\\lambda_n\\), \\(Q_{n,n-1}=\\mu_n\\), \\(Q_{nn}=-(\\lambda_n+\\mu_n)\\)。逗留时间 \\(\\text{Exp}(\\lambda_n+\\mu_n)\\)。排队论中 \\(\\lambda\\) 是到达率，\\(\\mu\\) 是服务率。"
+      },
+      {
+        "id": "stochastic-ch02-q7",
+        "question": "嵌入链 (embedded chain) 是什么？",
+        "options": [
+          "只记录跳转状态（忽略逗留时间）得到的离散时间 Markov 链",
+        "将连续时间离散化（等间隔采样）",
+        "\\(P(h)\\) 在 \\(h=1\\) 处的取值",
+        "生成矩阵的特征向量"
+        ],
+        "answer": 0,
+        "explanation": "跳转概率 \\(J_{ij}=Q_{ij}/q_i\\)（\\(i \\neq j\\)）。嵌入链的转移矩阵 \\(J\\) 忽略时间信息，只记录\"下一个去哪\"。连续链 = 嵌入链 + 指数逗留时间。分析常返/暂态时嵌入链很有用。"
+      },
+      {
+        "id": "stochastic-ch02-q8",
+        "question": "\\(Q=\\begin{pmatrix}-3&2&1\\\\1&-2&1\\\\2&1&-3\\end{pmatrix}\\)。状态 \\(1\\) 的平均逗留时间？",
+        "options": [
+          "\\(1/3\\)",
+        "\\(1/2\\)",
+        "\\(3\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(q_1=-Q_{11}=3\\)。逗留时间 \\(\\sim \\text{Exp}(3)\\)，\\(E[T_1]=1/q_1=1/3\\)。从状态 \\(1\\) 跳到状态 \\(2\\) 概率 \\(=Q_{12}/q_1=2/3\\)，跳到状态 \\(3\\) 概率 \\(=1/3\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q9",
+        "question": "二状态连续链 \\(Q=\\begin{pmatrix}-a&a\\\\b&-b\\end{pmatrix}\\)。\\(P_{11}(t)=\\)？",
+        "options": [
+          "\\(\\frac{b}{a+b}+\\frac{a}{a+b}e^{-(a+b)t}\\)",
+        "\\(e^{-at}\\)",
+        "\\(1-e^{-bt}\\)",
+        "\\(a/(a+b)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q\\) 的特征值 \\(0\\) 和 \\(-(a+b)\\)。\\(P(t)=e^{Qt}\\)。\\(P_{11}(t)=\\pi_1+(\\delta_{11}-\\pi_1)e^{-(a+b)t}\\)（\\(\\pi_1=b/(a+b)\\)）。\\(t \\to \\infty\\) 时趋于 \\(\\pi_1=b/(a+b)\\)。收敛速率 \\(a+b\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q10",
+        "question": "M/M/1 排队 (\\(\\lambda<\\mu\\))。稳态队长 \\(L\\) 的期望？",
+        "options": [
+          "\\(\\rho/(1-\\rho)\\)（\\(\\rho=\\lambda/\\mu\\)）",
+        "\\(\\lambda/\\mu\\)",
+        "\\(1/(1-\\rho)\\)",
+        "\\(\\lambda+\\mu\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_n=(1-\\rho)\\rho^n\\)（几何分布）。\\(E[L]=\\sum n\\pi_n=\\rho/(1-\\rho)\\)。\\(\\rho \\to 1\\) 时 \\(E[L] \\to \\infty\\)（系统过载）。Little 公式：\\(E[L]=\\lambda E[W]\\)，\\(E[W]=1/(\\mu-\\lambda)\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q11",
+        "question": "M/M/1 排队中 \\(\\rho \\geq 1\\) 时会发生什么？",
+        "options": [
+          "不存在平稳分布，队列趋于无穷",
+        "队伍稳定在 \\(\\rho\\)",
+        "仍有平稳分布但不唯一",
+        "队列振荡"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\rho \\geq 1\\)：到达率 \\(\\geq\\) 服务率，队列无界增长。生灭链暂态。\\(\\sum \\lambda_0\\cdots\\lambda_{n-1}/(\\mu_1\\cdots\\mu_n)=\\sum \\rho^n=\\infty\\)。平稳分布不存在。实际中必须 \\(\\rho<1\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q12",
+        "question": "均匀化 (uniformization)：取 \\(\\gamma \\geq \\max_i q_i\\)，构造 \\(\\tilde{P}=I+Q/\\gamma\\)。\\(\\tilde{P}\\) 是什么？",
+        "options": [
+          "离散时间转移矩阵（均匀化后的）",
+        "生成矩阵",
+        "对角阵",
+        "投影矩阵"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tilde{P}_{ij}=\\delta_{ij}+Q_{ij}/\\gamma \\geq 0\\)（因 \\(\\gamma \\geq q_i\\)），行和 \\(=1\\)。\\(P(t)=e^{Qt}=e^{-\\gamma t}\\sum_{k=0}^\\infty \\frac{(\\gamma t)^k}{k!}\\tilde{P}^k\\)（Poisson 权重）。便于数值计算和随机模拟。"
+      },
+      {
+        "id": "stochastic-ch02-q13",
+        "question": "连续时间 Markov 链的爆炸 (explosion) 是什么？",
+        "options": [
+          "有限时间内发生无穷多次跳转",
+        "状态空间变无穷",
+        "转移概率发散",
+        "逗留时间变负"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(\\sum_n T_n < \\infty\\)（逗留时间总和有限），则有限时间内经历无穷次跳转。例如纯生过程 \\(\\lambda_n=n^2\\)：\\(\\sum 1/n^2<\\infty\\)。非爆炸条件：\\(\\sum 1/q_n=\\infty\\)（充分条件）。"
+      },
+      {
+        "id": "stochastic-ch02-q14",
+        "question": "连续时间链的平稳分布 \\(\\pi\\) 满足？",
+        "options": [
+          "\\(\\pi Q=0\\)（加上 \\(\\sum \\pi_i=1\\)）",
+        "\\(\\pi P=\\pi\\)",
+        "\\(\\pi Q=\\pi\\)",
+        "\\(Q\\pi=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi P(t)=\\pi\\) 对所有 \\(t\\)。对 \\(t\\) 求导：\\(\\pi P'(0)=0\\)，\\(P'(0)=Q\\)。故 \\(\\pi Q=0\\)。分量形式：\\(\\sum_i \\pi_i Q_{ij}=0\\)。这等价于\"流入=流出\"。B 是离散时间的。"
+      },
+      {
+        "id": "stochastic-ch02-q15",
+        "question": "生灭过程平稳分布 \\(\\pi_n\\)（若存在）中 \\(\\pi_n/\\pi_0=\\)？",
+        "options": [
+          "\\(\\prod_{k=0}^{n-1}\\frac{\\lambda_k}{\\mu_{k+1}}\\)",
+        "\\((\\lambda/\\mu)^n\\)",
+        "\\(n!\\lambda^n/\\mu^n\\)",
+        "\\(e^{-\\lambda n/\\mu}\\)"
+        ],
+        "answer": 0,
+        "explanation": "细致平衡 \\(\\pi_n \\mu_{n+1}=\\pi_{n+1}\\lambda_n\\)。递推得 \\(\\pi_n=\\pi_0 \\prod_{k=0}^{n-1}\\lambda_k/\\mu_{k+1}\\)。M/M/1 中 \\(\\lambda_k=\\lambda, \\mu_{k+1}=\\mu\\) 退化为 \\(\\rho^n\\)（选 B 特殊情况）。归一化 \\(\\sum \\pi_n=1\\) 确定 \\(\\pi_0\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q16",
+        "question": "嵌入链的平稳分布 \\(\\tilde\\pi\\) 与连续链的 \\(\\pi\\) 的关系？",
+        "options": [
+          "\\(\\pi_i \\propto \\tilde\\pi_i / q_i\\)",
+        "\\(\\pi=\\tilde\\pi\\)",
+        "\\(\\pi_i \\propto \\tilde\\pi_i q_i\\)",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "连续链在状态 \\(i\\) 花的时间 \\(\\propto\\) 访问次数 \\(\\times\\) 平均逗留时间 \\(=\\tilde\\pi_i \\cdot (1/q_i)\\)。归一化：\\(\\pi_i=\\frac{\\tilde\\pi_i/q_i}{\\sum_j \\tilde\\pi_j/q_j}\\)。C 反了（常见错误）：逗留短的状态反而 \\(\\pi\\) 小。"
+      },
+      {
+        "id": "stochastic-ch02-q17",
+        "question": "两状态链 \\(Q=\\begin{pmatrix}-2&2\\\\3&-3\\end{pmatrix}\\)。\\(\\pi=\\)？",
+        "options": [
+          "\\((3/5, 2/5)\\)",
+        "\\((2/5, 3/5)\\)",
+        "\\((1/2, 1/2)\\)",
+        "\\((2/3, 1/3)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi Q=0\\): \\(-2\\pi_1+3\\pi_2=0 \\Rightarrow \\pi_1/\\pi_2=3/2\\)。\\(\\pi=(3/5,2/5)\\)。与离散时间二状态链公式一致：\\(\\pi_1=b/(a+b)=3/5\\)（\\(a=Q_{12}=2, b=Q_{21}=3\\)）。"
+      },
+      {
+        "id": "stochastic-ch02-q18",
+        "question": "\\(Q=\\begin{pmatrix}-4&1&3\\\\2&-5&3\\\\1&4&-5\\end{pmatrix}\\)。求 \\(\\pi\\)。",
+        "options": [
+          "\\(\\pi=(11/36, 7/36, 18/36)=(11/36, 7/36, 1/2)\\)",
+        "\\(\\pi=(1/3, 1/3, 1/3)\\)",
+        "\\(\\pi=(1/4, 1/4, 1/2)\\)",
+        "\\(\\pi=(4/12, 5/12, 3/12)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi Q=0\\): \\(-4\\pi_1+2\\pi_2+\\pi_3=0\\); \\(\\pi_1-5\\pi_2+4\\pi_3=0\\); \\(3\\pi_1+3\\pi_2-5\\pi_3=0\\)。第一+第三：\\(-\\pi_1+5\\pi_2-4\\pi_3=0\\)（与第二式相同）。设 \\(\\pi_3=t\\): \\(\\pi_2=(4t+\\pi_1)/5\\)，代入得 \\(\\pi_1=11t/18\\), \\(\\pi_2=7t/18\\)。\\(\\sum=1\\): \\(t=1/2\\)。\\(\\pi=(11/36, 7/36, 1/2)\\)。"
+      },
+      {
+        "id": "stochastic-ch02-q19",
+        "question": "非爆炸连续链的前向方程 \\(P'(t)=P(t)Q\\) 的唯一解是？",
+        "options": [
+          "\\(P(t)=e^{Qt}\\)（Feller 条件保证的极小解即唯一解）",
+        "任意满足 \\(P(0)=I\\) 的矩阵",
+        "\\(P(t)=I+Qt\\)",
+        "解不唯一"
+        ],
+        "answer": 0,
+        "explanation": "非爆炸（保守+唯一解）⟹ Feller 条件 \\(\\sum 1/q_n=\\infty\\)。极小\\(Q\\)-过程 = 唯一\\(Q\\)-过程 = 矩阵指数 \\(e^{Qt}\\)。爆炸时极小解不保守（\\(\\sum_j P_{ij}(t)<1\\)），需指定\"爆炸后行为\"。"
+      },
+      {
+        "id": "stochastic-ch02-q20",
+        "question": "M/M/\\(c\\) 排队中 Erlang C 公式给出 \\(P(\\text{等待})=\\)？",
+        "options": [
+          "\\(\\frac{(c\\rho)^c/(c!(1-\\rho))}{\\sum_{k=0}^{c-1}(c\\rho)^k/k!+(c\\rho)^c/(c!(1-\\rho))}\\)",
+        "\\(\\rho^c\\)",
+        "\\(c\\rho/(1+c\\rho)\\)",
+        "\\((1-\\rho)^c\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c\\) 个服务台，到达率 \\(\\lambda\\)，每台服务率 \\(\\mu\\)，\\(\\rho=\\lambda/(c\\mu)<1\\)。\\(P(\\text{等待})\\)（全忙）= Erlang C 公式。特殊 \\(c=1\\): 退化为 \\(\\rho\\)（M/M/1 忙概率）。呼叫中心容量规划的基础。"
+      },
+      {
+        "id": "stochastic-ch02-q21",
+        "question": "M/M/\\(\\infty\\) 队列稳态队长分布？",
+        "options": [
+          "\\(\\text{Poisson}(\\lambda/\\mu)\\)",
+        "几何分布",
+        "二项分布",
+        "均匀分布"
+        ],
+        "answer": 0,
+        "explanation": "无穷服务台：到达即服务。生灭链 \\(\\lambda_n=\\lambda\\), \\(\\mu_n=n\\mu\\)。\\(\\pi_n=\\frac{(\\lambda/\\mu)^n}{n!}e^{-\\lambda/\\mu}\\)（Poisson）。每个顾客独立，服务时间 \\(\\text{Exp}(\\mu)\\)，由 Poisson 叠加/稀疏得到。"
+      },
+      {
+        "id": "stochastic-ch02-q22",
+        "question": "均匀化方法中，给定连续链在 \\([0,t]\\) 的模拟，跳转次数 \\(N(t)\\) 服从？",
+        "options": [
+          "\\(\\text{Poisson}(\\gamma t)\\)",
+        "\\(\\text{Bin}(n, \\gamma t)\\)",
+        "几何分布",
+        "负二项分布"
+        ],
+        "answer": 0,
+        "explanation": "均匀化以速率 \\(\\gamma\\) 的 Poisson 过程触发事件（含\"虚跳\"——自环）。\\(N(t) \\sim \\text{Poi}(\\gamma t)\\)。每次事件按 \\(\\tilde{P}\\) 转移（可能原地不动）。消除了不同状态速率不同的异质性。"
+      },
+      {
+        "id": "stochastic-ch02-q23",
+        "question": "连续链的细致平衡 \\(\\pi_i Q_{ij}=\\pi_j Q_{ji}\\) 蕴含 \\(\\pi Q=0\\) 的证明？",
+        "options": [
+          "对 \\(i\\) 求和：\\(\\sum_i \\pi_i Q_{ij}=\\sum_i \\pi_j Q_{ji}=\\pi_j \\sum_i Q_{ji}=\\pi_j \\cdot 0=0\\)",
+        "直接由特征值得出",
+        "需要额外条件",
+        "不成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum_i \\pi_i Q_{ij}=\\sum_{i \\neq j}\\pi_i Q_{ij}+\\pi_j Q_{jj}\\)。细致平衡 ⟹ \\(\\sum_{i \\neq j}\\pi_j Q_{ji}+\\pi_j Q_{jj}=\\pi_j(\\sum_{i \\neq j}Q_{ji}+Q_{jj})=\\pi_j \\cdot 0=0\\) ✓。反向不一定成立（\\(\\pi Q=0\\) 不蕴含细致平衡）。"
+      },
+      {
+        "id": "stochastic-ch02-q24",
+        "question": "连续时间链与离散时间链最根本的区别？",
+        "options": [
+          "逗留时间连续（指数分布）vs 每步花单位时间",
+        "状态空间不同",
+        "不具有 Markov 性",
+        "没有平稳分布"
+        ],
+        "answer": 0,
+        "explanation": "离散链在每个时间步转移一次（时间 \\(\\mathbb{N}\\)）；连续链在随机时刻跳转（时间 \\(\\mathbb{R}_+\\)），逗留时间指数分布。两者都满足 Markov 性、都可有平稳分布。连续链 = 嵌入链 + 指数钟。"
+      },
+      {
+        "id": "stochastic-ch02-q25",
+        "question": "CTMC 模拟中\"下一反应时间\" (Gillespie 算法) 的步骤？",
+        "options": [
+          "从 \\(\\text{Exp}(q_i)\\) 抽逗留时间，以 \\(Q_{ij}/q_i\\) 概率选下一状态",
+        "从均匀分布抽时间",
+        "以固定步长前进",
+        "枚举所有可能路径"
+        ],
+        "answer": 0,
+        "explanation": "Gillespie SSA: (1) 在状态 \\(i\\) 抽 \\(T \\sim \\text{Exp}(q_i)\\); (2) 抽下一状态 \\(j\\) 概率 \\(Q_{ij}/q_i\\); (3) 更新时间和状态。精确模拟——不是近似。化学反应网络、生物系统中广泛使用。"
+      },
+      {
+        "id": "stochastic-ch02-q26",
+        "question": "呼叫中心有 \\(c=10\\) 席位，到达率 \\(\\lambda=8\\)/min，服务率 \\(\\mu=1\\)/min。\\(\\rho=\\)？系统稳定吗？",
+        "options": [
+          "\\(\\rho=0.8<1\\)，稳定",
+        "\\(\\rho=8>1\\)，不稳定",
+        "\\(\\rho=8/10=0.8\\)，不稳定",
+        "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\rho=\\lambda/(c\\mu)=8/10=0.8<1\\) ✓。系统稳定。B 错误：把 \\(\\rho\\) 算成 \\(\\lambda/\\mu=8\\)（那是单席位负荷，M/M/1 不稳定但 M/M/10 可以）。\\(c\\) 增加 → 稳定域变大。"
+      },
+      {
+        "id": "stochastic-ch02-q27",
+        "question": "蛋白质降解模型：产生率 \\(\\lambda\\)，降解率 \\(\\mu n\\)（\\(n\\) 为分子数）。稳态分子数分布？",
+        "options": [
+          "\\(\\text{Poisson}(\\lambda/\\mu)\\)",
+        "正态分布",
+        "二项分布",
+        "指数分布"
+        ],
+        "answer": 0,
+        "explanation": "这是 M/M/\\(\\infty\\) 生灭过程：\\(\\lambda_n=\\lambda\\)，\\(\\mu_n=n\\mu\\)。\\(\\pi_n=e^{-\\lambda/\\mu}(\\lambda/\\mu)^n/n!\\)。均值 \\(\\lambda/\\mu\\)。Gillespie 模拟可验证。系统生物学中的基本模型。"
+      },
+      {
+        "id": "stochastic-ch02-q28",
+        "question": "双态离子通道模型：关闭 →开概率速率 \\(\\alpha\\)，开→关速率 \\(\\beta\\)。通道打开的稳态概率？",
+        "options": [
+          "\\(\\alpha/(\\alpha+\\beta)\\)",
+        "\\(\\beta/(\\alpha+\\beta)\\)",
+        "\\(1/2\\)",
+        "\\(\\alpha\\beta\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q=\\begin{pmatrix}-\\alpha&\\alpha\\\\\\beta&-\\beta\\end{pmatrix}\\)。\\(\\pi_{\\text{open}}=\\alpha/(\\alpha+\\beta)\\)。单通道电流记录可估计 \\(\\alpha,\\beta\\)。离子通道动力学是 Hodgkin-Huxley 模型的基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic.html" class="module-name">随机过程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 连续时间 Markov 性质与生成矩阵</a></li>
+      <li><a href="#kp2">02 · Kolmogorov 前进和后退方程</a></li>
+      <li><a href="#kp3">03 · 生灭过程与排队模型</a></li>
+      <li><a href="#kp4">04 · 嵌入链与均匀化</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>连续时间 Markov 链</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>连续时间 Markov 性质与生成矩阵</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>许多随机现象在连续时间中演化：电话呼叫的到达、化学反应的 状态变化、服务器队列的长度。连续时间 Markov 链(CTMC)将 离散时间 Markov 链推广到连续时间，生成矩阵 \(Q\) 代替了 转移矩阵 \(P\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>CTMC 的核心思想：用微分方程代替差分方程。\(Q\) 是 \(P\) 的 「导数」：\(P(t) = e^{tQ}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>CT Markov 性：\(P(X(t+s) = j \;|\; X(s) = i, \text{past}) = P(X(t+s) = j \;|\; X(s) = i)\)。 生成矩阵(Q-matrix)：\(Q = (q_{ij})\) 满足 \(q_{ij} \geq 0\)（\(i \neq j\)），\(q_{ii} = -\sum_{j \neq i} q_{ij}\)。 跳跃机制：在状态 \(i\) 的停留时间 \(\sim \text{Exp}(|q_{ii}|)\)。 跳跃到 \(j\) 的概率为 \(q_{ij}/|q_{ii}|\)。 转移半群：\(P(t) = e^{tQ}\)，即 \[P(t) = \sum_{n=0}^{\infty} \frac{(tQ)^n}{n!}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>电信系统中的信道分配、化学动力学中的反应网络都用 CTMC 建模。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：两状态 CTMC，\(Q = \begin{pmatrix} -\lambda & \lambda \\ \mu & -\mu \end{pmatrix}\)。 求平稳分布。 解答：\(\pi Q = 0\)：\(-\lambda\pi_1 + \mu\pi_2 = 0\)，\(\pi_1 + \pi_2 = 1\)。 \(\pi = (\mu/(\lambda+\mu),\; \lambda/(\lambda+\mu))\)。 易错点：CTMC 的平稳方程是 \(\pi Q = 0\)（不是 \(\pi P = \pi\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CTMC 中状态 \(i\) 的停留时间服从</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。指数分布的无记忆性保证了 CTMC 的 Markov 性质。')">A. 均匀分布</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！指数分布的无记忆性保证了 CTMC 的 Markov 性质。')">B. 指数分布</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。指数分布的无记忆性保证了 CTMC 的 Markov 性质。')">C. 正态分布</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。指数分布的无记忆性保证了 CTMC 的 Markov 性质。')">D. Poisson 分布</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Kolmogorov 前进和后退方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何计算 \(P(t)\) 的演化？Kolmogorov 方程是描述 \(P'(t)\) 的 ODE， 它将连续时间动态归结为矩阵微分方程。前进方程描述「到达」， 后退方程描述「出发」，两者从不同角度刻画同一过程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Kolmogorov 前进方程： \[P'(t) = P(t) Q\] Kolmogorov 后退方程： \[P'(t) = Q P(t)\] 初始条件：\(P(0) = I\)。 解：\(P(t) = e^{tQ}\)（矩阵指数）。 组分形式（前进）： \[\frac{d}{dt}p_{ij}(t) = \sum_{k \neq j} p_{ik}(t) q_{kj} - p_{ij}(t)|q_{jj}|\] 直觉：状态 \(j\) 的概率增量 = 从其他状态流入 - 从 \(j\) 流出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>化学主方程(Master equation)就是 Kolmogorov 前进方程的 物理学版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(Q = \begin{pmatrix} -2 & 2 \\ 3 & -3 \end{pmatrix}\)。 写出 \(p_{11}'(t)\) 的微分方程。 解答：前进方程：\(p_{11}'(t) = p_{12}(t) \cdot 3 - p_{11}(t) \cdot 2\) \(= 3(1-p_{11}(t)) - 2p_{11}(t) = 3 - 5p_{11}(t)\)。 解：\(p_{11}(t) = 3/5 + 2/5 \cdot e^{-5t}\)。 易错点：混淆前进和后退方程的矩阵乘法顺序。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Kolmogorov 前进方程是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。前进 = \\(P(t)Q\\)，后退 = \\(QP(t)\\)。')">A. \(P'(t) = QP(t)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！前进 = \\(P(t)Q\\)，后退 = \\(QP(t)\\)。')">B. \(P'(t) = P(t)Q\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。前进 = \\(P(t)Q\\)，后退 = \\(QP(t)\\)。')">C. \(P'(t) = P(t)^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>生灭过程与排队模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>生灭过程是最重要的 CTMC 例子：状态只能“生”（+1）或“灭”（-1）。 它直接建模了队列系统：顾客到达（生）和服务完成（灭）。 M/M/1 队列是排队论的基础模型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>生灭过程：状态空间 \(\{0,1,2,\ldots\}\)， 生率 \(\lambda_n\)（从 \(n\) 到 \(n+1\)），灭率 \(\mu_n\)（从 \(n\) 到 \(n-1\)）。 M/M/1 队列：\(\lambda_n = \lambda\)，\(\mu_n = \mu\)（常数）。 平稳条件（细致平衡）：\(\lambda \pi_n = \mu \pi_{n+1}\)。 \[\pi_n = \rho^n (1 - \rho), \quad \rho = \lambda/\mu < 1\] 平均队长 \(L\)： \[L = \sum_{n=0}^{\infty} n \pi_n = \frac{\rho}{1-\rho}\] Little 公式：\(L = \lambda W\)（\(W\) = 平均等待时间）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>网络路由器、呼叫中心、银行柜台的服务能力规划。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：商店顾客到达率 \(\lambda = 3\)/时，服务率 \(\mu = 5\)/时。 求平均队长和平均等待时间。 解答：\(\rho = 3/5 = 0.6\)。\(L = 0.6/0.4 = 1.5\) 人。 \(W = L/\lambda = 1.5/3 = 0.5\) 小时 = 30 分钟。 易错点：忘记检查稳定条件 \(\rho < 1\)。若 \(\lambda \geq \mu\)， 队列无平稳分布，队长趋向无穷。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">M/M/1 队列稳定的充要条件是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\rho = \\lambda/\\mu < 1\\) 即 \\(\\lambda < \\mu\\)。当 \\(\\lambda \\geq \\mu\\) 时')">A. \(\lambda > \mu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\rho = \\lambda/\\mu < 1\\) 即 \\(\\lambda < \\mu\\)。当 \\(\\lambda \\geq \\mu\\) 时')">B. \(\lambda < \mu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\rho = \\lambda/\\mu < 1\\) 即 \\(\\lambda < \\mu\\)。当 \\(\\lambda \\geq \\mu\\) 时')">C. \(\lambda = \mu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\rho = \\lambda/\\mu < 1\\) 即 \\(\\lambda < \\mu\\)。当 \\(\\lambda \\geq \\mu\\) 时')">D. \(\lambda + \mu < 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>嵌入链与均匀化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>CTMC 的分析可以通过两种策略简化：嵌入链（只看跳跃时刻）和 均匀化（将不同速率统一）。嵌入链将 CTMC 归结为 DTMC； 均匀化使得可以用离散时间方法模拟 CTMC。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>嵌入链：忽略停留时间，只看跳跃序列 \(\{Y_n\}\)。 转移概率：\(\tilde{p}_{ij} = q_{ij}/|q_{ii}|\)（\(i \neq j\)）。 \(\{Y_n\}\) 是离散时间 Markov 链。 均匀化：若存在 \(q = \max_i |q_{ii}| < \infty\)，令 \[\tilde{P} = I + Q/q\] 则 \(\tilde{P}\) 是随机矩阵，且 \[P(t) = e^{tQ} = e^{-qt} \sum_{n=0}^{\infty} \frac{(qt)^n}{n!} \tilde{P}^n\] 这可解读为：在 Poisson(\(q\)) 时钟下，每次「滴答」时按 \(\tilde{P}\) 跳跃。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>均匀化是模拟 CTMC 的标准方法，广泛用于随机模拟。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(Q = \begin{pmatrix} -3 & 2 & 1 \\ 1 & -2 & 1 \\ 0 & 3 & -3 \end{pmatrix}\)。 求均匀化矩阵 \(\tilde{P}\)。 解答：\(q = \max(3, 2, 3) = 3\)。 \(\tilde{P} = I + Q/3 = \begin{pmatrix} 0 & 2/3 & 1/3 \\ 1/3 & 1/3 & 1/3 \\ 0 & 1 & 0 \end{pmatrix}\)。 易错点：\(q\) 必须取所有 \(|q_{ii}|\) 的最大值，以保证 \(\tilde{P}\) 的对角元素非负。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">嵌入链与原 CTMC 的平稳分布一样吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。嵌入链的平稳分布 \\(\\tilde{\\pi}\\) 与 CTMC 的 \\(\\pi\\) 之间关系：')">A. 一定一样</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！嵌入链的平稳分布 \\(\\tilde{\\pi}\\) 与 CTMC 的 \\(\\pi\\) 之间关系：')">B. 一般不同，需要校正</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。嵌入链的平稳分布 \\(\\tilde{\\pi}\\) 与 CTMC 的 \\(\\pi\\) 之间关系：')">C. 嵌入链没有平稳分布</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/probability/stochastic.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

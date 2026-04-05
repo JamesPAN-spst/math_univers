@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 子群与陪集 — 群论 Groupes — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "groups-ch02-q1",
+        "question": "设 \\(G = (\\mathbb{Z}, +)\\)，\\(H = 2\\mathbb{Z}\\)（偶数集合）。用一步判定法验证 \\(H \\leq G\\)，关键步骤是？",
+        "options": [
+          "验证 \\(H\\) 非空且 \\(\\forall a,b \\in H\\)，\\(a - b \\in H\\)",
+        "验证 \\(H\\) 对加法封闭",
+        "验证 \\(H\\) 包含 \\(0\\)",
+        "验证 \\(H\\) 是有限集"
+        ],
+        "answer": 0,
+        "explanation": "一步判定法要求 \\(H \\neq \\emptyset\\) 且 \\(\\forall a,b \\in H,\\; ab^{-1} \\in H\\)。在加法群中 \\(b^{-1}=-b\\)，故条件为 \\(a-b \\in H\\)。\\(H\\) 非空（\\(0 \\in H\\)），且偶数减偶数仍为偶数，满足条件。B 只检查了封闭性，不够完整。"
+      },
+      {
+        "id": "groups-ch02-q2",
+        "question": "下列哪个是 \\((\\mathbb{Z}, +)\\) 的子群？",
+        "options": [
+          "\\(\\{0, 1, -1\\}\\)",
+        "\\(\\{n \\in \\mathbb{Z} : n \\geq 0\\}\\)",
+        "\\(5\\mathbb{Z} = \\{5k : k \\in \\mathbb{Z}\\}\\)",
+        "\\(\\{2, 4, 6, 8, \\ldots\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(5\\mathbb{Z}\\) 满足一步判定法：非空（\\(0 \\in 5\\mathbb{Z}\\)）且 \\(5a - 5b = 5(a-b) \\in 5\\mathbb{Z}\\)。A 不封闭（\\(1+1=2 \\notin A\\)）；B 缺逆元（\\(1 \\in B\\) 但 \\(-1 \\notin B\\)）；D 不含 \\(0\\)（非空但缺单位元和逆元）。"
+      },
+      {
+        "id": "groups-ch02-q3",
+        "question": "求对称群 \\(S_3\\) 的中心 \\(Z(S_3)\\)。",
+        "options": [
+          "\\(\\{e\\}\\)",
+        "\\(\\{e, (1\\;2\\;3), (1\\;3\\;2)\\}\\)",
+        "\\(\\{e, (1\\;2)\\}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_3\\) 非交换。检查 \\((1\\;2)\\)：\\((1\\;2)(1\\;2\\;3) = (1\\;3) \\neq (2\\;3) = (1\\;2\\;3)(1\\;2)\\)，故 \\((1\\;2) \\notin Z(S_3)\\)。类似验证所有非恒等元素均不与全体元素交换。\\(Z(S_3) = \\{e\\}\\)。易错：误以为非交换群必有非平凡中心。"
+      },
+      {
+        "id": "groups-ch02-q4",
+        "question": "在交换群 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 中，任意元素 \\(\\overline{a}\\) 的中心化子 \\(C_G(\\overline{a})\\) 等于什么？",
+        "options": [
+          "\\(\\{\\overline{0}\\}\\)",
+        "\\(\\langle \\overline{a} \\rangle\\)",
+        "\\(\\mathbb{Z}/12\\mathbb{Z}\\)",
+        "\\(\\{\\overline{a}, -\\overline{a}\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "交换群中每个元素与所有元素交换，故 \\(C_G(\\overline{a}) = G = \\mathbb{Z}/12\\mathbb{Z}\\)。等价地，\\(Z(G) = G\\) 时 \\(C_G(a) = G\\) 对所有 \\(a\\) 成立。B 只是 \\(C_G(a)\\) 的一个子群。"
+      },
+      {
+        "id": "groups-ch02-q5",
+        "question": "在 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 中，子群 \\(H = \\{\\overline{0}, \\overline{3}\\}\\) 的所有左陪集是什么？",
+        "options": [
+          "\\(H\\)、\\(\\overline{1}+H\\)、\\(\\overline{2}+H\\)",
+        "\\(H\\) 和 \\(\\overline{1}+H\\)",
+        "\\(H\\)、\\(\\overline{1}+H\\)、\\(\\overline{2}+H\\)、\\(\\overline{3}+H\\)",
+        "只有 \\(H\\) 自身"
+        ],
+        "answer": 0,
+        "explanation": "\\(|H| = 2\\)，\\([G:H] = 6/2 = 3\\)。三个陪集：\\(H = \\{\\overline{0}, \\overline{3}\\}\\)，\\(\\overline{1}+H = \\{\\overline{1}, \\overline{4}\\}\\)，\\(\\overline{2}+H = \\{\\overline{2}, \\overline{5}\\}\\)。C 中 \\(\\overline{3}+H = H\\)（重复）。"
+      },
+      {
+        "id": "groups-ch02-q6",
+        "question": "设 \\(|G| = 20\\)，\\(H \\leq G\\)，\\(|H| = 5\\)。指数 \\([G:H]\\) 等于多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(15\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([G:H] = |G|/|H| = 20/5 = 4\\)。\\(G\\) 被分成 \\(4\\) 个不相交的左陪集，每个含 \\(5\\) 个元素。\\(4 \\times 5 = 20 = |G|\\)。✓"
+      },
+      {
+        "id": "groups-ch02-q7",
+        "question": "设 \\(|G| = 15\\)，\\(g \\in G\\) 且 \\(g \\neq e\\)。\\(\\mathrm{ord}(g)\\) 可能为以下哪些值？",
+        "options": [
+          "\\(\\{1, 3, 5, 15\\}\\)",
+        "\\(\\{3, 5, 15\\}\\)",
+        "\\(\\{1, 15\\}\\)",
+        "任意正整数"
+        ],
+        "answer": 1,
+        "explanation": "Lagrange 定理：\\(\\mathrm{ord}(g) \\mid |G| = 15\\)，因子为 \\(\\{1,3,5,15\\}\\)。\\(g \\neq e\\) 排除 \\(1\\)。故可能值为 \\(\\{3, 5, 15\\}\\)。D 错：元素阶必须整除群阶。"
+      },
+      {
+        "id": "groups-ch02-q8",
+        "question": "\\(SL_2(\\mathbb{R}) = \\{A \\in GL_2(\\mathbb{R}) : \\det(A) = 1\\}\\)。若 \\(A, B \\in SL_2(\\mathbb{R})\\)，则 \\(\\det(AB^{-1})\\) 等于多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\det(A) + \\det(B)\\)",
+        "\\(\\det(A) - \\det(B)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\det(AB^{-1}) = \\det(A) \\cdot \\det(B^{-1}) = \\det(A) \\cdot (\\det(B))^{-1} = 1 \\cdot 1^{-1} = 1\\)。因此 \\(AB^{-1} \\in SL_2(\\mathbb{R})\\)。由一步判定法（\\(I_2 \\in SL_2\\)，非空），确认 \\(SL_2(\\mathbb{R}) \\leq GL_2(\\mathbb{R})\\)。"
+      },
+      {
+        "id": "groups-ch02-q9",
+        "question": "在 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 中，\\(\\langle \\overline{4}, \\overline{6} \\rangle\\)（由 \\(\\overline{4}\\) 和 \\(\\overline{6}\\) 生成的子群）等于什么？",
+        "options": [
+          "\\(\\langle \\overline{2} \\rangle = \\{\\overline{0}, \\overline{2}, \\overline{4}, \\overline{6}, \\overline{8}, \\overline{10}\\}\\)",
+        "\\(\\langle \\overline{4} \\rangle = \\{\\overline{0}, \\overline{4}, \\overline{8}\\}\\)",
+        "\\(\\{\\overline{0}, \\overline{4}, \\overline{6}\\}\\)",
+        "\\(\\mathbb{Z}/12\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle \\overline{4}, \\overline{6} \\rangle\\) 包含 \\(\\overline{6} - \\overline{4} = \\overline{2}\\)。\\(\\langle \\overline{2} \\rangle\\) 反过来包含 \\(\\overline{4}\\) 和 \\(\\overline{6}\\)。因此 \\(\\langle \\overline{4}, \\overline{6} \\rangle = \\langle \\overline{2} \\rangle\\)，有 \\(6\\) 个元素。等价地 \\(\\gcd(4,6,12)=2\\)，生成子群为 \\(\\langle \\overline{2} \\rangle\\)。"
+      },
+      {
+        "id": "groups-ch02-q10",
+        "question": "在 \\(S_3\\) 中，子群 \\(H = \\{e, (1\\;2)\\}\\) 的正规化子 \\(N_{S_3}(H)\\) 等于什么？",
+        "options": [
+          "\\(\\{e\\}\\)",
+        "\\(H = \\{e, (1\\;2)\\}\\)",
+        "\\(A_3\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(N_G(H) = \\{g : gHg^{-1} = H\\}\\)。\\((1\\;2\\;3)(1\\;2)(1\\;3\\;2) = (2\\;3) \\notin H\\)，故 \\((1\\;2\\;3) \\notin N_G(H)\\)。类似验证 \\((1\\;3), (2\\;3), (1\\;3\\;2)\\) 都不在 \\(N_G(H)\\) 中。仅 \\(e\\) 和 \\((1\\;2)\\) 满足，故 \\(N_{S_3}(H) = H\\)。"
+      },
+      {
+        "id": "groups-ch02-q11",
+        "question": "二面体群 \\(D_4\\)（\\(|D_4| = 8\\)，由旋转 \\(r\\) 和反射 \\(s\\) 生成）的中心 \\(Z(D_4)\\) 是？",
+        "options": [
+          "\\(\\{e\\}\\)",
+        "\\(\\{e, r^2\\}\\)",
+        "\\(\\{e, r, r^2, r^3\\}\\)",
+        "\\(D_4\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(D_4\\) 满足 \\(srs = r^{-1}\\)。\\(r^2\\) 与 \\(r\\) 交换（显然），且 \\(sr^2s = r^{-2} = r^2\\)，故 \\(r^2\\) 与 \\(s\\) 也交换。而 \\(r\\) 不与 \\(s\\) 交换（\\(srs = r^{-1} \\neq r\\)）。因此 \\(Z(D_4) = \\{e, r^2\\}\\)，阶为 \\(2\\)。"
+      },
+      {
+        "id": "groups-ch02-q12",
+        "question": "在 \\(S_3\\) 中，设 \\(H = \\{e, (1\\;2)\\}\\)。左陪集 \\((1\\;2\\;3)H\\) 等于什么？",
+        "options": [
+          "\\(\\{(1\\;2\\;3), (1\\;3)\\}\\)",
+        "\\(\\{(1\\;2\\;3), (2\\;3)\\}\\)",
+        "\\(\\{(1\\;2\\;3), (1\\;3\\;2)\\}\\)",
+        "\\(\\{(1\\;2\\;3), (1\\;2)\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((1\\;2\\;3)H = \\{(1\\;2\\;3) \\cdot e,\\; (1\\;2\\;3) \\cdot (1\\;2)\\}\\)。\\((1\\;2\\;3)(1\\;2)\\)：\\(1 \\to 2 \\to 1... \\) 用追踪法：\\(1 \\xrightarrow{(12)} 2 \\xrightarrow{(123)} 3\\)，\\(2 \\xrightarrow{(12)} 1 \\xrightarrow{(123)} 2\\)，\\(3 \\xrightarrow{(12)} 3 \\xrightarrow{(123)} 1\\)。结果 \\(= (1\\;3)\\)。"
+      },
+      {
+        "id": "groups-ch02-q13",
+        "question": "设 \\(K \\leq H \\leq G\\)，\\([G:H] = 3\\)，\\([H:K] = 4\\)。则 \\([G:K]\\) 等于多少？",
+        "options": [
+          "\\(7\\)",
+        "\\(12\\)",
+        "\\(4\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "指数乘法性：\\([G:K] = [G:H] \\cdot [H:K] = 3 \\times 4 = 12\\)。这是因为 \\(G\\) 被 \\(H\\) 分成 \\(3\\) 个陪集，每个陪集内部又被 \\(K\\) 分成 \\(4\\) 个小陪集。A 是加法错误。"
+      },
+      {
+        "id": "groups-ch02-q14",
+        "question": "设 \\(|G| = 7\\)（素数）。\\(G\\) 的子群个数为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(7\\)"
+        ],
+        "answer": 1,
+        "explanation": "Lagrange 定理：子群阶必整除 \\(7\\)，可能值为 \\(1\\) 和 \\(7\\)。因此 \\(G\\) 只有平凡子群 \\(\\{e\\}\\) 和 \\(G\\) 本身，共 \\(2\\) 个。素阶群没有非平凡真子群，这也意味着 \\(G\\) 是循环群。"
+      },
+      {
+        "id": "groups-ch02-q15",
+        "question": "设 \\(|G| = 24\\)，\\(g \\in G\\) 且 \\(\\mathrm{ord}(g) = 8\\)。则 \\(g^6\\) 的阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{ord}(g^6) = \\mathrm{ord}(g)/\\gcd(6, \\mathrm{ord}(g)) = 8/\\gcd(6,8) = 8/2 = 4\\)。验证：\\((g^6)^4 = g^{24} = (g^8)^3 = e\\)，且 \\((g^6)^2 = g^{12} = g^{8+4} = g^4 \\neq e\\)（因 \\(\\mathrm{ord}(g) = 8\\)）。"
+      },
+      {
+        "id": "groups-ch02-q16",
+        "question": "\\(A_4\\)（\\(|A_4| = 12\\)）是否有 \\(6\\) 阶子群？",
+        "options": [
+          "有，因为 \\(6 \\mid 12\\)（Lagrange 定理的逆）",
+        "没有，Lagrange 定理的逆不一定成立",
+        "有，每个 \\(12\\) 阶群都有 \\(6\\) 阶子群",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(6 \\mid 12\\)，但 \\(A_4\\) 实际上没有 \\(6\\) 阶子群——这是 Lagrange 定理逆命题失效的经典反例。\\(A_4\\) 的子群阶只能是 \\(1, 2, 3, 4, 12\\)，不含 \\(6\\)。易错：以为整除群阶就保证子群存在。"
+      },
+      {
+        "id": "groups-ch02-q17",
+        "question": "设 \\(|G| = 12\\)。由 Lagrange 定理，\\(G\\) 的子群的阶的所有可能值是？",
+        "options": [
+          "\\(\\{1, 2, 3, 4, 6, 12\\}\\)",
+        "\\(\\{1, 2, 3, 6, 12\\}\\)",
+        "\\(\\{1, 12\\}\\)",
+        "\\(\\{1, 2, 3, 4, 5, 6, 12\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "子群阶必须整除 \\(|G| = 12\\)。\\(12\\) 的所有正因子为 \\(\\{1, 2, 3, 4, 6, 12\\}\\)。注意 Lagrange 定理只给出阶的必要条件（必须是因子），不保证每个因子对应的子群都存在。D 多了 \\(5\\)（\\(5 \\nmid 12\\)）。"
+      },
+      {
+        "id": "groups-ch02-q18",
+        "question": "设 \\(H, K \\leq G\\)。证明 \\(H \\cap K \\leq G\\)。以下哪步是关键？",
+        "options": [
+          "\\(H \\cap K\\) 非空（\\(e \\in H\\) 且 \\(e \\in K\\)）且对任意 \\(a,b \\in H \\cap K\\)，\\(ab^{-1} \\in H\\)（因 \\(H\\) 是子群）且 \\(ab^{-1} \\in K\\)（因 \\(K\\) 是子群），故 \\(ab^{-1} \\in H \\cap K\\)",
+        "\\(|H \\cap K|\\) 整除 \\(|G|\\)",
+        "\\(H \\cap K\\) 包含 \\(H\\) 和 \\(K\\) 的所有公共生成元",
+        "\\(H \\cap K\\) 总是正规子群"
+        ],
+        "answer": 0,
+        "explanation": "一步判定法的直接应用：\\(e \\in H \\cap K\\)（非空）；\\(a,b \\in H \\cap K\\) 时 \\(ab^{-1}\\) 同时属于 \\(H\\)（\\(H\\) 是子群）和 \\(K\\)（\\(K\\) 是子群），故 \\(ab^{-1} \\in H \\cap K\\)。D 错：\\(H \\cap K\\) 不一定正规。"
+      },
+      {
+        "id": "groups-ch02-q19",
+        "question": "设 \\(H, K \\leq G\\)，\\(H \\cup K\\) 何时是 \\(G\\) 的子群？",
+        "options": [
+          "总是子群",
+        "当且仅当 \\(H \\subseteq K\\) 或 \\(K \\subseteq H\\)",
+        "当且仅当 \\(H \\cap K = \\{e\\}\\)",
+        "当且仅当 \\(H\\) 和 \\(K\\) 都是正规子群"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(H \\not\\subseteq K\\) 且 \\(K \\not\\subseteq H\\)，取 \\(h \\in H \\setminus K\\) 和 \\(k \\in K \\setminus H\\)。若 \\(hk \\in H\\) 则 \\(k = h^{-1}(hk) \\in H\\)，矛盾；若 \\(hk \\in K\\) 则 \\(h = (hk)k^{-1} \\in K\\)，矛盾。故 \\(hk \\notin H \\cup K\\)，不封闭。易错：以为子群的并还是子群。"
+      },
+      {
+        "id": "groups-ch02-q20",
+        "question": "在 \\(S_4\\) 中，\\((1\\;2\\;3)\\) 的共轭类有多少个元素？已知 \\(|C_{S_4}((1\\;2\\;3))| = 3\\)。",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(12\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|\\mathrm{Cl}(g)| = [G : C_G(g)] = |G|/|C_G(g)| = 24/3 = 8\\)。\\(S_4\\) 中 \\(3\\)-轮换的个数为 \\(\\binom{4}{3} \\times 2 = 8\\)（选 \\(3\\) 个元素排成轮换有 \\((3-1)! = 2\\) 种），与结果一致。"
+      },
+      {
+        "id": "groups-ch02-q21",
+        "question": "设 \\(G\\) 是 \\(p\\)-群，\\(|G| = p^3\\)。由类方程可知 \\(|Z(G)|\\) 至少为多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(p\\)",
+        "\\(p^2\\)",
+        "\\(p^3\\)"
+        ],
+        "answer": 1,
+        "explanation": "类方程 \\(|G| = |Z(G)| + \\sum [G:C_G(g_i)]\\)，每个 \\([G:C_G(g_i)] \\geq p\\)。\\(|G| \\equiv |Z(G)| \\pmod{p}\\)，即 \\(0 \\equiv |Z(G)| \\pmod{p}\\)。因 \\(|Z(G)| \\geq 1\\)（含 \\(e\\)），故 \\(|Z(G)| \\geq p\\)。这是 \\(p\\)-群中心非平凡的关键结论。"
+      },
+      {
+        "id": "groups-ch02-q22",
+        "question": "在 \\(S_3\\) 中，设 \\(H = \\{e, (1\\;2)\\}\\)。左陪集 \\((1\\;3)H\\) 和右陪集 \\(H(1\\;3)\\) 是否相同？",
+        "options": [
+          "相同，均为 \\(\\{(1\\;3), (1\\;2\\;3)\\}\\)",
+        "相同，均为 \\(\\{(1\\;3), (1\\;3\\;2)\\}\\)",
+        "不同，\\((1\\;3)H = \\{(1\\;3), (1\\;2\\;3)\\}\\)，\\(H(1\\;3) = \\{(1\\;3), (1\\;3\\;2)\\}\\)",
+        "不同，\\((1\\;3)H = \\{(1\\;3), (1\\;3\\;2)\\}\\)，\\(H(1\\;3) = \\{(1\\;3), (1\\;2\\;3)\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\((1\\;3)H\\)：\\((1\\;3) \\cdot e = (1\\;3)\\)，\\((1\\;3)(1\\;2) = (1\\;2\\;3)\\)（\\(1 \\to 2 \\to 2,\\; 2 \\to 1 \\to 3,\\; 3 \\to 3 \\to 1\\)...验证得 \\((1\\;2\\;3)\\)）。\\(H(1\\;3)\\)：\\(e \\cdot (1\\;3) = (1\\;3)\\)，\\((1\\;2)(1\\;3) = (1\\;3\\;2)\\)。左右陪集不同，因 \\(H\\) 不是正规子群。"
+      },
+      {
+        "id": "groups-ch02-q23",
+        "question": "设 \\(H \\leq G\\)，\\(|G| = 30\\)，\\(|H| = 6\\)。若 \\(K \\leq H\\)，\\(|K| = 3\\)，则 \\([G:K]\\) 等于多少？",
+        "options": [
+          "\\(5\\)",
+        "\\(10\\)",
+        "\\(15\\)",
+        "\\(30\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([G:K] = |G|/|K| = 30/3 = 10\\)。也可用乘法性：\\([G:K] = [G:H] \\cdot [H:K] = (30/6) \\cdot (6/3) = 5 \\times 2 = 10\\)。"
+      },
+      {
+        "id": "groups-ch02-q24",
+        "question": "证明 \\(|G| = 7\\)（素数）的群 \\(G\\) 是循环群。关键推理是？",
+        "options": [
+          "取 \\(g \\neq e\\)，\\(\\mathrm{ord}(g) \\mid 7\\) 且 \\(\\mathrm{ord}(g) > 1\\)，故 \\(\\mathrm{ord}(g) = 7\\)，\\(G = \\langle g \\rangle\\)",
+        "\\(G\\) 是交换群所以是循环群",
+        "\\(G\\) 有唯一的生成元",
+        "素阶群的单位元就是生成元"
+        ],
+        "answer": 0,
+        "explanation": "Lagrange 定理：\\(\\mathrm{ord}(g) \\mid 7\\)。因 \\(7\\) 是素数，因子仅 \\(1\\) 和 \\(7\\)。\\(g \\neq e\\) 排除 \\(\\mathrm{ord}(g)=1\\)，故 \\(\\mathrm{ord}(g) = 7 = |G|\\)，\\(G = \\langle g \\rangle \\cong \\mathbb{Z}/7\\mathbb{Z}\\)。B 的推理不完整：交换群不一定循环。"
+      },
+      {
+        "id": "groups-ch02-q25",
+        "question": "设 \\(|G| = 35 = 5 \\times 7\\)。若 \\(G\\) 有唯一的 \\(5\\) 阶子群和唯一的 \\(7\\) 阶子群，则 \\(G\\) 同构于？",
+        "options": [
+          "\\(\\mathbb{Z}/35\\mathbb{Z}\\)",
+        "\\(D_5 \\times \\mathbb{Z}/7\\mathbb{Z}\\)",
+        "\\(S_5\\)",
+        "\\(A_5\\)"
+        ],
+        "answer": 0,
+        "explanation": "设 \\(P \\cong \\mathbb{Z}/5\\mathbb{Z}\\)，\\(Q \\cong \\mathbb{Z}/7\\mathbb{Z}\\)。唯一性意味着两者正规。\\(P \\cap Q = \\{e\\}\\)（阶互素），\\(|PQ| = |P||Q|/|P \\cap Q| = 35 = |G|\\)。故 \\(G = P \\times Q \\cong \\mathbb{Z}/5\\mathbb{Z} \\times \\mathbb{Z}/7\\mathbb{Z} \\cong \\mathbb{Z}/35\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "groups-ch02-q26",
+        "question": "在编码理论中，线性码 \\(C\\) 是 \\(\\mathbb{F}_2^4\\) 的加法子群。若 \\(|C| = 4\\)，则 \\(C\\) 有多少个陪集（即码字的等价类个数）？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([\\mathbb{F}_2^4 : C] = |\\mathbb{F}_2^4|/|C| = 16/4 = 4\\)。在编码理论中，这些陪集用于错误检测：每个陪集中的向量对应相同的\"综合征\"。Lagrange 定理保证了陪集个数为整数。"
+      },
+      {
+        "id": "groups-ch02-q27",
+        "question": "在化学中，苯分子 \\(\\text{C}_6\\text{H}_6\\) 的对称群 \\(D_6\\) 含四个子群 \\(\\{e\\}\\)、\\(C_2\\)、\\(C_3\\)、\\(C_6\\)（旋转子群）。\\(D_6\\) 的阶为 \\(12\\)，旋转子群 \\(C_6\\) 的指数 \\([D_6 : C_6]\\) 等于多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([D_6 : C_6] = |D_6|/|C_6| = 12/6 = 2\\)。指数为 \\(2\\) 意味着 \\(C_6 \\trianglelefteq D_6\\)（正规子群），这在分子对称性分析中意味着旋转操作构成一个\"本质\"对称子群，反射操作则形成另一个陪集。"
+      },
+      {
+        "id": "groups-ch02-q28",
+        "question": "Diffie-Hellman 密钥交换中使用群 \\((\\mathbb{Z}/p\\mathbb{Z})^*\\)（\\(p\\) 素数）。若 \\(p = 23\\)，该群的阶为多少？由 Lagrange 定理，任意元素 \\(g\\) 满足 \\(g^k = 1\\) 的最小正整数 \\(k\\) 必定整除什么？",
+        "options": [
+          "阶为 \\(23\\)，\\(k \\mid 23\\)",
+        "阶为 \\(22\\)，\\(k \\mid 22\\)",
+        "阶为 \\(22\\)，\\(k \\mid 23\\)",
+        "阶为 \\(23\\)，\\(k \\mid 22\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|(\\mathbb{Z}/p\\mathbb{Z})^*| = p - 1 = 22\\)。Lagrange 定理：\\(\\mathrm{ord}(g) \\mid 22\\)。因此 \\(g^{22} \\equiv 1 \\pmod{23}\\) 对所有 \\(g \\not\\equiv 0\\) 成立（这也是费马小定理的内容）。密钥安全性依赖于离散对数的计算困难性。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="groups"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/groups.html" class="module-name">群论 Groupes</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 子群的定义与判定法</a></li>
+      <li><a href="#kp2">02 · 中心、中心化子与正规化子</a></li>
+      <li><a href="#kp3">03 · 陪集与等价类划分</a></li>
+      <li><a href="#kp4">04 · Lagrange 定理及其推论</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>子群与陪集</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>子群的定义与判定法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群太大时，我们希望找到其中「自成一体」的小群——子群。 在解方程、分析对称性时，子群对应于部分对称性或约束条件。 子群判定法提供了高效的验证工具，避免逐条检查群公理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>子群是群结构的「遗传」：子集继承了母群的运算并自身构成群。 一步判定法 \(ab^{-1} \in H\) 将四条公理压缩为一个条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(H \subseteq G\) 是子群（记 \(H \leq G\)），若 \(H\) 关于 \(G\) 的运算自身构成群。 <strong>一步判定法</strong>：\(H \neq \emptyset\) 且 \(\forall a,b \in H,\; ab^{-1} \in H \Rightarrow H \leq G\)。 证明：取 \(a = b\) 得 \(e \in H\)；取 \(a = e\) 得 \(b^{-1} \in H\)； 再由 \(ab^{-1} \in H\) 取 \(b\) 换为 \(b^{-1}\) 得封闭性。 <strong>两步判定法</strong>：\(H \neq \emptyset\)，封闭且 \(a \in H \Rightarrow a^{-1} \in H\)。 <strong>生成子群</strong> \(\langle S \rangle\) = 包含 \(S\) 的最小子群 = \(S\) 中元素及其逆的所有有限乘积。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在编码理论中，线性码是 \(\mathbb{F}_q^n\) 的加法子群； 在化学中，分子点群的子群对应于部分对称操作。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(H = \{A \in GL_2(\mathbb{R}) : \det(A) > 0\}\) 是 \(GL_2(\mathbb{R})\) 的子群。 解答：\(I_2 \in H\)（\(\det(I_2)=1>0\)），\(H \neq \emptyset\)。 \(\det(AB^{-1}) = \det(A)/\det(B) > 0\)。由一步判定法，\(H \leq G\)。 易错点：忘记验证 \(H \neq \emptyset\)。空集满足 「\(\forall a,b \in H, ab^{-1} \in H\)」（空真命题）， 但空集不是子群。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">用一步判定法验证子群时，需要验证的条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。一步判定法同时包含非空条件和 \\(ab^{-1} \\in H\\)。')">A. \(\forall a,b \in H,\; ab \in H\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！一步判定法同时包含非空条件和 \\(ab^{-1} \\in H\\)。')">B. \(H \neq \emptyset\) 且 \(\forall a,b \in H,\; ab^{-1} \in H\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。一步判定法同时包含非空条件和 \\(ab^{-1} \\in H\\)。')">C. \(e \in H\) 且 \(H\) 关于运算封闭</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。一步判定法同时包含非空条件和 \\(ab^{-1} \\in H\\)。')">D. \(H\) 是 \(G\) 的非空子集</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>中心、中心化子与正规化子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定群中的一个元素或子集，哪些元素与它「交换」？哪些元素 「保持它不变」？这些问题产生了中心 \(Z(G)\)、中心化子 \(C_G(a)\) 和正规化子 \(N_G(H)\) 等重要子群概念，它们在分析群的内部结构时 反复出现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思想是「交换性的定量描述」——不是整个群都交换，而是精确 刻画哪些元素与给定对象交换，形成的子集恰好构成子群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>中心</strong>：\(Z(G) = \{z \in G : \forall g \in G,\; zg = gz\}\)。 \(Z(G) \trianglelefteq G\)（正规子群）。\(G\) 交换 \(\Leftrightarrow Z(G) = G\)。 <strong>中心化子</strong>：\(C_G(a) = \{g \in G : ga = ag\}\)。 \(C_G(a) \leq G\)（用一步判定法：\(g_1 a = a g_1,\; g_2 a = a g_2 \Rightarrow g_1 g_2^{-1} a = g_1 a g_2^{-1} = a g_1 g_2^{-1}\)）。 显然 \(Z(G) = \bigcap_{a \in G} C_G(a)\)。 <strong>正规化子</strong>：\(N_G(H) = \{g \in G : gHg^{-1} = H\}\)。 \(H \leq N_G(H) \leq G\)，且 \(H \trianglelefteq N_G(H)\)。 \(H \trianglelefteq G \Leftrightarrow N_G(H) = G\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(S_3\) 的中心 \(Z(S_3)\)。 解答：\(S_3 = \{e, (12), (13), (23), (123), (132)\}\)。 检查 \((12)\)：\((12)(123) = (23)\) 而 \((123)(12) = (13)\)，不相等。 故 \((12) \notin Z(S_3)\)。类似地所有非恒等元素都不与所有元素 交换。故 \(Z(S_3) = \{e\}\)。 易错点：误以为「中心总是非平凡的」。非交换群的中心可以是平凡的 （如 \(S_3\)）。但 \(p\)-群的中心一定非平凡（由类方程推出）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 \(G\) 为群，\(a \in G\)。下列哪个关系正确？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！与所有元素交换的（\\(Z(G)\\)）自然与 \\(a\\) 交换（\\(C_G(a)\\)），')">A. \(Z(G) \subseteq C_G(a) \subseteq N_G(\langle a \rangle)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。与所有元素交换的（\\(Z(G)\\)）自然与 \\(a\\) 交换（\\(C_G(a)\\)），')">B. \(C_G(a) \subseteq Z(G)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。与所有元素交换的（\\(Z(G)\\)）自然与 \\(a\\) 交换（\\(C_G(a)\\)），')">C. \(N_G(\langle a \rangle) \subseteq C_G(a)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。与所有元素交换的（\\(Z(G)\\)）自然与 \\(a\\) 交换（\\(C_G(a)\\)），')">D. \(Z(G) = C_G(a)\) 对所有 \(a\) 成立</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>陪集与等价类划分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定群 \(G\) 及子群 \(H\)，如何系统地「分解」\(G\)？陪集 \(aH\) 把 \(G\) 的元素按照与 \(H\) 的关系进行分组。这种划分是 Lagrange 定理的基础，也是构建商群的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>陪集本质是等价关系 \(a \sim b \Leftrightarrow a^{-1}b \in H\) 诱导的等价类。这把集合论中等价类划分的抽象框架应用到了群结构中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>左陪集</strong>：\(aH = \{ah : h \in H\}\)，<strong>右陪集</strong>：\(Ha\)。 定义等价关系 \(a \sim b \Leftrightarrow a^{-1}b \in H\)， 则 \([a] = aH\)。 <strong>等势性</strong>：映射 \(\varphi: H \to aH,\; h \mapsto ah\) 是双射， 故 \(|aH| = |H|\)。所有左陪集大小相同。 <strong>划分</strong>：\(G\) 被左陪集不交地划分： \[G = \bigsqcup_{i} a_i H\] 每个元素恰属于一个陪集。陪集个数称为<strong>指数</strong> \([G:H] = |G|/|H|\)（\(G\) 有限时）。 <strong>指数乘法性</strong>：若 \(K \leq H \leq G\)， 则 \([G:K] = [G:H] \cdot [H:K]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：列出 \(\mathbb{Z}\) 中子群 \(3\mathbb{Z}\) 的所有左陪集。 解答：\(0 + 3\mathbb{Z} = \{\ldots,-3,0,3,6,\ldots\}\)， \(1 + 3\mathbb{Z} = \{\ldots,-2,1,4,7,\ldots\}\)， \(2 + 3\mathbb{Z} = \{\ldots,-1,2,5,8,\ldots\}\)。 共 3 个陪集，\([\mathbb{Z}:3\mathbb{Z}] = 3\)。 易错点：以为 \(aH = Ha\) 对任意子群成立。 左右陪集相等当且仅当 \(H\) 是正规子群。一般情况下可能不同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 \(|G|=12\)，\(H \leq G\) 且 \(|H|=4\)，则 \([G:H] = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\([G:H] = |G|/|H| = 12/4 = 3\\)。')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\([G:H] = |G|/|H| = 12/4 = 3\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\([G:H] = |G|/|H| = 12/4 = 3\\)。')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\([G:H] = |G|/|H| = 12/4 = 3\\)。')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Lagrange 定理及其推论</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Lagrange 定理是有限群论最基本的结果：子群的阶必须整除群的阶。 这个简洁的整除关系立刻排除了大量子群不存在的可能性，并导出 素阶群是循环群等重要推论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lagrange 定理把群的「大小」问题翻译为「整除」问题，连接了 群论与初等数论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Lagrange 定理</strong>：若 \(H \leq G\)，\(G\) 有限，则 \[|H| \;\big|\; |G|\] 证明：由陪集划分 \(G = \bigsqcup_{i=1}^{[G:H]} a_i H\)， 且每个 \(|a_i H| = |H|\)，故 \(|G| = [G:H] \cdot |H|\)。 <strong>推论 1</strong>：\(\mathrm{ord}(g) \mid |G|\) （因为 \(\langle g \rangle \leq G\)，\(\mathrm{ord}(g) = |\langle g \rangle|\)）。 <strong>推论 2</strong>：\(g^{|G|} = e\)（因为 \(|G| = \mathrm{ord}(g) \cdot k\)）。 <strong>推论 3</strong>：素阶群 \(|G| = p\) 是循环群（除 \(e\) 外每个元素阶为 \(p\)）。 <strong>推论 4</strong>（Lagrange 逆不一定成立）：\(d \mid |G|\) 不保证存在 \(d\) 阶子群（\(A_4\) 无 6 阶子群）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在密码学中，Lagrange 定理保证了 Diffie-Hellman 群中元素的 阶整除群阶，从而可计算离散对数的搜索空间大小。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 7 阶群 \(G\) 是循环群。 解答：取 \(g \neq e\)，则 \(\mathrm{ord}(g) \mid 7\)，且 \(\mathrm{ord}(g) > 1\)。因为 7 是素数，\(\mathrm{ord}(g) = 7\)， 故 \(G = \langle g \rangle \cong \mathbb{Z}/7\mathbb{Z}\)。 易错点：误以为 Lagrange 定理的逆成立——即 \(d \mid |G|\) 就 存在 \(d\) 阶子群。反例：\(A_4\)（\(|A_4|=12\)）没有 6 阶子群。 （但 Sylow 定理保证素数幂阶子群存在。）</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 \(|G| = 35\)，\(g \in G\) 且 \(g \neq e\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ord}(g) \\mid 35\\)，故可能为 \\(1,5,7,35\\)。')">A. \(\{1, 5, 7, 35\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\mathrm{ord}(g) \\mid 35\\)，故可能为 \\(1,5,7,35\\)。')">B. \(\{5, 7, 35\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ord}(g) \\mid 35\\)，故可能为 \\(1,5,7,35\\)。')">C. \(\{1, 5, 7\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ord}(g) \\mid 35\\)，故可能为 \\(1,5,7,35\\)。')">D. 任意正整数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/algebra/groups.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

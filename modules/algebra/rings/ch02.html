@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 理想与商环 — 环与域论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "rings-ch02-q1",
+        "question": "在 \\(\\mathbb{Z}\\) 中，\\((6) + (10) = \\) ？",
+        "options": [
+          "\\((2)\\)",
+        "\\((60)\\)",
+        "\\((16)\\)",
+        "\\((6)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}\\) 中理想之和 \\((m)+(n)=(\\gcd(m,n))\\)。\\(\\gcd(6,10)=2\\)，故 \\((6)+(10)=(2)\\)。这是因为 \\(2=(-1)\\times6+1\\times10\\in(6)+(10)\\)，且 \\((2)\\) 包含 \\((6)\\) 和 \\((10)\\)。易错：将理想之和与理想之积混淆。"
+      },
+      {
+        "id": "rings-ch02-q2",
+        "question": "在 \\(\\mathbb{Z}\\) 中，\\((6) \\cap (10) = \\) ？",
+        "options": [
+          "\\((30)\\)",
+        "\\((2)\\)",
+        "\\((60)\\)",
+        "\\((6)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}\\) 中 \\((m)\\cap(n)=(\\mathrm{lcm}(m,n))\\)。\\(\\mathrm{lcm}(6,10)=30\\)，故 \\((6)\\cap(10)=(30)\\)。包含关系 \\((6)(10)=(60)\\subseteq(30)=(6)\\cap(10)\\subseteq(2)=(6)+(10)\\) 成立。"
+      },
+      {
+        "id": "rings-ch02-q3",
+        "question": "在 \\(\\mathbb{R}[x]/(x^2+1)\\) 中，\\(\\bar{x}^2 = \\) ？",
+        "options": [
+          "\\(-\\bar{1}\\)",
+        "\\(\\bar{1}\\)",
+        "\\(\\bar{x}\\)",
+        "\\(\\bar{0}\\)"
+        ],
+        "answer": 0,
+        "explanation": "在商环 \\(\\mathbb{R}[x]/(x^2+1)\\) 中，\\(\\bar{x}^2+\\bar{1}=\\overline{x^2+1}=\\bar{0}\\)，故 \\(\\bar{x}^2=-\\bar{1}\\)。这正是虚数单位 \\(i\\) 的性质，\\(\\mathbb{R}[x]/(x^2+1)\\cong\\mathbb{C}\\)。选 D 误以为 \\(\\bar{x}^2\\) 本身为零。"
+      },
+      {
+        "id": "rings-ch02-q4",
+        "question": "\\(R/\\mathfrak{m}\\) 是域当且仅当 \\(\\mathfrak{m}\\) 是什么？",
+        "options": [
+          "素理想",
+        "极大理想",
+        "主理想",
+        "零理想"
+        ],
+        "answer": 1,
+        "explanation": "\\(R/\\mathfrak{m}\\) 是域 \\(\\Leftrightarrow\\) \\(\\mathfrak{m}\\) 极大。\\(R/\\mathfrak{p}\\) 是整环 \\(\\Leftrightarrow\\) \\(\\mathfrak{p}\\) 是素理想。域是整环，故极大理想一定是素理想，但反之不一定。这是理想论中最重要的等价刻画之一。"
+      },
+      {
+        "id": "rings-ch02-q5",
+        "question": "\\(\\mathbb{Z}\\) 中 \\((5)\\) 是素理想吗？是极大理想吗？",
+        "options": [
+          "是素且极大",
+        "仅素非极大",
+        "仅极大非素",
+        "两者都不是"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}/(5)\\cong\\mathbb{Z}/5\\mathbb{Z}\\) 是域（\\(5\\) 素数），域是整环。商环是域 \\(\\Rightarrow\\) 极大 \\(\\Rightarrow\\) 素。\\(\\mathbb{Z}\\) 是 PID，PID 中非零素理想 \\(=\\) 极大理想。在 PID 中两者等价，但一般环中不等价。"
+      },
+      {
+        "id": "rings-ch02-q6",
+        "question": "由第三同构定理，\\((\\mathbb{Z}/6\\mathbb{Z})/(3\\mathbb{Z}/6\\mathbb{Z}) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(\\{0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(6\\mathbb{Z}\\subseteq3\\mathbb{Z}\\subseteq\\mathbb{Z}\\)。第三同构定理：\\((\\mathbb{Z}/6\\mathbb{Z})/(3\\mathbb{Z}/6\\mathbb{Z})\\cong\\mathbb{Z}/3\\mathbb{Z}\\)。\\(3\\mathbb{Z}/6\\mathbb{Z}=\\{\\bar{0},\\bar{3}\\}\\) 在 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 中阶 \\(2\\)，商环阶 \\(6/2=3\\)。"
+      },
+      {
+        "id": "rings-ch02-q7",
+        "question": "若 \\(\\varphi: R \\to S\\) 是满射环同态，\\(\\ker\\varphi = I\\)，则 \\(R/I \\cong \\) ？",
+        "options": [
+          "\\(S\\)",
+        "\\(R\\)",
+        "\\(I\\)",
+        "\\(\\ker\\varphi\\)"
+        ],
+        "answer": 0,
+        "explanation": "这是环的第一同构定理（同态基本定理）：\\(R/\\ker\\varphi\\cong\\mathrm{im}\\varphi\\)。\\(\\varphi\\) 满射时 \\(\\mathrm{im}\\varphi=S\\)，故 \\(R/I\\cong S\\)。这与群论中的第一同构定理完全类似，是代数学中最基本的工具。"
+      },
+      {
+        "id": "rings-ch02-q8",
+        "question": "\\(\\mathbb{Z}\\) 中 \\((6)(10)\\) = ？",
+        "options": [
+          "\\((60)\\)",
+        "\\((30)\\)",
+        "\\((2)\\)",
+        "\\((16)\\)"
+        ],
+        "answer": 0,
+        "explanation": "PID 中主理想之积 \\((a)(b)=(ab)\\)。\\((6)(10)=(6\\times10)=(60)\\)。注意 \\((60)\\subsetneq(30)=(6)\\cap(10)\\)，理想之积一般小于理想之交。\\((6)(10)\\) 由所有 \\(6a\\cdot10b\\) 之和生成，最小公倍数为 \\(60\\) 的元素。"
+      },
+      {
+        "id": "rings-ch02-q9",
+        "question": "\\(\\mathbb{Z}[x]/(x^2+1)\\) 中元素的一般形式是什么？",
+        "options": [
+          "\\(a+b\\bar{x}\\)，\\(a,b\\in\\mathbb{Z}\\)",
+        "任意次多项式",
+        "\\(a+b\\bar{x}+c\\bar{x}^2\\)，\\(a,b,c\\in\\mathbb{Z}\\)",
+        "仅整数"
+        ],
+        "answer": 0,
+        "explanation": "模 \\(x^2+1\\) 后 \\(\\bar{x}^2=-\\bar{1}\\)，高次项可化简。每个元素唯一表示为 \\(a+b\\bar{x}\\)（\\(a,b\\in\\mathbb{Z}\\)）。元素空间以 \\(\\{1,\\bar{x}\\}\\) 为 \\(\\mathbb{Z}\\)-基，\\(\\mathbb{Z}[x]/(x^2+1)\\cong\\mathbb{Z}[i]\\)。C 错：三维空间太大，\\(\\bar{x}^2\\) 可化简为 \\(-1\\)。"
+      },
+      {
+        "id": "rings-ch02-q10",
+        "question": "\\(\\mathbb{Z}[x]\\) 中 \\((x)\\) 的性质是什么？",
+        "options": [
+          "素且极大",
+        "仅素非极大",
+        "仅极大非素",
+        "两者都不是"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}[x]/(x)\\cong\\mathbb{Z}\\)。\\(\\mathbb{Z}\\) 是整环 \\(\\Rightarrow\\) \\((x)\\) 素。\\(\\mathbb{Z}\\) 不是域 \\(\\Rightarrow\\) \\((x)\\) 非极大。\\((x)\\subsetneq(2,x)\\subsetneq\\mathbb{Z}[x]\\) 说明 \\((x)\\) 不极大。这是素 \\(\\neq\\) 极大的经典例子，\\(\\mathbb{Z}[x]\\) 不是 PID。"
+      },
+      {
+        "id": "rings-ch02-q11",
+        "question": "\\((\\mathbb{Z}/12\\mathbb{Z})/(4\\mathbb{Z}/12\\mathbb{Z}) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/12\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(12\\mathbb{Z}\\subseteq4\\mathbb{Z}\\subseteq\\mathbb{Z}\\)。第三同构定理：\\((\\mathbb{Z}/12\\mathbb{Z})/(4\\mathbb{Z}/12\\mathbb{Z})\\cong\\mathbb{Z}/4\\mathbb{Z}\\)。\\(4\\mathbb{Z}/12\\mathbb{Z}=\\{\\bar{0},\\bar{4},\\bar{8}\\}\\) 阶 \\(3\\)，商环阶 \\(12/3=4\\)。等价于 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 模掉 \\(\\bar{4}\\) 生成的理想后得到 \\(\\mathbb{Z}/4\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "rings-ch02-q12",
+        "question": "第二同构定理：\\(I=(6), J=(10)\\) 在 \\(\\mathbb{Z}\\) 中。\\(I/(I\\cap J) \\cong (I+J)/J\\)，两边各同构于什么？",
+        "options": [
+          "\\(\\mathbb{Z}/5\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/15\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(I+J=(2)\\)，\\(I\\cap J=(30)\\)。\\(I/(I\\cap J)=(6)/(30)\\)，阶 \\(30/6=5\\)，\\(\\cong\\mathbb{Z}/5\\mathbb{Z}\\)。\\((I+J)/J=(2)/(10)\\)，阶 \\(10/2=5\\)，\\(\\cong\\mathbb{Z}/5\\mathbb{Z}\\)。两边均同构于 \\(\\mathbb{Z}/5\\mathbb{Z}\\)，验证了第二同构定理。"
+      },
+      {
+        "id": "rings-ch02-q13",
+        "question": "\\(\\mathbb{Z}\\) 中 \\((12) + (18) = \\) ？",
+        "options": [
+          "\\((6)\\)",
+        "\\((12)\\)",
+        "\\((36)\\)",
+        "\\((216)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((12)+(18)=(\\gcd(12,18))=(6)\\)。因为 \\(6=(-1)\\times12+1\\times18\\in(12)+(18)\\)，且 \\(6\\mid12\\) 和 \\(6\\mid18\\) 保证了包含关系。\\(\\gcd\\) 可用欧几里得算法：\\(18=1\\times12+6\\)，\\(12=2\\times6+0\\)，故 \\(\\gcd=6\\)。"
+      },
+      {
+        "id": "rings-ch02-q14",
+        "question": "商环 \\(\\mathbb{Q}[x]/(x^2-2)\\) 中 \\(\\bar{x}\\) 是否可逆？若可逆，\\(\\bar{x}^{-1} = \\) ？",
+        "options": [
+          "\\(\\bar{x}/2\\)",
+        "不可逆",
+        "\\(-\\bar{x}\\)",
+        "\\(\\bar{x}^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^2-2\\) 在 \\(\\mathbb{Q}\\) 上不可约（\\(\\sqrt{2}\\notin\\mathbb{Q}\\)），故 \\(\\mathbb{Q}[x]/(x^2-2)\\) 是域，非零元都可逆。\\(\\bar{x}\\cdot\\bar{x}/2=\\bar{x}^2/2=\\bar{2}/2=\\bar{1}\\)，故 \\(\\bar{x}^{-1}=\\bar{x}/2\\)。等价地 \\((\\sqrt{2})^{-1}=\\sqrt{2}/2\\)。"
+      },
+      {
+        "id": "rings-ch02-q15",
+        "question": "以下哪个是「素但不极大」理想的例子？",
+        "options": [
+          "\\(\\mathbb{Z}\\) 中 \\((6)\\)",
+        "\\(\\mathbb{Z}[x]\\) 中 \\((x)\\)",
+        "\\(\\mathbb{Z}\\) 中 \\((5)\\)",
+        "\\(\\mathbb{Z}\\) 中 \\((4)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}[x]/(x)\\cong\\mathbb{Z}\\) 整环但非域，\\((x)\\) 素非极大。A：\\(\\mathbb{Z}/(6)\\) 有零因子（\\(\\bar{2}\\cdot\\bar{3}=\\bar{0}\\)），非素。C：\\(\\mathbb{Z}/(5)\\) 是域，\\((5)\\) 既素又极大。D：\\(\\mathbb{Z}/(4)\\) 有零因子（\\(\\bar{2}^2=\\bar{0}\\)），非素。易错：PID 中非零素 \\(=\\) 极大，但 \\(\\mathbb{Z}[x]\\) 非 PID。"
+      },
+      {
+        "id": "rings-ch02-q16",
+        "question": "\\(\\mathbb{Z}[x]/(x,2) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}[x]/(x)\\)",
+        "\\(\\{0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((x)\\subseteq(x,2)\\)。第三定理：\\(\\mathbb{Z}[x]/(x,2)\\cong(\\mathbb{Z}[x]/(x))/((x,2)/(x))\\cong\\mathbb{Z}/2\\mathbb{Z}\\)。或直接：模 \\(x\\) 令 \\(x=0\\) 得 \\(\\mathbb{Z}\\)，再模 \\(2\\) 得 \\(\\mathbb{Z}/2\\mathbb{Z}\\)。\\((x,2)\\) 是 \\(\\mathbb{Z}[x]\\) 的极大理想（商环为域 \\(\\mathbb{F}_2\\)）。"
+      },
+      {
+        "id": "rings-ch02-q17",
+        "question": "在 \\(\\mathbb{Z}/6\\mathbb{Z}\\) 中，\\(\\bar{3}\\) 生成的理想 \\((\\bar{3})\\) 等于？",
+        "options": [
+          "\\(\\{\\bar{0}, \\bar{3}\\}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(\\{\\bar{0}\\}\\)",
+        "\\(\\{\\bar{0}, \\bar{2}, \\bar{4}\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\bar{3})=\\{n\\bar{3}:n\\in\\mathbb{Z}\\}=\\{\\bar{0},\\bar{3}\\}\\)（因 \\(2\\cdot\\bar{3}=\\bar{0}\\)，\\(3\\cdot\\bar{3}=\\bar{3}\\)，周期为 \\(2\\)）。作为加法群 \\((\\bar{3})\\cong\\mathbb{Z}/2\\mathbb{Z}\\)，有 \\(2\\) 个元素。B 错：\\(\\bar{1}\\notin(\\bar{3})\\)，因 \\(\\gcd(3,6)=3\\neq1\\)。"
+      },
+      {
+        "id": "rings-ch02-q18",
+        "question": "高斯整数环 \\(\\mathbb{Z}[i]\\) 中，商环 \\(\\mathbb{Z}[i]/(2+i)\\) 有多少个元素？",
+        "options": [
+          "\\(5\\)",
+        "\\(4\\)",
+        "\\(2\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N(2+i)=|2+i|^2=4+1=5\\)，素数。\\(2+i\\) 是高斯素数，\\(\\mathbb{Z}[i]/(2+i)\\cong\\mathbb{F}_5\\)，有 \\(5\\) 个元素。一般地 \\(\\mathbb{Z}[i]/(\\pi)\\cong\\mathbb{F}_{N(\\pi)}\\) 当 \\(\\pi\\) 为高斯素数。元素为 \\(\\{\\bar{0},\\bar{1},\\bar{2},\\bar{3},\\bar{4}\\}\\)。"
+      },
+      {
+        "id": "rings-ch02-q19",
+        "question": "商环 \\(\\mathbb{R}[x]/(x^3-x)\\) 同构于什么？",
+        "options": [
+          "\\(\\mathbb{R}^3\\)",
+        "\\(\\mathbb{R} \\times \\mathbb{C}\\)",
+        "\\(\\mathbb{R}[x]/(x^3)\\)",
+        "\\(M_3(\\mathbb{R})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^3-x=x(x-1)(x+1)\\)，三个互素一次因子。由 CRT：\\(\\mathbb{R}[x]/(x(x-1)(x+1))\\cong\\mathbb{R}[x]/(x)\\times\\mathbb{R}[x]/(x-1)\\times\\mathbb{R}[x]/(x+1)\\cong\\mathbb{R}\\times\\mathbb{R}\\times\\mathbb{R}=\\mathbb{R}^3\\)。C 错：\\((x^3)\\) 与 \\((x^3-x)\\) 完全不同。"
+      },
+      {
+        "id": "rings-ch02-q20",
+        "question": "\\(\\mathbb{Z}[x]\\) 中 \\((x,3)\\) 是极大理想吗？",
+        "options": [
+          "是（商环为 \\(\\mathbb{F}_3\\)）",
+        "仅是素理想",
+        "两者都不是",
+        "是主理想"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}[x]/(x,3)\\cong(\\mathbb{Z}[x]/(x))/(3)\\cong\\mathbb{Z}/3\\mathbb{Z}=\\mathbb{F}_3\\)。\\(\\mathbb{F}_3\\) 是域 \\(\\Rightarrow\\) \\((x,3)\\) 极大。D 错：\\((x,3)\\) 不是主理想——若 \\((x,3)=(f)\\)，则 \\(f\\mid x\\) 且 \\(f\\mid3\\)，\\(f\\) 只能是常数 \\(\\pm1\\)，但 \\((1)=\\mathbb{Z}[x]\\neq(x,3)\\)。"
+      },
+      {
+        "id": "rings-ch02-q21",
+        "question": "\\(\\mathbb{Z}[x]/(x^2+1, 3) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{F}_9\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{F}_3 \\times \\mathbb{F}_3\\)",
+        "\\(\\mathbb{Z}[i]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}[x]/(x^2+1,3)\\cong\\mathbb{F}_3[x]/(x^2+1)\\)。在 \\(\\mathbb{F}_3\\) 中检验 \\(x^2+1\\)：\\(0^2+1=1\\)，\\(1^2+1=2\\)，\\(2^2+1=2\\)，无根 \\(\\Rightarrow\\) 不可约。\\(\\mathbb{F}_3[x]/(x^2+1)\\cong\\mathbb{F}_{3^2}=\\mathbb{F}_9\\)。若 \\(p\\equiv3\\pmod{4}\\) 则 \\(x^2+1\\) 在 \\(\\mathbb{F}_p\\) 上不可约。"
+      },
+      {
+        "id": "rings-ch02-q22",
+        "question": "\\(\\mathbb{F}_2[x]/(x^2+1)\\) 是域吗？",
+        "options": [
+          "是",
+        "否，\\(x^2+1=(x+1)^2\\) 在 \\(\\mathbb{F}_2\\) 上可约",
+        "否，\\(\\mathbb{F}_2\\) 不是域",
+        "是，因为 \\(x^2+1\\) 不可约"
+        ],
+        "answer": 1,
+        "explanation": "在特征 \\(2\\) 中 \\(x^2+1=x^2+2x+1=(x+1)^2\\)。\\((x+1)^2\\) 可约，\\(\\mathbb{F}_2[x]/(x+1)^2\\) 有幂零元 \\(\\overline{x+1}^2=\\bar{0}\\)，不是整环，更不是域。易错：以为 \\(x^2+1\\) 在任何域上都不可约——特征 \\(2\\) 时 \\(-1=1\\)，\\(x^2+1=x^2-1=(x-1)^2\\)。"
+      },
+      {
+        "id": "rings-ch02-q23",
+        "question": "\\(\\mathbb{Z}\\) 中 \\((4)+(6,x)\\) 在 \\(\\mathbb{Z}[x]\\) 中等于什么？",
+        "options": [
+          "\\((2,x)\\)",
+        "\\((4,6,x)\\)",
+        "\\((12,x)\\)",
+        "\\(\\mathbb{Z}[x]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((4)+(6,x)=(4,6,x)\\)。\\(\\gcd(4,6)=2\\)，\\(2=(-1)\\times4+1\\times6\\in(4,6)\\)。故 \\((4,6,x)=(2,x)\\)。\\((2,x)\\) 是 \\(\\mathbb{Z}[x]\\) 中由 \\(2\\) 和 \\(x\\) 生成的理想。含所有常数项为偶数的多项式。D 错：\\(1\\notin(2,x)\\)。"
+      },
+      {
+        "id": "rings-ch02-q24",
+        "question": "\\(\\mathbb{Z}[\\sqrt{2}]/(7) \\cong \\) ？",
+        "options": [
+          "\\(\\mathbb{F}_7 \\times \\mathbb{F}_7\\)",
+        "\\(\\mathbb{F}_{49}\\)",
+        "\\(\\mathbb{Z}/7\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/49\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}[\\sqrt{2}]\\cong\\mathbb{Z}[x]/(x^2-2)\\)，故 \\(\\mathbb{Z}[\\sqrt{2}]/(7)\\cong\\mathbb{F}_7[x]/(x^2-2)\\)。在 \\(\\mathbb{F}_7\\) 中 \\(3^2=9\\equiv2\\)，\\(4^2=16\\equiv2\\)，故 \\(x^2-2=(x-3)(x-4)\\)。CRT：\\(\\mathbb{F}_7[x]/((x-3)(x-4))\\cong\\mathbb{F}_7\\times\\mathbb{F}_7\\)。\\(7\\) 在 \\(\\mathbb{Z}[\\sqrt{2}]\\) 中分裂。"
+      },
+      {
+        "id": "rings-ch02-q25",
+        "question": "积环 \\(R \\times S\\) 的理想的一般形式是什么？",
+        "options": [
+          "\\(I \\times J\\)（\\(I \\triangleleft R, J \\triangleleft S\\)）",
+        "仅 \\(R \\times S\\) 和 \\(\\{(0,0)\\}\\)",
+        "\\(R \\times J\\)（\\(J \\triangleleft S\\)）",
+        "对角形式 \\(\\{(a,a): a \\in I\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "积环的理想恰好形如 \\(I\\times J\\)，\\(I\\) 是 \\(R\\) 的理想，\\(J\\) 是 \\(S\\) 的理想。证明：设 \\(K\\) 是 \\(R\\times S\\) 的理想，\\(I=\\{a:(a,b)\\in K\\}\\)，\\(J=\\{b:(a,b)\\in K\\}\\)。\\((1,0)(a,b)=(a,0)\\in K\\) 且 \\((0,1)(a,b)=(0,b)\\in K\\)，故 \\(K=I\\times J\\)。"
+      },
+      {
+        "id": "rings-ch02-q26",
+        "question": "编码理论中，循环码是 \\(\\mathbb{F}_2[x]/(x^7-1)\\) 的理想。\\(x^7-1=(x+1)(x^3+x+1)(x^3+x^2+1)\\) 在 \\(\\mathbb{F}_2\\) 上。该环有多少个理想？",
+        "options": [
+          "\\(8\\)",
+        "\\(4\\)",
+        "\\(7\\)",
+        "\\(3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^7-1\\) 有 \\(3\\) 个不可约因子。由 CRT，\\(\\mathbb{F}_2[x]/(x^7-1)\\cong\\mathbb{F}_2\\times\\mathbb{F}_8\\times\\mathbb{F}_8\\)。每个域只有 \\(\\{0\\}\\) 和全域两个理想，积环的理想数 \\(=2\\times2\\times2=8\\)。每个理想对应一个生成多项式 \\(g(x)\\mid(x^7-1)\\)，共 \\(2^3=8\\) 个因式（含 \\(1\\) 和 \\(x^7-1\\)）。"
+      },
+      {
+        "id": "rings-ch02-q27",
+        "question": "计算机代数中 \\(\\mathbb{Q}[x]/(x^2-1)\\) 里 \\((x+1)^3\\) 化简为？",
+        "options": [
+          "\\(4\\bar{x}+4\\)",
+        "\\(\\bar{x}+1\\)",
+        "\\(\\bar{8}\\)",
+        "\\(\\bar{0}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((x+1)^3=x^3+3x^2+3x+1\\)。模 \\(x^2-1\\)：\\(x^2\\equiv1\\)，\\(x^3\\equiv x\\)。代入：\\(x+3+3x+1=4x+4\\)。\\(\\mathbb{Q}[x]/(x^2-1)\\cong\\mathbb{Q}\\times\\mathbb{Q}\\)（\\(x^2-1=(x-1)(x+1)\\)），\\((x+1)^3\\) 对应 \\((0^3, 2^3)=(0,8)\\)，即 \\(4x+4\\)。"
+      },
+      {
+        "id": "rings-ch02-q28",
+        "question": "代数几何中 \\(k[x,y]/(y-x^2)\\) 中 \\(\\bar{y}\\) 值可用 \\(\\bar{x}\\) 表示为？",
+        "options": [
+          "\\(\\bar{x}^2\\)",
+        "\\(\\bar{x}\\)",
+        "\\(\\bar{0}\\)",
+        "\\(\\bar{y}\\) 不可化简"
+        ],
+        "answer": 0,
+        "explanation": "\\(y-x^2\\in(y-x^2)\\)，故 \\(\\bar{y}=\\bar{x}^2\\)。\\(k[x,y]/(y-x^2)\\cong k[x]\\)（\\(y\\) 被 \\(x^2\\) 替代）。这对应抛物线 \\(y=x^2\\) 的坐标环，是仿射簇的代数刻画。商环\"消除\"了 \\(y\\) 的独立性，用 \\(x\\) 就够了。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="rings"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/rings.html" class="module-name">环与域论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 理想的定义与运算</a></li>
+      <li><a href="#kp2">02 · 商环的构造</a></li>
+      <li><a href="#kp3">03 · 素理想与极大理想</a></li>
+      <li><a href="#kp4">04 · 同态定理组</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>理想与商环</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>理想的定义与运算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>正规子群对应商群。在环论中，「具有吸收性的子环」就是理想。 理想是构造商环 \(R/I\) 的工具，类似于整数中“模 \(n\)”运算。 理解理想是环论的核心，因为它控制了环的「商」行为。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>理想是环中「对乘法封闭」的加法子群，其地位等同于群论中的正规子群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>左理想</strong>: \(I \subseteq R\)，\(\forall r \in R, a \in I: ra \in I\)。 <strong>右理想</strong>: \(aR \subseteq I\)。<strong>双边理想</strong>: 左右均成立。 交换环中三者相同。 <strong>类型</strong>: 主理想 \((a) = Ra\)，极大理想，素理想。 <strong>理想运算</strong>: \(I + J = \{a + b : a \in I, b \in J\}\)， \(IJ = \{\sum a_i b_i : a_i \in I, b_i \in J\}\)， \(I \cap J\)。 \[IJ \subseteq I \cap J \subseteq I + J\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{Z}\) 中 \((6) + (10) = ?\)，\((6)(10) = ?\)，\((6) \cap (10) = ?\) 解答: \((6) + (10) = (\gcd(6,10)) = (2)\)。 \((6)(10) = (60)\)。\((6) \cap (10) = (\mathrm{lcm}(6,10)) = (30)\)。 验证: \((60) \subseteq (30) \subseteq (2)\)。✓ 易错点: 混淆 \(I \cdot J\) 和 \(I \cap J\)。 \(IJ \neq I \cap J\)（一般 \(IJ \subsetneq I \cap J\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{Z}\) 中 \((4) + (6) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\((4) + (6) = (\\gcd(4,6)) = (2)\\)。')">A. \((2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((4) + (6) = (\\gcd(4,6)) = (2)\\)。')">B. \((10)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((4) + (6) = (\\gcd(4,6)) = (2)\\)。')">C. \((24)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((4) + (6) = (\\gcd(4,6)) = (2)\\)。')">D. \((12)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>商环的构造</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>将整个理想 \(I\) 「压缩」为零，得到的商环 \(R/I\) 反映了 \(R\) 模掉 \(I\) 后的结构。就像 \(\mathbb{Z}/n\mathbb{Z}\) 是模 \(n\) 算术一样，\(R/I\) 是环论中构造 新环的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>商环</strong>: \(R/I = \{a + I : a \in R\}\)。 运算: \((a+I) + (b+I) = (a+b) + I\)，\((a+I)(b+I) = ab + I\)。 良定义性: 需 \(I\) 是理想（不仅是子环）。 <strong>自然同态</strong>: \(\pi: R \to R/I\)，\(\pi(a) = a + I\)。 \(\ker \pi = I\)。 <strong>对应定理</strong>: \(R/I\) 的理想与 \(R\) 中包含 \(I\) 的理想一一对应: \[\{J : I \subseteq J \subseteq R\} \longleftrightarrow \{\bar{J} : \bar{J} \subseteq R/I\}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{Z}[x]/(x^2 + 1)\) 是什么环？ 解答: 在 \(\mathbb{Z}[x]/(x^2+1)\) 中，\(\bar{x}^2 = -1\)。 元素形如 \(a + b\bar{x}\)，运算类似复数。 但它不是域（因为 \(\mathbb{Z}\) 不是域）。 若用 \(\mathbb{R}[x]/(x^2+1)\)，则得到 \(\mathbb{C}\)。 易错点: 在商环中直接写 \(x\) 而不是 \(\bar{x}\)， 模糊了原环和商环的元素。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}[x]/(x^2+1)\) 同构于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\bar{x}\\) 满足 \\(\\bar{x}^2 = -1\\)，即 \\(\\bar{x} = i\\)，\\(\\mathbb{R}[x]/(x^2+1) \\cong \\mathbb{C}\\)。')">A. \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\bar{x}\\) 满足 \\(\\bar{x}^2 = -1\\)，即 \\(\\bar{x} = i\\)，\\(\\mathbb{R}[x]/(x^2+1) \\cong \\mathbb{C}\\)。')">B. \(\mathbb{C}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\bar{x}\\) 满足 \\(\\bar{x}^2 = -1\\)，即 \\(\\bar{x} = i\\)，\\(\\mathbb{R}[x]/(x^2+1) \\cong \\mathbb{C}\\)。')">C. \(\mathbb{R}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\bar{x}\\) 满足 \\(\\bar{x}^2 = -1\\)，即 \\(\\bar{x} = i\\)，\\(\\mathbb{R}[x]/(x^2+1) \\cong \\mathbb{C}\\)。')">D. \(\mathbb{R}[x]\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>素理想与极大理想</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>整数中素数 \(p\) 的「环论翻译」是素理想，而极大理想描述「最大的非平凡」 包含关系。素理想对应商环是整环，极大理想对应商环是域。 这两个概念是理解环结构的关键工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>素理想抽象了「素数」的整除性质，极大理想抽象了「不可分解」的性质。 在 PID 中两者等价，但一般不等价。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>素理想</strong>: \(\mathfrak{p} \neq R\)，\(ab \in \mathfrak{p} \Rightarrow a \in \mathfrak{p}\) 或 \(b \in \mathfrak{p}\)。 等价: \(R/\mathfrak{p}\) 是整环。 <strong>极大理想</strong>: \(\mathfrak{m} \neq R\)，且不存在理想 \(J\) 使 \(\mathfrak{m} \subsetneq J \subsetneq R\)。 等价: \(R/\mathfrak{m}\) 是域。 <strong>关系</strong>: \[\mathfrak{m} \text{ 极大} \Rightarrow \mathfrak{m} \text{ 素}\] 因为域是整环。反之不一定成立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>代数几何: 素理想对应代数簇的不可约子簇。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{Z}\) 中 \((6)\) 是素理想吗？\((5)\) 呢？ 解答: \((6)\): \(2 \cdot 3 \in (6)\)，但 \(2 \notin (6), 3 \notin (6)\)。不是素理想。 \((5)\): \(\mathbb{Z}/(5) \cong \mathbb{Z}/5\mathbb{Z}\) 是域，故 \((5)\) 是极大理想，因而也是素理想。 易错点: 在非 PID 中以为素理想 = 极大理想。 \(\mathbb{Z}[x]\) 中 \((x)\) 是素理想但不是极大理想 （因为 \((x) \subsetneq (2, x) \subsetneq \mathbb{Z}[x]\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(R/\mathfrak{m}\) 是域意味着 \(\mathfrak{m}\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。商环为域 \\(\\Leftrightarrow\\) 极大理想。商环为整环 \\(\\Leftrightarrow\\) 素理想。')">A. 素理想</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！商环为域 \\(\\Leftrightarrow\\) 极大理想。商环为整环 \\(\\Leftrightarrow\\) 素理想。')">B. 极大理想</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。商环为域 \\(\\Leftrightarrow\\) 极大理想。商环为整环 \\(\\Leftrightarrow\\) 素理想。')">C. 主理想</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。商环为域 \\(\\Leftrightarrow\\) 极大理想。商环为整环 \\(\\Leftrightarrow\\) 素理想。')">D. 零理想</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>同态定理组</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群的同构定理有三个，环也类似。第一同构定理已见（同态基本定理）， 第二、三定理描述了商环之间的关系，是分析环结构的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>第一同构定理</strong>: \(R/\ker\varphi \cong \mathrm{im}\varphi\)。 <strong>第二同构定理</strong>: 若 \(I, J\) 是 \(R\) 的理想，则 \[I/(I \cap J) \cong (I + J)/J\] <strong>第三同构定理</strong>: 若 \(I \subseteq J\)，则 \[(R/I)/(J/I) \cong R/J\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用第三同构定理证 \(\mathbb{Z}[x]/(x, 2) \cong \mathbb{Z}/2\mathbb{Z}\)。 解答: \((x) \subseteq (x, 2)\)。 \(\mathbb{Z}[x]/(x) \cong \mathbb{Z}\)（令 \(x=0\)）。 \((x, 2)/(x) \cong (2) = 2\mathbb{Z}\)（在 \(\mathbb{Z}\) 中）。 由第三定理: \(\mathbb{Z}[x]/(x, 2) \cong (\mathbb{Z}[x]/(x)) / ((x,2)/(x)) \cong \mathbb{Z}/2\mathbb{Z}\)。 易错点: 直接写 \(\mathbb{Z}[x]/(x, 2) \cong \mathbb{Z}/2\mathbb{Z}\) 而不经过严格推导——需要明确商环的中间步骤。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(I \subseteq J \subseteq R\)，则 \((R/I)/(J/I) \cong\) ?</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是第三同构定理。')">A. \(R/I\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！这是第三同构定理。')">B. \(R/J\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是第三同构定理。')">C. \(J/I\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是第三同构定理。')">D. \(I/J\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/algebra/rings.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

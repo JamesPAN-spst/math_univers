@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 非凸优化与现代方法 — 优化理论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "optimization-ch06-q1",
+        "question": "非凸函数的局部极小点和全局极小点有什么关系？",
+        "options": [
+          "局部极小不一定是全局极小——非凸函数可有多个局部极小",
+        "局部极小一定是全局极小",
+        "非凸函数无局部极小",
+        "全局极小不存在"
+        ],
+        "answer": 0,
+        "explanation": "凸函数\"任何局部极小=全局极小\"。非凸函数打破这个性质：\\(f(x)=x^4-2x^2\\) 有两个局部极小 \\(x=\\pm 1\\) 且 \\(f(\\pm 1)=-1\\) 是（并列)全局极小，还有局部极大 \\(x=0\\)。非凸景观中一阶方法只能保证收敛到局部极小或鞍点，不保证全局。"
+      },
+      {
+        "id": "optimization-ch06-q2",
+        "question": "鞍点(saddle point)的定义——在鞍点处 Hessian 有什么性质？",
+        "options": [
+          "Hessian 不定（有正有负特征值）——某些方向上升，某些方向下降",
+        "Hessian 正定",
+        "Hessian 负定",
+        "梯度不为零"
+        ],
+        "answer": 0,
+        "explanation": "驻点 \\(\\nabla f=0\\) 分三类：极小（\\(\\nabla^2 f\\succ 0\\)）、极大（\\(\\nabla^2 f\\prec 0\\)）、鞍点（\\(\\nabla^2 f\\) 不定）。高维中大多数驻点是鞍点——随机矩阵理论表明 \\(n\\) 维函数约有 \\(n-1\\) 个负特征值方向比 0 更多可能。深度学习中鞍点远多于局部极小。"
+      },
+      {
+        "id": "optimization-ch06-q3",
+        "question": "SGD (随机梯度下降) 用 mini-batch 梯度 \\(g_t=\\frac{1}{|B|}\\sum_{i\\in B}\\nabla f_i(x_t)\\) 代替全梯度。\\(g_t\\) 的核心性质是？",
+        "options": [
+          "无偏估计：\\(\\mathbb{E}[g_t]=\\nabla f(x_t)\\)",
+        "\\(g_t=\\nabla f(x_t)\\)（精确等于全梯度）",
+        "\\(g_t\\) 是有偏估计",
+        "\\(g_t\\) 与 \\(\\nabla f\\) 无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x)=\\frac{1}{n}\\sum_{i=1}^n f_i(x)\\)。\\(B\\) 均匀随机采样时 \\(\\mathbb{E}[g_t]=\\nabla f(x_t)\\)。方差 \\(\\text{Var}(g_t)=\\frac{\\sigma^2}{|B|}\\)。\\(|B|\\) 大→方差小但计算贵；\\(|B|\\) 小→方差大但每步快。噪声的好处：(1) 逃逸鞍点；(2) 隐式正则化（倾向平坦极小）。坏处：需要衰减学习率或方差缩减。"
+      },
+      {
+        "id": "optimization-ch06-q4",
+        "question": "SGD 在凸、\\(L\\)-光滑、方差 \\(\\sigma^2\\) 条件下，学习率 \\(\\eta=1/\\sqrt{T}\\) 时的收敛率？",
+        "options": [
+          "\\(\\mathbb{E}[f(\\bar{x}_T)-f^*]=O(1/\\sqrt{T})\\)（比 GD 的 \\(O(1/T)\\) 慢）",
+        "\\(O(1/T)\\)",
+        "\\(O(1/T^2)\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "SGD 凸情形下 \\(\\mathbb{E}[f(\\bar{x}_T)-f^*]\\leq \\frac{\\|x_0-x^*\\|^2}{2\\eta T}+\\frac{\\eta\\sigma^2}{2}\\)。取 \\(\\eta=\\frac{\\|x_0-x^*\\|}{\\sigma\\sqrt{T}}\\) 得 \\(O(\\sigma/\\sqrt{T})\\)。比全梯度 GD 慢（\\(O(1/T)\\)），因为噪声方差不衰减。但 SGD 每步 \\(O(|B|)\\) 比 GD \\(O(n)\\) 便宜。总计算量常认为 SGD 更优。"
+      },
+      {
+        "id": "optimization-ch06-q5",
+        "question": "Adam 优化器结合了哪两种思想？",
+        "options": [
+          "动量(momentum)一阶矩估计 + RMSProp 二阶矩自适应学习率",
+        "只有动量",
+        "只有自适应学习率",
+        "Newton 法 + SGD"
+        ],
+        "answer": 0,
+        "explanation": "Adam: \\(m_t=\\beta_1 m_{t-1}+(1-\\beta_1)g_t\\)（一阶矩/动量），\\(v_t=\\beta_2 v_{t-1}+(1-\\beta_2)g_t^2\\)（二阶矩）。偏差校正：\\(\\hat{m}_t=m_t/(1-\\beta_1^t)\\), \\(\\hat{v}_t=v_t/(1-\\beta_2^t)\\)。更新：\\(x_{t+1}=x_t-\\eta\\hat{m}_t/(\\sqrt{\\hat{v}_t}+\\epsilon)\\)。默认 \\(\\beta_1=0.9, \\beta_2=0.999, \\epsilon=10^{-8}\\)。"
+      },
+      {
+        "id": "optimization-ch06-q6",
+        "question": "Polyak-Łojasiewicz (PL) 条件 \\(\\|\\nabla f(x)\\|^2\\geq 2\\mu(f(x)-f^*)\\) 是强凸条件的推广。PL 成立但不要求什么？",
+        "options": [
+          "不要求凸性——PL 函数可以非凸但仍保证 GD 线性收敛到全局极小",
+        "不要求可微",
+        "不要求梯度存在",
+        "不要求极小存在"
+        ],
+        "answer": 0,
+        "explanation": "强凸→PL，但 PL\\(\\not\\Rightarrow\\) 凸。例：\\(f(x)=x^2(2-x)^2/4\\) 非凸但满足 PL（两个全局极小 \\(0,2\\) 同值 \\(0\\)）。PL 保证 GD 以 \\(f(x_k)-f^*\\leq(1-\\mu\\eta)^k(f(x_0)-f^*)\\) 线性收敛。深度学习中，过参数化网络在某些条件下满足 PL——这解释了 SGD 的快速收敛。"
+      },
+      {
+        "id": "optimization-ch06-q7",
+        "question": "\\(f(x)=\\sin(x)+x^2/10\\) 在 \\([-10,10]\\) 上有多少个局部极小？",
+        "options": [
+          "多个（约3-4个），因为 \\(\\sin\\) 的振荡与 \\(x^2/10\\) 的凹凸竞争",
+        "恰好1个",
+        "0个",
+        "无穷多个"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(x)=\\cos x+x/5=0\\)。\\(\\cos x=-x/5\\)。画图：\\(\\cos x\\) 在 \\([-10,10]\\) 间振荡 \\(\\sim 3\\) 周, 而 \\(-x/5\\) 是直线。交点约 6-7 个（驻点）。其中一半是极小，一半极大。大致 3-4 个局部极小。\\(x^2/10\\) 使远离原点的极小值更大——全局极小在 \\(x\\approx 0\\) 附近。非凸景观的典型例子。"
+      },
+      {
+        "id": "optimization-ch06-q8",
+        "question": "\\(f(x,y)=x^2-y^2\\) 在原点是鞍点。GD 从 \\((0.01, 0.01)\\) 出发，步长 \\(\\eta=0.1\\)。经若干步后 \\(x\\) 和 \\(y\\) 分量的演化趋势？",
+        "options": [
+          "\\(x\\) 趋向0（沿正曲率方向收缩），\\(y\\) 指数发散（沿负曲率方向放大）——GD 沿不稳定方向逃逸",
+        "两者都趋向0",
+        "两者都发散",
+        "收敛到 \\((1,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla f=(2x,-2y)\\)。\\(x_{t+1}=x_t-0.2x_t=0.8x_t\\), \\(y_{t+1}=y_t+0.2y_t=1.2y_t\\)。\\(x\\) 以 \\(0.8^t\\) 衰减, \\(y\\) 以 \\(1.2^t\\) 增长！GD 在鞍点附近不稳定——沿负曲率方向微小扰动被放大。好消息：GD 自然逃逸鞍点（只要初始不恰好在稳定流形上）。但\"逼近\"鞍点时可能非常慢（需 \\(O(1/\\epsilon)\\) 步）。"
+      },
+      {
+        "id": "optimization-ch06-q9",
+        "question": "mini-batch 大小 \\(|B|\\) 从 32 增到 320。SGD 梯度估计的方差变化和对学习率的影响？",
+        "options": [
+          "方差减小 10 倍 → 可用更大学习率（线性缩放规则: \\(\\eta\\propto |B|\\)）",
+        "方差不变",
+        "方差增大",
+        "需要更小学习率"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(g_B)=\\sigma^2/|B|\\)。\\(|B|\\) 增 10x → 方差减 10x。线性缩放规则(Goyal et al. 2017): \\(|B|\\) 增大 \\(k\\) 倍 → \\(\\eta\\) 也增大 \\(k\\) 倍，保持\"噪声对信号比\" \\(\\eta^2\\text{Var}\\sim\\eta^2\\sigma^2/|B|\\) 不变。实际中大 batch 还需 warmup（前几步小\\(\\eta\\)然后线性增大）避免发散。"
+      },
+      {
+        "id": "optimization-ch06-q10",
+        "question": "Adam 中偏差校正 \\(\\hat{m}_t=m_t/(1-\\beta_1^t)\\) 的作用是什么？\\(t=1\\) 时校正系数多大？",
+        "options": [
+          "消除零初始化导致的偏差；\\(t=1\\)时 \\(1/(1-0.9)=10\\)——放大 10 倍",
+        "偏差校正不重要",
+        "\\(t=1\\) 时系数为 1",
+        "偏差校正使学习率减小"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_0=0\\), \\(m_1=0.1g_1\\)。\\(\\mathbb{E}[m_1]=0.1\\mathbb{E}[g_1]\\)——低估了真实梯度均值。校正：\\(\\hat{m}_1=m_1/0.1=g_1\\)。\\(t\\) 大时 \\(1-\\beta_1^t\\approx 1\\)，校正消失。\\(\\beta_2=0.999\\) 的 \\(v_t\\) 校正更关键：\\(t=1\\) 时放大 1000 倍！前期 \\(\\hat{v}_t\\) 可能很小→步长过大→warmup 很重要。"
+      },
+      {
+        "id": "optimization-ch06-q11",
+        "question": "RMSProp 更新 \\(x_{t+1}=x_t-\\frac{\\eta}{\\sqrt{v_t}+\\epsilon}g_t\\)（\\(v_t=\\beta v_{t-1}+(1-\\beta)g_t^2\\)）。对\"稀疏梯度\"维度（\\(g_t^{(j)}\\approx 0\\) 多数时间），\\(v_t^{(j)}\\) 累积很小，导致什么？",
+        "options": [
+          "有效学习率 \\(\\eta/\\sqrt{v_t^{(j)}}\\) 变大——稀疏特征获得更大更新，有利于稀疏优化",
+        "稀疏维度不更新",
+        "所有维度学习率相同",
+        "稀疏维度发散"
+        ],
+        "answer": 0,
+        "explanation": "RMSProp 为每个参数维度自适应学习率。频繁梯度大的维度→\\(v_t\\) 大→有效\\(\\eta\\)小。罕见梯度的维度→\\(v_t\\)小→有效\\(\\eta\\)大。对 NLP 中稀疏词嵌入：低频词的梯度罕见但出现时应给大更新——RMSProp/Adam 自动实现。这是 Adagrad 思想的指数衰减版本。"
+      },
+      {
+        "id": "optimization-ch06-q12",
+        "question": "过参数化(overparameterization)在深度学习中为什么有效？参数数远超数据量不导致过拟合的原因？",
+        "options": [
+          "隐式正则化——SGD 倾向找\"最小范数\"或\"平坦\"解，即使损失景观有无穷多全局极小",
+        "过参数化一定导致过拟合",
+        "参数多但大部分固定为零",
+        "正则化项消除了过参数化效应"
+        ],
+        "answer": 0,
+        "explanation": "过参数化使损失景观中全局极小值构成一个连通集（流形）。SGD+小学习率在此流形上倾向选择小范数或平坦方向的解——隐式正则化(implicit regularization)。理论结果：对线性模型SGD收敛到最小\\(\\ell_2\\)范数解；对矩阵分解趋向低秩解。NTK(Neural Tangent Kernel)理论解释了宽网络的这种行为。"
+      },
+      {
+        "id": "optimization-ch06-q13",
+        "question": "PL 条件 \\(\\|\\nabla f\\|^2\\geq 2\\mu(f-f^*)\\) 下 GD 的收敛率？",
+        "options": [
+          "线性收敛 \\(f(x_k)-f^*\\leq(1-\\mu/L)^k(f(x_0)-f^*)\\)——与强凸相同",
+        "\\(O(1/k)\\)",
+        "\\(O(1/k^2)\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(L\\)-光滑+PL: \\(f(x_{k+1})\\leq f(x_k)-\\frac{1}{2L}\\|\\nabla f(x_k)\\|^2\\leq f(x_k)-\\frac{\\mu}{L}(f(x_k)-f^*)\\)。\\(f(x_{k+1})-f^*\\leq(1-\\mu/L)(f(x_k)-f^*)\\)。线性收敛！关键：不需凸性。PL 等价条件：满足二次增长条件(quadratic growth) + 每个驻点都是全局极小。"
+      },
+      {
+        "id": "optimization-ch06-q14",
+        "question": "方差缩减(Variance Reduction)方法 SVRG 的核心思想？",
+        "options": [
+          "周期性计算全梯度 \\(\\tilde\\mu=\\nabla f(\\tilde{x})\\)，然后用 \\(g_t=\\nabla f_i(x_t)-\\nabla f_i(\\tilde{x})+\\tilde\\mu\\) 作为低方差梯度估计",
+        "增大 mini-batch",
+        "使用 Hessian",
+        "固定学习率SGD"
+        ],
+        "answer": 0,
+        "explanation": "SVRG 每 \\(T\\) 步计算一次全梯度 \\(\\tilde\\mu\\)（\\(O(n)\\)），中间用修正梯度 \\(g_t=\\nabla f_i(x_t)-\\nabla f_i(\\tilde{x})+\\tilde\\mu\\)。\\(\\mathbb{E}[g_t]=\\nabla f(x_t)\\)（无偏），且 \\(x_t\\to\\tilde{x}\\) 时 \\(g_t\\to\\tilde\\mu\\) 方差趋零！对强凸 \\(f\\)，收敛率 \\(O((n+\\kappa)\\ln(1/\\epsilon))\\)——比 SGD 的 \\(O(1/\\epsilon)\\) 快指数倍。"
+      },
+      {
+        "id": "optimization-ch06-q15",
+        "question": "在神经网络损失景观中，\"Loss surface\"的典型特征？",
+        "options": [
+          "大量鞍点，少量局部极小且值接近全局极小；损失景观非凸但\"良性\"",
+        "大量局部极小且值差异大",
+        "严格凸",
+        "单一全局极小"
+        ],
+        "answer": 0,
+        "explanation": "实验(Choromanska et al.)和理论(随机矩阵/统计物理)发现：深层网络的损失面类似高维随机函数——鞍点占驻点的绝大多数。局部极小值之差随网络宽度增大而趋于零（\"良性\"非凸性）。SGD 的噪声帮助逃逸鞍点，而局部极小因值接近全局最优而\"足够好\"。"
+      },
+      {
+        "id": "optimization-ch06-q16",
+        "question": "Adam 和 SGD+momentum 在实际中的选择经验？",
+        "options": [
+          "Adam 收敛快但泛化可能次于 SGD+momentum; 视觉任务常用 SGD+momentum, NLP/生成模型常用 Adam",
+        "Adam 总是更好",
+        "SGD+momentum 总是更好",
+        "两者完全等价"
+        ],
+        "answer": 0,
+        "explanation": "经验观察：Adam 在训练损失上收敛快（自适应学习率），但某些图像分类任务中 SGD+momentum+carefully tuned schedule 的测试精度更高。假说：Adam 更容易找到\"sharp minima\"（泛化差），SGD 的噪声引导向\"flat minima\"（泛化好）。AdamW(weight decay decoupled)部分缓解此问题。Transformer 类通常用 Adam。"
+      },
+      {
+        "id": "optimization-ch06-q17",
+        "question": "梯度裁剪(Gradient Clipping) \\(g_t\\leftarrow g_t\\cdot\\min(1, C/\\|g_t\\|)\\) 的目的？",
+        "options": [
+          "防止梯度爆炸——限制梯度范数不超过 \\(C\\)，在 RNN/Transformer 训练中稳定训练",
+        "加速收敛",
+        "使梯度为零",
+        "只影响正则化"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|g_t\\|\\leq C\\) 时不变，\\(\\|g_t\\|>C\\) 时缩放到范数 \\(C\\)。RNN 中因时间步反向传播梯度可能指数增长（梯度爆炸）。\\(C\\) 一般取 1-5。理论：对 \\(L\\)-光滑函数 clipped GD 仍收敛。Transformer 训练中 gradient clipping 是标准技术，\\(C=1\\) 常用。注意与梯度消失不同——后者需其他方法(residual connection, LSTM)解决。"
+      },
+      {
+        "id": "optimization-ch06-q18",
+        "question": "Morse 理论告诉我们：\\(n\\) 维函数的鞍点按\"指数\"(index, 负曲率方向数) \\(k\\) 分类。\\(k=0\\) 是极小，\\(k=n\\) 是极大。高维中大部分驻点是什么类型？",
+        "options": [
+          "中等指数的鞍点（\\(k\\approx n/2\\)），即约一半方向向上、一半向下",
+        "极小点占主导",
+        "极大点占主导",
+        "所有类型均等"
+        ],
+        "answer": 0,
+        "explanation": "类比高维中心极限定理/随机矩阵：Hessian 的 \\(n\\) 个特征值随机分布，约一半正一半负的概率最大，对应指数 \\(\\approx n/2\\) 的鞍点。极小（\\(k=0\\)）和极大（\\(k=n\\)）需要所有特征值同号——概率指数小。Baldi-Hornik 对线性网络的精确结果证实了这点。"
+      },
+      {
+        "id": "optimization-ch06-q19",
+        "question": "SGD 的学习率 schedule 对最终解有何影响？比较常数 \\(\\eta\\)、\\(\\eta_t=\\eta_0/\\sqrt{t}\\)、余弦退火三种。",
+        "options": [
+          "常数：不收敛到极小（在 \\(O(\\eta\\sigma^2)\\) 邻域震荡）；\\(1/\\sqrt{t}\\): 精确收敛但慢；余弦退火：前期大步探索，后期小步收敛，实际中效果最好",
+        "三者完全等效",
+        "常数学习率收敛到精确极小",
+        "只有 \\(1/\\sqrt{t}\\) 有效"
+        ],
+        "answer": 0,
+        "explanation": "常数 \\(\\eta\\): \\(\\mathbb{E}[f-f^*]\\leq O(\\eta\\sigma^2)\\)——有 bias。\\(\\eta_t=O(1/\\sqrt{t})\\): \\(\\sum\\eta_t=\\infty, \\sum\\eta_t^2<\\infty\\)（Robbins-Monro 条件）→精确收敛。余弦退火 \\(\\eta_t=\\eta_0(1+\\cos(\\pi t/T))/2\\): 周期性降温，结合 warm restart 可跳出局部极小（\"SGD with warm restarts\"）。Transformer 训练常用 linear warmup + cosine decay。"
+      },
+      {
+        "id": "optimization-ch06-q20",
+        "question": "Adagrad 更新 \\(x_{t+1}^{(j)}=x_t^{(j)}-\\eta g_t^{(j)}/\\sqrt{\\sum_{s=1}^t(g_s^{(j)})^2+\\epsilon}\\)。该方法在稀疏问题上优秀但在深度学习中有什么缺陷？",
+        "options": [
+          "累积平方梯度 \\(\\sum g_s^2\\) 单调增 → 有效学习率持续衰减趋向零 → 过早停止学习",
+        "内存不足",
+        "计算太慢",
+        "只适用于凸问题"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum_{s=1}^t g_s^2\\) 只增不减，\\(t\\) 大时学习率 \\(\\to 0\\) 过快。非凸深度学习中训练远未收敛但学习率已消失。RMSProp 解决：用指数衰减均值 \\(v_t=\\beta v_{t-1}+(1-\\beta)g_t^2\\) 代替累积——忘记\"古老\"梯度。Adam 进一步加入动量。Adagrad 仍在凸/在线学习中理论最优。"
+      },
+      {
+        "id": "optimization-ch06-q21",
+        "question": "Neural Tangent Kernel (NTK) 理论说宽网络（宽度 \\(m\\to\\infty\\)）训练时参数变化很小。这意味着什么？",
+        "options": [
+          "训练动态近似为线性（核回归），收敛到全局极小且满足 PL 条件",
+        "网络不学习",
+        "NTK 只适用于浅网络",
+        "宽度不影响训练"
+        ],
+        "answer": 0,
+        "explanation": "NTK: \\(K(x,x')=\\mathbb{E}[\\nabla_\\theta f(x,\\theta)^T\\nabla_\\theta f(x',\\theta)]\\)。\\(m\\to\\infty\\) 时 \\(K\\) 不随训练变化（lazy regime）。训练 \\(\\Leftrightarrow\\) 核回归 \\(\\min\\|y-K\\alpha\\|^2\\)——凸！PL 条件：\\(K\\) 正定时 \\(\\|\\nabla L\\|^2\\geq 2\\lambda_{\\min}(K)L\\)。但 NTK regime 可能无法解释特征学习——有限宽度网络学到的特征比 NTK 基更好。"
+      },
+      {
+        "id": "optimization-ch06-q22",
+        "question": "逃逸鞍点的方法：Perturbed GD 加随机扰动 \\(x_{t+1}=x_t-\\eta\\nabla f(x_t)+\\xi_t\\)（\\(\\xi_t\\) 小随机向量）。为什么这能帮助？需要多少步逃逸？",
+        "options": [
+          "扰动在负曲率方向上被放大（指数增长），\\(O(\\text{poly}(d)/\\epsilon)\\) 步内逃逸到二阶驻点",
+        "扰动使算法不收敛",
+        "需要指数多步",
+        "不需要扰动"
+        ],
+        "answer": 0,
+        "explanation": "Jin et al. (2017): perturbed GD 在非凸 \\(L\\)-光滑函数上以 \\(\\tilde{O}(\\text{poly}(d)/\\epsilon^2)\\) 步找到 \\(\\epsilon\\)-二阶驻点（\\(\\nabla f\\) 小且 \\(\\nabla^2 f\\succeq -\\sqrt{\\epsilon}\\)）。鞍点附近：沿负曲率方向扰动被 Hessian 负特征值指数放大 → 快速逃逸。维度 \\(d\\) 只对数出现。SGD 的固有噪声起到类似扰动的作用。"
+      },
+      {
+        "id": "optimization-ch06-q23",
+        "question": "Gradient compression 在分布式 SGD 中的作用：\\(K\\) 个 worker 异步/同步通信梯度。Top-\\(k\\) sparsification 只传输最大的 \\(k\\) 个分量。收敛性受何影响？",
+        "options": [
+          "保持无偏（通过 error feedback），收敛率几乎不变但通信量减少 \\(d/k\\) 倍",
+        "不收敛",
+        "精度大幅下降",
+        "只适用于小模型"
+        ],
+        "answer": 0,
+        "explanation": "Top-\\(k\\)直接是有偏压缩。Error feedback: \\(e_{t+1}=g_t-\\text{TopK}(g_t+e_t)\\)，累积被丢弃的分量。Stich et al. (2018): error feedback + Top-\\(k\\) 收敛率 \\(O(1/\\sqrt{KT})\\)（与全通信相同），只需 \\(k=O(\\sqrt{d})\\)。GPT-3 训练中通信瓶颈决定了分布式效率。"
+      },
+      {
+        "id": "optimization-ch06-q24",
+        "question": "权重衰减(weight decay) \\(x_{t+1}=x_t-\\eta g_t-\\lambda x_t\\) 和 \\(L_2\\) 正则化 \\(\\min f(x)+\\frac{\\lambda}{2}\\|x\\|^2\\) 在 Adam 中是否等价？",
+        "options": [
+          "不等价——\\(L_2\\)正则化的梯度经过 Adam 的自适应缩放会被扭曲；AdamW 使用解耦的weight decay",
+        "完全等价",
+        "只在 SGD 中不等价",
+        "两者都无效"
+        ],
+        "answer": 0,
+        "explanation": "SGD 中等价: \\(\\nabla(f+\\frac{\\lambda}{2}\\|x\\|^2)=\\nabla f+\\lambda x\\), 更新 \\(x-\\eta(\\nabla f+\\lambda x)=x(1-\\eta\\lambda)-\\eta\\nabla f\\)。Adam 中 \\((\\nabla f+\\lambda x)\\) 除以 \\(\\sqrt{v_t}\\)，但 \\(\\lambda x\\) 不应被自适应缩放——否则大梯度维度的衰减被缩小，小梯度维度的衰减被放大。AdamW(Loshchilov-Hutter 2019)解耦: \\(x_{t+1}=x_t-\\eta\\hat{m}/\\sqrt{\\hat{v}}-\\eta\\lambda x_t\\)。"
+      },
+      {
+        "id": "optimization-ch06-q25",
+        "question": "Sharp minima vs flat minima 对泛化性能的影响？",
+        "options": [
+          "flat minima 对参数扰动不敏感 → Hessian 特征值小 → 泛化好（PAC-Bayes bound）",
+        "sharp minima 泛化更好",
+        "无关系",
+        "只有全局极小泛化好"
+        ],
+        "answer": 0,
+        "explanation": "PAC-Bayes 泛化界 \\(\\sim \\sqrt{KL(\\mathcal{N}(w^*,\\sigma^2)\\|\\mathcal{N}(0,\\sigma_0^2))/n}\\)。flat minimum: 大 \\(\\sigma^2\\) 围绕 \\(w^*\\) 权重分布仍低训练损失 → KL 小 → 泛化好。sharp minimum: 小 \\(\\sigma^2\\) 才能保持低损失 → KL 大。SGD 小 batch size 倾向 flat minima（大噪声→逃逸 sharp 区域）——解释了小 batch 泛化优势。"
+      },
+      {
+        "id": "optimization-ch06-q26",
+        "question": "训练 GPT 模型（\\(\\sim 10^{11}\\) 参数, \\(\\sim 10^{12}\\) tokens）时的优化策略选择和挑战？",
+        "options": [
+          "AdamW + 线性warmup + cosine decay + gradient clipping; 分布式数据/模型/pipeline并行; 梯度累积模拟大batch",
+        "标准 GD",
+        "Newton 法",
+        "遗传算法"
+        ],
+        "answer": 0,
+        "explanation": "工业实践(GPT-3/4, LLaMA): AdamW(\\(\\beta_1=0.9, \\beta_2=0.95\\), \\(\\eta\\sim 10^{-4}\\))。warmup 1000-5000步避免早期不稳定。cosine decay 到 \\(\\eta_{min}=0.1\\eta_{max}\\)。gradient clipping \\(C=1\\)。数千 GPU 数据并行+模型并行(ZeRO/tensor parallel)。batch size 百万+ tokens 通过梯度累积模拟。训练成本数百万美元。"
+      },
+      {
+        "id": "optimization-ch06-q27",
+        "question": "在强化学习中 PPO (Proximal Policy Optimization) 使用什么优化策略保证策略更新的稳定性？",
+        "options": [
+          "裁剪目标函数: \\(L^{CLIP}=\\min(r_t A_t, \\text{clip}(r_t, 1-\\epsilon, 1+\\epsilon)A_t)\\)，限制策略比率 \\(r_t\\) 的范围",
+        "标准梯度下降",
+        "全局优化",
+        "只用 Adam 就够了"
+        ],
+        "answer": 0,
+        "explanation": "\\(r_t=\\pi_\\theta(a|s)/\\pi_{\\theta_{old}}(a|s)\\)（新旧策略比率）。裁剪到 \\([1-\\epsilon, 1+\\epsilon]\\)（\\(\\epsilon=0.2\\) 通常）保证策略不大幅变化（避免\"性能崩塌\"）。相比 TRPO(信赖域)更简单：不需 Hessian/Fisher矩阵。PPO 内部用 Adam 优化裁剪后目标。mini-batch SGD 在 rollout 数据上多 epoch 更新。"
+      },
+      {
+        "id": "optimization-ch06-q28",
+        "question": "在联邦学习(Federated Learning)中，FedAvg 算法的优化挑战是什么？如何处理非独立同分布(non-IID)数据？",
+        "options": [
+          "各客户端本地做多步 SGD 再平均模型；non-IID 数据导致\"client drift\"——解决方案包括 FedProx(近端项)和 SCAFFOLD(方差缩减)",
+        "直接集中数据训练",
+        "没有挑战",
+        "只用全局模型不本地训练"
+        ],
+        "answer": 0,
+        "explanation": "FedAvg: 每轮选 \\(K\\) 个客户端各做 \\(E\\) 步本地 SGD，上传模型 \\(\\to\\) 服务器平均 \\(\\to\\) 广播。Non-IID: 各客户端数据分布不同→本地 SGD 方向偏离全局梯度(client drift)→收敛变慢/不收敛。FedProx 添加 \\(\\frac{\\mu}{2}\\|x-x_{global}\\|^2\\) 拉回全局；SCAFFOLD 用控制变量修正漂移。通信效率: 每轮只传模型（不传数据）保护隐私。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="optimization"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/optimization.html" class="module-name">优化理论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 局部极小、全局极小与鞍点</a></li>
+      <li><a href="#kp2">02 · 随机梯度下降（SGD）与 mini-batch</a></li>
+      <li><a href="#kp3">03 · 自适应学习率方法（Adam/AdaGrad/RMSProp）</a></li>
+      <li><a href="#kp4">04 · Polyak-Łojasiewicz 条件与非凸收敛</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>非凸优化与现代方法</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>局部极小、全局极小与鞍点</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>深度学习的成功迫使我们面对非凸优化：神经网络的损失函数高度非 凸，有大量局部极小和鞍点。理论和实验表明，高维中鞍点远多于差 的局部极小，且"好的"局部极小值通常接近全局最优。理解非凸景 观的结构是解释为什么 SGD 能训练深度网络的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>高维非凸问题的直觉与低维截然不同：随机矩阵理论预测 Hessian 特征值随机分布，鞍点数随维度指数增长。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>鞍点的形式定义：\(\nabla f(x^*)=0\) 且 \(\nabla^2 f(x^*)\) 不定。 在 \(n\) 维中，若 Hessian 的 \(n\) 个特征值各以 \(1/2\) 概率为正/负， 鞍点概率 \(= 1 - 2 \cdot (1/2)^n \to 1\)（\(n \to \infty\)）。 鞍点逃逸：沿负曲率方向（Hessian 最小特征值对应方向）移动即可逃逸： \[x_{k+1} = x_k - \alpha \nabla f(x_k) + \xi_k\] 其中 \(\xi_k\) 是小随机扰动。定理(Jin et al., 2017)：带扰动的 GD 在多项式时间内逃逸所有严格鞍点。 损失景观经验：深度网络中大部分局部极小的函数值非常接近全局最优。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>可视化工具（如 loss surface visualization）帮助理解神经网络 训练动态，模式连通性(mode connectivity)表明不同局部极小之间 存在低损失路径。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x,y) = x^2 - y^2\)。分析 \((0,0)\) 处的性质。 解答：\(\nabla f = (2x, -2y) = (0,0)\) 在原点。 \(\nabla^2 f = \begin{pmatrix} 2 & 0 \\ 0 & -2 \end{pmatrix}\)，特征值 \(2, -2\)。 不定 \(\Rightarrow\) 鞍点。沿 \(y\) 方向（负曲率）逃逸。 易错点：不是所有驻点都是极值点。高维中鞍点是"常态"非"例外"。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在高维非凸问题中，SGD 的随机性主要帮助？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。SGD 的随机梯度噪声自然提供了扰动，帮助逃逸鞍点。')">A. 加速收敛到全局最优</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！SGD 的随机梯度噪声自然提供了扰动，帮助逃逸鞍点。')">B. 逃逸鞍点</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。SGD 的随机梯度噪声自然提供了扰动，帮助逃逸鞍点。')">C. 保证凸性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。SGD 的随机梯度噪声自然提供了扰动，帮助逃逸鞍点。')">D. 减小过拟合</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>随机梯度下降（SGD）与 mini-batch</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在大规模机器学习中，全梯度 \(\nabla f = \frac{1}{n}\sum \nabla f_i\) 的 计算代价与数据量成正比，对百万级数据不可接受。SGD 每步只用一 个（或一小批）样本的梯度估计全梯度，以噪声换速度，是深度学习 训练的标准方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>SGD 迭代：从 \(\{1,\ldots,n\}\) 均匀随机抽样 \(i_k\)， \[x_{k+1} = x_k - \alpha_k \nabla f_{i_k}(x_k)\] 无偏性：\(\mathbb{E}[\nabla f_{i_k}] = \nabla f\)。 Mini-batch：用 \(|B|\) 个样本平均，方差减小 \(|B|\) 倍： \[\mathrm{Var}[\frac{1}{|B|}\sum_{i \in B}\nabla f_i] = \frac{\sigma^2}{|B|}\] 收敛速率（凸 + Lipschitz 梯度 + 递减步长 \(\alpha_k = O(1/\sqrt{k})\)）： \[\mathbb{E}[f(\bar{x}_k)] - f^* = O(1/\sqrt{k})\] 比 GD 的 \(O(1/k)\) 慢，但每步代价从 \(O(n)\) 降到 \(O(1)\)。 总复杂度(达到 \(\epsilon\) 精度)：SGD \(O(1/\epsilon^2)\) 步 vs GD \(O(n/\epsilon)\) 步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>所有现代深度学习框架（PyTorch, TensorFlow）默认用 mini-batch SGD， batch size 通常 32-1024。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：训练集 \(n=10^6\)，梯度计算代价相同。比较 GD 和 SGD(batch=256) 达 \(\epsilon=0.01\) 所需总梯度计算次数。 解答：GD: \(O(n/\epsilon) = 10^6/0.01 = 10^8\) 次梯度计算。 SGD: \(O(1/\epsilon^2) = 10^4\) 步 \(\times 256 = 2.56 \times 10^6\) 次。 SGD 快约 40 倍。 易错点：SGD 不能用固定步长（会在最优值附近震荡），需递减步长或用方差缩减技术。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">SGD 比 GD 快的根本原因是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SGD 每步 \\(O(1)\\) vs GD 每步 \\(O(n)\\)，虽然收敛率更差但总成本更低。')">A. SGD 的梯度更精确</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！SGD 每步 \\(O(1)\\) vs GD 每步 \\(O(n)\\)，虽然收敛率更差但总成本更低。')">B. 每步成本低，用噪声换取更多迭代</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SGD 每步 \\(O(1)\\) vs GD 每步 \\(O(n)\\)，虽然收敛率更差但总成本更低。')">C. SGD 保证全局最优</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SGD 每步 \\(O(1)\\) vs GD 每步 \\(O(n)\\)，虽然收敛率更差但总成本更低。')">D. SGD 不需要学习率</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>自适应学习率方法（Adam/AdaGrad/RMSProp）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不同参数维度的梯度尺度可能差异巨大。固定学习率难以适配：对梯度 大的维度步长过大，对梯度小的维度步长过小。自适应方法为每个参数 维持独立的学习率，自动适配梯度尺度，在深度学习中极为流行。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>AdaGrad（2011）：累计历史梯度平方 \(G_t = \sum_{\tau=1}^t g_\tau^2\)， \[x_{t+1} = x_t - \frac{\alpha}{\sqrt{G_t + \epsilon}} g_t\] 问题：\(G_t\) 单调增长导致步长趋零。 RMSProp：指数移动平均替代累加 \(v_t = \beta v_{t-1} + (1-\beta) g_t^2\), 更新 \(x_{t+1} = x_t - \frac{\alpha}{\sqrt{v_t+\epsilon}} g_t\)。 Adam（2015）：结合 momentum 和 RMSProp： \[m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t, \quad v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2\] 偏差修正：\(\hat{m}_t = m_t/(1-\beta_1^t)\), \(\hat{v}_t = v_t/(1-\beta_2^t)\)。 \[x_{t+1} = x_t - \frac{\alpha \hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}\] 默认超参：\(\beta_1=0.9\), \(\beta_2=0.999\), \(\epsilon=10^{-8}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Adam 是 Transformer、GPT 等大模型训练的标准优化器。AdamW 添加 权重衰减修正，进一步改善泛化性能。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：维度 1 的梯度稳定 \(\approx 100\)，维度 2 的梯度 \(\approx 0.01\)。 固定 \(\alpha=0.01\) 时，维度 1 的更新 \(= 1\)（过大），维度 2 的更新 \(=0.0001\)。 Adam 自适应后两个维度的有效步长自动均衡。 易错点：Adam 的偏差修正在初始阶段关键——去掉修正会导致初始步长过大。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Adam 结合了哪两种技术？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Adam = 一阶矩估计(momentum) + 二阶矩估计(自适应学习率，RMSProp 风格)。')">A. Momentum + Newton 法</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Adam = 一阶矩估计(momentum) + 二阶矩估计(自适应学习率，RMSProp 风格)。')">B. Momentum + 自适应学习率</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Adam = 一阶矩估计(momentum) + 二阶矩估计(自适应学习率，RMSProp 风格)。')">C. 线搜索 + 信赖域</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Adam = 一阶矩估计(momentum) + 二阶矩估计(自适应学习率，RMSProp 风格)。')">D. 正则化 + Dropout</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Polyak-Łojasiewicz 条件与非凸收敛</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>很多非凸函数虽然不是凸的，但"表现得像凸函数"——梯度下降仍能 高效找到全局极小。PL 条件是最重要的此类结构性条件：它比强凸弱 （不要求唯一极小），但足以保证线性收敛。过参数化的神经网络在 训练过程中经验上满足 PL 条件，这部分解释了深度学习的成功。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>PL 条件将"梯度的大小"与"离最优值的距离"关联，无需凸性假设。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>PL 条件：\(f\) 满足 \(\mu\)-PL 条件 iff \[\frac{1}{2}\|\nabla f(x)\|^2 \geq \mu(f(x) - f^*)\] 对比强凸：强凸 \(\Rightarrow\) PL，但 PL 不要求唯一极小点。 例如 \(f(x,y)=(xy-1)^2\) 满足 PL 但有无穷多极小点（双曲线 \(xy=1\)）。 收敛定理：若 \(f\) 满足 \(\mu\)-PL 且 \(L\)-光滑，GD (\(\alpha=1/L\)) 线性收敛： \[f(x_k) - f^* \leq (1-\mu/L)^k(f(x_0)-f^*)\] 学习率调度：在非 PL 的非凸问题中，余弦退火(cosine decay) \(\alpha_t = \alpha_0 \cdot \frac{1}{2}(1+\cos(\pi t/T))\) 和 warmup 是常用的启发式策略。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>过参数化神经网络在 NTK 极限下满足 PL 条件，提供了理论保证。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x)=\frac{1}{2}(x^2-1)^2\)。检验在 \(x \neq 0\) 的区域是否满足 PL。 解答：\(f'(x)=2x(x^2-1)\), \(f^*=0\), \(f(x)=\frac{1}{2}(x^2-1)^2\)。 PL 要求 \(\frac{1}{2}|2x(x^2-1)|^2 \geq \mu \cdot \frac{1}{2}(x^2-1)^2\)， 即 \(2x^2(x^2-1)^2 \geq \mu(x^2-1)^2\)，\(\Rightarrow\) \(2x^2 \geq \mu\)。 在 \(|x| \geq r > 0\) 的区域，取 \(\mu = 2r^2\) 局部满足 PL。 易错点：PL 条件允许多个全局极小，但保证所有极小值相等（\(f=f^*\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">PL 条件与强凸的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。PL 比强凸弱——不要求函数凸更不要求唯一极小，但仍保证 GD 线性收敛。')">A. PL 等价于强凸</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！PL 比强凸弱——不要求函数凸更不要求唯一极小，但仍保证 GD 线性收敛。')">B. 强凸 \(\Rightarrow\) PL，但 PL \(\not\Rightarrow\) 强凸</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。PL 比强凸弱——不要求函数凸更不要求唯一极小，但仍保证 GD 线性收敛。')">C. PL \(\Rightarrow\) 强凸</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。PL 比强凸弱——不要求函数凸更不要求唯一极小，但仍保证 GD 线性收敛。')">D. 两者无关</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/applied/optimization.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

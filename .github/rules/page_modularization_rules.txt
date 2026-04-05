@@ -1,0 +1,387 @@
+════════════════════════════════════════════════════════════════════════
+  Mathematica · 页面模块化规则 (Strict Page Modularization Rules)
+  版本: 3.0    日期: 2026-04-04
+  ⚠ 本文件是所有章节页面生成的唯一标准。任何偏离均视为不合规。
+════════════════════════════════════════════════════════════════════════
+
+████████████████████████████████████████████████████████████████████████
+  §0 · 术语定义
+████████████████████████████████████████████████████████████████████████
+
+  术语         | 含义
+  -------------|--------------------------------------------------------------
+  模块(Module)  | 一个完整的数学学科单元，如"群论"、"实分析"
+  章节(Chapter) | 模块下的一个教学章，如 Ch.03
+  知识点(KP)    | 章节内的一个核心知识点区块，编号 kp1-kp4
+  教学步骤(Step)| KP 内的教学展开步骤，有固定类型
+  快速小测(IQ)  | 知识点末尾的 inline quiz，每 KP 一道
+
+████████████████████████████████████████████████████████████████████████
+  §1 · 文件结构 (File Structure)
+████████████████████████████████████████████████████████████████████████
+
+  根目录/
+  ├── index.html                        # 主页（路线图）
+  ├── full_knowledge_tree_deep.txt      # 知识树参考
+  ├── shared/
+  │   ├── theme.css                     # 全局主题变量（亮/暗）
+  │   ├── layout.css                    # 页面布局（导航/侧边栏/主区域）
+  │   ├── components.css                # 组件样式（卡片/quiz/step-card 等）
+  │   ├── components.js                 # 交互逻辑（quiz/导航/进度）
+  │   └── storage.js                    # localStorage 存储 API
+  ├── modules/
+  │   ├── algebra/
+  │   │   ├── groups.html               # 群论概览页
+  │   │   ├── groups-ch1.html           # 群论第1章
+  │   │   ├── groups-ch2.html
+  │   │   └── ...
+  │   ├── analysis/
+  │   ├── geometry/
+  │   ├── probability/
+  │   ├── applied/
+  │   └── discrete/
+  └── .github/
+      ├── rules/                        # 规则文件
+      └── agents/                       # Agent 指令
+
+  [R1.1] 分类目录恰好 6 个: algebra, analysis, geometry, probability, applied, discrete
+  [R1.2] 每个模块的文件必须全部位于对应分类目录下
+  [R1.3] 文件命名规范:
+         - 概览页: {module-id}.html         (如 groups.html)
+         - 章节页: {module-id}-ch{N}.html   (如 groups-ch3.html)
+         - module-id 全小写、连字符分隔     (如 real-analysis, stochastic-calc)
+  [R1.4] 禁止在 modules/ 目录外存放任何页面 HTML
+
+████████████████████████████████████████████████████████████████████████
+  §2 · 章节页 HTML 骨架 (Chapter Page Skeleton)
+████████████████████████████████████████████████████████████████████████
+
+  以下为完整的 HTML 骨架范例。每个 {{占位符}} 必须替换为实际内容。
+  不得增删任何结构层级或改变标签嵌套顺序。
+
+  ─────────────────── 骨架开始 ───────────────────
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAGE_TITLE}} — Mathematica</title>
+  <link rel="stylesheet" href="../../shared/theme.css">
+  <link rel="stylesheet" href="../../shared/layout.css">
+  <link rel="stylesheet" href="../../shared/components.css">
+  <script>
+    // ═══ QUESTIONS 数组 ═══
+    // 恰好 25 题。每题结构严格按以下格式:
+    const QUESTIONS = [
+      {
+        "id": "{{MODULE_ID}}-q1",
+        "question": "题干文本（支持 LaTeX: \\( ... \\)）",
+        "options": ["选项A", "选项B", "选项C", "选项D"],
+        "answer": 0,
+        "explanation": "解析文本（支持 LaTeX）"
+      }
+      // ... 共 25 题
+    ];
+  </script>
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="{{CATEGORY}}" data-module="{{MODULE_ID}}">
+
+  <!-- ═══ 导航栏 ═══ -->
+  <nav class="topbar">
+    <a href="../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">{{DOMAIN_LABEL}}</span>
+      <a href="{{MODULE_ID}}.html" class="module-name">{{MODULE_FULL_NAME}}</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.{{CH_NUM}} / {{TOTAL_CH}}</span>
+      <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">🌓</button>
+    </div>
+  </nav>
+
+  <!-- ═══ 目录侧边栏 ═══ -->
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">{{KP1_TOC_TITLE}}</a></li>
+      <li><a href="#kp2">{{KP2_TOC_TITLE}}</a></li>
+      <li><a href="#kp3">{{KP3_TOC_TITLE}}</a></li>
+      <li><a href="#kp4">{{KP4_TOC_TITLE}}</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <!-- ═══ 主内容区 ═══ -->
+  <main class="main-content">
+
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre {{CH_NUM}}</p>
+      <h1>{{CHAPTER_TITLE}}</h1>
+      <p class="chapter-intro">{{CHAPTER_INTRO_1_2_SENTENCES}}</p>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>{{KP1_TITLE}}</h2>
+      <div class="mental-chain">
+
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            {{KP1_MOTIVATION_CONTENT}}
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            {{KP1_ABSTRACTION_CONTENT — 可选，若不适用则删除此 step-card}}
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            {{KP1_DERIVATION_CONTENT}}
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            {{KP1_APPLICATION_CONTENT — 可选，若不适用则删除此 step-card}}
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            {{KP1_EXAMPLE_CONTENT}}
+          </div>
+        </div>
+
+      </div><!-- /mental-chain -->
+
+      <!-- KP1 快速小测 -->
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">{{KP1_QUIZ_PROMPT}}</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, {{true|false}}, '{{反馈}}')">{{选项A}}</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, {{true|false}}, '{{反馈}}')">{{选项B}}</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, {{true|false}}, '{{反馈}}')">{{选项C}}</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP2 ── (与 KP1 结构完全相同) -->
+    <section id="kp2" class="kp-section">
+      <!-- ... 同 KP1 结构 ... -->
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <!-- ... 同 KP1 结构 ... -->
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <!-- ... 同 KP1 结构 ... -->
+    </section>
+
+    <!-- ═══ 综合练习 ═══ -->
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <!-- ═══ 章节导航 ═══ -->
+    <nav class="chapter-nav">
+      <a href="{{MODULE_ID}}-ch{{PREV}}.html" class="nav-prev">← Ch.{{PREV}} {{PREV_TITLE}}</a>
+      <a href="{{MODULE_ID}}.html" class="nav-overview">📋 概览</a>
+      <a href="{{MODULE_ID}}-ch{{NEXT}}.html" class="nav-next">Ch.{{NEXT}} {{NEXT_TITLE}} →</a>
+    </nav>
+
+  </main>
+
+  <!-- ═══ 页脚 ═══ -->
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <!-- ═══ 脚本 ═══ -->
+  <script src="../../shared/storage.js"></script>
+  <script src="../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "{{MODULE_ID}}-ch{{CH_NUM}}";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+
+</body>
+</html>
+
+  ─────────────────── 骨架结束 ───────────────────
+
+████████████████████████████████████████████████████████████████████████
+  §3 · 内容约束 (Content Constraints)
+████████████████████████████████████████████████████████████████████████
+
+  [R3.1] 每章恰好 4 个 KP (kp1-kp4)。不多不少。
+  [R3.2] 每个 KP 必须包含以下教学步骤（按顺序）:
+         ① step-motivation   — 为什么研究这个问题             [必填]
+         ② step-abstraction  — 抽象化方法/逻辑思维            [可选]
+         ③ step-derivation   — 公式推导或模型建立的过程        [必填]
+         ④ step-application  — 具体的实际应用                 [可选]
+         ⑤ step-example      — 例题分析及易错点解析            [必填]
+  [R3.3] 可选步骤 (②④) 若不适用，直接省略该 step-card，不留空壳。
+  [R3.4] 每个 KP 末尾恰好 1 个 inline-quiz (iq-kp{N})。
+  [R3.5] inline-quiz 考察该 KP 的核心概念或易错点，禁止出"本节该掌握什么"之类的 meta 问题。
+  [R3.6] inline-quiz 选项 2-4 个。选项文本 > 40 字符时，iq-options 使用 flex-direction: column。
+  [R3.7] QUESTIONS 数组恰好 25 题，覆盖本章 4 个 KP，格式见骨架。
+  [R3.8] 所有数学公式使用 LaTeX: 行内 \(...\), 独立行 \[...\]。
+
+████████████████████████████████████████████████████████████████████████
+  §4 · 内容质量标准 (Content Quality Standards)
+████████████████████████████████████████████████████████████████████████
+
+  [R4.1] step-motivation: 说明「为什么要引入这个概念/定理」，从问题出发而非定义出发。
+         要求: ≥ 150 字符，有具体的数学场景或历史背景。
+  [R4.2] step-abstraction: 说明核心的抽象方法论（如：映射化简、对称性利用、空间对偶等）。
+         要求: 如果该 KP 有明确的抽象逻辑跃迁，必须包含。
+  [R4.3] step-derivation: 给出关键定理/公式的推导过程，或模型的建立思路。
+         要求: ≥ 400 字符，包含至少 2 个数学公式，逻辑步骤清晰。
+         对于证明: 给出完整框架，关键步骤不可省略。
+  [R4.4] step-application: 给出该知识的实际应用场景（物理/工程/计算机/金融等）。
+         要求: 如果知识点确有应用价值，必须包含，且要具体（不是"广泛应用于..."）。
+  [R4.5] step-example: 至少一道完整例题（题目 → 解答过程 → 结果），
+         加上 1-2 个易错点提示（常见错误 + 为什么错 + 正确做法）。
+  [R4.6] 整体语言风格: 严谨但不枯燥。数学陈述精确，解释部分用直觉帮助理解。
+  [R4.7] 每个 KP 的总内容量: ≥ 800 字符（不含 HTML 标签）。
+  [R4.8] 每章正文总量: ≥ 4000 字符。
+
+████████████████████████████████████████████████████████████████████████
+  §5 · ID 与引用规范 (ID & Reference Conventions)
+████████████████████████████████████████████████████████████████████████
+
+  [R5.1] MODULE_ID 格式: "{module-id}-ch{N}"，如 "groups-ch3", "real-analysis-ch5"
+  [R5.2] KP section id: "kp1", "kp2", "kp3", "kp4" — 纯数字编号。
+  [R5.3] Inline quiz id: "iq-kp1", "iq-kp2", "iq-kp3", "iq-kp4" — 与 KP 一一对应。
+  [R5.4] QUESTIONS id: "{module-id}-q1" 到 "{module-id}-q25"。
+  [R5.5] 禁止出现 id="iq-start" 或任何不在上述规范内的 id。
+
+████████████████████████████████████████████████████████████████████████
+  §6 · CSS class 清单 (Allowed CSS Classes)
+████████████████████████████████████████████████████████████████████████
+
+  以下为章节页允许使用的全部 CSS class。不得自创其他 class。
+
+  布局:      chapter-page, topbar, topbar-brand, topbar-module, topbar-right,
+             module-domain, module-name, chapter-indicator, theme-toggle,
+             toc-sidebar, toc-header, toc-list, main-content, site-footer
+
+  章头:      chapter-hero, chapter-label
+
+  KP 区块:   kp-section, kp-title, kp-number, mental-chain, kp-separator
+
+  Step 卡片: step-card, step-label, step-body,
+             step-motivation, step-abstraction, step-derivation,
+             step-application, step-example
+
+  Quiz:      inline-quiz, iq-header, iq-prompt, iq-options,
+             exercises-section
+
+  导航:      chapter-nav, nav-prev, nav-overview, nav-next
+
+████████████████████████████████████████████████████████████████████████
+  §7 · 概览页骨架 (Overview Page — 简述)
+████████████████████████████████████████████████████████████████████████
+
+  概览页 ({module-id}.html) 包含:
+  - 模块标题 + 简介（3-5 句话描述该学科的核心目标）
+  - 章节列表（链接到所有 ch 页面，含章标题和 1 句摘要）
+  - 先修要求（列出需要先学的模块）
+  - 学习路线建议
+
+  概览页不含 QUESTIONS 数组、不含 KP 区块、不含 inline-quiz。
+
+████████████████████████████████████████████████████████████████████████
+  §8 · 模块 ID 速查表 (Module ID Reference)
+████████████████████████████████████████████████████████████████████████
+
+  分类          | module-id            | 中文名         | 章数
+  --------------|----------------------|----------------|-----
+  foundation    | foundation           | 微积分+线代     | 1*
+  algebra       | groups               | 群论            | 6
+  algebra       | number-theory        | 数论            | 6
+  algebra       | linear-adv           | 线代进阶        | 6
+  algebra       | rings                | 环与域论        | 6
+  algebra       | representation       | 表示论          | 6
+  analysis      | real-analysis        | 实分析/测度论   | 7
+  analysis      | functional           | 泛函分析        | 7
+  analysis      | complex              | 复分析          | 6
+  analysis      | harmonic             | 调和分析        | 6
+  analysis      | edo                  | 常微分方程      | 6
+  analysis      | pde                  | 偏微分方程      | 7
+  geometry      | topology             | 点集拓扑        | 7
+  geometry      | diffgeo              | 微分几何        | 6
+  geometry      | alg-topo             | 代数拓扑        | 6
+  geometry      | riemannian           | 黎曼几何        | 6
+  probability   | probability          | 概率论          | 7
+  probability   | stochastic           | 随机过程        | 6
+  probability   | statistics           | 统计推断        | 6
+  probability   | stochastic-calc      | 随机微积分      | 6
+  applied       | optimization         | 优化理论        | 6
+  applied       | numerical            | 数值分析        | 6
+  applied       | ml-math              | 机器学习数学    | 6
+  applied       | quantum              | 量子计算        | 6
+  applied       | optimal-transport    | 最优传输        | 6
+  discrete      | cryptography         | 密码学          | 6
+  discrete      | info-theory          | 信息论          | 6
+  probability   | game-theory          | 博弈论          | 6
+
+  * foundation 模块仅有 Ch.07 (多元微积分初步)，Ch.01-06 标记为已掌握。
+
+  总计: 28 模块, 174 章
+
+████████████████████████████████████████████████████████████████████████
+  §9 · 违规检查清单 (Compliance Checklist)
+████████████████████████████████████████████████████████████████████████
+
+  生成每个页面后，必须通过以下检查:
+
+  □ KP 数量 = 4
+  □ 每个 KP 含 step-motivation + step-derivation + step-example
+  □ 每个 KP 末尾有且仅有 1 个 inline-quiz (iq-kpN)
+  □ 无 meta-quiz（不问"本节该掌握什么"）
+  □ QUESTIONS 数组 = 25 题
+  □ MODULE_ID 格式正确
+  □ 所有 section 标签开闭平衡
+  □ 无自创 CSS class
+  □ 无 id="iq-start"
+  □ MathJax 配置存在
+  □ renderQuiz 调用存在
+  □ 每 KP 内容 ≥ 800 字符
+  □ 全章正文 ≥ 4000 字符
+
+═══════════════════════════════════════════════════════════════════════
+  END OF RULES
+═══════════════════════════════════════════════════════════════════════

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 ODE 数值方法 — 数值分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "numerical-ch05-q1",
+        "question": "前向 Euler 法 \\(y_{n+1}=y_n+hf(t_n,y_n)\\) 的局部截断误差（LTE）阶？",
+        "options": [
+          "\\(O(h^2)\\)（全局误差 \\(O(h)\\)，一阶方法）",
+        "\\(O(h)\\)",
+        "\\(O(h^3)\\)",
+        "\\(O(h^4)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Taylor：\\(y(t+h)=y+hf+\\frac{h^2}{2}y''+\\cdots\\)。Euler：\\(\\tilde y=y+hf\\)。LTE \\(=y(t+h)-\\tilde y=\\frac{h^2}{2}y''(\\xi)\\)。\\(N=T/h\\) 步后全局 \\(\\sim Nh^2=Th=O(h)\\)。简单但精度低——每步相当于用切线近似曲线。"
+      },
+      {
+        "id": "numerical-ch05-q2",
+        "question": "经典四阶 Runge-Kutta（RK4）方法每步需要几次函数求值？",
+        "options": [
+          "4 次",
+        "1 次",
+        "2 次",
+        "6 次"
+        ],
+        "answer": 0,
+        "explanation": "\\(k_1=f(t_n,y_n)\\)，\\(k_2=f(t_n+h/2,y_n+hk_1/2)\\)，\\(k_3=f(t_n+h/2,y_n+hk_2/2)\\)，\\(k_4=f(t_n+h,y_n+hk_3)\\)。\\(y_{n+1}=y_n+\\frac{h}{6}(k_1+2k_2+2k_3+k_4)\\)。4次 \\(f\\) 求值 → \\(O(h^5)\\) LTE → 4阶方法。"
+      },
+      {
+        "id": "numerical-ch05-q3",
+        "question": "刚性（stiff）ODE 的特征？",
+        "options": [
+          "解中含快速衰减分量但关注慢变化行为 → 显式方法需极小步长",
+        "解振荡",
+        "无解",
+        "解爆炸"
+        ],
+        "answer": 0,
+        "explanation": "\\(y'=\\lambda y\\)（\\(\\lambda\\ll -1\\)）：\\(y=e^{\\lambda t}\\to 0\\) 快。显式 Euler 稳定要求 \\(|1+h\\lambda|\\leq 1\\) → \\(h\\leq 2/|\\lambda|\\)（极小）。隐式方法（如后向 Euler \\(|1/(1-h\\lambda)|\\leq 1\\) 总成立）→ 无条件稳定。化学反应、电路仿真常产生刚性系统。"
+      },
+      {
+        "id": "numerical-ch05-q4",
+        "question": "Adams-Bashforth 2步法 \\(y_{n+1}=y_n+\\frac{h}{2}(3f_n-f_{n-1})\\) 的阶？",
+        "options": [
+          "2 阶",
+        "1 阶",
+        "3 阶",
+        "4 阶"
+        ],
+        "answer": 0,
+        "explanation": "多步法：用 \\(f_n,f_{n-1}\\) 的线性组合。二阶：LTE \\(=O(h^3)\\)，全局 \\(O(h^2)\\)。Adams-Bashforth \\(k\\) 步法为 \\(k\\) 阶（显式）。Adams-Moulton \\(k\\) 步为 \\(k+1\\) 阶（隐式）。预估-校正：AB 预估 + AM 校正 → 综合优势。"
+      },
+      {
+        "id": "numerical-ch05-q5",
+        "question": "一步法 \\(y_{n+1}=y_n+h\\Phi(t_n,y_n,h)\\) 的全局误差和 LTE 的关系？",
+        "options": [
+          "LTE \\(=O(h^{p+1})\\) → 全局误差 \\(=O(h^p)\\)（相差一阶：\\(N\\) 步累积）",
+        "相同阶",
+        "全局更高",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(N=T/h\\) 步，每步 LTE \\(=O(h^{p+1})\\) → 总 \\(=Nh^{p+1}=Th^p\\)。前提：方法稳定（Lipschitz 条件 → 误差不放大）。一致性（LTE→0）+ 稳定性 → 收敛性（Lax 等价定理的 ODE 版本）。"
+      },
+      {
+        "id": "numerical-ch05-q6",
+        "question": "RK4 的 LTE 阶和全局误差阶？",
+        "options": [
+          "LTE \\(=O(h^5)\\)，全局 \\(=O(h^4)\\)",
+        "LTE \\(O(h^4)\\)",
+        "LTE \\(O(h^3)\\)",
+        "全局 \\(O(h^5)\\)"
+        ],
+        "answer": 0,
+        "explanation": "RK4 是四阶方法。4次函数求值达到 4阶精度——Butcher (1963) 研究了RK方法的阶条件，发现4阶正好需要4级。5阶方法至少需要6级（Butcher 障碍）。RK4 是精度/成本最优平衡点之一。"
+      },
+      {
+        "id": "numerical-ch05-q7",
+        "question": "后向 Euler \\(y_{n+1}=y_n+hf(t_{n+1},y_{n+1})\\) 属于什么类型？",
+        "options": [
+          "隐式方法——每步需解非线性方程",
+        "显式",
+        "多步法",
+        "自适应"
+        ],
+        "answer": 0,
+        "explanation": "\\(y_{n+1}\\) 出现在等式两边 → 需迭代求解（Newton 法或不动点迭代）。代价高于显式，但稳定域包含整个左半平面（\\(\\text{Re}(h\\lambda)<0\\)）→ L-稳定。适合刚性问题。"
+      },
+      {
+        "id": "numerical-ch05-q8",
+        "question": "用 Euler 法解 \\(y'=-10y\\)，\\(y(0)=1\\)，步长 \\(h=0.3\\)。前两步？",
+        "options": [
+          "\\(y_1=1+0.3(-10\\cdot 1)=-2\\)，\\(y_2=-2+0.3(-10\\cdot(-2))=4\\)（振荡发散！）",
+        "\\(y_1=0.7\\)，\\(y_2=0.49\\)",
+        "\\(y_1=-2\\)，\\(y_2=-4\\)",
+        "\\(y_1=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(1+h\\lambda=1-3=-2\\) → \\(|1+h\\lambda|=2>1\\) → 不稳定。精确解 \\(y=e^{-10t}\\to 0\\) 但数值解振荡增长。稳定条件 \\(|1-10h|\\leq 1\\) → \\(h\\leq 0.2\\)。\\(h=0.3\\) 违反 → 灾难。"
+      },
+      {
+        "id": "numerical-ch05-q9",
+        "question": "嵌入式 RK 方法（如 RK45 / Dormand-Prince）如何估计局部误差？",
+        "options": [
+          "用同一组 \\(k_i\\) 构造两个不同阶（4阶和5阶）的近似，差作为误差估计",
+        "Richardson 外推",
+        "残差检查",
+        "无法估计"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat y_{n+1}\\)（5阶）和 \\(y_{n+1}\\)（4阶）用相同的 \\(k_1,...,k_6\\)（6次函数求值）。\\(\\|y-\\hat y\\|\\approx\\) LTE。若 \\(>\\) 容差 → 拒绝步、减小 \\(h\\)。接受后 \\(h\\) 增大（如 \\(h_{\\text{new}}=h\\cdot(tol/err)^{1/5}\\)）。MATLAB `ode45` 的核心。"
+      },
+      {
+        "id": "numerical-ch05-q10",
+        "question": "A-稳定方法的定义：对测试方程 \\(y'=\\lambda y\\)（\\(\\text{Re}\\lambda<0\\)），方法满足？",
+        "options": [
+          "\\(|y_{n+1}/y_n|\\leq 1\\) 对所有 \\(h>0\\) 和 \\(\\text{Re}\\lambda<0\\)（稳定域 \\(\\supseteq\\) 左半平面）",
+        "仅 \\(h\\) 足够小",
+        "\\(|y|\\to\\infty\\)",
+        "仅实 \\(\\lambda\\)"
+        ],
+        "answer": 0,
+        "explanation": "后向 Euler：\\(R(z)=1/(1-z)\\)，\\(|R(z)|\\leq 1\\) 当 \\(\\text{Re}z\\leq 0\\) → A-稳定 ✓。梯形法（Crank-Nicolson）：\\(R(z)=(1+z/2)/(1-z/2)\\)，\\(|R|=1\\) 在虚轴 → A-稳定（边界情况）。Dahlquist 障碍：A-稳定多步法阶至多 2。"
+      },
+      {
+        "id": "numerical-ch05-q11",
+        "question": "Adams-Bashforth-Moulton 预估-校正法（PECE）的流程？",
+        "options": [
+          "P: AB 预估 \\(y^*\\)，E: 求 \\(f(t_{n+1},y^*)\\)，C: AM 校正 \\(y_{n+1}\\)，E: 求 \\(f(t_{n+1},y_{n+1})\\)",
+        "仅预估",
+        "仅校正",
+        "两次 AB"
+        ],
+        "answer": 0,
+        "explanation": "AB（显式）快但低阶；AM（隐式）高一阶但需迭代。组合：AB 预估一个好初值 → AM 校正一次（不迭代）。效果接近隐式但成本接近显式。每步 2 次 \\(f\\) 求值。AB3-AM3 为 3阶 PECE。"
+      },
+      {
+        "id": "numerical-ch05-q12",
+        "question": "修正 Euler 法（Heun 法）\\(y_{n+1}=y_n+\\frac{h}{2}(f_n+f(t_{n+1},y_n+hf_n))\\) 是几阶？",
+        "options": [
+          "2 阶",
+        "1 阶",
+        "3 阶",
+        "4 阶"
+        ],
+        "answer": 0,
+        "explanation": "\\(k_1=f_n\\)，\\(k_2=f(t_{n+1},y_n+hk_1)\\)，\\(y_{n+1}=y_n+\\frac{h}{2}(k_1+k_2)\\)。这是 2 级 2 阶 RK（RK2 之一）。稳定域：\\(|1+z+z^2/2|\\leq 1\\)，比 Euler 大但仍有限。"
+      },
+      {
+        "id": "numerical-ch05-q13",
+        "question": "梯形法（隐式中点法）\\(y_{n+1}=y_n+\\frac{h}{2}(f_n+f_{n+1})\\) 的稳定函数 \\(R(z)=\\)？",
+        "options": [
+          "\\(R(z)=\\frac{1+z/2}{1-z/2}\\)（Padé [1/1]）",
+        "\\(R=1+z\\)",
+        "\\(R=1/(1-z)\\)",
+        "\\(R=e^z\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(y_{n+1}=y_n+\\frac{h}{2}(\\lambda y_n+\\lambda y_{n+1})\\)，\\(z=h\\lambda\\)。\\((1-z/2)y_{n+1}=(1+z/2)y_n\\)。\\(R(z)=(2+z)/(2-z)\\)。\\(|R(iz)|=1\\)（虚轴上模为1）→ 无耗散 → 适合保守系统（但可能不抑制寄生振荡）。"
+      },
+      {
+        "id": "numerical-ch05-q14",
+        "question": "自适应步长控制的基本公式：\\(h_{\\text{new}}=h\\cdot S\\cdot\\left(\\frac{\\text{tol}}{\\text{err}}\\right)^{1/(p+1)}\\)，\\(S\\) 是？",
+        "options": [
+          "安全因子（通常 \\(0.8\\sim 0.9\\)）",
+        "1",
+        "2",
+        "误差"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{err}\\sim Ch^{p+1}\\) → 要 \\(\\text{err}_\\text{new}=\\text{tol}\\) → \\(h_\\text{new}=h(tol/err)^{1/(p+1)}\\)。\\(S<1\\)：保守以避免反复拒绝步。PI 控制器（比例-积分）：\\(h_\\text{new}=h\\cdot(e_n/e_{n-1})^\\beta\\cdot(tol/e_n)^\\alpha\\) → 更平滑的步长变化。"
+      },
+      {
+        "id": "numerical-ch05-q15",
+        "question": "线性多步法 \\(\\sum\\alpha_j y_{n+j}=h\\sum\\beta_j f_{n+j}\\) 的零稳定性条件？",
+        "options": [
+          "第一特征多项式 \\(\\rho(\\zeta)=\\sum\\alpha_j\\zeta^j\\) 的根满足 \\(|\\zeta|\\leq 1\\) 且 \\(|\\zeta|=1\\) 的根为单根",
+        "\\(\\rho\\) 无根",
+        "所有根 \\(=0\\)",
+        "无条件"
+        ],
+        "answer": 0,
+        "explanation": "根条件（root condition）：\\(\\rho\\) 的根不超出单位圆，单位圆上的根为简单根。\\(\\rho(\\zeta)=\\zeta^k-\\zeta^{k-1}\\) → 根 \\(\\zeta=1\\)（单根）和 \\(\\zeta=0\\)（\\(k-1\\) 重） → 满足 ✓。中点法 \\(y_{n+1}=y_{n-1}+2hf_n\\)：\\(\\rho=\\zeta^2-1\\)，根 \\(\\pm 1\\) → 条件满足但 \\(\\zeta=-1\\) 导致寄生解。"
+      },
+      {
+        "id": "numerical-ch05-q16",
+        "question": "L-稳定方法（A-稳定 + \\(|R(\\infty)|=0\\)）的意义？",
+        "options": [
+          "对极刚性分量（\\(|h\\lambda|\\to\\infty\\)）数值解也衰减到零——后向 Euler L-稳定，梯形法不是",
+        "与 A-稳定相同",
+        "仅适用于线性",
+        "无意义"
+        ],
+        "answer": 0,
+        "explanation": "梯形法：\\(R(z)\\to -1\\)（\\(z\\to -\\infty\\)） → 极刚性分量变为 \\((-1)^n\\)（振荡不衰减）。后向 Euler：\\(R(z)\\to 0\\) → 快速衰减 ✓。化学反应/电路中暂态的快速衰减必须被正确抑制 → L-稳定。SDIRK 方法常设计为 L-稳定。"
+      },
+      {
+        "id": "numerical-ch05-q17",
+        "question": "Butcher 障碍：\\(s\\) 级 RK 方法的最高可能阶？（\\(s\\leq 4\\)）",
+        "options": [
+          "\\(s\\leq 4\\) 时阶 \\(=s\\)（1级1阶, 2级2阶, 3级3阶, 4级4阶）；\\(s=5\\) 时阶至多 4",
+        "阶 \\(=s\\) 恒成立",
+        "阶 \\(=2s\\)",
+        "阶 \\(=s-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(s=5\\): 最高 4阶。\\(s=6\\): 最高 5阶。\\(s=7,8\\): 最高 6阶。阶条件数指数增长。Butcher 用有根树（rooted tree）系统化描述。\\(p\\) 阶需满足 \\(T(p)\\) 个方程（\\(T(4)=8\\)，\\(T(5)=17\\)）。"
+      },
+      {
+        "id": "numerical-ch05-q18",
+        "question": "Euler 法解 \\(y'=y^2\\)，\\(y(0)=1\\)（精确解 \\(y=1/(1-t)\\) 在 \\(t=1\\) 爆破）。数值解能检测到爆破吗？",
+        "options": [
+          "步长固定时 \\(y_n\\to\\infty\\) 的速度不同于精确解（数值到 \\(t=1\\) 附近已极大但延迟）；自适应步长 → \\(h\\to 0\\) 示意爆破",
+        "精确捕捉",
+        "无法检测",
+        "数值解有界"
+        ],
+        "answer": 0,
+        "explanation": "Euler：\\(y_{n+1}=y_n(1+hy_n)\\)。\\(y_n\\) 大 → 下一步更大（正反馈）。但数值解在 \\(t<1\\) 时偏小（一阶方法低估导数）。自适应：\\(h\\) 必须急剧减小 → 步长累积有限 → 无法到达 \\(t=1\\)，与精确行为一致。"
+      },
+      {
+        "id": "numerical-ch05-q19",
+        "question": "Dahlquist 第二障碍：A-稳定的线性多步法阶至多？",
+        "options": [
+          "2（如梯形法和 BDF2 是极限）",
+        "4",
+        "6",
+        "无限制"
+        ],
+        "answer": 0,
+        "explanation": "1963 年 Dahlquist 证明。BDF3-BDF6 不是 A-稳定（稳定域不含整个左半平面）但 A(\\(\\alpha\\))-稳定（稳定域含角度 \\(\\alpha\\) 的楔形）。BDF6 的 \\(\\alpha\\approx 18°\\)。实际中 BDF 方法（1-5阶）广泛用于刚性问题（MATLAB `ode15s`）。"
+      },
+      {
+        "id": "numerical-ch05-q20",
+        "question": "自适应步长多步法的困难？",
+        "options": [
+          "步长变化导致系数需重新计算（与固定步长不同），或用 Nordsieck 向量重新表示",
+        "无困难",
+        "多步法不可自适应",
+        "仅影响精度"
+        ],
+        "answer": 0,
+        "explanation": "Adams 方法依赖等间距 \\(h\\) → \\(h\\) 变化时差商/系数全变。Nordsieck 形式（存储 \\([y, hy', h^2 y''/2!,\\ldots]\\)）→ 步长变化 = 向量缩放，更自然。LSODE/CVODE 库用 Nordsieck 向量实现变步长变阶 BDF。"
+      },
+      {
+        "id": "numerical-ch05-q21",
+        "question": "显式 RK 方法的稳定域（\\(y'=\\lambda y\\)，\\(z=h\\lambda\\)）：\\(|R(z)|\\leq 1\\) 围成的区域。RK4 的稳定域近似？",
+        "options": [
+          "沿实轴延伸到 \\(z\\approx -2.78\\)，沿虚轴到 \\(z\\approx\\pm 2.83i\\)（近似圆形但不含全左半平面）",
+        "整个左半平面",
+        "单位圆",
+        "实轴 \\([-2,0]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(z)=1+z+z^2/2+z^3/6+z^4/24\\)（\\(e^z\\) 的 4阶 Taylor）。稳定边界 \\(|R(z)|=1\\) 数值画出。Euler（\\(|1+z|\\leq 1\\)）仅圆盘 \\(|z+1|\\leq 1\\)。RK4 明显更大。但所有显式方法稳定域有限 → 步长受限。"
+      },
+      {
+        "id": "numerical-ch05-q22",
+        "question": "隐式 RK（IRK）方法如 Gauss-Legendre RK 的优势？",
+        "options": [
+          "\\(s\\) 级可达 \\(2s\\) 阶（最高可能），且 A-稳定（辛方法）",
+        "与显式相同",
+        "阶 \\(\\leq s\\)",
+        "不稳定"
+        ],
+        "answer": 0,
+        "explanation": "Gauss-Legendre \\(s\\) 点 = 配点法用 Legendre 零点 → \\(2s\\) 阶。\\(s=1\\): 隐式中点（2阶辛）。\\(s=2\\): 4阶辛。代价：每步解 \\(sn\\) 维非线性系统（Newton 迭代 + \\(sn\\times sn\\) 线性系统）。Hamilton 系统长期积分首选。"
+      },
+      {
+        "id": "numerical-ch05-q23",
+        "question": "一步法收敛定理（Dahlquist-Lax）：一致性 + 稳定性 → 全局 \\(O(h^p)\\)。\"稳定性\"在此指？",
+        "options": [
+          "\\(\\Phi\\) 满足 Lipschitz 条件（\\(|\\Phi(t,u,h)-\\Phi(t,v,h)|\\leq L|u-v|\\)）→ 误差不指数放大",
+        "A-稳定",
+        "零稳定",
+        "有界解"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_{n+1}=e_n+h[\\Phi(t_n,y_n,h)-\\Phi(t_n,\\hat y_n,h)]+\\tau_{n+1}h\\)。\\(|e_{n+1}|\\leq(1+hL)|e_n|+h\\tau\\)。Gronwall → \\(|e_n|\\leq\\frac{\\tau}{L}(e^{LT}-1)=O(\\tau)=O(h^p)\\)。Lipschitz 条件保证误差增长至多指数（有限时间后有界）。"
+      },
+      {
+        "id": "numerical-ch05-q24",
+        "question": "SDIRK（Singly Diagonally Implicit RK）方法的结构优势？",
+        "options": [
+          "Butcher 表的 \\(a_{ii}\\) 全相同（\\(=\\gamma\\)） → 每级只解一个 \\(n\\times n\\) 系统（而非 \\(sn\\times sn\\)），且 Jacobian 矩阵相同可复用",
+        "与显式 RK 相同",
+        "无优势",
+        "仅适用于线性"
+        ],
+        "answer": 0,
+        "explanation": "全隐式 IRK 每步解 \\(sn\\) 维系统 → LU 分解 \\(O((sn)^3)\\)。SDIRK：\\(s\\) 个 \\(n\\) 维系统，Jacobian \\((I-h\\gamma J)\\) 相同 → 一次 LU 分解，\\(s\\) 次回代。非常适合刚性问题。ESDIRK（第一级显式）→ 嵌入误差估计。"
+      },
+      {
+        "id": "numerical-ch05-q25",
+        "question": "密输出（dense output）/ 连续插值在 RK 方法中的意义？",
+        "options": [
+          "在已接受的步 \\([t_n, t_{n+1}]\\) 内任意 \\(t\\) 处提供与方法同阶的近似 → 事件定位、绘图",
+        "仅用于误差估计",
+        "增加精度",
+        "仅多步法需要"
+        ],
+        "answer": 0,
+        "explanation": "Dormand-Prince 的 4阶密输出多项式（5个系数）→ 在 \\([t_n,t_{n+1}]\\) 内任意 \\(t\\) 处 4阶近似。事件检测：\\(g(y(t))=0\\) → 对密输出用零点搜索。MATLAB `ode45` 的 `deval` 函数基于此。步长可大于输出间隔。"
+      },
+      {
+        "id": "numerical-ch05-q26",
+        "question": "模拟弹簧振子 \\(y''+\\omega^2 y=0\\)（化为 \\(y'=v\\), \\(v'=-\\omega^2 y\\)）。Euler 法会导致？",
+        "options": [
+          "能量持续增长（数值解螺旋向外）",
+        "能量守恒",
+        "能量衰减",
+        "振幅不变"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(i\\omega h)=1+i\\omega h\\)（Euler），\\(|R|=\\sqrt{1+\\omega^2 h^2}>1\\) → 每步放大。后向 Euler：\\(|R|<1\\) → 衰减。辛方法（如 Störmer-Verlet）：\\(|R|=1\\) → 能量有界振荡（长期稳定）。天体力学必须用辛积分器。"
+      },
+      {
+        "id": "numerical-ch05-q27",
+        "question": "化学反应动力学 \\(\\frac{dc_i}{dt}=f_i(c_1,...,c_n)\\) 中速率常数差异 \\(10^6\\) 倍。应该用什么求解器？",
+        "options": [
+          "刚性 ODE 求解器（如 BDF、隐式 RK）",
+        "显式 Euler",
+        "RK4",
+        "Leap-frog"
+        ],
+        "answer": 0,
+        "explanation": "快反应（\\(τ\\sim 10^{-6}\\) s）到平衡后，慢反应（\\(τ\\sim 1\\) s）主导。显式方法步长受 \\(τ_{\\text{fast}}\\) 限制 → 需 \\(10^6\\) 步。隐式方法无此限制。MATLAB `ode15s`（变阶 BDF）或 `ode23s`（Rosenbrock）是标准选择。"
+      },
+      {
+        "id": "numerical-ch05-q28",
+        "question": "卫星轨道计算中使用变步长多步法（如 LSODE）的注意事项？",
+        "options": [
+          "长时间积分需监控能量误差漂移；变步长破坏辛性 → 考虑辛方法或正则化",
+        "无注意",
+        "固定步长",
+        "仅用 RK4"
+        ],
+        "answer": 0,
+        "explanation": "轨道积分 \\(\\sim 10^6\\) 周期。非辛方法 → 能量线性漂移。辛（Störmer-Verlet, Gauss-Legendre RK）→ 能量有界振荡。但变步长辛方法（时间变换）实现复杂。折衷：高阶显式辛 + 小固定步长，或正则化消除 Kepler 奇点。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="numerical"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/numerical.html" class="module-name">数值分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Euler 方法与基本概念</a></li>
+      <li><a href="#kp2">02 · Runge-Kutta 方法</a></li>
+      <li><a href="#kp3">03 · 刚性问题与隐式方法</a></li>
+      <li><a href="#kp4">04 · 多步法与自适应步长</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>ODE 数值方法</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Euler 方法与基本概念</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>大多数 ODE 没有解析解，数值方法是唯一的出路。Euler 方法 是最简单的 ODE 数值解法——用切线代替曲线。虽然精度低（\(O(h)\)）， 但它包含了所有 ODE 数值方法的核心概念：离散化、局部截断误差、 全局误差、收敛性和稳定性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>ODE 数值方法将连续动力系统 \(y' = f(t,y)\) 离散化为 差分递推 \(y_{n+1} = \Phi(y_n, t_n, h)\)。一步法和多步法 的区别在于 \(\Phi\) 是否用到前几步的值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>前向 Euler</strong>：\(y_{n+1} = y_n + hf(t_n, y_n)\)。 几何意义：沿 \((t_n, y_n)\) 处的切线走一步。 <strong>局部截断误差</strong>（LTE）：\(\tau_{n+1} = y(t_{n+1}) - y(t_n) - hf(t_n, y(t_n))\)。 Taylor 展开：\(y(t_{n+1}) = y(t_n) + hy'(t_n) + \frac{h^2}{2}y''(\xi)\)， \(\tau_{n+1} = \frac{h^2}{2}y''(\xi) = O(h^2)\)。LTE 阶 = \(p+1 = 2\)，方法阶 \(p = 1\)。 <strong>全局误差</strong>：\(e_n = y(t_n) - y_n\)。 递推：\(e_{n+1} = e_n + h[f(t_n,y(t_n))-f(t_n,y_n)] + \tau_{n+1}\)。 Lipschitz 条件 → \(|e_{n+1}| \leq (1+Lh)|e_n| + Ch^2\)。 Grönwall 引理 → \(|e_n| \leq \frac{Ch}{L}(e^{L(t_n-t_0)}-1) = O(h)\)。 <strong>后向 Euler</strong>：\(y_{n+1} = y_n + hf(t_{n+1}, y_{n+1})\)（隐式，需解方程）。 稳定性远优于前向 Euler（见 KP3）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- ODE 数值方法是天体力学（轨道计算）、化学动力学（反应方程）的基本工具 - 机器学习中的 Neural ODE 将 ODE 数值方法与深度学习结合</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用前向 Euler（\(h=0.1\)）解 \(y' = -y\)，\(y(0) = 1\)，求 \(y(0.2)\)。 解答：\(y_1 = 1 + 0.1(-1) = 0.9\)，\(y_2 = 0.9 + 0.1(-0.9) = 0.81\)。 精确值 \(y(0.2) = e^{-0.2} \approx 0.8187\)。误差 \(\approx 0.009\)（\(O(h)\)）。 易错点：前向 Euler 对刚性方程（如 \(y' = -1000y\)）需要极小步长 \(h < 2/1000\)， 否则数值解振荡发散。刚性问题必须用隐式方法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">前向 Euler 方法的全局误差阶是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。LTE 是 \\(O(h^2)\\)，但经过 \\(O(1/h)\\) 步累积后全局误差为 \\(O(h)\\)。')">A. \(O(h^2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！LTE 是 \\(O(h^2)\\)，但经过 \\(O(1/h)\\) 步累积后全局误差为 \\(O(h)\\)。')">B. \(O(h)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。LTE 是 \\(O(h^2)\\)，但经过 \\(O(1/h)\\) 步累积后全局误差为 \\(O(h)\\)。')">C. \(O(h^3)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。LTE 是 \\(O(h^2)\\)，但经过 \\(O(1/h)\\) 步累积后全局误差为 \\(O(h)\\)。')">D. \(O(1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Runge-Kutta 方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Euler 方法精度太低。Runge-Kutta（RK）方法通过在每步内 评估多个斜率的加权平均来提高精度，无需计算高阶导数。 经典四阶 RK（RK4）以仅 4 次函数求值达到 \(O(h^4)\) 精度， 是一般非刚性 ODE 的标准方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>RK 方法用 Butcher 表 \((A,b,c)\) 统一描述。阶条件是一系列 关于 \(A,b,c\) 的代数方程，由 Taylor 展开与 B-series 理论推导。 \(s\) 级 RK 方法最高可达 \(s\) 阶（\(s \leq 4\)）或更低（\(s \geq 5\) 时有阶障碍）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(s\) 级显式 RK 方法</strong>： \[k_i = f\left(t_n + c_i h,\; y_n + h\sum_{j=1}^{i-1}a_{ij}k_j\right), \quad i=1,\ldots,s\] \[y_{n+1} = y_n + h\sum_{i=1}^s b_i k_i\] <strong>经典 RK4</strong>（最著名的 RK 方法）： \(k_1 = f(t_n, y_n)\)，\(k_2 = f(t_n+h/2, y_n+hk_1/2)\)， \(k_3 = f(t_n+h/2, y_n+hk_2/2)\)，\(k_4 = f(t_n+h, y_n+hk_3)\)。 \[y_{n+1} = y_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)\] LTE = \(O(h^5)\)，全局误差 \(O(h^4)\)。 <strong>阶条件</strong>（\(p=4\) 需要 8 个方程）： \(\sum b_i = 1\)，\(\sum b_i c_i = 1/2\)，\(\sum b_i c_i^2 = 1/3\)， \(\sum b_i a_{ij}c_j = 1/6\)，... <strong>嵌入式 RK</strong>（Dormand-Prince）：两个不同阶的 RK 共享 \(k_i\)， 阶差提供误差估计 → 自适应步长控制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- MATLAB `ode45` = Dormand-Prince 4(5) 阶嵌入式 RK - 计算机游戏中的物理模拟（刚体运动）常用 RK4</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 RK4（\(h=0.1\)）解 \(y' = -y\)，\(y(0)=1\)。求 \(y_1\)。 解答：\(k_1 = -1\)，\(k_2 = -(1-0.05) = -0.95\)， \(k_3 = -(1+0.1\times(-0.95)/2) = -(1-0.0475) = -0.9525\)， \(k_4 = -(1+0.1\times(-0.9525)) = -(1-0.09525) = -0.90475\)。 \(y_1 = 1 + 0.1/6(-1-1.9-1.905-0.90475) = 1 - 0.1 \times 0.95163 = 0.904837\)。 精确值 \(e^{-0.1} = 0.904837...\)。误差 \(< 10^{-6}\)（\(O(h^4)\) 非常精确！）。 易错点：RK4 需要 4 次函数求值/步，对高维系统（\(f\) 计算昂贵时） 成本不低。此时应考虑多步法或自适应步长方法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">经典 RK4 方法每步需要几次 \(f\) 的计算？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(s = 4\\) 级方法需要 4 次函数求值 (\\(k_1, k_2, k_3, k_4\\))。')">A. 1 次</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(s = 4\\) 级方法需要 4 次函数求值 (\\(k_1, k_2, k_3, k_4\\))。')">B. 2 次</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(s = 4\\) 级方法需要 4 次函数求值 (\\(k_1, k_2, k_3, k_4\\))。')">C. 4 次</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(s = 4\\) 级方法需要 4 次函数求值 (\\(k_1, k_2, k_3, k_4\\))。')">D. 8 次</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>刚性问题与隐式方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>刚性（stiff）ODE 包含快慢两种时间尺度（如化学反应中的快速 平衡与慢速动力学）。显式方法被迫使用极小步长以保稳定， 效率极低。隐式方法（如后向 Euler、梯形法、隐式 RK）的稳定域 覆盖整个左半平面，天然适合刚性问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>稳定性分析在测试方程 \(y' = \lambda y\)（\(\text{Re}\,\lambda < 0\)）上进行。 方法对 \(z = h\lambda\) 的放大因子 \(R(z)\) 决定了稳定域 \(\{z : |R(z)| \leq 1\}\)。A-稳定 = 稳定域包含整个 \(\text{Re}\,z < 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>测试方程</strong>：\(y' = \lambda y\)，\(\lambda \in \mathbb{C}\)，\(\text{Re}\,\lambda < 0\)。 精确解 \(y = e^{\lambda t} \to 0\)，数值方法也应衰减。 <strong>前向 Euler</strong>：\(y_{n+1} = (1+z)y_n\)，\(R(z) = 1+z\)。 稳定域：\(|1+z| \leq 1\)（以 \(-1\) 为心的单位圆）。 \(\lambda\) 实负时需 \(|1+h\lambda| \leq 1\) → \(h < 2/|\lambda|\)。 <strong>后向 Euler</strong>：\(y_{n+1} = y_n + h\lambda y_{n+1}\) → \(R(z) = 1/(1-z)\)。 \(|R(z)| \leq 1 \iff |1-z| \geq 1\)，包含整个 \(\text{Re}\,z < 0\)。<strong>A-稳定！</strong> <strong>梯形法（Crank-Nicolson）</strong>：\(R(z) = (1+z/2)/(1-z/2)\)。 \(|R(z)| = 1\) 当 \(\text{Re}\,z = 0\)，\(|R(z)| < 1\) 当 \(\text{Re}\,z < 0\)。A-稳定且 2 阶。 <strong>Dahlquist 第二障碍定理</strong>：线性多步法中 A-稳定方法的最高阶是 2 （即梯形法已是理论极限）。隐式 RK 可以突破此限制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 电路仿真（SPICE）中的电路方程是刚性 ODE - 大气化学模型中的反应-扩散方程</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(y' = -100y\)，\(y(0) = 1\)。比较前向 Euler 和后向 Euler 在 \(h = 0.03\) 时的表现。 解答：\(z = h\lambda = -3\)。 前向 Euler：\(R(-3) = 1 + (-3) = -2\)，\(|R| = 2 > 1\) → 发散！\(y_1 = -2\)，\(y_2 = 4\)，\(y_3 = -8\)... 后向 Euler：\(R(-3) = 1/(1-(-3)) = 1/4\)，\(|R| = 0.25 < 1\) → 稳定衰减。 \(y_1 = 0.25\)，\(y_2 = 0.0625\)，...（单调衰减到 0）。 易错点：「刚性」不等于「解变化快」。刚性是指存在快速衰减的模态 约束了显式方法的步长，即使这些快速模态对解的贡献很小。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">A-稳定的数值方法需要满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A-稳定 \\(\\iff\\) 对所有 \\(\\text{Re}\\,\\lambda < 0\\) 的测试方程数值解衰减，')">A. 稳定域包含实轴</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！A-稳定 \\(\\iff\\) 对所有 \\(\\text{Re}\\,\\lambda < 0\\) 的测试方程数值解衰减，')">B. 稳定域包含整个左半复平面 \(\text{Re}\,z \leq 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A-稳定 \\(\\iff\\) 对所有 \\(\\text{Re}\\,\\lambda < 0\\) 的测试方程数值解衰减，')">C. 稳定域是无界的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A-稳定 \\(\\iff\\) 对所有 \\(\\text{Re}\\,\\lambda < 0\\) 的测试方程数值解衰减，')">D. 放大因子 \(|R(z)| = 0\) 当 \(z \to -\infty\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>多步法与自适应步长</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>RK 方法每步重新计算多个 \(k_i\)，不利用先前步的信息。 线性多步法利用 \(y_{n}, y_{n-1}, \ldots\) 的历史值，仅需每步 1 次 \(f\) 求值即可达到高阶——效率极高。自适应步长控制则根据 局部误差估计自动调整 \(h\)，兼顾精度和效率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>线性多步法 = 差分方程，收敛性 \(\iff\) 一致性 + 零稳定性 （Dahlquist 等价定理）。这类似于 PDE 中的 Lax 等价定理， 是数值方法理论的核心结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(k\) 步线性多步法</strong>： \[\sum_{j=0}^k \alpha_j y_{n+j} = h\sum_{j=0}^k \beta_j f_{n+j}\] \(\alpha_k = 1\)（归一化）。\(\beta_k = 0\)（显式）或 \(\beta_k \neq 0\)（隐式）。 <strong>Adams-Bashforth</strong>（显式）：用 \(f_n, f_{n-1},\ldots\) 的插值多项式积分。 AB2：\(y_{n+2} = y_{n+1} + h(3f_{n+1}-f_n)/2\)（2 阶）。 AB4：4 阶，每步仅 1 次 \(f\) 求值。 <strong>Adams-Moulton</strong>（隐式）：同阶精度更高。 AM2（梯形法）：\(y_{n+1} = y_n + h(f_{n+1}+f_n)/2\)（2 阶 A-稳定）。 <strong>预测-校正</strong>：用 AB 预测，AM 校正（PECE 模式）。 <strong>Dahlquist 等价定理</strong>：多步法收敛 \(\iff\) 一致（\(p \geq 1\)）+ 零稳定 （第一特征多项式 \(\rho(\zeta) = \sum\alpha_j\zeta^j\) 的根满足根条件： \(|\zeta| \leq 1\)，且 \(|\zeta|=1\) 的根是单根）。 <strong>自适应步长</strong>：用嵌入公式或 Richardson 外推估计 LTE \(\approx \hat\tau\)。 若 \(|\hat\tau| > \text{tol}\)，缩小 \(h\)：\(h_{\text{new}} = h\cdot({\text{tol}}/|\hat\tau|)^{1/(p+1)}\)。 若 \(|\hat\tau| \ll \text{tol}\)，增大 \(h\) 以提高效率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 天体力学中的长时间轨道积分使用高阶 Adams 方法 - MATLAB `ode113` = 变阶 Adams-Bashforth-Moulton PECE</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 AB2 方法解 \(y' = -y\)（\(y_0 = 1\)，\(y_1 = e^{-h}\)，\(h = 0.1\)）。 解答：\(f_0 = -1\)，\(f_1 = -e^{-0.1} \approx -0.9048\)。 \(y_2 = y_1 + 0.1(3(-0.9048)-(-1))/2 = 0.9048 + 0.1(-2.7145+1)/2\) \(= 0.9048 + 0.1\times(-0.8572) = 0.9048 - 0.08572 = 0.8191\)。 精确值 \(e^{-0.2} \approx 0.8187\)。误差 \(\approx 4\times10^{-4}\)（\(O(h^2)\) ✓）。 易错点：多步法需要额外的起步值 \(y_1,\ldots,y_{k-1}\)（用 RK 方法计算）。 如果起步值精度低于多步法阶数，全局精度降阶。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Dahlquist 等价定理说多步法收敛等价于什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。收敛 \\(\\iff\\) 一致 + 零稳定。二者缺一不可。')">A. 一致性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。收敛 \\(\\iff\\) 一致 + 零稳定。二者缺一不可。')">B. 零稳定性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！收敛 \\(\\iff\\) 一致 + 零稳定。二者缺一不可。')">C. 一致性 + 零稳定性</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。收敛 \\(\\iff\\) 一致 + 零稳定。二者缺一不可。')">D. A-稳定性</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/applied/numerical.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 Fourier 级数 — 调和分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "harmonic-ch01-q1",
+        "question": "周期函数 \\(f\\) 的 Fourier 级数定义？（周期 \\(2\\pi\\)）",
+        "options": [
+          "\\(f(x) \\sim \\frac{a_0}{2} + \\sum_{n=1}^\\infty (a_n \\cos nx + b_n \\sin nx)\\)，\\(a_n = \\frac{1}{\\pi}\\int_{-\\pi}^{\\pi} f(x)\\cos nx\\, dx\\)",
+        "\\(f(x) = \\sum a_n x^n\\)（Taylor）",
+        "\\(f(x) = \\sum a_n e^{nx}\\)",
+        "\\(f(x) = a_0 + a_1 x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a_n = \\langle f, \\cos nx \\rangle / \\|\\cos nx\\|^2\\)（\\(L^2\\) 内积投影）。\\(b_n = \\frac{1}{\\pi}\\int f\\sin nx\\, dx\\)。\\(\\sim\\) 表示形式对应——收敛性需额外条件。复指数形式：\\(f \\sim \\sum c_n e^{inx}\\)（\\(c_n = \\frac{1}{2\\pi}\\int f e^{-inx}\\, dx\\)）。"
+      },
+      {
+        "id": "harmonic-ch01-q2",
+        "question": "\\(f(x) = x\\)（\\(-\\pi < x < \\pi\\)），\\(2\\pi\\) 周期延拓。\\(a_n = ?\\)，\\(b_n = ?\\)",
+        "options": [
+          "\\(a_n = 0\\)（\\(f\\) 奇函数），\\(b_n = \\frac{2(-1)^{n+1}}{n}\\)",
+        "\\(a_n = 1/n\\)，\\(b_n = 0\\)",
+        "\\(a_0 = \\pi\\)，其余为零",
+        "\\(a_n = b_n = 1/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 奇函数 \\(\\Rightarrow\\) \\(a_n = 0\\)（\\(\\forall n\\)）。\\(b_n = \\frac{1}{\\pi}\\int_{-\\pi}^\\pi x\\sin nx\\, dx = \\frac{2}{\\pi}\\int_0^\\pi x\\sin nx\\, dx\\)。分部积分：\\(= \\frac{2}{\\pi}[-\\frac{x\\cos nx}{n}\\big|_0^\\pi + \\frac{1}{n}\\int_0^\\pi \\cos nx\\, dx] = \\frac{2(-1)^{n+1}}{n}\\)。\\(f \\sim 2\\sum \\frac{(-1)^{n+1}}{n}\\sin nx\\)。"
+      },
+      {
+        "id": "harmonic-ch01-q3",
+        "question": "Fourier 系数 \\(c_n = \\frac{1}{2\\pi}\\int_{-\\pi}^\\pi f(x) e^{-inx}\\, dx\\) 有什么衰减性质？若 \\(f \\in C^k\\)，则 \\(|c_n| = ?\\)",
+        "options": [
+          "\\(O(|n|^{-k})\\)（\\(f\\) 越光滑，系数衰减越快）",
+        "\\(O(1)\\)",
+        "\\(O(e^{-n})\\)",
+        "不衰减"
+        ],
+        "answer": 0,
+        "explanation": "分部积分 \\(k\\) 次：每次对 \\(e^{-inx}\\) 积分产生 \\(1/(in)\\) 因子。\\(c_n = (in)^{-k} \\cdot \\frac{1}{2\\pi}\\int f^{(k)} e^{-inx}\\, dx\\)。\\(|c_n| \\leq C/|n|^k\\)。\\(C^\\infty\\)：超过任何多项式衰减。解析函数：指数衰减。光滑性 \\(\\leftrightarrow\\) 系数衰减——调和分析的核心原则。"
+      },
+      {
+        "id": "harmonic-ch01-q4",
+        "question": "Parseval 等式：\\(f \\in L^2[-\\pi, \\pi]\\)。\\(\\frac{1}{2\\pi}\\int_{-\\pi}^\\pi |f(x)|^2\\, dx = ?\\)",
+        "options": [
+          "\\(\\sum_{n=-\\infty}^\\infty |c_n|^2\\)（\\(= \\frac{a_0^2}{4} + \\frac{1}{2}\\sum(a_n^2 + b_n^2)\\)）",
+        "\\(|c_0|^2\\)",
+        "\\(\\sum |c_n|\\)",
+        "\\((\\sum |c_n|)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{e^{inx}/\\sqrt{2\\pi}\\}\\) 是 \\(L^2\\) 的 ONB。\\(\\|f\\|^2 = \\sum|\\langle f, e_n\\rangle|^2 = \\sum |c_n|^2 \\cdot 2\\pi\\)。归一化后得 Parseval。物理：时域总能量 \\(=\\) 频域总能量（能量守恒）。Bessel 不等式 \\(\\leq\\) 对任何有限截断成立。"
+      },
+      {
+        "id": "harmonic-ch01-q5",
+        "question": "Bessel 不等式 vs Parseval 等式：区别？",
+        "options": [
+          "Bessel：\\(\\sum |c_n|^2 \\leq \\frac{1}{2\\pi}\\|f\\|_2^2\\)（对任何正交系）。Parseval：等号成立当正交系完备（ONB）",
+        "相同",
+        "Bessel 是等号",
+        "Parseval 是不等号"
+        ],
+        "answer": 0,
+        "explanation": "正交系不完备：部分系数不能捕获全部能量，\\(\\sum |c_n|^2 < \\|f\\|^2\\)。完备（\\(\\{e^{inx}\\}\\) 在 \\(L^2\\)）：等号——\\(f\\) 被完全\"分解\"。Parseval \\(\\Leftrightarrow\\) ONB 完备性。\\(L^2\\) 收敛不保证逐点收敛。"
+      },
+      {
+        "id": "harmonic-ch01-q6",
+        "question": "偶函数的 Fourier 级数只含 \\(\\cos\\) 项（\\(b_n = 0\\)），奇函数只含 \\(\\sin\\) 项（\\(a_n = 0\\)）。\\(f(x) = |x|\\)（\\(-\\pi < x < \\pi\\)）的 Fourier 级数？",
+        "options": [
+          "\\(\\frac{\\pi}{2} - \\frac{4}{\\pi}\\sum_{k=0}^\\infty \\frac{\\cos(2k+1)x}{(2k+1)^2}\\)（偶函数，仅余弦项）",
+        "\\(\\sum \\frac{\\sin nx}{n}\\)",
+        "\\(\\pi/2\\)",
+        "\\(\\sum \\frac{\\cos nx}{n^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|x|\\) 偶：\\(b_n = 0\\)。\\(a_0 = \\frac{2}{\\pi}\\int_0^\\pi x\\, dx = \\pi\\)。\\(a_n = \\frac{2}{\\pi}\\int_0^\\pi x\\cos nx\\, dx = \\frac{2}{\\pi}\\frac{(-1)^n - 1}{n^2}\\)。\\(n\\) 偶：\\(a_n = 0\\)。\\(n = 2k+1\\)：\\(a_{2k+1} = -4/(\\pi(2k+1)^2)\\)。\\(|x| = \\pi/2 - \\frac{4}{\\pi}\\sum \\frac{\\cos(2k+1)x}{(2k+1)^2}\\)。"
+      },
+      {
+        "id": "harmonic-ch01-q7",
+        "question": "Gibbs 现象：Fourier 级数在间断点附近的行为？",
+        "options": [
+          "部分和在跳跃间断点处过冲约 \\(9\\%\\)（\\(\\approx 8.95\\%\\)），且过冲不随 \\(N \\to \\infty\\) 消失",
+        "部分和处处收敛到 \\(f\\)",
+        "过冲趋零",
+        "过冲为 \\(50\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "方波 \\(f\\) 在跳跃处 Fourier 部分和 \\(S_N\\) 的最大值超过跳跃量的一半约 \\(\\frac{2}{\\pi}\\int_0^\\pi \\frac{\\sin t}{t}\\, dt - 1 \\approx 0.0895\\)。\\(N \\to \\infty\\)：过冲不消失（但过冲区段宽度\\(\\to 0\\)）。\\(L^2\\) 收敛但非一致收敛。Gibbs 现象是截断频域的固有缺陷。"
+      },
+      {
+        "id": "harmonic-ch01-q8",
+        "question": "Dirichlet 核 \\(D_N(x) = \\sum_{n=-N}^N e^{inx} = ?\\)",
+        "options": [
+          "\\(\\frac{\\sin((N+1/2)x)}{\\sin(x/2)}\\)",
+        "\\(2N + 1\\)",
+        "\\(N \\cos x\\)",
+        "\\(e^{iNx}\\)"
+        ],
+        "answer": 0,
+        "explanation": "几何级数：\\(\\sum_{-N}^N e^{inx} = \\frac{e^{-iNx}(e^{i(2N+1)x} - 1)}{e^{ix} - 1} = \\frac{\\sin((N+1/2)x)}{\\sin(x/2)}\\)。\\(S_N f(x) = (D_N * f)(x)/(2\\pi)\\)。\\(D_N\\) 不是好核（\\(\\int |D_N| \\to \\infty\\)）——导致 Fourier 级数收敛问题的根源。"
+      },
+      {
+        "id": "harmonic-ch01-q9",
+        "question": "若 \\(f\\) 是 \\(C^1\\) 函数（\\(2\\pi\\) 周期），Fourier 级数在每点一致收敛。但 \\(C^0\\) 呢？",
+        "options": [
+          "\\(C^0\\) 不保证逐点收敛——存在连续函数 Fourier 级数在某点发散（du Bois-Reymond，1876）",
+        "\\(C^0\\) 保证一致收敛",
+        "\\(C^0\\) 保证逐点收敛",
+        "不可能发散"
+        ],
+        "answer": 0,
+        "explanation": "du Bois-Reymond 构造了连续函数其 Fourier 级数在某点发散。Carleson（1966）：\\(L^2\\) 函数的 Fourier 级数几乎处处收敛（重大定理）。\\(L^1\\)：可能到处发散（Kolmogorov）。充分条件：\\(f\\) Hölder 连续（\\(|f(x+h)-f(x)| \\leq C|h|^\\alpha\\)，\\(\\alpha > 0\\)）\\(\\Rightarrow\\) 处处收敛。"
+      },
+      {
+        "id": "harmonic-ch01-q10",
+        "question": "用 Parseval 等式求 \\(\\sum_{n=1}^\\infty \\frac{1}{n^2}\\)。（提示：用 \\(f(x) = x\\) 的 Fourier 级数）",
+        "options": [
+          "\\(\\pi^2/6\\)",
+        "\\(\\pi^2/4\\)",
+        "\\(\\pi^2/3\\)",
+        "\\(\\pi^2/12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = x\\)：\\(c_n = (-1)^{n+1}i/n\\)（\\(n \\neq 0\\)），\\(c_0 = 0\\)。\\(\\|f\\|^2 = \\int_{-\\pi}^\\pi x^2\\, dx = 2\\pi^3/3\\)。Parseval：\\(\\frac{1}{2\\pi}\\cdot\\frac{2\\pi^3}{3} = \\sum |c_n|^2 = 2\\sum_{n=1}^\\infty \\frac{1}{n^2}\\)。\\(\\pi^2/3 = 2\\sum 1/n^2\\)。\\(\\sum 1/n^2 = \\pi^2/6\\)。Euler 的巴塞尔问题。"
+      },
+      {
+        "id": "harmonic-ch01-q11",
+        "question": "Cesàro 求和（Fejér 求和）：\\(\\sigma_N f = \\frac{1}{N+1}\\sum_{k=0}^N S_k f\\)。Fejér 核 \\(F_N(x) = ?\\)",
+        "options": [
+          "\\(\\frac{1}{N+1}\\left(\\frac{\\sin((N+1)x/2)}{\\sin(x/2)}\\right)^2\\)",
+        "\\(D_N(x)\\)",
+        "\\(\\frac{\\sin Nx}{x}\\)",
+        "\\(e^{-x^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(F_N = \\frac{1}{N+1}\\sum_{k=0}^N D_k\\)。闭式：\\(F_N(x) = \\frac{1}{N+1}\\frac{\\sin^2((N+1)x/2)}{\\sin^2(x/2)}\\)。\\(F_N \\geq 0\\)（好核！），\\(\\int F_N = 2\\pi\\)（归一化），\\(\\int_{|x|>\\delta} F_N \\to 0\\)。Fejér 定理：\\(\\sigma_N f \\to f\\) 一致收敛（\\(f\\) 连续周期）——解决了 Fourier 级数的收敛困难。"
+      },
+      {
+        "id": "harmonic-ch01-q12",
+        "question": "\\(f\\) Lipschitz 连续（\\(|f(x+h)-f(x)| \\leq C|h|\\)）。Fourier 系数 \\(c_n\\) 的衰减速率？",
+        "options": [
+          "\\(|c_n| = O(1/n)\\)（类似 \\(C^1\\) 的衰减速率）",
+        "\\(|c_n| = O(1/n^2)\\)",
+        "\\(|c_n| = O(1)\\)",
+        "\\(|c_n| = O(1/\\sqrt{n})\\)"
+        ],
+        "answer": 0,
+        "explanation": "Lipschitz \\(\\Rightarrow\\) 有界变差 \\(\\Rightarrow\\) \\(|c_n| = O(1/n)\\)。更精细：\\(c_n = \\frac{1}{2\\pi}\\int f(x)e^{-inx}\\, dx = \\frac{1}{2\\pi}\\int[f(x) - f(x + \\pi/n)]e^{-inx}\\, dx \\cdot 1/2\\)。\\(|c_n| \\leq C/(2n) \\cdot 2\\pi/(2\\pi) = C/n\\)。衰减速率直接反映函数的正则性。"
+      },
+      {
+        "id": "harmonic-ch01-q13",
+        "question": "复指数形式：\\(c_n\\) 和 \\(a_n\\), \\(b_n\\) 的关系？",
+        "options": [
+          "\\(c_n = (a_n - ib_n)/2\\)（\\(n > 0\\)），\\(c_{-n} = \\bar{c}_n\\)（\\(f\\) 实值时），\\(c_0 = a_0/2\\)",
+        "\\(c_n = a_n + ib_n\\)",
+        "\\(c_n = a_n\\)",
+        "\\(c_n = b_n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a_n \\cos nx + b_n \\sin nx = \\frac{a_n - ib_n}{2}e^{inx} + \\frac{a_n + ib_n}{2}e^{-inx}\\)。\\(c_n = (a_n - ib_n)/2\\)，\\(c_{-n} = (a_n + ib_n)/2 = \\bar{c}_n\\)。\\(|c_n|^2 + |c_{-n}|^2 = (a_n^2 + b_n^2)/2\\)。复形式在理论上更简洁——卷积、对偶、群论都更自然。"
+      },
+      {
+        "id": "harmonic-ch01-q14",
+        "question": "Abel 求和：\\(A_r f(x) = \\sum c_n r^{|n|} e^{inx}\\)（\\(0 < r < 1\\)）\\(= ?\\)（用 Poisson 核表示）",
+        "options": [
+          "\\(\\frac{1}{2\\pi}\\int_{-\\pi}^\\pi P_r(\\theta) f(x - \\theta)\\, d\\theta\\)（\\(P_r(\\theta) = \\frac{1-r^2}{1 - 2r\\cos\\theta + r^2}\\)）",
+        "\\(\\sum c_n e^{inx}\\)",
+        "\\(f(x) \\cdot r\\)",
+        "\\(f(rx)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P_r(\\theta) = \\sum r^{|n|} e^{in\\theta}\\)（Poisson 核的 Fourier 展开）。\\(A_r f = P_r * f / (2\\pi)\\)。\\(P_r \\geq 0\\)，\\(\\int P_r = 2\\pi\\)，\\(r \\to 1^-\\) 时趋于 \\(\\delta\\)——好核。\\(A_r f \\to f\\)（\\(r \\to 1\\)）一致（\\(f\\) 连续时）。Poisson 核同时解决 Dirichlet 问题和 Abel 求和。"
+      },
+      {
+        "id": "harmonic-ch01-q15",
+        "question": "\\(\\sum_{n=1}^\\infty \\frac{1}{n^4}\\) 用 Parseval 求？（用 \\(f(x) = x^2\\) 或类似）",
+        "options": [
+          "\\(\\pi^4/90\\)",
+        "\\(\\pi^4/96\\)",
+        "\\(\\pi^4/6\\)",
+        "\\(\\pi^4/45\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = x^2\\)（\\(-\\pi \\leq x \\leq \\pi\\)）：\\(a_0 = 2\\pi^2/3\\)，\\(a_n = 4(-1)^n/n^2\\)，\\(b_n = 0\\)。\\(\\|f\\|^2 = 2\\pi^5/5\\)。Parseval：\\(\\frac{2\\pi^5/5}{2\\pi} = \\frac{(2\\pi^2/3)^2}{4} + \\frac{1}{2}\\sum_{n=1}^\\infty \\frac{16}{n^4}\\)。\\(\\pi^4/5 = \\pi^4/9 + 8\\sum 1/n^4\\)。\\(\\sum = \\frac{\\pi^4}{5\\cdot8}(1 - 5/9) = \\pi^4/90\\)。"
+      },
+      {
+        "id": "harmonic-ch01-q16",
+        "question": "Riemann-Lebesgue 引理：\\(f \\in L^1[-\\pi, \\pi]\\)。\\(c_n \\to ?\\)（\\(|n| \\to \\infty\\)）",
+        "options": [
+          "\\(0\\)",
+        "\\(\\|f\\|_1\\)",
+        "\\(1\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(|c_n| = |\\frac{1}{2\\pi}\\int f e^{-inx}\\, dx| \\to 0\\)。对 \\(C^1\\) 由分部积分。推广到 \\(L^1\\) 用逼近：\\(\\|f - g\\|_1 < \\epsilon\\)（\\(g\\) 阶梯函数），\\(|c_n(g)| \\to 0\\)，\\(|c_n(f) - c_n(g)| \\leq \\epsilon/(2\\pi)\\)。Riemann-Lebesgue 是最基本的衰减结果——但仅给 \\(o(1)\\)，速率取决于正则性。"
+      },
+      {
+        "id": "harmonic-ch01-q17",
+        "question": "\\(f\\) 有跳跃间断点 \\(x_0\\)（\\(f(x_0^+) \\neq f(x_0^-)\\)）。Fourier 部分和 \\(S_N(x_0) \\to ?\\)",
+        "options": [
+          "\\(\\frac{f(x_0^+) + f(x_0^-)}{2}\\)（左右极限的平均值）",
+        "\\(f(x_0^+)\\)",
+        "\\(f(x_0^-)\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "Dirichlet 条件下（分段光滑）：\\(S_N \\to (f(x^+)+f(x^-))/2\\)。连续点取 \\(f(x)\\)。Gibbs 现象：\\(S_N\\) 在 \\(x_0\\) 附近过冲——部分和的振荡。但\"平均值\"意义下的收敛是精确的。"
+      },
+      {
+        "id": "harmonic-ch01-q18",
+        "question": "\\(f(x) = 1\\)（\\(0 \\leq x < \\pi\\)），\\(= 0\\)（\\(-\\pi \\leq x < 0\\)），\\(2\\pi\\)周期。\\(c_n = ?\\)",
+        "options": [
+          "\\(c_0 = 1/2\\)，\\(c_n = \\frac{1 - (-1)^n}{2\\pi i n}\\)（\\(n \\neq 0\\)）——\\(n\\) 偶时 \\(c_n = 0\\)，\\(n\\) 奇时 \\(c_n = 1/(\\pi i n)\\)",
+        "\\(c_n = 1/n\\)",
+        "\\(c_n = 0\\)",
+        "\\(c_n = 1/(2n)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_n = \\frac{1}{2\\pi}\\int_0^\\pi e^{-inx}\\, dx = \\frac{1}{2\\pi}\\frac{1-e^{-in\\pi}}{in} = \\frac{1 - (-1)^n}{2\\pi in}\\)。\\(n\\) 偶：\\(c_n = 0\\)。\\(n\\) 奇：\\(c_n = 1/(\\pi in)\\)。\\(c_0 = 1/2\\)。阶梯函数的 Fourier 系数 \\(O(1/n)\\)——反映间断性。"
+      },
+      {
+        "id": "harmonic-ch01-q19",
+        "question": "Fourier 系数的唯一性：\\(c_n(f) = 0\\)（\\(\\forall n\\)）且 \\(f \\in L^1\\) \\(\\Rightarrow\\) \\(f = 0\\) a.e.（几乎处处）。这依赖于？",
+        "options": [
+          "\\(\\{e^{inx}\\}\\) 在 \\(L^2\\) 中完备（或 \\(L^1\\) 中分离点——Fejér 定理推论）",
+        "直接由定义",
+        "测度论",
+        "Stone-Weierstrass"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_n = 0\\) \\(\\Rightarrow\\) \\(\\sigma_N f = 0\\)（Fejér 均值也为零）。\\(\\sigma_N f \\to f\\)（\\(L^1\\) 或逐点——Fejér）\\(\\Rightarrow\\) \\(f = 0\\) a.e.。完备性：\\(\\{e^{inx}\\}\\) 在 \\(L^p\\)（\\(1 \\leq p < \\infty\\)）中完备——唯一分解零函数为零系数。"
+      },
+      {
+        "id": "harmonic-ch01-q20",
+        "question": "Parseval 等式推广：\\(f, g \\in L^2\\)。\\(\\frac{1}{2\\pi}\\int_{-\\pi}^\\pi f(x)\\overline{g(x)}\\, dx = ?\\)",
+        "options": [
+          "\\(\\sum_{n=-\\infty}^\\infty c_n(f) \\overline{c_n(g)}\\)（极化恒等式）",
+        "\\(\\sum c_n(f) c_n(g)\\)",
+        "\\(\\sum |c_n(f)| |c_n(g)|\\)",
+        "\\(c_0(f) \\overline{c_0(g)}\\)"
+        ],
+        "answer": 0,
+        "explanation": "极化：\\(\\langle f, g \\rangle = \\frac{1}{4}[\\|f+g\\|^2 - \\|f-g\\|^2 + i\\|f+ig\\|^2 - i\\|f-ig\\|^2]\\)。Parseval 对每项成立 \\(\\Rightarrow\\) \\(\\langle f, g \\rangle = \\sum c_n \\bar{d}_n\\)。或直接：\\(\\langle f, g \\rangle = \\sum_{m,n} c_m \\bar{d}_n \\langle e^{imx}, e^{inx}\\rangle = \\sum c_n \\bar{d}_n\\)（正交性）。"
+      },
+      {
+        "id": "harmonic-ch01-q21",
+        "question": "de la Vallée-Poussin 核比 Fejér 核有什么优势？",
+        "options": [
+          "三角多项式次数 \\(\\leq 2N\\) 但更好地近似高频——\\(V_N = 2\\sigma_{2N} - \\sigma_N\\)，\\(\\widehat{V_N}(n) = 1\\)（\\(|n| \\leq N\\)）",
+        "更差近似",
+        "无优势",
+        "负值"
+        ],
+        "answer": 0,
+        "explanation": "Fejér 核的 Fourier 系数 \\(\\hat\\sigma_N(n) = 1 - |n|/(N+1)\\)（\\(|n| \\leq N\\)）——对高频有衰减。de la Vallée-Poussin：\\(\\hat V_N(n) = 1\\)（\\(|n| \\leq N\\)），\\(\\hat V_N(n) = 2 - |n|/N\\)（\\(N < |n| \\leq 2N\\)）。精确保留前 \\(N\\) 个频率。\\(V_N\\) 仍是好核（\\(\\geq 0\\) 虽不保证但 \\(L^1\\) 有界）。"
+      },
+      {
+        "id": "harmonic-ch01-q22",
+        "question": "Carleson 定理（1966）：\\(f \\in L^2[-\\pi,\\pi]\\) 的 Fourier 级数？",
+        "options": [
+          "几乎处处收敛（\\(S_N f(x) \\to f(x)\\) a.e.）",
+        "处处收敛",
+        "仅 \\(L^2\\) 收敛",
+        "可能到处发散"
+        ],
+        "answer": 0,
+        "explanation": "Carleson-Hunt 定理：\\(f \\in L^p\\)（\\(p > 1\\)）\\(\\Rightarrow\\) \\(S_N f \\to f\\) a.e.。\\(p = 1\\)：Kolmogorov 反例（\\(L^1\\) 函数 Fourier 级数到处发散）。Carleson 的证明极其深刻（time-frequency analysis），被认为 20 世纪调和分析最大成就之一。"
+      },
+      {
+        "id": "harmonic-ch01-q23",
+        "question": "\\(f\\) 是 \\(\\alpha\\)-Hölder 连续（\\(0 < \\alpha < 1\\)）。\\(|c_n| = O(?)\\)",
+        "options": [
+          "\\(O(|n|^{-\\alpha})\\)",
+        "\\(O(|n|^{-1})\\)",
+        "\\(O(|n|^{-2})\\)",
+        "\\(O(1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_n = \\frac{1}{2\\pi}\\int f(x) e^{-inx}\\, dx\\)。\\(= \\frac{1}{2\\pi}\\int [f(x) - f(x+\\pi/n)] e^{-inx}\\, dx \\cdot 1/(1 - e^{-i\\pi})\\)... 简化：\\(|c_n| \\leq C \\cdot \\omega(1/n) \\leq C|n|^{-\\alpha}\\)（\\(\\omega\\) 是连续模）。\\(\\alpha = 1\\)（Lipschitz）：\\(O(1/n)\\)。\\(\\alpha \\to 0\\)：\\(O(1)\\)（几乎不衰减）。Hölder 指数精确度量衰减速率。"
+      },
+      {
+        "id": "harmonic-ch01-q24",
+        "question": "等距同构：Fourier 变换 \\(\\mathcal{F}: L^2[-\\pi,\\pi] \\to \\ell^2(\\mathbb{Z})\\)，\\(f \\mapsto \\{c_n\\}\\)。这是酉算子吗？",
+        "options": [
+          "是（Parseval：保内积，双射（完备性）\\(\\Rightarrow\\) 酉）",
+        "不是（不满射）",
+        "仅对 \\(L^1\\)",
+        "不保范数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle f, g \\rangle_{L^2} = \\sum c_n \\bar{d}_n = \\langle \\{c_n\\}, \\{d_n\\}\\rangle_{\\ell^2}\\)（Parseval 保内积）。满射：\\(\\{c_n\\} \\in \\ell^2 \\Rightarrow\\) \\(f = \\sum c_n e^{inx}\\) 收敛在 \\(L^2\\)。\\(\\mathcal{F}\\) 是酉算子——\\(L^2\\) 和 \\(\\ell^2\\) 是\"同一个\"Hilbert 空间的两种表示。"
+      },
+      {
+        "id": "harmonic-ch01-q25",
+        "question": "Cesàro 求和能否恢复所有 Abel 可求和的级数？即 \\(A\\)-可求和 \\(\\Rightarrow\\) \\(C\\)-可求和？",
+        "options": [
+          "一般不：\\(A\\) 可求和 \\(\\not\\Rightarrow\\) \\(C\\) 可求和（\\(A\\) 更强）。但 \\(C\\)-可求和 \\(\\Rightarrow\\) \\(A\\)-可求和",
+        "等价",
+        "\\(C\\) 更强",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_1\\)-可求和（Cesàro）\\(\\Rightarrow\\) Abel-可求和（取 \\(r \\to 1\\) 极限时传递）。反之不成立：\\(\\sum (-1)^n n\\)：Abel 和计算 \\(= 1/4\\)（\\(\\sum (-1)^n n r^n\\) 在 \\(r < 1\\) 收敛），但 Cesàro 部分和 \\(\\sigma_N \\to \\pm\\infty\\)。求和方法层级：\\(C \\subset A \\subset ...\\) 更一般的方法。"
+      },
+      {
+        "id": "harmonic-ch01-q26",
+        "question": "在信号处理中，周期 \\(T\\) 信号的频谱：Fourier 级数给出离散频率 \\(f_n = n/T\\)。基频 \\(f_1 = ?\\)",
+        "options": [
+          "\\(1/T\\)",
+        "\\(T\\)",
+        "\\(2\\pi/T\\)",
+        "\\(T/(2\\pi)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(t) = \\sum c_n e^{2\\pi i n t/T}\\)：频率 \\(n/T\\)（Hz）。基频 \\(f_1 = 1/T\\)。\\(c_n\\) = 第 \\(n\\) 次谐波的复振幅。\\(|c_n|^2\\) = 功率谱（离散）。音乐中基频决定音高，高次谐波决定音色。"
+      },
+      {
+        "id": "harmonic-ch01-q27",
+        "question": "热方程 \\(u_t = u_{xx}\\)（\\(0 < x < \\pi\\)），\\(u(0,t) = u(\\pi,t) = 0\\)，\\(u(x,0) = f(x)\\)。用 Fourier 正弦级数求解？",
+        "options": [
+          "\\(u(x,t) = \\sum_{n=1}^\\infty b_n e^{-n^2 t} \\sin(nx)\\)（\\(b_n\\) = \\(f\\) 的正弦 Fourier 系数）",
+        "\\(u = f(x) e^{-t}\\)",
+        "\\(u = \\sum b_n \\cos nx\\)",
+        "\\(u = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "分离变量：\\(u = X(x)T(t)\\)。\\(X'' + \\lambda X = 0\\)，\\(X(0) = X(\\pi) = 0\\) \\(\\Rightarrow\\) \\(\\lambda_n = n^2\\)，\\(X_n = \\sin nx\\)。\\(T_n' = -n^2 T_n \\Rightarrow T_n = e^{-n^2 t}\\)。叠加：\\(u = \\sum b_n e^{-n^2 t}\\sin nx\\)。\\(e^{-n^2 t}\\)：高频衰减极快——热传导平滑初始数据。"
+      },
+      {
+        "id": "harmonic-ch01-q28",
+        "question": "MP3 压缩利用 Fourier 分析的哪个原理？",
+        "options": [
+          "人耳对高频不敏感——截断高频 Fourier 系数（\\(|c_n|\\) 小的分量丢弃）减少数据量",
+        "增加采样率",
+        "用 Taylor 展开",
+        "存储时域数据"
+        ],
+        "answer": 0,
+        "explanation": "心理声学模型 + 频域表示（MDCT，改进离散余弦变换——Fourier 分析的变体）。小系数 \\(\\to\\) 量化为零或粗略编码。信息论+Fourier 分析 = 有损压缩。Parseval：丢弃小系数 \\(\\Rightarrow\\) \\(L^2\\) 误差小。人耳掩蔽效应允许更激进的截断。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="harmonic"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/harmonic.html" class="module-name">调和分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Fourier 级数的定义与收敛性</a></li>
+      <li><a href="#kp2">02 · Dirichlet 核与 Fejér 核</a></li>
+      <li><a href="#kp3">03 · Fourier 系数的性质与应用</a></li>
+      <li><a href="#kp4">04 · 等度分布与数论应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>Fourier 级数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Fourier 级数的定义与收敛性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>任何"合理"的周期函数都可以表示为正弦和余弦的叠加——这是 Fourier 在研究热传导时的革命性发现。但"叠加"在什么意义下 成立？逐点？一致？\(L^2\)？Fourier 级数的收敛问题驱动了 19-20 世纪分析学的大发展，包括 Lebesgue 积分和集合论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fourier 级数将函数空间 \(L^2([-\pi,\pi])\) "坐标化"： \(\{e^{inx}/\sqrt{2\pi}\}\) 是 ONB，Fourier 系数就是坐标。 \(L^2\) 收敛 ⇔ Parseval 等式，对应 Hilbert 空间理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Fourier 系数</strong>：\(f \in L^1([-\pi, \pi])\)， \[\hat{f}(n) = c_n = \frac{1}{2\pi} \int_{-\pi}^{\pi} f(x) e^{-inx}\, dx\] <strong>Fourier 级数</strong>：\(f(x) \sim \sum_{n=-\infty}^{\infty} c_n e^{inx}\)。 <strong>\(L^2\) 收敛</strong>：若 \(f \in L^2\)，则 \(\sum c_n e^{inx} \to f\) 在 \(L^2\) 中。 <strong>Parseval</strong>：\(\|f\|_2^2 = \sum |c_n|^2\)。 <strong>逐点收敛</strong>：Dirichlet 定理——若 \(f\) 在 \(x_0\) 处满足 Dini 条件 （局部 Lipschitz），则 \(S_N(x_0) \to f(x_0)\)。 但存在连续函数 \(f\) 使 Fourier 级数在某点发散（du Bois-Reymond）。 <strong>Carleson 定理（陈述）</strong>：\(f \in L^2 \Rightarrow\) Fourier 级数 几乎处处逐点收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>音频信号分解为频率分量（频谱分析）、数字通信中的 正交频分复用（OFDM）都基于 Fourier 级数展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x) = x\)（\(x \in [-\pi, \pi]\)）的 Fourier 级数。 解答：\(c_n = \frac{1}{2\pi}\int_{-\pi}^\pi x e^{-inx} dx\)。 \(c_0 = 0\)（奇函数），\(c_n = \frac{(-1)^{n+1}}{in}\)（分部积分）。 \(x \sim 2\sum_{n=1}^\infty \frac{(-1)^{n+1}}{n}\sin(nx)\)。 \(x = \pi\) 处：\(\sum (-1)^{n+1}/n = \pi/2 \Rightarrow\)不收敛到 \(\pi\) （Gibbs 现象——在跳跃点收敛到中间值 \(0\)）。 易错点：Fourier 级数在跳跃不连续点收敛到左右极限的平均值， 不是函数值本身。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f \in L^2\) 时，Fourier 级数一定？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L^2\\) 收敛由 Parseval 保证。逐点收敛需额外条件。')">A. 逐点收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L^2\\) 收敛由 Parseval 保证。逐点收敛需额外条件。')">B. 一致收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(L^2\\) 收敛由 Parseval 保证。逐点收敛需额外条件。')">C. \(L^2\) 收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(L^2\\) 收敛由 Parseval 保证。逐点收敛需额外条件。')">D. 处处收敛</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Dirichlet 核与 Fejér 核</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 级数的部分和可以用卷积表示：\(S_N f = D_N * f\)， 其中 \(D_N\) 是 Dirichlet 核。但 \(D_N\) 不是"好的"逼近核 （有大量振荡），导致 Gibbs 现象。Fejér 核 \(K_N\)（部分和的算术 平均）是好的逼近核，保证了 Cesàro 求和的一致收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>好的近似核（good kernel/approximate identity）满足： (1) 归一化 \(\int = 1\)，(2) \(L^1\) 范数有界，(3) 质量集中于原点。 Fejér 核满足这三条，Dirichlet 核不满足 (2)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Dirichlet 核</strong>：\(D_N(x) = \sum_{n=-N}^N e^{inx} = \frac{\sin((N+1/2)x)}{\sin(x/2)}\)。 \(S_N f(x) = (D_N * f)(x) = \frac{1}{2\pi}\int f(t) D_N(x-t) dt\)。 \(D_N\) 的 \(L^1\) 范数 \(\|D_N\|_1 \sim \frac{4}{\pi^2}\log N \to \infty\) ！ 这导致逐点收敛不自动成立。 <strong>Fejér 核</strong>：\(K_N = \frac{1}{N+1}\sum_{n=0}^N D_n = \frac{1}{N+1} \cdot \frac{\sin^2((N+1)x/2)}{\sin^2(x/2)}\)。 性质：\(K_N \geq 0\), \(\frac{1}{2\pi}\int K_N = 1\), \(\lim_{N \to \infty} K_N = 0\)（\(|x| > \delta\)）。 <strong>Fejér 定理</strong>：\(f\) 连续且周期 \(2\pi\) ⇒ \(\sigma_N f = K_N * f \to f\) 一致。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Fejér 定理证明 Weierstrass 逼近定理（三角多项式版）。 解答：\(\sigma_N f = K_N * f = \sum_{|n| \leq N}(1 - |n|/(N+1)) c_n e^{inx}\) 是三角多项式。\(\sigma_N f \to f\) 一致。 故连续周期函数可被三角多项式一致逼近。✓ 易错点：\(D_N\) 核不是正的——它会导致"过冲"（Gibbs 现象约 9%）。 Fejér 核 \(\geq 0\)，避免了此问题。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Dirichlet 核 \(\|D_N\|_1\) 随 \(N\) 如何增长？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\|D_N\\|_1 \\sim (4/\\pi^2)\\log N\\)，无界增长。')">A. 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\|D_N\\|_1 \\sim (4/\\pi^2)\\log N\\)，无界增长。')">B. \(O(\log N)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\|D_N\\|_1 \\sim (4/\\pi^2)\\log N\\)，无界增长。')">C. \(O(N)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\|D_N\\|_1 \\sim (4/\\pi^2)\\log N\\)，无界增长。')">D. \(O(N^2)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Fourier 系数的性质与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 系数 \(\hat{f}(n)\) 编码了函数的频率信息。函数越光滑， 系数衰减越快——\(C^k\) 函数的系数衰减如 \(O(1/n^k)\)。Riemann- Lebesgue 引理保证 \(L^1\) 函数的系数趋于零。这些定量关系是 信号处理和数值分析中频率截断方法的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Riemann-Lebesgue 引理</strong>：\(f \in L^1 \Rightarrow \hat{f}(n) \to 0\) （\(|n| \to \infty\)）。 证明：对阶梯函数成立（直接计算），\(L^1\) 函数用阶梯逼近， \(|\hat{f}(n) - \hat{g}(n)| \leq \|f - g\|_1/(2\pi) \to 0\)。 <strong>光滑性与衰减</strong>： - \(f \in C^k \Rightarrow \hat{f}(n) = O(|n|^{-k})\) （分部积分 \(k\) 次：\(\widehat{f^{(k)}}(n) = (in)^k \hat{f}(n)\)） - \(f\) 解析 ⇒ \(|\hat{f}(n)| = O(e^{-c|n|})\)（指数衰减） <strong>对偶</strong>：\(\hat{f}\) 衰减快 ⇔ \(f\) 光滑。 这是"不确定性原理"的一种形式——函数不能同时"紧致"和 "频谱紧致"。 <strong>卷积定理</strong>：\(\widehat{f * g}(n) = 2\pi \hat{f}(n)\hat{g}(n)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>JPEG 图像压缩利用 DCT（离散余弦变换），正是利用自然图像 频谱快速衰减——高频系数小，可以截断。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(x) = |x|\)（\(x \in [-\pi, \pi]\)），求 \(\hat{f}(n)\)。 解答：\(c_0 = \pi/2\)。\(n \neq 0\)：\(c_n = \frac{1}{2\pi}\int_{-\pi}^\pi |x|e^{-inx}dx\)。 \(|x|\) 为偶函数，\(c_n = \frac{1}{\pi}\int_0^\pi x\cos(nx) dx\)。 分部积分：\(c_n = \frac{(-1)^n - 1}{\pi n^2}\)。 偶数 \(n\)：\(c_n = 0\)；奇数 \(n\)：\(c_n = -2/(\pi n^2)\)。 衰减如 \(O(1/n^2)\)——\(|x|\) 连续但不 \(C^1\)（角点）。 易错点：\(C^0\) 只保证 \(o(1)\)（R-L 引理），不保证幂次衰减。 \(C^k\) 才保证 \(O(n^{-k})\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f \in C^\infty\) 且周期，其 Fourier 系数衰减速度？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(C^\\infty\\) 意味对所有 \\(k\\) 都有 \\(O(n^{-k})\\)，即"超多项式衰减"。')">A. \(O(1/n)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(C^\\infty\\) 意味对所有 \\(k\\) 都有 \\(O(n^{-k})\\)，即"超多项式衰减"。')">B. \(O(1/n^k)\) 对某个 \(k\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(C^\\infty\\) 意味对所有 \\(k\\) 都有 \\(O(n^{-k})\\)，即"超多项式衰减"。')">C. 比任何 \(n^{-k}\) 都快</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(C^\\infty\\) 意味对所有 \\(k\\) 都有 \\(O(n^{-k})\\)，即"超多项式衰减"。')">D. 不一定衰减</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>等度分布与数论应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 分析不只是工具——它与数论有深层联系。Weyl 的等度分布 定理用 Fourier 系数刻画序列的"均匀性"：序列 \(\{n\alpha\}\) 在 \([0,1)\) 中等度分布当且仅当 \(\alpha\) 为无理数。Fourier 方法 在加法数论（如 Goldbach 猜想的部分结果）中也发挥关键作用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Weyl 等度分布定理</strong>：序列 \(\{x_n\}\) 在 \([0,1)\) 中等度分布 \(\Leftrightarrow\) 对所有 \(k \neq 0\)： \[\frac{1}{N}\sum_{n=1}^N e^{2\pi i k x_n} \to 0 \quad (N \to \infty)\] <strong>定理 (Weyl)</strong>：\(\alpha \in \mathbb{R} \setminus \mathbb{Q}\) ⇒ \(\{n\alpha \mod 1\}\) 等度分布。 证明框架：取 \(x_n = n\alpha\)，\(\frac{1}{N}\sum e^{2\pi ikn\alpha} = \frac{1}{N} \cdot \frac{e^{2\pi ik\alpha(N+1)} - e^{2\pi ik\alpha}}{e^{2\pi ik\alpha} - 1}\)。 分母 \(\neq 0\)（\(k\alpha \notin \mathbb{Z}\) 因 \(\alpha\) 无理）， 分子有界，故 \(O(1/N) \to 0\)。 <strong>应用</strong>：\(\frac{1}{N}\sum_{n=1}^N f(\{n\alpha\}) \to \int_0^1 f(x) dx\) 对连续 \(f\) 成立（Fourier 逼近 + Weyl 准则）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Monte Carlo 积分的"拟随机"版本：Halton 序列等基于 等度分布理论构造低差异序列，比伪随机数更高效。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\alpha = \sqrt{2}\)，证明 \(\frac{1}{N}\sum_{n=1}^N \cos(2\pi\{n\sqrt{2}\}) \to \int_0^1 \cos(2\pi x) dx = 0\)。 解答：\(\sqrt{2}\) 无理 ⇒ \(\{n\sqrt{2}\}\) 等度分布 ⇒ 由 Weyl 准则 对 \(f(x) = \cos(2\pi x)\) 成立。 易错点：等度分布不意味"随机"——序列是确定性的，只是 统计分布均匀。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\{n \cdot 1/3 \mod 1\}\) 是否等度分布？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/3\\) 是有理数，\\(n/3 \\mod 1\\) 只取有限多个值，')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(1/3\\) 是有理数，\\(n/3 \\mod 1\\) 只取有限多个值，')">B. 否，只取 \(\{0, 1/3, 2/3\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/3\\) 是有理数，\\(n/3 \\mod 1\\) 只取有限多个值，')">C. 取决于采样数量</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(1/3\\) 是有理数，\\(n/3 \\mod 1\\) 只取有限多个值，')">D. 仅当 \(n\) 为素数时</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/analysis/harmonic.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

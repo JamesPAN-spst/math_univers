@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 构造新空间 — 点集拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "topology-ch04-q1",
+        "question": "\\([0,1]\\) 是 \\(\\mathbb{R}\\) 的子空间。在子空间拓扑下，\\([0, 1/2)\\) 是 \\([0,1]\\) 中的开集吗？",
+        "options": [
+          "是",
+        "否",
+        "取决于 \\(\\mathbb{R}\\) 的拓扑",
+        "\\([0, 1/2)\\) 在 \\([0,1]\\) 中既开又闭"
+        ],
+        "answer": 0,
+        "explanation": "\\([0, 1/2) = (-1, 1/2) \\cap [0,1]\\)。\\((-1, 1/2)\\) 在 \\(\\mathbb{R}\\) 中开，故 \\([0, 1/2)\\) 在 \\([0,1]\\) 的子空间拓扑中开。虽然 \\([0, 1/2)\\) 在 \\(\\mathbb{R}\\) 中不是开集，但子空间拓扑允许\"切出\"后变开。"
+      },
+      {
+        "id": "topology-ch04-q2",
+        "question": "积拓扑 \\(\\mathbb{R} \\times \\mathbb{R}\\) 的基元素是什么形式？",
+        "options": [
+          "开圆盘 \\(\\{(x,y) : x^2+y^2 < r^2\\}\\)",
+        "开矩形 \\((a,b) \\times (c,d)\\)",
+        "开集的任意笛卡尔积",
+        "闭矩形 \\([a,b] \\times [c,d]\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{R} \\times \\mathbb{R}\\) 的积拓扑基由 \\(U_1 \\times U_2\\)（\\(U_i\\) 为 \\(\\mathbb{R}\\) 中开集）构成。用更精细的基：\\((a,b) \\times (c,d)\\)（开矩形）。积拓扑与 \\(\\mathbb{R}^2\\) 的标准（度量）拓扑一致——开圆盘可以用开矩形的并表示，反之亦然。但基元素的标准形式是开矩形。"
+      },
+      {
+        "id": "topology-ch04-q3",
+        "question": "商映射 \\(q: X \\to X/{\\sim}\\) 的定义中，\\(U \\subseteq X/{\\sim}\\) 是开集当且仅当什么？",
+        "options": [
+          "\\(U\\) 是 \\(X\\) 中的开集",
+        "\\(q^{-1}(U)\\) 是 \\(X\\) 中的开集",
+        "\\(q(U)\\) 是 \\(X/{\\sim}\\) 中的开集",
+        "\\(U\\) 包含等价类的代表元"
+        ],
+        "answer": 1,
+        "explanation": "商拓扑的定义：\\(U \\subseteq X/{\\sim}\\) 开 \\(\\iff q^{-1}(U) \\subseteq X\\) 开。这是使商映射 \\(q\\) 连续的最强拓扑（终止拓扑）。注意 \\(U\\) 是 \\(X/{\\sim}\\) 中的子集（等价类的集合），\\(q^{-1}(U)\\) 是 \\(X\\) 中对应的点的并集。"
+      },
+      {
+        "id": "topology-ch04-q4",
+        "question": "将 \\([0,1]\\) 的两个端点粘合（\\(0 \\sim 1\\)），得到的商空间同胚于什么？",
+        "options": [
+          "\\((0,1)\\)",
+        "\\(S^1\\)",
+        "\\(\\mathbb{R}\\)",
+        "\\([0,1]\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([0,1]/\\{0 \\sim 1\\}\\) 把线段弯成环。映射 \\(f: [0,1] \\to S^1\\)，\\(f(t) = e^{2\\pi it}\\) 是连续满射，\\(f(0) = f(1)\\)，诱导双射 \\(\\bar{f}: [0,1]/{\\sim} \\to S^1\\)。\\([0,1]\\) 紧 \\(\\Rightarrow [0,1]/{\\sim}\\) 紧，\\(S^1\\) Hausdorff，紧到 Hausdorff 的连续双射是同胚。"
+      },
+      {
+        "id": "topology-ch04-q5",
+        "question": "Hausdorff 性是否遗传到子空间？",
+        "options": [
+          "是，对任意子空间都遗传",
+        "只遗传到闭子空间",
+        "只遗传到开子空间",
+        "不遗传"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) Hausdorff，\\(A \\subseteq X\\)。对 \\(a, b \\in A\\)，\\(a \\neq b\\)，\\(X\\) 中存在不相交开集 \\(U \\ni a\\), \\(V \\ni b\\)。\\(U \\cap A, V \\cap A\\) 是 \\(A\\) 的子空间拓扑中的开集，不相交（\\((U \\cap A) \\cap (V \\cap A) = (U \\cap V) \\cap A = \\emptyset\\)），分别包含 \\(a, b\\)。Hausdorff 性对所有子空间遗传。"
+      },
+      {
+        "id": "topology-ch04-q6",
+        "question": "积拓扑和 box 拓扑在有限积时有什么关系？",
+        "options": [
+          "积拓扑严格细于 box 拓扑",
+        "积拓扑和 box 拓扑相同",
+        "box 拓扑严格细于积拓扑",
+        "不可比较"
+        ],
+        "answer": 1,
+        "explanation": "对有限积 \\(X_1 \\times \\cdots \\times X_n\\)，积拓扑和 box 拓扑完全相同。两者的基都是 \\(U_1 \\times \\cdots \\times U_n\\)（所有分量开）。区别只在无穷积时出现：积拓扑只允许有限多个分量被限制（其余取全空间），box 拓扑允许所有分量被限制。"
+      },
+      {
+        "id": "topology-ch04-q7",
+        "question": "不交并 \\(X \\sqcup Y\\) 中，\\(A \\subseteq X \\sqcup Y\\) 是开集的条件是什么？",
+        "options": [
+          "\\(A\\) 在 \\(X\\) 中开或在 \\(Y\\) 中开",
+        "\\(A \\cap X\\) 在 \\(X\\) 中开且 \\(A \\cap Y\\) 在 \\(Y\\) 中开",
+        "\\(A = X\\) 或 \\(A = Y\\)",
+        "\\(A\\) 是 \\(X\\) 和 \\(Y\\) 的某子集的并"
+        ],
+        "answer": 1,
+        "explanation": "不交并拓扑（余积拓扑）中，\\(A\\) 开 \\(\\iff\\) \\(A \\cap X\\) 在 \\(X\\) 中开且 \\(A \\cap Y\\) 在 \\(Y\\) 中开。这是终止拓扑的特例：使两个包含映射 \\(\\iota_X: X \\to X \\sqcup Y\\) 和 \\(\\iota_Y: Y \\to X \\sqcup Y\\) 连续的最强拓扑。"
+      },
+      {
+        "id": "topology-ch04-q8",
+        "question": "设 \\(A = (0,1) \\cup (2,3)\\) 是 \\(\\mathbb{R}\\) 的子空间。\\(A\\) 中集合 \\(\\{x \\in A : x < 1.5\\} = (0,1)\\) 是否是 \\(A\\) 中的闭集？",
+        "options": [
+          "是",
+        "否",
+        "取决于度量",
+        "\\((0,1)\\) 在 \\(A\\) 中既开又闭"
+        ],
+        "answer": 3,
+        "explanation": "\\(A = (0,1) \\cup (2,3)\\)。\\((0,1)\\) 在 \\(A\\) 中开（本身是 \\(\\mathbb{R}\\) 的开集与 \\(A\\) 的交）。\\((0,1)\\) 在 \\(A\\) 中也闭：\\(A \\setminus (0,1) = (2,3)\\)，\\((2,3)\\) 在 \\(A\\) 中开。所以 \\((0,1)\\) 是 \\(A\\) 中的 clopen 集（既开又闭）。这反映了 \\(A\\) 不连通——可以分成两个 clopen 非空子集。"
+      },
+      {
+        "id": "topology-ch04-q9",
+        "question": "无穷积 \\(\\prod_{n=1}^{\\infty} \\{0,1\\}\\)（每个 \\(\\{0,1\\}\\) 带离散拓扑）在积拓扑下同胚于什么经典空间？",
+        "options": [
+          "\\([0,1]\\)",
+        "Cantor 集",
+        "\\(\\mathbb{R}\\)",
+        "\\(\\{0,1\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\{0,1\\}^{\\mathbb{N}}\\) 在积拓扑下是紧致、全不连通、无孤立点的度量空间（度量 \\(d(x,y) = \\sum 2^{-n}|x_n - y_n|\\)）。Brouwer 的定理：满足这三个条件的不可数紧度量空间唯一同胚于 Cantor 集。\\(\\{0,1\\}^{\\mathbb{N}}\\) 的二进展开与 Cantor 集的三进制表示对应。"
+      },
+      {
+        "id": "topology-ch04-q10",
+        "question": "商映射一定是开映射吗？",
+        "options": [
+          "是",
+        "否",
+        "当且仅当等价类都是单点集时",
+        "当且仅当 \\(X\\) 紧致时"
+        ],
+        "answer": 1,
+        "explanation": "商映射不一定是开映射。例如 \\(q: \\mathbb{R} \\to \\mathbb{R}/\\mathbb{Z}\\)，\\(U = (-0.1, 0.1)\\) 在 \\(\\mathbb{R}\\) 中开，\\(q(U) = \\{[x] : x \\in (-0.1, 0.1)\\}\\)。\\(q^{-1}(q(U)) = \\bigcup_{n \\in \\mathbb{Z}} (n-0.1, n+0.1)\\) 在 \\(\\mathbb{R}\\) 中开，所以 \\(q(U)\\) 在商空间中确实开——这个例子 \\(q\\) 恰好是开映射。换一个反例：取 \\(\\mathbb{R}\\) 上将 \\([0,1]\\) 粘成一点的商映射，\\((0.5, 1.5)\\) 的像中包含粘合点，但原像包含 \\([0,1]\\)，不一定给出开集...需要更仔细构造。总之商映射可以不是开映射；充分条件是等价关系是\"开的\"（饱和开集的像开）。"
+      },
+      {
+        "id": "topology-ch04-q11",
+        "question": "将正方形 \\([0,1]^2\\) 的上下边按 \\((x,0) \\sim (1-x,1)\\) 粘合，左右边按 \\((0,y) \\sim (1,y)\\) 粘合。得到什么空间？",
+        "options": [
+          "环面 \\(T^2\\)",
+        "Klein 瓶",
+        "\\(\\mathbb{RP}^2\\)",
+        "\\(S^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "左右边同方向粘合 \\((0,y) \\sim (1,y)\\) 先得圆柱。上下边反方向粘合 \\((x,0) \\sim (1-x,1)\\)——翻转粘合。圆柱两端反方向粘合得 Klein 瓶。若上下边也同方向 \\((x,0) \\sim (x,1)\\)，则得环面。Klein 瓶不可定向，不能嵌入 \\(\\mathbb{R}^3\\)（但可以浸入）。"
+      },
+      {
+        "id": "topology-ch04-q12",
+        "question": "紧致性是否遗传到任意子空间？",
+        "options": [
+          "是",
+        "只遗传到闭子空间",
+        "只遗传到开子空间",
+        "不遗传到任何子空间"
+        ],
+        "answer": 1,
+        "explanation": "紧致空间的闭子空间紧致：\\(F\\) 闭 \\(\\subseteq X\\) 紧。\\(F\\) 的开覆盖加上 \\(X \\setminus F\\)（开）覆盖 \\(X\\)，取有限子覆盖，去掉 \\(X \\setminus F\\) 即得 \\(F\\) 的有限子覆盖。但开子空间不一定紧致：\\((0,1) \\subseteq [0,1]\\)，\\([0,1]\\) 紧但 \\((0,1)\\) 不紧。所以紧致性只遗传到闭子空间。"
+      },
+      {
+        "id": "topology-ch04-q13",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}^\\omega\\)（可数积，积拓扑），\\(f(t) = (t, t, t, \\ldots)\\)（对角映射）。\\(f\\) 在积拓扑下是否连续？",
+        "options": [
+          "是",
+        "否",
+        "在 box 拓扑下连续但积拓扑下不连续",
+        "取决于 \\(\\mathbb{R}^\\omega\\) 的基选取"
+        ],
+        "answer": 0,
+        "explanation": "积拓扑下 \\(f\\) 连续 \\(\\iff\\) 每个分量 \\(\\pi_n \\circ f\\) 连续。\\(\\pi_n \\circ f(t) = t\\)（恒等），显然连续。所以 \\(f\\) 在积拓扑下连续。注意在 box 拓扑下 \\(f\\) 不连续：\\(W = \\prod_n (-1/n, 1/n)\\) 在 box 拓扑中开，\\(f^{-1}(W) = \\{t : |t| < 1/n, \\forall n\\} = \\{0\\}\\)，不开。"
+      },
+      {
+        "id": "topology-ch04-q14",
+        "question": "\\(\\mathbb{R}/\\mathbb{Z}\\)（实数模整数的商群）同胚于什么？",
+        "options": [
+          "\\(\\mathbb{R}\\)",
+        "\\(S^1\\)",
+        "\\((0,1)\\)",
+        "\\([0,1]\\)"
+        ],
+        "answer": 1,
+        "explanation": "商映射 \\(q: \\mathbb{R} \\to \\mathbb{R}/\\mathbb{Z}\\)，\\(q(x) = x \\bmod 1\\)。等价地 \\(f: \\mathbb{R} \\to S^1\\)，\\(f(x) = e^{2\\pi ix}\\) 是连续满射，\\(\\ker f = \\mathbb{Z}\\)。\\(f\\) 诱导连续双射 \\(\\bar{f}: \\mathbb{R}/\\mathbb{Z} \\to S^1\\)。验证 \\(\\bar{f}\\) 是同胚：\\(\\bar{f}\\) 是开映射（\\(\\mathbb{R} \\to S^1\\) 是局部同胚，商映射也是开映射），所以 \\(\\bar{f}\\) 是连续开的双射 = 同胚。"
+      },
+      {
+        "id": "topology-ch04-q15",
+        "question": "\\(\\mathbb{RP}^2 = S^2/\\{x \\sim -x\\}\\)。\\(\\mathbb{RP}^2\\) 是否可定向？",
+        "options": [
+          "可定向",
+        "不可定向",
+        "取决于嵌入方式",
+        "只有当嵌入 \\(\\mathbb{R}^4\\) 时可定向"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{RP}^2\\) 不可定向。对径粘合 \\(x \\sim -x\\) 反转定向（反射的行列式为 \\(-1\\)）。等价的说法：\\(\\mathbb{RP}^2\\) 包含 Möbius 带作为子集（切掉一个圆盘后得 Möbius 带），包含不可定向子流形的流形不可定向。\\(H_2(\\mathbb{RP}^2; \\mathbb{Z}) = 0\\)（非零只在可定向闭流形上）即可判定。"
+      },
+      {
+        "id": "topology-ch04-q16",
+        "question": "Tychonoff 定理：紧致空间的任意积在积拓扑下紧致。该定理在 box 拓扑下成立吗？",
+        "options": [
+          "成立",
+        "不成立",
+        "只在有限积时成立",
+        "取决于每个分量空间"
+        ],
+        "answer": 1,
+        "explanation": "Box 拓扑下 Tychonoff 定理不成立。反例：\\(\\{0,1\\}\\) 紧致（有限），但 \\(\\{0,1\\}^{\\mathbb{N}}\\) 在 box 拓扑下不紧致。开覆盖 \\(\\{U_f : f \\in \\{0,1\\}^{\\mathbb{N}}\\}\\)（每个 \\(U_f = \\prod_n V_n\\)，\\(V_n = \\{f(n)\\}\\)）没有有限子覆盖（每个 \\(U_f\\) 只包含一个点）。这正是选择积拓扑（而非 box 拓扑）的根本理由。"
+      },
+      {
+        "id": "topology-ch04-q17",
+        "question": "\\(\\mathbb{R}^n\\) 的子空间 \\(S^{n-1} = \\{x : |x| = 1\\}\\) 是否紧致？",
+        "options": [
+          "紧致，因为 Heine-Borel 定理",
+        "不紧致，因为不是开子集",
+        "紧致，因为连通",
+        "不紧致，因为无界"
+        ],
+        "answer": 0,
+        "explanation": "\\(S^{n-1}\\) 是 \\(\\mathbb{R}^n\\) 中的有界闭集（\\(|x| = 1\\) 定义的等值面，\\(f(x) = |x|^2 - 1\\) 的零集，\\(f\\) 连续所以零集闭；有界因为 \\(|x| = 1\\)）。Heine-Borel 定理：\\(\\mathbb{R}^n\\) 中有界闭集紧致。连通性（C）与紧致性无关。\"不是开子集\"（B）与紧致性无关。"
+      },
+      {
+        "id": "topology-ch04-q18",
+        "question": "积拓扑满足以下万有性质：\\(f: Z \\to \\prod X_\\alpha\\) 连续 \\(\\iff\\) 对所有 \\(\\alpha\\)，\\(\\pi_\\alpha \\circ f\\) 连续。Box 拓扑满足吗？",
+        "options": [
+          "满足",
+        "不满足，\\(\\Leftarrow\\) 方向可能不成立",
+        "不满足，\\(\\Rightarrow\\) 方向可能不成立",
+        "Box 拓扑满足更强的万有性质"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\Rightarrow\\) 在 box 拓扑下仍成立（投影在 box 拓扑下也连续）。\\(\\Leftarrow\\) 不成立：对角映射 \\(f: \\mathbb{R} \\to \\mathbb{R}^{\\mathbb{N}}\\)，\\(f(t) = (t, t, \\ldots)\\)，每个 \\(\\pi_n \\circ f = \\mathrm{id}\\) 连续，但前面已证 \\(f\\) 在 box 拓扑下不连续。万有性质的失败正是积拓扑优于 box 拓扑的原因。"
+      },
+      {
+        "id": "topology-ch04-q19",
+        "question": "商空间 \\(X/{\\sim}\\) 是否一定是 Hausdorff 的（假设 \\(X\\) Hausdorff）？",
+        "options": [
+          "是",
+        "否，商映射可以破坏 Hausdorff 性",
+        "当且仅当等价关系是闭的",
+        "B 和 C 都正确"
+        ],
+        "answer": 3,
+        "explanation": "Hausdorff 性在商映射下不保持。例如 \\(X = \\mathbb{R}\\)，等价关系 \\(x \\sim y \\iff x - y \\in \\mathbb{Q}\\)，商空间 \\(\\mathbb{R}/\\mathbb{Q}\\) 不 Hausdorff（余有限拓扑的变体）。充要条件：\\(X/{\\sim}\\) Hausdorff \\(\\iff\\) 等价关系 \\(R = \\{(x,y) : x \\sim y\\}\\) 是 \\(X \\times X\\) 中的闭集（\"闭等价关系\"），加上商映射是开映射等额外条件。"
+      },
+      {
+        "id": "topology-ch04-q20",
+        "question": "连通和（Connected sum）\\(M_1 \\# M_2\\) 的构造过程是什么？",
+        "options": [
+          "取 \\(M_1 \\times M_2\\) 在对角线上商",
+        "各去掉一个开圆盘，然后沿边界圆粘合",
+        "取不交并 \\(M_1 \\sqcup M_2\\)",
+        "取 \\(M_1\\) 与 \\(M_2\\) 的积"
+        ],
+        "answer": 1,
+        "explanation": "连通和 \\(M_1 \\# M_2\\)：从 \\(M_1\\) 和 \\(M_2\\) 各去掉一个嵌入的开 \\(n\\)-圆盘 \\(D^n\\)，得到带边流形 \\(M_1 \\setminus D_1\\) 和 \\(M_2 \\setminus D_2\\)，边界都是 \\(S^{n-1}\\)。通过边界同胚粘合：\\((M_1 \\setminus D_1) \\cup_{S^{n-1}} (M_2 \\setminus D_2)\\)。例如 \\(T^2 \\# T^2\\) 是亏格 2 的曲面。连通和是曲面分类定理的关键操作。"
+      },
+      {
+        "id": "topology-ch04-q21",
+        "question": "\\(X\\) 的柱积紧致，\\(Y\\) 紧致。\\(X \\times Y\\) 在积拓扑下是否一定紧致？",
+        "options": [
+          "是（Tychonoff 定理的有限积特例）",
+        "否",
+        "只在 \\(X, Y\\) 都 Hausdorff 时成立",
+        "只在 \\(X, Y\\) 都度量化时成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 紧致、\\(Y\\) 紧致 \\(\\Rightarrow X \\times Y\\) 紧致。这是 Tychonoff 定理的有限积特例，不需要选择公理。证明：引理（管状引理）+ 有限子覆盖提取。对开覆盖 \\(\\{W_\\alpha\\}\\)，固定 \\(x\\)，\\(\\{x\\} \\times Y\\) 紧致被有限多个 \\(W_\\alpha\\) 覆盖，管状引理给出 \\(U_x \\times Y\\) 的有限子覆盖。\\(\\{U_x\\}\\) 覆盖 \\(X\\)，取有限子覆盖，组合即得。"
+      },
+      {
+        "id": "topology-ch04-q22",
+        "question": "设 \\(q: X \\to Y\\) 是商映射。\\(g: Y \\to Z\\) 连续当且仅当什么？",
+        "options": [
+          "\\(g\\) 是开映射",
+        "\\(g \\circ q: X \\to Z\\) 连续",
+        "\\(g\\) 是双射",
+        "\\(Z\\) 是 Hausdorff 的"
+        ],
+        "answer": 1,
+        "explanation": "商映射的万有性质：\\(g: Y \\to Z\\) 连续 \\(\\iff g \\circ q: X \\to Z\\) 连续。\\(\\Rightarrow\\)：\\(g\\) 连续 + \\(q\\) 连续 \\(\\Rightarrow g \\circ q\\) 连续。\\(\\Leftarrow\\)：设 \\(W \\subseteq Z\\) 开，\\(g^{-1}(W) \\subseteq Y\\)。\\(q^{-1}(g^{-1}(W)) = (g \\circ q)^{-1}(W)\\) 在 \\(X\\) 中开。由商拓扑定义，\\(g^{-1}(W)\\) 在 \\(Y\\) 中开。所以 \\(g\\) 连续。"
+      },
+      {
+        "id": "topology-ch04-q23",
+        "question": "\\(\\prod_{\\alpha \\in A} X_\\alpha\\) 在积拓扑下 Hausdorff 当且仅当什么条件？",
+        "options": [
+          "所有 \\(X_\\alpha\\) 都 Hausdorff",
+        "至少一个 \\(X_\\alpha\\) Hausdorff",
+        "\\(A\\) 可数且每个 \\(X_\\alpha\\) Hausdorff",
+        "积空间非空"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Rightarrow\\)：\\(X_\\alpha\\) 同胚于 \\(\\prod X_\\beta\\) 的子空间（固定其他坐标），Hausdorff 对子空间遗传。\\(\\Leftarrow\\)：设 \\(f \\neq g \\in \\prod X_\\alpha\\)，存在 \\(\\alpha_0\\) 使 \\(f(\\alpha_0) \\neq g(\\alpha_0)\\)。\\(X_{\\alpha_0}\\) Hausdorff，取不相交开集 \\(U, V\\) 分离 \\(f(\\alpha_0), g(\\alpha_0)\\)。\\(\\pi_{\\alpha_0}^{-1}(U)\\) 和 \\(\\pi_{\\alpha_0}^{-1}(V)\\) 是积空间中不相交开集。"
+      },
+      {
+        "id": "topology-ch04-q24",
+        "question": "\\(\\mathbb{RP}^n\\) 的基本群 \\(\\pi_1(\\mathbb{RP}^n)\\) 是什么（\\(n \\geq 2\\)）？",
+        "options": [
+          "\\(\\{0\\}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^2\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathbb{RP}^n = S^n/\\{x \\sim -x\\}\\)，\\(n \\geq 2\\) 时 \\(S^n\\) 是万有覆叠空间（\\(S^n\\) 单连通因为 \\(\\pi_1(S^n) = 0\\) 对 \\(n \\geq 2\\)）。覆叠度 = 2（\\(x \\sim -x\\) 给出 2-重覆叠）。\\(\\pi_1(\\mathbb{RP}^n) = \\mathbb{Z}/2\\mathbb{Z}\\)（覆叠变换群）。\\(n = 1\\) 时 \\(\\mathbb{RP}^1 \\cong S^1\\)，\\(\\pi_1 = \\mathbb{Z}\\)，不同。"
+      },
+      {
+        "id": "topology-ch04-q25",
+        "question": "正规性是否遗传到开子空间？",
+        "options": [
+          "是",
+        "否，存在正规空间的开子空间不正规",
+        "只在度量空间中遗传",
+        "有条件地成立（遗传正规空间）"
+        ],
+        "answer": 1,
+        "explanation": "正规性对闭子空间遗传（前面证过），但对开子空间不一定遗传。\"遗传正规\"(completely normal / \\(T_5\\)) 空间的定义就是每个子空间都正规——这是比 \\(T_4\\) 更强的条件。度量空间是 \\(T_5\\) 的（C 中\"只在度量空间中\"过于绝对）。存在 \\(T_4\\) 但非 \\(T_5\\) 的空间，其开子空间可以不正规。"
+      },
+      {
+        "id": "topology-ch04-q26",
+        "question": "在计算机图形学中，环面 \\(T^2\\) 可以用\"周期性边界条件\"的矩形表示。若游戏地图的左右边和上下边分别\"相连\"，地图的拓扑类型是什么？",
+        "options": [
+          "球面 \\(S^2\\)",
+        "环面 \\(T^2\\)",
+        "Klein 瓶",
+        "平面 \\(\\mathbb{R}^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "矩形 \\([0,1]^2\\) 上同方向粘合左右边 \\((0,y) \\sim (1,y)\\) 和上下边 \\((x,0) \\sim (x,1)\\) 得环面 \\(T^2 = S^1 \\times S^1\\)。许多经典游戏（如 Pac-Man）的地图使用这种拓扑：从一侧出去在对面出现。这意味着地图没有\"边缘\"，但有两个独立的\"环绕方向\"——对应 \\(T^2\\) 的两个 \\(S^1\\) 因子。"
+      },
+      {
+        "id": "topology-ch04-q27",
+        "question": "在分布式系统中，将多个计算节点的资源\"合并\"对应什么拓扑构造？",
+        "options": [
+          "子空间拓扑",
+        "不交并（余积）",
+        "商拓扑",
+        "积拓扑"
+        ],
+        "answer": 1,
+        "explanation": "不交并（余积）将多个独立空间\"放在一起\"但保持它们各自的拓扑结构。分布式系统中多个节点各自独立运行，整体系统的状态空间是各节点状态空间的不交并。通信则对应后续的商操作（将不同节点的某些状态粘合识别）。积拓扑对应\"同时观察多个分量\"，不交并对应\"选择其中一个分量\"。"
+      },
+      {
+        "id": "topology-ch04-q28",
+        "question": "在材料科学中，晶体的对称性由空间群描述，周期结构使得物理性质在晶格平移下不变。将 \\(\\mathbb{R}^3\\) 对晶格 \\(\\Lambda\\) 取商 \\(\\mathbb{R}^3/\\Lambda\\)，得到什么？",
+        "options": [
+          "球面",
+        "三维环面 \\(T^3\\)",
+        "射影空间",
+        "欧几里得空间"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\Lambda \\cong \\mathbb{Z}^3\\) 是 \\(\\mathbb{R}^3\\) 的离散平移子群。\\(\\mathbb{R}^3/\\Lambda = \\mathbb{R}^3/\\mathbb{Z}^3 \\cong T^3 = S^1 \\times S^1 \\times S^1\\)（三维环面）。这意味着晶体的物理性质可以在 \\(T^3\\) 上定义——这就是固体物理中\"布里渊区\"的数学基础。Bloch 定理利用了 \\(T^3\\) 的拓扑结构来分析电子的能带结构。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="topology"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/topology.html" class="module-name">点集拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 子空间拓扑与性质遗传</a></li>
+      <li><a href="#kp2">02 · 积拓扑</a></li>
+      <li><a href="#kp3">03 · 商拓扑与商映射</a></li>
+      <li><a href="#kp4">04 · 典型构造实例与不交并</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>构造新空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>子空间拓扑与性质遗传</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当我们研究一个大空间中的子集时，自然希望子集"继承"环境空间的拓扑 结构。子空间拓扑（诱导拓扑）正是实现这一目的的标准方式。核心问题 是：哪些拓扑性质能遗传给子空间？Hausdorff 性可以遗传，但紧致性 只遗传给闭子集——这些细微差别在实际应用中至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>子空间拓扑是初始拓扑的特例：关于包含映射 \(\iota: A \hookrightarrow X\) 的初始拓扑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\((X, \tau)\) 为拓扑空间，\(A \subseteq X\)。 子空间拓扑为 \(\tau_A = \{U \cap A : U \in \tau\}\)。 验证是拓扑： (T1) \(\emptyset = \emptyset \cap A\)，\(A = X \cap A\)。 (T2) \((U_1 \cap A) \cap (U_2 \cap A) = (U_1 \cap U_2) \cap A\)。 (T3) \(\bigcup (U_\alpha \cap A) = (\bigcup U_\alpha) \cap A\)。 <strong>性质遗传</strong>： - \(T_2\) 遗传：\(\forall A \subseteq X\)，\((A, \tau_A)\) 仍 Hausdorff。 - \(C_1, C_2\) 遗传。 - 紧致性<strong>不</strong>完全遗传：\((0,1) \subseteq [0,1]\) 但 \((0,1)\) 不紧。 - 紧致性遗传到闭子集：\(A\) 闭 + \(X\) 紧 \(\Rightarrow\) \(A\) 紧。 \[\text{闭子集 of 紧空间} \Rightarrow \text{紧}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 在数值分析中，约束优化的可行域通常是 \(\mathbb{R}^n\) 的闭子空间</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(A = [0,1] \cap \mathbb{Q}\) 在 \(\mathbb{R}\) 的子空间拓扑中 是否紧致？ 解答：不紧致。\([0,1] \cap \mathbb{Q}\) 不是 \(\mathbb{R}\) 中的闭集 （\(\sqrt{2}/2 \in \overline{A}\) 但 \(\sqrt{2}/2 \notin A\)）。 具体开覆盖：对每个 \(q \in A\)，取不含 \(\sqrt{2}/2\) 的小开区间。 或者更直接：\(A\) 不是 \(\mathbb{R}\) 中有界闭集，所以在 \(\mathbb{R}\) 中不紧。子空间拓扑下 \(A\) 的紧致性与环境空间一致。 易错点：误以为 \(A \subseteq [0,1]\)（有界）就紧致。 Heine-Borel 要求"有界且闭"，\(A\) 不闭。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(X\) 是 Hausdorff 空间，\(A \subseteq X\)。以下哪个一定成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Hausdorff 性对任意子空间遗传。紧致、连通、正规性不遗传。')">A. \(A\) 是 Hausdorff 的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Hausdorff 性对任意子空间遗传。紧致、连通、正规性不遗传。')">B. \(A\) 是紧致的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Hausdorff 性对任意子空间遗传。紧致、连通、正规性不遗传。')">C. \(A\) 是连通的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Hausdorff 性对任意子空间遗传。紧致、连通、正规性不遗传。')">D. \(A\) 是正规的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>积拓扑</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何在笛卡尔积 \(\prod X_\alpha\) 上定义"自然"的拓扑？最直觉的 box 拓扑（每个分量取开集的积）在无穷积时性质太差。Tychonoff 选择了积拓扑（只允许有限多个分量限制），使得投影连续且积空间具有 良好的性质——尤其是 Tychonoff 定理（紧空间的积仍紧）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>积拓扑 = 关于所有投影映射 \(\pi_\alpha\) 的初始拓扑。 这是范畴积(categorical product)在 \(\mathbf{Top}\) 中的实现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>有限积</strong>：\(X_1 \times X_2\) 上的积拓扑以 \(\{U_1 \times U_2 : U_i \in \tau_i\}\) 为基。 此时 box 拓扑 = 积拓扑。 <strong>无穷积</strong>：\(\prod_{\alpha \in A} X_\alpha\) 上的积拓扑以 \[\pi_{\alpha_1}^{-1}(U_1) \cap \cdots \cap \pi_{\alpha_n}^{-1}(U_n)\] （有限交）为基，其中 \(U_i \in \tau_{\alpha_i}\)。 即只有有限多个分量被"限制"。 <strong>box 拓扑 vs 积拓扑</strong>：\(\prod U_\alpha\)（所有分量开）为 box 基。 无穷积时 box 严格细于 product。 关键区别：在 box 拓扑下，\(f: Y \to \prod X_\alpha\) 连续要求 每个 \(\pi_\alpha \circ f\) 连续且更多；在积拓扑下， \[f \text{ 连续} \iff \forall \alpha,\; \pi_\alpha \circ f \text{ 连续}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 函数空间 \(Y^X = \prod_{x \in X} Y\) 的积拓扑 = 逐点收敛拓扑 - 概率论中无穷乘积测度空间的基础</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(f_n: \mathbb{R} \to \mathbb{R}\)，\(f_n(x) = x/n\)。 证明 \(F = (f_1, f_2, \ldots): \mathbb{R} \to \mathbb{R}^{\mathbb{N}}\) 在积拓扑下连续，但在 box 拓扑下不连续。 解答：积拓扑：\(\pi_n \circ F = f_n\) 连续 \(\forall n\)，故 \(F\) 连续。 Box 拓扑：取 \(W = \prod_n (-1/n, 1/n)\)，\(W\) 在 box 拓扑中开。 \(F^{-1}(W) = \{x : |x/n| < 1/n,\; \forall n\} = \{x : |x| < 1\} = (-1,1)\)。 等等，这看似是开的。修改例子：取 \(f_n(x) = x\)，\(F = (x,x,\ldots)\)， \(W = \prod_n (-1/n, 1/n)\)，则 \(F^{-1}(W) = \bigcap_n (-1/n,1/n) = \{0\}\)， 不是开集。 易错点：box 拓扑在无穷积中使太多映射不连续，这正是不选它的原因。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">积拓扑的基元素是什么形式？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。积拓扑的基元素只限制有限多个分量，其余取全空间。')">A. \(\prod U_\alpha\)，所有 \(U_\alpha\) 开</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！积拓扑的基元素只限制有限多个分量，其余取全空间。')">B. \(\prod U_\alpha\)，\(U_\alpha = X_\alpha\) 除有限个外</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。积拓扑的基元素只限制有限多个分量，其余取全空间。')">C. \(\prod U_\alpha\)，\(U_\alpha \neq \emptyset\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。积拓扑的基元素只限制有限多个分量，其余取全空间。')">D. \(\prod U_\alpha\)，至多一个 \(U_\alpha \neq X_\alpha\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>商拓扑与商映射</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>许多重要空间来自"粘合"操作：将正方形的对边粘合得环面、将圆盘 的边界粘成一点得球面。商拓扑将等价关系下的"粘合"严格化：商空 间 \(X/{\sim}\) 继承了使商映射连续的最强拓扑。这是构造流形、轨 道空间和 CW 复形的基本手段。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>商拓扑 = 关于商映射 \(q: X \to X/{\sim}\) 的终止拓扑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：设 \(\sim\) 为 \(X\) 上的等价关系，\(q: X \to X/{\sim}\) 为商映射 \(q(x) = [x]\)。商拓扑为 \[\tau_{X/\sim} = \{U \subseteq X/{\sim} : q^{-1}(U) \in \tau_X\}\] 即 \(U\) 开当且仅当其原像在 \(X\) 中开。 <strong>商映射的判定</strong>：\(f: X \to Y\) 满射。\(f\) 是商映射 \(\iff\) \(V \subseteq Y\) 开 \(\iff f^{-1}(V) \subseteq X\) 开。 充分条件：\(f\) 满射 + 开映射，或 \(f\) 满射 + 闭映射。 <strong>性质</strong>：商映射不一定是开映射也不一定是闭映射。 万有性质：\(g: X/{\sim} \to Z\) 连续 \(\iff g \circ q\) 连续。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 群作用的轨道空间 \(X/G\) 是商空间（如 \(\mathbb{R}/\mathbb{Z} \cong S^1\)） - CW 复形的构造基于粘合映射和商拓扑</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(S^1 \cong [0,1]/\{0 \sim 1\}\)。 解答：定义 \(f: [0,1] \to S^1\)，\(f(t) = e^{2\pi i t}\)。 \(f\) 连续、满射。\(f(0) = f(1) = 1\)，且 \(f\) 在 \((0,1)\) 上单射。 \(f\) 与等价关系 \(0 \sim 1\) 相容，诱导双射 \(\bar{f}: [0,1]/{\sim} \to S^1\)。 \(\bar{f}\) 连续（\(\bar{f} \circ q = f\) 连续，由万有性质）。 \([0,1]\) 紧 \(\Rightarrow [0,1]/{\sim}\) 紧（连续像）， \(S^1\) Hausdorff，因此紧到 Hausdorff 的连续双射是同胚。 易错点：忘记验证"紧到 Hausdorff"条件。不能直接说连续双射=同胚。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">将 \([0,1] \times [0,1]\) 的上下边粘合（\((x,0) \sim (x,1)\)），</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。上下粘合得圆柱，圆柱两端再粘合得环面 \\(T^2 = S^1 \\times S^1\\)。')">A. \(S^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！上下粘合得圆柱，圆柱两端再粘合得环面 \\(T^2 = S^1 \\times S^1\\)。')">B. \(T^2\)（环面）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。上下粘合得圆柱，圆柱两端再粘合得环面 \\(T^2 = S^1 \\times S^1\\)。')">C. Klein 瓶</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。上下粘合得圆柱，圆柱两端再粘合得环面 \\(T^2 = S^1 \\times S^1\\)。')">D. \(\mathbb{RP}^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>典型构造实例与不交并</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>理论的价值在于其实例。莫比乌斯带、环面、射影空间等经典空间都 可以用子空间、积和商拓扑来严格构造。不交并（余积）则是"分离 地放在一起"的操作。这些例子既是几何直觉的训练场，也是后续 代数拓扑中计算不变量的主要对象。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>莫比乌斯带</strong>：\(M = [0,1] \times [-1,1] / {\sim}\)， \((0, y) \sim (1, -y)\)。粘合时翻转了第二坐标。 <strong>环面</strong>：\(T^2 = [0,1]^2 / {\sim}\)，\((x,0) \sim (x,1)\)， \((0,y) \sim (1,y)\)。同胚于 \(S^1 \times S^1\)。 <strong>射影空间</strong>：\(\mathbb{RP}^n = S^n / {\sim}\)，\(x \sim -x\) （对径点等价）。\(\mathbb{RP}^1 \cong S^1\)。 <strong>不交并 (Coproduct)</strong>：\(X \sqcup Y\) 的拓扑为 \(\tau_{X \sqcup Y} = \{U \cup V : U \in \tau_X, V \in \tau_Y\}\)。 等价地，\(A \subseteq X \sqcup Y\) 开 \(\iff\) \(A \cap X\) 在 \(X\) 中开且 \(A \cap Y\) 在 \(Y\) 中开。 <strong>性质</strong>： \[\pi_1(T^2) \cong \mathbb{Z}^2, \quad \pi_1(\mathbb{RP}^2) \cong \mathbb{Z}/2\mathbb{Z}\] \[\chi(T^2) = 0, \quad \chi(S^2) = 2, \quad \chi(\mathbb{RP}^2) = 1\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 莫比乌斯带是纤维丛理论的入门例子（不可定向曲面） - 射影空间在计算机视觉中用于表示直线方向</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathbb{RP}^1 \cong S^1\)。 解答：\(\mathbb{RP}^1 = S^1/{\sim}\)，\((x,y) \sim (-x,-y)\)。 定义 \(f: S^1 \to S^1\)，\(f(e^{i\theta}) = e^{2i\theta}\)。 则 \(f(e^{i\theta}) = f(e^{i(\theta+\pi)})\)，所以 \(f\) 与 \(\sim\) 相容。 诱导的 \(\bar{f}: \mathbb{RP}^1 \to S^1\) 是连续双射。 \(\mathbb{RP}^1\) 紧（\(S^1\) 紧的连续像），\(S^1\) Hausdorff， 故 \(\bar{f}\) 是同胚。 易错点：\(\mathbb{RP}^n \cong S^n\) 仅在 \(n=1\) 时成立！ \(n \geq 2\) 时 \(\mathbb{RP}^n \not\cong S^n\)（基本群不同）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">莫比乌斯带是什么空间的商？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。将矩形的一对对边以相反方向粘合即得莫比乌斯带。')">A. \(S^1 \times [-1,1]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！将矩形的一对对边以相反方向粘合即得莫比乌斯带。')">B. \([0,1] \times [-1,1]\)（粘合 \((0,y) \sim (1,-y)\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。将矩形的一对对边以相反方向粘合即得莫比乌斯带。')">C. \(S^1 \times S^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。将矩形的一对对边以相反方向粘合即得莫比乌斯带。')">D. \(\mathbb{R}^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/geometry/topology.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

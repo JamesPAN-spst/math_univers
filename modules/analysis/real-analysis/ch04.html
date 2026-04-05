@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 收敛定理 — 实分析/测度论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "real-analysis-ch04-q1",
+        "question": "单调收敛定理 (MCT) 的适用条件是什么？",
+        "options": [
+          "\\(f_n\\) 有界且逐点收敛",
+        "\\(f_n \\geq 0\\)，\\(f_n\\) 单调递增，\\(f_n \\to f\\) 逐点",
+        "\\(f_n\\) 一致收敛",
+        "\\(f_n \\in L^1\\) 且 \\(\\|f_n\\|_1\\) 有界"
+        ],
+        "answer": 1,
+        "explanation": "MCT 要求三个条件：(1) \\(f_n \\geq 0\\)（非负）；(2) \\(f_n \\leq f_{n+1}\\)（单调递增）；(3) \\(f_n \\to f\\) 逐点。结论：\\(\\int f_n \\to \\int f\\)。不要求有界性、一致收敛或可积性。MCT 允许 \\(\\int f = +\\infty\\)。"
+      },
+      {
+        "id": "real-analysis-ch04-q2",
+        "question": "设 \\(f_n = \\mathbf{1}_{[0,n]}\\)（\\([0,n]\\) 的特征函数）。\\(f_n \\uparrow \\mathbf{1}_{[0,\\infty)}\\)。由 MCT，\\(\\lim \\int f_n\\) 等于？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)",
+        "不存在"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\int f_n = m([0,n]) = n \\to +\\infty\\)。由 MCT，\\(\\int \\mathbf{1}_{[0,\\infty)} = m([0,\\infty)) = +\\infty\\)。MCT 允许极限积分为无穷——它说的是\"等式成立\"，不保证有限性。\\(f_n \\geq 0\\) 递增 ✓，逐点收敛 ✓。"
+      },
+      {
+        "id": "real-analysis-ch04-q3",
+        "question": "Fatou 引理说：若 \\(f_n \\geq 0\\) 可测，则 \\(\\int \\liminf f_n\\) 与 \\(\\liminf \\int f_n\\) 的关系是？",
+        "options": [
+          "\\(\\int \\liminf f_n = \\liminf \\int f_n\\)",
+        "\\(\\int \\liminf f_n \\leq \\liminf \\int f_n\\)",
+        "\\(\\int \\liminf f_n \\geq \\liminf \\int f_n\\)",
+        "无确定关系"
+        ],
+        "answer": 1,
+        "explanation": "Fatou 引理：\\(\\int \\liminf f_n \\leq \\liminf \\int f_n\\)。不等号可以是严格的：例如 \\(f_n = n \\cdot \\mathbf{1}_{[0,1/n]}\\)，\\(\\liminf f_n = 0\\)，\\(\\int(\\liminf f_n) = 0\\)，但 \\(\\liminf \\int f_n = 1\\)。等号在 MCT 条件下成立。"
+      },
+      {
+        "id": "real-analysis-ch04-q4",
+        "question": "设 \\(f_n(x) = (1 + x/n)^{-n}\\) 在 \\([0, \\infty)\\) 上，\\(f_n \\to e^{-x}\\)。由 Fatou 引理，\\(\\int_0^\\infty e^{-x}\\, dx \\leq ?\\)",
+        "options": [
+          "\\(\\liminf \\int_0^\\infty f_n\\)",
+        "\\(\\limsup \\int_0^\\infty f_n\\)",
+        "\\(\\int_0^\\infty f_1\\)",
+        "\\(+\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_n \\geq 0\\)，\\(f_n \\to e^{-x}\\) 逐点。Fatou 引理给出 \\(\\int e^{-x} \\leq \\liminf \\int f_n\\)。实际 \\(\\int f_n = n/(n-1)\\)（\\(n \\geq 2\\) 时），\\(\\liminf = 1\\)，\\(\\int e^{-x} = 1\\)，等号成立。这里恰好可以用 DCT（\\(f_n \\leq f_1\\)）得到等号。"
+      },
+      {
+        "id": "real-analysis-ch04-q5",
+        "question": "控制收敛定理 (DCT) 的关键假设\"存在可积控制函数 \\(g\\)\"具体是？",
+        "options": [
+          "\\(|f_n(x)| \\leq g(x)\\) a.e.，\\(g \\in L^1\\)",
+        "\\(f_n \\leq g\\) 逐点",
+        "\\(\\|f_n\\|_\\infty \\leq M\\)",
+        "\\(\\int f_n \\leq \\int g\\)"
+        ],
+        "answer": 0,
+        "explanation": "DCT 要求：\\(|f_n| \\leq g\\) a.e.（对所有 \\(n\\)），\\(g \\in L^1\\)，\\(f_n \\to f\\) a.e.。结论：\\(f \\in L^1\\) 且 \\(\\int f_n \\to \\int f\\)。条件 (A) 中的控制函数必须不依赖于 \\(n\\)。B 缺少绝对值和可积性；C 仅对有限测度空间有用；D 太弱。"
+      },
+      {
+        "id": "real-analysis-ch04-q6",
+        "question": "设 \\(f_n(x) = x^n/n\\) 在 \\([0, 1]\\) 上，\\(f_n \\to 0\\) 逐点（\\(x \\in [0,1)\\)），\\(f_n(1) = 1/n \\to 0\\)。由 DCT（\\(|f_n| \\leq 1\\)），\\(\\lim \\int_0^1 f_n\\) 等于？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(|f_n(x)| = x^n/n \\leq 1\\) 对所有 \\(x \\in [0,1]\\)。\\(g(x) = 1 \\in L^1([0,1])\\)。\\(f_n \\to 0\\) a.e.。由 DCT，\\(\\lim \\int f_n = \\int \\lim f_n = \\int 0 = 0\\)。直接计算验证：\\(\\int_0^1 x^n/n\\, dx = 1/(n(n+1)) \\to 0\\) ✓。"
+      },
+      {
+        "id": "real-analysis-ch04-q7",
+        "question": "设 \\(\\sum_{n=1}^\\infty f_n\\) 点态收敛，\\(f_n \\geq 0\\)。由 MCT，\\(\\int \\sum f_n = ?\\)",
+        "options": [
+          "\\(\\sum \\int f_n\\)",
+        "\\(\\sup \\int f_n\\)",
+        "\\(\\int f_1 + \\int f_2\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "部分和 \\(S_N = \\sum_{n=1}^N f_n\\) 非负递增，\\(S_N \\uparrow \\sum f_n\\)。MCT：\\(\\int \\sum f_n = \\lim \\int S_N = \\lim \\sum_{n=1}^N \\int f_n = \\sum_{n=1}^\\infty \\int f_n\\)。这就是\"非负函数级数的逐项积分\"——MCT 的经典推论。不需要一致收敛。"
+      },
+      {
+        "id": "real-analysis-ch04-q8",
+        "question": "设 \\(f_n(x) = n \\cdot x \\cdot e^{-nx^2}\\) 在 \\([0, \\infty)\\) 上。\\(f_n \\to 0\\) 逐点（\\(x > 0\\)）。\\(\\int_0^\\infty f_n\\, dx\\) 是否趋于 \\(0\\)？",
+        "options": [
+          "是，由 DCT",
+        "否，\\(\\int f_n = 1/2\\) 对所有 \\(n\\)",
+        "否，\\(\\int f_n \\to \\infty\\)",
+        "是，由 MCT"
+        ],
+        "answer": 1,
+        "explanation": "换元 \\(u = nx^2\\)：\\(\\int_0^\\infty nx e^{-nx^2}\\, dx = (1/2)\\int_0^\\infty e^{-u}\\, du = 1/2\\)。虽然 \\(f_n \\to 0\\) 逐点但 \\(\\int f_n = 1/2 \\not\\to 0\\)。DCT 不适用因为没有可积控制函数（\\(\\sup_n f_n(x)\\) 不可积）。这展示了控制函数的必要性。"
+      },
+      {
+        "id": "real-analysis-ch04-q9",
+        "question": "设 \\(f_n(x) = (1 - x/n)^n \\mathbf{1}_{[0,n]}\\)。\\(f_n \\to e^{-x}\\)。能否用 MCT？",
+        "options": [
+          "能，\\(f_n\\) 递增",
+        "不能，\\(f_n\\) 不单调递增",
+        "能，\\(f_n \\geq 0\\)",
+        "不能，\\(f_n\\) 不可测"
+        ],
+        "answer": 0,
+        "explanation": "\\((1 - x/n)^n\\) 关于 \\(n\\) 递增（对固定 \\(x \\geq 0\\)，由 \\((1-x/n)^n \\leq (1-x/(n+1))^{n+1}\\)，利用 AM-GM）。\\(f_n \\geq 0\\) 且逐点 \\(\\uparrow e^{-x}\\)。MCT 适用：\\(\\int f_n \\uparrow \\int e^{-x} = 1\\)。（也可用 DCT：\\(f_n \\leq e^{-x} \\in L^1\\)。）"
+      },
+      {
+        "id": "real-analysis-ch04-q10",
+        "question": "设 \\(f_n = \\mathbf{1}_{[n, n+1]}\\) 在 \\(\\mathbb{R}\\) 上。\\(\\liminf f_n = 0\\)，\\(\\int f_n = 1\\)。Fatou 引理是否为严格不等式？",
+        "options": [
+          "等号成立：\\(0 = 0\\)",
+        "严格：\\(0 < 1\\)",
+        "Fatou 引理不适用",
+        "需要更多信息"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\liminf f_n(x) = 0\\)（对任意 \\(x\\)，\\(f_n(x) = 0\\) 终极地），故 \\(\\int \\liminf f_n = 0\\)。\\(\\liminf \\int f_n = 1\\)。Fatou：\\(0 \\leq 1\\) ✓，严格不等号。\"质量\"移动到无穷远处但不消失——Fatou 引理的不等号可以严格。"
+      },
+      {
+        "id": "real-analysis-ch04-q11",
+        "question": "\\(\\lim_{n \\to \\infty} \\int_0^1 \\frac{n x^{n-1}}{1 + x}\\, dx = ?\\)。使用积分与极限交换的定理。",
+        "options": [
+          "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f_n(x) = nx^{n-1}/(1+x)\\)。\\(f_n(x) \\to 0\\) 对 \\(x \\in [0,1)\\)，\\(f_n(1) = n/2 \\to \\infty\\)。但 \\(|f_n| \\leq nx^{n-1}\\)（\\(x \\in [0,1]\\) 时 \\(1/(1+x) \\leq 1\\)），而 \\(\\int_0^1 nx^{n-1}\\, dx = 1\\)。实际上直接计算：换元 \\(u = x^n\\)，\\(\\int_0^1 nx^{n-1}/(1+x)\\, dx\\)。令 \\(n \\to \\infty\\)，被积函数的质量集中在 \\(x = 1\\) 附近，\\(1/(1+x) \\to 1/2\\)，故极限为 \\(1/2\\)。"
+      },
+      {
+        "id": "real-analysis-ch04-q12",
+        "question": "设 \\(f_n(x) = \\sin(x/n)/x\\) 在 \\([1, \\infty)\\) 上。\\(f_n \\to 1/n \\to 0\\)......不对。\\(\\sin(x/n)/(x) \\to (x/n)/x = 1/n\\) 当 \\(x/n \\to 0\\)。用 DCT 求 \\(\\lim \\int_1^\\infty f_n\\, dx\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(\\pi/2\\)",
+        "\\(1\\)",
+        "DCT 不适用"
+        ],
+        "answer": 1,
+        "explanation": "换元 \\(u = x/n\\)：\\(\\int_1^\\infty \\sin(x/n)/x\\, dx = \\int_{1/n}^\\infty \\sin(u)/u\\, du\\)。当 \\(n \\to \\infty\\)，下界 \\(1/n \\to 0\\)，故极限为 \\(\\int_0^\\infty \\sin u/u\\, du = \\pi/2\\)。这是 Dirichlet 积分。注意此函数不 Lebesgue 可积（\\(|\\sin u/u|\\) 不可积），但作为反常 Riemann 积分收敛。"
+      },
+      {
+        "id": "real-analysis-ch04-q13",
+        "question": "设 \\(f_n \\geq 0\\)，\\(\\int f_n \\leq M\\) 对所有 \\(n\\)，\\(f_n \\to f\\) a.e.。Fatou 引理保证？",
+        "options": [
+          "\\(\\int f \\leq M\\)",
+        "\\(\\int f = M\\)",
+        "\\(\\int f = \\lim \\int f_n\\)",
+        "\\(f \\in L^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "Fatou 引理：\\(\\int f = \\int \\liminf f_n \\leq \\liminf \\int f_n \\leq M\\)。因此 \\(f \\in L^1\\) 且 \\(\\int f \\leq M\\)。Fatou 引理给出积分的上界估计。不能保证等号（如前面 \\(f_n = \\mathbf{1}_{[n,n+1]}\\) 的例子）。这是分析学中\"弱紧性\"论证的基础工具。"
+      },
+      {
+        "id": "real-analysis-ch04-q14",
+        "question": "设 \\(f \\in L^1(\\mathbb{R})\\)，\\(f_n(x) = f(x) \\cos(nx)\\)。则 \\(\\lim \\int f_n = ?\\)（Riemann-Lebesgue 引理）",
+        "options": [
+          "\\(\\int f\\)",
+        "\\(0\\)",
+        "\\(\\|f\\|_1\\)",
+        "不存在"
+        ],
+        "answer": 1,
+        "explanation": "Riemann-Lebesgue 引理：若 \\(f \\in L^1\\)，则 \\(\\hat{f}(n) = \\int f(x) e^{-inx}\\, dx \\to 0\\)（\\(|n| \\to \\infty\\)）。取实部：\\(\\int f \\cos(nx) \\to 0\\)。证明对阶梯函数直接验证（积分为 \\(O(1/n)\\)），再由 \\(L^1\\) 逼近推广。DCT 在此不直接适用（\\(|f \\cos(nx)| \\leq |f|\\) 可积但极限依赖于振荡消去）。"
+      },
+      {
+        "id": "real-analysis-ch04-q15",
+        "question": "\\(\\lim_{n \\to \\infty} \\int_0^\\infty \\frac{x}{1 + n^2 x^2} \\cdot e^{-x}\\, dx = ?\\) 用 DCT 求解。",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\pi/2\\)",
+        "\\(1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_n(x) = xe^{-x}/(1 + n^2x^2)\\)。\\(|f_n(x)| \\leq xe^{-x}\\)（\\(1/(1+n^2x^2) \\leq 1\\)），\\(g(x) = xe^{-x} \\in L^1([0,\\infty))\\)（\\(\\int = 1\\)）。逐点：\\(f_n(x) \\to 0\\)（\\(x > 0\\) 时分母 \\(\\to \\infty\\)）。DCT：\\(\\lim \\int f_n = \\int 0 = 0\\)。"
+      },
+      {
+        "id": "real-analysis-ch04-q16",
+        "question": "设 \\(f_n \\in L^1\\)，\\(f_n \\to f\\) a.e.，\\(\\|f_n - f\\|_1 \\to 0\\)。以下哪个是 Scheffé 引理的条件？",
+        "options": [
+          "\\(f_n \\geq 0\\)，\\(f \\geq 0\\)，\\(\\int f_n \\to \\int f\\)",
+        "\\(|f_n| \\leq g \\in L^1\\)",
+        "\\(f_n\\) 单调",
+        "\\(f_n\\) 一致有界"
+        ],
+        "answer": 0,
+        "explanation": "Scheffé 引理：若 \\(f_n \\geq 0\\)，\\(f_n \\to f\\) a.e.，\\(\\int f_n \\to \\int f < \\infty\\)，则 \\(\\|f_n - f\\|_1 \\to 0\\)。这比 DCT 更精确：不需要控制函数，只需积分值收敛。证明：\\(|f_n - f| \\leq f_n + f\\)，\\(\\int |f_n - f| = \\int(f_n + f) - 2\\int \\min(f_n, f)\\)，由 Fatou 引理 \\(\\liminf \\int \\min(f_n, f) \\geq \\int f\\)。"
+      },
+      {
+        "id": "real-analysis-ch04-q17",
+        "question": "DCT 中\"可积控制函数\"条件能否替换为\"\\(\\sup_n |f_n| \\in L^1\\)\"？",
+        "options": [
+          "不能，这比 DCT 条件更强",
+        "能，两者等价",
+        "不能，\\(\\sup_n |f_n|\\) 可能不可测",
+        "能，但只对紧支撑函数"
+        ],
+        "answer": 1,
+        "explanation": "DCT 要求存在 \\(g \\in L^1\\) 使 \\(|f_n| \\leq g\\)。取 \\(g = \\sup_n |f_n|\\) 即满足。反之，若 \\(|f_n| \\leq g\\) 则 \\(\\sup_n |f_n| \\leq g \\in L^1\\)。关于可测性：可数个可测函数的上确界可测。因此\"\\(\\sup_n |f_n| \\in L^1\\)\"等价于 DCT 的控制条件。"
+      },
+      {
+        "id": "real-analysis-ch04-q18",
+        "question": "\\(\\lim_{n \\to \\infty} \\int_0^n (1 - x/n)^n e^{2x}\\, dx = ?\\)",
+        "options": [
+          "\\(+\\infty\\)",
+        "\\(1\\)",
+        "\\(e^2 - 1\\)",
+        "用 MCT：\\(\\int_0^\\infty e^{x}\\, dx = +\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((1-x/n)^n \\uparrow e^{-x}\\)（\\(0 \\leq x \\leq n\\)），故 \\(f_n(x) = (1-x/n)^n e^{2x} \\mathbf{1}_{[0,n]} \\uparrow e^{-x} e^{2x} = e^x\\)。由 MCT，\\(\\lim \\int f_n = \\int_0^\\infty e^x\\, dx = +\\infty\\)。MCT 允许极限为无穷。"
+      },
+      {
+        "id": "real-analysis-ch04-q19",
+        "question": "（Fatou 引理的反向版本）设 \\(f_n \\leq g \\in L^1\\)，\\(f_n \\to f\\) a.e.。则？",
+        "options": [
+          "\\(\\int \\limsup f_n \\geq \\limsup \\int f_n\\)",
+        "\\(\\int \\limsup f_n \\leq \\limsup \\int f_n\\)",
+        "\\(\\int f = \\lim \\int f_n\\)（DCT）",
+        "A 和 C 都正确"
+        ],
+        "answer": 0,
+        "explanation": "反向 Fatou 引理：若 \\(f_n \\leq g \\in L^1\\)，则 \\(\\int \\limsup f_n \\geq \\limsup \\int f_n\\)。证明：对 \\(g - f_n \\geq 0\\) 应用标准 Fatou：\\(\\int \\liminf(g - f_n) \\leq \\liminf \\int(g-f_n)\\)，即 \\(\\int g - \\int \\limsup f_n \\leq \\int g - \\limsup \\int f_n\\)。DCT 是 Fatou + 反向 Fatou 的结合。"
+      },
+      {
+        "id": "real-analysis-ch04-q20",
+        "question": "设 \\(f_n \\to f\\) 依测度收敛，\\(|f_n| \\leq g \\in L^1\\)。则 \\(\\int f_n \\to \\int f\\) 吗？",
+        "options": [
+          "是（DCT 的推广版）",
+        "不一定",
+        "仅当 \\(f_n \\to f\\) a.e. 时",
+        "仅当测度空间有限时"
+        ],
+        "answer": 0,
+        "explanation": "DCT 可以推广：将\"a.e. 收敛\"替换为\"依测度收敛\"，结论仍然成立。证明：依测度收敛的子列有 a.e. 收敛的子子列。若 \\(\\int f_n \\not\\to \\int f\\)，取子列使 \\(|\\int f_{n_k} - \\int f| \\geq \\varepsilon\\)，再取 a.e. 收敛的子子列，由 DCT 得矛盾。"
+      },
+      {
+        "id": "real-analysis-ch04-q21",
+        "question": "设 \\(f_n, f \\in L^1\\)，\\(f_n \\to f\\) a.e.，\\(\\int |f_n| \\to \\int |f|\\)（积分模收敛）。则 \\(\\|f_n - f\\|_1 \\to 0\\) 吗？",
+        "options": [
+          "是（Scheffé 引理的推广）",
+        "不一定",
+        "仅当 \\(f_n \\geq 0\\) 时",
+        "仅当有控制函数时"
+        ],
+        "answer": 0,
+        "explanation": "这是 Brezis-Lieb 引理/广义 Scheffé 引理。\\(|f_n - f| \\leq |f_n| + |f|\\)，\\(\\int(|f_n| + |f| - |f_n - f|) \\to 2\\int|f|\\)（因为 \\(|f_n| + |f| - |f_n - f| \\to 2|f|\\) 且有 Fatou 控制），由此 \\(\\int|f_n - f| \\to 0\\)。关键是 \\(\\int |f_n| \\to \\int |f|\\) 排除了\"质量逃逸\"。"
+      },
+      {
+        "id": "real-analysis-ch04-q22",
+        "question": "Fatou 引理中不等号的\"间隙\"\\(\\liminf \\int f_n - \\int \\liminf f_n\\) 何时为零？",
+        "options": [
+          "当 \\(f_n\\) 单调递增时",
+        "当存在可积控制函数时",
+        "A 或 B 任意一个成立时",
+        "仅当 \\(f_n\\) 一致收敛时"
+        ],
+        "answer": 2,
+        "explanation": "(A) \\(f_n \\uparrow\\) 时 \\(\\liminf = \\lim\\)，MCT 保证等号。(B) \\(|f_n| \\leq g \\in L^1\\) 时 DCT 保证 \\(\\int f_n \\to \\int f = \\int \\liminf f_n\\)。两种情况都消除间隙。一致收敛不必要（有界收敛足以在有限测度空间上保证交换）。"
+      },
+      {
+        "id": "real-analysis-ch04-q23",
+        "question": "（MCT 的推广）设 \\(f_n\\) 可测（不要求非负），\\(f_1 \\in L^1\\)，\\(f_n \\uparrow f\\)。则 \\(\\int f_n \\uparrow \\int f\\)。为什么需要 \\(f_1 \\in L^1\\)？",
+        "options": [
+          "保证 \\(f_n\\) 可测",
+        "保证 \\(f_n - f_1 \\geq 0\\) 从而可用标准 MCT",
+        "保证级数绝对收敛",
+        "不需要，标准 MCT 足够"
+        ],
+        "answer": 1,
+        "explanation": "\\(g_n = f_n - f_1 \\geq 0\\)（因递增），\\(g_n \\uparrow f - f_1\\)。对 \\(g_n\\) 用标准 MCT：\\(\\int g_n \\uparrow \\int(f - f_1)\\)，即 \\(\\int f_n - \\int f_1 \\uparrow \\int f - \\int f_1\\)。需要 \\(\\int f_1 > -\\infty\\)（即 \\(f_1 \\in L^1\\)）才能两边加 \\(\\int f_1\\)。若 \\(\\int f_1 = -\\infty\\) 则 \\(\\int f_n = -\\infty\\) 对所有 \\(n\\)，无意义。"
+      },
+      {
+        "id": "real-analysis-ch04-q24",
+        "question": "设 \\(f \\in L^1(\\mathbb{R})\\)，\\(\\varepsilon > 0\\)。则存在连续紧支撑函数 \\(g\\) 使 \\(\\|f - g\\|_1 < \\varepsilon\\)。这依赖于 DCT 吗？",
+        "options": [
+          "不依赖，是直接构造",
+        "依赖 MCT（用简单函数逼近）",
+        "依赖 DCT（截断和磨光）",
+        "B 和 C 都有参与"
+        ],
+        "answer": 3,
+        "explanation": "\\(L^1\\) 中连续紧支撑函数稠密的证明：(1) 用 MCT，非负函数是简单函数的递增极限（\\(\\int\\) 收敛）；(2) 截断：\\(f \\mathbf{1}_{|x| \\leq N} \\to f\\) 由 DCT；(3) 磨光卷积 \\(f * \\varphi_\\varepsilon \\to f\\)（\\(L^1\\)）由 DCT 和平移连续性。MCT 和 DCT 共同作用。"
+      },
+      {
+        "id": "real-analysis-ch04-q25",
+        "question": "设 \\(\\sum a_n\\) 为正项级数，\\(a_n \\to 0\\) 但 \\(\\sum a_n = \\infty\\)。定义 \\(f_n = a_n \\cdot \\mathbf{1}_{[n, n+1]}\\)。则 \\(\\int \\sum f_n\\) 如何？",
+        "options": [
+          "\\(= \\sum a_n = \\infty\\)（MCT）",
+        "\\(= 0\\)（\\(f_n \\to 0\\)）",
+        "有限但非零",
+        "不可积分"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_n \\geq 0\\)，MCT/Tonelli 允许交换求和与积分：\\(\\int \\sum f_n = \\sum \\int f_n = \\sum a_n \\cdot m([n,n+1]) = \\sum a_n = \\infty\\)。函数 \\(g = \\sum f_n\\)（各段等于 \\(a_n\\)）虽逐点有限（每点只有一个非零项），但整体 \\(L^1\\) 范数发散。"
+      },
+      {
+        "id": "real-analysis-ch04-q26",
+        "question": "在热传导问题中，温度分布 \\(u(x,t)\\) 随时间 \\(t \\to \\infty\\) 衰减。若 \\(|u(x,t)| \\leq Ce^{-t}e^{-x^2}\\)（\\(C\\) 常数），则总热能 \\(E(t) = \\int_{-\\infty}^\\infty u(x,t)\\, dx\\) 在 \\(t \\to \\infty\\) 时的行为是？使用哪个收敛定理？",
+        "options": [
+          "\\(E(t) \\to 0\\)，使用 DCT（控制函数 \\(Ce^{-x^2}\\)）",
+        "\\(E(t) \\to \\infty\\)",
+        "无法确定",
+        "\\(E(t)\\) 恒为常数"
+        ],
+        "answer": 0,
+        "explanation": "\\(|u(x,t)| \\leq Ce^{-x^2}\\)（对所有 \\(t\\)），\\(g(x) = Ce^{-x^2} \\in L^1(\\mathbb{R})\\)（高斯积分 \\(= C\\sqrt{\\pi}\\)）。\\(u(x,t) \\to 0\\) 逐点（\\(t \\to \\infty\\)）。DCT：\\(E(t) = \\int u \\to \\int 0 = 0\\)。物理解释：热量通过扩散消散，总热能趋零。"
+      },
+      {
+        "id": "real-analysis-ch04-q27",
+        "question": "在气象学中，某站点的日降雨量序列 \\(\\{X_n\\}\\) 非负，统计得 \\(\\sum P(X_n > 100) < \\infty\\)。由 Borel-Cantelli 第一引理结合 MCT/Fatou，能否断言\"几乎必然只有有限天降雨超过 100mm\"？",
+        "options": [
+          "能，\\(P(\\limsup\\{X_n > 100\\}) = 0\\)",
+        "不能，需要独立性",
+        "能，但需要 \\(E[X_n] < \\infty\\)",
+        "不能，需要 DCT"
+        ],
+        "answer": 0,
+        "explanation": "Borel-Cantelli 第一引理不需要独立性。\\(\\sum P(X_n > 100) < \\infty \\Rightarrow P(\\limsup\\{X_n > 100\\}) = 0\\)。\"\\(\\limsup\\)\"意味着\"无穷多次发生\"，概率为零说明几乎必然只有有限天超过 100mm。这是气象极端事件分析的理论基础。"
+      },
+      {
+        "id": "real-analysis-ch04-q28",
+        "question": "在数值分析中，用 Monte Carlo 方法估计 \\(I = \\int_0^1 f(x)\\, dx\\)：取 \\(I_n = (1/n)\\sum_{k=1}^n f(U_k)\\)（\\(U_k\\) 独立均匀）。大数定律保证 \\(I_n \\to I\\) a.s.。若还需 \\(E[I_n^2] \\to I^2\\)，需要什么条件？",
+        "options": [
+          "\\(f\\) 有界",
+        "\\(f \\in L^2([0,1])\\)",
+        "\\(f\\) 连续",
+        "A 或 B"
+        ],
+        "answer": 3,
+        "explanation": "\\(E[I_n] = I\\)，\\(\\text{Var}(I_n) = \\text{Var}(f(U))/n\\)。\\(E[I_n^2] = \\text{Var}(I_n) + I^2 \\to I^2\\) 当且仅当 \\(\\text{Var}(f(U)) < \\infty\\)，即 \\(\\int_0^1 f^2 < \\infty\\)（\\(f \\in L^2\\)）。有界 \\(\\Rightarrow L^2\\)。DCT/MCT 保证了 \\(E[I_n^2]\\) 的收敛性。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="real-analysis"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/real-analysis.html" class="module-name">实分析/测度论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 单调收敛定理 (MCT)</a></li>
+      <li><a href="#kp2">02 · Fatou 引理</a></li>
+      <li><a href="#kp3">03 · 控制收敛定理 (DCT)</a></li>
+      <li><a href="#kp4">04 · 积分号下求导与逐项积分</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>收敛定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>单调收敛定理 (MCT)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>分析学的核心问题之一是：何时可以交换极限和积分？单调收敛定理 给出最简洁的条件——只要函数序列非负且单调递增，极限和积分就 可以交换。这是 Lebesgue 积分理论中最基础、最常用的工具， 也是证明其他收敛定理的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>MCT 体现了 Lebesgue 积分的"从下逼近"本质：非负函数的积分 本身就是简单函数积分的上确界，而单调递增序列的上确界就是极限。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (MCT)</strong>：设 \(0 \leq f_1 \leq f_2 \leq \cdots\) 为可测函数序列， \(f_n \uparrow f\) 逐点，则 \[\lim_{n \to \infty} \int f_n\, d\mu = \int f\, d\mu\] （两边可以是 \(+\infty\)）。 <strong>证明框架</strong>： "\(\leq\)"：\(f_n \leq f\) 对所有 \(n\)，由单调性 \(\int f_n \leq \int f\)， 取极限得 \(\lim \int f_n \leq \int f\)。 "\(\geq\)"：对任意简单函数 \(\varphi \leq f\) 和 \(0 < c < 1\)， 令 \(E_n = \{x : f_n(x) \geq c\varphi(x)\}\)，则 \(E_n \uparrow X\)。 \[\int f_n\, d\mu \geq \int_{E_n} f_n\, d\mu \geq c \int_{E_n} \varphi\, d\mu\] 由测度的连续性，\(\int_{E_n} \varphi\, d\mu \to \int \varphi\, d\mu\)。 令 \(n \to \infty\) 再令 \(c \to 1\)，得 \(\lim \int f_n \geq \int \varphi\)。 对所有 \(\varphi \leq f\) 取 \(\sup\)，得 \(\lim \int f_n \geq \int f\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>MCT 的级数版本：\(\int \sum f_n = \sum \int f_n\)（\(f_n \geq 0\)）， 用于证明 \(L^p\) 空间的完备性和级数的逐项积分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\int_0^1 \sum_{n=1}^{\infty} x^n\, dx\)。 解答：\(f_n(x) = x^n \geq 0\)，部分和 \(S_N = \sum_{n=1}^N x^n\) 单调递增趋向 \(x/(1-x)\)（\(0 \leq x < 1\)）。由 MCT， \(\int_0^1 \frac{x}{1-x} dx = \sum_{n=1}^{\infty} \int_0^1 x^n dx = \sum_{n=1}^{\infty} \frac{1}{n+1}\)。 注意此级数发散，所以积分为 \(+\infty\)（\(x/(1-x)\) 在 1 附近不可积）。 易错点：忘记 MCT 要求 \(f_n \geq 0\)。 对可以取负值的函数序列，MCT 不适用，需用 DCT。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">MCT 的条件中，哪个不能去掉？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。可测性保证积分有定义；非负性和单调递增性共同保证')">A. 可测性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。可测性保证积分有定义；非负性和单调递增性共同保证')">B. 非负性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。可测性保证积分有定义；非负性和单调递增性共同保证')">C. 单调递增性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！可测性保证积分有定义；非负性和单调递增性共同保证')">D. 以上都不能去掉</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Fatou 引理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当函数序列不单调递增时，MCT 不再适用。Fatou 引理提供了一个 更一般的工具：对非负函数序列，积分的下极限至少不小于下极限的 积分。虽然这只是一个不等式而非等式，但在证明 DCT 和研究弱 收敛等问题中，Fatou 引理是不可或缺的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fatou 引理可视为 MCT 的推论：\(g_n = \inf_{k \geq n} f_k\) 单调递增趋向 \(\liminf f_n\)，对 \(g_n\) 用 MCT 即得。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Fatou 引理)</strong>：设 \(f_n \geq 0\) 可测，则 \[\int \liminf_{n \to \infty} f_n\, d\mu \leq \liminf_{n \to \infty} \int f_n\, d\mu\] <strong>证明</strong>：令 \(g_n = \inf_{k \geq n} f_k\)，则： (1) \(g_n\) 可测（可测函数的 \(\inf\) 可测）； (2) \(0 \leq g_1 \leq g_2 \leq \cdots\)（递增）； (3) \(g_n \uparrow \liminf f_n\)。 由 MCT，\(\int \liminf f_n = \lim \int g_n\)。 又 \(g_n \leq f_n\) 意味 \(\int g_n \leq \int f_n\)，故 \[\lim_{n} \int g_n = \liminf_{n} \int g_n \leq \liminf_{n} \int f_n\] <strong>不等式可以严格</strong>：例如 \(f_n = n \cdot \mathbf{1}_{(0,1/n)}\)， \(\liminf f_n = 0\) a.e.，但 \(\int f_n = 1\) 对所有 \(n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f_n = \mathbf{1}_{[n, n+1]}\) 在 \((\mathbb{R}, \lambda)\) 上。 验证 Fatou 引理。 解答：\(\liminf f_n(x) = 0\) 对所有 \(x\)（任意 \(x\) 只属于有限个 \([n, n+1]\)），故 \(\int \liminf f_n = 0\)。 \(\int f_n = 1\) 对所有 \(n\)，故 \(\liminf \int f_n = 1\)。 不等式 \(0 \leq 1\) 成立，但严格不等。✓ 易错点：试图将 Fatou 引理反向使用（\(\geq\)）。 Fatou 引理只给出一个方向的不等式，严格不等的反例说明 反向不成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fatou 引理要求 \(f_n\) 满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Fatou 引理只需 \\(f_n \\geq 0\\) 且可测。C 是 DCT 的条件，')">A. 一致收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Fatou 引理只需 \\(f_n \\geq 0\\) 且可测。C 是 DCT 的条件，')">B. 非负且可测</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Fatou 引理只需 \\(f_n \\geq 0\\) 且可测。C 是 DCT 的条件，')">C. 有可积控制函数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Fatou 引理只需 \\(f_n \\geq 0\\) 且可测。C 是 DCT 的条件，')">D. 单调递增</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>控制收敛定理 (DCT)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>DCT 是 Lebesgue 积分理论中最实用的定理——它告诉我们：如果 函数序列逐点收敛且被一个可积函数"控制"，则极限和积分可以交换。 这正是 Riemann 积分做不到的——DCT 的威力使得 Lebesgue 积分 在分析学、概率论和 PDE 中成为标准工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>DCT 的证明是 Fatou 引理的双向应用：对 \(g + f_n\) 和 \(g - f_n\) 分别使用 Fatou 引理，利用控制函数 \(g\) 的可积性"两面夹击"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (DCT)</strong>：设 \(f_n\) 可测，\(f_n \to f\) a.e.，存在 \(g \in L^1\) 使 \(|f_n| \leq g\) a.e. 对所有 \(n\)。则 \(f \in L^1\) 且 \[\lim_{n \to \infty} \int f_n\, d\mu = \int f\, d\mu\] 即 \(\int |f_n - f|\, d\mu \to 0\)。 <strong>证明</strong>：\(|f| = \lim |f_n| \leq g\)，故 \(f \in L^1\)。 \(g + f_n \geq 0\)，对 \(\{g + f_n\}\) 用 Fatou 引理： \[\int (g + f) \leq \liminf \int (g + f_n)\] 即 \(\int f \leq \liminf \int f_n\)。 \(g - f_n \geq 0\)，对 \(\{g - f_n\}\) 用 Fatou 引理： \[\int (g - f) \leq \liminf \int (g - f_n)\] 即 \(-\int f \leq -\limsup \int f_n\)，即 \(\limsup \int f_n \leq \int f\)。 合并：\(\int f \leq \liminf \int f_n \leq \limsup \int f_n \leq \int f\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>概率论中 DCT 对应有界收敛定理；PDE 中利用 DCT 证明 含参积分的连续性和可微性（Leibniz 积分法则的严格化）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\lim_{n \to \infty} \int_0^{\infty} \frac{n \sin(x/n)}{x(1+x^2)}\, dx\)。 解答：\(f_n(x) = \frac{n \sin(x/n)}{x(1+x^2)}\)。 当 \(n \to \infty\)，\(n\sin(x/n) \to x\)，故 \(f_n(x) \to \frac{1}{1+x^2}\) 逐点。 控制函数：\(|n\sin(x/n)| \leq x\)，所以 \(|f_n(x)| \leq \frac{1}{1+x^2} = g(x) \in L^1(\mathbb{R}^+)\)。 由 DCT，\(\lim \int f_n = \int \frac{1}{1+x^2} dx = \frac{\pi}{2}\)。 易错点：找不到控制函数时草率声称可以用 DCT。 必须明确给出控制函数 \(g\) 并验证 \(g \in L^1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">DCT 中控制函数 \(g\) 必须满足？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(g\\) 只需可积（\\(\\int g\\, d\\mu < \\infty\\)），不需要连续、')">A. \(g\) 连续</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(g\\) 只需可积（\\(\\int g\\, d\\mu < \\infty\\)），不需要连续、')">B. \(g \in L^1\)（可积）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(g\\) 只需可积（\\(\\int g\\, d\\mu < \\infty\\)），不需要连续、')">C. \(g\) 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(g\\) 只需可积（\\(\\int g\\, d\\mu < \\infty\\)），不需要连续、')">D. \(g\) 单调</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>积分号下求导与逐项积分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际分析中经常遇到含参积分 \(F(t) = \int f(x,t)\, d\mu(x)\)， 需要对参数 \(t\) 求导。Leibniz 积分法则（积分号下求导）何时合法？ 类似地，无穷级数 \(\sum f_n\) 何时可以逐项积分？这些问题都是 收敛定理的直接应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>积分号下求导 (Leibniz 规则的测度论版)</strong>： 设 \(f(x,t)\) 关于 \(t\) 可微（a.e. \(x\)），且存在 \(g \in L^1(\mu)\) 使 \(|\partial f/\partial t(x,t)| \leq g(x)\) 对所有 \(t\)。则 \[\frac{d}{dt} \int f(x,t)\, d\mu(x) = \int \frac{\partial f}{\partial t}(x,t)\, d\mu(x)\] 证明：\(\frac{F(t+h) - F(t)}{h} = \int \frac{f(x,t+h) - f(x,t)}{h} d\mu\)。 由均值定理，差商被 \(g(x)\) 控制，对 \(h \to 0\) 用 DCT 即得。 <strong>逐项积分</strong>：若 \(f_n \geq 0\) 或 \(\sum \int |f_n| < \infty\)，则 \[\int \sum_{n=1}^{\infty} f_n\, d\mu = \sum_{n=1}^{\infty} \int f_n\, d\mu\] 非负情形由 MCT 保证；绝对收敛情形由 DCT 保证 （控制函数 \(g = \sum |f_n|\) 可积）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>含参积分求导在统计学中用于计算 Fisher 信息 \(I(\theta) = -E[\partial^2 \log f(X|\theta)/\partial\theta^2]\)； 在物理学中用于求解场论中的传播子。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(F(t) = \int_0^{\infty} e^{-tx} \frac{\sin x}{x}\, dx\)，\(t > 0\)。 求 \(F'(t)\)。 解答：\(\frac{\partial}{\partial t}(e^{-tx} \sin x/x) = -e^{-tx} \sin x\)， \(|{-e^{-tx} \sin x}| \leq e^{-t_0 x}\) 对 \(t \geq t_0 > 0\)， 且 \(e^{-t_0 x} \in L^1([0,\infty))\)。由 Leibniz 规则， \(F'(t) = -\int_0^{\infty} e^{-tx} \sin x\, dx = -\frac{1}{1+t^2}\)。 积分得 \(F(t) = -\arctan t + C\)。由 \(F(\infty) = 0\) 得 \(C = \pi/2\)，故 \(F(t) = \pi/2 - \arctan t\)， 特别 \(F(0^+) = \pi/2\)（即 Dirichlet 积分）。 易错点：忘记验证控制条件，直接在积分号下求导。 必须找到不依赖 \(t\)（或在 \(t\) 的邻域内一致）的 \(L^1\) 控制函数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">逐项积分 \(\int \sum f_n = \sum \int f_n\) 在以下哪种条件下成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f_n \\geq 0\\) 时，部分和单调递增趋向 \\(\\sum f_n\\)，')">A. \(f_n\) 连续</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(f_n \\geq 0\\) 时，部分和单调递增趋向 \\(\\sum f_n\\)，')">B. \(f_n \geq 0\) 对所有 \(n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f_n \\geq 0\\) 时，部分和单调递增趋向 \\(\\sum f_n\\)，')">C. \(\sum f_n\) 一致收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f_n \\geq 0\\) 时，部分和单调递增趋向 \\(\\sum f_n\\)，')">D. \(f_n\) 有界</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/analysis/real-analysis.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

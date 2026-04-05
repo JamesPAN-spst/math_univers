@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 热方程 — 偏微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "pde-ch02-q1",
+        "question": "一维热方程 \\(u_t=ku_{xx}\\) 从物理上描述什么现象？",
+        "options": [
+          "热传导/扩散",
+        "波的传播",
+        "静电平衡",
+        "弹性变形"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_t=ku_{xx}\\) 由 Fourier 热传导定律 \\(q=-k\\nabla T\\) 和能量守恒推导得出。\\(k>0\\) 是热扩散率。温度从高温区扩散到低温区，梯度越大扩散越快。等价于 Fick 扩散方程、概率中的布朗运动方程。"
+      },
+      {
+        "id": "pde-ch02-q2",
+        "question": "热方程的即时光滑化效应（smoothing effect）指什么？",
+        "options": [
+          "即使初始数据不光滑，\\(t>0\\) 时解立即变成 \\(C^\\infty\\)",
+        "解保持初始光滑度",
+        "解变得不连续",
+        "光滑化需要 \\(t\\to\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "热核 \\(G(x,t)=\\frac{1}{\\sqrt{4\\pi kt}}e^{-x^2/(4kt)}\\in C^\\infty\\)（\\(t>0\\)）。\\(u=G*u_0\\) 保持光滑性。物理上：扩散抹平一切尖锐结构。与波方程（传播奇点）截然不同。"
+      },
+      {
+        "id": "pde-ch02-q3",
+        "question": "\\(u_t=u_{xx}\\)，\\(u(0,t)=u(\\pi,t)=0\\)，\\(u(x,0)=\\sin 2x\\)。分离变量解？",
+        "options": [
+          "\\(u=e^{-4t}\\sin 2x\\)",
+        "\\(u=e^{-t}\\sin x\\)",
+        "\\(u=e^{-2t}\\sin 2x\\)",
+        "\\(u=\\sin 2x\\)"
+        ],
+        "answer": 0,
+        "explanation": "分离变量 \\(u=T(t)X(x)\\)：\\(X''+\\lambda X=0\\)，\\(X(0)=X(\\pi)=0\\) → \\(\\lambda_n=n^2\\)，\\(X_n=\\sin nx\\)。\\(T_n'+n^2 T_n=0\\)，\\(T_n=e^{-n^2 t}\\)。初条件 \\(\\sin 2x\\) → \\(n=2\\)，\\(u=e^{-4t}\\sin 2x\\)。"
+      },
+      {
+        "id": "pde-ch02-q4",
+        "question": "分离变量法中，\\(u(x,0)=\\sum_{n=1}^\\infty b_n\\sin(n\\pi x/L)\\)。\\(b_n\\) 的公式是？",
+        "options": [
+          "\\(b_n=\\frac{2}{L}\\int_0^L u(x,0)\\sin(n\\pi x/L)\\,dx\\)",
+        "\\(b_n=\\int_0^L u(x,0)\\,dx\\)",
+        "\\(b_n=u(0,0)\\)",
+        "\\(b_n=\\frac{1}{L}\\int_0^L u(x,0)\\cos(n\\pi x/L)\\,dx\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{\\sin(n\\pi x/L)\\}\\) 在 \\([0,L]\\) 上正交，范数平方 \\(=L/2\\)。Fourier 系数 \\(b_n=\\frac{2}{L}\\int_0^L f(x)\\sin(n\\pi x/L)dx\\)。这是 Fourier 正弦级数——由Dirichlet条件（两端 \\(=0\\)）决定。"
+      },
+      {
+        "id": "pde-ch02-q5",
+        "question": "全空间热方程 \\(u_t=ku_{xx}\\)，\\(u(x,0)=\\delta(x)\\) 的解（基本解/热核）是？",
+        "options": [
+          "\\(G(x,t)=\\frac{1}{\\sqrt{4\\pi kt}}e^{-x^2/(4kt)}\\)",
+        "\\(G=e^{-|x|/\\sqrt{kt}}\\)",
+        "\\(G=\\frac{1}{2\\pi kt}e^{-x^2/(2kt)}\\)",
+        "\\(G=1/(1+x^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Fourier 变换：\\(\\hat G_t=-k\\xi^2\\hat G\\)，\\(\\hat G=e^{-k\\xi^2 t}\\)（Gauss 函数），逆变换得 \\(G\\)。\\(G>0\\)，\\(\\int G\\,dx=1\\)（概率密度），标准差 \\(\\sigma=\\sqrt{2kt}\\)（扩散尺度 \\(\\propto\\sqrt{t}\\)）。"
+      },
+      {
+        "id": "pde-ch02-q6",
+        "question": "热方程的极大值原理：\\(u_t=ku_{xx}\\) 在 \\([0,L]\\times[0,T]\\) 上，\\(u\\) 的最大值在哪取得？",
+        "options": [
+          "在抛物边界上（\\(t=0\\) 或 \\(x=0\\) 或 \\(x=L\\)）",
+        "在内部",
+        "在 \\(t=T\\) 处",
+        "在中心 \\(x=L/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "弱极大值原理：非齐次项 \\(\\leq 0\\) 时 \\(\\max u\\) 在抛物边界 \\(\\Gamma_p=\\{t=0\\}\\cup\\{x=0\\}\\cup\\{x=L\\}\\) 上取得。物理直觉：热扩散使温度峰值随时间降低，最大温度出现在初始时刻或加热边界上。"
+      },
+      {
+        "id": "pde-ch02-q7",
+        "question": "热核 \\(G(x,t)\\) 在 \\(t\\to 0^+\\) 时趋向什么？",
+        "options": [
+          "\\(\\delta(x)\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(\\cdot,t)\\to\\delta\\) 在分布意义下。\\(G\\) 越来越窄和高（\\(G(0,t)=1/\\sqrt{4\\pi kt}\\to\\infty\\)），但面积 \\(=1\\) 不变。\\(t\\to 0^+\\) 时所有热量集中在原点——恢复初始 \\(\\delta\\) 函数。"
+      },
+      {
+        "id": "pde-ch02-q8",
+        "question": "\\(u_t=u_{xx}\\)，\\(u(0,t)=u(1,t)=0\\)，\\(u(x,0)=x(1-x)\\)。展开为 Fourier 正弦级数，\\(b_n\\) 的表达式？",
+        "options": [
+          "\\(b_n=\\frac{2}{1}\\int_0^1 x(1-x)\\sin(n\\pi x)dx\\)",
+        "\\(b_n=0\\)（奇数 \\(n\\)）",
+        "\\(b_n=\\frac{4}{(n\\pi)^3}\\)（\\(n\\) 奇）；\\(b_n=0\\)（\\(n\\) 偶）",
+        "A 和 C 都正确"
+        ],
+        "answer": 3,
+        "explanation": "\\(b_n=2\\int_0^1 x(1-x)\\sin(n\\pi x)dx\\)。分部积分两次：\\(n\\) 偶时被积函数关于 \\(x=1/2\\) 反对称 → \\(b_n=0\\)。\\(n\\) 奇时 \\(b_n=\\frac{4}{(n\\pi)^3}\\)。\\(u=\\sum_{n\\text{ odd}}\\frac{4}{(n\\pi)^3}e^{-n^2\\pi^2 t}\\sin(n\\pi x)\\)。"
+      },
+      {
+        "id": "pde-ch02-q9",
+        "question": "全空间热方程 \\(u_t=ku_{xx}\\)，\\(u(x,0)=e^{-x^2}\\)。解 \\(u(x,t)\\) 是什么形式？",
+        "options": [
+          "\\(\\frac{1}{\\sqrt{1+4kt}}e^{-x^2/(1+4kt)}\\)",
+        "\\(e^{-x^2-kt}\\)",
+        "\\(e^{-x^2}\\cos(kt)\\)",
+        "无闭式解"
+        ],
+        "answer": 0,
+        "explanation": "\\(u=G*u_0=\\int\\frac{1}{\\sqrt{4\\pi kt}}e^{-(x-y)^2/(4kt)}e^{-y^2}dy\\)。配方：两个 Gauss 函数卷积仍是 Gauss。方差叠加：\\(\\sigma^2=1/2+2kt=(1+4kt)/2\\)。\\(u=\\frac{1}{\\sqrt{1+4kt}}e^{-x^2/(1+4kt)}\\)。"
+      },
+      {
+        "id": "pde-ch02-q10",
+        "question": "由极大值原理推导热方程解的唯一性。若 \\(u_1,u_2\\) 都满足同一方程和边界/初值条件，\\(w=u_1-u_2\\) 满足？",
+        "options": [
+          "\\(w_t=kw_{xx}\\)，\\(w|_{\\Gamma_p}=0\\) → \\(\\max w\\leq 0\\) 且 \\(\\min w\\geq 0\\) → \\(w\\equiv 0\\)",
+        "\\(w\\) 可以非零",
+        "需要其他方法",
+        "唯一性不成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(w\\) 满足齐次热方程和零边界/初值条件。极大值原理：\\(\\max w\\) 在抛物边界取 \\(=0\\)。同理 \\(\\min w\\) 在抛物边界取 \\(=0\\)（对 \\(-w\\) 用极大值原理）。\\(0\\leq w\\leq 0\\) → \\(w\\equiv 0\\) → \\(u_1=u_2\\)。"
+      },
+      {
+        "id": "pde-ch02-q11",
+        "question": "\\(n\\) 维热核 \\(G(\\mathbf{x},t)\\) 的形式？",
+        "options": [
+          "\\(\\frac{1}{(4\\pi kt)^{n/2}}e^{-|\\mathbf{x}|^2/(4kt)}\\)",
+        "\\(\\frac{1}{\\sqrt{4\\pi kt}}e^{-|\\mathbf{x}|/(4kt)}\\)",
+        "\\((4\\pi kt)^n e^{-|\\mathbf{x}|^2}\\)",
+        "\\(\\frac{1}{(2\\pi kt)^{n/2}}e^{-|\\mathbf{x}|^2/(2kt)}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\) 维热核是一维的张量积：\\(G(\\mathbf{x},t)=\\prod_{i=1}^n\\frac{1}{\\sqrt{4\\pi kt}}e^{-x_i^2/(4kt)}=\\frac{1}{(4\\pi kt)^{n/2}}e^{-|\\mathbf{x}|^2/(4kt)}\\)。归一化 \\(\\int_{\\mathbb{R}^n}G\\,d\\mathbf{x}=1\\)。"
+      },
+      {
+        "id": "pde-ch02-q12",
+        "question": "热方程 \\(u_t=ku_{xx}\\) 的能量 \\(E(t)=\\int u^2\\,dx\\) 随时间是增还是减？",
+        "options": [
+          "\\(dE/dt=-2k\\int u_x^2\\,dx\\leq 0\\)（单调递减）",
+        "\\(dE/dt=0\\)",
+        "\\(dE/dt>0\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(dE/dt=2\\int uu_t\\,dx=2k\\int uu_{xx}\\,dx=-2k\\int u_x^2\\,dx\\)（分部积分，边界项 \\(=0\\)）。\\(\\leq 0\\)，等号当且仅当 \\(u_x\\equiv 0\\)。热扩散消耗 \\(L^2\\) 能量——这是耗散系统的标志。"
+      },
+      {
+        "id": "pde-ch02-q13",
+        "question": "热方程 Neumann 问题 \\(u_x(0,t)=u_x(L,t)=0\\) 用什么级数？",
+        "options": [
+          "Fourier 余弦级数 \\(\\sum a_n\\cos(n\\pi x/L)\\)",
+        "Fourier 正弦级数",
+        "复指数级数",
+        "Chebyshev 级数"
+        ],
+        "answer": 0,
+        "explanation": "\\(X''+\\lambda X=0\\)，\\(X'(0)=X'(L)=0\\) → \\(X_n=\\cos(n\\pi x/L)\\)（\\(n=0,1,2,\\ldots\\)）。\\(n=0\\) 给出常数模态 \\(a_0\\)（整体平均温度守恒，因为热流为零）。Neumann 用余弦，Dirichlet 用正弦。"
+      },
+      {
+        "id": "pde-ch02-q14",
+        "question": "极大值原理可推出什么额外性质？",
+        "options": [
+          "热方程解的比较原理和 \\(L^\\infty\\) 估计",
+        "仅唯一性",
+        "存在性",
+        "正则性"
+        ],
+        "answer": 0,
+        "explanation": "比较原理：\\(u_1|_{\\Gamma_p}\\leq u_2|_{\\Gamma_p}\\) → \\(u_1\\leq u_2\\)（处处）。\\(L^\\infty\\) 估计：\\(\\|u(\\cdot,t)\\|_\\infty\\leq\\|u(\\cdot,0)\\|_\\infty\\)。稳定性：数据变化 \\(\\leq\\varepsilon\\) → 解变化 \\(\\leq\\varepsilon\\)。这些都是极大值原理的推论。"
+      },
+      {
+        "id": "pde-ch02-q15",
+        "question": "\\(u(x,t)=\\frac{1}{\\sqrt{4\\pi kt}}\\int_{-\\infty}^{\\infty}e^{-(x-y)^2/(4kt)}f(y)\\,dy\\)。当 \\(f=H(x)\\)（Heaviside 函数）时，\\(u(0,t)\\) 等于？",
+        "options": [
+          "\\(1/2\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "取决于 \\(t\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u(0,t)=\\frac{1}{\\sqrt{4\\pi kt}}\\int_0^\\infty e^{-y^2/(4kt)}dy=\\frac{1}{2}\\)（半 Gauss 积分）。对称性：\\(G\\) 关于 \\(x=0\\) 对称，\\(H\\) 在正半轴 \\(=1\\)，负半轴 \\(=0\\)。\\(u(0,t)\\) 始终 \\(=1/2\\)——这是误差函数 \\(\\text{erf}\\) 的值。"
+      },
+      {
+        "id": "pde-ch02-q16",
+        "question": "热方程推导中 Fourier 定律 \\(q=-\\kappa\\nabla u\\) 和能量守恒 \\(\\rho c\\,u_t=-\\nabla\\cdot q\\) 结合得到？",
+        "options": [
+          "\\(u_t=\\frac{\\kappa}{\\rho c}\\Delta u=k\\Delta u\\)",
+        "\\(u_t=-k\\Delta u\\)",
+        "\\(u_{tt}=k\\Delta u\\)",
+        "\\(u_t=k u_{xx}+k u_{yy}+k u_{zz}+k^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\rho c\\,u_t=\\nabla\\cdot(\\kappa\\nabla u)=\\kappa\\Delta u\\)，\\(u_t=k\\Delta u\\)（\\(k=\\kappa/(\\rho c)\\)为热扩散率）。Fourier 定律是经验律（热量从高温流向低温），能量守恒是第一定律。"
+      },
+      {
+        "id": "pde-ch02-q17",
+        "question": "\\(u_t=u_{xx}\\)，\\(u(0,t)=0\\)，\\(u(\\pi,t)=0\\)，\\(u(x,0)=100\\)。\\(u(x,t)\\) 的级数表达式？",
+        "options": [
+          "\\(u=\\sum_{n\\text{ odd}}\\frac{400}{n\\pi}e^{-n^2 t}\\sin nx\\)",
+        "\\(u=100e^{-t}\\)",
+        "\\(u=\\sum_{n=1}^\\infty\\frac{200}{n\\pi}e^{-n^2 t}\\sin nx\\)",
+        "\\(u=100\\)（不变）"
+        ],
+        "answer": 0,
+        "explanation": "\\(b_n=\\frac{2}{\\pi}\\int_0^\\pi 100\\sin nx\\,dx=\\frac{200}{n\\pi}(1-\\cos n\\pi)\\)。\\(n\\) 偶：\\(\\cos n\\pi=1\\)，\\(b_n=0\\)。\\(n\\) 奇：\\(b_n=400/(n\\pi)\\)。\\(u=\\sum_{n=1,3,5,\\ldots}\\frac{400}{n\\pi}e^{-n^2 t}\\sin nx\\)。高频项快速衰减。"
+      },
+      {
+        "id": "pde-ch02-q18",
+        "question": "\\(u(x,t)=G*f\\) 中，若 \\(f\\in L^1(\\mathbb{R})\\)，\\(\\|u(\\cdot,t)\\|_\\infty\\) 的上界？",
+        "options": [
+          "\\(\\|u\\|_\\infty\\leq\\frac{1}{\\sqrt{4\\pi kt}}\\|f\\|_1\\)",
+        "\\(\\|u\\|_\\infty=\\|f\\|_\\infty\\)",
+        "\\(\\|u\\|_\\infty\\leq\\|f\\|_2\\)",
+        "无上界"
+        ],
+        "answer": 0,
+        "explanation": "Young 不等式：\\(\\|G*f\\|_\\infty\\leq\\|G\\|_\\infty\\|f\\|_1=\\frac{1}{\\sqrt{4\\pi kt}}\\|f\\|_1\\)。说明 (1) \\(t\\to 0^+\\) 时 \\(\\|u\\|_\\infty\\) 可能爆炸（峰值恢复），(2) \\(t\\to\\infty\\) 时 \\(\\|u\\|_\\infty\\to 0\\)（扩散平摊能量）。"
+      },
+      {
+        "id": "pde-ch02-q19",
+        "question": "强极大值原理：若热方程的解在内部某点取 \\(\\max\\)，则？",
+        "options": [
+          "\\(u\\) 是常数",
+        "\\(u\\) 仅在该点最大",
+        "\\(u\\) 在边界也取最大",
+        "不可能"
+        ],
+        "answer": 0,
+        "explanation": "强极大值原理（Nirenberg/Friedman）：若 \\(u\\) 在 \\((x_0,t_0)\\)（\\(t_0>0\\)）取最大值，则 \\(u\\) 在 \\(\\{t\\leq t_0\\}\\) 上是常数。物理上：如果有一个内部最热的点，扩散会立即拉平它——唯一的可能是温度处处相等。"
+      },
+      {
+        "id": "pde-ch02-q20",
+        "question": "当 \\(t\\to\\infty\\) 时，Dirichlet 问题 \\(u_t=u_{xx}\\), \\(u(0,t)=u(L,t)=0\\) 的解趋向什么？",
+        "options": [
+          "\\(u\\to 0\\)（均匀）",
+        "\\(u\\to f(x)\\)",
+        "\\(u\\to\\text{平均值}\\)",
+        "取决于初值"
+        ],
+        "answer": 0,
+        "explanation": "\\(u=\\sum b_n e^{-n^2\\pi^2 t/L^2}\\sin(n\\pi x/L)\\)。\\(t\\to\\infty\\) 时所有模态指数衰减至零（最慢的是 \\(n=1\\)，\\(\\tau_1=L^2/(\\pi^2 k)\\)）。Dirichlet 零边界 → 所有热量最终流失 → \\(u\\equiv 0\\)。"
+      },
+      {
+        "id": "pde-ch02-q21",
+        "question": "热方程是时间不可逆的。数学上这体现为？",
+        "options": [
+          "反向热方程 \\(u_t=-ku_{xx}\\) 不适定（高频放大）",
+        "解不唯一",
+        "方程在 \\(t\\to-t\\) 下不变",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "正向：\\(\\hat u\\propto e^{-k\\xi^2 t}\\)（高频衰减 → 信息丢失）。反向：\\(e^{+k\\xi^2 t}\\)（爆炸）。物理上：知道现在温度可以预测未来但不能精确重建过去（热力学第二定律，熵增不可逆）。"
+      },
+      {
+        "id": "pde-ch02-q22",
+        "question": "极大值原理的证明关键步骤？",
+        "options": [
+          "反证法：若内部最大值 \\(u(x_0,t_0)=M\\)，则 \\(u_t\\geq 0\\) 和 \\(u_{xx}\\leq 0\\)，与 \\(u_t=ku_{xx}\\) 矛盾",
+        "用 Fourier 分析",
+        "用 Green 函数",
+        "用概率方法"
+        ],
+        "answer": 0,
+        "explanation": "在内部极大点：\\(u_t\\geq 0\\)（时间方向不能更大）且 \\(u_{xx}\\leq 0\\)（空间方向是极大），\\(u_t-ku_{xx}\\geq 0+0=0\\)。但方程要求 \\(u_t-ku_{xx}=0\\)。严格时需要微扰技巧（考虑 \\(v=u-\\varepsilon t\\)），但本质思想就是空间极大 vs 时间向前的矛盾。"
+      },
+      {
+        "id": "pde-ch02-q23",
+        "question": "多维热方程 \\(u_t=k\\Delta u\\) 在 \\(\\mathbb{R}^3\\) 中的基本解衰减率？",
+        "options": [
+          "\\(G\\sim t^{-3/2}\\)（在原点 \\(x=0\\)）",
+        "\\(G\\sim t^{-1/2}\\)",
+        "\\(G\\sim t^{-1}\\)",
+        "\\(G\\sim e^{-t}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(0,t)=\\frac{1}{(4\\pi kt)^{3/2}}\\)。\\(n\\) 维热核在原点衰减率 \\(\\sim t^{-n/2}\\)。\\(n=1\\)：\\(t^{-1/2}\\)，\\(n=2\\)：\\(t^{-1}\\)，\\(n=3\\)：\\(t^{-3/2}\\)。这与随机游走的扩散尺度 \\(\\sigma\\sim\\sqrt{t}\\) 一致（\\(n\\) 维体积 \\(\\sigma^n\\sim t^{n/2}\\)）。"
+      },
+      {
+        "id": "pde-ch02-q24",
+        "question": "热方程解满足半群性质 \\(S(t+s)=S(t)\\circ S(s)\\)。这来源于什么数学结构？",
+        "options": [
+          "热核的卷积半群 \\(G(\\cdot,t)*G(\\cdot,s)=G(\\cdot,t+s)\\)",
+        "\\(G\\) 可逆",
+        "群结构",
+        "交换性"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(\\cdot,t)*G(\\cdot,s)=G(\\cdot,t+s)\\)（Gauss 函数卷积：方差相加）。\\(S(t)f=G(\\cdot,t)*f\\)，\\(S(t)S(s)f=G(\\cdot,t)*(G(\\cdot,s)*f)=G(\\cdot,t+s)*f=S(t+s)f\\)。这定义了热半群——不是群（不可逆，对应信息不可逆丢失）。"
+      },
+      {
+        "id": "pde-ch02-q25",
+        "question": "Robin 边界条件 \\(u_x(0,t)+hu(0,t)=0\\)（\\(h>0\\)）对应什么物理情形？",
+        "options": [
+          "Newton 冷却律：表面热流正比于温度差 \\(u-u_\\text{env}\\)",
+        "绝热",
+        "恒温",
+        "辐射"
+        ],
+        "answer": 0,
+        "explanation": "\\(-k u_x(0,t)=h(u(0,t)-0)\\)（假设环境温度 \\(=0\\)）。\\(u_x+\\frac{h}{k}u=0\\)。\\(h/k\\) 越大 → 散热越快（Biot 数大）。Robin 条件介于 Dirichlet（\\(h\\to\\infty\\)，恒温）和 Neumann（\\(h=0\\)，绝热）之间。"
+      },
+      {
+        "id": "pde-ch02-q26",
+        "question": "金属棒两端温度 \\(u(0,t)=100°C\\)，\\(u(L,t)=0°C\\)。稳态温度分布（\\(t\\to\\infty\\)）？",
+        "options": [
+          "\\(u=100(1-x/L)\\)（线性）",
+        "\\(u=50\\)（均匀）",
+        "\\(u=100e^{-x/L}\\)",
+        "\\(u=100\\sin(\\pi x/L)\\)"
+        ],
+        "answer": 0,
+        "explanation": "稳态 \\(u_t=0\\)：\\(u_{xx}=0\\) → \\(u\\) 是 \\(x\\) 的线性函数。\\(u(0)=100\\)，\\(u(L)=0\\)：\\(u=100(1-x/L)\\)。热流 \\(q=-ku_x=100k/L\\)（常数，从左向右流）。"
+      },
+      {
+        "id": "pde-ch02-q27",
+        "question": "布朗运动粒子的扩散。\\(N\\) 个粒子从原点释放，在时间 \\(t\\) 时粒子数密度 \\(\\rho(x,t)\\) 满足？",
+        "options": [
+          "\\(\\rho=\\frac{N}{\\sqrt{4\\pi Dt}}e^{-x^2/(4Dt)}\\)（热核形式，\\(D\\) 为扩散系数）",
+        "\\(\\rho=N\\delta(x-vt)\\)",
+        "\\(\\rho=N/(1+t)\\)",
+        "\\(\\rho\\) 均匀分布"
+        ],
+        "answer": 0,
+        "explanation": "Fick 扩散方程 \\(\\rho_t=D\\rho_{xx}\\) 等价于热方程。初始 \\(\\rho(x,0)=N\\delta(x)\\) → \\(\\rho=N\\cdot G(x,t)\\)。标准差 \\(\\sigma=\\sqrt{2Dt}\\)（Einstein 关系）。这是 Einstein 1905 年解释布朗运动的核心结果。"
+      },
+      {
+        "id": "pde-ch02-q28",
+        "question": "Black-Scholes 方程 \\(V_t+\\frac{\\sigma^2}{2}S^2V_{SS}+rSV_S-rV=0\\) 可以化为热方程。这说明什么？",
+        "options": [
+          "期权定价本质上是一个扩散问题，热方程理论（极大值原理等）直接适用",
+        "金融和物理无关",
+        "需要全新理论",
+        "只能数值求解"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(S=e^x\\)，\\(\\tau=T-t\\) 并适当变量替换，BS 方程变为标准热方程。因此热方程的解析解（热核卷积）直接给出 Black-Scholes 公式。极大值原理给出期权价格的上下界。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="pde"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/pde.html" class="module-name">偏微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 热方程的物理推导与基本性质</a></li>
+      <li><a href="#kp2">02 · 分离变量法与 Fourier 级数解</a></li>
+      <li><a href="#kp3">03 · 热核与全空间初值问题</a></li>
+      <li><a href="#kp4">04 · 极大值原理与唯一性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>热方程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>热方程的物理推导与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>热方程 \(u_t = \kappa \Delta u\) 是人类最早研究的 PDE 之一（Fourier, 1822）。 它不仅描述热传导，还出现在扩散过程、金融中的 Black-Scholes 模型、 概率论中 Brown 运动的密度函数等众多领域。热方程具有的平滑化效应 和无穷传播速度是其最显著的数学特征。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>热方程是典型的抛物型 PDE，其解算子是一个「平滑化算子」： 即使初值不连续，正时间后的解也是无穷可微的。这与双曲型方程 保持奇异性的行为形成鲜明对比。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>物理推导</strong>：Fourier 热传导定律 \(\mathbf{q} = -\kappa\nabla u\)（热流正比于温度梯度） 和能量守恒 \(\partial u/\partial t = -\text{div}\,\mathbf{q}\) 结合得 \[\frac{\partial u}{\partial t} = \kappa \Delta u = \kappa\left(\frac{\partial^2 u}{\partial x_1^2} + \cdots + \frac{\partial^2 u}{\partial x_n^2}\right)\] <strong>基本性质</strong>： 1. <strong>线性</strong>：解的叠加原理成立 2. <strong>平滑化</strong>：\(u(\cdot, t) \in C^\infty\) 对所有 \(t > 0\)，即使初值仅 \(L^1\) 3. <strong>无穷传播速度</strong>：初值仅在一点非零，正时间后 \(u > 0\) 处处成立 4. <strong>不可逆性</strong>：热方程反向 \(u_t = -\kappa\Delta u\) 不适定（Hadamard） <strong>基本解/热核</strong>（\(n\) 维）： \[\Phi(x,t) = \frac{1}{(4\pi\kappa t)^{n/2}} \exp\left(-\frac{|x|^2}{4\kappa t}\right), \quad t > 0\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 金融数学：Black-Scholes 方程通过变量替换可化为热方程 - AI 中的扩散模型(DDPM)的正向过程对应加噪 ≈ 热方程演化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证热核 \(\Phi(x,t) = (4\pi\kappa t)^{-1/2}e^{-x^2/(4\kappa t)}\) 满足一维热方程。 解答：\(\Phi_t = \Phi\left(-\frac{1}{2t} + \frac{x^2}{4\kappa t^2}\right)\)， \(\Phi_{xx} = \Phi\left(-\frac{1}{2\kappa t} + \frac{x^2}{4\kappa^2 t^2}\right)\)， \(\kappa\Phi_{xx} = \Phi\left(-\frac{1}{2t} + \frac{x^2}{4\kappa t^2}\right) = \Phi_t\)。✓ 易错点：热核在 \(t = 0\) 时不是普通函数而是 \(\delta\)-分布。 \(\Phi(\cdot, t) \to \delta(x)\) 当 \(t \to 0^+\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程的无穷传播速度意味着什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。热核 \\(\\Phi(x,t) > 0\\) 对所有 \\(x\\) 和 \\(t>0\\)，这意味着一点的热量')">A. 热量以光速传播</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！热核 \\(\\Phi(x,t) > 0\\) 对所有 \\(x\\) 和 \\(t>0\\)，这意味着一点的热量')">B. 任意点的初始扰动立即影响全空间</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。热核 \\(\\Phi(x,t) > 0\\) 对所有 \\(x\\) 和 \\(t>0\\)，这意味着一点的热量')">C. 解在有限时间爆破</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。热核 \\(\\Phi(x,t) > 0\\) 对所有 \\(x\\) 和 \\(t>0\\)，这意味着一点的热量')">D. 特征线速度无穷大</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>分离变量法与 Fourier 级数解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>分离变量法是求解矩形/圆域上 PDE 最经典的方法。基本思想是 猜测解可以写成各变量乘积的形式 \(u(x,t) = X(x)T(t)\)，将 PDE 分解为若干 ODE。每个 ODE 独立求解后，通过 Fourier 级数叠加 满足初值条件的整体解。这就是 Fourier（1807）的革命性方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>分离变量法的数学本质是将 PDE 算子的解展开为特征函数序列。 Fourier 级数是 Sturm-Liouville 理论（\(L^2\) 上的谱理论）在特殊情况 （三角函数系）下的实现。这开启了从有限维到无穷维的跨越。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>问题</strong>：\(u_t = \kappa u_{xx}\)，\(0 < x < L\)，\(u(0,t)=u(L,t)=0\)，\(u(x,0) = \phi(x)\)。 <strong>步骤 1</strong>：设 \(u = X(x)T(t)\)，代入得 \(XT' = \kappa X''T\)，\(T'/(\kappa T) = X''/X = -\lambda\)（常数）。 <strong>步骤 2</strong>：空间 ODE \(X'' + \lambda X = 0\)，\(X(0) = X(L) = 0\)。 特征值 \(\lambda_n = (n\pi/L)^2\)，\(n = 1,2,\ldots\) 特征函数 \(X_n(x) = \sin(n\pi x/L)\)。 <strong>步骤 3</strong>：时间 ODE \(T_n' = -\kappa\lambda_n T_n\)，\(T_n(t) = e^{-\kappa(n\pi/L)^2 t}\)。 <strong>步骤 4</strong>：叠加 \(u(x,t) = \sum_{n=1}^\infty b_n \sin\frac{n\pi x}{L} e^{-\kappa(n\pi/L)^2 t}\)， \(b_n = \frac{2}{L}\int_0^L \phi(x)\sin\frac{n\pi x}{L}\,dx\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 金属棒两端保持零温度时的温度衰减 - 量子力学中无穷势阱的能级问题用相同的特征值方法</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求解 \(u_t = u_{xx}\)，\(u(0,t)=u(\pi,t)=0\)，\(u(x,0) = \sin 2x\)。 解答：初值恰好是 \(n=2\) 的特征函数：\(b_2 = 1\)，\(b_n = 0\)（\(n \neq 2\)）。 \(u(x,t) = \sin 2x \cdot e^{-4t}\)。温度按指数衰减，高频模衰减更快。 易错点：Fourier 系数的计算中，正交性 \(\int_0^L \sin(m\pi x/L)\sin(n\pi x/L)\,dx = 0\) （\(m \neq n\)）是关键。忘记归一化因子 \(2/L\) 会导致系数错误。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程 Fourier 级数解中，高频分量（\(n\) 大）的衰减速率如何？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。时间因子 \\(e^{-\\kappa(n\\pi/L)^2 t}\\) 中指数与 \\(n^2\\) 成正比，')">A. 与 \(n\) 无关</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！时间因子 \\(e^{-\\kappa(n\\pi/L)^2 t}\\) 中指数与 \\(n^2\\) 成正比，')">B. 衰减更快（\(\sim e^{-n^2 t}\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。时间因子 \\(e^{-\\kappa(n\\pi/L)^2 t}\\) 中指数与 \\(n^2\\) 成正比，')">C. 衰减更慢</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。时间因子 \\(e^{-\\kappa(n\\pi/L)^2 t}\\) 中指数与 \\(n^2\\) 成正比，')">D. 不衰减</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>热核与全空间初值问题</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在无穷域 \(\mathbb{R}^n\) 上，没有边界条件的束缚，初值问题 \(u(x,0) = \phi(x)\) 的解可以用热核的卷积优美地表达。热核是 热方程的「脉冲响应」——它描述了一点热源的温度分布如何随时间 扩散。热核的高斯结构与概率论中正态分布的密切联系并非巧合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>热核 \(\Phi(x,t)\) 是热方程的 Green 函数（基本解）。 解 \(u = \Phi * \phi\) 的卷积结构是线性 PDE 的普遍特征， 它将初值问题转化为积分运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>全空间初值问题</strong>：\(u_t = \kappa\Delta u\)，\(u(x,0) = \phi(x)\)，\(x \in \mathbb{R}^n\)。 <strong>解的表达式</strong>（卷积）： \[u(x,t) = (\Phi(\cdot,t) * \phi)(x) = \int_{\mathbb{R}^n} \frac{1}{(4\pi\kappa t)^{n/2}} e^{-|x-y|^2/(4\kappa t)} \phi(y)\,dy\] <strong>性质</strong>： 1. 对 \(t > 0\)，\(u \in C^\infty\)（即使 \(\phi\) 不连续） 2. \(u(\cdot, t) \to \phi\) 当 \(t \to 0^+\)（在适当意义下） 3. \(\int_{\mathbb{R}^n} u(x,t)\,dx = \int_{\mathbb{R}^n} \phi(x)\,dx\)（质量守恒） <strong>Fourier 变换视角</strong>：\(\hat{u}(\xi, t) = \hat{\phi}(\xi)e^{-4\pi^2\kappa|\xi|^2 t}\)， 每个频率分量 \(\xi\) 以速率 \(4\pi^2\kappa|\xi|^2\) 指数衰减。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Brown 运动的转移密度恰好是热核：\(p(x,t|y,0) = \Phi(x-y,t)\) - 图像处理中高斯模糊 = 热方程在图像上的短时演化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(u_t = u_{xx}\)，\(u(x,0) = e^{-|x|}\) 在 \(\mathbb{R}\) 上的解。 解答：\(u(x,t) = \int_{-\infty}^\infty \frac{1}{\sqrt{4\pi t}}e^{-(x-y)^2/(4t)} e^{-|y|}\,dy\)。 利用 Fourier 变换：\(\hat{\phi}(\xi) = \frac{2}{1+4\pi^2\xi^2}\)， \(\hat{u}(\xi,t) = \frac{2e^{-4\pi^2\xi^2 t}}{1+4\pi^2\xi^2}\)。反变换需数值计算。 易错点：热核公式要求 \(\phi\) 增长不太快（至多 \(e^{a|x|^2}\)）。 若 \(\phi(x) = e^{x^2}\)，卷积积分发散，解不存在。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">热方程全空间解 \(u(x,t)\) 与初值 \(\phi\) 的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(u(x,t) = \\int \\Phi(x-y,t)\\phi(y)\\,dy\\) 是卷积。')">A. \(u = \phi e^{-t}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(u(x,t) = \\int \\Phi(x-y,t)\\phi(y)\\,dy\\) 是卷积。')">B. \(u = \Phi * \phi\)（卷积）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(u(x,t) = \\int \\Phi(x-y,t)\\phi(y)\\,dy\\) 是卷积。')">C. \(u = \Phi + \phi\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(u(x,t) = \\int \\Phi(x-y,t)\\phi(y)\\,dy\\) 是卷积。')">D. \(u = \Phi \cdot \phi\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>极大值原理与唯一性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>极大值原理是 PDE 理论中最强大的定性工具之一。对于热方程， 它断言：温度的最大值只能出现在初始时刻或边界上，不会在 内部自发产生——这符合热力学第二定律的直觉。极大值原理可以 直接推出解的唯一性和对数据的连续依赖。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>极大值原理将 PDE 解的整体控制化归为边界/初值的控制。 它不需要解的显式公式，是纯定性的工具。这种思想在椭圆型和 抛物型方程中都成立，但双曲型方程没有类似的原理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>弱极大值原理</strong>：设 \(u_t \leq \kappa\Delta u\) 在 \(Q_T = \Omega \times (0,T]\) 内， 则 \(\max_{\overline{Q_T}} u = \max_{\Gamma_T} u\)， 其中 \(\Gamma_T = (\Omega \times \{0\}) \cup (\partial\Omega \times [0,T])\)（抛物边界）。 <strong>证明思路</strong>（\(\kappa = 1\)）：反证。设 \(u\) 在内部点 \((x^*, t^*)\) 取最大值。 在该点 \(u_t \geq 0\)（因右边无法增大），\(\Delta u \leq 0\)（极值的 Hessian 负半定）。 但 \(u_t = \Delta u\) 要求两者相等，矛盾可通过微扰 \(v = u - \epsilon t\) 锐化。 <strong>唯一性推论</strong>：设 \(u_1, u_2\) 均解热方程且同初边值。 \(w = u_1 - u_2\) 满足 \(w_t = \kappa\Delta w\)，\(w|_{\Gamma_T} = 0\)。 对 \(w\) 和 \(-w\) 用极大值原理：\(\max w \leq 0\) 且 \(\min w \geq 0\)，即 \(w \equiv 0\)。 <strong>连续依赖</strong>：\(\|u_1 - u_2\|_\infty \leq \|\phi_1 - \phi_2\|_\infty + \|g_1 - g_2\|_\infty\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 扩散模型中将极大值原理推广到更复杂的抛物型 PDE 来保证正性</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：热方程 \(u_t = u_{xx}\)，\(0<x<1\)，\(u(0,t)=u(1,t)=0\)，\(u(x,0)=\sin\pi x\)。 不用求解，估计 \(\max_{x,t} u(x,t)\)。 解答：极大值原理：\(\max u\) 在边界上取到。 \(u|_{\partial\Omega} = 0\)，\(u(x,0) = \sin\pi x \leq 1\)。 故 \(\max u = \max\sin\pi x = 1\)（在 \(t=0\), \(x=1/2\) 处）。 易错点：极大值原理的「边界」对抛物型方程是抛物边界 \(\Gamma_T\) （底面+侧面），不包括顶面 \(t = T\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">极大值原理对以下哪类方程成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。极大值原理对椭圆型（Laplace）和抛物型（热方程）成立。')">A. 仅椭圆型</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！极大值原理对椭圆型（Laplace）和抛物型（热方程）成立。')">B. 椭圆型和抛物型</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。极大值原理对椭圆型（Laplace）和抛物型（热方程）成立。')">C. 仅双曲型</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。极大值原理对椭圆型（Laplace）和抛物型（热方程）成立。')">D. 所有类型</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/analysis/pde.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

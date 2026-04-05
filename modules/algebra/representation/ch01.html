@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 群表示基础 — 表示论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "representation-ch01-q1",
+        "question": "群表示 \\(\\rho: G \\to GL(V)\\) 中，\\(\\rho(e) = \\) ？（\\(e\\) 为单位元）",
+        "options": [
+          "\\(0\\)",
+        "\\(I\\)（单位矩阵）",
+        "\\(-I\\)",
+        "取决于 \\(G\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\rho\\) 是群同态，\\(\\rho(e) = \\rho(g g^{-1}) = \\rho(g)\\rho(g^{-1})\\)。群同态必将单位元映为单位元，\\(\\rho(e) = I\\)。若 \\(\\rho(e) = A\\)，则 \\(A^2 = A\\) 且 \\(A\\) 可逆，故 \\(A = I\\)。"
+      },
+      {
+        "id": "representation-ch01-q2",
+        "question": "\\(\\mathbb{Z}/2\\mathbb{Z} = \\{e, g\\}\\) 的 1 维复表示 \\(\\rho\\) 满足 \\(\\rho(g)^2 = 1\\)。\\(\\rho(g)\\) 的所有可能值为？",
+        "options": [
+          "\\(\\{1\\}\\)",
+        "\\(\\{-1\\}\\)",
+        "\\(\\{1, -1\\}\\)",
+        "\\(\\{i, -i\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\rho(g)^2 = \\rho(g^2) = \\rho(e) = 1\\)。\\(\\rho(g) \\in \\mathbb{C}^\\times\\) 满足 \\(z^2 = 1\\)，故 \\(z = \\pm 1\\)。两个表示：平凡表示 \\(\\rho(g)=1\\)，符号表示 \\(\\rho(g)=-1\\)。"
+      },
+      {
+        "id": "representation-ch01-q3",
+        "question": "Maschke 定理要求的条件是？",
+        "options": [
+          "\\(G\\) 有限且 \\(\\mathrm{char}(K) \\nmid |G|\\)",
+        "\\(G\\) 为 Abel 群",
+        "\\(V\\) 无限维",
+        "\\(K = \\mathbb{R}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Maschke 定理：\\(G\\) 有限，\\(\\mathrm{char}(K) \\nmid |G|\\)，则任何 \\(G\\)-表示完全可约。核心是 \\(|G|\\) 在 \\(K\\) 中可逆以构造平均化投影 \\(\\tilde{\\pi} = \\frac{1}{|G|}\\sum_{g}\\rho(g)\\pi\\rho(g)^{-1}\\)。\\(\\mathbb{C}\\) 上有限群均满足（\\(\\mathrm{char}(\\mathbb{C})=0\\)）。"
+      },
+      {
+        "id": "representation-ch01-q4",
+        "question": "\\(S_3\\) 的群代数 \\(\\mathbb{C}[S_3]\\) 的维数是？",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(9\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\dim \\mathbb{C}[G] = |G|\\)。\\(|S_3| = 3! = 6\\)，\\(\\mathbb{C}[S_3]\\) 以 \\(\\{e, (12), (13), (23), (123), (132)\\}\\) 为基。群代数是以群元素为基的向量空间，维数等于群的阶。"
+      },
+      {
+        "id": "representation-ch01-q5",
+        "question": "\\(\\dim \\rho_1 = 3, \\dim \\rho_2 = 2\\)。\\(\\dim(\\rho_1 \\oplus \\rho_2) = \\) ？",
+        "options": [
+          "\\(5\\)",
+        "\\(6\\)",
+        "\\(1\\)",
+        "\\(3\\)"
+        ],
+        "answer": 0,
+        "explanation": "直和的维数等于各表示维数之和：\\(\\dim(\\rho_1 \\oplus \\rho_2) = 3 + 2 = 5\\)。注意区别张量积：\\(\\dim(\\rho_1 \\otimes \\rho_2) = 3 \\times 2 = 6\\)。"
+      },
+      {
+        "id": "representation-ch01-q6",
+        "question": "\\(\\dim \\rho_1 = 3, \\dim \\rho_2 = 2\\)。\\(\\dim(\\rho_1 \\otimes \\rho_2) = \\) ？",
+        "options": [
+          "\\(5\\)",
+        "\\(6\\)",
+        "\\(9\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "张量积的维数等于各表示维数之积：\\(\\dim(\\rho_1 \\otimes \\rho_2) = 3 \\times 2 = 6\\)。易错点：把张量积和直和搞混——直和维数相加，张量积维数相乘。"
+      },
+      {
+        "id": "representation-ch01-q7",
+        "question": "\\(|G| = 8\\)，不可约复表示维数为 \\((1,1,1,1,2)\\)。验证 \\(\\sum d_i^2 = \\) ？",
+        "options": [
+          "\\(6\\)",
+        "\\(8\\)",
+        "\\(10\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(1^2+1^2+1^2+1^2+2^2 = 1+1+1+1+4 = 8 = |G|\\)。Artin-Wedderburn 定理保证 \\(\\sum d_i^2 = |G|\\)。这对应 \\(\\mathbb{C}[G] \\cong \\mathbb{C}^4 \\oplus M_2(\\mathbb{C})\\)。"
+      },
+      {
+        "id": "representation-ch01-q8",
+        "question": "\\(\\mathbb{Z}/3\\mathbb{Z} = \\{0,1,2\\}\\) 的 1 维复表示 \\(\\rho\\)，\\(\\rho(1)\\) 的所有可能值为？",
+        "options": [
+          "\\(\\{1\\}\\)",
+        "\\(\\{1, \\omega, \\omega^2\\}\\)（\\(\\omega = e^{2\\pi i/3}\\)）",
+        "\\(\\{1, -1\\}\\)",
+        "\\(\\{0, 1, 2\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\rho(1)^3 = \\rho(0) = 1\\)，\\(\\rho(1)\\) 是 3 次单位根：\\(1, \\omega, \\omega^2\\)（\\(\\omega = e^{2\\pi i/3}\\)）。循环群 \\(\\mathbb{Z}/n\\mathbb{Z}\\) 恰有 \\(n\\) 个 1 维复表示，由 \\(\\rho(1) = e^{2\\pi ik/n}\\)（\\(k=0,\\ldots,n-1\\)）给出。"
+      },
+      {
+        "id": "representation-ch01-q9",
+        "question": "\\(\\mathbb{F}_2\\) 上 \\(\\mathbb{Z}/2\\mathbb{Z} = \\{e,g\\}\\) 的表示 \\(V = \\mathbb{F}_2^2\\)，\\(\\rho(g) = \\begin{pmatrix}1&1\\\\0&1\\end{pmatrix}\\)。子空间 \\(W = \\mathrm{span}\\{e_1\\}\\) 是否有 \\(G\\)-不变补？",
+        "options": [
+          "有，Maschke 定理保证",
+        "无，Maschke 失效",
+        "有，\\(\\mathrm{span}\\{e_2\\}\\)",
+        "无，\\(G\\) 不是有限群"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{char}(\\mathbb{F}_2) = 2\\)，\\(|G| = 2\\)，\\(2 \\mid 2\\)，Maschke 条件不满足。\\(\\rho(g)e_2 = e_1+e_2\\)，故任何含 \\(e_2\\) 的子空间不 \\(G\\)-不变。\\(V\\) 不完全可约。这是 Maschke 失效的经典例子。"
+      },
+      {
+        "id": "representation-ch01-q10",
+        "question": "\\(S_3\\) 的标准 2 维表示 \\(V = \\{(x,y,z) \\in \\mathbb{C}^3 : x+y+z=0\\}\\) 是不可约的。原因是？",
+        "options": [
+          "\\(\\dim V = 2\\) 且 \\(S_3\\) 有 2 维不可约表示",
+        "\\(V\\) 无非平凡 \\(G\\)-不变子空间",
+        "A 和 B 都对",
+        "\\(V\\) 是正则表示"
+        ],
+        "answer": 2,
+        "explanation": "\\(S_3\\) 的不可约表示维数为 \\(1,1,2\\)（\\(1+1+4=6\\)）。\\(\\dim V = 2\\)，若 \\(V\\) 可约则分解为 \\(1+1\\)，但两个 1 维 \\(S_3\\)-不变子空间的特征标和 \\(\\neq \\chi_V\\)。直接验证 \\(V\\) 无 1 维 \\(S_3\\)-不变子空间（对换 \\((12)\\) 不保持任何 1 维子空间）。"
+      },
+      {
+        "id": "representation-ch01-q11",
+        "question": "\\(\\mathbb{C}[S_3]\\) 分解为矩阵代数的直和形式为？",
+        "options": [
+          "\\(\\mathbb{C} \\oplus \\mathbb{C} \\oplus M_2(\\mathbb{C})\\)",
+        "\\(M_3(\\mathbb{C}) \\oplus M_3(\\mathbb{C})\\)",
+        "\\(\\mathbb{C}^6\\)",
+        "\\(M_6(\\mathbb{C})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_3\\) 不可约表示维数 \\(d_i = 1,1,2\\)。\\(\\mathbb{C}[S_3] \\cong M_1(\\mathbb{C}) \\oplus M_1(\\mathbb{C}) \\oplus M_2(\\mathbb{C}) = \\mathbb{C} \\oplus \\mathbb{C} \\oplus M_2(\\mathbb{C})\\)。\\(\\dim = 1+1+4 = 6 = |S_3|\\)。"
+      },
+      {
+        "id": "representation-ch01-q12",
+        "question": "\\(\\varepsilon\\) 为 \\(\\mathbb{Z}/2\\mathbb{Z}\\) 的符号表示（\\(\\varepsilon(g) = -1\\)）。\\(\\varepsilon \\otimes \\varepsilon \\cong \\) ？",
+        "options": [
+          "\\(\\varepsilon\\)",
+        "平凡表示",
+        "正则表示",
+        "零表示"
+        ],
+        "answer": 1,
+        "explanation": "\\((\\varepsilon \\otimes \\varepsilon)(g) = \\varepsilon(g) \\cdot \\varepsilon(g) = (-1)(-1) = 1\\)。\\(\\varepsilon \\otimes \\varepsilon\\) 是平凡表示。更一般地，1 维表示 \\(\\chi\\) 满足 \\(\\chi^{\\otimes 2}\\) 不一定平凡，但阶为 \\(2\\) 的表示一定满足。"
+      },
+      {
+        "id": "representation-ch01-q13",
+        "question": "两个表示 \\(\\rho_1, \\rho_2\\) 等价的条件是？",
+        "options": [
+          "\\(\\dim \\rho_1 = \\dim \\rho_2\\)",
+        "\\(\\exists\\) 可逆 \\(T\\) 使 \\(T\\rho_1(g) = \\rho_2(g)T\\)，\\(\\forall g\\)",
+        "\\(\\rho_1(e) = \\rho_2(e)\\)",
+        "\\(\\rho_1\\) 和 \\(\\rho_2\\) 不可约"
+        ],
+        "answer": 1,
+        "explanation": "表示等价 \\(\\rho_1 \\sim \\rho_2\\) 指存在可逆线性映射 \\(T: V_1 \\to V_2\\) 使 \\(T\\rho_1(g)T^{-1} = \\rho_2(g)\\) 对所有 \\(g\\) 成立，即矩阵表示同时相似。A 是必要条件但不充分。"
+      },
+      {
+        "id": "representation-ch01-q14",
+        "question": "正则表示 \\(\\mathbb{C}[G]\\) 中每个 \\(d_i\\) 维不可约表示 \\(\\rho_i\\) 出现的重数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(d_i\\)",
+        "\\(d_i^2\\)",
+        "\\(|G|/d_i\\)"
+        ],
+        "answer": 1,
+        "explanation": "正则表示中 \\(\\rho_i\\) 出现 \\(n_i = d_i\\) 次。\\(\\dim \\mathbb{C}[G] = |G| = \\sum d_i \\cdot d_i = \\sum d_i^2\\)。正则表示是\"最大\"的表示，包含每个不可约表示恰好 \\(d_i\\) 份。"
+      },
+      {
+        "id": "representation-ch01-q15",
+        "question": "对偶表示 \\(\\rho^*\\) 的定义中，\\(\\rho^*(g)(f) = \\) ？",
+        "options": [
+          "\\(f \\circ \\rho(g)\\)",
+        "\\(f \\circ \\rho(g)^{-1}\\)",
+        "\\(\\rho(g) \\circ f\\)",
+        "\\(f + \\rho(g)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\rho^*(g)(f) = f \\circ \\rho(g)^{-1}\\)，其中 \\(f \\in V^*\\)。取 \\(\\rho(g)^{-1}\\) 而非 \\(\\rho(g)\\) 是为了保证 \\(\\rho^*\\) 仍是同态：\\(\\rho^*(g_1 g_2) = \\rho^*(g_1)\\rho^*(g_2)\\)。若用 \\(\\rho(g)\\) 则得反同态。"
+      },
+      {
+        "id": "representation-ch01-q16",
+        "question": "Maschke 定理证明中的平均化投影公式为？",
+        "options": [
+          "\\(\\tilde{\\pi} = \\sum_{g} \\rho(g)\\pi\\)",
+        "\\(\\tilde{\\pi} = \\frac{1}{|G|}\\sum_{g} \\rho(g) \\pi \\rho(g)^{-1}\\)",
+        "\\(\\tilde{\\pi} = \\pi^2\\)",
+        "\\(\\tilde{\\pi} = \\rho(e)\\pi\\)"
+        ],
+        "answer": 1,
+        "explanation": "取任意投影 \\(\\pi: V \\to W\\)，定义 \\(\\tilde{\\pi} = \\frac{1}{|G|}\\sum_{g \\in G}\\rho(g)\\pi\\rho(g)^{-1}\\)。\\(\\tilde{\\pi}\\) 是 \\(G\\)-等变投影：\\(\\rho(h)\\tilde{\\pi} = \\tilde{\\pi}\\rho(h)\\)（换元 \\(g \\to hg\\)）。\\(\\ker\\tilde{\\pi}\\) 是 \\(W\\) 的 \\(G\\)-不变补。"
+      },
+      {
+        "id": "representation-ch01-q17",
+        "question": "一个群 \\(G\\) 的平凡表示 \\(\\rho_{\\mathrm{triv}}\\) 满足 \\(\\rho_{\\mathrm{triv}}(g) = \\) ？",
+        "options": [
+          "\\(g\\)",
+        "\\(0\\)",
+        "\\(I\\)（对所有 \\(g\\)）",
+        "\\(-I\\)"
+        ],
+        "answer": 2,
+        "explanation": "平凡表示将每个群元素映射为恒等变换 \\(I\\)。\\(\\rho_{\\mathrm{triv}}: G \\to GL(V)\\)，\\(\\rho_{\\mathrm{triv}}(g) = I_V\\)，\\(\\forall g \\in G\\)。这是最简单的 1 维表示，\\(\\dim = 1\\)。"
+      },
+      {
+        "id": "representation-ch01-q18",
+        "question": "\\(|G| = 12\\)，\\(G\\) 有 4 个共轭类。不可约表示维数为 \\((d_1,d_2,d_3,d_4)\\)，满足 \\(\\sum d_i^2 = 12\\)。可能的解为？",
+        "options": [
+          "\\((1,1,1,3)\\)",
+        "\\((1,1,2,2)\\)",
+        "\\((1,1,2,3)\\)",
+        "A 和 B 均可能"
+        ],
+        "answer": 0,
+        "explanation": "\\(d_1^2+d_2^2+d_3^2+d_4^2=12\\)，且 \\(d_i \\mid 12\\)。\\(d_i \\in \\{1,2,3,4,6,12\\}\\)。\\(1^2+1^2+1^2+3^2=12\\) ✓。\\(1^2+1^2+2^2+2^2=10 \\neq 12\\) ✗。还有 \\((1,1,1,3)\\) 是唯一满足条件的组合（如 \\(A_4\\)）。"
+      },
+      {
+        "id": "representation-ch01-q19",
+        "question": "\\(G = \\mathbb{Z}/2\\mathbb{Z}\\)，\\(\\mathrm{char}(K) = 2\\)。2 维表示 \\(\\rho(g) = \\begin{pmatrix}1&1\\\\0&1\\end{pmatrix}\\)。\\(\\rho\\) 有几个不可约子表示？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(W = \\mathrm{span}\\{e_1\\}\\) 是 \\(G\\)-不变的（\\(\\rho(g)e_1 = e_1\\)），是唯一的非平凡不变子空间。\\(V/W\\) 也是平凡表示。但 \\(W\\) 没有 \\(G\\)-不变补（\\(\\rho(g)e_2 = e_1+e_2 \\notin \\mathrm{span}\\{e_2\\}\\)）。\\(\\rho\\) 不完全可约，恰有 1 个不可约子表示。"
+      },
+      {
+        "id": "representation-ch01-q20",
+        "question": "\\(\\rho\\) 是幺表示（\\(\\rho(g)\\) 酉矩阵）。对偶表示满足 \\(\\rho^*(g) = \\) ？",
+        "options": [
+          "\\(\\rho(g)^T\\)",
+        "\\(\\overline{\\rho(g)}^T\\)",
+        "\\(\\rho(g)^{-1}\\)",
+        "B 和 C 相同"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\rho^*(g) = \\rho(g^{-1})^T = (\\rho(g)^{-1})^T\\)。幺表示时 \\(\\rho(g)^{-1} = \\overline{\\rho(g)}^T\\)，故 \\(\\rho^*(g) = \\overline{\\rho(g)}\\)。B 给出 \\(\\overline{\\rho(g)}^T\\)，C 给出 \\(\\rho(g)^{-1} = \\overline{\\rho(g)}^T\\)，两者相同。"
+      },
+      {
+        "id": "representation-ch01-q21",
+        "question": "\\(G\\) 为 Abel 群，\\(|G| = n\\)。\\(\\mathbb{C}[G]\\) 的 Artin-Wedderburn 分解？",
+        "options": [
+          "\\(\\mathbb{C}^n\\)",
+        "\\(M_n(\\mathbb{C})\\)",
+        "\\(M_2(\\mathbb{C})^{n/4}\\)",
+        "\\(\\mathbb{C}^{n/2} \\oplus M_1(\\mathbb{C})^{n/2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Abel 群的所有不可约复表示为 1 维（\\(d_i = 1\\)），有 \\(n\\) 个不可约表示。\\(\\mathbb{C}[G] \\cong \\bigoplus_{i=1}^n M_1(\\mathbb{C}) = \\mathbb{C}^n\\)。\\(\\sum 1^2 = n = |G|\\)。"
+      },
+      {
+        "id": "representation-ch01-q22",
+        "question": "\\(D_3\\)（二面体群，阶 6）的 2 维表示 \\(\\rho\\) 中旋转 \\(r\\) 的表示矩阵为 \\(\\rho(r) = \\begin{pmatrix}\\cos(2\\pi/3) & -\\sin(2\\pi/3)\\\\ \\sin(2\\pi/3) & \\cos(2\\pi/3)\\end{pmatrix}\\)。\\(\\rho(r^3) = \\) ？",
+        "options": [
+          "\\(I\\)",
+        "\\(-I\\)",
+        "\\(\\rho(r)\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(r^3 = e\\)（\\(D_3\\) 中旋转部分为 \\(\\mathbb{Z}/3\\mathbb{Z}\\)），\\(\\rho(r^3) = \\rho(e) = I\\)。或直接计算：\\(\\rho(r)\\) 的旋转角为 \\(2\\pi/3\\)，\\(\\rho(r)^3\\) 旋转 \\(2\\pi\\)，即恒等。"
+      },
+      {
+        "id": "representation-ch01-q23",
+        "question": "\\(G\\) 有限，\\(\\mathrm{char}(K) = 0\\)。表示 \\(V\\) 的 \\(G\\)-不变子空间 \\(W\\) 是否一定有 \\(G\\)-不变补？",
+        "options": [
+          "是，由 Maschke 定理",
+        "否，需要 \\(K\\) 代数闭",
+        "否，需要 \\(V\\) 有限维",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{char}(K) = 0\\) 表示 \\(\\mathrm{char}(K) \\nmid |G|\\)（\\(|G|\\) 有限正整数，特征 0 不整除任何正整数）。Maschke 条件满足。\\(K\\) 不需要代数闭。Maschke 定理对有限维 \\(V\\) 适用。"
+      },
+      {
+        "id": "representation-ch01-q24",
+        "question": "\\(\\rho_1\\) 是 \\(S_3\\) 的 2 维不可约表示，\\(\\varepsilon\\) 是符号表示。\\(\\rho_1 \\otimes \\varepsilon\\) 是否不可约？",
+        "options": [
+          "不可约",
+        "可约，\\(= \\varepsilon \\oplus \\varepsilon\\)",
+        "可约，\\(= \\rho_1 \\oplus\\) 平凡",
+        "零表示"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dim(\\rho_1 \\otimes \\varepsilon) = 2 \\times 1 = 2\\)。特征标 \\(\\chi_{\\rho_1 \\otimes \\varepsilon}(g) = \\chi_{\\rho_1}(g)\\varepsilon(g)\\)。\\(\\chi = (2, 0, -1)\\)，\\(\\varepsilon = (1,-1,1)\\)。\\(\\chi' = (2, 0, -1)\\)。\\(\\langle\\chi',\\chi'\\rangle = \\frac{1}{6}(4+0+2) = 1\\)，不可约。实际上 \\(\\rho_1 \\otimes \\varepsilon \\cong \\rho_1\\)。"
+      },
+      {
+        "id": "representation-ch01-q25",
+        "question": "\\((\\mathbb{Z}/2\\mathbb{Z})^3\\) 有多少个不可约复表示？",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(2\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|(\\mathbb{Z}/2\\mathbb{Z})^3| = 8\\)。Abel 群全部不可约表示 1 维，个数 \\(= |G| = 8\\)。\\(\\sum 1^2 = 8\\)。每个不可约表示由 \\((a,b,c) \\in \\{0,1\\}^3\\) 参数化：\\(\\rho_{a,b,c}(x,y,z) = (-1)^{ax+by+cz}\\)。"
+      },
+      {
+        "id": "representation-ch01-q26",
+        "question": "水分子 \\(H_2O\\) 的对称群为 \\(C_{2v}\\)（阶 4）。\\(C_{2v}\\) 的不可约表示个数为？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(C_{2v} \\cong \\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)，阶 4 的 Abel 群。不可约表示全部 1 维，个数 \\(= |G| = 4\\)。分别记为 \\(A_1, A_2, B_1, B_2\\)。分子振动模式由表示分解确定。"
+      },
+      {
+        "id": "representation-ch01-q27",
+        "question": "在量子力学中，Hamilton 算子 \\(H\\) 关于对称群 \\(G\\) 不变意味着什么？",
+        "options": [
+          "\\(H\\) 的本征空间构成 \\(G\\)-表示",
+        "\\(H = 0\\)",
+        "\\(G\\) 是平凡群",
+        "\\(H\\) 是单位矩阵"
+        ],
+        "answer": 0,
+        "explanation": "\\([H, \\rho(g)] = 0\\) 对所有 \\(g \\in G\\)。则 \\(H\\) 的每个本征空间是 \\(G\\)-不变子空间，构成 \\(G\\)-表示。由 Maschke 定理（\\(\\mathbb{C}\\)，有限群），可分解为不可约表示。同一不可约表示中的能级简并——这是量子力学中对称性导致简并的数学基础。"
+      },
+      {
+        "id": "representation-ch01-q28",
+        "question": "粒子物理中两个自旋-\\(\\frac{1}{2}\\) 粒子的复合态的表示是 \\(V_{1/2} \\otimes V_{1/2}\\)。其分解为？",
+        "options": [
+          "\\(V_1 \\oplus V_0\\)（三重态+单重态）",
+        "\\(V_1\\)",
+        "\\(V_{1/2} \\oplus V_{1/2}\\)",
+        "\\(V_2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dim(V_{1/2} \\otimes V_{1/2}) = 2 \\times 2 = 4\\)。Clebsch-Gordan 分解：\\(V_{1/2} \\otimes V_{1/2} \\cong V_1 \\oplus V_0\\)，\\(\\dim = 3+1 = 4\\)。\\(V_1\\) 是对称（三重态），\\(V_0\\) 是反对称（单重态）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="representation"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/representation.html" class="module-name">表示论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 表示的定义与基本概念</a></li>
+      <li><a href="#kp2">02 · 子表示与完全可约性</a></li>
+      <li><a href="#kp3">03 · 正则表示与群代数</a></li>
+      <li><a href="#kp4">04 · 表示的直和、张量积与对偶</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>群表示基础</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>表示的定义与基本概念</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群是抽象的对称性，但线性代数是具体可计算的。表示论将群「嵌入」到 矩阵世界中: \(\rho: G \to GL(V)\)，用矩阵乘法实现群运算。 这把抽象群论问题变成线性代数问题，在物理（粒子对称性）和化学（分子振动）中 应用广泛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>表示是群到线性算子的同态，本质上是 \(G\)-模的观点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>表示</strong>: \(\rho: G \to GL(V)\) 是群同态。 \(\rho(g_1 g_2) = \rho(g_1)\rho(g_2)\)，\(\rho(e) = I\)。 \(\dim V\) 称为表示的维数/次数。 <strong>等价性</strong>: \(\rho_1 \sim \rho_2\) \(\Leftrightarrow\) \(\exists\) 可逆 \(T: V_1 \to V_2\)， \(T\rho_1(g) = \rho_2(g)T\)，\(\forall g\)。即矩阵表示同时相似。 <strong>常见表示</strong>: - 平凡表示: \(\rho(g) = I\)，\(\forall g\) - 正则表示: \(G \to GL(\mathbb{C}[G])\)，\(g \mapsto\) 左乘 \[\rho(g): \sum a_h h \mapsto \sum a_h (gh)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>分子对称性: 水分子 \(H_2O\) 的对称群 \(C_{2v}\) 的表示确定了分子振动模式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 给出 \(\mathbb{Z}/2\mathbb{Z}\) 的所有 1 维复表示。 解答: \(G = \{e, g\}\)，\(g^2 = e\)。 1 维表示: \(\rho(g) \in \mathbb{C}^\times\)，\(\rho(g)^2 = 1\)，故 \(\rho(g) = \pm 1\)。 两个: 平凡表示 \(\rho(g) = 1\)；符号表示 \(\rho(g) = -1\)。 易错点: 混淆「表示」和「作用」。 表示要求映射到 \(GL(V)\)（可逆线性算子），不仅仅是群对集合的作用。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">群表示 \(\rho: G \to GL(V)\) 满足？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。表示是群同态，保持乘法结构。')">A. \(\rho(g_1 g_2) = \rho(g_1) + \rho(g_2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！表示是群同态，保持乘法结构。')">B. \(\rho(g_1 g_2) = \rho(g_1)\rho(g_2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。表示是群同态，保持乘法结构。')">C. \(\rho(g) = g\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。表示是群同态，保持乘法结构。')">D. \(\rho(g)^2 = I\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>子表示与完全可约性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定一个表示，能否将它分解为更小的「积木」？子表示和直和分解就是 这种分解。对有限群的复表示，Maschke 定理保证了分解总能做到， 这种「完全可约性」是表示论得以系统化的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完全可约性意味着表示的「原子」是不可约表示，任何表示都是 不可约表示的直和。类似于向量空间的基分解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>子表示</strong>: \(W \subseteq V\) 是 \(G\)-不变子空间 （\(\forall g, \rho(g)(W) \subseteq W\)）。 \(\rho|_W: G \to GL(W)\) 为子表示。 <strong>Maschke 定理</strong>: 若 \(G\) 有限，\(\mathrm{char}(K) \nmid |G|\)， 则每个 \(G\)-不变子空间都有 \(G\)-不变补空间。 即每个表示都是不可约表示的直和。 <strong>证明思路</strong>: 任取投影 \(\pi: V \to W\)，平均化: \[\tilde{\pi} = \frac{1}{|G|} \sum_{g \in G} \rho(g) \circ \pi \circ \rho(g)^{-1}\] \(\tilde{\pi}\) 是 \(G\)-等变投影，\(\ker \tilde{\pi}\) 是 \(G\)-不变补空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(S_3\) 的标准 2 维表示 \(V = \{(x,y,z) : x+y+z=0\}\) 是否可约？ 解答: \(\dim V = 2\)。\(S_3\) 的不可约表示维数为 \(1, 1, 2\)。 \(V\) 本身就是 2 维不可约表示（无非平凡 \(G\)-不变子空间）。 易错点: 忘记 Maschke 的条件 \(\mathrm{char}(K) \nmid |G|\)。 \(\mathrm{char}(K) \mid |G|\) 时 Maschke 失效（如 \(\mathbb{F}_2\) 上的 \(\mathbb{Z}/2\mathbb{Z}\)-表示）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Maschke 定理的条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Maschke 需要 \\(|G|\\) 在 \\(K\\) 中可逆，即 \\(\\mathrm{char}(K) \\nmid |G|\\)。')">A. \(G\) 无限</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Maschke 需要 \\(|G|\\) 在 \\(K\\) 中可逆，即 \\(\\mathrm{char}(K) \\nmid |G|\\)。')">B. \(G\) 有限且 \(\mathrm{char}(K) \nmid |G|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Maschke 需要 \\(|G|\\) 在 \\(K\\) 中可逆，即 \\(\\mathrm{char}(K) \\nmid |G|\\)。')">C. \(V\) 无限维</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Maschke 需要 \\(|G|\\) 在 \\(K\\) 中可逆，即 \\(\\mathrm{char}(K) \\nmid |G|\\)。')">D. \(K = \mathbb{R}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>正则表示与群代数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>正则表示 \(\mathbb{C}[G]\) 是群表示中最「大」的表示，它包含了所有不可约表示 的信息。群代数 \(\mathbb{C}[G]\) 是将群表示问题转化为环论问题的桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>群代数 \(\mathbb{C}[G]\) 是以群元为基的向量空间+环。 \(G\)-表示 \(\Leftrightarrow\) \(\mathbb{C}[G]\)-模。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>群代数</strong>: \(\mathbb{C}[G] = \{\sum_{g \in G} a_g g : a_g \in \mathbb{C}\}\)。 乘法由 \(G\) 的乘法线性扩录。\(\dim \mathbb{C}[G] = |G|\)。 <strong>正则表示</strong>: \(G\) 左乘作用于 \(\mathbb{C}[G]\)。 <strong>Artin-Wedderburn</strong>: 若 \(G\) 有限，则 \[\mathbb{C}[G] \cong \bigoplus_{i} M_{d_i}(\mathbb{C})\] 其中 \(d_i = \dim V_i\)（不可约表示维数）。 推论: \(\sum d_i^2 = |G|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(S_3\) 的群代数分解。 解答: \(|S_3| = 6\)。不可约表示维数: \(1, 1, 2\)。 \(1^2 + 1^2 + 2^2 = 6 = |S_3|\)。✓ \(\mathbb{C}[S_3] \cong \mathbb{C} \oplus \mathbb{C} \oplus M_2(\mathbb{C})\)。 易错点: 以为 \(\sum d_i = |G|\)。 是平方和 \(\sum d_i^2 = |G|\)，不是维数和。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|G| = 8\)，不可约表示维数可能为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A 对应如 \\(D_4\\)，C 对应如 \\((\\mathbb{Z}/2\\mathbb{Z})^3\\)。只要 \\(\\sum d_i^2 = |G|\\) 即可。')">A. \(1, 1, 1, 1, 2\)（\(\sum d_i^2 = 8\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A 对应如 \\(D_4\\)，C 对应如 \\((\\mathbb{Z}/2\\mathbb{Z})^3\\)。只要 \\(\\sum d_i^2 = |G|\\) 即可。')">B. \(2, 2, 2\)（\(\sum = 12\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A 对应如 \\(D_4\\)，C 对应如 \\((\\mathbb{Z}/2\\mathbb{Z})^3\\)。只要 \\(\\sum d_i^2 = |G|\\) 即可。')">C. \(1, 1, 1, 1, 1, 1, 1, 1\)（\(\sum = 8\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！A 对应如 \\(D_4\\)，C 对应如 \\((\\mathbb{Z}/2\\mathbb{Z})^3\\)。只要 \\(\\sum d_i^2 = |G|\\) 即可。')">D. A 和 C 均可能</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>表示的直和、张量积与对偶</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>从已知表示构造新表示的三种基本操作: 直和、张量积、对偶。 张量积在物理中对应复合系统、耍宗量子数的耦合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>表示的运算构成了一个「表示环」，其乘法为张量积，加法为直和。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>直和</strong>: \(\rho_1 \oplus \rho_2: G \to GL(V_1 \oplus V_2)\)， \((\rho_1 \oplus \rho_2)(g) = \rho_1(g) \oplus \rho_2(g)\)。 <strong>张量积</strong>: \(\rho_1 \otimes \rho_2: G \to GL(V_1 \otimes V_2)\)， \((\rho_1 \otimes \rho_2)(g) = \rho_1(g) \otimes \rho_2(g)\)。 \[\dim(\rho_1 \otimes \rho_2) = \dim \rho_1 \cdot \dim \rho_2\] <strong>对偶表示</strong>: \(\rho^*: G \to GL(V^*)\)， \(\rho^*(g)(f) = f \circ \rho(g)^{-1}\)。 当 \(\rho\) 幺时，\(\rho^*(g) = \overline{\rho(g)}^T\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>粒子物理: 两个粒子的复合表示是各自表示的张量积， Clebsch-Gordan 分解将张量积分解为不可约表示的直和。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{Z}/2\mathbb{Z}\) 的符号表示 \(\varepsilon\)。计算 \(\varepsilon \otimes \varepsilon\)。 解答: \(\varepsilon(g) = -1\)。 \((\varepsilon \otimes \varepsilon)(g) = (-1)(-1) = 1\)。 \(\varepsilon \otimes \varepsilon \cong\) 平凡表示。 易错点: 张量积的维数不是加法。 \(\dim(\rho_1 \otimes \rho_2) = d_1 \cdot d_2\)，\(\dim(\rho_1 \oplus \rho_2) = d_1 + d_2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim \rho_1 = 2, \dim \rho_2 = 3\)。\(\dim(\rho_1 \otimes \rho_2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。张量积维数是乘积: \\(2 \\times 3 = 6\\)。')">A. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！张量积维数是乘积: \\(2 \\times 3 = 6\\)。')">B. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。张量积维数是乘积: \\(2 \\times 3 = 6\\)。')">C. 8</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。张量积维数是乘积: \\(2 \\times 3 = 6\\)。')">D. 9</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/algebra/representation.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 Monge-Kantorovich 问题 — 最优传输 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "optimal-transport-ch01-q1",
+        "question": "Monge 问题(1781年)的原始提法: 从一个分布 \\(\\mu\\) 到另一个分布 \\(\\nu\\) 的最优传输映射 \\(T\\) 需满足什么条件？",
+        "options": [
+          "\\(T_\\#\\mu=\\nu\\)(推前条件, push-forward)且最小化 \\(\\int c(x,T(x))d\\mu(x)\\)——每个\"沙粒\"从 \\(x\\) 搬到 \\(T(x)\\), 不能拆分",
+        "\\(T\\) 可以将一个点映到多个点",
+        "不需要成本函数",
+        "只适用于离散分布"
+        ],
+        "answer": 0,
+        "explanation": "Monge 的\"搬土\"问题: 将沙堆 \\(\\mu\\) 搬成形状 \\(\\nu\\), 每粒沙从 \\(x\\) 搬到 \\(T(x)\\), 成本 \\(c(x,y)=\\|x-y\\|\\)。\\(T_\\#\\mu=\\nu\\): 对每个可测集 \\(B\\), \\(\\mu(T^{-1}(B))=\\nu(B)\\)——质量守恒。困难: (1) Monge 问题可能无解(如 \\(\\mu=\\delta_0\\), \\(\\nu=\\frac{1}{2}\\delta_{-1}+\\frac{1}{2}\\delta_1\\)——一个点不能\"拆分\"到两个); (2) 非凸优化(映射空间不是凸集)。这激发了 Kantorovich 的松弛。"
+      },
+      {
+        "id": "optimal-transport-ch01-q2",
+        "question": "Kantorovich 松弛将 Monge 问题推广为什么？核心概念\"耦合(coupling)\"的定义？",
+        "options": [
+          "允许质量拆分: 在 \\(\\mu\\times\\nu\\) 上找联合分布 \\(\\pi\\)(耦合), 边际为 \\(\\mu,\\nu\\), 最小化 \\(\\int c(x,y)d\\pi(x,y)\\)——将非凸问题转化为线性规划",
+        "不允许拆分",
+        "耦合是映射",
+        "与线性规划无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Pi(\\mu,\\nu)=\\{\\pi\\in\\mathcal{P}(X\\times Y):(\\pi_1)_\\#\\pi=\\mu,(\\pi_2)_\\#\\pi=\\nu\\}\\)——所有耦合的集合(凸紧)。Kantorovich 问题: \\(\\inf_{\\pi\\in\\Pi(\\mu,\\nu)}\\int c\\,d\\pi\\)。线性规划: 目标和约束都是 \\(\\pi\\) 的线性函数→凸! 总有最优解(紧性)。Monge 映射 \\(T\\) 对应退化耦合 \\(\\pi=(Id,T)_\\#\\mu\\)。Kantorovich 推广允许一个源 \\(x\\) 将质量分送到多个目标——解决了 Monge 问题的存在性难题。"
+      },
+      {
+        "id": "optimal-transport-ch01-q3",
+        "question": "离散最优传输: \\(\\mu=\\sum_ia_i\\delta_{x_i}\\), \\(\\nu=\\sum_jb_j\\delta_{y_j}\\)。OT 问题变成什么标准优化？",
+        "options": [
+          "线性规划: \\(\\min_{\\pi\\geq 0}\\sum_{ij}c_{ij}\\pi_{ij}\\) s.t. \\(\\sum_j\\pi_{ij}=a_i\\), \\(\\sum_i\\pi_{ij}=b_j\\)——传输矩阵 \\(\\pi\\in\\mathbb{R}^{m\\times n}_+\\) 的行/列和约束",
+        "非线性优化",
+        "无约束优化",
+        "整数规划"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_{ij}=c(x_i,y_j)\\)。传输计划 \\(\\pi_{ij}\\)=从 \\(x_i\\) 到 \\(y_j\\) 的传输量。约束: 每行和=供给 \\(a_i\\), 每列和=需求 \\(b_j\\)。这是经典运输问题(Transportation Problem)——LP 特殊结构。单纯形法复杂度 \\(O(n^3\\log n)\\)（网络单纯形更快）; 拍卖算法(Bertsekas); Hungarian 算法(等大小assignment \\(O(n^3)\\))。\\(m=n\\) 时 LP 有 \\(n^2\\) 变量, \\(2n\\) 约束——利用结构可高效求解。"
+      },
+      {
+        "id": "optimal-transport-ch01-q4",
+        "question": "OT 的度量性质: Kantorovich 问题的最优值 \\(W_p(\\mu,\\nu)=(\\inf_\\pi\\int\\|x-y\\|^pd\\pi)^{1/p}\\) 满足什么？",
+        "options": [
+          "\\(W_p\\) 是 \\(\\mathcal{P}_p(\\mathbb{R}^d)\\)（\\(p\\)-阶矩有限的概率测度）上的度量——满足对称性、三角不等式、\\(W_p(\\mu,\\nu)=0\\Leftrightarrow\\mu=\\nu\\)",
+        "\\(W_p\\) 不是度量",
+        "不满足三角不等式",
+        "\\(W_p\\) 可以为负"
+        ],
+        "answer": 0,
+        "explanation": "对称: \\(c(x,y)=c(y,x)\\)→\\(W_p(\\mu,\\nu)=W_p(\\nu,\\mu)\\)。三角不等式(gluing lemma): \\(\\pi_1\\in\\Pi(\\mu,\\sigma)\\), \\(\\pi_2\\in\\Pi(\\sigma,\\nu)\\) 可\"粘合\"为 \\(\\mu\\to\\sigma\\to\\nu\\) 的传输计划 → \\(W_p(\\mu,\\nu)\\leq W_p(\\mu,\\sigma)+W_p(\\sigma,\\nu)\\)。正定性: \\(W_p=0\\Leftrightarrow\\pi\\) 集中在对角线 \\(\\Leftrightarrow\\mu=\\nu\\)。\\(W_p\\) 收敛 \\(\\Leftrightarrow\\) 弱收敛 + \\(p\\)-阶矩收敛——比弱收敛更强，感知分布的几何结构。"
+      },
+      {
+        "id": "optimal-transport-ch01-q5",
+        "question": "OT 在经济学中的原始应用: Kantorovich 为什么获诺贝尔经济学奖(1975)？",
+        "options": [
+          "线性规划(含传输问题)是资源最优分配的数学基础——对偶变量 = 影子价格(shadow price), OT 对偶 = 竞争均衡",
+        "因为量子物理",
+        "因为统计学",
+        "因为微分方程"
+        ],
+        "answer": 0,
+        "explanation": "Kantorovich 1939: 解决苏联木材运输优化。传输问题的对偶: \\(\\max_{\\phi,\\psi}\\int\\phi d\\mu+\\int\\psi d\\nu\\) s.t. \\(\\phi(x)+\\psi(y)\\leq c(x,y)\\)。\\(\\phi(x)\\)=在 \\(x\\) 处的\"出发价格\", \\(\\psi(y)\\)=在 \\(y\\) 处的\"到达价格\"。均衡: 传输发生当且仅当 \\(\\phi(x)+\\psi(y)=c(x,y)\\)——\"互补松弛\"。经济学: \\(\\phi,\\psi\\) 是边际价值/影子价格; matching 问题(工人-公司配对): 传输计划=配对方案, 成本=负效用。LP 对偶理论是 OR(运筹学)的基石。"
+      },
+      {
+        "id": "optimal-transport-ch01-q6",
+        "question": "一维OT有闭式解。\\(\\mu,\\nu\\) 在 \\(\\mathbb{R}\\) 上, 最优传输映射是什么？",
+        "options": [
+          "\\(T=F_\\nu^{-1}\\circ F_\\mu\\)——分位数函数的复合; \\(W_p^p=\\int_0^1|F_\\mu^{-1}(t)-F_\\nu^{-1}(t)|^pdt\\)",
+        "\\(T=F_\\mu\\circ F_\\nu^{-1}\\)",
+        "一维也无闭式",
+        "\\(T\\) 是恒等映射"
+        ],
+        "answer": 0,
+        "explanation": "一维 Monge 问题有解且唯一(对连续 \\(\\mu\\)): 最优映射 \\(T\\) 保序(单调递增, 因为 \\(c=|x-y|^p\\) 下交叉不优)。\\(T=F_\\nu^{-1}\\circ F_\\mu\\): 先将 \\(x\\) 映射到均匀分布 \\([0,1]\\)(CDF \\(F_\\mu\\)), 再映射到 \\(\\nu\\)(逆CDF \\(F_\\nu^{-1}\\))。\\(W_p^p=\\int_0^1|F_\\mu^{-1}(t)-F_\\nu^{-1}(t)|^pdt\\)。\\(p=1\\): \\(W_1=\\int|F_\\mu-F_\\nu|dx\\)——面积。\\(p=2\\): \\(W_2^2=\\|\\mu-\\nu\\|_2^2\\) 在分位数空间。计算 \\(O(n\\log n)\\)(排序)。高维没有类似闭式。"
+      },
+      {
+        "id": "optimal-transport-ch01-q7",
+        "question": "OT 与统计学中分布比较的关系: 为什么 Wasserstein 距离比 KL 散度更适合生成模型训练？",
+        "options": [
+          "\\(W_p\\) 对不重叠的分布也有有意义的距离(提供梯度信息); \\(D_{KL}\\) 在支撑不重叠时为 \\(+\\infty\\)——WGAN 正是利用这一点改善了 GAN 训练稳定性",
+        "KL 散度更好",
+        "两者完全相同",
+        "Wasserstein 没有梯度信息"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu_\\theta=\\delta_\\theta\\), \\(\\nu=\\delta_0\\): \\(W_1(\\mu_\\theta,\\nu)=|\\theta|\\)（有梯度→可优化）; \\(D_{KL}(\\mu_\\theta\\|\\nu)=+\\infty\\)(\\(\\theta\\neq 0\\) 时, 支撑不重叠）。GAN: 生成器从低维流形映射到高维空间→几乎肯定与真实分布不重叠。JS散度也饱和→梯度消失。WGAN (Arjovsky 2017): 用 \\(W_1\\) 替代 JS → Critic 网络近似 KR 对偶 \\(W_1=\\sup_{\\|f\\|_{Lip}\\leq 1}\\mathbb{E}_\\mu[f]-\\mathbb{E}_\\nu[f]\\) → Lipschitz 约束(梯度裁剪/惩罚/谱归一化)。"
+      },
+      {
+        "id": "optimal-transport-ch01-q8",
+        "question": "OT 问题的存在性和唯一性: 什么条件下 Monge 解(确定性映射)存在？",
+        "options": [
+          "Brenier 定理: 当 \\(c=\\|x-y\\|^2\\), \\(\\mu\\) 关于 Lebesgue 测度绝对连续时, 存在唯一最优映射 \\(T=\\nabla\\phi\\) (凸函数的梯度)",
+        "Monge 解总是存在",
+        "不需要 \\(\\mu\\) 的绝对连续性",
+        "最优映射不唯一"
+        ],
+        "answer": 0,
+        "explanation": "Kantorovich 解(耦合)总存在(凸紧集上连续函数的最小)。Monge 解(映射)不一定存在(离散→离散时可能需要拆分)。Brenier (1991): \\(c(x,y)=\\|x-y\\|^2\\), \\(\\mu\\ll\\mathcal{L}^d\\) → \\(\\exists!\\) 最优 \\(T=\\nabla\\phi\\), \\(\\phi\\) 凸。\\(T_\\#\\mu=\\nu\\) 等价于 Monge-Ampère: \\(\\det(D^2\\phi(x))\\cdot\\frac{d\\nu}{dx}(\\nabla\\phi(x))=\\frac{d\\mu}{dx}(x)\\)。推广: Gangbo-McCann 定理(\\(c\\) 满足 twist 条件时)。一维: \\(T\\) 单调(凸梯度=单调函数)。"
+      },
+      {
+        "id": "optimal-transport-ch01-q9",
+        "question": "OT 在计算生物学中的应用: 如何用 OT 分析单细胞 RNA 测序(scRNA-seq)数据？",
+        "options": [
+          "将不同时间点的细胞分布视为概率测度, OT 映射推断细胞发育轨迹(cell trajectory)——Waddington-OT 框架",
+        "OT 与生物学无关",
+        "只用欧氏距离",
+        "不能处理高维数据"
+        ],
+        "answer": 0,
+        "explanation": "scRNA-seq: 每个细胞 = 高维基因表达向量。问题: 不同时间点采样不同的细胞(破坏性测量, 无法追踪同一细胞)。Waddington-OT (Schiebinger et al., Cell 2019): 将 \\(t_1\\) 的细胞分布 \\(\\mu_{t_1}\\) 传输到 \\(t_2\\) 的 \\(\\mu_{t_2}\\), 传输计划推断\"哪些 \\(t_1\\) 细胞变成了哪些 \\(t_2\\) 细胞\"。加熵正则化避免过拟合。还用于: 空间转录组(spatial OT), 药物响应预测(CellOT), 蛋白质进化轨迹。"
+      },
+      {
+        "id": "optimal-transport-ch01-q10",
+        "question": "多边际最优传输(Multi-Marginal OT): 将经典 OT 推广到 \\(K\\) 个分布时, 复杂度如何变化？",
+        "options": [
+          "离散情况变为 \\(n^K\\) 变量的 LP, 指数爆炸; 但某些特殊成本(如\"和\"成本 \\(c=\\sum_{i<j}c_{ij}\\))可分解——DFT 密度泛函理论中的多电子成本就是此类",
+        "复杂度不变",
+        "总是多项式",
+        "不能推广到多边际"
+        ],
+        "answer": 0,
+        "explanation": "MMOT: \\(\\inf_{\\pi\\in\\Pi(\\mu_1,...,\\mu_K)}\\int c(x_1,...,x_K)d\\pi\\)。一般: LP 变量数 \\(n^K\\)——不可处理。结构化成本: (1) \"Coulomb 成本\" \\(c=\\sum_{i<j}|x_i-x_j|^{-1}\\)——多电子 Schrödinger 方程的 OT 形式(DFT-OT 连接, Cotar-Friesecke-Klüppelberg); (2) 可分离成本→多个两边际 OT; (3) barycenter 问题: 固定 \\(\\mu_i\\), 找 \\(\\mu'\\) 最小化 \\(\\sum_i\\lambda_iW_p^p(\\mu_i,\\mu')\\)——等价于 MMOT。Sinkhorn 迭代可推广到多边际。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="optimal-transport"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/optimal-transport.html" class="module-name">最优传输</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Monge 问题的历史与数学建模</a></li>
+      <li><a href="#kp2">02 · Kantorovich 松弛与耦合</a></li>
+      <li><a href="#kp3">03 · 离散最优传输与线性规划</a></li>
+      <li><a href="#kp4">04 · 最优传输的度量性质</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>Monge-Kantorovich 问题</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Monge 问题的历史与数学建模</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>1781 年 Gaspard Monge 提出一个看似简单的问题：如何将一堆土最省 力地搬到指定位置？这是最优传输理论的起点。虽然直觉上很自然，但 严格数学化需要测度论语言，而且 Monge 问题在一般情况下可能无解 ——这推动了 Kantorovich 松弛的诞生。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>质量分布 \(=\) 概率测度 \(\mu, \nu\)；搬运方案 \(=\) 推前映射 \(T\) 满足 \(T_\#\mu = \nu\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Monge 问题的严格表述：给定概率空间 \((X, \mu)\) 和 \((Y, \nu)\)， 及代价函数 \(c: X \times Y \to \mathbb{R}_+\)，求 \[\inf_{T: T_\#\mu = \nu} \int_X c(x, T(x)) \, d\mu(x)\] 推前条件 \(T_\#\mu = \nu\)：对所有 Borel 集 \(B \subset Y\)， \(\mu(T^{-1}(B)) = \nu(B)\)。即 \(T\) 将 \(\mu\) 的质量精确转移到 \(\nu\)。 存在性问题：若 \(\mu = \delta_{x_0}\)（点质量），\(\nu = \frac{1}{2}\delta_{y_1} + \frac{1}{2}\delta_{y_2}\)， 则不存在映射 \(T\) 使 \(T_\#\mu = \nu\)——一个点无法映射到两个点！ Monge 问题可能无可行解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>物流网络中的仓库-门店配送路径优化（每个仓库的货物只能发到一个目的地）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X = Y = \mathbb{R}\), \(\mu = \mathcal{U}[0,1]\)（均匀分布）， \(\nu = \mathcal{U}[1,2]\), \(c(x,y) = |x-y|^2\)。最优映射？ 解答：分位数映射 \(T(x) = F_\nu^{-1}(F_\mu(x)) = x + 1\)（平移）。 代价 \(= \int_0^1 |x - (x+1)|^2 dx = 1\)。 这是一维情况下的解——分位数映射总是最优的。 易错点：分位数映射公式只在一维有效。高维情况需要 Brenier 定理。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Monge 问题可能无解的根本原因是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。映射是确定性的——每个点只能去一个位置。Kantorovich 松弛允许"分裂"。')">A. 代价函数可以是无穷大</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！映射是确定性的——每个点只能去一个位置。Kantorovich 松弛允许"分裂"。')">B. 映射 \(T\) 不允许"分裂"质量</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。映射是确定性的——每个点只能去一个位置。Kantorovich 松弛允许"分裂"。')">C. 测度不一定有密度</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。映射是确定性的——每个点只能去一个位置。Kantorovich 松弛允许"分裂"。')">D. \(X\) 和 \(Y\) 可能不等维</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Kantorovich 松弛与耦合</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Leonid Kantorovich 在 1942 年提出了天才的松弛：不要求确定性映射， 而是允许随机传输方案（耦合）。每个源点的质量可以分配到多个目标。 这保证了最优解总是存在的。Kantorovich 因这一工作获得 1975 年诺 贝尔经济学奖（与 Koopmans 分享）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>耦合 \(\gamma \in \Pi(\mu, \nu)\) \(=\) \(X \times Y\) 上的联合分布，边缘 为 \(\mu\) 和 \(\nu\)。松弛：映射 \(\to\) 联合分布。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Kantorovich 问题： \[\inf_{\gamma \in \Pi(\mu,\nu)} \int_{X \times Y} c(x,y) \, d\gamma(x,y)\] 其中 \(\Pi(\mu,\nu) = \{\gamma \in \mathcal{P}(X \times Y) : (\pi_X)_\#\gamma = \mu, (\pi_Y)_\#\gamma = \nu\}\)。 存在性定理：若 \(c\) 下半连续且 \(X, Y\) 是波兰空间(Polish space)， 则 \(\Pi(\mu,\nu)\) 非空紧（弱拓扑），\(c\) 的积分下半连续， 由 Weierstrass 极值定理，最优 \(\gamma^*\) 存在。 与 Monge 的关系：若最优 \(\gamma^*\) 集中在图 \(\{(x, T(x))\}\) 上， 则 \(T\) 是 Monge 最优映射。Kantorovich \(\leq\) Monge（松弛更宽）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>计算机视觉中图像之间的 Earth Mover's Distance 就是离散 Kantorovich 问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu = \frac{1}{2}\delta_0 + \frac{1}{2}\delta_1\)，\(\nu = \delta_{1/2}\)，\(c = |x-y|^2\)。 Monge 解？Kantorovich 解？ 解答：Monge：\(T(0) = T(1) = 1/2\)。\(T_\#\mu = \delta_{1/2} = \nu\)。✓ 代价 \(= \frac{1}{2}(0-1/2)^2 + \frac{1}{2}(1-1/2)^2 = 1/4\)。 Kantorovich 也是 \(1/4\)（这里 Monge 解存在且是唯一耦合的支撑）。 反例：\(\mu = \delta_0, \nu = \frac{1}{2}\delta_{-1}+\frac{1}{2}\delta_1\)——Monge 无解， Kantorovich 解 \(\gamma = \frac{1}{2}\delta_{(0,-1)} + \frac{1}{2}\delta_{(0,1)}\)，代价 \(= 1\)。 易错点：Kantorovich 解总存在；Monge 解不一定存在。两者代价可以相等。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">耦合 \(\gamma \in \Pi(\mu,\nu)\) 的边缘条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！B 是独立耦合（通常不最优）。C 对应 Monge 解（特例）。D 太弱。')">A. \(\gamma(A \times Y) = \mu(A)\) 且 \(\gamma(X \times B) = \nu(B)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。B 是独立耦合（通常不最优）。C 对应 Monge 解（特例）。D 太弱。')">B. \(\gamma = \mu \otimes \nu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。B 是独立耦合（通常不最优）。C 对应 Monge 解（特例）。D 太弱。')">C. \(\gamma\) 的支撑是函数图</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。B 是独立耦合（通常不最优）。C 对应 Monge 解（特例）。D 太弱。')">D. \(\int d\gamma = 1\) 即可</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>离散最优传输与线性规划</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当 \(\mu, \nu\) 都是有限离散测度时，Kantorovich 问题退化为标准线性 规划(LP)——传输问题(Transportation Problem)。这是运筹学的经典 问题，单纯形法可精确求解。理解离散版本有助于建立直觉，也是计算 方法的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>耦合 \(\gamma\) \(\leftrightarrow\) 传输矩阵 \(P \in \mathbb{R}^{m \times n}_+\)； 约束 \(\leftrightarrow\) 行和列和；目标 \(\leftrightarrow\) Frobenius 内积 \(\langle C, P \rangle\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>离散设定：\(\mu = \sum_{i=1}^m a_i \delta_{x_i}\)，\(\nu = \sum_{j=1}^n b_j \delta_{y_j}\)， \(\sum a_i = \sum b_j = 1\)。代价矩阵 \(C_{ij} = c(x_i, y_j)\)。 LP 形式： \[\min_{P \geq 0} \sum_{i,j} C_{ij} P_{ij} \quad \text{s.t.} \quad P\mathbf{1} = a, \; P^\top\mathbf{1} = b\] \(P\) 有 \(mn\) 个变量，\(m+n-1\) 个独立约束。 解：传输单纯形法(Transportation Simplex)复杂度约 \(O(m^2 n \log m)\)。 Birkhoff-von Neumann 定理：当 \(m=n, a_i=b_j=1/n\) 时， 最优 \(P\) 是双随机矩阵集的顶点 \(=\) 置换矩阵——回到 Monge！</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Document distance（词频直方图之间的 Earth Mover's Distance）用于文本相似度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(a = (1/2, 1/2)\)，\(b = (1/3, 2/3)\)。 \(C = \begin{pmatrix}1&2\\3&1\end{pmatrix}\)。求最优传输矩阵。 解答：\(P = \begin{pmatrix}p_{11}&p_{12}\\p_{21}&p_{22}\end{pmatrix}\)， \(p_{11}+p_{12}=1/2, p_{21}+p_{22}=1/2, p_{11}+p_{21}=1/3, p_{12}+p_{22}=2/3\)。 由约束：\(p_{11} = 1/3 - p_{21}\), \(p_{12} = 1/2 - p_{11} = 1/6 + p_{21}\), \(p_{22} = 1/2 - p_{21}\)。\(0 \leq p_{21} \leq 1/3\)。 目标：\((1/3-p_{21}) + 2(1/6+p_{21}) + 3p_{21} + (1/2-p_{21})\) \(= 1/3 + 1/3 + 1/2 + 4p_{21} = 7/6 + 4p_{21}\)。最小化取 \(p_{21}=0\)。 \(P^* = \begin{pmatrix}1/3&1/6\\0&1/2\end{pmatrix}\)，最优代价 \(= 7/6\)。 易错点：LP 最优解在顶点取到——传输矩阵的非零元素数 \(\leq m+n-1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(m\) 个源、\(n\) 个目标的传输问题有多少自由度？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(mn\\) 个变量减去 \\(m+n-1\\) 个独立约束 \\(= (m-1)(n-1)\\) 个自由度，')">A. \(mn\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(mn\\) 个变量减去 \\(m+n-1\\) 个独立约束 \\(= (m-1)(n-1)\\) 个自由度，')">B. \(m + n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(mn\\) 个变量减去 \\(m+n-1\\) 个独立约束 \\(= (m-1)(n-1)\\) 个自由度，')">C. \(m + n - 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(mn\\) 个变量减去 \\(m+n-1\\) 个独立约束 \\(= (m-1)(n-1)\\) 个自由度，')">D. \((m-1)(n-1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>最优传输的度量性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>最优传输代价赋予概率测度空间一个自然的距离结构——Wasserstein 距 离。这个距离比 KL 散度、TV 距离更"几何"：它考虑底空间的度量结 构。这种度量性质是最优传输在机器学习（WGAN）、统计和几何中广泛 应用的根基。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Wasserstein 距离将底空间 \((X, d)\) 的距离结构提升到概率测度空间 \(\mathcal{P}(X)\) 上。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(p\)-Wasserstein 距离（\(p \geq 1\)）： \[W_p(\mu,\nu) = \left(\inf_{\gamma \in \Pi(\mu,\nu)} \int |x-y|^p \, d\gamma\right)^{1/p}\] 度量性质验证： - \(W_p(\mu,\nu) \geq 0\)，等号当且仅当 \(\mu = \nu\) - 对称性：\(W_p(\mu,\nu) = W_p(\nu,\mu)\) - 三角不等式：\(W_p(\mu,\sigma) \leq W_p(\mu,\nu) + W_p(\nu,\sigma)\) （通过耦合的"粘合"证明） 一维显式公式： \[W_p(\mu,\nu) = \left(\int_0^1 |F_\mu^{-1}(t) - F_\nu^{-1}(t)|^p \, dt\right)^{1/p}\] 其中 \(F^{-1}\) 是分位数函数。特别地， \(W_2^2(\mu,\nu) = \int_0^1 (F_\mu^{-1}(t) - F_\nu^{-1}(t))^2 \, dt\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>WGAN 用 \(W_1\) 距离替代 JS 散度训练 GAN，避免了梯度消失问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu = \mathcal{N}(m_1, \sigma_1^2)\), \(\nu = \mathcal{N}(m_2, \sigma_2^2)\)。 求 \(W_2(\mu, \nu)\)。 解答：\(F_\mu^{-1}(t) = m_1 + \sigma_1 \Phi^{-1}(t)\), \(F_\nu^{-1}(t) = m_2 + \sigma_2 \Phi^{-1}(t)\)。 \(W_2^2 = \int_0^1 [(m_1-m_2) + (\sigma_1-\sigma_2)\Phi^{-1}(t)]^2 dt\) \(= (m_1-m_2)^2 + (\sigma_1-\sigma_2)^2\)（因 \(\int [\Phi^{-1}(t)]^2 dt = 1\)）。 \(W_2 = \sqrt{(m_1-m_2)^2 + (\sigma_1-\sigma_2)^2}\)。 易错点：高维高斯的 \(W_2\) 公式涉及协方差矩阵平方根： \(W_2^2 = \|m_1-m_2\|^2 + \mathrm{tr}(\Sigma_1+\Sigma_2-2(\Sigma_1^{1/2}\Sigma_2\Sigma_1^{1/2})^{1/2})\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(W_1\) 距离又称？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(W_1\\) 衡量"把一个分布搬成另一个分布的最小工作量"——直观如搬土。')">A. Hellinger 距离</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(W_1\\) 衡量"把一个分布搬成另一个分布的最小工作量"——直观如搬土。')">B. Earth Mover's Distance（推土机距离）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(W_1\\) 衡量"把一个分布搬成另一个分布的最小工作量"——直观如搬土。')">C. KL 散度</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(W_1\\) 衡量"把一个分布搬成另一个分布的最小工作量"——直观如搬土。')">D. Fisher-Rao 距离</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/applied/optimal-transport.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

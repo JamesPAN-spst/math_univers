@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 Lebesgue 测度的构造 — 实分析/测度论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "real-analysis-ch02-q1",
+        "question": "设 \\(A = (0, 1) \\cup (2, 4)\\)。其 Lebesgue 外测度 \\(m^*(A)\\) 等于多少？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)"
+        ],
+        "answer": 2,
+        "explanation": "外测度定义为覆盖 \\(A\\) 的所有可数开区间族的总长度的下确界。\\(A\\) 本身就由两个开区间组成，长度分别为 \\(1\\) 和 \\(2\\)，故 \\(m^*(A) = 1 + 2 = 3\\)。不能更小，因为任何覆盖至少要覆盖这两段。选 D 是将端点也计入的错误。"
+      },
+      {
+        "id": "real-analysis-ch02-q2",
+        "question": "Lebesgue 外测度 \\(m^*\\) 对可数集 \\(A = \\{a_1, a_2, \\ldots\\}\\) 的值为多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\aleph_0\\)",
+        "取决于点的分布"
+        ],
+        "answer": 0,
+        "explanation": "对任意 \\(\\varepsilon > 0\\)，用长度为 \\(\\varepsilon/2^n\\) 的开区间覆盖 \\(a_n\\)，总长 \\(\\sum \\varepsilon/2^n = \\varepsilon\\)。由 \\(\\varepsilon\\) 任意性，\\(m^*(A) = 0\\)。这适用于所有可数集，包括 \\(\\mathbb{Q}\\)。常见错误：以为稠密集（如 \\(\\mathbb{Q}\\)）应有正测度。"
+      },
+      {
+        "id": "real-analysis-ch02-q3",
+        "question": "闭区间 \\([a, b]\\) 的 Lebesgue 测度 \\(m([a, b])\\) 等于多少？",
+        "options": [
+          "\\(b - a + 1\\)",
+        "\\(b - a\\)",
+        "\\(b - a - 1\\)",
+        "\\((b - a)/2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(m([a, b]) = m((a, b)) + m(\\{a\\}) + m(\\{b\\}) = (b-a) + 0 + 0 = b - a\\)。Lebesgue 测度下，单点集（可数集的特例）测度为零，所以开区间、闭区间、半开区间的测度都等于 \\(b-a\\)。选 A 是混淆了测度和离散点数。"
+      },
+      {
+        "id": "real-analysis-ch02-q4",
+        "question": "外测度 \\(m^*\\) 满足 \\(\\sigma\\)-可加性吗？",
+        "options": [
+          "满足，对所有集合",
+        "仅满足次可加性：\\(m^*(\\bigcup A_n) \\leq \\sum m^*(A_n)\\)",
+        "满足，但仅对开集",
+        "不满足任何可加性"
+        ],
+        "answer": 1,
+        "explanation": "外测度只满足可数次可加性，不满足 \\(\\sigma\\)-可加性。次可加性：\\(m^*(\\bigcup A_n) \\leq \\sum m^*(A_n)\\)（由外测度定义直接得出）。但不存在对所有 \\(\\mathcal{P}(\\mathbb{R})\\) 上的 \\(\\sigma\\)-可加的平移不变测度（Vitali 构造）。Carathéodory 条件筛出可测集后才有 \\(\\sigma\\)-可加性。"
+      },
+      {
+        "id": "real-analysis-ch02-q5",
+        "question": "设 \\(A\\) 是 Lebesgue 可测集，\\(m(A) = 5\\)。则 \\(A + 3 = \\{a + 3 : a \\in A\\}\\) 的测度为？",
+        "options": [
+          "\\(2\\)",
+        "\\(5\\)",
+        "\\(8\\)",
+        "\\(15\\)"
+        ],
+        "answer": 1,
+        "explanation": "Lebesgue 测度具有平移不变性：\\(m(A + x) = m(A)\\) 对任意 \\(x \\in \\mathbb{R}\\)。这是 Lebesgue 测度最核心的性质之一，也是其构造的出发点——将\"长度\"推广到更一般的集合，同时保持平移不变。\\(m(A + 3) = m(A) = 5\\)。"
+      },
+      {
+        "id": "real-analysis-ch02-q6",
+        "question": "设 \\(A\\) 是 Lebesgue 可测集，\\(m(A) = 3\\)。则 \\(2A = \\{2a : a \\in A\\}\\) 的测度为？",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(9\\)",
+        "\\(1.5\\)"
+        ],
+        "answer": 1,
+        "explanation": "Lebesgue 测度在 \\(\\mathbb{R}\\) 上满足缩放关系：\\(m(cA) = |c| \\cdot m(A)\\)。这里 \\(c = 2\\)，故 \\(m(2A) = 2 \\cdot 3 = 6\\)。在 \\(\\mathbb{R}^n\\) 中对应 \\(m(cA) = |c|^n m(A)\\)。选 C 是误用 \\(c^2\\) 的二维公式。"
+      },
+      {
+        "id": "real-analysis-ch02-q7",
+        "question": "Cantor 集 \\(C\\) 的 Lebesgue 测度为多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1/3\\)",
+        "\\(2/3\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cantor 集由 \\([0,1]\\) 反复去掉中间三分之一构建。第 \\(n\\) 步去掉 \\(2^{n-1}\\) 个长度为 \\(3^{-n}\\) 的区间，被去掉的总长度 \\(= \\sum_{n=1}^{\\infty} 2^{n-1}/3^n = (1/3) \\cdot 1/(1 - 2/3) = 1\\)。故 \\(m(C) = 1 - 1 = 0\\)。尽管 Cantor 集不可数（与 \\([0,1]\\) 等势），它却是零测集。"
+      },
+      {
+        "id": "real-analysis-ch02-q8",
+        "question": "设 \\(A \\subseteq \\mathbb{R}\\)。Carathéodory 条件要求 \\(A\\) 满足什么才被称为 Lebesgue 可测？",
+        "options": [
+          "\\(m^*(A) < \\infty\\)",
+        "对任意 \\(E \\subseteq \\mathbb{R}\\)，\\(m^*(E) = m^*(E \\cap A) + m^*(E \\cap A^c)\\)",
+        "\\(A\\) 是开集或闭集",
+        "\\(A\\) 可以被开集逼近"
+        ],
+        "answer": 1,
+        "explanation": "Carathéodory 可测性定义：\\(A\\) 可测，当且仅当对所有 \\(E \\subseteq \\mathbb{R}\\)（不要求可测），\\(m^*(E) = m^*(E \\cap A) + m^*(E \\cap A^c)\\)。这比只要求 \\(\\leq\\)（次可加性）更强。直觉上，\\(A\\) \"干净地\"将任何集合分为两部分，使得测度精确相加。"
+      },
+      {
+        "id": "real-analysis-ch02-q9",
+        "question": "设 \\(A_n = [n, n + 1/2^n]\\)，\\(n = 1, 2, \\ldots\\)。求 \\(m\\bigl(\\bigcup_{n=1}^\\infty A_n\\bigr)\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(\\infty\\)",
+        "\\(1/2\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "各 \\(A_n\\) 互不相交（因 \\(n + 1/2^n < n+1\\) 对 \\(n \\geq 1\\)），故 \\(m(\\bigcup A_n) = \\sum m(A_n) = \\sum 1/2^n = 1\\)。互不相交时 \\(\\sigma\\)-可加性保证精确相加。若不互不相交，只能用次可加性（\\(\\leq\\)）。"
+      },
+      {
+        "id": "real-analysis-ch02-q10",
+        "question": "设 \\(G \\subseteq [0,1]\\) 为开集，\\(m(G) = 3/4\\)。则 \\(m([0,1] \\setminus G)\\) 等于？",
+        "options": [
+          "\\(1/4\\)",
+        "\\(3/4\\)",
+        "\\(0\\)",
+        "取决于 \\(G\\) 的结构"
+        ],
+        "answer": 0,
+        "explanation": "\\([0,1] = G \\cup ([0,1] \\setminus G)\\)，互不相交，故 \\(m([0,1] \\setminus G) = m([0,1]) - m(G) = 1 - 3/4 = 1/4\\)。注意 \\([0,1] \\setminus G\\) 是闭集（开集的补），可能结构复杂（如 fat Cantor 集），但测度由差值确定。"
+      },
+      {
+        "id": "real-analysis-ch02-q11",
+        "question": "设 \\(A\\) 可测。\"正则性\"意味对任意 \\(\\varepsilon > 0\\) 存在开集 \\(G \\supseteq A\\) 使 \\(m(G \\setminus A) < \\varepsilon\\)。这是以下哪个定理的内容？",
+        "options": [
+          "Egoroff 定理",
+        "Lusin 定理",
+        "测度的正则性",
+        "Vitali 覆盖引理"
+        ],
+        "answer": 2,
+        "explanation": "Lebesgue 测度的外正则性：\\(m(A) = \\inf\\{m(G) : G \\supseteq A, G \\text{ 开}\\}\\)，等价于对任意 \\(\\varepsilon > 0\\) 存在开集 \\(G \\supseteq A\\)，\\(m(G \\setminus A) < \\varepsilon\\)。类似地有内正则性（用紧集从内部逼近）。Lusin 定理是关于可测函数被连续函数逼近的，Egoroff 定理是关于一致收敛的。"
+      },
+      {
+        "id": "real-analysis-ch02-q12",
+        "question": "Vitali 集 \\(V\\) 为何不可测？其构造利用了以下哪个关键性质？",
+        "options": [
+          "\\(V\\) 是不可数集",
+        "\\(V\\) 不是 Borel 集",
+        "平移不变性与 \\(\\sigma\\)-可加性的矛盾",
+        "\\(V\\) 的外测度为无穷"
+        ],
+        "answer": 2,
+        "explanation": "Vitali 构造：在 \\([0,1]\\) 中取等价类 \\(x \\sim y \\Leftrightarrow x - y \\in \\mathbb{Q}\\) 的代表元集 \\(V\\)（需选择公理）。\\([0,1) = \\bigcup_{q \\in \\mathbb{Q} \\cap [-1,1]} (V + q) \\pmod{1}\\)（不相交并）。若 \\(V\\) 可测，由平移不变性 \\(m(V + q) = m(V)\\) 和 \\(\\sigma\\)-可加性，\\(1 = \\sum m(V)\\)。但 \\(m(V) > 0\\) 时和为 \\(\\infty\\)，\\(m(V) = 0\\) 时和为 \\(0\\)，矛盾。"
+      },
+      {
+        "id": "real-analysis-ch02-q13",
+        "question": "设 \\(A, B\\) 可测，\\(m(A \\triangle B) = 0\\)（对称差）。则以下哪个成立？",
+        "options": [
+          "\\(A = B\\)",
+        "\\(m(A) = m(B)\\)",
+        "\\(A \\subseteq B\\)",
+        "\\(m(A) = 0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(A \\triangle B = (A \\setminus B) \\cup (B \\setminus A)\\)，\\(m(A \\triangle B) = 0\\) 意味着 \\(m(A \\setminus B) = m(B \\setminus A) = 0\\)。\\(m(A) = m(A \\cap B) + m(A \\setminus B) = m(A \\cap B) + 0\\)，\\(m(B) = m(A \\cap B) + m(B \\setminus A) = m(A \\cap B) + 0\\)，故 \\(m(A) = m(B)\\)。但 \\(A\\) 和 \\(B\\) 不必相等（仅\"几乎处处相等\"）。"
+      },
+      {
+        "id": "real-analysis-ch02-q14",
+        "question": "设 \\(E \\subseteq \\mathbb{R}\\)，\\(m^*(E) = 0\\)。则 \\(E\\) 是否 Lebesgue 可测？",
+        "options": [
+          "是",
+        "否",
+        "仅当 \\(E\\) 可数时",
+        "仅当 \\(E\\) 是 Borel 集时"
+        ],
+        "answer": 0,
+        "explanation": "零测集一定可测。验证 Carathéodory 条件：\\(m^*(T) \\leq m^*(T \\cap E) + m^*(T \\cap E^c) \\leq m^*(E) + m^*(T) = 0 + m^*(T) = m^*(T)\\)。反向不等式由次可加性已知。故等式成立，\\(E\\) 可测。推论：零测集的任何子集也是零测（Lebesgue 测度是完备的）。"
+      },
+      {
+        "id": "real-analysis-ch02-q15",
+        "question": "构造\"胖 Cantor 集\"（fat Cantor set）：从 \\([0,1]\\) 开始，第 \\(n\\) 步去掉 \\(2^{n-1}\\) 个长度为 \\(\\alpha/4^n\\) 的区间。若总去掉长度为 \\(1/2\\)，则剩余集 \\(F\\) 的测度为？",
+        "options": [
+          "\\(0\\)",
+        "\\(1/4\\)",
+        "\\(1/2\\)",
+        "\\(3/4\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(m(F) = 1 - \\text{去掉总长} = 1 - 1/2 = 1/2\\)。大 Cantor 集 \\(F\\) 是闭的、无处稠密（不含开区间）但有正测度的集合。这展示了一个反直觉现象：正测度集可以不含任何开区间。标准 Cantor 集去掉的总长为 1 故测度为 0。"
+      },
+      {
+        "id": "real-analysis-ch02-q16",
+        "question": "在 \\(\\mathbb{R}^2\\) 中，直线 \\(L = \\{(x, 0) : x \\in \\mathbb{R}\\}\\) 的二维 Lebesgue 测度为多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(1\\)",
+        "未定义"
+        ],
+        "answer": 0,
+        "explanation": "\\(L = \\mathbb{R} \\times \\{0\\}\\)。对任意 \\(\\varepsilon > 0\\)，\\(L\\) 可被 \\(\\bigcup_{n \\in \\mathbb{Z}} (n, n+1) \\times (-\\varepsilon/2^{|n|+2}, \\varepsilon/2^{|n|+2})\\) 覆盖，面积 \\(\\leq C\\varepsilon\\)。故 \\(m_2(L) = 0\\)。一般地，\\(\\mathbb{R}^n\\) 中维度 \\(< n\\) 的仿射子空间的 \\(n\\)-维 Lebesgue 测度为零。"
+      },
+      {
+        "id": "real-analysis-ch02-q17",
+        "question": "设 \\(f: \\mathbb{R} \\to \\mathbb{R}\\) Lipschitz 连续（\\(|f(x) - f(y)| \\leq L|x - y|\\)），\\(m(A) = 0\\)。则 \\(m(f(A)) = ?\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(\\leq Lm(A)\\)",
+        "可能为正",
+        "A 和 B 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(A\\) 可被长度 \\(\\leq \\varepsilon\\) 的区间族 \\(\\{I_n\\}\\) 覆盖，\\(\\sum |I_n| < \\varepsilon\\)。\\(f(A) \\subseteq \\bigcup f(I_n)\\)，\\(|f(I_n)| \\leq L|I_n|\\)（Lipschitz），故 \\(m^*(f(A)) \\leq L \\sum |I_n| < L\\varepsilon\\)。取 \\(\\varepsilon \\to 0\\)，\\(m(f(A)) = 0\\)。因此 A 和 B 都正确。注意：若 \\(f\\) 仅连续（非 Lipschitz），像集可能有正测度。"
+      },
+      {
+        "id": "real-analysis-ch02-q18",
+        "question": "以下关于 Lebesgue 外测度的性质，哪个是错误的？",
+        "options": [
+          "\\(m^*(\\emptyset) = 0\\)",
+        "\\(A \\subseteq B \\Rightarrow m^*(A) \\leq m^*(B)\\)",
+        "\\(m^*(\\bigcup A_n) = \\sum m^*(A_n)\\) 对互不相交集合",
+        "\\(m^*(\\bigcup A_n) \\leq \\sum m^*(A_n)\\) 对任意集合"
+        ],
+        "answer": 2,
+        "explanation": "C 错误。外测度不保证互不相交集合的精确可加性，只保证次可加性 (D)。\\(\\sigma\\)-可加性仅在 Carathéodory 可测集上成立。反例：利用 Vitali 集，可以构造互不相交集合使 \\(m^*(\\bigcup A_n) < \\sum m^*(A_n)\\)。这正是引入可测性条件的原因。"
+      },
+      {
+        "id": "real-analysis-ch02-q19",
+        "question": "设 \\(A \\subseteq [0,1]\\)，\\(m^*(A) = 1/2\\)，\\(m^*(A^c \\cap [0,1]) = 1/2\\)。\\(A\\) 是否一定可测？",
+        "options": [
+          "一定可测",
+        "不一定可测",
+        "可测当且仅当 \\(A\\) 是 Borel 集",
+        "可测当且仅当 \\(m^*(A) + m^*(A^c \\cap [0,1]) = 1\\)"
+        ],
+        "answer": 3,
+        "explanation": "取 \\(E = [0,1]\\) 验证 Carathéodory 条件：\\(m^*(E) = m^*(E \\cap A) + m^*(E \\cap A^c)\\)，即 \\(1 = m^*(A) + m^*(A^c \\cap [0,1]) = 1/2 + 1/2 = 1\\) ✓。但这只验证了对 \\(E = [0,1]\\) 成立，Carathéodory 条件要求对所有 \\(E\\) 成立。因此外测度互补不足以保证可测性。实际上 D 的条件（对所有 \\(E\\) 成立）才是充要条件。"
+      },
+      {
+        "id": "real-analysis-ch02-q20",
+        "question": "设 \\(A\\) Lebesgue 可测，\\(m(A) > 0\\)。Steinhaus 定理表明 \\(A - A = \\{a_1 - a_2 : a_1, a_2 \\in A\\}\\) 包含？",
+        "options": [
+          "一个开区间 \\((-\\delta, \\delta)\\)",
+        "仅包含 \\(\\{0\\}\\)",
+        "所有有理数",
+        "整个 \\(\\mathbb{R}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Steinhaus 定理：若 \\(m(A) > 0\\)，则 \\(A - A\\) 包含原点的一个邻域 \\((-\\delta, \\delta)\\)。证明思路：考虑卷积 \\((\\mathbf{1}_A * \\mathbf{1}_{-A})(x) = m(A \\cap (A + x))\\)，由 \\(f(0) = m(A) > 0\\) 和 \\(f\\) 的连续性（用 \\(L^1\\) 逼近），\\(f(x) > 0\\) 在 \\(0\\) 附近成立；\\(f(x) > 0\\) 则 \\(x \\in A - A\\)。这不需要正则性以外的额外条件。"
+      },
+      {
+        "id": "real-analysis-ch02-q21",
+        "question": "是否存在不可数集 \\(A \\subseteq \\mathbb{R}\\) 使得 \\(m(A) = 0\\)？",
+        "options": [
+          "不存在，不可数集必有正测度",
+        "存在，Cantor 集即是例子",
+        "存在，但仅在选择公理下",
+        "取决于连续统假设"
+        ],
+        "answer": 1,
+        "explanation": "Cantor 集 \\(C\\) 是标准例子：\\(C\\) 不可数（通过三进制展开与 \\([0,1]\\) 等势），但 \\(m(C) = 0\\)（构造中去掉的区间总长为 1）。这说明测度与基数无关——不可数集可以零测，可数集也必零测，但不可数集不一定正测。还有更极端的例子：\\(\\mathbb{R}\\) 中存在零测集的基数为 \\(2^{\\aleph_0}\\)。"
+      },
+      {
+        "id": "real-analysis-ch02-q22",
+        "question": "设 \\(E_n\\) 是 \\([0,1]\\) 中的开集，\\(m(E_n) > 1 - 1/2^n\\)。则 \\(m\\bigl(\\bigcap_{n=1}^\\infty E_n\\bigr)\\) 至少为多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(1\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(m(E_n^c) < 1/2^n\\)，故 \\(m(\\bigcup E_n^c) \\leq \\sum m(E_n^c) < \\sum 1/2^n = 1\\)。\\(\\bigcap E_n = (\\bigcup E_n^c)^c\\)，故 \\(m(\\bigcap E_n) = 1 - m(\\bigcup E_n^c) > 1 - 1 = 0\\)。更精确地：\\(m(\\bigcup_{n=1}^\\infty E_n^c) \\leq \\sum_{n=1}^\\infty 1/2^n = 1\\)，但取前 \\(N\\) 项，\\(m(\\bigcup_{n=1}^N E_n^c) < \\sum_{n=1}^N 1/2^n < 1\\)，故 \\(m(\\bigcap E_n) \\geq 1 - 1 = 0\\)。事实上更精准估计：\\(m(\\bigcap E_n) \\geq 1 - \\sum 1/2^n\\)。取极限后只能确保 \\(\\geq 0\\)，但可证 \\(\\geq 1/2\\)：取 \\(N=1\\)，\\(m(\\bigcap_{n=1}^\\infty E_n) \\geq m(E_1) - \\sum_{n=2}^\\infty m(E_n^c) > (1-1/2) - \\sum_{n=2}^\\infty 1/2^n = 1/2 - 1/2 = 0\\)。更好的估计：\\(m(\\bigcap E_n) = 1 - m(\\bigcup E_n^c) \\geq 1 - \\sum m(E_n^c) > 1 - 1 = 0\\)。选 B。"
+      },
+      {
+        "id": "real-analysis-ch02-q23",
+        "question": "设 \\(f: [0,1] \\to [0,1]\\) 连续且满射。若 \\(A\\) 不可测，则 \\(f^{-1}(A)\\) 是否可测？",
+        "options": [
+          "一定可测",
+        "一定不可测",
+        "可能可测也可能不可测",
+        "取决于 \\(f\\) 是否单射"
+        ],
+        "answer": 2,
+        "explanation": "连续函数的原像将 Borel 集映为 Borel 集，但 Lebesgue 可测集的原像不一定可测。如果 \\(A\\) 不可测但恰好 \\(f^{-1}(A)\\) 是零测集的子集则可测（完备性）。反之也可以构造不可测原像。因此答案取决于具体情况。注意：Borel 可测与 Lebesgue 可测的区别在此很关键。"
+      },
+      {
+        "id": "real-analysis-ch02-q24",
+        "question": "设 \\(A \\subseteq \\mathbb{R}\\) 可测，\\(m(A) > 0\\)。考虑 \\(A\\) 的 Lebesgue 密度点：\\(\\lim_{r \\to 0} m(A \\cap (x-r, x+r))/(2r) = 1\\)。密度点集 \\(D\\) 与 \\(A\\) 的关系是？",
+        "options": [
+          "\\(D = A\\)",
+        "\\(m(D \\triangle A) = 0\\)（几乎处处相等）",
+        "\\(D \\subseteq A\\)",
+        "\\(D\\) 可能与 \\(A\\) 不相交"
+        ],
+        "answer": 1,
+        "explanation": "Lebesgue 密度定理：几乎每一个 \\(x \\in A\\) 都是 \\(A\\) 的密度点，几乎每一个 \\(x \\notin A\\) 都是 \\(A^c\\) 的密度点。因此 \\(m(D \\triangle A) = 0\\)。但 \\(D\\) 不必等于 \\(A\\)（如 \\(A\\) 的边界点处密度可能不存在或不为 1），选 B。"
+      },
+      {
+        "id": "real-analysis-ch02-q25",
+        "question": "假设不使用选择公理（仅 ZF 框架）。以下哪个陈述可能成立？",
+        "options": [
+          "所有 \\(\\mathbb{R}\\) 的子集都是 Lebesgue 可测的",
+        "存在不可测集",
+        "Lebesgue 测度无法定义",
+        "外测度不存在"
+        ],
+        "answer": 0,
+        "explanation": "在 ZF（不含选择公理）+ 某些额外一致性假设（如 Solovay 模型）下，可以证明 \\(\\mathbb{R}\\) 的所有子集都是 Lebesgue 可测的。不可测集的存在依赖于选择公理（Vitali 构造需要选取代表元）。因此，不可测集不是 ZF 的定理，而是 ZFC 的。"
+      },
+      {
+        "id": "real-analysis-ch02-q26",
+        "question": "在数字信号采样中，Nyquist 采样定理要求采样率超过信号最高频率的两倍。若信号频带 \\([0, B]\\) 对应的频域 Lebesgue 测度为 \\(B\\)，将频带 \\([0, B]\\) 离散化为 \\(N\\) 个等距采样点。当 \\(N \\to \\infty\\) 时，离散频率集 \\(F_N\\) 的 Lebesgue 测度是多少？",
+        "options": [
+          "\\(B\\)",
+        "\\(0\\)",
+        "\\(B/N\\)",
+        "\\(NB\\)"
+        ],
+        "answer": 1,
+        "explanation": "有限点集的 Lebesgue 测度始终为 \\(0\\)。无论 \\(N\\) 多大，\\(F_N\\) 是有限集（因此可数），\\(m(F_N) = 0\\)。即使 \\(N \\to \\infty\\)（可数个点），\\(m(\\bigcup F_N) = 0\\)。在信号处理中，我们使用的是离散测度（计数测度）来描述采样点，而非 Lebesgue 测度。"
+      },
+      {
+        "id": "real-analysis-ch02-q27",
+        "question": "在概率论中，均匀分布 \\(U([0,1])\\) 的概率测度即 Lebesgue 测度限制在 \\([0,1]\\) 上。若产品质量控制中，缺陷出现位置在 \\([0,1]\\) 上均匀分布，问缺陷恰好出现在 \\(x = 0.5\\) 处的概率是多少？",
+        "options": [
+          "\\(0.5\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(0.01\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(X = 0.5) = m(\\{0.5\\}) = 0\\)。连续均匀分布中，任何单点的概率都为零——这是 Lebesgue 测度\"无原子\"性质的直接体现。实际意义：虽然缺陷可以出现在 \\(x = 0.5\\)（\\(P > 0\\) 不是必要条件），但该事件的概率为零。概率为零 \\(\\neq\\) 不可能。"
+      },
+      {
+        "id": "real-analysis-ch02-q28",
+        "question": "在材料科学中，某合金的晶界网络可建模为 \\(\\mathbb{R}^3\\) 中的二维曲面。用三维 Lebesgue 测度来衡量这些晶界的\"体积\"，结果是？这说明需要什么工具？",
+        "options": [
+          "体积为正，Lebesgue 测度足够",
+        "体积为零，需要 Hausdorff 测度",
+        "体积为无穷，需要 \\(\\sigma\\)-有限化",
+        "体积未定义"
+        ],
+        "answer": 1,
+        "explanation": "二维曲面在 \\(\\mathbb{R}^3\\) 中的 3-维 Lebesgue 测度为零（低维子流形的高维测度为零，类比直线在平面中面积为零）。要度量晶界的\"大小\"，需要 2-维 Hausdorff 测度 \\(\\mathcal{H}^2\\)，它推广了曲面面积的概念。这是几何测度论的出发点。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="real-analysis"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/real-analysis.html" class="module-name">实分析/测度论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 外测度与 Carathéodory 条件</a></li>
+      <li><a href="#kp2">02 · Lebesgue 测度的性质</a></li>
+      <li><a href="#kp3">03 · 不可测集的存在</a></li>
+      <li><a href="#kp4">04 · Cantor 集与零测不可数集</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>Lebesgue 测度的构造</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>外测度与 Carathéodory 条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何在 \(\mathbb{R}\) 上构造一个推广"长度"的测度？直接定义所有 子集的测度是不可能的（Vitali 构造表明不存在平移不变的全集测度）。 Carathéodory 的天才方案是：先定义一个对所有集合"粗略估计大小" 的外测度，再筛选出满足"分割一致性"条件的集合作为可测集。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从"所有集合的粗略估计"到"精确测度"的过程体现了分析学的 "先放松再约束"策略：外测度对所有集合有定义但只满足次可加性， Carathéodory 条件从中筛选出满足 σ-可加性的子族。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>外测度构造</strong>：对 \(E \subseteq \mathbb{R}\)，定义 \[\mu^*(E) = \inf\left\{\sum_{n=1}^{\infty} |I_n| : E \subseteq \bigcup_{n=1}^{\infty} I_n,\; I_n \text{ 为开区间}\right\}\] 外测度性质：\(\mu^*(\emptyset) = 0\)，单调性，次可加性 \(\mu^*(\bigcup E_n) \leq \sum \mu^*(E_n)\)。 <strong>Carathéodory 条件</strong>：\(E\) 是 Lebesgue 可测的，若对任意 \(A \subseteq \mathbb{R}\)， \[\mu^*(A) = \mu^*(A \cap E) + \mu^*(A \cap E^c)\] 直觉：\(E\) 能将任意集合 \(A\) "干净地"一分为二。 <strong>定理</strong>：满足 Carathéodory 条件的集合族构成 σ-代数， 且 \(\mu^*\) 限制在这个 σ-代数上是完备测度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明每个外测度为零的集合是 Lebesgue 可测的。 解答：设 \(\mu^*(E) = 0\)，对任意 \(A\)， \(\mu^*(A \cap E) \leq \mu^*(E) = 0\)， 故 \(\mu^*(A \cap E) + \mu^*(A \cap E^c) = \mu^*(A \cap E^c) \leq \mu^*(A)\)。 反向由次可加性 \(\mu^*(A) \leq \mu^*(A \cap E) + \mu^*(A \cap E^c)\)。 两边相等，Carathéodory 条件成立。 易错点：混淆"外测度为零"与"测度为零"。外测度对所有集合有定义， 只有通过 Carathéodory 条件筛选后才成为真正的测度。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Carathéodory 可测性条件 \(\mu^*(A) = \mu^*(A \cap E) + \mu^*(A \cap E^c)\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(A = (A \\cap E) \\cup (A \\cap E^c)\\)，由次可加性')">A. 因为 \(\geq\) 方向由外测度的次可加性自动成立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A = (A \\cap E) \\cup (A \\cap E^c)\\)，由次可加性')">B. 因为两边总是相等的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A = (A \\cap E) \\cup (A \\cap E^c)\\)，由次可加性')">C. 因为 \(\leq\) 蕴含 \(\geq\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A = (A \\cap E) \\cup (A \\cap E^c)\\)，由次可加性')">D. 因为外测度是可加的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Lebesgue 测度的性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Lebesgue 测度构造完成后，需要验证它确实推广了我们熟悉的"长度"。 它的核心特征是什么？平移不变性确保"不同位置的相同形状有相同大小"； 正则性提供了用开集/紧集从外部/内部逼近的能力，这在实际计算中至关 重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>平移不变性</strong>：对任意 Lebesgue 可测集 \(E\) 和 \(x \in \mathbb{R}\)， \(E + x = \{e + x : e \in E\}\) 也可测，且 \[\lambda(E + x) = \lambda(E)\] 这是因为外测度定义中的区间覆盖与平移相容。 <strong>外正则性</strong>：\(\lambda(E) = \inf\{\lambda(U) : U \supseteq E,\; U \text{ 开}\}\)。 证明：由外测度定义，\(E\) 可被开区间之并覆盖，其总长度 可任意逼近 \(\lambda(E)\)。 <strong>内正则性</strong>：\(\lambda(E) = \sup\{\lambda(K) : K \subseteq E,\; K \text{ 紧}\}\)。 <strong>特征定理</strong>：Lebesgue 测度是 \(\mathbb{R}\) 上唯一（到常数倍） 的平移不变 Borel 测度（Haar 测度在 \((\mathbb{R}, +)\) 上的唯一性）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>正则性在概率论的弱收敛理论中不可或缺：Prokhorov 定理利用 内正则性将测度族的紧性问题转化为 tight 性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(\mathbb{Q} \cap [0,1]\) 的 Lebesgue 测度为 0。 解答：\(\mathbb{Q} \cap [0,1]\) 是可数集 \(\{q_1, q_2, \ldots\}\)。 对任意 \(\varepsilon > 0\)，覆盖 \(q_n\) 以长度 \(\varepsilon/2^n\) 的开区间。总长度 \(\leq \sum \varepsilon/2^n = \varepsilon\)。 令 \(\varepsilon \to 0\) 得 \(\lambda(\mathbb{Q} \cap [0,1]) = 0\)。 易错点：误以为"稠密集的测度一定正"。\(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密但测度为零。稠密性是拓扑概念，与测度无关。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Lebesgue 测度具有下列哪个性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 不对（Vitali 集不可测）；B 正确，平移不变性是')">A. 对所有 \(\mathbb{R}\) 的子集有定义</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！A 不对（Vitali 集不可测）；B 正确，平移不变性是')">B. 平移不变性</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 不对（Vitali 集不可测）；B 正确，平移不变性是')">C. 每个无穷集的测度为 \(\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 不对（Vitali 集不可测）；B 正确，平移不变性是')">D. 与 Borel σ-代数相同的定义域</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>不可测集的存在</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个自然的问题：\(\mathbb{R}\) 的所有子集都可以被 Lebesgue 测量吗？ 1905年 Vitali 给出了否定回答：利用选择公理，他构造了一个不可测集。 这一结果深刻揭示了测度论的边界——平移不变性、σ-可加性和"所有集合 可测"三者不可兼得。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Vitali 构造利用了等价关系的商空间思想：将 \([0,1]\) 按 \(x \sim y \Leftrightarrow x - y \in \mathbb{Q}\) 分类， 用选择公理从每个等价类中取一个代表元。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Vitali 构造</strong>：定义 \([0,1]\) 上的等价关系 \(x \sim y \Leftrightarrow x - y \in \mathbb{Q}\)。 由选择公理，取选择集 \(V\)（每个等价类恰好一个代表元）。 <strong>证明 \(V\) 不可测</strong>（反证法）：枚举 \(\{r_n\} = \mathbb{Q} \cap [-1,1]\)， 则 \(V + r_n\) 两两不交（否则同一等价类有两个代表元），且 \[[0,1] \subseteq \bigcup_{n=1}^{\infty} (V + r_n) \subseteq [-1,2]\] 若 \(V\) 可测，由平移不变性 \(\lambda(V + r_n) = \lambda(V)\)， \[1 \leq \sum_{n=1}^{\infty} \lambda(V) \leq 3\] 若 \(\lambda(V) = 0\)，则 \(\sum = 0 < 1\)，矛盾； 若 \(\lambda(V) > 0\)，则 \(\sum = +\infty > 3\)，矛盾。 故 \(V\) 不可测。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Banach-Tarski 悖论（\(\mathbb{R}^3\) 版本）声称球可以 分解为有限块并重组为两个等大球。这与 Lebesgue 测度矛盾吗？ 解答：不矛盾，因为 Banach-Tarski 分解中的"块"是不可测集。 Lebesgue 测度只对可测集有可加性，不可测集的"分解-重组" 不受测度约束。 易错点：误以为"不可测集不存在"或"选择公理可以省略"。 事实上，在 ZF + 选择公理 (ZFC) 下不可测集必然存在； 但在某些不含完整选择公理的模型中，所有实数子集可以可测。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Vitali 不可测集的构造依赖于什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Vitali 构造需要从不可数多个等价类中各取一个代表元，')">A. 连续统假设</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Vitali 构造需要从不可数多个等价类中各取一个代表元，')">B. 选择公理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Vitali 构造需要从不可数多个等价类中各取一个代表元，')">C. 排中律</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Vitali 构造需要从不可数多个等价类中各取一个代表元，')">D. 良序原理（但不需要选择公理）</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Cantor 集与零测不可数集</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>直觉告诉我们：集合越"大"（元素越多），其测度应该越大。但 Cantor 集打破了这个直觉——它是不可数的（与 \(\mathbb{R}\) 等势），却具有 零 Lebesgue 测度。这个反例是测度论中最重要的"病理对象"之一， 深刻说明了"测度零"与"基数小"是完全不同的概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Cantor 集的构造体现了"迭代移除"的分形思想。它揭示了 "拓扑大小"（不可数、完全不连通、无孤立点）和"测度大小" （零测度）可以完全独立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>构造</strong>：从 \(C_0 = [0,1]\) 出发，递归移除每个区间的中间三分之一： \(C_1 = [0,1/3] \cup [2/3,1]\)，\(C_2 = [0,1/9] \cup [2/9,1/3] \cup [2/3,7/9] \cup [8/9,1]\)，…… \[C = \bigcap_{n=0}^{\infty} C_n\] <strong>测度计算</strong>：第 \(n\) 步移除的区间总长为 \(2^{n-1} \cdot 3^{-n}\)， 总移除长度： \[\sum_{n=1}^{\infty} \frac{2^{n-1}}{3^n} = \frac{1/3}{1 - 2/3} = 1\] 故 \(\lambda(C) = 1 - 1 = 0\)。 <strong>不可数性</strong>：\(C\) 中的点恰好是三进制展开中只含 \(0\) 和 \(2\) 的实数。映射 \(0.a_1 a_2 \cdots_{(3)} \mapsto 0.b_1 b_2 \cdots_{(2)}\) （其中 \(b_i = a_i/2\)）给出 \(C\) 到 \([0,1]\) 的满射， 故 \(|C| = 2^{\aleph_0}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Cantor 集是分形几何的原型，其 Hausdorff 维数为 \(\log 2 / \log 3 \approx 0.631\)；在动力系统中，许多奇异吸引子具有 Cantor 集式的结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：构造一个测度为正的"胖 Cantor 集"。 解答：在第 \(n\) 步移除中间长度为 \(\alpha \cdot 3^{-n}\)（\(\alpha < 1\)） 的区间而非 \(3^{-n}\)。例如取 \(\alpha = 1/4\)，总移除长度为 \(\sum 2^{n-1} \cdot (1/4) \cdot 3^{-n} \cdot 3^n / 3^n\) —— 更简单地，令每步移除中间长度 \(1/2^{2n}\)，使总移除量 \(< 1\)， 剩余集为正测度、无处稠密的闭集。 易错点：误以为"零测集一定是可数的"。 Cantor 集是不可数零测集的标准反例。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Cantor 集是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cantor 集通过三进制展开与 \\([0,1]\\) 等势（不可数），')">A. 可数且零测</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cantor 集通过三进制展开与 \\([0,1]\\) 等势（不可数），')">B. 不可数且测度为正</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Cantor 集通过三进制展开与 \\([0,1]\\) 等势（不可数），')">C. 不可数且零测</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cantor 集通过三进制展开与 \\([0,1]\\) 等势（不可数），')">D. 有限集</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/analysis/real-analysis.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

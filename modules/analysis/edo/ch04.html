@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 线性微分方程组 — 常微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "edo-ch04-q1",
+        "question": "一阶线性方程组 \\(\\mathbf{x}'=A(t)\\mathbf{x}\\) 中，\\(A\\) 为 \\(n\\times n\\) 矩阵。基解矩阵 \\(\\Phi(t)\\) 满足什么条件？",
+        "options": [
+          "\\(\\Phi'=A\\Phi\\) 且 \\(\\det\\Phi\\neq 0\\)",
+        "\\(\\Phi'=A\\Phi\\) 且 \\(\\det\\Phi = 0\\)",
+        "\\(\\Phi' = \\Phi A\\)",
+        "\\(\\Phi\\) 是对称矩阵"
+        ],
+        "answer": 0,
+        "explanation": "基解矩阵的列是 \\(n\\) 个线性无关解，所以满足 \\(\\Phi'=A\\Phi\\) 和 \\(\\det\\Phi(t)\\neq 0\\)（至少在某一点，由 Abel-Liouville 公式则处处非零）。\\(\\det\\Phi=0\\) 意味着列向量线性相关，不构成基本解组。"
+      },
+      {
+        "id": "edo-ch04-q2",
+        "question": "矩阵指数 \\(e^{tA}\\) 的定义是？",
+        "options": [
+          "\\(\\sum_{k=0}^{n} \\frac{(tA)^k}{k!}\\)",
+        "\\(\\sum_{k=0}^{\\infty} \\frac{(tA)^k}{k!}\\)",
+        "\\(\\lim_{n\\to\\infty}(I+tA/n)\\)",
+        "\\(I + tA\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(e^{tA}=\\sum_{k=0}^{\\infty}\\frac{t^k A^k}{k!}\\)，该级数对任意 \\(A\\) 和 \\(t\\) 绝对收敛。A 只是有限截断。C 少了指数：应为 \\((I+tA/n)^n\\)。D 仅是一阶近似。\\(e^{tA}\\) 满足 \\(\\frac{d}{dt}e^{tA}=Ae^{tA}\\)，\\(e^{0\\cdot A}=I\\)。"
+      },
+      {
+        "id": "edo-ch04-q3",
+        "question": "若 \\(A\\) 是 \\(2\\times 2\\) 零矩阵，\\(e^{tA}\\) 等于？",
+        "options": [
+          "\\(0\\)",
+        "\\(I\\)",
+        "\\(tA\\)",
+        "\\(I + tA\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(A=0\\) 时 \\(A^k=0\\)（\\(k\\geq 1\\)），\\(e^{tA}=I+0+0+\\cdots=I\\)。对应方程 \\(\\mathbf{x}'=0\\) 的解为常数向量，基解矩阵就是单位矩阵。"
+      },
+      {
+        "id": "edo-ch04-q4",
+        "question": "\\(A=\\begin{pmatrix}2&0\\\\0&-1\\end{pmatrix}\\)（对角矩阵），\\(e^{tA}\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix}e^{2t}&0\\\\0&e^{-t}\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}2t&0\\\\0&-t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^{2t}&0\\\\0&e^{t}\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^{2t}&e^{-t}\\\\e^{-t}&e^{2t}\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "对角矩阵的矩阵指数：\\(e^{t\\text{diag}(\\lambda_1,\\lambda_2)}=\\text{diag}(e^{t\\lambda_1},e^{t\\lambda_2})\\)。此处 \\(\\lambda_1=2\\)，\\(\\lambda_2=-1\\)。这是最简单的情况，避免了 Jordan 块的额外计算。"
+      },
+      {
+        "id": "edo-ch04-q5",
+        "question": "Abel-Liouville 公式：\\(\\det\\Phi(t) = \\det\\Phi(t_0)\\exp(\\int_{t_0}^t \\text{tr}A(s)\\,ds)\\)。若 \\(\\text{tr}A = -3\\)（常数），\\(\\det\\Phi(0)=2\\)，则 \\(\\det\\Phi(1)\\) 等于？",
+        "options": [
+          "\\(2e^3\\)",
+        "\\(2e^{-3}\\)",
+        "\\(2\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\det\\Phi(1)=2\\exp(\\int_0^1(-3)ds)=2e^{-3}\\)。迹 \\(\\text{tr}A=-3\\) 反映了相体积的压缩率（Liouville 定理的 ODE 版本）。"
+      },
+      {
+        "id": "edo-ch04-q6",
+        "question": "\\(A=\\begin{pmatrix}0&1\\\\-1&0\\end{pmatrix}\\)，\\(e^{tA}\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix}\\cos t&\\sin t\\\\-\\sin t&\\cos t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^t&te^t\\\\0&e^t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}\\cos t&-\\sin t\\\\\\sin t&\\cos t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&t\\\\-t&1\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "特征值 \\(\\lambda=\\pm i\\)。\\(A^2=-I\\)，\\(A^3=-A\\)，\\(A^4=I\\)。\\(e^{tA}=I\\cos t+A\\sin t=\\begin{pmatrix}\\cos t&\\sin t\\\\-\\sin t&\\cos t\\end{pmatrix}\\)。描述的是平面旋转。C 差一个符号——仔细计算 \\(A\\sin t\\) 中的元素位置。"
+      },
+      {
+        "id": "edo-ch04-q7",
+        "question": "非齐次系统 \\(\\mathbf{x}' = A\\mathbf{x} + \\mathbf{f}(t)\\) 的通解公式（Duhamel/常数变易法）是？",
+        "options": [
+          "\\(\\mathbf{x} = e^{tA}\\mathbf{x}_0\\)",
+        "\\(\\mathbf{x} = e^{tA}\\mathbf{x}_0 + \\int_0^t e^{(t-s)A}\\mathbf{f}(s)\\,ds\\)",
+        "\\(\\mathbf{x} = \\int_0^t e^{sA}\\mathbf{f}(s)\\,ds\\)",
+        "\\(\\mathbf{x} = e^{tA}\\int_0^t \\mathbf{f}(s)\\,ds\\)"
+        ],
+        "answer": 1,
+        "explanation": "齐次解 \\(e^{tA}\\mathbf{x}_0\\) 加上特解 \\(\\int_0^t e^{(t-s)A}\\mathbf{f}(s)ds\\)（Duhamel 公式）。常数变易法令 \\(\\mathbf{x}=e^{tA}\\mathbf{c}(t)\\)，则 \\(\\mathbf{c}(t)=\\mathbf{x}_0+\\int_0^t e^{-sA}\\mathbf{f}(s)ds\\)，代回得 B。"
+      },
+      {
+        "id": "edo-ch04-q8",
+        "question": "\\(A=\\begin{pmatrix}3&1\\\\0&3\\end{pmatrix}\\)（Jordan 块 \\(J_2(3)\\)），\\(e^{tA}\\) 等于？",
+        "options": [
+          "\\(e^{3t}\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^{3t}&e^{3t}\\\\0&e^{3t}\\end{pmatrix}\\)",
+        "\\(e^{3t}\\begin{pmatrix}1&0\\\\t&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^{3t}&te^t\\\\0&e^{3t}\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=3I+N\\)，\\(N=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)，\\(N^2=0\\)。\\(e^{tA}=e^{3tI}e^{tN}=e^{3t}(I+tN)=e^{3t}\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)。\\(3I\\) 和 \\(N\\) 可交换，所以 \\(e^{t(3I+N)}=e^{3tI}e^{tN}\\)。"
+      },
+      {
+        "id": "edo-ch04-q9",
+        "question": "\\(A=\\begin{pmatrix}1&-2\\\\1&3\\end{pmatrix}\\)，特征值 \\(\\lambda=2\\)（二重）。\\(A\\) 可对角化吗？",
+        "options": [
+          "可以",
+        "不可以，\\((A-2I)\\) 的秩为 1",
+        "不可以，\\((A-2I)\\) 的秩为 2",
+        "需要更多信息"
+        ],
+        "answer": 1,
+        "explanation": "\\(A-2I=\\begin{pmatrix}-1&-2\\\\1&1\\end{pmatrix}\\)，\\(\\text{rank}=1\\)（\\(\\text{nullity}=1<2\\)）。只有 1 个线性无关特征向量，不能对角化，需要 Jordan 形 \\(J_2(2)\\)。\\(e^{tA}=P e^{tJ}P^{-1}\\) 中 \\(e^{tJ}=e^{2t}\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "edo-ch04-q10",
+        "question": "若 \\(A\\) 和 \\(B\\) 不可交换（\\(AB\\neq BA\\)），下列哪个一般不成立？",
+        "options": [
+          "\\(e^{(A+B)t} = e^{At}e^{Bt}\\)",
+        "\\(e^{A\\cdot 0} = I\\)",
+        "\\(\\frac{d}{dt}e^{At} = Ae^{At}\\)",
+        "\\((e^{At})^{-1} = e^{-At}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^{(A+B)t}=e^{At}e^{Bt}\\) 当且仅当 \\(AB=BA\\)。这是矩阵指数与标量指数的关键区别。Baker-Campbell-Hausdorff 公式给出一般情况下的修正。B、C、D 对任意矩阵都成立。"
+      },
+      {
+        "id": "edo-ch04-q11",
+        "question": "\\(\\mathbf{x}'=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\mathbf{x}+\\begin{pmatrix}0\\\\1\\end{pmatrix}\\)，\\(\\mathbf{x}(0)=\\mathbf{0}\\)。\\(\\mathbf{x}(t)\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix}t^2/2\\\\t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}t\\\\1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^t-1\\\\e^t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}t\\\\t\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)，\\(e^{tA}=\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)。Duhamel：\\(\\mathbf{x}=\\int_0^t e^{(t-s)A}\\begin{pmatrix}0\\\\1\\end{pmatrix}ds=\\int_0^t\\begin{pmatrix}t-s\\\\1\\end{pmatrix}ds=\\begin{pmatrix}t^2/2\\\\t\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "edo-ch04-q12",
+        "question": "两个基解矩阵 \\(\\Phi_1\\) 和 \\(\\Phi_2\\) 的关系是什么？",
+        "options": [
+          "\\(\\Phi_2 = \\Phi_1 + C\\)",
+        "\\(\\Phi_2 = \\Phi_1 C\\)（\\(C\\) 为可逆常数矩阵）",
+        "\\(\\Phi_2 = C\\Phi_1\\)（\\(C\\) 为可逆常数矩阵）",
+        "\\(\\Phi_2 = \\Phi_1^{-1}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\Phi_2\\) 的每列是齐次解，可由 \\(\\Phi_1\\) 的列线性组合得到：\\(\\Phi_2=\\Phi_1 C\\)。\\(C\\) 是常数矩阵且可逆（因为两者都是基解矩阵，\\(\\det C\\neq 0\\)）。注意乘 \\(C\\) 在右侧，不是在左侧。"
+      },
+      {
+        "id": "edo-ch04-q13",
+        "question": "\\(A\\) 有特征值 \\(\\lambda_1=1+2i\\)，\\(\\lambda_2=1-2i\\)（实矩阵），对应的实通解形式是？",
+        "options": [
+          "\\(c_1 e^{(1+2i)t}\\mathbf{v}_1+c_2 e^{(1-2i)t}\\mathbf{v}_2\\)（复形式）",
+        "\\(e^t(c_1\\text{Re}(\\mathbf{v}_1)\\cos 2t-c_1\\text{Im}(\\mathbf{v}_1)\\sin 2t+\\cdots)\\)",
+        "\\((c_1+c_2 t)e^t\\)",
+        "\\(c_1 e^t\\cos 2t + c_2 e^t\\sin 2t\\)"
+        ],
+        "answer": 1,
+        "explanation": "复解 \\(e^{(1+2i)t}\\mathbf{v}\\) 的实部和虚部分别是实线性无关解：\\(e^t(\\text{Re}(\\mathbf{v})\\cos 2t-\\text{Im}(\\mathbf{v})\\sin 2t)\\) 和 \\(e^t(\\text{Re}(\\mathbf{v})\\sin 2t+\\text{Im}(\\mathbf{v})\\cos 2t)\\)。D 不完整——少了向量部分。"
+      },
+      {
+        "id": "edo-ch04-q14",
+        "question": "\\(e^{tA}\\) 在 \\(t=0\\) 处的 Taylor 展开到两阶是 \\(I + tA + \\frac{t^2}{2}A^2 + O(t^3)\\)。若 \\(A=\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\)，\\(e^{tA}\\) 的 \\((1,1)\\) 元素到二阶近似是？",
+        "options": [
+          "\\(1-t^2/2\\)",
+        "\\(1+t^2/2\\)",
+        "\\(1\\)",
+        "\\(1-t\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=\\begin{pmatrix}-1&0\\\\0&-1\\end{pmatrix}=-I\\)。\\((I+tA+t^2A^2/2)_{11}=1+0+t^2(-1)/2=1-t^2/2\\)。精确值就是 \\(\\cos t\\) 的 Taylor 展开，因为 \\(e^{tA}\\) 精确结果的 \\((1,1)\\) 元素是 \\(\\cos t\\)。"
+      },
+      {
+        "id": "edo-ch04-q15",
+        "question": "用 Duhamel 公式计算 \\(\\mathbf{x}'=\\lambda\\mathbf{x}+f(t)\\)（标量情况）的解，等价于什么经典公式？",
+        "options": [
+          "Lagrange 常数变易法",
+        "Euler 法",
+        "分离变量法",
+        "幂级数法"
+        ],
+        "answer": 0,
+        "explanation": "标量 Duhamel：\\(x(t)=e^{\\lambda t}x_0+\\int_0^t e^{\\lambda(t-s)}f(s)ds\\)。这正是一阶线性 ODE 的常数变易法公式（积分因子法），其中积分因子为 \\(e^{-\\lambda t}\\)。Duhamel 公式是常数变易法到系统（向量/矩阵）的自然推广。"
+      },
+      {
+        "id": "edo-ch04-q16",
+        "question": "\\(\\mathbf{x}'=A\\mathbf{x}\\)，\\(A=\\begin{pmatrix}1&0\\\\0&-2\\end{pmatrix}\\)，初值 \\(\\mathbf{x}(0)=\\begin{pmatrix}3\\\\-1\\end{pmatrix}\\)。\\(\\mathbf{x}(t)\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix}3e^t\\\\-e^{-2t}\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}3e^{-t}\\\\-e^{2t}\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}3\\\\-1\\end{pmatrix}e^{-t}\\)",
+        "\\(\\begin{pmatrix}3e^t\\\\-e^{2t}\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "对角系统：\\(x_1'=x_1\\)，\\(x_2'=-2x_2\\)。\\(x_1=3e^t\\)，\\(x_2=-e^{-2t}\\)。\\(\\mathbf{x}=e^{tA}\\mathbf{x}_0=\\begin{pmatrix}e^t&0\\\\0&e^{-2t}\\end{pmatrix}\\begin{pmatrix}3\\\\-1\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "edo-ch04-q17",
+        "question": "\\(A=\\begin{pmatrix}2&1&0\\\\0&2&1\\\\0&0&2\\end{pmatrix}\\)（\\(J_3(2)\\)），\\(e^{tA}\\) 等于？",
+        "options": [
+          "\\(e^{2t}\\begin{pmatrix}1&t&t^2/2\\\\0&1&t\\\\0&0&1\\end{pmatrix}\\)",
+        "\\(e^{2t}\\begin{pmatrix}1&t&t^2\\\\0&1&t\\\\0&0&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^{2t}&te^{2t}&t^2e^{2t}/2\\\\0&e^{2t}&te^{2t}\\\\0&0&e^{2t}\\end{pmatrix}\\)",
+        "A 和 C 等价"
+        ],
+        "answer": 3,
+        "explanation": "\\(A=2I+N\\)（\\(N\\) 为幂零矩阵，\\(N^3=0\\)）。\\(e^{tN}=I+tN+\\frac{t^2}{2}N^2=\\begin{pmatrix}1&t&t^2/2\\\\0&1&t\\\\0&0&1\\end{pmatrix}\\)。\\(e^{tA}=e^{2t}e^{tN}\\)。A 和 C 只是乘法分配前后的写法，数值完全相同。"
+      },
+      {
+        "id": "edo-ch04-q18",
+        "question": "\\(\\mathbf{x}'=\\begin{pmatrix}1&0\\\\0&2\\end{pmatrix}\\mathbf{x}+\\begin{pmatrix}e^{2t}\\\\0\\end{pmatrix}\\)，\\(\\mathbf{x}(0)=\\mathbf{0}\\)。\\(x_1(t)\\) 等于？",
+        "options": [
+          "\\(te^{2t}\\)",
+        "\\(e^{2t}-e^t\\)",
+        "\\(te^t\\)",
+        "\\(e^{2t}/(2-1)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(x_1'=x_1+e^{2t}\\)，\\(x_2'=2x_2\\)。\\(x_2=0\\)（初值 0）。对 \\(x_1\\)：积分因子 \\(e^{-t}\\)，\\((e^{-t}x_1)'=e^t\\)，\\(e^{-t}x_1=e^t+C\\)。\\(x_1(0)=0\\)：\\(0=1+C\\)，\\(C=-1\\)。\\(x_1=e^{2t}-e^t\\)。"
+      },
+      {
+        "id": "edo-ch04-q19",
+        "question": "\\(A=\\begin{pmatrix}0&-4\\\\1&4\\end{pmatrix}\\)，特征值为 \\(\\lambda=2\\)（二重）。求广义特征向量 \\(\\mathbf{w}\\)（\\((A-2I)\\mathbf{w}=\\mathbf{v}\\)，\\(\\mathbf{v}\\) 为特征向量）。若 \\(\\mathbf{v}=\\begin{pmatrix}2\\\\1\\end{pmatrix}\\)，\\(\\mathbf{w}\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix}1\\\\0\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}0\\\\1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1\\\\1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}-1\\\\0\\end{pmatrix}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(A-2I=\\begin{pmatrix}-2&-4\\\\1&2\\end{pmatrix}\\)。\\((A-2I)\\mathbf{w}=\\mathbf{v}\\)：\\(-2w_1-4w_2=2\\)，\\(w_1+2w_2=1\\)（一致方程）。\\(w_1=1-2w_2\\)，取 \\(w_2=0\\)：\\(\\mathbf{w}=\\begin{pmatrix}1\\\\0\\end{pmatrix}\\)。但验证 C：\\(-2(1)-4(1)=-6\\neq 2\\)。取 \\(w_2=0\\)：\\(\\mathbf{w}=\\begin{pmatrix}1\\\\0\\end{pmatrix}\\)。答案是 A。"
+      },
+      {
+        "id": "edo-ch04-q20",
+        "question": "证明 \\(e^{At}\\) 可逆并给出逆的表达式。",
+        "options": [
+          "\\((e^{At})^{-1}=e^{-At}\\)，因为 \\(e^{At}e^{-At}=e^{0}=I\\)",
+        "\\((e^{At})^{-1}\\) 不一定存在",
+        "\\((e^{At})^{-1}=I-At\\)",
+        "\\((e^{At})^{-1}=e^{A/t}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\) 和 \\(-A\\) 可交换，因此 \\(e^{At}e^{-At}=e^{At+(-At)}=e^{0}=I\\)（利用 \\(AB=BA\\Rightarrow e^{A+B}=e^Ae^B\\)）。所以 \\(e^{At}\\) 始终可逆，逆为 \\(e^{-At}\\)。\\(\\det e^{At}=e^{t\\cdot\\text{tr}A}\\neq 0\\) 也说明了可逆性。"
+      },
+      {
+        "id": "edo-ch04-q21",
+        "question": "系统 \\(\\mathbf{x}'=A(t)\\mathbf{x}\\) 的 \\(n\\) 个解 \\(\\mathbf{x}_1,\\ldots,\\mathbf{x}_n\\) 在某 \\(t_0\\) 处线性无关，是否在所有 \\(t\\) 处都线性无关？",
+        "options": [
+          "是，Abel-Liouville 公式保证",
+        "不一定，需逐点验证",
+        "仅当 \\(A\\) 为常数矩阵时成立",
+        "仅当 \\(n=2\\) 时成立"
+        ],
+        "answer": 0,
+        "explanation": "Abel-Liouville：\\(\\det\\Phi(t)=\\det\\Phi(t_0)\\exp(\\int_{t_0}^t\\text{tr}A(s)ds)\\)。\\(\\det\\Phi(t_0)\\neq 0\\)（\\(t_0\\) 处无关），指数函数不为零，故 \\(\\det\\Phi(t)\\neq 0\\)（处处无关）。"
+      },
+      {
+        "id": "edo-ch04-q22",
+        "question": "矩阵指数的半群性质 \\(e^{(s+t)A} = e^{sA}e^{tA}\\) 成立的根本原因是？",
+        "options": [
+          "因为 \\(sA\\) 和 \\(tA\\) 可交换（\\((sA)(tA)=(tA)(sA)\\)）",
+        "因为 \\(A\\) 是方阵",
+        "因为指数级数绝对收敛",
+        "因为 \\(e^x\\) 对任意 \\(x\\) 有定义"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^{A+B}=e^Ae^B\\) 当且仅当 \\(AB=BA\\)。\\(sA\\) 和 \\(tA\\) 的乘积 \\((sA)(tA)=st A^2=(tA)(sA)\\)，可交换。所以 \\(e^{(s+t)A}=e^{sA+tA}=e^{sA}e^{tA}\\)。这正是 \\(e^{tA}\\) 构成单参数群的基础。"
+      },
+      {
+        "id": "edo-ch04-q23",
+        "question": "\\(A=\\begin{pmatrix}a&-b\\\\b&a\\end{pmatrix}\\)（\\(b\\neq 0\\)），\\(e^{tA}\\) 等于？",
+        "options": [
+          "\\(e^{at}\\begin{pmatrix}\\cos bt&-\\sin bt\\\\\\sin bt&\\cos bt\\end{pmatrix}\\)",
+        "\\(e^{at}\\begin{pmatrix}\\cos bt&\\sin bt\\\\-\\sin bt&\\cos bt\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^{at}&-e^{bt}\\\\e^{bt}&e^{at}\\end{pmatrix}\\)",
+        "\\(e^{(a+b)t}I\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=aI+bJ\\)，\\(J=\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\)。\\(e^{tJ}=\\begin{pmatrix}\\cos bt&-\\sin bt\\\\\\sin bt&\\cos bt\\end{pmatrix}\\)（旋转矩阵）。\\(aI\\) 与 \\(bJ\\) 可交换，\\(e^{tA}=e^{at}e^{btJ}\\)。特征值 \\(a\\pm bi\\)，\\(e^{at}\\) 控制伸缩，\\(J\\) 控制旋转。"
+      },
+      {
+        "id": "edo-ch04-q24",
+        "question": "耦合弹簧系统 \\(m\\ddot{\\mathbf{q}} = -K\\mathbf{q}\\) 改写为一阶系统后，\\(K=\\begin{pmatrix}2&-1\\\\-1&2\\end{pmatrix}\\)（\\(m=1\\)），简正模态频率是？",
+        "options": [
+          "\\(\\omega_1=1\\)，\\(\\omega_2=\\sqrt{3}\\)",
+        "\\(\\omega_1=\\sqrt{2}\\)，\\(\\omega_2=\\sqrt{2}\\)",
+        "\\(\\omega_1=1\\)，\\(\\omega_2=2\\)",
+        "\\(\\omega_1=\\sqrt{3}\\)，\\(\\omega_2=\\sqrt{3}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\) 的特征值：\\(\\det(K-\\mu I)=(\\mu-2)^2-1=0\\)，\\(\\mu=1,3\\)。\\(\\omega_k=\\sqrt{\\mu_k}\\)，\\(\\omega_1=1\\)，\\(\\omega_2=\\sqrt{3}\\)。特征向量 \\(\\mathbf{v}_1=\\begin{pmatrix}1\\\\1\\end{pmatrix}\\)（同相模态，\\(\\omega_1=1\\)），\\(\\mathbf{v}_2=\\begin{pmatrix}1\\\\-1\\end{pmatrix}\\)（反相模态，\\(\\omega_2=\\sqrt{3}\\)）。"
+      },
+      {
+        "id": "edo-ch04-q25",
+        "question": "标准化基解矩阵 \\(\\Phi(t)\\)（满足 \\(\\Phi(0)=I\\)）与一般基解矩阵 \\(\\Psi(t)\\) 的关系是？",
+        "options": [
+          "\\(\\Phi(t)=\\Psi(t)\\Psi(0)^{-1}\\)",
+        "\\(\\Phi(t)=\\Psi(0)\\Psi(t)^{-1}\\)",
+        "\\(\\Phi(t)=\\Psi(t)^{-1}\\)",
+        "\\(\\Phi(t)=\\Psi(t)-\\Psi(0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Psi(t)\\Psi(0)^{-1}\\) 在 \\(t=0\\) 时等于 \\(I\\)，且满足 \\((\\Psi C)'=\\Psi'C=A\\Psi C=A(\\Psi C)\\)（仍是基解矩阵）。对常系数系统 \\(\\Phi(t)=e^{tA}\\)。"
+      },
+      {
+        "id": "edo-ch04-q26",
+        "question": "放射性衰变链 \\(A\\to B\\to C\\)（\\(A'=-\\lambda_1 A\\)，\\(B'=\\lambda_1 A-\\lambda_2 B\\)）。\\(A(0)=N_0\\)，\\(B(0)=0\\)。\\(B(t)\\) 的物理解释是？",
+        "options": [
+          "\\(B(t)=N_0\\frac{\\lambda_1}{\\lambda_2-\\lambda_1}(e^{-\\lambda_1 t}-e^{-\\lambda_2 t})\\)，中间核素先增后减",
+        "\\(B(t) = N_0 e^{-\\lambda_1 t}\\)",
+        "\\(B(t) = N_0(1-e^{-\\lambda_2 t})\\)",
+        "\\(B(t)\\) 单调递增"
+        ],
+        "answer": 0,
+        "explanation": "这是 Bateman 方程。\\(A=N_0 e^{-\\lambda_1 t}\\) 代入 \\(B\\) 方程：\\(B'+\\lambda_2 B=\\lambda_1 N_0 e^{-\\lambda_1 t}\\)（一阶线性，用 Duhamel 公式）。\\(B(t)=\\frac{\\lambda_1 N_0}{\\lambda_2-\\lambda_1}(e^{-\\lambda_1 t}-e^{-\\lambda_2 t})\\)。\\(B\\) 先增（\\(A\\) 生成）后减（自身衰变），在 \\(t^*=\\frac{\\ln(\\lambda_2/\\lambda_1)}{\\lambda_2-\\lambda_1}\\) 取极大值。"
+      },
+      {
+        "id": "edo-ch04-q27",
+        "question": "LR 电路网络 \\(L\\mathbf{I}'=-R\\mathbf{I}\\)，其中 \\(R=\\text{diag}(R_1,R_2)\\)，\\(L=I\\)。电流衰减的时间常数由什么决定？",
+        "options": [
+          "\\(A=-R\\) 的特征值",
+        "\\(R\\) 的行列式",
+        "\\(L\\) 的值",
+        "\\(R\\) 的迹"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbf{I}(t)=e^{-Rt}\\mathbf{I}(0)\\)。对角 \\(R\\) 时特征值为 \\(-R_1,-R_2\\)，时间常数 \\(\\tau_k=1/R_k\\)。每个回路独立衰减。一般情况下互感耦合使 \\(L\\) 非对角，特征值分析更复杂。"
+      },
+      {
+        "id": "edo-ch04-q28",
+        "question": "生态系统 Lotka-Volterra 竞争模型线性化后 \\(\\mathbf{x}'=A\\mathbf{x}\\)，\\(A=\\begin{pmatrix}-1&-0.5\\\\-0.3&-2\\end{pmatrix}\\)。两个种群的共存平衡点稳定吗？",
+        "options": [
+          "稳定，因为 \\(\\text{tr}A<0\\) 且 \\(\\det A>0\\)",
+        "不稳定，因为 \\(\\det A<0\\)",
+        "需要计算具体特征值",
+        "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{tr}A=-1+(-2)=-3<0\\)，\\(\\det A=(-1)(-2)-(-0.5)(-0.3)=2-0.15=1.85>0\\)。对 \\(2\\times 2\\) 系统，\\(\\text{tr}<0\\) 且 \\(\\det>0\\) 保证两特征值实部均为负（\\(\\lambda=(\\text{tr}\\pm\\sqrt{\\text{tr}^2-4\\det})/2\\)）。平衡点渐近稳定，两种群共存。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="edo"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/edo.html" class="module-name">常微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 线性方程组一般理论与基解矩阵</a></li>
+      <li><a href="#kp2">02 · 矩阵指数的定义与性质</a></li>
+      <li><a href="#kp3">03 · 矩阵指数的计算——对角化与 Jordan 形</a></li>
+      <li><a href="#kp4">04 · 非齐次系统与常数变易法</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>线性微分方程组</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>线性方程组一般理论与基解矩阵</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>高阶标量方程可以改写为一阶方程组，多自由度物理系统（耦合弹簧、 多物种种群模型、电路网络）天然以方程组形式出现。矩阵-向量语言 \(\mathbf{X}' = A(t)\mathbf{X}\) 将线性代数与 ODE 统一起来， 而基解矩阵将「\(n\) 个线性无关解」打包为一个矩阵框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>方程组 \(\mathbf{X}' = A(t)\mathbf{X}\) 的解空间仍是 \(n\) 维向量空间。 基解矩阵 \(\Phi(t)\) 的每一列是一个基本解，\(\Phi\) 本身满足矩阵 微分方程 \(\Phi' = A\Phi\)。这是用线性代数的矩阵语言重述 ODE 理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>线性方程组</strong>：\(\mathbf{X}'(t) = A(t)\mathbf{X}(t)\)，\(A(t) \in \mathbb{R}^{n \times n}\)。 解空间维数为 \(n\)（类比标量情况）。 <strong>基解矩阵</strong>：\(\Phi(t) = [\mathbf{X}_1(t) | \cdots | \mathbf{X}_n(t)]\)， 其中 \(\mathbf{X}_1, \ldots, \mathbf{X}_n\) 为线性无关的解。 \(\Phi' = A\Phi\)，且 \(\det\Phi(t) \neq 0\) 恒成立（Abel-Liouville 公式： \(\det\Phi(t) = \det\Phi(t_0)\exp\int_{t_0}^t \text{tr}A(s)\,ds\)）。 <strong>通解</strong>：\(\mathbf{X}(t) = \Phi(t)\mathbf{c}\)，\(\mathbf{c} \in \mathbb{R}^n\)。 <strong>初值问题</strong>：\(\mathbf{X}(t_0) = \mathbf{X}_0\) ⇒ \(\mathbf{c} = \Phi(t_0)^{-1}\mathbf{X}_0\)。 \[\mathbf{X}(t) = \Phi(t)\Phi(t_0)^{-1}\mathbf{X}_0\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 耦合弹簧系统 \(m_1 x_1'' + (k_1+k_2)x_1 - k_2 x_2 = 0\) 等可改写为一阶系统 - 控制论中状态空间模型 \(\dot{x} = Ax + Bu\) 的自由响应即为 \(\dot{x} = Ax\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：将 \(y'' + 3y' + 2y = 0\) 改写为一阶系统并求基解矩阵。 解答：令 \(x_1 = y\)，\(x_2 = y'\)，则 \(\begin{pmatrix} x_1 \\ x_2 \end{pmatrix}' = \begin{pmatrix} 0 & 1 \\ -2 & -3 \end{pmatrix}\begin{pmatrix} x_1 \\ x_2 \end{pmatrix}\)。 特征值 \(\lambda^2 + 3\lambda + 2 = 0\)，\(\lambda_1 = -1\)，\(\lambda_2 = -2\)。 \(\Phi(t) = \begin{pmatrix} e^{-t} & e^{-2t} \\ -e^{-t} & -2e^{-2t} \end{pmatrix}\)。 易错点：改写为一阶系统时，伴侣矩阵最后一行的符号容易弄反。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">基解矩阵 \(\Phi(t)\) 的行列式满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Abel-Liouville 公式 \\(\\det\\Phi(t) = \\det\\Phi(t_0)e^{\\int\\text{tr}A\\,ds}\\)')">A. \(\det\Phi(t) > 0\) 恒成立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Abel-Liouville 公式 \\(\\det\\Phi(t) = \\det\\Phi(t_0)e^{\\int\\text{tr}A\\,ds}\\)')">B. \(\det\Phi(t) \neq 0\) 恒成立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Abel-Liouville 公式 \\(\\det\\Phi(t) = \\det\\Phi(t_0)e^{\\int\\text{tr}A\\,ds}\\)')">C. \(\det\Phi(t)\) 可能在某些点为零</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Abel-Liouville 公式 \\(\\det\\Phi(t) = \\det\\Phi(t_0)e^{\\int\\text{tr}A\\,ds}\\)')">D. \(\det\Phi(t) = 1\) 恒成立</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>矩阵指数的定义与性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>常系数系统 \(\mathbf{X}' = A\mathbf{X}\) 的解可以写成 \(\mathbf{X}(t) = e^{tA}\mathbf{X}_0\)， 完全类比标量情况 \(x' = ax\) 的解 \(x = e^{at}x_0\)。矩阵指数 \(e^{tA}\) 是理解常系数线性系统的钥匙，也是量子力学中时间演化算子、 李群理论中指数映射的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>矩阵指数将线性代数（矩阵 \(A\) 的谱性质）与分析（指数函数的收敛性） 连接起来。它是从 Lie 代数到 Lie 群的桥梁：\(e^{tA}\) 定义了单参数群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(e^{tA} = \sum_{k=0}^{\infty} \frac{(tA)^k}{k!} = I + tA + \frac{t^2 A^2}{2!} + \cdots\) 绝对收敛性：\(\|e^{tA}\| \leq e^{|t|\|A\|}\)（任意矩阵范数）。 <strong>基本性质</strong>： 1. \(\frac{d}{dt}e^{tA} = Ae^{tA} = e^{tA}A\)（因此 \(e^{tA}\) 满足 \(\Phi' = A\Phi\)） 2. \(e^{0 \cdot A} = I\) 3. \(e^{(s+t)A} = e^{sA} e^{tA}\)（单参数群性质） 4. \((e^{tA})^{-1} = e^{-tA}\) 5. <strong>不可交换时</strong>：\(e^{A+B} \neq e^A e^B\) 一般不成立！ \(e^{A+B} = e^A e^B\) 当且仅当 \([A, B] = AB - BA = 0\)。 <strong>与基解矩阵的关系</strong>：\(\Phi(t) = e^{tA}\) 是满足 \(\Phi(0) = I\) 的基解矩阵。 初值问题的解：\(\mathbf{X}(t) = e^{(t-t_0)A}\mathbf{X}_0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 量子力学中时间演化算子 \(U(t) = e^{-iHt/\hbar}\) - 李群理论中 \(SO(3)\) 的参数化：\(R(\theta) = e^{\theta \hat{n}}\)（旋转矩阵）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(e^{tA}\)，其中 \(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)。 解答：\(A^2 = 0\)（幂零矩阵），故级数终止： \(e^{tA} = I + tA = \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}\)。 验证：\(\frac{d}{dt}e^{tA} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} = A = Ae^{tA}\)。✓ 易错点：\(e^{A+B} = e^A e^B\) 仅在 \(AB = BA\) 时成立。 例如 \(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)， \(B = \begin{pmatrix} 0 & 0 \\ 1 & 0 \end{pmatrix}\)，\(AB \neq BA\)， \(e^{A+B} \neq e^A e^B\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(e^{tA}\) 求导后等于什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。逐项求导 \\(\\sum \\frac{k t^{k-1}A^k}{k!} = A\\sum \\frac{t^{k-1}A^{k-1}}{(k-1)!} = Ae^{tA}\\)。')">A. \(tAe^{tA}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！逐项求导 \\(\\sum \\frac{k t^{k-1}A^k}{k!} = A\\sum \\frac{t^{k-1}A^{k-1}}{(k-1)!} = Ae^{tA}\\)。')">B. \(Ae^{tA}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。逐项求导 \\(\\sum \\frac{k t^{k-1}A^k}{k!} = A\\sum \\frac{t^{k-1}A^{k-1}}{(k-1)!} = Ae^{tA}\\)。')">C. \(e^{tA}t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。逐项求导 \\(\\sum \\frac{k t^{k-1}A^k}{k!} = A\\sum \\frac{t^{k-1}A^{k-1}}{(k-1)!} = Ae^{tA}\\)。')">D. \(A^2 e^{tA}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>矩阵指数的计算——对角化与 Jordan 形</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>直接用定义（无穷级数）计算 \(e^{tA}\) 在实际中几乎不可行。 关键技巧是利用 \(A\) 的谱分解：对角化后指数函数逐分量作用， Jordan 块的情况则需要处理幂零部分。掌握这些计算方法是 求解常系数方程组的实用核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>如果 \(A = PDP^{-1}\)（可对角化），则 \(e^{tA} = Pe^{tD}P^{-1}\)， 对角矩阵的指数只需对每个特征值分别取 \(e^{\lambda_i t}\)。 不可对角化时利用 \(A = P(D+N)P^{-1}\)，\(D\) 对角、\(N\) 幂零， 且 \(DN = ND\)，故 \(e^{t(D+N)} = e^{tD}e^{tN}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>可对角化情况</strong>：\(A = PDP^{-1}\)，\(D = \text{diag}(\lambda_1,\ldots,\lambda_n)\)。 \[e^{tA} = Pe^{tD}P^{-1} = P\,\text{diag}(e^{\lambda_1 t},\ldots,e^{\lambda_n t})\,P^{-1}\] <strong>Jordan 块</strong> \(J_k(\lambda) = \lambda I + N\)，其中 \(N\) 是 \(k \times k\) 幂零矩阵 （上三角全 1），\(N^k = 0\)。 \[e^{tJ_k(\lambda)} = e^{\lambda t} e^{tN} = e^{\lambda t}\begin{pmatrix} 1 & t & t^2/2! & \cdots & t^{k-1}/(k-1)! \\ 0 & 1 & t & \cdots & t^{k-2}/(k-2)! \\ \vdots & & \ddots & & \vdots \\ 0 & 0 & \cdots & 0 & 1 \end{pmatrix}\] <strong>Cayley-Hamilton 方法</strong>：若 \(A\) 的特征多项式为 \(p(\lambda) = \lambda^n + \cdots\)， 则 \(p(A) = 0\)。可将 \(e^{tA}\) 表示为 \(A\) 的多项式 \(e^{tA} = \alpha_0(t)I + \alpha_1(t)A + \cdots + \alpha_{n-1}(t)A^{n-1}\)， 系数由插值条件确定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 耦合振动系统的正则模分析：对角化给出独立的振动模态 - 电路瞬态分析中的状态空间方法</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(e^{tA}\)，\(A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)。 解答：\(A = J_2(1) = I + N\)，\(N = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)。 \(e^{tA} = e^t e^{tN} = e^t \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix}\)。 易错点：处理 Jordan 块时忘记 \(e^{\lambda t}\) 的前因子。 \(e^{tJ} \neq e^{tN}\)，必须是 \(e^{\lambda t} \cdot e^{tN}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(A\) 有特征值 \(2\) 和 \(-1\)（均为单根），则 \(e^{tA}\) 的元素涉及哪些函数？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。不同单特征值的矩阵可对角化，\\(e^{tA}\\) 只含 \\(e^{\\lambda_i t}\\)')">A. \(e^{2t}\) 和 \(te^{2t}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！不同单特征值的矩阵可对角化，\\(e^{tA}\\) 只含 \\(e^{\\lambda_i t}\\)')">B. \(e^{2t}\) 和 \(e^{-t}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。不同单特征值的矩阵可对角化，\\(e^{tA}\\) 只含 \\(e^{\\lambda_i t}\\)')">C. \(\cos 2t\) 和 \(\sin t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。不同单特征值的矩阵可对角化，\\(e^{tA}\\) 只含 \\(e^{\\lambda_i t}\\)')">D. \(e^{2t}\) 和 \(e^{t}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>非齐次系统与常数变易法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际系统几乎总有外部输入：控制信号 \(\mathbf{B}(t)\)、外力驱动。 非齐次系统 \(\mathbf{X}' = A\mathbf{X} + \mathbf{B}(t)\) 的通解 由齐次解与一个利用基解矩阵构造的特解叠加而成。常数变易法 将高阶标量方程的求解方法自然推广到系统情形。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>非齐次系统</strong>：\(\mathbf{X}' = A(t)\mathbf{X} + \mathbf{B}(t)\)。 设齐次方程的基解矩阵为 \(\Phi(t)\)。令 \(\mathbf{X} = \Phi(t)\mathbf{u}(t)\) （常数变易法），代入： \(\Phi'\mathbf{u} + \Phi\mathbf{u}' = A\Phi\mathbf{u} + \mathbf{B}\) 因 \(\Phi' = A\Phi\)，消去得 \(\Phi\mathbf{u}' = \mathbf{B}\)， \[\mathbf{u}'(t) = \Phi(t)^{-1}\mathbf{B}(t),\quad \mathbf{u}(t) = \int_{t_0}^t \Phi(s)^{-1}\mathbf{B}(s)\,ds + \mathbf{c}\] 特解： \[\mathbf{X}_p(t) = \Phi(t)\int_{t_0}^t \Phi(s)^{-1}\mathbf{B}(s)\,ds\] <strong>常系数情况</strong>：\(\Phi(t) = e^{tA}\)，\(\Phi(s)^{-1} = e^{-sA}\)， \[\mathbf{X}_p(t) = \int_{t_0}^t e^{(t-s)A}\mathbf{B}(s)\,ds\] 这就是卷积形式的「Duhamel 公式」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 控制论中状态空间方程 \(\dot{x} = Ax + Bu\) 的解即为 Duhamel 公式 - 线性电网络的瞬态分析</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(\mathbf{X}' = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}\mathbf{X} + \begin{pmatrix} 1 \\ t \end{pmatrix}\)，\(\mathbf{X}(0) = \mathbf{0}\) 的解。 解答：\(e^{tA} = \text{diag}(e^t, e^{2t})\)，\(e^{-sA} = \text{diag}(e^{-s}, e^{-2s})\)。 \(\mathbf{X}(t) = \int_0^t \begin{pmatrix} e^{t-s} \\ te^{2(t-s)} \end{pmatrix}\,ds\)... 更仔细地：\(\int_0^t e^{t-s}\,ds = e^t - 1\)， \(\int_0^t s e^{2(t-s)}\,ds = e^{2t}\int_0^t s e^{-2s}\,ds\)。 \(\int_0^t se^{-2s}\,ds = [-\frac{s}{2}e^{-2s}]_0^t + \frac{1}{2}\int_0^t e^{-2s}\,ds = -\frac{t}{2}e^{-2t} - \frac{1}{4}(e^{-2t}-1)\)。 \(\mathbf{X}(t) = \begin{pmatrix} e^t - 1 \\ \frac{1}{4}(e^{2t}-1) - \frac{t}{2} \end{pmatrix}\)。 易错点：Duhamel 积分中 \(e^{(t-s)A}\) 的指数是 \((t-s)\)，不是 \(t\) 也不是 \(s\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">常数变易法中，设 \(\mathbf{X} = \Phi(t)\mathbf{u}(t)\)，则 \(\mathbf{u}'(t)\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。代入 \\(\\mathbf{X}\\' = A\\mathbf{X} + \\mathbf{B}\\)，利用 \\(\\Phi\\' = A\\Phi\\) 消去')">A. \(A\mathbf{u}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！代入 \\(\\mathbf{X}\\' = A\\mathbf{X} + \\mathbf{B}\\)，利用 \\(\\Phi\\' = A\\Phi\\) 消去')">B. \(\Phi^{-1}\mathbf{B}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。代入 \\(\\mathbf{X}\\' = A\\mathbf{X} + \\mathbf{B}\\)，利用 \\(\\Phi\\' = A\\Phi\\) 消去')">C. \(\Phi\mathbf{B}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。代入 \\(\\mathbf{X}\\' = A\\mathbf{X} + \\mathbf{B}\\)，利用 \\(\\Phi\\' = A\\Phi\\) 消去')">D. \(A^{-1}\mathbf{B}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/analysis/edo.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

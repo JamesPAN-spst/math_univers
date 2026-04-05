@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 全纯函数 — 复分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "complex-ch01-q1",
+        "question": "函数 \\(f(z)\\) 在 \\(z_0\\) 处复可微（全纯）的定义？",
+        "options": [
+          "\\(\\lim_{h \\to 0} \\frac{f(z_0 + h) - f(z_0)}{h}\\) 存在（\\(h \\in \\mathbb{C}\\)，从任意方向趋于 \\(0\\)）",
+        "实部和虚部分别可微",
+        "\\(f\\) 连续",
+        "\\(f\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "复可微要求极限对所有方向的 \\(h \\to 0\\) 都存在且相同。\\(h\\) 沿实轴取 \\(\\Delta x\\)，沿虚轴取 \\(i\\Delta y\\)——两个方向的极限必须一致，由此导出 Cauchy-Riemann 方程。复可微远比实可微苛刻——实际上蕴含无穷次可微。"
+      },
+      {
+        "id": "complex-ch01-q2",
+        "question": "\\(f(z) = u(x,y) + iv(x,y)\\) 全纯 \\(\\Leftrightarrow\\) Cauchy-Riemann 方程成立。CR 方程是？",
+        "options": [
+          "\\(\\frac{\\partial u}{\\partial x} = \\frac{\\partial v}{\\partial y}\\)，\\(\\frac{\\partial u}{\\partial y} = -\\frac{\\partial v}{\\partial x}\\)",
+        "\\(\\frac{\\partial u}{\\partial x} = \\frac{\\partial v}{\\partial x}\\)，\\(\\frac{\\partial u}{\\partial y} = \\frac{\\partial v}{\\partial y}\\)",
+        "\\(u_{xx} + u_{yy} = 0\\)",
+        "\\(u = v\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(z_0)\\) 沿实轴：\\(u_x + iv_x\\)。沿虚轴：\\(\\frac{u_y + iv_y}{i} = v_y - iu_y\\)。两者相等 \\(\\Rightarrow\\) \\(u_x = v_y\\)，\\(v_x = -u_y\\)。加上 \\(u\\), \\(v\\) 偏导连续（\\(C^1\\)）\\(\\Rightarrow\\) \\(f\\) 全纯。CR 方程是复分析的基石。"
+      },
+      {
+        "id": "complex-ch01-q3",
+        "question": "\\(e^z = e^{x+iy}\\) 的实部和虚部？",
+        "options": [
+          "\\(u = e^x \\cos y\\)，\\(v = e^x \\sin y\\)",
+        "\\(u = e^x\\)，\\(v = e^y\\)",
+        "\\(u = \\cos y\\)，\\(v = \\sin y\\)",
+        "\\(u = e^x \\sin y\\)，\\(v = e^x \\cos y\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^z = e^x e^{iy} = e^x(\\cos y + i \\sin y)\\)。\\(u = e^x \\cos y\\)，\\(v = e^x \\sin y\\)。验证 CR：\\(u_x = e^x \\cos y = v_y\\)，\\(u_y = -e^x \\sin y = -v_x\\) ✓。\\(e^z\\) 处处全纯，\\((e^z)' = e^z\\)。"
+      },
+      {
+        "id": "complex-ch01-q4",
+        "question": "\\(\\sin z\\) 的零点集？",
+        "options": [
+          "\\(z = n\\pi\\)（\\(n \\in \\mathbb{Z}\\)）",
+        "\\(z = (n + 1/2)\\pi\\)",
+        "\\(z = ni\\)",
+        "\\(z = n\\pi i\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sin z = \\frac{e^{iz} - e^{-iz}}{2i} = 0 \\Rightarrow e^{iz} = e^{-iz} \\Rightarrow e^{2iz} = 1 \\Rightarrow 2iz = 2n\\pi i \\Rightarrow z = n\\pi\\)。复正弦的零点与实正弦相同——但 \\(|\\sin z|\\) 在虚轴方向无界：\\(\\sin(iy) = i\\sinh y \\to \\pm i\\infty\\)。"
+      },
+      {
+        "id": "complex-ch01-q5",
+        "question": "全纯函数有哪些令人惊讶的性质（与实可微函数的差异）？",
+        "options": [
+          "全纯 \\(\\Rightarrow\\) 无穷次可微 \\(\\Rightarrow\\) 解析（等幂级数展开）",
+        "全纯仅保证一次可微",
+        "全纯函数可能不连续",
+        "全纯函数不一定解析"
+        ],
+        "answer": 0,
+        "explanation": "复可微一次 \\(\\Rightarrow\\) 无穷次可微（由 Cauchy 积分公式推出）。进一步，全纯 \\(\\Leftrightarrow\\) 解析（可局部展为收敛幂级数）。实分析中 \\(C^\\infty \\not\\Rightarrow\\) 解析（\\(f(x) = e^{-1/x^2}\\)）。复分析的\"刚性\"：一次可微的微弱假设蕴含极强的正则性。"
+      },
+      {
+        "id": "complex-ch01-q6",
+        "question": "\\(f(z) = |z|^2 = x^2 + y^2\\)。\\(f\\) 全纯吗？",
+        "options": [
+          "仅在 \\(z = 0\\) 处复可微，整体不全纯",
+        "处处全纯",
+        "处处不可微",
+        "\\(f\\) 解析"
+        ],
+        "answer": 0,
+        "explanation": "\\(u = x^2 + y^2\\)，\\(v = 0\\)。CR：\\(u_x = 2x = v_y = 0\\)，\\(u_y = 2y = -v_x = 0\\)。仅 \\(x = y = 0\\) 时成立。\\(|z|^2\\) 实可微但不全纯——说明复可微的严格性。\\(\\bar{z}\\) 也不全纯（CR 在任何点都不成立）。"
+      },
+      {
+        "id": "complex-ch01-q7",
+        "question": "若 \\(f = u + iv\\) 全纯，则 \\(u\\) 和 \\(v\\) 满足什么 PDE？",
+        "options": [
+          "\\(\\Delta u = u_{xx} + u_{yy} = 0\\)（\\(u\\) 调和），\\(\\Delta v = 0\\)（\\(v\\) 调和）",
+        "\\(u_{xx} = u_{yy}\\)",
+        "\\(u_{xx} + v_{yy} = 0\\)",
+        "\\(u\\) 满足热方程"
+        ],
+        "answer": 0,
+        "explanation": "CR：\\(u_x = v_y\\)，\\(u_y = -v_x\\)。\\(u_{xx} = v_{yx}\\)，\\(u_{yy} = -v_{xy}\\)。\\(C^2\\) 时 \\(v_{xy} = v_{yx}\\)，故 \\(u_{xx} + u_{yy} = 0\\)。同理 \\(v\\) 调和。\\(u\\) 与 \\(v\\) 互为调和共轭。全纯函数的实部/虚部自动满足 Laplace 方程——连接复分析与位势论。"
+      },
+      {
+        "id": "complex-ch01-q8",
+        "question": "\\(f(z) = \\bar{z}\\)（共轭）满足 CR 方程吗？",
+        "options": [
+          "不满足（\\(u_x = 1 \\neq v_y = -1\\)）",
+        "满足",
+        "仅在原点满足",
+        "仅实轴上满足"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\bar{z} = x - iy\\)：\\(u = x\\)，\\(v = -y\\)。\\(u_x = 1\\)，\\(v_y = -1\\)。\\(u_x \\neq v_y\\) \\(\\Rightarrow\\) 不满足 CR，处处不全纯。\\(\\bar z\\) 是\"反全纯\"的（满足 \\(\\bar\\partial f / \\partial \\bar z = 0\\) 变为 \\(\\partial f / \\partial z = 0\\)——反向 CR）。"
+      },
+      {
+        "id": "complex-ch01-q9",
+        "question": "\\(\\log z\\) 的主值定义域和全纯性？",
+        "options": [
+          "\\(\\text{Log}\\, z = \\ln|z| + i\\,\\text{Arg}\\, z\\)（\\(\\text{Arg} \\in (-\\pi, \\pi]\\)），在 \\(\\mathbb{C} \\setminus (-\\infty, 0]\\) 上全纯",
+        "在所有 \\(\\mathbb{C}\\) 上全纯",
+        "仅在实轴上定义",
+        "在 \\(z = 0\\) 处全纯"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log z\\) 的多值性：\\(e^w = z\\) 的解 \\(w = \\ln|z| + i(\\arg z + 2k\\pi)\\)。选取主值 \\(\\text{Arg} \\in (-\\pi, \\pi]\\) 割去负实轴——在 \\(\\mathbb{C} \\setminus (-\\infty, 0]\\) 上连续、全纯。\\((\\text{Log}\\, z)' = 1/z\\)。支割线的选择不唯一，但必须割去某条从 \\(0\\) 到 \\(\\infty\\) 的曲线。"
+      },
+      {
+        "id": "complex-ch01-q10",
+        "question": "全纯函数的零点是孤立的（除非恒为零）。即：\\(f\\) 全纯，\\(f(z_0) = 0\\)，\\(f \\not\\equiv 0\\)，则？",
+        "options": [
+          "\\(\\exists r > 0\\)，\\(f(z) \\neq 0\\)，\\(\\forall z \\in B(z_0, r) \\setminus \\{z_0\\}\\)",
+        "零点可以有聚点",
+        "零点总是有限个",
+        "取决于区域"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(z) = (z - z_0)^m g(z)\\)（\\(g(z_0) \\neq 0\\)，\\(m \\geq 1\\)）。\\(g\\) 连续 \\(\\Rightarrow\\) \\(g \\neq 0\\) 在 \\(z_0\\) 附近。零点孤立。若零点有聚点——在连通域上恒等定理 \\(\\Rightarrow\\) \\(f \\equiv 0\\)。这是复分析刚性的另一体现。"
+      },
+      {
+        "id": "complex-ch01-q11",
+        "question": "极坐标 CR 方程：\\(f(re^{i\\theta}) = U(r,\\theta) + iV(r,\\theta)\\)。CR 方程的极坐标形式？",
+        "options": [
+          "\\(\\frac{\\partial U}{\\partial r} = \\frac{1}{r}\\frac{\\partial V}{\\partial \\theta}\\)，\\(\\frac{\\partial V}{\\partial r} = -\\frac{1}{r}\\frac{\\partial U}{\\partial \\theta}\\)",
+        "\\(U_r = V_\\theta\\)，\\(U_\\theta = -V_r\\)",
+        "\\(U_{rr} + U_{\\theta\\theta} = 0\\)",
+        "\\(U_r = V_r\\)"
+        ],
+        "answer": 0,
+        "explanation": "链式法则：\\(x = r\\cos\\theta\\)，\\(y = r\\sin\\theta\\)。\\(u_x = U_r \\cos\\theta - U_\\theta \\sin\\theta/r\\) 等。代入笛卡尔 CR 方程化简得极坐标形式。在圆盘和环形域上分析问题时用极坐标 CR 更自然。\\(f'(z) = e^{-i\\theta}(U_r + iV_r)\\)。"
+      },
+      {
+        "id": "complex-ch01-q12",
+        "question": "\\(z^{1/2}\\) 的主分支在哪里全纯？",
+        "options": [
+          "\\(\\mathbb{C} \\setminus (-\\infty, 0]\\)（割去负实轴后全纯）",
+        "全平面",
+        "\\(\\{z : |z| < 1\\}\\)",
+        "仅正实轴"
+        ],
+        "answer": 0,
+        "explanation": "\\(z^{1/2} = e^{\\frac{1}{2}\\text{Log}\\, z} = |z|^{1/2} e^{i\\text{Arg}(z)/2}\\)。\\(\\text{Log}\\) 在 \\(\\mathbb{C} \\setminus (-\\infty, 0]\\) 全纯 \\(\\Rightarrow\\) \\(z^{1/2}\\) 全纯。\\((z^{1/2})' = \\frac{1}{2} z^{-1/2}\\)。越过支割线辐角跳 \\(2\\pi\\)，\\(z^{1/2}\\) 跳符号——多值性的体现。"
+      },
+      {
+        "id": "complex-ch01-q13",
+        "question": "最大模原理：\\(f\\) 在区域 \\(D\\) 上全纯，\\(|f|\\) 在 \\(D\\) 内部不取最大值（除非 \\(f\\) 常数）。\\(f(z) = z\\) 在 \\(|z| \\leq 1\\) 上最大模在哪取到？",
+        "options": [
+          "在边界 \\(|z| = 1\\) 上（\\(\\max |f| = 1\\)）",
+        "在原点",
+        "在 \\(z = 1/2\\)",
+        "在 \\(D\\) 内部"
+        ],
+        "answer": 0,
+        "explanation": "\\(|z|\\) 在 \\(|z| \\leq 1\\) 上的最大值 \\(= 1\\)，在 \\(|z| = 1\\) 上取到。最大模原理：\\(\\max_{\\bar D} |f| = \\max_{\\partial D} |f|\\)。物理直觉：调和函数的平均值性质——内点值是周围值的平均，不能超过最大值。全纯函数模没有内部极大值。"
+      },
+      {
+        "id": "complex-ch01-q14",
+        "question": "\\(u(x,y) = x^2 - y^2\\)。\\(u\\) 调和吗？调和共轭 \\(v = ?\\)",
+        "options": [
+          "调和。\\(v = 2xy + C\\)",
+        "不调和",
+        "\\(v = x^2 + y^2\\)",
+        "\\(v = xy\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_{xx} = 2\\)，\\(u_{yy} = -2\\)，\\(\\Delta u = 0\\) ✓。CR：\\(v_y = u_x = 2x \\Rightarrow v = 2xy + \\phi(x)\\)。\\(v_x = -u_y = 2y\\)。\\(v_x = 2y + \\phi'(x) = 2y \\Rightarrow \\phi'(x) = 0 \\Rightarrow \\phi = C\\)。故 \\(v = 2xy + C\\)。\\(f = u + iv = (x^2 - y^2) + 2ixy = z^2\\) ✓。"
+      },
+      {
+        "id": "complex-ch01-q15",
+        "question": "Liouville 定理：全平面上有界的全纯函数一定是常数。\\(f(z) = e^z\\) 有界吗？",
+        "options": [
+          "无界（\\(|e^z| = e^x \\to \\infty\\)（\\(x \\to \\infty\\)）），不违背 Liouville 定理",
+        "有界（\\(|e^{iy}| = 1\\)）",
+        "有界，矛盾 Liouville",
+        "不是全纯的"
+        ],
+        "answer": 0,
+        "explanation": "\\(|e^z| = e^{\\text{Re}(z)} = e^x\\)。\\(x \\to +\\infty\\) 时 \\(|e^z| \\to +\\infty\\)。无界。虽然 \\(|e^{iy}| = 1\\)（虚轴上模为 \\(1\\)），但在右半平面无界。Liouville 定理的威力：排除非平凡的有界整函数——代数基本定理的关键工具。"
+      },
+      {
+        "id": "complex-ch01-q16",
+        "question": "\\(u\\) 调和，\\(\\Omega\\) 单连通。那么调和共轭 \\(v\\) 存在吗？",
+        "options": [
+          "存在（单连通保证路径积分与路径无关，可构造 \\(v\\)）",
+        "不一定存在",
+        "仅在圆盘上",
+        "需要 \\(u\\) 额外条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(v(z) = \\int_{z_0}^{z} (-u_y\\, dx + u_x\\, dy)\\)。\\(\\frac{\\partial(-u_y)}{\\partial y} = -u_{yy} = u_{xx} = \\frac{\\partial(u_x)}{\\partial x}\\)（\\(\\Delta u = 0\\)）。恰当微分 \\(\\Rightarrow\\) 单连通域上 \\(v\\) 存在。非单连通（如环域）：\\(v\\) 可能多值——\\(\\text{Log}|z|\\) 的共轭 \\(\\arg z\\) 多值。"
+      },
+      {
+        "id": "complex-ch01-q17",
+        "question": "\\(\\frac{\\partial}{\\partial \\bar z}\\) 算子定义为 \\(\\frac{1}{2}\\left(\\frac{\\partial}{\\partial x} + i\\frac{\\partial}{\\partial y}\\right)\\)。\\(f\\) 全纯 \\(\\Leftrightarrow\\)？",
+        "options": [
+          "\\(\\frac{\\partial f}{\\partial \\bar z} = 0\\)",
+        "\\(\\frac{\\partial f}{\\partial z} = 0\\)",
+        "\\(\\frac{\\partial f}{\\partial \\bar z} = 1\\)",
+        "\\(\\frac{\\partial^2 f}{\\partial z \\partial \\bar z} = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{\\partial f}{\\partial \\bar z} = \\frac{1}{2}(f_x + if_y) = \\frac{1}{2}[(u_x - v_y) + i(v_x + u_y)]\\)。CR 方程 \\(\\Leftrightarrow\\) \\(u_x = v_y\\)，\\(v_x = -u_y\\) \\(\\Leftrightarrow\\) 上式 \\(= 0\\)。\\(\\partial / \\partial \\bar z = 0\\) 是 CR 方程的优雅重写。\\(f'(z) = \\partial f / \\partial z\\)。"
+      },
+      {
+        "id": "complex-ch01-q18",
+        "question": "\\(f\\) 在 \\(z_0\\) 处 \\(\\mathbb{R}\\)-可微且满足 CR 方程。\\(f\\) 一定在 \\(z_0\\) 处 \\(\\mathbb{C}\\)-可微吗？",
+        "options": [
+          "是（\\(\\mathbb{R}\\)-可微 + CR \\(\\Rightarrow\\) \\(\\mathbb{C}\\)-可微）",
+        "不一定（\\(\\mathbb{R}\\)-可微不够）",
+        "需要 \\(C^1\\)",
+        "需要二阶可微"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(z_0 + h) - f(z_0) = f_x \\Delta x + f_y \\Delta y + o(|h|)\\)（\\(\\mathbb{R}\\)-可微）。\\(h = \\Delta x + i\\Delta y\\)。利用 CR：\\(f_y = if_x\\)，代入得 \\(= f_x h + o(|h|) = f'(z_0) h + o(|h|)\\)（\\(f'(z_0) = f_x = u_x + iv_x\\)）。\\(\\mathbb{R}\\)-可微 + CR 足以保证复可微——不需要偏导连续。"
+      },
+      {
+        "id": "complex-ch01-q19",
+        "question": "\\(z^n\\)（\\(n \\in \\mathbb{Z}^+\\)）在全平面全纯。\\((z^n)' = ?\\)，零点阶数多少？",
+        "options": [
+          "\\(nz^{n-1}\\)，原点是 \\(n\\) 阶零点",
+        "\\(z^{n-1}\\)，原点是 \\(1\\) 阶",
+        "\\(nz^n\\)",
+        "\\(z^n / n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((z^n)' = nz^{n-1}\\)（与实分析相同的幂法则）。\\(z^n = (z - 0)^n \\cdot 1\\)：原点是 \\(n\\) 阶零点。\\(n\\) 阶零点意味着 \\(f(z_0) = f'(z_0) = ... = f^{(n-1)}(z_0) = 0\\)，\\(f^{(n)}(z_0) \\neq 0\\)。在零点附近 \\(f(z) \\approx c(z-z_0)^n\\)——\\(n:1\\) 的局部映射。"
+      },
+      {
+        "id": "complex-ch01-q20",
+        "question": "恒等定理：\\(f, g\\) 在连通域 \\(D\\) 上全纯，\\(\\{z : f(z) = g(z)\\}\\) 有极限点在 \\(D\\) 中，则？",
+        "options": [
+          "\\(f \\equiv g\\)（在全 \\(D\\) 上）",
+        "\\(f = g\\) 仅在子集上",
+        "\\(f - g\\) 有有限个零点",
+        "需要更多条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(h = f - g\\) 全纯，零点集有聚点。Taylor 展开：\\(h(z) = \\sum a_n (z-z_0)^n\\)。若 \\(h \\not\\equiv 0\\)，零点孤立——与有聚点矛盾。\\(h \\equiv 0\\) 在 \\(z_0\\) 附近。连通性传播到全 \\(D\\)。推论：在 \\(\\mathbb{R}\\) 上相等的两个全纯函数在公共全纯域上相等——\"无外推自由度\"。"
+      },
+      {
+        "id": "complex-ch01-q21",
+        "question": "\\(f(z) = \\sum_{n=0}^{\\infty} z^n/n!\\)。收敛半径？这个函数是？",
+        "options": [
+          "\\(R = \\infty\\)（整函数），\\(f(z) = e^z\\)",
+        "\\(R = 1\\)",
+        "\\(R = e\\)",
+        "收敛域不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(a_n = 1/n!\\)，\\(|a_n|^{1/n} = (n!)^{-1/n} \\to 0\\)（Stirling），\\(R = 1/\\limsup |a_n|^{1/n} = \\infty\\)。整函数（entire function）。与实 \\(e^x\\) 相同的级数定义——复幂级数自然地将 \\(e^x\\) 延拓到 \\(\\mathbb{C}\\)。\\(|e^z| = e^{\\text{Re}(z)}\\)。"
+      },
+      {
+        "id": "complex-ch01-q22",
+        "question": "\\(u(x,y) = \\log(x^2 + y^2)\\)（\\(= 2\\ln|z|\\)）。\\(u\\) 在哪里调和？共轭？",
+        "options": [
+          "在 \\(\\mathbb{C} \\setminus \\{0\\}\\) 上调和。共轭 \\(v = 2\\arg z\\)（多值）",
+        "在全平面调和",
+        "不调和",
+        "共轭 \\(v = \\log(x^2 + y^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_x = 2x/(x^2+y^2)\\)，\\(u_{xx} = 2(y^2 - x^2)/(x^2+y^2)^2\\)。\\(u_{yy} = 2(x^2 - y^2)/(x^2+y^2)^2\\)。\\(\\Delta u = 0\\)（\\(z \\neq 0\\)）。\\(f = 2\\log z = 2\\ln|z| + 2i\\arg z\\)。在 \\(\\mathbb{C}\\setminus\\{0\\}\\) 上非单连通，\\(\\arg z\\) 多值——这是多值现象的经典例子。"
+      },
+      {
+        "id": "complex-ch01-q23",
+        "question": "Schwarz 引理：\\(f: \\mathbb{D} \\to \\mathbb{D}\\)（\\(\\mathbb{D}\\) 是单位圆盘）全纯，\\(f(0) = 0\\)。则？",
+        "options": [
+          "\\(|f(z)| \\leq |z|\\) 且 \\(|f'(0)| \\leq 1\\)；等号成立 \\(\\Leftrightarrow\\) \\(f(z) = e^{i\\theta} z\\)",
+        "\\(|f(z)| \\leq 1\\)",
+        "\\(f\\) 是常数",
+        "\\(|f'(z)| \\leq 1\\) 处处成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(g(z) = f(z)/z\\)（\\(z \\neq 0\\)），\\(g(0) = f'(0)\\)。\\(g\\) 全纯，\\(|g(z)| \\leq 1/r\\)（\\(|z| = r\\)）。\\(r \\to 1^-\\)：\\(|g(z)| \\leq 1\\)，即 \\(|f(z)| \\leq |z|\\)。等号：\\(|g| \\equiv 1\\)（最大模原理取等）\\(\\Rightarrow\\) \\(g = e^{i\\theta}\\)。Schwarz 引理是自同构刚性的起点。"
+      },
+      {
+        "id": "complex-ch01-q24",
+        "question": "Dirichlet 问题：在圆盘 \\(|z| < R\\) 上找调和函数 \\(u\\)，边界 \\(u|_{|z|=R} = \\phi(\\theta)\\)。解是？",
+        "options": [
+          "Poisson 积分：\\(u(r,\\theta) = \\frac{1}{2\\pi} \\int_0^{2\\pi} \\frac{R^2 - r^2}{R^2 - 2Rr\\cos(\\theta - t) + r^2}\\, \\phi(t)\\, dt\\)",
+        "\\(u = \\phi\\) 恒等",
+        "不存在",
+        "\\(u = \\frac{1}{2\\pi}\\int_0^{2\\pi} \\phi(t)\\, dt\\)（常数）"
+        ],
+        "answer": 0,
+        "explanation": "Poisson 核 \\(P_r(\\theta) = \\frac{R^2 - r^2}{R^2 - 2Rr\\cos\\theta + r^2}\\)：正值、积分为 \\(1\\)、\\(r \\to R\\) 时趋向 \\(\\delta\\)。Poisson 积分公式从全纯函数的 Cauchy 积分取实部推出。在调和分析和 PDE 中提供了 Laplace 方程在圆域上的显式求解公式。"
+      },
+      {
+        "id": "complex-ch01-q25",
+        "question": "\\(f(z) = z \\bar z\\)。\\(f\\) 可以分解为关于 \\(z\\) 和 \\(\\bar z\\) 的函数。\\(f\\) 全纯吗？\\(f\\) 的 Wirtinger 导数？",
+        "options": [
+          "\\(\\frac{\\partial f}{\\partial \\bar z} = z \\neq 0\\)（\\(z \\neq 0\\)），不全纯",
+        "\\(f\\) 全纯",
+        "\\(\\frac{\\partial f}{\\partial \\bar z} = 0\\)",
+        "仅在单位圆上全纯"
+        ],
+        "answer": 0,
+        "explanation": "\\(f = z\\bar z = |z|^2\\)。\\(\\frac{\\partial}{\\partial \\bar z}(z\\bar z) = z\\)（\\(z\\) 视为与 \\(\\bar z\\) 独立的变量）。\\(\\partial f / \\partial \\bar z = z \\neq 0\\)（\\(z \\neq 0\\)），故不全纯。Wirtinger 微积分把 \\(z, \\bar z\\) 当独立变量——全纯 \\(\\Leftrightarrow\\) 不依赖 \\(\\bar z\\)。"
+      },
+      {
+        "id": "complex-ch01-q26",
+        "question": "静电场中，电势 \\(\\phi(x,y)\\) 满足 \\(\\Delta \\phi = 0\\)（无源处）。电场线和等势线的关系？",
+        "options": [
+          "互相正交——\\(\\phi\\) 和调和共轭 \\(\\psi\\) 组成全纯函数 \\(f = \\phi + i\\psi\\)，\\(\\phi = \\) 常数和 \\(\\psi = \\) 常数正交",
+        "互相平行",
+        "无关",
+        "互相成 \\(45°\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla \\phi \\cdot \\nabla \\psi = \\phi_x \\psi_x + \\phi_y \\psi_y\\)。CR：\\(\\psi_x = -\\phi_y\\)，\\(\\psi_y = \\phi_x\\)。\\(\\nabla\\phi \\cdot \\nabla\\psi = \\phi_x(-\\phi_y) + \\phi_y \\phi_x = 0\\)。正交！等势线（\\(\\phi = c\\)）和流线（\\(\\psi = c\\)）组成正交网格。复势 \\(f = \\phi + i\\psi\\) 统一描述二维场。"
+      },
+      {
+        "id": "complex-ch01-q27",
+        "question": "在流体力学中，二维不可压无旋流的复速度势 \\(W(z) = \\phi + i\\psi\\) 全纯。绕圆柱的均匀流 \\(W(z) = U(z + R^2/z)\\) 的流线？",
+        "options": [
+          "\\(\\psi = U(r - R^2/r)\\sin\\theta\\)，\\(\\psi = 0\\)：实轴和圆柱面 \\(r = R\\)（圆柱为流线）",
+        "同心圆",
+        "直线",
+        "抛物线"
+        ],
+        "answer": 0,
+        "explanation": "\\(W = U(z + R^2/z)\\)。\\(z = re^{i\\theta}\\)：\\(\\psi = U\\sin\\theta(r - R^2/r)\\)。\\(r = R\\)：\\(\\psi = 0\\)（圆柱面是流线——流体不穿透）。\\(\\theta = 0, \\pi\\)：\\(\\psi = 0\\)（滞点流线）。远场 \\(r \\gg R\\)：\\(W \\approx Uz\\)（均匀流）。Joukowski 变换将圆柱变为机翼——航空气动力学的起点。"
+      },
+      {
+        "id": "complex-ch01-q28",
+        "question": "代数基本定理：\\(n\\) 次多项式 \\(p(z) = a_n z^n + ... + a_0\\)（\\(a_n \\neq 0\\)，\\(n \\geq 1\\)）在 \\(\\mathbb{C}\\) 中至少有一个零点。用 Liouville 定理证明的思路？",
+        "options": [
+          "假设 \\(p\\) 无零点，则 \\(1/p\\) 全平面全纯有界，Liouville \\(\\Rightarrow\\) \\(1/p\\) 常数，矛盾",
+        "直接构造零点",
+        "用最大模原理",
+        "用 Rouché 定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(|p(z)| \\to \\infty\\)（\\(|z| \\to \\infty\\)）。若 \\(p\\) 无零点：\\(g = 1/p\\) 全纯。\\(|z| \\geq R\\)：\\(|g| \\leq \\epsilon\\)。\\(|z| \\leq R\\)：\\(|g|\\) 连续在紧集上有界。\\(g\\) 全平面有界全纯 \\(\\Rightarrow\\) \\(g\\) 常数（Liouville）\\(\\Rightarrow\\) \\(p\\) 常数——矛盾 \\(n \\geq 1\\)。复分析给出代数定理的简洁证明。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="complex"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/complex.html" class="module-name">复分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 复可微与 Cauchy-Riemann 方程</a></li>
+      <li><a href="#kp2">02 · 全纯函数的基本性质与初等函数</a></li>
+      <li><a href="#kp3">03 · 解析函数与收敛幂级数</a></li>
+      <li><a href="#kp4">04 · 全纯函数的刚性与唯一性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>全纯函数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>复可微与 Cauchy-Riemann 方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实函数的可微性要求极限只从左右两个方向趋近。但复数平面是 二维的——极限可以从任意方向趋近。这一更强的条件产生了惊人的 后果：复可微一次 ⇒ 无穷次可微 + 解析，这在实分析中完全不成立。 Cauchy-Riemann 方程将复可微条件翻译为实二维语言。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>复可微性统一了实部和虚部的耦合关系。CR 方程 \(u_x = v_y\), \(u_y = -v_x\) 是调和方程的特殊形式， 将复分析与 PDE（调和函数论）连接起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>复导数</strong>：\(f'(z_0) = \lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h}\) （\(h \in \mathbb{C}\) 从任意方向趋于 0）。 <strong>Cauchy-Riemann 方程</strong>：设 \(f = u + iv\)，\(z = x + iy\)。 \(f\) 在 \(z_0\) 复可微 \(\Rightarrow\) \[\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \quad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}\] 证明：令 \(h = t\)（实方向）得 \(f' = u_x + iv_x\)； 令 \(h = it\) 得 \(f' = v_y - iu_y\)。两者相等即 CR 方程。 反之，CR 方程 + 偏导数连续 ⇒ 复可微。 <strong>推论</strong>：\(u\) 和 \(v\) 都是调和函数： \(\Delta u = u_{xx} + u_{yy} = 0\)，\(\Delta v = 0\)。 （由 CR 方程：\(u_{xx} = v_{yx} = -u_{yy}\)。）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>流体力学中，不可压缩无旋流的速度势 \(\phi\) 和流函数 \(\psi\) 恰好满足 CR 方程——复势 \(f = \phi + i\psi\) 是全纯的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(f(z) = z^2 = (x^2 - y^2) + i(2xy)\) 满足 CR 方程。 解答：\(u = x^2 - y^2\), \(v = 2xy\)。 \(u_x = 2x = v_y\)，\(u_y = -2y = -v_x\)。✓ \(f'(z) = u_x + iv_x = 2x + i(2y) = 2(x + iy) = 2z\)。✓ 易错点：\(f(z) = \bar{z} = x - iy\) 不满足 CR（\(u_x = 1 \neq v_y = -1\)）， 故 \(\bar{z}\) 不全纯！共轭运算破坏全纯性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f(z) = |z|^2\) 在哪里全纯？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|z|^2 = x^2 + y^2\\), \\(u = x^2 + y^2\\), \\(v = 0\\)。')">A. 处处全纯</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(|z|^2 = x^2 + y^2\\), \\(u = x^2 + y^2\\), \\(v = 0\\)。')">B. 仅在 \(z = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|z|^2 = x^2 + y^2\\), \\(u = x^2 + y^2\\), \\(v = 0\\)。')">C. 仅在实轴上</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|z|^2 = x^2 + y^2\\), \\(u = x^2 + y^2\\), \\(v = 0\\)。')">D. 处处不全纯</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>全纯函数的基本性质与初等函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>复指数函数、三角函数、对数函数在复数域上的行为远比实数域丰富。 \(e^z\) 变成周期函数（虚方向周期 \(2\pi i\)）、\(\ln z\) 变成多值函数、 \(z^a\) 的定义需要选择"分支"。理解这些初等全纯函数是复分析的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>复指数</strong>：\(e^z = e^x(\cos y + i\sin y)\)（Euler 公式）。 性质：\(e^{z+w} = e^z e^w\)，\(|e^z| = e^x\)，周期 \(2\pi i\)。 <strong>复对数</strong>：\(\log z = \ln|z| + i\arg z\)（多值！）。 主值：\(\text{Log}\, z = \ln|z| + i\text{Arg}\, z\)（\(\text{Arg} \in (-\pi, \pi]\)）。 \(\text{Log}\) 在负实轴上不连续——<strong>分支切割</strong>。 <strong>复幂</strong>：\(z^a = e^{a \log z}\)（一般多值）。 例：\(i^i = e^{i \log i} = e^{i(i\pi/2 + 2k\pi i)} = e^{-\pi/2 - 2k\pi}\)（实数！）。 <strong>Liouville 定理</strong>：有界整函数为常数。 证明（预览，用 Cauchy 估计）：\(|f'(z)| \leq M/R \to 0\)（\(R \to \infty\)）， 故 \(f' = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>电气工程中，交流电路分析用 \(e^{i\omega t}\) 表示信号， 阻抗 \(Z = R + iX\) 是全纯函数理论的直接应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(\log(-1)\) 的所有值。 解答：\(\log(-1) = \ln|-1| + i\arg(-1) = 0 + i(\pi + 2k\pi) = i(2k+1)\pi\)（\(k \in \mathbb{Z}\)）。 主值 \(\text{Log}(-1) = i\pi\)。 易错点：把 \(\log(z_1 z_2) = \log z_1 + \log z_2\) 当作恒等式。 多值函数下等号变为集合相等，取主值后不一定成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(i^i\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(i^i = e^{-\\pi/2 - 2k\\pi}\\)，确实是实数（取不同 \\(k\\) 值）。')">A. 纯虚数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(i^i = e^{-\\pi/2 - 2k\\pi}\\)，确实是实数（取不同 \\(k\\) 值）。')">B. 实数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(i^i = e^{-\\pi/2 - 2k\\pi}\\)，确实是实数（取不同 \\(k\\) 值）。')">C. 多值，所有值均为实数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(i^i = e^{-\\pi/2 - 2k\\pi}\\)，确实是实数（取不同 \\(k\\) 值）。')">D. 无定义</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>解析函数与收敛幂级数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实分析中，无穷次可微不代表等于 Taylor 级数（如 \(e^{-1/x^2}\)）。 但复分析中，全纯一次 ⇒ 可以展开为收敛幂级数！这一"全纯 = 解析" 的等价性是复分析最核心的奇迹之一——复可微性远比实可微性强。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>全纯函数在收敛圆盘内完全由系数决定——幂级数提供了"无穷维坐标"。 收敛半径由最近奇点的距离决定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>幂级数</strong>：\(f(z) = \sum_{n=0}^\infty a_n (z - z_0)^n\)。 <strong>收敛半径</strong>：\(R = 1/\limsup |a_n|^{1/n}\)（Hadamard 公式）。 级数在 \(|z - z_0| < R\) 内绝对一致收敛（紧子集上）， 在 \(|z - z_0| > R\) 发散。 <strong>逐项求导</strong>：\(f'(z) = \sum n a_n (z - z_0)^{n-1}\)， 收敛半径不变。全纯函数无穷次可微。 <strong>核心定理（后证）</strong>：全纯 ⇔ 解析（局部可展为幂级数）。 每个全纯函数在其定义域内每点可展开 Taylor 级数： \[f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!}(z - z_0)^n\] 收敛半径 = \(z_0\) 到最近奇点的距离。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = 1/(1-z)\)。求以 \(z_0 = 0\) 为中心的 Taylor 级数和收敛半径。 解答：\(f(z) = \sum_{n=0}^\infty z^n\)，\(R = 1\)。 最近奇点 \(z = 1\)，\(|z_0 - 1| = 1 = R\)。✓ 以 \(z_0 = i\) 为中心呢？\(f(z) = \frac{1}{1-i-(z-i)} = \frac{1}{1-i} \cdot \frac{1}{1 - (z-i)/(1-i)} = \sum \frac{(z-i)^n}{(1-i)^{n+1}}\)。 \(R = |1-i| = \sqrt{2}\)（到奇点 \(z=1\) 的距离）。✓ 易错点：实轴上无奇点不意味实 Taylor 级数收敛半径无穷。 \(1/(1+x^2)\) 实轴处处光滑，但 Taylor 级数在 \(|x| > 1\) 发散—— 因为复奇点 \(z = \pm i\) 距原点为 1。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\sum z^n/n!\) 的收敛半径是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(a_n = 1/n!\\), \\(R = 1/\\limsup (1/n!)^{1/n} = \\infty\\)。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(a_n = 1/n!\\), \\(R = 1/\\limsup (1/n!)^{1/n} = \\infty\\)。')">B. \(e\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(a_n = 1/n!\\), \\(R = 1/\\limsup (1/n!)^{1/n} = \\infty\\)。')">C. \(\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(a_n = 1/n!\\), \\(R = 1/\\limsup (1/n!)^{1/n} = \\infty\\)。')">D. 0</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>全纯函数的刚性与唯一性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>全纯函数有惊人的"刚性"：如果两个全纯函数在一个有聚点的集合上 相等，则它们在整个连通区域上相等（唯一性定理/零点孤立性）。 这意味着全纯函数完全由"很少的信息"决定——这在实分析中 不可能（光滑函数可以在任意开集外为 0）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>零点孤立性是"全纯 = 解析"的直接推论——幂级数不能在非 孤立零点处非零。全纯函数的值在区域内"全局锁定"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>零点孤立性定理</strong>：设 \(f\) 在区域 \(D\) 上全纯且 \(f \not\equiv 0\)。 则 \(f\) 的零点集 \(\{z : f(z) = 0\}\) 没有聚点在 \(D\) 内。 <strong>证明</strong>：设 \(f(z_0) = 0\)。Taylor 展开 \(f(z) = (z - z_0)^m g(z)\)（\(g(z_0) \neq 0\), \(m \geq 1\)）。 \(g\) 连续故在 \(z_0\) 附近 \(g \neq 0\)，故 \(z_0\) 是孤立零点。 <strong>唯一性定理</strong>：设 \(f, g\) 在连通区域 \(D\) 上全纯，且 \(f = g\) 在 具有 \(D\) 内聚点的子集 \(S\) 上。则 \(f \equiv g\) 在 \(D\) 上。 <strong>最大模原理</strong>：非常数全纯函数 \(|f|\) 在区域内部不取最大值。 \[\max_{z \in \overline{D}} |f(z)| = \max_{z \in \partial D} |f(z)|\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>解析延拓的理论基础：全纯函数从小区域"唯一"延拓到大区域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：若 \(f\) 在单位圆盘上全纯，且 \(f(1/n) = 0\) 对所有 \(n \geq 1\)， 证明 \(f \equiv 0\)。 解答：\(\{1/n\}\) 的聚点 \(0 \in D\)（单位圆盘）。 由唯一性定理 \(f \equiv 0\)。 易错点：零点集可以是无穷的（如 \(\sin z\) 在 \(z = n\pi\) 处为零）， 但不能有聚点在定义域内。\(\sin z\) 的零点 \(n\pi \to \infty\)， 聚点不在任何有界区域内。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">非常数全纯函数的零点在区域内是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。零点孤立但可以有无穷多个（如 \\(\\sin z\\)），')">A. 有限个</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！零点孤立但可以有无穷多个（如 \\(\\sin z\\)），')">B. 孤立的（可能可数个）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。零点孤立但可以有无穷多个（如 \\(\\sin z\\)），')">C. 可以有聚点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。零点孤立但可以有无穷多个（如 \\(\\sin z\\)），')">D. 总是在边界上</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/analysis/complex.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

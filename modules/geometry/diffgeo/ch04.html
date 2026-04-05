@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 积分与 Stokes — 微分几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "diffgeo-ch04-q1",
+        "question": "流形的定向 (orientation) 是什么？",
+        "options": [
+          "坐标轴的选取",
+        "处处非零 \\(n\\)-形式（体积形式）的等价类",
+        "流形的旋转方向",
+        "法向量的选取"
+        ],
+        "answer": 1,
+        "explanation": "\\(n\\)-维流形 \\(M\\) 可定向 \\(\\iff\\) 存在全局处处非零 \\(n\\)-形式 \\(\\omega\\)（体积形式）。等价地：存在坐标图册使所有转移函数 Jacobian 行列式 \\(> 0\\)。两个体积形式 \\(\\omega, \\omega'\\)：若 \\(\\omega' = f\\omega\\) 且 \\(f > 0\\) 处处，则同方向。Möbius 带不可定向。"
+      },
+      {
+        "id": "diffgeo-ch04-q2",
+        "question": "\\(S^2\\) 是否可定向？",
+        "options": [
+          "是",
+        "否",
+        "取决于嵌入",
+        "Möbius 带子集不可定向所以 \\(S^2\\) 也不"
+        ],
+        "answer": 0,
+        "explanation": "\\(S^2\\) 可定向。标准体积形式：用球极坐标的面积形式 \\(\\sin\\phi\\,d\\phi \\wedge d\\theta\\)，或用嵌入 \\(\\mathbb{R}^3\\) 的外法向量诱导定向。更一般地，所有 \\(S^n\\) 可定向。紧致有向曲面分类：\\(S^2, T^2, \\Sigma_g\\)（亏格 \\(g\\) 曲面）都可定向。Klein 瓶和 \\(\\mathbb{RP}^2\\) 不可定向。"
+      },
+      {
+        "id": "diffgeo-ch04-q3",
+        "question": "带边流形 \\(M\\) 的 Stokes 定理的陈述是什么？",
+        "options": [
+          "\\(\\int_M d\\omega = \\int_{\\partial M} \\omega\\)",
+        "\\(\\int_M \\omega = \\int_{\\partial M} d\\omega\\)",
+        "\\(\\int_M d\\omega = 0\\)",
+        "\\(\\int_{\\partial M} \\omega = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Stokes 定理：\\(\\int_M d\\omega = \\int_{\\partial M} \\omega\\)（\\(\\omega\\) 是紧支撑 \\((n-1)\\)-形式）。\\(M\\) 有向 \\(n\\)-维带边流形，\\(\\partial M\\) 继承定向。这统一了：Green 定理（\\(n = 2\\), \\(M\\) 平面区域），经典 Stokes 定理（\\(n = 3\\), \\(M\\) 曲面），散度定理（\\(n = 3\\), \\(M\\) 区域）。"
+      },
+      {
+        "id": "diffgeo-ch04-q4",
+        "question": "\\(\\omega = 0\\) 时 Stokes 定理变成什么？",
+        "options": [
+          "\\(\\int_M 0 = 0\\)",
+        "\\(\\int_{\\partial M} 0 = 0\\)",
+        "无意义",
+        "A 和 B"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\omega = 0\\) 代入：\\(\\int_M d(0) = \\int_M 0 = 0\\)，\\(\\int_{\\partial M} 0 = 0\\)。平凡但一致。更有意义的推论：\\(\\partial M = \\emptyset\\) 时（无边流形），\\(\\int_M d\\eta = 0\\) 对所有 \\(\\eta\\)——闭流形上恰当形式的积分为零。"
+      },
+      {
+        "id": "diffgeo-ch04-q5",
+        "question": "Green 定理 \\(\\oint_C P\\,dx + Q\\,dy = \\iint_D (\\partial_x Q - \\partial_y P)\\,dx\\,dy\\) 是 Stokes 定理在什么情况下的特例？",
+        "options": [
+          "\\(n = 2\\)，\\(M = D\\)（平面区域），\\(\\omega = P\\,dx + Q\\,dy\\)",
+        "\\(n = 3\\)，\\(M\\) 是曲面",
+        "\\(n = 1\\)，\\(M = [a,b]\\)",
+        "\\(n = 3\\)，\\(M\\) 是体积"
+        ],
+        "answer": 0,
+        "explanation": "\\(M = D \\subseteq \\mathbb{R}^2\\)，\\(\\partial M = C\\)（边界曲线）。\\(\\omega = P\\,dx + Q\\,dy\\)（1-形式）。\\(d\\omega = (\\partial_x Q - \\partial_y P)\\,dx \\wedge dy\\)（2-形式）。\\(\\int_D d\\omega = \\int_C \\omega\\) 就是 Green 定理。\\(n = 1\\)（C）对应微积分基本定理 \\(\\int_a^b f'(x)\\,dx = f(b) - f(a)\\)。\\(n = 3\\), \\(M\\) 曲面（B）对应经典 Stokes 定理。"
+      },
+      {
+        "id": "diffgeo-ch04-q6",
+        "question": "散度定理 \\(\\iiint_V \\nabla \\cdot F\\,dV = \\oiint_S F \\cdot n\\,dA\\) 对应 Stokes 定理的哪个版本？",
+        "options": [
+          "\\(n = 2\\), 1-形式",
+        "\\(n = 3\\), \\(M = V\\)（体积），\\(\\omega\\) = 与 \\(F\\) 对偶的 2-形式",
+        "\\(n = 1\\), 0-形式",
+        "\\(n = 3\\), 0-形式"
+        ],
+        "answer": 1,
+        "explanation": "\\(F = (F_1, F_2, F_3)\\) 对应 2-形式 \\(\\omega = F_1\\,dy \\wedge dz + F_2\\,dz \\wedge dx + F_3\\,dx \\wedge dy\\)。\\(d\\omega = (\\partial_x F_1 + \\partial_y F_2 + \\partial_z F_3)\\,dx \\wedge dy \\wedge dz = (\\nabla \\cdot F)\\,dV\\)。\\(\\int_V d\\omega = \\int_{\\partial V = S} \\omega\\) 就是散度定理。\\(V\\) 是 3 维有向带边流形，\\(\\partial V = S\\) 是闭曲面。"
+      },
+      {
+        "id": "diffgeo-ch04-q7",
+        "question": "微积分基本定理 \\(\\int_a^b f'(x)\\,dx = f(b) - f(a)\\) 是 Stokes 定理在什么维度的特例？",
+        "options": [
+          "\\(n = 1\\), \\(M = [a,b]\\), \\(\\omega = f\\)（0-形式）",
+        "\\(n = 2\\)",
+        "\\(n = 0\\)",
+        "不是特例"
+        ],
+        "answer": 0,
+        "explanation": "\\(M = [a,b]\\)，\\(\\partial M = \\{a, b\\}\\)（带定向：\\(b\\) 正，\\(a\\) 负）。\\(\\omega = f\\)，\\(d\\omega = f'\\,dx\\)。\\(\\int_{[a,b]} f'\\,dx = \\int_{\\partial[a,b]} f = f(b) - f(a)\\)。从 1 维到 \\(n\\) 维，Stokes 定理的精神始终是\"内部的微分 = 边界的值\"。"
+      },
+      {
+        "id": "diffgeo-ch04-q8",
+        "question": "Klein 瓶上是否可以定义一致体积形式（处处非零 2-形式）？",
+        "options": [
+          "可以",
+        "不可以，Klein 瓶不可定向",
+        "可以，但需要选择定向",
+        "只在嵌入 \\(\\mathbb{R}^4\\) 时可以"
+        ],
+        "answer": 1,
+        "explanation": "Klein 瓶不可定向：不存在全局处处非零 2-形式。等价地：沿某些闭曲线绕一圈，面积元的\"方向\"翻转。不可定向流形上不能一致定义\"顺时针/逆时针\"。但可以定义密度（取绝对值），从而仍有\"体积\"概念。"
+      },
+      {
+        "id": "diffgeo-ch04-q9",
+        "question": "计算 \\(\\int_{S^1} d\\theta\\)（\\(d\\theta\\) 是 \\(S^1\\) 上的角形式）。",
+        "options": [
+          "\\(0\\)",
+        "\\(\\pi\\)",
+        "\\(2\\pi\\)",
+        "\\(1\\)"
+        ],
+        "answer": 2,
+        "explanation": "参数化 \\(\\gamma(t) = e^{it}\\), \\(t \\in [0, 2\\pi]\\)。\\(\\gamma^*(d\\theta) = dt\\)。\\(\\int_{S^1} d\\theta = \\int_0^{2\\pi} dt = 2\\pi\\)。注意 \\(d\\theta\\) 是局部恰当但全局不恰当的 1-形式（\\(\\theta\\) 不是 \\(S^1\\) 上的全局函数）。如果 \\(d\\theta = df\\) 对某个全局 \\(f\\)，则 \\(\\int = f(2\\pi) - f(0) = 0\\)，矛盾。"
+      },
+      {
+        "id": "diffgeo-ch04-q10",
+        "question": "\\(\\omega = x\\,dy - y\\,dx\\) 在 \\(\\mathbb{R}^2\\) 上。\\(\\int_{S^1} \\omega = ?\\)（\\(S^1\\) 逆时针）",
+        "options": [
+          "\\(0\\)",
+        "\\(\\pi\\)",
+        "\\(2\\pi\\)",
+        "\\(-2\\pi\\)"
+        ],
+        "answer": 2,
+        "explanation": "方法1：Green 定理。\\(d\\omega = dx \\wedge dy - (-dx \\wedge dy)... \\) 计算 \\(d\\omega\\)：\\(d(x\\,dy) = dx \\wedge dy\\), \\(d(-y\\,dx) = -dy \\wedge dx = dx \\wedge dy\\)。\\(d\\omega = 2\\,dx \\wedge dy\\)。\\(\\int_{S^1} \\omega = \\int_D 2\\,dx \\wedge dy = 2 \\cdot \\text{Area}(D) = 2\\pi\\)（\\(D\\) = 单位圆盘）。方法2：\\(\\gamma(t) = (\\cos t, \\sin t)\\)，\\(\\omega(\\gamma'(t)) = \\cos^2 t + \\sin^2 t = 1\\), \\(\\int_0^{2\\pi} 1\\,dt = 2\\pi\\)。"
+      },
+      {
+        "id": "diffgeo-ch04-q11",
+        "question": "\\(\\mathbb{R}^3\\) 中曲面 \\(S\\) 上的经典 Stokes 定理 \\(\\int_S (\\nabla \\times F) \\cdot dA = \\oint_{\\partial S} F \\cdot dl\\) 中，\\(\\nabla \\times F\\) 对应微分形式的什么操作？",
+        "options": [
+          "\\(F\\) 的对偶 1-形式的外微分",
+        "\\(F\\) 的 Hodge 对偶",
+        "\\(F\\) 的散度",
+        "\\(F\\) 的 Laplacian"
+        ],
+        "answer": 0,
+        "explanation": "\\(F = (F_1, F_2, F_3)\\) 对应 1-形式 \\(\\omega_F = F_1\\,dx + F_2\\,dy + F_3\\,dz\\)。\\(d\\omega_F\\) 对应旋度。\\(\\int_S d\\omega_F = \\int_{\\partial S} \\omega_F\\) 就是经典 Stokes 定理。Hodge 对偶（B）是将 \\(k\\)-形式转为 \\((n-k)\\)-形式，旋度的计算可以用它但不是直接对应。"
+      },
+      {
+        "id": "diffgeo-ch04-q12",
+        "question": "带边流形 \\(\\partial M\\) 的边界有什么性质？",
+        "options": [
+          "\\(\\partial(\\partial M) = M\\)",
+        "\\(\\partial(\\partial M) = \\emptyset\\)",
+        "\\(\\partial M\\) 总是连通的",
+        "\\(\\partial M\\) 总是紧致的"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\partial(\\partial M) = \\emptyset\\)（\"边界的边界为空\"）。这与 \\(d^2 = 0\\) 对偶——Stokes 定理中 \\(\\int_M d(d\\omega) = \\int_{\\partial M} d\\omega = \\int_{\\partial(\\partial M)} \\omega\\)，若 \\(\\partial\\partial M \\neq \\emptyset\\) 则矛盾（左边 \\(= 0\\)）。几何上：\\([0,1]\\) 的边界是 \\(\\{0, 1\\}\\)（两个点），点没有边界。"
+      },
+      {
+        "id": "diffgeo-ch04-q13",
+        "question": "计算 \\(\\oint_C \\frac{-y\\,dx + x\\,dy}{x^2 + y^2}\\)（\\(C\\) 是以原点为心的单位圆，逆时针）。",
+        "options": [
+          "\\(0\\)",
+        "\\(\\pi\\)",
+        "\\(2\\pi\\)",
+        "\\(-2\\pi\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\omega = \\frac{-y\\,dx + x\\,dy}{x^2+y^2}\\) 在 \\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 上闭（\\(d\\omega = 0\\)）但不恰当。\\(\\gamma(t) = (\\cos t, \\sin t)\\)：\\(\\omega(\\gamma'(t)) = \\frac{-\\sin t(-\\sin t) + \\cos t \\cdot \\cos t}{1} = 1\\)。\\(\\int_0^{2\\pi} dt = 2\\pi\\)。不能用 Green 定理（\\(\\omega\\) 在 \\(0\\) 处无定义，域不包含原点时积分为 \\(0\\)）。"
+      },
+      {
+        "id": "diffgeo-ch04-q14",
+        "question": "单位分解在积分定义中的作用是什么？",
+        "options": [
+          "把全局积分拆成坐标卡上的局部积分之和",
+        "使积分为零",
+        "选择坐标",
+        "定义定向"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_M \\omega = \\sum_\\alpha \\int_M \\rho_\\alpha \\omega\\)（\\(\\{\\rho_\\alpha\\}\\) 是隶属于坐标覆盖 \\(\\{U_\\alpha\\}\\) 的单位分解）。每个 \\(\\rho_\\alpha \\omega\\) 支撑在 \\(U_\\alpha\\) 中，可以用坐标写出 \\(\\int_{U_\\alpha} \\rho_\\alpha \\omega = \\int_{\\varphi_\\alpha(U_\\alpha)} (\\varphi_\\alpha^{-1})^*(\\rho_\\alpha \\omega)\\)。结果与坐标选择和分解无关。"
+      },
+      {
+        "id": "diffgeo-ch04-q15",
+        "question": "de Rham 定理将什么联系起来？",
+        "options": [
+          "de Rham 上同调 \\(H^k_{\\text{dR}}(M) \\cong H^k_{\\text{sing}}(M; \\mathbb{R})\\)（奇异上同调）",
+        "同调与同伦群",
+        "微分方程与积分方程",
+        "流形与代数簇"
+        ],
+        "answer": 0,
+        "explanation": "de Rham 定理：微分形式定义的 de Rham 上同调同构于奇异上同调（实系数）。同构由积分给出：\\([\\omega] \\mapsto (\\sigma \\mapsto \\int_\\sigma \\omega)\\)（对上同调类 \\([\\omega]\\) 和同调类 \\([\\sigma]\\) 的配对）。这连接了微分几何（连续对象）和代数拓扑（组合/代数对象）。"
+      },
+      {
+        "id": "diffgeo-ch04-q16",
+        "question": "\\(M\\) 是紧致有向 \\(n\\)-维无边流形。\\(\\int_M d\\omega = ?\\)",
+        "options": [
+          "\\(\\int_{\\partial M} \\omega = 0\\)（因为 \\(\\partial M = \\emptyset\\)）",
+        "\\(\\int_M \\omega\\)",
+        "不确定",
+        "\\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\partial M = \\emptyset\\) \\(\\Rightarrow \\int_M d\\omega = \\int_\\emptyset \\omega = 0\\)。推论：闭流形上恰当形式的积分为零。即若 \\([\\omega]_{\\text{dR}} = 0\\)（\\(\\omega = d\\eta\\)），则 \\(\\int_M \\omega = 0\\)。反之若 \\(\\int_M \\omega \\neq 0\\) 则 \\(\\omega\\) 不恰当。这是判断上同调类非零的工具。"
+      },
+      {
+        "id": "diffgeo-ch04-q17",
+        "question": "\\(\\mathbb{RP}^2\\) 不可定向。这意味着什么？",
+        "options": [
+          "不存在全局非零 2-形式",
+        "不存在 Stokes 定理",
+        "不能定义积分",
+        "A 正确，但可以用密度定义积分"
+        ],
+        "answer": 3,
+        "explanation": "不可定向流形没有全局体积形式（A），但可以定义密度（\\(|dx^1 \\wedge \\cdots \\wedge dx^n|\\) 变换时取绝对值），从而定义\"无向积分\"。Stokes 定理对有向流形成立；不可定向时有\"扭曲版本\"（用定向丛的截面）。物理中面积和体积的计算不需要定向。"
+      },
+      {
+        "id": "diffgeo-ch04-q18",
+        "question": "Stokes 定理的证明核心步骤是什么？",
+        "options": [
+          "用单位分解归结为坐标卡上的计算，再用 Fubini 定理和微积分基本定理",
+        "用 Baire 范畴定理",
+        "用同伦论",
+        "用 Sard 定理"
+        ],
+        "answer": 0,
+        "explanation": "Step 1: 单位分解，\\(\\int_M d\\omega = \\sum \\int d(\\rho_i \\omega)\\)。Step 2: 每项支撑在一个坐标卡内，归结为 \\(\\mathbb{R}^n\\) 或 \\(\\mathbb{R}^n_+\\) 上的计算。Step 3: 在 \\(\\mathbb{R}^n\\) 上，\\(d(\\rho_i \\omega) = \\sum \\frac{\\partial f_j}{\\partial x^j} dx^1 \\wedge \\cdots \\wedge dx^n\\)。用 Fubini 和微积分基本定理，沿每个方向积分。边界项在 \\(\\mathbb{R}^n_+\\) 的 \\(\\{x^n = 0\\}\\) 面上贡献 \\(\\int_{\\partial M}\\)。"
+      },
+      {
+        "id": "diffgeo-ch04-q19",
+        "question": "Gauss-Bonnet 定理对紧致有向 2-维无边流形 \\(M\\) 说什么？",
+        "options": [
+          "\\(\\int_M K\\,dA = 2\\pi \\chi(M)\\)",
+        "\\(\\int_M K\\,dA = 0\\)",
+        "\\(\\int_M dA = \\text{Area}(M)\\)",
+        "\\(\\int_M K\\,dA = 4\\pi\\)"
+        ],
+        "answer": 0,
+        "explanation": "Gauss-Bonnet：\\(\\int_M K\\,dA = 2\\pi \\chi(M)\\)（\\(K\\) = Gauss 曲率，\\(\\chi\\) = Euler 特征数）。\\(S^2\\)：\\(K = 1\\), \\(\\chi = 2\\), \\(\\int K\\,dA = 4\\pi = 2\\pi \\cdot 2\\)。\\(T^2\\)：\\(\\chi = 0\\), \\(\\int K\\,dA = 0\\)。这将局部几何量（曲率）与全局拓扑不变量（Euler 数）联系起来——微分几何中最深刻的定理之一。"
+      },
+      {
+        "id": "diffgeo-ch04-q20",
+        "question": "Stokes 定理蕴含 \\(d^2 = 0\\) 的\"物理直觉\"是什么？",
+        "options": [
+          "场的旋度的散度为零",
+        "边界的边界为空 \\(\\partial^2 = 0\\)",
+        "A 和 B 等价，都反映 \\(d^2 = 0\\)",
+        "\\(d^2 = 0\\) 与 Stokes 无关"
+        ],
+        "answer": 2,
+        "explanation": "\\(d^2 = 0\\) 的对偶是 \\(\\partial^2 = 0\\)（边界的边界为空）。物理：\\(\\nabla \\cdot (\\nabla \\times F) = 0\\)（旋度无散）和 \\(\\nabla \\times (\\nabla f) = 0\\)（梯度无旋）都是 \\(d^2 = 0\\) 的特例。Stokes 定理将 \\(d\\) 和 \\(\\partial\\) 对偶：\\(\\int_M d\\omega = \\int_{\\partial M} \\omega\\)，\\(d^2 = 0\\) 和 \\(\\partial^2 = 0\\) 互为镜像。"
+      },
+      {
+        "id": "diffgeo-ch04-q21",
+        "question": "\\(n\\)-维紧致有向闭流形 \\(M\\) 上体积形式 \\(\\omega_M\\) 满足 \\(\\int_M \\omega_M > 0\\)。这意味着 \\([\\omega_M] \\neq 0\\) 在 \\(H^n_{\\text{dR}}(M)\\) 中。\\(H^n(M) = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(\\mathbb{R}\\)",
+        "\\(\\mathbb{Z}\\)",
+        "取决于 \\(M\\)"
+        ],
+        "answer": 1,
+        "explanation": "紧致有向连通 \\(n\\)-流形 \\(M\\)：\\(H^n_{\\text{dR}}(M) \\cong \\mathbb{R}\\)，由 \\([\\omega_M]\\) 生成。积分映射 \\(\\int_M: H^n(M) \\to \\mathbb{R}\\) 是同构（Poincaré 对偶的结果）。\\(\\int_M \\omega_M \\neq 0\\) 证明 \\([\\omega_M] \\neq 0\\)。不可定向流形 \\(H^n = 0\\)。"
+      },
+      {
+        "id": "diffgeo-ch04-q22",
+        "question": "经典向量分析中 \\(\\nabla \\times (\\nabla f) = 0\\) 对应微分形式的什么？",
+        "options": [
+          "\\(d(df) = d^2 f = 0\\)",
+        "\\(\\Delta f = 0\\)",
+        "\\(f\\) 是调和函数",
+        "\\(\\nabla \\cdot f = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 是 0-形式，\\(df\\) 是 1-形式（梯度），\\(d(df) = d^2 f = 0\\)（2-形式）。在 \\(\\mathbb{R}^3\\) 中 \\(d^2 f\\) 的分量是 \\(\\partial_i \\partial_j f - \\partial_j \\partial_i f = 0\\)（混合偏导交换 + 反对称抵消），即旋度为零。类似地 \\(\\nabla \\cdot (\\nabla \\times F) = 0\\) 对应 \\(d^2 \\omega_F = 0\\)（\\(\\omega_F\\) 是 \\(F\\) 的 1-形式）。"
+      },
+      {
+        "id": "diffgeo-ch04-q23",
+        "question": "\\(S^2\\) 上的面积形式 \\(\\omega = \\sin\\phi\\,d\\phi \\wedge d\\theta\\)。\\(\\int_{S^2} \\omega = ?\\)",
+        "options": [
+          "\\(2\\pi\\)",
+        "\\(4\\pi\\)",
+        "\\(\\pi\\)",
+        "\\(8\\pi\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\int_{S^2} \\omega = \\int_0^\\pi \\int_0^{2\\pi} \\sin\\phi\\,d\\phi\\,d\\theta = 2\\pi \\int_0^\\pi \\sin\\phi\\,d\\phi = 2\\pi \\cdot [-\\cos\\phi]_0^\\pi = 2\\pi \\cdot 2 = 4\\pi\\)。这是单位球面面积。\\(\\omega\\) 是 \\(S^2\\) 的标准体积形式（由 \\(\\mathbb{R}^3\\) 中外法向量诱导的定向）。"
+      },
+      {
+        "id": "diffgeo-ch04-q24",
+        "question": "Brouwer 不动点定理可以用 Stokes 定理证明的思路是什么？",
+        "options": [
+          "假设无不动点 \\(\\Rightarrow\\) 构造收缩 \\(r: D^n \\to S^{n-1}\\) \\(\\Rightarrow\\) 矛盾 Stokes 定理",
+        "直接用 Stokes 定理计算不动点数",
+        "用 Baire 范畴定理",
+        "用 Sard 定理"
+        ],
+        "answer": 0,
+        "explanation": "假设 \\(f: D^n \\to D^n\\) 无不动点。从 \\(f(x)\\) 向 \\(x\\) 做射线交 \\(S^{n-1}\\) 于 \\(r(x)\\)。\\(r: D^n \\to S^{n-1}\\) 是收缩（\\(r|_{S^{n-1}} = \\mathrm{id}\\)）。\\(r^*: H^{n-1}(S^{n-1}) \\to H^{n-1}(D^n)\\)。\\(H^{n-1}(S^{n-1}) = \\mathbb{R}\\), \\(H^{n-1}(D^n) = 0\\), 但 \\(r^* \\circ \\iota^* = \\mathrm{id}^*\\) 非零。矛盾。Stokes 定理支持体积形式的积分论证。"
+      },
+      {
+        "id": "diffgeo-ch04-q25",
+        "question": "为什么流形必须有向才能定义 \\(n\\)-形式的积分？",
+        "options": [
+          "因为坐标变换时 \\(\\det J\\) 可以为负，导致积分可能变号",
+        "因为流形可能不紧致",
+        "因为微分形式可能不连续",
+        "因为积分需要度量"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int \\omega = \\int f(x) \\det\\left(\\frac{\\partial x}{\\partial y}\\right) dy^1 \\cdots dy^n\\)。若 \\(\\det J < 0\\)，符号翻转。有向意味着限制 \\(\\det J > 0\\)（一致定向的坐标卡），保证积分良定。不可定向流形上可以用密度（\\(|f \\cdot |\\det J||\\)）定义无向积分。度量不需要（D 错——勒贝格积分需要度量，但微分形式积分只需定向）。"
+      },
+      {
+        "id": "diffgeo-ch04-q26",
+        "question": "Gauss 电通量定理 \\(\\oiint_S E \\cdot dA = Q/\\varepsilon_0\\) 是以下哪个定理的物理版本？",
+        "options": [
+          "Stokes 定理（散度形式）",
+        "Green 定理",
+        "微积分基本定理",
+        "Poincaré 对偶"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla \\cdot E = \\rho/\\varepsilon_0\\)（Maxwell 方程）。对区域 \\(V\\) 积分：\\(\\iiint_V \\nabla \\cdot E\\,dV = Q/\\varepsilon_0\\)。散度定理（Stokes 定理的 \\(n = 3\\) 版本）：\\(= \\oiint_{\\partial V} E \\cdot dA\\)。微分形式版：\\(d*E = \\rho/\\varepsilon_0\\,dV\\)，\\(\\int_V d*E = \\int_{\\partial V} *E\\)。"
+      },
+      {
+        "id": "diffgeo-ch04-q27",
+        "question": "在流体力学中，Kelvin 环流定理说无粘性流体的环量 \\(\\Gamma = \\oint_C v \\cdot dl\\) 守恒。这可以用什么微分形式工具理解？",
+        "options": [
+          "Stokes 定理 + Lie 导数 \\(\\mathcal{L}_X \\omega = 0\\)",
+        "Baire 范畴定理",
+        "de Rham 上同调",
+        "谱序列"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Gamma = \\oint_C v \\cdot dl = \\int_S (\\nabla \\times v) \\cdot dA\\)（Stokes 定理）。\\(v\\) 对应 1-形式 \\(\\omega_v\\)。Kelvin 定理：\\(\\frac{d}{dt} \\int_{C_t} \\omega_v = 0\\)（\\(C_t\\) 随流运动）。用 Lie 导数：\\(\\mathcal{L}_v \\omega_v = 0\\)（Euler 方程 + Cartan 公式）。这是微分形式在流体力学中的经典应用。"
+      },
+      {
+        "id": "diffgeo-ch04-q28",
+        "question": "在拓扑数据分析 (TDA) 中，persistent homology 使用了什么数学工具？",
+        "options": [
+          "同调群的演化",
+        "Stokes 定理直接应用",
+        "微分方程",
+        "积分变换"
+        ],
+        "answer": 0,
+        "explanation": "TDA 的核心是 persistent homology：在不同尺度下计算同调群，追踪\"出生-死亡\"对。虽然不直接用 Stokes 定理，但 de Rham 理论提供了连续版本的背景——离散的单纯同调类比连续的 de Rham 上同调。Stokes 定理在离散版本（分段线性链）中变成同调代数的边界算子 \\(\\partial\\)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="diffgeo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/diffgeo.html" class="module-name">微分几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 流形的定向与带边流形</a></li>
+      <li><a href="#kp2">02 · 微分形式的积分</a></li>
+      <li><a href="#kp3">03 · 广义 Stokes 定理</a></li>
+      <li><a href="#kp4">04 · 散度定理与 Maxwell 方程</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>积分与 Stokes</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>流形的定向与带边流形</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>要在流形上积分，首先需要确定"正方向"——这就是定向。在曲面上， 定向决定了法向量的方向；在高维流形上，定向决定了顶阶形式的符号。 带边流形（如半空间 \(\{x^n \geq 0\}\)）是 Stokes 定理的自然舞台： \(\partial M\) 是 \(M\) 的边界，继承一个诱导定向。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>定向 = 顶阶形式的全局一致符号选取。不可定向流形（莫比乌斯带、 Klein 瓶）上顶阶形式改变符号，积分需修正（或用密度替代）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定向</strong>：\(n\) 维流形 \(M\) 可定向 \(\iff\) 存在处处不为零的 \(n\)-形式 \(\omega \in \Omega^n(M)\)（体积形式）。 等价地：存在图册使所有转移函数的 Jacobian 行列式为正。 <strong>带边流形</strong>：\(M\) 的每点邻域同胚于 \(\mathbb{R}^n\) 或 \(\mathbb{H}^n = \{x \in \mathbb{R}^n : x^n \geq 0\}\)。 边界 \(\partial M = \{p : p \text{ 对应 } x^n = 0\}\)， \(\partial M\) 是 \((n-1)\) 维无边流形。 <strong>诱导定向</strong>：\(M\) 定向时，\(\partial M\) 继承"外法向量优先"的定向规则。 \[(\text{外法向}, e_1, \ldots, e_{n-1}) \text{ 正定向于 } M \iff (e_1, \ldots, e_{n-1}) \text{ 正定向于 } \partial M\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 莫比乌斯带不可定向——上面的蚂蚁走一圈后左右翻转</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(D^2 = \{(x,y) : x^2+y^2 \leq 1\}\) 是带边流形。 \(\partial D^2 = S^1\)。确定诱导定向。 解答：\(D^2\) 取标准定向（\(dx \wedge dy\)）。 外法向量为 \(\vec{n} = (x, y)/|(x,y)|\)（向外）。 \((\vec{n}, \vec{e})\) 正定向 \(\iff\) \(\vec{e}\) 逆时针。 所以 \(\partial D^2 = S^1\) 的诱导定向是逆时针方向。 易错点：Stokes 定理要求 \(\partial M\) 使用诱导定向。 方向搞反会导致积分差一个负号。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">莫比乌斯带是否可定向？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。莫比乌斯带不可定向——不存在全局一致的法向量选取。')">A. 可定向</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！莫比乌斯带不可定向——不存在全局一致的法向量选取。')">B. 不可定向</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。莫比乌斯带不可定向——不存在全局一致的法向量选取。')">C. 取决于嵌入方式</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。莫比乌斯带不可定向——不存在全局一致的法向量选取。')">D. 取决于维数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>微分形式的积分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在流形上，积分的"被积对象"不是函数而是顶阶微分形式。这是因为 坐标变换时 Jacobian 行列式恰好给出微分形式在拉回下的变换因子， 保证积分的坐标无关性。体积形式提供了流形上的"测度"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>积分的坐标无关性来自微分形式的变换律： \(\int_{\varphi(U)} \omega = \int_U \varphi^*\omega\)（拉回公式）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(n\)-形式在 \(n\) 维定向流形上的积分</strong>： 设 \((U, \varphi)\) 是坐标卡，\(\omega = f(x)\, dx^1 \wedge \cdots \wedge dx^n\)。 \[\int_U \omega = \int_{\varphi(U)} f(x)\, dx^1 \cdots dx^n\] （右边是 \(\mathbb{R}^n\) 中的 Lebesgue 积分）。 <strong>坐标变换律</strong>：若 \(\psi = \varphi \circ \phi^{-1}\) 是转移函数， \[\int f \circ \psi \cdot |\det J_\psi|\, dy = \int f\, dx\] 定向保证 \(\det J_\psi > 0\)，故可去绝对值。 <strong>配分函数</strong>：对一般 \(\omega \in \Omega^n(M)\)，取从属于坐标覆盖的 单位分解 \(\{\rho_\alpha\}\)，\(\int_M \omega = \sum_\alpha \int_{U_\alpha} \rho_\alpha \omega\)。 <strong>体积形式</strong>：\(dV_g = \sqrt{\det(g_{ij})}\, dx^1 \wedge \cdots \wedge dx^n\) （黎曼流形上）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 曲面面积 \(A = \int_S dA\)，曲线长度 \(L = \int_\gamma ds\) 都是形式积分的特例</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\int_{S^1} d\theta\)（\(S^1\) 逆时针定向，\(\theta\) 为角度坐标）。 解答：\(d\theta = \frac{-y\,dx + x\,dy}{x^2+y^2}|_{S^1}\)。 参数化：\(x = \cos t\)，\(y = \sin t\)，\(t \in [0, 2\pi]\)。 \(d\theta|_{S^1} = dt\)。\(\int_0^{2\pi} dt = 2\pi\)。 易错点：\(\theta\) 不是 \(S^1\) 上的全局光滑函数（在某点不连续）， 所以 \(d\theta\) 闭但不恰当。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(n\)-形式在 \(n\) 维流形上积分时，定向改变会怎样？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。翻转定向等价于乘以 \\(-1\\)，积分变号。')">A. 积分值不变</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！翻转定向等价于乘以 \\(-1\\)，积分变号。')">B. 积分值变号</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。翻转定向等价于乘以 \\(-1\\)，积分变号。')">C. 积分值变为零</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。翻转定向等价于乘以 \\(-1\\)，积分变号。')">D. 积分无意义</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>广义 Stokes 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Green 定理、Gauss 散度定理、经典 Stokes 旋度定理看似不同， 实则都是同一个定理的特例——广义 Stokes 定理：\(\int_M d\omega = \int_{\partial M} \omega\)。 这是微分几何中最优美的公式之一，将体上的"微分"与边界上的 "积分"联系起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Stokes 定理是 \(d\) 与 \(\int\) 的对偶：外微分是边界算子的 "伴随"。这在同调/上同调理论中有深远意义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>广义 Stokes 定理</strong>：设 \(M\) 是 \(n\) 维紧致定向带边流形， \(\omega \in \Omega^{n-1}(M)\)。则 \[\int_M d\omega = \int_{\partial M} \omega\] <strong>证明思路</strong>（\(\mathbb{R}^n\) 中紧支撑情况）： 设 \(\omega = f\, dx^1 \wedge \cdots \wedge \widehat{dx^i} \wedge \cdots \wedge dx^n\)。 \(d\omega = (-1)^{i-1} \frac{\partial f}{\partial x^i} dx^1 \wedge \cdots \wedge dx^n\)。 对第 \(i\) 个变量用 Fubini 定理： \(\int \frac{\partial f}{\partial x^i} dx^i = f|_{\text{边界}}\)。 逐坐标方向验证，用单位分解拼合。 <strong>经典特例</strong>： - <strong>Green</strong>（\(n=2\)，\(M \subseteq \mathbb{R}^2\)）：\(\oint_{\partial M} P\,dx + Q\,dy = \iint_M (Q_x - P_y)\,dx\,dy\) - <strong>散度定理</strong>（\(n=3\)，\(\omega = F_1 dy \wedge dz + \cdots\)）：\(\oint_{\partial M} \vec{F} \cdot d\vec{S} = \iiint_M \nabla \cdot \vec{F}\,dV\) - <strong>经典 Stokes</strong>（\(n=2\)，\(M\) 是 \(\mathbb{R}^3\) 中的曲面）：\(\oint_{\partial M} \vec{F} \cdot d\vec{r} = \iint_M (\nabla \times \vec{F}) \cdot d\vec{S}\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 电磁学中 Gauss 定律：\(\oint \vec{E} \cdot d\vec{S} = Q/\varepsilon_0\) - 流体力学中 Kelvin 环量定理</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Stokes 定理计算 \(\oint_C y\,dx + x\,dy\)， \(C\) 是 \(x^2 + y^2 = 1\) 逆时针。 解答：\(\omega = y\,dx + x\,dy\)。\(d\omega = dy \wedge dx + dx \wedge dy = 0\)。 所以 \(\oint_C \omega = \int_{D^2} d\omega = 0\)。 易错点：若 \(\omega = -y\,dx + x\,dy\)，则 \(d\omega = 2\,dx \wedge dy\)， \(\oint = 2 \cdot \text{面积} = 2\pi\)。注意正负号。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">广义 Stokes 定理 \(\int_M d\omega = \int_{\partial M} \omega\) 的条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。需要 \\(M\\) 紧致（保证积分收敛）、定向（积分有意义）、')">A. \(M\) 是紧致无边流形</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。需要 \\(M\\) 紧致（保证积分收敛）、定向（积分有意义）、')">B. \(M\) 是开流形</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！需要 \\(M\\) 紧致（保证积分收敛）、定向（积分有意义）、')">C. \(M\) 是紧致定向带边流形</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。需要 \\(M\\) 紧致（保证积分收敛）、定向（积分有意义）、')">D. \(\omega\) 是恰当形式</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>散度定理与 Maxwell 方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Maxwell 方程组是电磁学的基石，传统上用向量微积分（散度、旋度） 表述。用微分形式语言重写后，四个 Maxwell 方程简化为两个： \(dF = 0\) 和 \(d{*F} = J\)。这不仅更优美，而且能推广到弯曲时空 ——这是广义相对论中电磁场理论的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>微分形式语言消除了坐标依赖，揭示了物理定律的几何本质。 散度定理的流形推广是 Stokes 定理的直接应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>散度定理（流形版）</strong>：\((M^n, g)\) 紧致黎曼流形带边。 向量场 \(X\) 的散度 \(\mathrm{div}(X) = *d(*X^\flat)\)（或用联络 \(\mathrm{div}(X) = \nabla_i X^i\)），则 \[\int_M \mathrm{div}(X)\, dV_g = \int_{\partial M} g(X, \nu)\, dA\] 其中 \(\nu\) 是外法向量。这是 Stokes 定理对 \((n-1)\)-形式的特例。 <strong>Maxwell 方程的形式语言</strong>： 电磁场 2-形式 \(F = E_i dx^i \wedge dt + B_{ij} dx^i \wedge dx^j\)。 \[dF = 0 \quad (\text{Faraday + 无磁单极})\] \[d{*F} = J \quad (\text{Ampère + Gauss})\] \(J\) 是电流 3-形式。\(d^2 = 0\) 自动给出电荷守恒 \(dJ = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中的弯曲时空用同样的形式语言描述电磁场 - Yang-Mills 方程推广了 \(dF = 0\)，\(d_A {*F} = J\) 到非阿贝尔规范群</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}^3\) 中验证散度定理： \(\vec{F} = (x,y,z)\)，\(M = \{x^2+y^2+z^2 \leq 1\}\)。 解答：\(\nabla \cdot \vec{F} = 3\)。 \(\iiint_M 3\,dV = 3 \cdot \frac{4\pi}{3} = 4\pi\)。 \(\oiint_{\partial M} \vec{F} \cdot d\vec{S} = \oiint_{S^2} (x,y,z) \cdot (x,y,z)\,dA = \oiint 1\,dA = 4\pi\)。一致。 易错点：\(\vec{F} \cdot \vec{n}\) 在球面上恰好等于 \(1\)（因为 \((x,y,z)\) 在 \(S^2\) 上是单位外法向），简化了计算。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Maxwell 方程 \(dF = 0\) 的物理含义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(dF = 0\\) 包含法拉第感应定律（\\(\\nabla \\times \\vec{E} = -\\partial \\vec{B}/\\partial t\\)）')">A. 高斯定律和安培定律</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(dF = 0\\) 包含法拉第感应定律（\\(\\nabla \\times \\vec{E} = -\\partial \\vec{B}/\\partial t\\)）')">B. 法拉第感应定律和无磁单极子</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(dF = 0\\) 包含法拉第感应定律（\\(\\nabla \\times \\vec{E} = -\\partial \\vec{B}/\\partial t\\)）')">C. 电荷守恒</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(dF = 0\\) 包含法拉第感应定律（\\(\\nabla \\times \\vec{E} = -\\partial \\vec{B}/\\partial t\\)）')">D. 洛伦兹力公式</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/geometry/diffgeo.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

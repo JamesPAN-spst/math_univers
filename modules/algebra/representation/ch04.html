@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 诱导表示 — 表示论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "representation-ch04-q1",
+        "question": "\\(G = S_3, H = \\{e,(12)\\}\\)，\\([G:H] = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([G:H] = |G|/|H| = 6/2 = 3\\)。\\(H\\) 有 3 个左陪集：\\(\\{e,(12)\\}, \\{(13),(123)\\}, \\{(23),(132)\\}\\)。指数是诱导表示维数放大因子。"
+      },
+      {
+        "id": "representation-ch04-q2",
+        "question": "\\(\\dim \\mathrm{Ind}^G_H(\\sigma) = \\) ？（\\([G:H] = 4, \\dim\\sigma = 2\\)）",
+        "options": [
+          "\\(2\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(4\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\dim\\mathrm{Ind}^G_H(\\sigma) = [G:H] \\cdot \\dim\\sigma = 4 \\times 2 = 8\\)。诱导表示将维数按指数倍放大。"
+      },
+      {
+        "id": "representation-ch04-q3",
+        "question": "Frobenius 互反律说明 \\(\\mathrm{Ind}\\) 和 \\(\\mathrm{Res}\\) 的关系是？",
+        "options": [
+          "互逆",
+        "互为伴随",
+        "相同",
+        "无关"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle\\mathrm{Ind}^G_H\\sigma, \\rho\\rangle_G = \\langle\\sigma, \\mathrm{Res}^G_H\\rho\\rangle_H\\)。\\(\\mathrm{Ind}\\) 是 \\(\\mathrm{Res}\\) 的左伴随函子。这不是互逆关系（\\(\\mathrm{Ind} \\circ \\mathrm{Res} \\neq \\mathrm{id}\\)）。"
+      },
+      {
+        "id": "representation-ch04-q4",
+        "question": "\\(G\\) 作用于 \\(G/H\\)（左陪集），对应的表示 \\(\\mathbb{C}[G/H] \\cong \\) ？",
+        "options": [
+          "\\(\\mathrm{Ind}^G_H(1_H)\\)",
+        "\\(\\mathrm{Res}^G_H(1_G)\\)",
+        "正则表示",
+        "平凡表示"
+        ],
+        "answer": 0,
+        "explanation": "\\(G\\) 左乘置换陪集 \\(\\{gH\\}\\)，生成的表示空间 \\(\\mathbb{C}[G/H]\\) 同构于从 \\(H\\) 的平凡表示 \\(1_H\\) 诱导到 \\(G\\) 的结果。当 \\(H = \\{e\\}\\) 时 \\(\\mathrm{Ind}^G_{\\{e\\}}(1) = \\mathbb{C}[G]\\) 为正则表示。"
+      },
+      {
+        "id": "representation-ch04-q5",
+        "question": "限制表示 \\(\\mathrm{Res}^G_H(\\rho)\\) 的维数是否改变？",
+        "options": [
+          "不改变",
+        "除以 \\([G:H]\\)",
+        "乘以 \\([G:H]\\)",
+        "变为 \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{Res}^G_H(\\rho)\\) 只是将 \\(\\rho\\) 限制在子群 \\(H\\) 上，底层向量空间不变，维数不变。只是群缩小了——\\(H\\) 的表示结构可能与 \\(G\\) 的不同（不可约的可能变为可约）。"
+      },
+      {
+        "id": "representation-ch04-q6",
+        "question": "双陪集 \\(K \\backslash G / H\\) 的元素个数满足？",
+        "options": [
+          "\\(|K \\backslash G / H| = |G|/(|K||H|)\\)",
+        "\\(|K \\backslash G / H| \\leq [G:H]\\)",
+        "\\(|K \\backslash G / H| = |G|\\)",
+        "无上界"
+        ],
+        "answer": 1,
+        "explanation": "每个双陪集 \\(KgH\\) 包含至少一个左陪集 \\(gH\\)，故双陪集数 \\(\\leq\\) 左陪集数 \\(= [G:H]\\)。同理 \\(\\leq [G:K]\\)。A 不对（大小不一的双陪集可能出现）。"
+      },
+      {
+        "id": "representation-ch04-q7",
+        "question": "用 Frobenius 互反计算 \\(\\langle\\mathrm{Ind}^{S_3}_{\\{e\\}}1, \\rho_1\\rangle_{S_3} = \\) ？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{Ind}^{S_3}_{\\{e\\}}1 = \\mathbb{C}[S_3]\\)（正则表示）。由互反：\\(\\langle\\mathbb{C}[S_3],\\rho_1\\rangle_G = \\langle 1,\\mathrm{Res}\\rho_1\\rangle_{\\{e\\}} = \\langle 1, 1\\rangle = 1 = d_1\\)。正则表示中平凡表示重数 \\(= \\dim\\rho_1 = 1\\)。"
+      },
+      {
+        "id": "representation-ch04-q8",
+        "question": "\\(G = S_3, H = A_3 = \\{e,(123),(132)\\}\\)，\\(\\sigma\\) 为 \\(A_3\\) 的 1 维表示 \\(\\sigma((123)) = \\omega\\)（\\(\\omega = e^{2\\pi i/3}\\)）。\\(\\dim\\mathrm{Ind}^{S_3}_{A_3}\\sigma = \\) ？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([S_3:A_3] = 6/3 = 2\\)。\\(\\dim\\mathrm{Ind} = 2 \\times 1 = 2\\)。诱导 \\(1\\) 维表示从指数 \\(2\\) 子群得到 \\(2\\) 维表示。"
+      },
+      {
+        "id": "representation-ch04-q9",
+        "question": "\\(\\langle\\mathrm{Ind}^{S_3}_{\\{e\\}}1, \\rho_3\\rangle = \\) ？（\\(\\rho_3\\) 为 2 维不可约）",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "由 Frobenius 互反：\\(\\langle\\mathbb{C}[S_3], \\rho_3\\rangle_G = \\langle 1, \\mathrm{Res}\\rho_3\\rangle_{\\{e\\}} = \\dim\\rho_3 = 2\\)。正则表示中 \\(\\rho_3\\) 重数 \\(= d_3 = 2\\)。"
+      },
+      {
+        "id": "representation-ch04-q10",
+        "question": "\\(G = S_3\\) 作用于 \\(\\{1,2,3\\}\\)，\\(\\mathrm{Stab}(1) = H = \\{e,(23)\\}\\)。\\(\\chi_{\\mathbb{C}[\\{1,2,3\\}]}(e) = \\) ？",
+        "options": [
+          "\\(3\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi(e) = \\dim\\mathbb{C}[\\{1,2,3\\}] = 3\\)。\\(e\\) 固定所有 3 个点，置换矩阵为 \\(I_3\\)，\\(\\mathrm{tr} = 3\\)。置换表示的特征标：\\(\\chi(g) = \\) 被 \\(g\\) 固定的点数。"
+      },
+      {
+        "id": "representation-ch04-q11",
+        "question": "\\(\\chi_{\\mathbb{C}[\\{1,2,3\\}]}((12)) = \\) ？（\\(S_3\\) 置换表示）",
+        "options": [
+          "\\(3\\)",
+        "\\(2\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\((12)\\) 固定 \\(3\\)，交换 \\(1,2\\)。被固定的点数 \\(= 1\\)。\\(\\chi((12)) = 1\\)。置换矩阵 \\(\\begin{pmatrix}0&1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}\\)，\\(\\mathrm{tr} = 1\\)。"
+      },
+      {
+        "id": "representation-ch04-q12",
+        "question": "\\(\\mathrm{Res}^{S_3}_{A_3}\\rho_3\\)（\\(\\rho_3\\) 为 2 维标准表示）可约吗？",
+        "options": [
+          "不可约",
+        "可约，分解为两个 1 维",
+        "不确定",
+        "限制后维数变为 1"
+        ],
+        "answer": 1,
+        "explanation": "\\(A_3 \\cong \\mathbb{Z}/3\\mathbb{Z}\\) Abel，所有不可约表示 1 维。\\(\\dim\\mathrm{Res}\\rho_3 = 2\\)，必须分解为两个 1 维。\\(\\mathrm{Res}^{S_3}_{A_3}\\rho_3 \\cong \\sigma \\oplus \\bar{\\sigma}\\)（\\(\\sigma((123)) = \\omega, \\bar{\\sigma}((123)) = \\omega^2\\)）。"
+      },
+      {
+        "id": "representation-ch04-q13",
+        "question": "诱导特征标公式 \\(\\chi_{\\mathrm{Ind}}(g) = \\frac{1}{|H|}\\sum_{x: x^{-1}gx \\in H}\\chi_\\sigma(x^{-1}gx)\\)。\\(g = e\\) 时 \\(\\chi_{\\mathrm{Ind}}(e) = \\) ？",
+        "options": [
+          "\\(\\dim\\sigma\\)",
+        "\\([G:H] \\cdot \\dim\\sigma\\)",
+        "\\(|G|\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(g = e\\) 时 \\(x^{-1}ex = e \\in H\\) 对所有 \\(x\\) 成立。\\(\\chi_{\\mathrm{Ind}}(e) = \\frac{1}{|H|}\\sum_{x \\in G}\\chi_\\sigma(e) = \\frac{|G|}{|H|}\\dim\\sigma = [G:H]\\dim\\sigma\\)。"
+      },
+      {
+        "id": "representation-ch04-q14",
+        "question": "\\(G = S_3, H = K = A_3\\)。\\(A_3 \\backslash S_3 / A_3\\) 有几个双陪集？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([S_3:A_3] = 2\\)，最多 2 个双陪集。\\(A_3 \\cdot e \\cdot A_3 = A_3\\)，\\(A_3 \\cdot (12) \\cdot A_3 = S_3 \\setminus A_3\\)。恰好 2 个双陪集：\\(A_3\\) 和 \\((12)A_3\\)。"
+      },
+      {
+        "id": "representation-ch04-q15",
+        "question": "\\(\\mathbb{C}[\\{1,2,3\\}]\\) 分解为 \\(S_3\\) 的不可约表示。\\(\\langle\\chi, \\chi_1\\rangle = \\) ？（\\(\\chi = (3,1,0)\\)）",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle(3,1,0),(1,1,1)\\rangle = \\frac{1}{6}(3 \\cdot 1 + 1 \\cdot 1 \\cdot 3 + 0 \\cdot 1 \\cdot 2) = \\frac{6}{6} = 1\\)。平凡表示出现 1 次（对应全 1 向量 \\((1,1,1)\\) 的不变子空间）。"
+      },
+      {
+        "id": "representation-ch04-q16",
+        "question": "从 \\(H = \\{e\\}\\) 诱导到 \\(G\\) 的结果 \\(\\mathrm{Ind}^G_{\\{e\\}}(1)\\) 是？",
+        "options": [
+          "平凡表示",
+        "正则表示 \\(\\mathbb{C}[G]\\)",
+        "符号表示",
+        "零表示"
+        ],
+        "answer": 1,
+        "explanation": "\\([G:\\{e\\}] = |G|\\)。\\(\\mathrm{Ind}^G_{\\{e\\}}(1) = \\mathbb{C}[G] \\otimes_\\mathbb{C} \\mathbb{C} = \\mathbb{C}[G]\\)。从平凡子群的平凡表示诱导得到正则表示，维数 \\(= |G|\\)。"
+      },
+      {
+        "id": "representation-ch04-q17",
+        "question": "Mackey 公式中，\\(\\sigma^g\\) 的定义是 \\(\\sigma^g(h) = \\) ？",
+        "options": [
+          "\\(\\sigma(ghg^{-1})\\)",
+        "\\(\\sigma(g^{-1}hg)\\)",
+        "\\(\\sigma(h)g\\)",
+        "\\(g\\sigma(h)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sigma^g(h) = \\sigma(g^{-1}hg)\\)。这是 \\(\\sigma\\) 的共轭表示，定义在 \\(gHg^{-1}\\) 上（然后限制到 \\(K \\cap gHg^{-1}\\)）。A 是 \\({}^g\\sigma\\) 的定义（对另一个约定）。"
+      },
+      {
+        "id": "representation-ch04-q18",
+        "question": "\\(G = S_4, H = S_3\\)（稳定 \\(4\\)）。\\(\\sigma = \\rho_3\\)（\\(S_3\\) 的 2 维不可约）。\\(\\dim\\mathrm{Ind}^{S_4}_{S_3}\\rho_3 = \\) ？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\([S_4:S_3] = 24/6 = 4\\)。\\(\\dim\\mathrm{Ind} = 4 \\times 2 = 8\\)。用 Frobenius 互反可计算此 \\(8\\) 维表示的不可约分解。"
+      },
+      {
+        "id": "representation-ch04-q19",
+        "question": "\\(\\chi_{\\mathbb{C}[\\{1,2,3\\}]}((123)) = \\) ？",
+        "options": [
+          "\\(3\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\((123)\\) 将 \\(1 \\to 2 \\to 3 \\to 1\\)，不固定任何点。\\(\\chi((123)) = 0\\)。置换矩阵 \\(\\begin{pmatrix}0&0&1\\\\1&0&0\\\\0&1&0\\end{pmatrix}\\)，\\(\\mathrm{tr} = 0\\)。分解验证：\\(\\chi = (3,1,0) = \\chi_1 + \\chi_3 = (1,1,1)+(2,0,-1) = (3,1,0)\\) ✓。"
+      },
+      {
+        "id": "representation-ch04-q20",
+        "question": "\\(G = D_4\\)（阶 8），\\(H = \\langle r \\rangle \\cong \\mathbb{Z}/4\\mathbb{Z}\\)。\\(\\sigma_1(r) = i\\)（1 维表示）。\\(\\dim\\mathrm{Ind}^{D_4}_H\\sigma_1 = \\) ？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\([D_4:\\langle r\\rangle] = 8/4 = 2\\)。\\(\\dim\\mathrm{Ind} = 2 \\times 1 = 2\\)。\\(D_4\\) 有一个 2 维不可约表示，可以通过此诱导构造。"
+      },
+      {
+        "id": "representation-ch04-q21",
+        "question": "\\(\\langle\\mathrm{Ind}^G_H\\sigma,\\mathrm{Ind}^G_H\\sigma\\rangle_G\\) 可以用互反律化简为？",
+        "options": [
+          "\\(\\langle\\sigma,\\sigma\\rangle_H\\)",
+        "\\(\\langle\\sigma, \\mathrm{Res}^G_H\\mathrm{Ind}^G_H\\sigma\\rangle_H\\)",
+        "\\([G:H]\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle\\mathrm{Ind}\\sigma, \\mathrm{Ind}\\sigma\\rangle_G = \\langle\\sigma, \\mathrm{Res}(\\mathrm{Ind}\\sigma)\\rangle_H\\)（Frobenius）。\\(\\mathrm{Res}(\\mathrm{Ind}\\sigma)\\) 由 Mackey 公式进一步分析。一般 \\(\\neq \\langle\\sigma,\\sigma\\rangle_H\\)（因为 \\(\\mathrm{Res} \\circ \\mathrm{Ind} \\neq \\mathrm{id}\\)）。"
+      },
+      {
+        "id": "representation-ch04-q22",
+        "question": "\\(G = S_4, H = K = S_2 \\times S_2\\)（阶 4）。\\(|H \\backslash G / H|\\) 等于？",
+        "options": [
+          "\\(3\\)",
+        "\\(6\\)",
+        "\\(4\\)",
+        "\\(24\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H = \\{e,(12),(34),(12)(34)\\}\\) 稳定分划 \\(\\{1,2\\}\\cup\\{3,4\\}\\)。\\(S_4\\) 对 \\(\\{\\{1,2\\},\\{3,4\\}\\}\\) 这种分划的作用给出 3 种配型（通过分析 \\(H\\)-\\(H\\) 双陪集）。\\(|S_4|/|H|^2\\) 不直接给出答案（双陪集大小不等）。"
+      },
+      {
+        "id": "representation-ch04-q23",
+        "question": "\\(\\mathrm{Ind}^{S_3}_H(1_H)\\) 中平凡表示 \\(\\rho_1\\) 的重数，其中 \\(H = \\{e,(23)\\}\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "由 Frobenius：\\(\\langle\\mathrm{Ind}^G_H 1, \\rho_1\\rangle_G = \\langle 1, \\mathrm{Res}\\rho_1\\rangle_H = \\langle 1, 1\\rangle_H = 1\\)。置换表示总含恰一次平凡表示（全 1 向量对应 \\(G\\)-不变子空间）。"
+      },
+      {
+        "id": "representation-ch04-q24",
+        "question": "\\(\\mathrm{Res}^{S_4}_{S_3}\\) 将 \\(S_4\\) 的 3 维不可约表示限制到 \\(S_3\\)。结果是？",
+        "options": [
+          "不可约",
+        "分解为 \\(1 + 2\\)",
+        "分解为 \\(1 + 1 + 1\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(S_4\\) 的 3 维标准表示 \\(V = \\{(x_1,x_2,x_3,x_4): \\sum x_i=0\\}\\)。限制到 \\(S_3\\)（稳定第 4 坐标）：\\(V = \\mathrm{span}\\{e_1-e_4,e_2-e_4,e_3-e_4\\}\\)。分解为 \\(S_3\\) 的平凡 \\(\\oplus\\) 2 维标准。"
+      },
+      {
+        "id": "representation-ch04-q25",
+        "question": "\\(G\\) 的表示 \\(V\\) 分解为 \\(\\bigoplus n_i V_i\\)。\\(\\langle\\chi_V,\\chi_{\\mathrm{Ind}^G_H 1}\\rangle = \\) ？",
+        "options": [
+          "\\(\\dim V^H\\)（\\(H\\)-不变向量的维数）",
+        "\\(\\dim V\\)",
+        "\\(|H|\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\chi_V, \\chi_{\\mathrm{Ind}^G_H 1}\\rangle_G = \\langle\\mathrm{Res}\\chi_V, 1\\rangle_H = \\frac{1}{|H|}\\sum_{h \\in H}\\chi_V(h) = \\dim V^H\\)。这是 \\(V\\) 中 \\(H\\)-不变向量构成的子空间维数。"
+      },
+      {
+        "id": "representation-ch04-q26",
+        "question": "晶体学中，空间群 \\(G\\) 的表示通过从平移子群 \\(T\\)（正规子群）的表示诱导得到。这种方法称为？",
+        "options": [
+          "Bloch 定理",
+        "诱导表示法",
+        "A 和 B 本质相同",
+        "Fourier 变换"
+        ],
+        "answer": 2,
+        "explanation": "Bloch 定理说晶体中电子波函数可按平移子群的不可约表示（即波矢 \\(k\\)）分类。这本质上是从 \\(T\\) 到 \\(G\\) 的诱导表示：\\(\\psi_k\\) 属于 \\(\\mathrm{Ind}^G_T\\chi_k\\)。晶体场理论广泛使用诱导表示。"
+      },
+      {
+        "id": "representation-ch04-q27",
+        "question": "置换表示 \\(\\mathbb{C}[G/H]\\) 中平凡表示的重数等于 \\(G\\) 在 \\(G/H\\) 上的什么？",
+        "options": [
+          "轨道数",
+        "固定点数",
+        "\\(|G/H|\\)",
+        "\\(|G|\\)"
+        ],
+        "answer": 0,
+        "explanation": "Burnside 引理：\\(\\langle\\mathbb{C}[X], 1\\rangle = \\) 轨道数。\\(G\\) 作用于 \\(G/H\\) 传递（只有一个轨道），故平凡表示重数 \\(= 1\\)。更一般地，\\(G\\) 作用于任何有限集 \\(X\\)，平凡表示重数 \\(=\\) 轨道数。"
+      },
+      {
+        "id": "representation-ch04-q28",
+        "question": "在量子化学分子轨道理论中，从原子轨道构造分子轨道。若原子群为 \\(H \\leq G\\)，原子的表示 \\(\\sigma\\) 通过诱导给出分子表示。Frobenius 互反用于？",
+        "options": [
+          "直接判断分子轨道的对称性类型",
+        "计算分子能量",
+        "画分子结构图",
+        "无实际用途"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\mathrm{Ind}^G_H\\sigma, \\rho_i\\rangle_G = \\langle\\sigma, \\mathrm{Res}\\rho_i\\rangle_H\\)。右端在原子群 \\(H\\) 上的内积更易计算。由此确定分子轨道分属哪些不可约表示（对称性类型），进而判断化学键类型（\\(\\sigma, \\pi, \\delta\\) 键）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="representation"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/representation.html" class="module-name">表示论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 限制与诱导</a></li>
+      <li><a href="#kp2">02 · Frobenius 互反律</a></li>
+      <li><a href="#kp3">03 · 诱导表示的应用</a></li>
+      <li><a href="#kp4">04 · Mackey 公式与双陪集</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>诱导表示</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>限制与诱导</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群 \(G\) 的表示和子群 \(H\) 的表示之间有什么关系？限制（从 \(G\) 到 \(H\)） 进入小群，诱导（从 \(H\) 到 \(G\)）回到大群。这两个操作互为伴随， 是将小群信息与大群信息联系起来的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>限制和诱导是一对伴随函子（在表示范畴之间）。 \(\mathrm{Res}\) 是「忘记」（只看子群的作用），\(\mathrm{Ind}\) 是「补全」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>限制</strong>: \(\mathrm{Res}^G_H(\rho): H \to GL(V)\)，即 \(\rho|_H\)。 简单地只看 \(\rho\) 在 \(H \leq G\) 上的作用。 <strong>诱导</strong>: 若 \(\sigma: H \to GL(W)\)，则 \[\mathrm{Ind}^G_H(\sigma) = \mathbb{C}[G] \otimes_{\mathbb{C}[H]} W\] \(\dim \mathrm{Ind}^G_H(\sigma) = [G:H] \cdot \dim \sigma\)。 <strong>具体构造</strong>: 取陪集代表 \(\{g_1, \ldots, g_m\}\)（\(m = [G:H]\)）。 \(\mathrm{Ind}^G_H(W) = \bigoplus_{i=1}^m g_i \otimes W\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(G = S_3\)，\(H = \{e, (12)\}\)，\(\sigma\) 为 \(H\) 的符号表示。 计算 \(\mathrm{Ind}^G_H(\sigma)\)。 解答: \([G:H] = 3\)，\(\dim \sigma = 1\)。 \(\dim \mathrm{Ind} = 3\)。 用特征标: \(\chi_{\mathrm{Ind}}(g) = \sum_{g_i^{-1} g g_i \in H} \sigma(g_i^{-1} g g_i)\)。 分解: \(\mathrm{Ind} \cong \rho_1 \oplus \rho_3\)（\(1 + 2 = 3\)）。 易错点: 以为 \(\dim \mathrm{Ind} = \dim \sigma\)。 诱导会放大维数: \(\times [G:H]\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim \mathrm{Ind}^G_H(\sigma) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。诱导放大因子为指数 \\([G:H]\\)。')">A. \(\dim \sigma\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！诱导放大因子为指数 \\([G:H]\\)。')">B. \([G:H] \cdot \dim \sigma\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。诱导放大因子为指数 \\([G:H]\\)。')">C. \(|G| \cdot \dim \sigma\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。诱导放大因子为指数 \\([G:H]\\)。')">D. \(\dim \sigma / [G:H]\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Frobenius 互反律</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>限制和诱导之间有什么精确关系？Frobenius 互反律给出答案: \(\langle \mathrm{Ind}^G_H \sigma, \rho \rangle_G = \langle \sigma, \mathrm{Res}^G_H \rho \rangle_H\)。 这类似于伴随算子，是计算的强大工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Frobenius 互反是「张量-Hom 伴随」在表示论中的体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Frobenius 互反律</strong>: \[\langle \mathrm{Ind}^G_H \sigma, \rho \rangle_G = \langle \sigma, \mathrm{Res}^G_H \rho \rangle_H\] 等价地: \(\mathrm{Hom}_G(\mathrm{Ind}^G_H W, V) \cong \mathrm{Hom}_H(W, \mathrm{Res}^G_H V)\)。 <strong>诱导特征标公式</strong>: \[\chi_{\mathrm{Ind}^G_H \sigma}(g) = \frac{1}{|H|} \sum_{\substack{x \in G \\ x^{-1}gx \in H}} \chi_\sigma(x^{-1}gx)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用互反律计算 \(\langle \mathrm{Ind}^{S_3}_{\{e\}} 1, \rho_3 \rangle\)。 解答: \(\mathrm{Ind}^{S_3}_{\{e\}} 1 = \mathbb{C}[S_3]\)（正则表示）。 由互反: \(\langle \mathbb{C}[S_3], \rho_3 \rangle_G = \langle 1, \mathrm{Res} \rho_3 \rangle_{\{e\}} = \dim \rho_3 = 2\)。 即 \(\rho_3\) 在正则表示中出现 2 次。 易错点: 内积的左右边群不同。 左边对 \(G\) 内积，右边对 \(H\) 内积。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Frobenius 互反律说明？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。它们是伴随函子，不是互逆。')">A. \(\mathrm{Ind}\) 和 \(\mathrm{Res}\) 互逆</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！它们是伴随函子，不是互逆。')">B. \(\mathrm{Ind}\) 和 \(\mathrm{Res}\) 互为伴随</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。它们是伴随函子，不是互逆。')">C. \(\mathrm{Ind} = \mathrm{Res}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。它们是伴随函子，不是互逆。')">D. \(\mathrm{Ind}\) 保持维数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>诱导表示的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>诱导表示的一个典型应用是构造 \(G\) 的表示: 从子群的简单表示出发， 通过诱导得到 \(G\) 的表示，再分解。特别地，从平凡子群诱导得到置换表示。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>置换表示与诱导</strong>: 若 \(G\) 作用于 \(G/H\)（左陪集），则 \(\mathbb{C}[G/H] \cong \mathrm{Ind}^G_H(1_H)\)（从 \(H\) 的平凡表示诱导）。 <strong>Burnside 置换定理</strong>: 置换表示中平凡表示的重数 = 轨道数。 \[\langle \mathrm{Ind}^G_H 1, 1_G \rangle = |H \backslash G / H| \text{ (双陪集数)}\] <strong>Mackey 公式</strong>: 描述诱导后再限制的结果， 涉及双陪集分解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>兑换对称性: 物理中等价粒子的交换表示用诱导构造。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(G = S_3\) 作用于 \(\{1,2,3\}\)。说明置换表示的分解。 解答: 稳定子群 \(H = \mathrm{Stab}(1) = \{e, (23)\}\)。 \(\mathbb{C}[\{1,2,3\}] = \mathrm{Ind}^{S_3}_H(1)\)，\(\dim = 3\)。 \(\chi = (3, 1, 0)\)。 \(\langle \chi, \chi_1 \rangle = \frac{1}{6}(3+3+0) = 1\)。 \(\langle \chi, \chi_3 \rangle = \frac{1}{6}(6+0+0) = 1\)。 \(\mathbb{C}[\{1,2,3\}] \cong \rho_1 \oplus \rho_3\)。 易错点: 置换表示总含平凡表示（因为全 1 向量不变）。 这是正确的——任何置换表示都包含至少一份 \(\rho_1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{Ind}^G_H(1_H)\) 等价于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。从 \\(H\\) 的平凡表示诱导得到 \\(G\\) 在 \\(G/H\\) 上的置换表示。')">A. \(G\) 的正则表示</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！从 \\(H\\) 的平凡表示诱导得到 \\(G\\) 在 \\(G/H\\) 上的置换表示。')">B. \(\mathbb{C}[G/H]\)（置换表示）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。从 \\(H\\) 的平凡表示诱导得到 \\(G\\) 在 \\(G/H\\) 上的置换表示。')">C. \(G\) 的平凡表示</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。从 \\(H\\) 的平凡表示诱导得到 \\(G\\) 在 \\(G/H\\) 上的置换表示。')">D. \(H\) 的正则表示</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Mackey 公式与双陪集</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>诱导再限制会发生什么？Mackey 公式给出了答案，它将 \(\mathrm{Res}^G_K \circ \mathrm{Ind}^G_H\) 分解为由双陪集索引的诱导-限制序列。 这是分析复杂群表示的强大技术。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Mackey 公式是「基变换」在表示论中的体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>双陪集</strong>: \(K \backslash G / H = \{KgH : g \in G\}\)。 <strong>Mackey 公式</strong>: 若 \(\sigma\) 是 \(H\) 的表示，则 \[\mathrm{Res}^G_K(\mathrm{Ind}^G_H \sigma) \cong \bigoplus_{g \in K \backslash G / H} \mathrm{Ind}^K_{K \cap gHg^{-1}}(\sigma^g|_{K \cap gHg^{-1}})\] 其中 \(\sigma^g(h) = \sigma(g^{-1}hg)\)。 当 \(K = H\) 时，这给出 \(\mathrm{Ind}\) 的内蕴可约性信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(G = S_3\)，\(H = K = A_3 = \{e, (123), (132)\}\)。 \(\sigma = \chi\)（\(A_3\) 的一个 1 维表示，\(\chi((123)) = \omega\)）。 \(A_3 \backslash S_3 / A_3\) 有 2 个双陪集: \(A_3\) 和 \(A_3 (12) A_3\)。 Mackey 公式给出 2 项贡献。 易错点: 双陪集和单边陪集不同。 \(|K \backslash G / H| \leq \min([G:K], [G:H])\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Mackey 公式中求和的索引集是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。求和遍历双陪集 \\(K \\backslash G / H\\) 的代表元。')">A. \(G\) 的元素</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。求和遍历双陪集 \\(K \\backslash G / H\\) 的代表元。')">B. \(K\) 的子群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！求和遍历双陪集 \\(K \\backslash G / H\\) 的代表元。')">C. \(K \backslash G / H\)（双陪集）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。求和遍历双陪集 \\(K \\backslash G / H\\) 的代表元。')">D. \(G/H\)（左陪集）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/algebra/representation.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

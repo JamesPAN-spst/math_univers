@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Lie 群与 Lie 代数 — 微分几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "diffgeo-ch05-q1",
+        "question": "Lie 群的定义是什么？",
+        "options": [
+          "群且是拓扑空间",
+        "群且是光滑流形，乘法 \\((g,h) \\mapsto gh\\) 和求逆 \\(g \\mapsto g^{-1}\\) 是光滑映射",
+        "任何矩阵群",
+        "有限群"
+        ],
+        "answer": 1,
+        "explanation": "Lie 群 = 光滑流形 + 群结构，群运算光滑。经典例子：\\(GL(n), O(n), SO(n), U(n), SU(n), SL(n), Sp(n)\\) 等矩阵 Lie 群。非矩阵例子：\\(\\mathbb{R}\\)（加法）。有限群不是流形（D 错，除非视为 0 维流形——但传统 Lie 群理论指连续群）。"
+      },
+      {
+        "id": "diffgeo-ch05-q2",
+        "question": "\\(SO(3)\\)（3D 旋转群）的维数是什么？",
+        "options": [
+          "3",
+        "6",
+        "9",
+        "1"
+        ],
+        "answer": 0,
+        "explanation": "\\(SO(3) = \\{A \\in M_{3 \\times 3} : A^T A = I, \\det A = 1\\}\\)。\\(A^T A = I\\) 给出 \\(\\binom{3+1}{2}/2 = 6\\) 个独立约束（对称矩阵方程，\\(3 \\times 3\\) 对称 = 6 个方程），\\(\\det A = 1\\) 已包含。\\(\\dim SO(3) = 9 - 6 = 3\\)。直觉：3 个旋转自由度（绕 \\(x, y, z\\) 轴）。"
+      },
+      {
+        "id": "diffgeo-ch05-q3",
+        "question": "Lie 代数 \\(\\mathfrak{g}\\) 与 Lie 群 \\(G\\) 的关系是什么？",
+        "options": [
+          "\\(\\mathfrak{g} = T_eG\\)（\\(e\\) = 单位元处的切空间）",
+        "\\(\\mathfrak{g} = G \\times G\\)",
+        "\\(\\mathfrak{g}\\) 是 \\(G\\) 的子群",
+        "\\(\\mathfrak{g} = G\\) 在所有点的切空间之和"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathfrak{g} = T_eG\\)，配备 Lie 括号 \\([\\cdot, \\cdot]\\)。\\(\\dim \\mathfrak{g} = \\dim G\\)。\\(\\mathfrak{g}\\) 是线性空间（向量空间 + Lie 括号），比 \\(G\\) 简单得多。\\(\\mathfrak{so}(3) = \\{A \\in M_{3\\times3} : A^T = -A\\}\\)（反对称矩阵），3 维。Lie 代数\"线性化\"了 Lie 群的信息。"
+      },
+      {
+        "id": "diffgeo-ch05-q4",
+        "question": "\\(\\mathfrak{gl}(n, \\mathbb{R})\\) = \\(GL(n)\\) 的 Lie 代数是什么？",
+        "options": [
+          "所有 \\(n \\times n\\) 矩阵（无限制）",
+        "可逆矩阵",
+        "对称矩阵",
+        "反对称矩阵"
+        ],
+        "answer": 0,
+        "explanation": "\\(GL(n)\\) 是开子集（\\(\\det \\neq 0\\)），\\(T_I GL(n) = T_I M_{n \\times n} = M_{n \\times n}\\)（所有矩阵，无约束）。\\(\\mathfrak{gl}(n) = M_{n \\times n}\\)，Lie 括号 \\([A, B] = AB - BA\\)（交换子）。\\(\\dim \\mathfrak{gl}(n) = n^2\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q5",
+        "question": "指数映射 \\(\\exp: \\mathfrak{g} \\to G\\) 对矩阵 Lie 群是什么？",
+        "options": [
+          "\\(\\exp(A) = e^A = \\sum_{k=0}^\\infty A^k/k!\\)（矩阵指数）",
+        "\\(\\exp(A) = A\\)",
+        "\\(\\exp(A) = I + A\\)",
+        "\\(\\exp(A) = \\det(A)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\exp(A) = \\sum_{k=0}^\\infty \\frac{A^k}{k!}\\) 将 Lie 代数（切空间）映到 Lie 群。\\(\\exp(tA)\\) 是 \\(G\\) 中过 \\(e\\) 的单参数子群，\\(\\frac{d}{dt}\\exp(tA)|_{t=0} = A\\)。\\(\\exp\\) 在 \\(0\\) 的邻域是微分同胚（逆函数定理）。\\(C\\) 只是 \\(\\exp\\) 的一阶近似。"
+      },
+      {
+        "id": "diffgeo-ch05-q6",
+        "question": "\\(SU(2)\\) 和 \\(SO(3)\\) 的关系是什么？",
+        "options": [
+          "同构",
+        "\\(SU(2)\\) 是 \\(SO(3)\\) 的二重覆叠",
+        "\\(SO(3)\\) 是 \\(SU(2)\\) 的子群",
+        "\\(SU(2) = SO(3) \\times \\mathbb{Z}/2\\)"
+        ],
+        "answer": 1,
+        "explanation": "存在满射同态 \\(\\phi: SU(2) \\to SO(3)\\)，\\(\\ker \\phi = \\{\\pm I\\} \\cong \\mathbb{Z}/2\\)。\\(SU(2) \\cong S^3\\)（单连通），\\(SO(3) \\cong \\mathbb{RP}^3\\)。\\(\\pi_1(SO(3)) = \\mathbb{Z}/2\\)，\\(SU(2)\\) 是其万有覆叠。物理中：自旋 1/2 粒子的旋转群是 \\(SU(2)\\)，旋转 \\(2\\pi\\) 变号，\\(4\\pi\\) 才回到原态。"
+      },
+      {
+        "id": "diffgeo-ch05-q7",
+        "question": "\\(U(n)\\) 的维数是什么？",
+        "options": [
+          "\\(n\\)",
+        "\\(n^2\\)",
+        "\\(2n^2\\)",
+        "\\(2n^2 - n\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(U(n) = \\{A \\in M_{n \\times n}(\\mathbb{C}) : A^* A = I\\}\\)。\\(A^*A = I\\) 给出 \\(n^2\\) 个实约束（\\(A^*A\\) 是 \\(n \\times n\\) Hermitian，有 \\(n^2\\) 个实自由度）。\\(U(n)\\) 嵌入 \\(\\mathbb{R}^{2n^2}\\)（复 \\(n \\times n\\) = 实 \\(2n^2\\)）。\\(\\dim U(n) = 2n^2 - n^2 = n^2\\)。\\(\\dim SU(n) = n^2 - 1\\)（额外 \\(\\det = 1\\) 约束）。"
+      },
+      {
+        "id": "diffgeo-ch05-q8",
+        "question": "左不变向量场的定义是什么？它与 Lie 代数的关系？",
+        "options": [
+          "\\((L_g)_* X = X\\) 对所有 \\(g \\in G\\)。左不变向量场与 \\(\\mathfrak{g}\\) 一一对应",
+        "向量场在右平移下不变",
+        "向量场处处平行",
+        "向量场为零"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_g: G \\to G\\), \\(L_g(h) = gh\\)（左平移）。\\(X\\) 左不变：\\((L_g)_*X_h = X_{gh}\\)。\\(X\\) 由 \\(X_e \\in T_eG = \\mathfrak{g}\\) 唯一确定（\\(X_g = (L_g)_* X_e\\)）。左不变向量场全体 = \\(\\mathfrak{g}\\)（作为 Lie 代数同构）。Lie 括号在 \\(\\mathfrak{g}\\) 上由向量场的 Lie 括号继承。"
+      },
+      {
+        "id": "diffgeo-ch05-q9",
+        "question": "\\(\\exp: \\mathfrak{so}(3) \\to SO(3)\\)。\\(A = \\begin{pmatrix} 0 & -\\theta & 0 \\\\ \\theta & 0 & 0 \\\\ 0 & 0 & 0 \\end{pmatrix}\\)。\\(\\exp(A) = ?\\)",
+        "options": [
+          "绕 \\(z\\) 轴旋转角度 \\(\\theta\\)：\\(R_z(\\theta)\\)",
+        "单位矩阵",
+        "\\(I + A\\)",
+        "绕 \\(x\\) 轴旋转"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\) 是 \\(\\hat{e}_z\\) 方向的反对称矩阵（\\(A = \\theta \\hat{e}_z^\\times\\)）。\\(\\exp(\\theta \\hat{e}_z^\\times) = I + \\sin\\theta \\hat{e}_z^\\times + (1-\\cos\\theta)(\\hat{e}_z^\\times)^2\\)（Rodrigues 公式）。\\(= \\begin{pmatrix}\\cos\\theta & -\\sin\\theta & 0 \\\\ \\sin\\theta & \\cos\\theta & 0 \\\\ 0 & 0 & 1\\end{pmatrix}\\)。这是绕 \\(z\\) 轴旋转 \\(\\theta\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q10",
+        "question": "\\(SU(2)\\) 作为流形同胚于什么？",
+        "options": [
+          "\\(S^2\\)",
+        "\\(S^3\\)",
+        "\\(T^2\\)",
+        "\\(\\mathbb{R}^3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(SU(2) = \\left\\{\\begin{pmatrix} \\alpha & -\\bar{\\beta} \\\\ \\beta & \\bar{\\alpha} \\end{pmatrix} : |\\alpha|^2 + |\\beta|^2 = 1\\right\\}\\)。写 \\(\\alpha = a + bi\\), \\(\\beta = c + di\\)，条件 \\(a^2+b^2+c^2+d^2 = 1\\)，即 \\(S^3 \\subseteq \\mathbb{R}^4\\)。\\(SU(2) \\cong S^3\\) 是 3 维紧致单连通 Lie 群。\\(SO(3) \\cong S^3/\\{\\pm 1\\} \\cong \\mathbb{RP}^3\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q11",
+        "question": "以下哪个不是 Lie 群？",
+        "options": [
+          "\\((\\mathbb{Z}, +)\\)（整数加法群）",
+        "\\((S^1, \\cdot)\\)（复数乘法）",
+        "\\((GL(2, \\mathbb{R}), \\cdot)\\)",
+        "\\((\\mathbb{R}, +)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}\\) 是离散群，不是光滑流形（0 维离散拓扑可以视为 0-维流形，但传统上 Lie 群指连续的，维数 \\(\\geq 1\\) 的情况，也有数学家接受离散 Lie 群）。在标准教科书中通常要求 Lie 群有正维数。\\(S^1, GL(2), \\mathbb{R}\\) 都是经典 Lie 群。"
+      },
+      {
+        "id": "diffgeo-ch05-q12",
+        "question": "Lie 群同态 \\(\\phi: G \\to H\\) 诱导什么？",
+        "options": [
+          "Lie 代数同态 \\(d\\phi_e: \\mathfrak{g} \\to \\mathfrak{h}\\)",
+        "拓扑同胚",
+        "向量丛同构",
+        "上同调映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\phi\\) 在单位元的微分 \\(d\\phi_e: T_eG \\to T_eH\\) 保持 Lie 括号：\\(d\\phi_e([X,Y]) = [d\\phi_e(X), d\\phi_e(Y)]\\)。这是 Lie 群到 Lie 代数的函子性。\\(\\phi\\) 是同构 \\(\\iff d\\phi_e\\) 是 Lie 代数同构（连通情况下）。与指数映射交换：\\(\\phi(\\exp X) = \\exp(d\\phi_e(X))\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q13",
+        "question": "\\(\\mathfrak{su}(2)\\) 的基和 Lie 括号关系是什么？",
+        "options": [
+          "基 \\(\\{e_1, e_2, e_3\\}\\)，\\([e_1, e_2] = 2e_3\\), \\([e_2, e_3] = 2e_1\\), \\([e_3, e_1] = 2e_2\\)",
+        "所有括号为零",
+        "\\([e_i, e_j] = \\delta_{ij}\\)",
+        "无法定义"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathfrak{su}(2) = \\{A \\in M_{2\\times2}(\\mathbb{C}) : A^* = -A, \\text{tr} A = 0\\}\\)。基：\\(e_j = i\\sigma_j/2\\)（\\(\\sigma_j\\) = Pauli 矩阵），或取 \\(e_1 = \\begin{pmatrix}i&0\\\\0&-i\\end{pmatrix}\\), \\(e_2 = \\begin{pmatrix}0&1\\\\-1&0\\end{pmatrix}\\), \\(e_3 = \\begin{pmatrix}0&i\\\\i&0\\end{pmatrix}\\)。括号关系类似 \\(\\mathfrak{so}(3)\\)（\\(\\mathfrak{su}(2) \\cong \\mathfrak{so}(3)\\) 作为 Lie 代数）。轮换结构 \\([e_i, e_j] = 2\\epsilon_{ijk} e_k\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q14",
+        "question": "\\(\\exp: \\mathfrak{g} \\to G\\) 是否总是满射？",
+        "options": [
+          "对紧致连通 Lie 群是",
+        "总是",
+        "从不",
+        "只对 Abel 群"
+        ],
+        "answer": 0,
+        "explanation": "紧致连通 Lie 群 \\(\\Rightarrow \\exp\\) 满射。\\(GL(n, \\mathbb{R})\\) 非紧致，\\(\\exp\\) 不满射：\\(\\det(\\exp A) = e^{\\text{tr}A} > 0\\)，所以 \\(\\exp\\) 不能给出行列式 \\(< 0\\) 的矩阵。\\(SL(2, \\mathbb{R})\\) 中 \\(-I\\) 不在 \\(\\exp\\) 像中（但 \\(SL(2, \\mathbb{R})\\) 连通非紧致）。对紧致群如 \\(SO(n), SU(n)\\)，\\(\\exp\\) 满射。"
+      },
+      {
+        "id": "diffgeo-ch05-q15",
+        "question": "Lie 群的作用 \\(\\rho: G \\times M \\to M\\) 是光滑映射。自由作用意味着什么？",
+        "options": [
+          "每个轨道只有一个点",
+        "对每个 \\(x\\)，稳定子群 \\(G_x = \\{e\\}\\)",
+        "\\(G\\) 是 Abel 群",
+        "作用不保持不动点"
+        ],
+        "answer": 1,
+        "explanation": "自由（free）：对每个 \\(x\\)，\\(g \\cdot x = x \\iff g = e\\)（稳定子群平凡）。等价：每条轨道同胚于 \\(G\\)——没有\"多余\"的对称性。自由且真（properly discontinuous）的作用保证商 \\(M/G\\) 是光滑流形。例如 \\(\\mathbb{Z}/2\\) 对 \\(S^n\\) 的对径作用自由。"
+      },
+      {
+        "id": "diffgeo-ch05-q16",
+        "question": "Baker-Campbell-Hausdorff (BCH) 公式的前两项是什么？",
+        "options": [
+          "\\(\\log(\\exp X \\exp Y) = X + Y + \\frac{1}{2}[X,Y] + \\cdots\\)",
+        "\\(\\log(\\exp X \\exp Y) = X \\cdot Y\\)",
+        "\\(\\log(\\exp X \\exp Y) = X + Y\\)",
+        "\\(\\log(\\exp X \\exp Y) = [X, Y]\\)"
+        ],
+        "answer": 0,
+        "explanation": "BCH 公式：\\(\\exp X \\exp Y = \\exp(X + Y + \\frac{1}{2}[X,Y] + \\frac{1}{12}([X,[X,Y]] - [Y,[X,Y]]) + \\cdots)\\)。级数完全由 Lie 括号决定——群乘法可以用 Lie 代数的括号运算重建。若 \\([X,Y] = 0\\)，\\(\\exp X \\exp Y = \\exp(X+Y)\\)（交换情况）。"
+      },
+      {
+        "id": "diffgeo-ch05-q17",
+        "question": "\\(\\mathfrak{so}(3)\\) 的维数和基是什么？",
+        "options": [
+          "3 维，基为三个反对称矩阵 \\(L_x, L_y, L_z\\)",
+        "6 维",
+        "9 维",
+        "1 维"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathfrak{so}(3) = \\{A \\in M_{3\\times3} : A^T = -A\\}\\)。反对称 \\(3 \\times 3\\) 矩阵有 \\(\\binom{3}{2} = 3\\) 个自由度。标准基：\\(L_x = \\begin{pmatrix}0&0&0\\\\0&0&-1\\\\0&1&0\\end{pmatrix}\\), \\(L_y = \\begin{pmatrix}0&0&1\\\\0&0&0\\\\-1&0&0\\end{pmatrix}\\), \\(L_z = \\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&0\\end{pmatrix}\\)。\\([L_x, L_y] = L_z\\)（轮换），类似角动量关系。"
+      },
+      {
+        "id": "diffgeo-ch05-q18",
+        "question": "闭子群定理（Cartan 定理）：Lie 群 \\(G\\) 的闭子群 \\(H\\) 自动是什么？",
+        "options": [
+          "离散群",
+        "嵌入 Lie 子群（自身带光滑结构）",
+        "开子集",
+        "正规子群"
+        ],
+        "answer": 1,
+        "explanation": "Cartan 闭子群定理：\\(G\\) 的闭子群 \\(H\\) 有唯一的光滑结构使其成为嵌入 Lie 子群。这意味着验证是否为 Lie 子群只需检查闭和子群两个条件，不需要独立验证光滑结构。例如 \\(O(n) \\subseteq GL(n)\\) 闭（方程 \\(A^TA = I\\) 定义的闭集）\\(\\Rightarrow\\) 自动是 Lie 子群。"
+      },
+      {
+        "id": "diffgeo-ch05-q19",
+        "question": "\\(\\exp(A+B) = \\exp(A)\\exp(B)\\) 成立的充要条件是什么（矩阵 Lie 群）？",
+        "options": [
+          "\\(A, B\\) 可逆",
+        "\\([A, B] = 0\\)",
+        "\\(A = B\\)",
+        "总成立"
+        ],
+        "answer": 1,
+        "explanation": "\\([A,B] = AB - BA = 0\\)（交换）\\(\\Rightarrow \\exp(A+B) = \\exp A \\exp B\\)。BCH 公式：\\(\\exp A \\exp B = \\exp(A + B + \\frac{1}{2}[A,B] + \\cdots)\\)，\\([A,B] = 0\\) 时高阶项全消。反之不交换时指数不加法。经典反例：\\(A = \\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\), \\(B = \\begin{pmatrix}0&0\\\\1&0\\end{pmatrix}\\), \\([A,B] \\neq 0\\), \\(\\exp(A+B) \\neq \\exp(A)\\exp(B)\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q20",
+        "question": "\\(\\text{Ad}: G \\to GL(\\mathfrak{g})\\)（伴随表示）的定义是什么？",
+        "options": [
+          "\\(\\text{Ad}_g(X) = gXg^{-1}\\)（对矩阵群）",
+        "\\(\\text{Ad}_g = L_g \\circ R_{g^{-1}}\\)",
+        "A 和 B 等价",
+        "\\(\\text{Ad}_g(X) = [g, X]\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\text{Ad}_g = d(C_g)_e: \\mathfrak{g} \\to \\mathfrak{g}\\)，\\(C_g(h) = ghg^{-1}\\)（共轭）。对矩阵群 \\(\\text{Ad}_g(X) = gXg^{-1}\\)。\\(\\text{Ad}: G \\to GL(\\mathfrak{g})\\) 是 Lie 群同态（表示），\\(d(\\text{Ad})_e = \\text{ad}: \\mathfrak{g} \\to \\mathfrak{gl}(\\mathfrak{g})\\)，\\(\\text{ad}_X(Y) = [X,Y]\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q21",
+        "question": "\\(Sp(n) = \\{A \\in M_{2n \\times 2n}(\\mathbb{R}) : A^T J A = J\\}\\)（\\(J = \\begin{pmatrix} 0 & I_n \\\\ -I_n & 0 \\end{pmatrix}\\)）的维数？",
+        "options": [
+          "\\(n^2\\)",
+        "\\(n(2n+1)\\)",
+        "\\(2n^2 + n\\)",
+        "B 和 C 相同"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathfrak{sp}(n) = \\{X : X^TJ + JX = 0\\}\\)，即 \\(JX\\) 对称。\\(JX\\) 是 \\(2n \\times 2n\\) 对称矩阵，有 \\(\\frac{2n(2n+1)}{2} = n(2n+1)\\) 个自由度。\\(\\dim Sp(n) = n(2n+1) = 2n^2 + n\\)。\\(Sp(1) \\cong SU(2) \\cong S^3\\)（3 维）。"
+      },
+      {
+        "id": "diffgeo-ch05-q22",
+        "question": "\\(\\exp: \\mathfrak{g} \\to G\\) 在 \\(0\\) 附近是微分同胚。\\(d(\\exp)_0\\) 是什么？",
+        "options": [
+          "零映射",
+        "恒等映射 \\(\\mathrm{id}: \\mathfrak{g} \\to T_eG = \\mathfrak{g}\\)",
+        "投影",
+        "旋转"
+        ],
+        "answer": 1,
+        "explanation": "\\(d(\\exp)_0(X) = \\frac{d}{dt}\\exp(tX)|_{t=0} = X\\)。\\(\\exp\\) 在 \\(0\\) 的微分是恒等映射。逆函数定理：\\(d(\\exp)_0\\) 可逆 \\(\\Rightarrow \\exp\\) 在 \\(0\\) 附近是局部微分同胚。\\(\\log: G \\to \\mathfrak{g}\\) 在 \\(e\\) 附近是 \\(\\exp\\) 的局部逆。"
+      },
+      {
+        "id": "diffgeo-ch05-q23",
+        "question": "物理中 Lorentz 群 \\(O(1,3)\\) 的连通分量和 Lie 代数是什么？",
+        "options": [
+          "\\(O(1,3)\\) 连通，\\(\\mathfrak{o}(1,3) = \\mathfrak{so}(3) \\oplus \\mathbb{R}^3\\)",
+        "\\(O(1,3)\\) 有 4 个连通分量，恒等分量 \\(SO^+(1,3)\\) 的 Lie 代数 6 维",
+        "\\(O(1,3)\\) 有 2 个连通分量",
+        "\\(O(1,3)\\) 是紧致 Lie 群"
+        ],
+        "answer": 1,
+        "explanation": "\\(O(1,3) = \\{A : A^T \\eta A = \\eta\\}\\)（\\(\\eta = \\text{diag}(-1,1,1,1)\\) Minkowski 度量）。4 个连通分量（\\(\\det = \\pm 1\\), \\(A^0_0 \\gtrless 0\\)）。\\(SO^+(1,3)\\)（proper orthochronous Lorentz group）6 维。\\(\\mathfrak{so}(1,3)\\) 基：3 个旋转生成元 + 3 个 boost 生成元。\\(O(1,3)\\) 不紧致（boost 参数无界）。"
+      },
+      {
+        "id": "diffgeo-ch05-q24",
+        "question": "\\(\\text{ad}: \\mathfrak{g} \\to \\mathfrak{gl}(\\mathfrak{g})\\), \\(\\text{ad}_X(Y) = [X,Y]\\)。Killing 形式 \\(B(X,Y) = \\text{tr}(\\text{ad}_X \\circ \\text{ad}_Y)\\) 的用途是什么？",
+        "options": [
+          "分类半单 Lie 代数（\\(B\\) 非退化 \\(\\iff \\mathfrak{g}\\) 半单）",
+        "计算维数",
+        "定义指数映射",
+        "计算 Euler 特征数"
+        ],
+        "answer": 0,
+        "explanation": "Cartan 判据：\\(\\mathfrak{g}\\) 半单 \\(\\iff B\\) 非退化（作为双线性形式）。\\(B\\) 负定 \\(\\iff G\\) 紧致（对紧致半单群）。Killing 形式是 Lie 代数的\"内积\"，用于分类简单 Lie 代数（\\(A_n, B_n, C_n, D_n, G_2, F_4, E_6, E_7, E_8\\)）和表示论。"
+      },
+      {
+        "id": "diffgeo-ch05-q25",
+        "question": "规范场论中，规范变换群是什么？",
+        "options": [
+          "有限群",
+        "无穷维 Lie 群（函数空间到 \\(G\\) 的映射群）",
+        "\\(\\mathbb{Z}/2\\)",
+        "向量空间"
+        ],
+        "answer": 1,
+        "explanation": "规范变换 \\(g: M \\to G\\)（\\(M\\) = 时空，\\(G\\) = 规范群如 \\(SU(3)\\)）。全体这样的映射在逐点乘法下形成无穷维 Lie 群。其 Lie 代数是 \\(C^\\infty(M, \\mathfrak{g})\\)（\\(M\\) 上 \\(\\mathfrak{g}\\)-值函数，逐点 Lie 括号）。杨-Mills 理论、标准模型的数学基础都是主 \\(G\\)-丛上的联络。"
+      },
+      {
+        "id": "diffgeo-ch05-q26",
+        "question": "在机器人学中，刚体运动群 \\(SE(3)\\) 是什么 Lie 群？",
+        "options": [
+          "\\(SO(3) \\ltimes \\mathbb{R}^3\\)（旋转 + 平移的半直积）",
+        "\\(GL(3)\\)",
+        "\\(SU(2)\\)",
+        "\\(SO(3) \\times \\mathbb{R}^3\\)（直积）"
+        ],
+        "answer": 0,
+        "explanation": "\\(SE(3) = \\{(R, t) : R \\in SO(3), t \\in \\mathbb{R}^3\\}\\)，作用 \\(x \\mapsto Rx + t\\)。非交换（先旋转后平移 \\(\\neq\\) 先平移后旋转），所以是半直积（A），不是直积（D）。6 维 Lie 群（3 旋转 + 3 平移）。\\(\\mathfrak{se}(3) = \\mathfrak{so}(3) \\ltimes \\mathbb{R}^3\\)。"
+      },
+      {
+        "id": "diffgeo-ch05-q27",
+        "question": "在量子力学中，可观测量（Hermitian 算子）的对称群由什么 Lie 群表示？",
+        "options": [
+          "\\(GL(n, \\mathbb{C})\\)",
+        "\\(U(n)\\) 或 \\(SU(n)\\)（酉群）",
+        "\\(O(n)\\)",
+        "对称群 \\(S_n\\)"
+        ],
+        "answer": 1,
+        "explanation": "量子态 \\(|\\psi\\rangle \\in \\mathbb{C}^n\\)，物理上等价于 \\(e^{i\\theta}|\\psi\\rangle\\)。对称操作保持内积 \\(\\Rightarrow\\) 酉变换 \\(U \\in U(n)\\)。全局相因子不可观测 \\(\\Rightarrow\\) 有效对称群 \\(SU(n)\\) 或 \\(PU(n) = U(n)/U(1)\\)。\\(SU(2)\\) = 自旋对称，\\(SU(3)\\) = 色对称（QCD）。Lie 代数 \\(\\mathfrak{su}(n)\\) 的不可约表示分类粒子的量子数。"
+      },
+      {
+        "id": "diffgeo-ch05-q28",
+        "question": "在密码学中，椭圆曲线 \\(E\\) 上的群结构（Abel Lie 群）用于什么？",
+        "options": [
+          "椭圆曲线密码 (ECC)",
+        "RSA 加密",
+        "哈希函数",
+        "对称加密"
+        ],
+        "answer": 0,
+        "explanation": "椭圆曲线 \\(E: y^2 = x^3 + ax + b\\) 是 1 维（复数时）Abel Lie 群（弦切法定义加法）。有限域 \\(\\mathbb{F}_p\\) 上的椭圆曲线群 \\(E(\\mathbb{F}_p)\\) 的离散对数问题是 ECC 安全性的基础。Lie 群结构保证了群运算的代数性质；椭圆曲线 Lie 群的指数映射在复数情况下是 Weierstrass \\(\\wp\\) 函数。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="diffgeo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/diffgeo.html" class="module-name">微分几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Lie 群的定义与经典例子</a></li>
+      <li><a href="#kp2">02 · Lie 代数与左不变向量场</a></li>
+      <li><a href="#kp3">03 · 指数映射</a></li>
+      <li><a href="#kp4">04 · 伴随表示与 Lie 子群</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Lie 群与 Lie 代数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Lie 群的定义与经典例子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>对称性在物理和数学中无处不在——旋转、反射、伸缩。Lie 群将"连续 对称"的直觉严格化：它既是群（可以复合和求逆），又是光滑流形 （可以做微积分）。\(GL(n), SO(n), U(n)\) 等矩阵群是最重要的例子， 它们分别编码了线性、旋转和酉对称性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lie 群 = 流形 + 群 + 两者兼容（乘法和逆是光滑映射）。 这是代数与几何的完美融合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(G\) 是 Lie 群 \(\iff\) (1) \(G\) 是光滑流形； (2) \(G\) 是群； (3) 乘法 \(\mu: G \times G \to G\) 和逆 \(\iota: G \to G\) 都是光滑映射。 <strong>经典例子</strong>（矩阵 Lie 群）： - \(GL(n, \mathbb{R}) = \{A \in M_n(\mathbb{R}) : \det A \neq 0\}\)，\(\dim = n^2\) - \(SL(n, \mathbb{R}) = \{\det A = 1\}\)，\(\dim = n^2 - 1\) - \(O(n) = \{A^T A = I\}\)，\(\dim = n(n-1)/2\) - \(SO(n) = O(n) \cap SL(n)\) - \(U(n) = \{A^* A = I\}\)，\(\dim = n^2\) - \(SU(n) = U(n) \cap SL(n, \mathbb{C})\)，\(\dim = n^2 - 1\) \[SO(2) \cong S^1, \quad SU(2) \cong S^3\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- \(SO(3)\) 描述三维旋转（机器人学、计算机图形学） - \(SU(3)\) 是粒子物理标准模型中强相互作用的规范群</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(SO(2)\) 与 \(S^1\) 作为 Lie 群同构。 解答：\(SO(2) = \left\{\begin{pmatrix}\cos\theta & -\sin\theta \\ \sin\theta & \cos\theta\end{pmatrix} : \theta \in \mathbb{R}\right\}\)。 映射 \(\varphi: SO(2) \to S^1\)，\(\varphi(R_\theta) = e^{i\theta}\)。 \(\varphi\) 是群同态（\(R_{\theta_1} R_{\theta_2} = R_{\theta_1+\theta_2}\) 对应 \(e^{i\theta_1} e^{i\theta_2} = e^{i(\theta_1+\theta_2)}\)）。 \(\varphi\) 光滑双射且逆光滑，故是 Lie 群同构。 易错点：\(O(2) \neq SO(2)\)。\(O(2)\) 包含反射（\(\det = -1\)）， 有两个连通分量，不与 \(S^1\) 同构。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim SU(2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(SU(2) \\subseteq M_2(\\mathbb{C})\\)，\\(A^*A = I\\) 给出 4 个实方程，')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(SU(2) \\subseteq M_2(\\mathbb{C})\\)，\\(A^*A = I\\) 给出 4 个实方程，')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(SU(2) \\subseteq M_2(\\mathbb{C})\\)，\\(A^*A = I\\) 给出 4 个实方程，')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(SU(2) \\subseteq M_2(\\mathbb{C})\\)，\\(A^*A = I\\) 给出 4 个实方程，')">D. 1</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Lie 代数与左不变向量场</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Lie 群是非线性对象（流形），但它的"无穷小版本"——Lie 代数—— 是线性的（向量空间），容易研究。Lie 代数是单位元处的切空间 \(\mathfrak{g} = T_eG\)，配备 Lie 括号。通过左不变向量场，\(\mathfrak{g}\) 中的信息扩展到整个群上。大量 Lie 群的问题可以"线性化"为 Lie 代数问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lie 代数 = Lie 群的"线性化"。Lie 群的全局非线性结构（曲率、拓扑） 大部分可以从 Lie 代数的线性代数结构恢复（至少是局部地）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>左平移</strong>：\(L_g: G \to G\)，\(L_g(h) = gh\)，是微分同胚。 <strong>左不变向量场</strong>：\(X \in \Gamma(TG)\) 左不变 \(\iff\) \((dL_g)_h(X_h) = X_{gh},\; \forall g, h \in G\)。 左不变向量场由其在 \(e\) 处的值 \(X_e \in T_eG\) 唯一确定： \(X_g = (dL_g)_e(X_e)\)。 因此 \(\{\text{左不变向量场}\} \cong T_eG\)（作为向量空间）。 <strong>Lie 代数</strong>：\(\mathfrak{g} = T_eG\)，Lie 括号定义为 \[[X_e, Y_e] = [X, Y]_e\] 其中 \(X, Y\) 是 \(X_e, Y_e\) 对应的左不变向量场，\([X, Y]\) 是 Lie 括号。 （左不变向量场的 Lie 括号仍然左不变。） \(\mathfrak{g}\) 满足：反对称、Jacobi 恒等式。\(\dim \mathfrak{g} = \dim G\)。 <strong>经典例子</strong>：\(\mathfrak{gl}(n) = M_n(\mathbb{R})\)，\([A,B] = AB - BA\)。 \(\mathfrak{so}(n) = \{A : A^T = -A\}\)（反对称矩阵）。 \(\mathfrak{su}(n) = \{A : A^* = -A,\; \mathrm{tr}\,A = 0\}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 粒子物理中的规范对称由 Lie 代数描述（\(\mathfrak{su}(3) \oplus \mathfrak{su}(2) \oplus \mathfrak{u}(1)\)）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(\mathfrak{so}(3)\) 的基和 Lie 括号。 解答：\(\mathfrak{so}(3) = \{A \in M_3(\mathbb{R}) : A^T = -A\}\)。 基：\(e_1 = \begin{pmatrix}0&0&0\\0&0&-1\\0&1&0\end{pmatrix}\)， \(e_2 = \begin{pmatrix}0&0&1\\0&0&0\\-1&0&0\end{pmatrix}\)， \(e_3 = \begin{pmatrix}0&-1&0\\1&0&0\\0&0&0\end{pmatrix}\)。 \([e_1, e_2] = e_3\)，\([e_2, e_3] = e_1\)，\([e_3, e_1] = e_2\) （与向量叉积的关系：\([a, b]\) 对应 \(\vec{a} \times \vec{b}\)）。 易错点：\(\mathfrak{so}(3)\) 的括号与 \(\mathbb{R}^3\) 上的叉积同构， 但不要将叉积与一般 Lie 括号混淆。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim \mathfrak{su}(2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim \\mathfrak{su}(2) = \\dim SU(2) = 3\\)。\\(\\mathfrak{su}(2)\\)')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\dim \\mathfrak{su}(2) = \\dim SU(2) = 3\\)。\\(\\mathfrak{su}(2)\\)')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim \\mathfrak{su}(2) = \\dim SU(2) = 3\\)。\\(\\mathfrak{su}(2)\\)')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim \\mathfrak{su}(2) = \\dim SU(2) = 3\\)。\\(\\mathfrak{su}(2)\\)')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>指数映射</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何从 Lie 代数（线性）回到 Lie 群（非线性）？指数映射 \(\exp: \mathfrak{g} \to G\) 是连接两者的桥梁：它沿左不变向量场 的流在单位时间走一步。对矩阵 Lie 群，\(\exp\) 就是矩阵指数 \(e^A = \sum A^n/n!\)，这是计算和理论中最常用的工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>指数映射是 Lie 代数"生成"Lie 群（的邻域）的机制。 \(e\) 附近的群元素 = \(\exp\) 的像。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：对 \(X \in \mathfrak{g}\)，\(\exp(X) = \phi_1^X(e)\)， 其中 \(\phi_t^X\) 是左不变向量场 \(\tilde{X}\) 的流。 性质： (1) \(\exp(0) = e\) (2) \(\exp((s+t)X) = \exp(sX) \cdot \exp(tX)\) （\(t \mapsto \exp(tX)\) 是 \(G\) 中的单参数子群） (3) \(d\exp_0 = \mathrm{id}: \mathfrak{g} \to T_eG = \mathfrak{g}\) （\(\exp\) 在 \(0\) 附近是局部微分同胚） <strong>矩阵群的情况</strong>：\(\exp(A) = \sum_{k=0}^{\infty} \frac{A^k}{k!}\)。 \[\exp: \mathfrak{gl}(n) \to GL(n), \quad \exp(A) = e^A\] 注意：一般地 \(\exp(A+B) \neq \exp(A)\exp(B)\)（除非 \([A,B] = 0\)）。 Baker-Campbell-Hausdorff (BCH) 公式： \(\exp(A)\exp(B) = \exp(A + B + \frac{1}{2}[A,B] + \cdots)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 控制论中矩阵指数 \(e^{At}\) 给出线性系统 \(\dot{x} = Ax\) 的解 - 3D 旋转：\(\exp(\theta \hat{n}) \in SO(3)\)（Rodrigues 公式）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\exp\begin{pmatrix}0 & -\theta \\ \theta & 0\end{pmatrix}\)。 解答：令 \(A = \begin{pmatrix}0&-\theta\\\theta&0\end{pmatrix}\)。 \(A^2 = -\theta^2 I\)，\(A^3 = -\theta^2 A\)，\(A^4 = \theta^4 I\)。 \(e^A = I\cos\theta + \frac{A}{\theta}\sin\theta = \begin{pmatrix}\cos\theta & -\sin\theta \\ \sin\theta & \cos\theta\end{pmatrix}\)。 即 \(\exp\) 将 \(\mathfrak{so}(2)\) 中的元素映为 \(SO(2)\) 中的旋转。 易错点：\(\exp(A+B) = \exp(A)\exp(B)\) 仅当 \([A,B] = 0\) 时成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\exp: \mathfrak{g} \to G\) 一定是满射吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\exp\\) 在 \\(e\\) 附近是满射，但全局不一定。')">A. 是，对所有 Lie 群</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\exp\\) 在 \\(e\\) 附近是满射，但全局不一定。')">B. 是，对连通 Lie 群</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\exp\\) 在 \\(e\\) 附近是满射，但全局不一定。')">C. 不一定，即使对连通 Lie 群</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\exp\\) 在 \\(e\\) 附近是满射，但全局不一定。')">D. 只对交换 Lie 群</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>伴随表示与 Lie 子群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Lie 群通过共轭作用于自身，这在 Lie 代数层面成为伴随表示 \(\mathrm{Ad}\) 和 \(\mathrm{ad}\)——Lie 群/代数最自然的表示。 理解伴随表示是分类 Lie 代数、研究根系和 Cartan 分解的起点。 Lie 子群和 Lie 子代数的对应则是 Lie 理论的结构核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>伴随表示让 Lie 群/代数"认识自己"：群作用于自己的 Lie 代数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>伴随表示 \(\mathrm{Ad}\)</strong>：\(G\) 作用于 \(\mathfrak{g}\) 通过 \(\mathrm{Ad}_g = d(\mathrm{Ad}_g)_e\)，其中 \(\mathrm{Ad}_g(X) = d(L_g \circ R_{g^{-1}})_e(X)\)。 矩阵群：\(\mathrm{Ad}_g(X) = gXg^{-1}\)。 <strong>小伴随表示 \(\mathrm{ad}\)</strong>：\(\mathfrak{g}\) 作用于自身， \(\mathrm{ad}_X(Y) = [X, Y]\)。 关系：\(\mathrm{ad} = d\mathrm{Ad}_e\)，即 \[\frac{d}{dt}\Big|_{t=0} \mathrm{Ad}_{\exp(tX)}(Y) = [X, Y]\] <strong>Lie 子群</strong>：\(H \subseteq G\) 是 Lie 子群 \(\iff\) \(H\) 是 \(G\) 的子群且是 \(G\) 的浸入子流形。 <strong>Lie 对应</strong>：连通 Lie 子群 \(H \subseteq G\) \(\longleftrightarrow\) Lie 子代数 \(\mathfrak{h} \subseteq \mathfrak{g}\)。 \(\mathfrak{h} = T_eH\)，\(H = \langle \exp(\mathfrak{h}) \rangle\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Killing 形式 \(B(X,Y) = \mathrm{tr}(\mathrm{ad}_X \circ \mathrm{ad}_Y)\) 是 Lie 代数分类（Cartan 分类）的核心工具</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(G = GL(2, \mathbb{R})\)，\(X = \begin{pmatrix}1&0\\0&-1\end{pmatrix}\)， \(Y = \begin{pmatrix}0&1\\0&0\end{pmatrix}\)。求 \(\mathrm{ad}_X(Y)\)。 解答：\(\mathrm{ad}_X(Y) = [X, Y] = XY - YX\)。 \(XY = \begin{pmatrix}0&1\\0&0\end{pmatrix}\)， \(YX = \begin{pmatrix}0&-1\\0&0\end{pmatrix}\)。 \([X,Y] = \begin{pmatrix}0&2\\0&0\end{pmatrix} = 2Y\)。 即 \(Y\) 是 \(\mathrm{ad}_X\) 的特征向量，特征值 \(2\)。 易错点：\(\mathrm{ad}_X\) 是 \(\mathfrak{g}\) 上的线性映射， 不是 \(G\) 上的映射。特征值分解对应根空间分解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{ad}_X(Y) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ad}_X(Y) = [X,Y] = XY - YX\\)（Lie 括号）。')">A. \(XY\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ad}_X(Y) = [X,Y] = XY - YX\\)（Lie 括号）。')">B. \(YX\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\mathrm{ad}_X(Y) = [X,Y] = XY - YX\\)（Lie 括号）。')">C. \([X,Y]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ad}_X(Y) = [X,Y] = XY - YX\\)（Lie 括号）。')">D. \(XYX^{-1}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/geometry/diffgeo.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

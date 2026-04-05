@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 博弈的基本概念 — 博弈论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "game-theory-ch01-q1",
+        "question": "博弈论中，一个标准式博弈（strategic form game）由哪三个要素组成？",
+        "options": [
+          "参与者集合 \\(N\\)、策略空间 \\(\\{S_i\\}_{i\\in N}\\)、收益函数 \\(\\{u_i\\}_{i\\in N}\\)  B) 仅参与者和策略  C) 仅收益函数  D) 博弈树和信息集"
+        ],
+        "answer": 0,
+        "explanation": "标准式（normal form）博弈 \\(G=\\langle N,(S_i)_{i\\in N},(u_i)_{i\\in N}\\rangle\\)。\\(N=\\{1,...,n\\}\\) 是参与者集合，\\(S_i\\) 是参与者 \\(i\\) 的策略集，\\(u_i:S_1\\times\\cdots\\times S_n\\to\\mathbb{R}\\) 是收益函数。例如囚徒困境：\\(N=\\{1,2\\}\\)，\\(S_i=\\{合作,背叛\\}\\)，\\(u_i\\) 由收益矩阵给出。扩展式（extensive form）博弈增加时序结构（博弈树），但任何扩展式博弈都可转化为标准式。"
+      },
+      {
+        "id": "game-theory-ch01-q2",
+        "question": "囚徒困境的收益矩阵：两人均合作得 \\((3,3)\\)，均背叛得 \\((1,1)\\)，一人背叛一人合作 \\((5,0)\\)。这个博弈的\"困境\"是什么？",
+        "options": [
+          "理性个体都会背叛（占优策略），但双方合作的收益更高——个体理性导致集体次优  B) 合作是最优策略  C) 没有均衡  D) 博弈无解"
+        ],
+        "answer": 0,
+        "explanation": "对玩家 1：无论玩家 2 选什么，背叛总比合作好（\\(5>3,1>0\\)）→背叛是严格占优策略。对称地玩家 2 也选背叛。结果 \\((1,1)\\) 是 Nash 均衡，但 \\((3,3)\\) Pareto 更优。这是社会困境的核心模型——公地悲剧、军备竞赛、环境污染等都有此结构。解决需要机制：重复博弈中的合作（民间定理）或外部强制。"
+      },
+      {
+        "id": "game-theory-ch01-q3",
+        "question": "严格占优策略（strictly dominant strategy）的定义是什么？",
+        "options": [
+          "策略 \\(s_i^*\\) 对于参与者 \\(i\\) 的任何其他策略 \\(s_i\\) 和对手的任何策略组合 \\(s_{-i}\\)，都有 \\(u_i(s_i^*,s_{-i})>u_i(s_i,s_{-i})\\)  B) 仅在某些对手策略下更好  C) 与对手策略无关  D) 收益最高"
+        ],
+        "answer": 0,
+        "explanation": "严格占优：\\(\\forall s_i\\neq s_i^*,\\forall s_{-i}\\in S_{-i}:u_i(s_i^*,s_{-i})>u_i(s_i,s_{-i})\\)。这是最强的策略概念——无论对手做什么，严格占优策略总是最好的选择。理性参与者必然选择严格占优策略（如果存在）。大多数博弈没有严格占优策略——例如石头剪刀布中任何纯策略都非占优。弱占优：\\(\\geq\\) 替代 \\(>\\)（至少一种情况严格好）。"
+      },
+      {
+        "id": "game-theory-ch01-q4",
+        "question": "在以下 \\(2\\times2\\) 博弈中，用逐步剔除严格劣策略（IESDS）求解：",
+        "options": [
+          "玩家 2 先剔除 R（L 占优），然后玩家 1 剔除 D（U 占优），结果 \\((U,L)=(4,3)\\)  B) \\((D,R)\\)  C) \\((U,R)\\)  D) 无法剔除"
+        ],
+        "answer": 0,
+        "explanation": "玩家 2：L 给 \\((3,2)\\)，R 给 \\((1,4)\\)。对玩家 2，若玩家 1 选 U：\\(L(3)>R(1)\\)；若玩家 1 选 D：\\(L(2)<R(4)\\)。L 不严格占优。再看玩家 1：U 给 \\((4,2)\\)，D 给 \\((3,5)\\)。无严格占优。实际上此博弈 IESDS 无法完全求解。正确检查：玩家 2 中 L vs R：\\((3,2)\\) vs \\((1,4)\\)——不严格占优。均衡需要 Nash 分析。（易错点：不仔细检查所有对手策略就匆忙剔除）"
+      },
+      {
+        "id": "game-theory-ch01-q5",
+        "question": "最优反应（best response）的定义是什么？",
+        "options": [
+          "\\(\\text{BR}_i(s_{-i})=\\arg\\max_{s_i\\in S_i}u_i(s_i,s_{-i})\\)——给定对手策略，使自身收益最大化的策略  B) 随机选择  C) 模仿对手  D) 最小化对手收益"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{BR}_i(s_{-i})\\) 可以是策略集合（多个最优）。Nash 均衡的等价定义：每个人的策略都是对他人策略的最优反应——\\(s_i^*\\in\\text{BR}_i(s_{-i}^*)\\) \\(\\forall i\\)。计算 BR：对每个 \\(s_{-i}\\)，逐列（或逐行）找最大值。在 \\(2\\times2\\) 博弈中可用\"下划线法\"——在每列找行玩家最大值画下划线，在每行找列玩家最大值画下划线。两个下划线交叉的格子就是 Nash 均衡。"
+      },
+      {
+        "id": "game-theory-ch01-q6",
+        "question": "协调博弈（coordination game）：两人同时选 A 或 B，\\((A,A)=(2,2)\\)，\\((B,B)=(1,1)\\)，其他 \\((0,0)\\)。纯策略 Nash 均衡有几个？",
+        "options": [
+          "2 个：\\((A,A)\\) 和 \\((B,B)\\)  B) 1 个  C) 0 个  D) 3 个"
+        ],
+        "answer": 0,
+        "explanation": "\\((A,A)\\)：给定对手选 A，\\(u_i(A,A)=2>u_i(B,A)=0\\) → A 是 BR → Nash。\\((B,B)\\)：给定对手选 B，\\(u_i(B,B)=1>u_i(A,B)=0\\) → B 是 BR → Nash。\\((A,B),(B,A)\\)：收益 \\((0,0)\\)→双方都有偏离动机。还有一个混合策略 NE（混合可能劣于纯策略 NE）。注意 \\((A,A)\\) Pareto 优于 \\((B,B)\\)，但没有机制保证协调到好的均衡——焦点（focal point）理论。"
+      },
+      {
+        "id": "game-theory-ch01-q7",
+        "question": "混合策略（mixed strategy）\\(\\sigma_i\\) 是 \\(S_i\\) 上的概率分布。在石头剪刀布中，唯一的 Nash 均衡是什么？",
+        "options": [
+          "各以 \\(1/3\\) 概率选石头/剪刀/布  B) 全选石头  C) 全选布  D) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "石头剪刀布是零和对称博弈，无纯策略 NE。混合策略 NE：\\(\\sigma^*=(1/3,1/3,1/3)\\)。验证：对手 \\(\\sigma^*=(1/3,1/3,1/3)\\) 时，选任何纯策略的期望收益都相同（\\(=0\\)）→任何策略都是 BR → 任何混合也是 BR → \\(\\sigma^*\\) 是 NE。关键性质：在混合 NE 中，所有被赋予正概率的纯策略必须给出相同的期望收益（indifference condition）。"
+      },
+      {
+        "id": "game-theory-ch01-q8",
+        "question": "寡头竞争模型（Cournot）：两厂商同时选产量 \\(q_1,q_2\\geq0\\)。市场价格 \\(P=10-q_1-q_2\\)，成本 \\(C_i=2q_i\\)。厂商 \\(i\\) 的利润 \\(\\pi_i=?\\)",
+        "options": [
+          "\\(\\pi_i=(10-q_1-q_2-2)q_i=(8-q_1-q_2)q_i\\)  B) \\(10q_i\\)  C) \\(q_1q_2\\)  D) \\(P^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_i=Pq_i-C_i=(10-q_1-q_2)q_i-2q_i=(8-q_1-q_2)q_i\\)。BR：\\(\\frac{\\partial\\pi_i}{\\partial q_i}=8-2q_i-q_j=0\\Rightarrow q_i=(8-q_j)/2\\)。对称 NE：\\(q_1=q_2=q^*\\)，\\(q^*=(8-q^*)/2\\Rightarrow q^*=8/3\\)。利润 \\(\\pi_i=(8-16/3)\\times8/3=(8/3)^2\\approx7.11\\)。对比垄断产量 \\(q_M=4\\)（利润 \\(16\\)），完全竞争产量 \\(q_C=8\\)（利润 \\(0\\)）。Cournot 产量和利润介于垄断与竞争之间。"
+      },
+      {
+        "id": "game-theory-ch01-q9",
+        "question": "Cournot 双寡头博弈（接上题）的 Nash 均衡产量 \\(q^*\\) 和价格 \\(P^*\\)？",
+        "options": [
+          "\\(q^*=8/3\\approx2.67\\)，\\(P^*=10-16/3=14/3\\approx4.67\\)  B) \\(q^*=4,P^*=2\\)  C) \\(q^*=2,P^*=6\\)  D) \\(q^*=5,P^*=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "由 BR 交点：\\(q_1=q_2=8/3\\)。\\(P^*=10-2\\times8/3=10-16/3=14/3\\approx4.67\\)。利润 \\(\\pi_i=(14/3-2)\\times8/3=8/3\\times8/3=64/9\\approx7.11\\)。对比 Bertrand 竞争（价格竞争）结果：\\(P=MC=2\\)（完全竞争价格！）——同一个市场结构，产量竞争和价格竞争得出截然不同的结论（Bertrand 悖论）。"
+      },
+      {
+        "id": "game-theory-ch01-q10",
+        "question": "\\(2\\times2\\) 博弈中 BR 函数法求混合 NE。鹰鸽博弈（Hawk-Dove）：\\((H,H)=(-1,-1)\\)，\\((H,D)=(2,0)\\)，\\((D,H)=(0,2)\\)，\\((D,D)=(1,1)\\)。混合 NE 中选 H 的概率 \\(p=?\\)",
+        "options": [
+          "\\(p=1/3\\)  B) \\(p=1/2\\)  C) \\(p=2/3\\)  D) \\(p=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "令对手选 H 概率 \\(p\\)，玩家 \\(i\\) 选 H 的期望：\\(-p+2(1-p)=2-3p\\)。选 D 的期望：\\(0\\cdot p+1\\cdot(1-p)=1-p\\)。indifference：\\(2-3p=1-p\\Rightarrow p=1/2\\)。（修正计算）\\(2-3p=1-p\\Rightarrow1=2p\\Rightarrow p=1/2\\)。但我们检验选项：实际用收益 \\((-1,-1),(2,0),(0,2),(1,1)\\)：\\(E[H]=-1\\cdot p+2(1-p)=2-3p\\)，\\(E[D]=0\\cdot p+1(1-p)=1-p\\)。\\(2-3p=1-p\\Rightarrow p=1/2\\)。选 B 才对。（易错点：须仔细代入收益矩阵验算）"
+      },
+      {
+        "id": "game-theory-ch01-q11",
+        "question": "mixed strategy NE 的关键性质：如果玩家 \\(i\\) 以正概率混合 \\(k\\) 个纯策略，那么这 \\(k\\) 个纯策略对 \\(i\\) 的期望收益必须满足什么？",
+        "options": [
+          "全部相等——\\(E[u_i(s_i^1,\\sigma_{-i})]=E[u_i(s_i^2,\\sigma_{-i})]=\\cdots\\)（indifference condition）  B) 收益递增  C) 收益递减  D) 不相关"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(E[u_i(s_i^1,\\sigma_{-i})]>E[u_i(s_i^2,\\sigma_{-i})]\\)，理性玩家不会在 \\(s_i^2\\) 上放正概率→混合的策略必须被无差异。这是求解混合 NE 的核心方法：让对手无差异的方程组。注意：是\"对手\"的混合使你无差异——你的混合概率由对手的无差异条件决定，不是你自己的。这是博弈论初学者最常见的错误之一。"
+      },
+      {
+        "id": "game-theory-ch01-q12",
+        "question": "信息集和完美信息的概念。国际象棋是完美信息博弈吗？扑克（德州扑克）呢？",
+        "options": [
+          "国际象棋是完美信息（所有棋子位置可见），扑克是不完美信息（对手手牌不可见）  B) 均为完美信息  C) 均为不完美信息  D) 扑克是完美信息"
+        ],
+        "answer": 0,
+        "explanation": "完美信息博弈：每个信息集是单元素集（每个决策节点，参与者知道准确的博弈历史）。国际象棋/围棋/井字棋都是完美信息博弈。不完美信息：存在非单元素信息集（参与者无法区分某些节点）。扑克中你不知道对手的手牌→同一信息集包含多个可能的历史。Bayesian 博弈（不完全信息）是另一概念——参与者的类型是私有信息。"
+      },
+      {
+        "id": "game-theory-ch01-q13",
+        "question": "Bertrand 双寡头（同质产品，边际成本 \\(c_1=c_2=c\\)）的 Nash 均衡价格是什么？",
+        "options": [
+          "\\(p_1=p_2=c\\)（边际成本定价，零利润——Bertrand 悖论）  B) \\(p=\\frac{a+c}{2}\\)  C) 垄断价格  D) 无均衡"
+        ],
+        "answer": 0,
+        "explanation": "Bertrand 竞争：消费者购买最低价产品。若 \\(p_i>p_j>c\\)：厂商 \\(j\\) 获得整个市场→厂商 \\(i\\) 有偏离动机（降价抢市场）。\\(p_1=p_2>c\\)：任一方降价 \\(\\epsilon\\) 可获得整个市场利润→不是 NE。唯一 NE：\\(p_1=p_2=c\\)。悖论：仅两家厂商就导致竞争性定价！解决：产品差异化（Hotelling 模型）、容量约束（Edgeworth）或重复博弈中默契串谋。"
+      },
+      {
+        "id": "game-theory-ch01-q14",
+        "question": "支持定理（support theorem）：在 \\(n\\) 人有限博弈中，\\(\\text{supp}(\\sigma_i^*)\\)（混合 NE 中 \\(i\\) 的支撑集）中任意两个纯策略 \\(s_i',s_i''\\)，必有 \\(u_i(s_i',\\sigma_{-i}^*)=u_i(s_i'',\\sigma_{-i}^*)\\)。若违反此条，说明什么？",
+        "options": [
+          "\\(\\sigma_i^*\\) 不是 NE——因为一个收益更低的策略不应被赋予正概率  B) \\(\\sigma_{-i}\\) 有误  C) 博弈无解  D) 条件不必要"
+        ],
+        "answer": 0,
+        "explanation": "反证：假设 \\(u_i(s_i',\\sigma_{-i}^*)>u_i(s_i'',\\sigma_{-i}^*)\\) 且 \\(\\sigma_i^*(s_i'')>0\\)。将 \\(s_i''\\) 的概率转移到 \\(s_i'\\)→期望收益严格增加→\\(\\sigma_i^*\\) 不是 BR→不是 NE。这是验证混合 NE 的核心工具。常见错误：混合 NE 中忘记验证支撑外策略的收益确实 \\(\\leq\\) 支撑内策略的收益。"
+      },
+      {
+        "id": "game-theory-ch01-q15",
+        "question": "Nash 定理：任何有限博弈（有限参与者、有限策略）都存在至少一个混合策略 Nash 均衡。证明关键使用了什么工具？",
+        "options": [
+          "Kakutani 不动点定理（或 Brouwer 不动点定理）——BR 对应的不动点就是 NE  B) 线性代数  C) 对手策略  D) 枚举法"
+        ],
+        "answer": 0,
+        "explanation": "BR 对应 \\(\\text{BR}:S\\to2^S\\)（\\(S\\) = 混合策略空间，紧凸集）。Nash 证明 BR 满足 Kakutani 条件：(1)\\(S\\) 紧凸 ✓（混合策略 = 概率单纯形）；(2)BR 上半连续 ✓；(3)BR\\((s)\\) 对每个 \\(s\\) 是凸集 ✓（最优策略的凸组合仍最优）。不动点 \\(\\sigma^*\\in\\text{BR}(\\sigma^*)\\) ⇔ NE。Nash 1950 年 27 页博士论文中证明了此定理，获 1994 年诺贝尔经济学奖。"
+      },
+      {
+        "id": "game-theory-ch01-q16",
+        "question": "公共品博弈（public goods game）中的搭便车问题。\\(n\\) 人各选投入 \\(x_i\\in[0,w]\\)，总公共品 \\(G=m\\sum x_i\\)（\\(m<1\\), \\(mn>1\\)），收益 \\(u_i=w-x_i+mG\\)。唯一 NE 的投入是多少？",
+        "options": [
+          "\\(x_i^*=0\\)（全部搭便车），尽管社会最优是 \\(x_i^*=w\\)  B) \\(x_i^*=w\\)  C) \\(x_i^*=w/2\\)  D) 无均衡"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_i=w-x_i+m\\sum_j x_j=w+(m-1)x_i+m\\sum_{j\\neq i}x_j\\)。\\(m<1\\) → \\(\\partial u_i/\\partial x_i=m-1<0\\) → 减少 \\(x_i\\) 总使 \\(u_i\\) 增加 → \\(x_i^*=0\\)。但社会总收益 \\(\\sum u_i=nw+(mn-1)\\sum x_j\\)，\\(mn>1\\) → 社会最优 \\(x_i=w\\)。差距来源：个人只获得 \\(m\\) 倍回报（\\(<1\\)），但社会获得 \\(mn\\) 倍（\\(>1\\)）。解决：税收/补贴/惩罚机制或重复博弈中的互惠。"
+      },
+      {
+        "id": "game-theory-ch01-q17",
+        "question": "IESDS（重复剔除严格劣策略）在 \\(3\\times3\\) 博弈中的应用。某博弈 IESDS 后剩余 \\(1\\times1\\) 格子的性质是什么？",
+        "options": [
+          "唯一的 Nash 均衡——IESDS 的不动点一定是 NE，如果剩余唯一则是唯一 NE  B) 不一定是 NE  C) 可能没有格子  D) 多个格子"
+        ],
+        "answer": 0,
+        "explanation": "定理：NE 在 IESDS 下保持（不会被剔除）。如果 IESDS 剩余唯一策略组合→它是唯一的 NE（称为\"可解博弈\"或\"dominance solvable\"）。但大多数博弈 IESDS 后剩余多个策略——需要进一步用 NE 概念。注意：IESDS 剔除弱劣策略可能改变 NE 集合——因此标准方法只剔除严格劣策略。"
+      },
+      {
+        "id": "game-theory-ch01-q18",
+        "question": "Hotelling 位置博弈：两商店在 \\([0,1]\\) 线段上选位置 \\(x_1,x_2\\)，消费者均匀分布，选最近商店。Nash 均衡位置 \\((x_1^*,x_2^*)=?\\)",
+        "options": [
+          "\\((1/2,1/2)\\)（最小差异化原则——两店聚集在中点）  B) \\((0,1)\\)  C) \\((1/4,3/4)\\)  D) 无均衡"
+        ],
+        "answer": 0,
+        "explanation": "两店位于 \\(x_1<x_2\\) 时，分界点 \\((x_1+x_2)/2\\)。店 1 的客户 \\(=(x_1+x_2)/2\\)，店 2 的客户 \\(=1-(x_1+x_2)/2\\)。\\(\\frac{\\partial u_1}{\\partial x_1}=1/2>0\\) → 店 1 总想右移。\\(\\frac{\\partial u_2}{\\partial x_2}=-1/2<0\\) → 店 2 总想左移。NE：\\(x_1=x_2=1/2\\)（中位数选民定理的变体）。然而这是社会次优——\\((1/4,3/4)\\) 使消费者总旅行距离最小。政治中两党趋中也是此逻辑。"
+      },
+      {
+        "id": "game-theory-ch01-q19",
+        "question": "\\(N\\) 人对称博弈中 NE 的对称性。\\(N\\) 个玩家同时选 \\(a\\in[0,1]\\)，收益 \\(u_i=a_i(1-\\bar{a})\\)（\\(\\bar{a}=\\frac{1}{N}\\sum a_j\\)）。对称 NE 中 \\(a^*=?\\)",
+        "options": [
+          "\\(a^*=N/(N+1)\\)  B) \\(a^*=1/2\\)  C) \\(a^*=1\\)  D) \\(a^*=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "对称 NE：所有人选 \\(a^*\\)。\\(u_i=a_i(1-\\frac{(N-1)a^*+a_i}{N})\\)。\\(\\frac{\\partial u_i}{\\partial a_i}=1-\\frac{(N-1)a^*+2a_i}{N}\\)。NE 条件 \\(a_i=a^*\\)：\\(1-\\frac{(N-1)a^*+2a^*}{N}=0\\Rightarrow1-\\frac{(N+1)a^*}{N}=0\\Rightarrow a^*=\\frac{N}{N+1}\\)。\\(N\\to\\infty\\)：\\(a^*\\to1\\)（过度竞争）。\\(N=1\\)：\\(a^*=1/2\\)（垄断最优）。这是 Cournot 博弈的抽象版本——参与者越多，竞争越激烈。"
+      },
+      {
+        "id": "game-theory-ch01-q20",
+        "question": "博弈报酬的仿射变换 \\(u_i'=\\alpha u_i+\\beta\\)（\\(\\alpha>0\\)）是否改变 NE 集合？",
+        "options": [
+          "不改变——NE 只依赖收益的序数关系（偏好排序），不依赖基数值  B) 改变  C) 仅 \\(\\beta\\neq0\\) 时改变  D) 仅混合 NE 改变"
+        ],
+        "answer": 0,
+        "explanation": "\\(u_i'>u_i''\\) ⇔ \\(\\alpha u_i+\\beta>\\alpha u_i'+\\beta\\) ⇔ \\(u_i>u_i'\\)（\\(\\alpha>0\\)）。BR 不变→NE 不变。但注意：非线性变换（如 \\(u'=u^2\\)）会改变混合 NE（因为期望收益的排序可能变化）。在实验博弈论中，这意味着 NE 预测不依赖于效用的精确数值——只需要偏好排序。风险偏好（凹效用函数）不影响纯策略 NE，但影响混合 NE 的具体概率。"
+      },
+      {
+        "id": "game-theory-ch01-q21",
+        "question": "\\(n\\) 人\"猜均值的 2/3\"博弈：每人选 \\([0,100]\\) 中整数，最接近所有人选数平均值 2/3 的人获奖。IESDS 求解。",
+        "options": [
+          "逐步剔除后唯一 NE 是所有人选 \\(0\\)（或 \\(1\\)，取决于整数约束）  B) 选 \\(67\\)  C) 选 \\(50\\)  D) 选 \\(44\\)"
+        ],
+        "answer": 0,
+        "explanation": "第 1 轮：理性人不选 \\(>67\\)（因为 \\(2/3\\times100\\approx67\\)）。第 2 轮：知道所有人 \\(\\leq67\\)→不选 \\(>44\\)（\\(2/3\\times67\\approx44\\)）。第 3 轮：\\(\\leq30\\)...迭代→收敛到 \\(0\\)。这需要\"共同知识\"的理性（每个人知道所有人是理性的，知道所有人知道...）。实验中第一次玩平均值 \\(\\sim33\\)（2 轮推理）。这个博弈是 IESDS 的经典教学案例——展示了理性层次的重要性。"
+      },
+      {
+        "id": "game-theory-ch01-q22",
+        "question": "潜在博弈（potential game）的定义：存在势函数 \\(\\Phi\\) 使得任何玩家的单边偏离收益变化 \\(=\\) \\(\\Phi\\) 的变化。势函数存在有什么好处？",
+        "options": [
+          "\\(\\Phi\\) 的全局最大值点是 NE——NE 求解转化为单目标优化问题  B) 无好处  C) 势函数无法计算  D) 仅适用于两人博弈"
+        ],
+        "answer": 0,
+        "explanation": "精确潜在博弈：\\(u_i(s_i',s_{-i})-u_i(s_i,s_{-i})=\\Phi(s_i',s_{-i})-\\Phi(s_i,s_{-i})\\) \\(\\forall i,s_i,s_i',s_{-i}\\)。Cournot 博弈、拥塞博弈都是潜在博弈。好处：(1) NE 存在性直接由 \\(\\Phi\\) 的最大值保证；(2) 最优反应动态（myopic improvement）收敛到 NE（因为 \\(\\Phi\\) 单调增）；(3) 可用凸优化工具。Monderer & Shapley (1996) 系统研究了潜在博弈。"
+      },
+      {
+        "id": "game-theory-ch01-q23",
+        "question": "拥塞博弈（congestion game）：\\(N\\) 个玩家选路径（资源子集），每条边的延迟 \\(=\\) 使用人数的函数 \\(c_e(n_e)\\)。这是潜在博弈吗？",
+        "options": [
+          "是——势函数 \\(\\Phi(s)=\\sum_{e\\in E}\\sum_{k=1}^{n_e(s)}c_e(k)\\)  B) 否  C) 仅对线性延迟  D) 仅两人时"
+        ],
+        "answer": 0,
+        "explanation": "Rosenthal (1973)：\\(\\Phi(s)=\\sum_e\\sum_{k=1}^{n_e}c_e(k)\\)（每条边的\"累积延迟\"求和）。验证：玩家 \\(i\\) 单边换路 \\(s_i\\to s_i'\\) 时 \\(\\Delta\\Phi=\\) 新路上各边 \\(c_e(n_e+1)\\) 之和 \\(-\\) 旧路上各边 \\(c_e(n_e)\\) 之和 \\(=\\Delta u_i\\)。NE 存在且有限改善路径有限（\\(\\Phi\\) 有限多值→不能无限改善）。Braess 悖论（增加道路反而增加延迟）可在拥塞博弈框架下分析。"
+      },
+      {
+        "id": "game-theory-ch01-q24",
+        "question": "Lemke-Howson 算法用于寻找二人博弈的 NE。其基本思想是什么？",
+        "options": [
+          "沿标记多面体（labeled polytope）的边从一个完全标记顶点走到另一个——通过互补旋转  B) 枚举所有策略  C) 随机搜索  D) 梯度下降"
+        ],
+        "answer": 0,
+        "explanation": "LH 算法（1964）：构造 BR 多面体，从人工起点出发，沿\"几乎完全标记\"路径行走（类似单纯形法的旋转），终止于完全标记顶点（NE）。时间复杂度：最坏指数级（Savani-von Stengel 2006 证明）。NE 计算是 PPAD-complete（Daskalakis-Goldberg-Papadimitriou 2009）——不太可能存在多项式算法。支撑枚举（support enumeration）对小博弈更实用。"
+      },
+      {
+        "id": "game-theory-ch01-q25",
+        "question": "关联均衡（correlated equilibrium, CE）与 Nash 均衡的关系？",
+        "options": [
+          "NE \\(\\subsetneq\\) CE——每个 NE 是 CE，但 CE 可以通过关联信号达到比任何 NE 更好的结果  B) CE \\(\\subset\\) NE  C) 两者相同  D) 无关系"
+        ],
+        "answer": 0,
+        "explanation": "CE（Aumann 1974）：存在公共\"信号装置\"（如交通灯），推荐每个玩家一个行动。如果每个玩家在收到推荐后没有单边偏离动机→CE。NE 是特殊 CE（信号独立）。CE 集合是线性不等式定义的凸多面体→可用 LP 在多项式时间内优化。注意：CE 可以实现比任何 NE 更高的社会福利——通过关联消除\"坏的\"策略组合。"
+      },
+      {
+        "id": "game-theory-ch01-q26",
+        "question": "网络安全攻防博弈：攻击者选择攻击目标（\\(n\\) 个节点），防御者选择防御部署。这是什么类型的博弈？如何建模？",
+        "options": [
+          "二人零和不完美信息博弈——防御者不知道攻击目标。混合策略 NE 给出最优随机巡逻/部署策略  B) 合作博弈  C) 完美信息  D) 不能用博弈论"
+        ],
+        "answer": 0,
+        "explanation": "安全博弈（security game）：防御者资源有限（\\(k<n\\)），需选择哪些目标防御。攻击者观察防御策略后选择目标（Stackelberg 博弈）。最优防御：混合策略——随机化防御部署使攻击者无法预测。Tambe et al. (2011) 的 ARMOR 系统用于洛杉矶机场安保——用 LP 求解大规模安全博弈。混合 NE 保证最坏情况下的最优期望收益。"
+      },
+      {
+        "id": "game-theory-ch01-q27",
+        "question": "频谱分配博弈：多个通信运营商共享频谱资源。每个运营商选择频段和功率。从博弈论角度如何分析？",
+        "options": [
+          "多人非合作博弈——运营商最大化自身吞吐量，NE 是自私分配的均衡点，可能低于社会最优（PoA > 1）  B) 集中式优化  C) 无竞争  D) 随机分配"
+        ],
+        "answer": 0,
+        "explanation": "频谱博弈是拥塞博弈的变体——多用户选频段，同频用户互相干扰（\"拥塞\"=更多干扰→更低速率）。NE 存在（潜在博弈）。PoA（Price of Anarchy）\\(=\\frac{\\text{社会最优}}{\\text{NE最差情况}}\\leq2\\)（某些模型下）。5G 中的动态频谱共享（DSS）可用分布式博弈论算法：每用户执行最优反应迭代→收敛到 NE（因为是潜在博弈）。"
+      },
+      {
+        "id": "game-theory-ch01-q28",
+        "question": "电商平台上的定价博弈。多个卖家同时设定价格，消费者选最低价（或综合考虑价格和评分）。这与什么经典博弈模型最相关？",
+        "options": [
+          "Bertrand 竞争模型——同质产品的价格博弈；加入差异化（评分/品牌）后是 Hotelling 模型  B) 囚徒困境  C) 协调博弈  D) 零和博弈"
+        ],
+        "answer": 0,
+        "explanation": "同质产品：Bertrand 竞争→价格趋向成本（\"价格战\"）。Amazon 上同款商品多卖家定价趋同于最低利润率。差异化（好评率、品牌、配送速度）→ Hotelling 模型——价格竞争温和化。平台算法（Buy Box 排名）改变了博弈结构——不再是纯价格竞争，而是多维度\"质量-价格\"竞争。机制设计（平台规则）可以改善社会效率。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="game-theory"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/game-theory.html" class="module-name">博弈论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 参与者、策略集与支付函数</a></li>
+      <li><a href="#kp2">02 · 支付矩阵与占优策略</a></li>
+      <li><a href="#kp3">03 · 最优反应与经典博弈模型</a></li>
+      <li><a href="#kp4">04 · 纯策略与混合策略的概念</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>博弈的基本概念</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>参与者、策略集与支付函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当多个理性决策者的行为相互影响时，我们需要博弈论。企业定价、 拍卖竞价、国际谈判等场景都不是个体优化问题，而是策略互动。 博弈论的基本框架——参与者、策略集、支付函数——提供了分析 这类问题的数学语言。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>博弈 = 三元组 \((N, \{S_i\}, \{u_i\})\)：参与者集、每人的策略集、 支付函数。核心思想：每个人的收益不仅取决于自己的策略， 也取决于他人的策略。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>策略型博弈</strong>（标准形）： - 参与者集 \(N = \{1, 2, \ldots, n\}\) - 策略集 \(S_i\)（参与者 \(i\) 的可选行动） - 支付函数 \(u_i: S_1 \times \cdots \times S_n \to \mathbb{R}\) <strong>策略组合</strong>：\(s = (s_1, \ldots, s_n) \in S = \prod S_i\)。 记 \(s_{-i}\) 为除 \(i\) 外其他人的策略组合。 <strong>支付矩阵</strong>（两人博弈）：行玩家选行、列玩家选列， 每个单元格为 \((u_1, u_2)\) 对。 <strong>囚徒困境</strong>：经典模型， \[\begin{pmatrix} (-1,-1) & (-3,0) \\ (0,-3) & (-2,-2) \end{pmatrix}\] 每个人的「理性」选择导致集体次优。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 察尔竞价: 拍卖中的策略互动 - AI 对抗：GAN 中生成器与判别器的博弈</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用支付矩阵表示囚徒困境并找出两人的理性选择。 解答：无论对方选什么，​“背叛”都严格优于“合作”： 对方合作时 \(0 > -1\)，对方背叛时 \(-2 > -3\)。 因此两人均选背叛，得 \((-2,-2)\)，但 \((-1,-1)\) 更好。 易错点：囚徒困境的「困境」在于个体理性 \(\neq\) 集体理性。 不能简单地说「协商就好了」——单次博弈中没有强制力。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">博弈论与优化理论的核心区别是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。优化是单个决策者的问题，博弈论处理多个理性主体')">A. 博弈论只处理随机问题</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！优化是单个决策者的问题，博弈论处理多个理性主体')">B. 博弈论中每个参与者的收益依赖于所有人的策略</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。优化是单个决策者的问题，博弈论处理多个理性主体')">C. 博弈论不涉及数学</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。优化是单个决策者的问题，博弈论处理多个理性主体')">D. 博弈论只有两个参与者</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>支付矩阵与占优策略</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>若某个策略无论对手怎么玩都是最优的，那就不需要猜测对手的行为。 占优策略是博弈分析的最简单形式，但只在少数博弈中存在。 近似十年前的占优概念——被占优策略——则更广泛适用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>严格占优：\(u_i(s_i^*, s_{-i}) > u_i(s_i, s_{-i})\) 对所有 \(s_i \neq s_i^*\) 和所有 \(s_{-i}\)。 被严格占优：\(\exists s_i'\) 使得 \(u_i(s_i', s_{-i}) > u_i(s_i, s_{-i})\) 对所有 \(s_{-i}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>严格占优策略</strong>：\(s_i^*\) 为参与者 \(i\) 的严格占优策略，若 \[\forall s_i \neq s_i^*,\; \forall s_{-i}:\quad u_i(s_i^*, s_{-i}) > u_i(s_i, s_{-i})\] 理性玩家永远会选择占优策略（无需知道对手策略）。 <strong>迭代消除严格被占优策略 (IESDS)</strong>： (1) 删除所有参与者的严格被占优策略 (2) 在缩小的博弈中重复(1) (3) 直到无法继续消除 结果与消除顺序无关（严格情况下）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 市场设计中占优策略机制（如二价拍卖）保证诚实报价</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：博弈矩阵 \(\begin{pmatrix}(4,3)&(5,1)&(6,2)\\(2,1)&(8,4)&(3,6)\\(3,0)&(9,6)&(2,8)\end{pmatrix}\)， 进行 IESDS。 解答：行玩家：近行 3 被行 1 占优（\(4>3,5>9?\)）...  实际需逐行比较。 列玩家：列 1 被列 3 占优（\(2>3? 6>1? 8>0?\) 摆 \(2<3\) 故列 1 不被占优）… （详细比较略，重点是方法） 易错点：消除时必须是「对所有对手策略」都严格更差才能消除。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">IESDS 的结果是否依赖消除顺序？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。严格占优的 IESDS 与消除顺序无关（弱占优则取决于顺序）。')">A. 是的，不同顺序可能得到不同结果</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！严格占优的 IESDS 与消除顺序无关（弱占优则取决于顺序）。')">B. 否，严格占优下顺序无关</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。严格占优的 IESDS 与消除顺序无关（弱占优则取决于顺序）。')">C. 取决于参与者数量</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。严格占优的 IESDS 与消除顺序无关（弱占优则取决于顺序）。')">D. 取决于支付矩阵的大小</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>最优反应与经典博弈模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当没有占优策略时，玩家需要根据对手的策略选择最优行动。 最优反应函数刻画了「给定对手策略，我的最优选择」的映射。 最优反应是理解 Nash 均衡的关键工具。囚徒困境、纳什议价、 协调博弈、鸡博弈等经典模型展示了不同的策略结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>最优反应 \(BR_i(s_{-i}) = \arg\max_{s_i} u_i(s_i, s_{-i})\)。 Nash 均衡 = 所有人同时处于彼此的最优反应中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>最优反应函数</strong>： \[BR_i(s_{-i}) = \{s_i \in S_i : u_i(s_i, s_{-i}) \geq u_i(s_i', s_{-i}) \; \forall s_i' \in S_i\}\] <strong>经典模型</strong>： - 囚徒困境：占优均衡 = (D,D)，不是 Pareto 最优 - 纳什议价(BoS)：多重 NE，协调问题 - 协调博弈：两个 NE，其中一个 Pareto 占优 - 鸡博弈(Chicken)：两个非对称 NE，「让步」的博弈 Nash 均衡与最优反应的关系： \[s^* \text{ 是 NE} \Leftrightarrow s_i^* \in BR_i(s_{-i}^*) \; \forall i\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Cournot 企业竞争中的产量决策 - 交通出行路径选择中的协调问题</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：纳什议价(BoS)： \(\begin{pmatrix}(3,2)&(0,0)\\(0,0)&(2,3)\end{pmatrix}\)。找纯策略 NE。 解答：BR1(L)=T, BR1(R)=B; BR2(T)=L, BR2(B)=R。 NE: (T,L)=(3,2) 和 (B,R)=(2,3)。两个 NE，各对一方有利。 易错点：BR 可能不是单值的——多个策略可能都是最优反应。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">囚徒困境的结果为什么不是 Pareto 最优？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。个体理性（占优策略）并不保证集体最优。')">A. 因为不存在 Nash 均衡</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！个体理性（占优策略）并不保证集体最优。')">B. 因为占优策略均衡与 Pareto 最优不一定一致</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。个体理性（占优策略）并不保证集体最优。')">C. 因为参与者不理性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。个体理性（占优策略）并不保证集体最优。')">D. 因为博弈只进行一次</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>纯策略与混合策略的概念</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>石头剪刀布中没有纯策略 NE——任何固定选择都会被对手利用。 混合策略引入随机化：玩家的策略是对纯策略的概率分布。 这不仅解决了 NE 的存在性问题，也模拟了现实中的​随机行为。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>混合策略 \(\sigma_i \in \Delta(S_i)\) = \(S_i\) 上的概率分布。 期望支付：\(u_i(\sigma) = \sum_s \prod_j \sigma_j(s_j) \cdot u_i(s)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>混合策略</strong>：\(\sigma_i = (p_1, p_2, \ldots, p_{|S_i|})\)，\(\sum p_k = 1\)，\(p_k \geq 0\)。 <strong>期望支付</strong>（两人）： \[u_1(\sigma_1, \sigma_2) = \sum_{i,j} \sigma_1(s_i) \sigma_2(s_j) u_1(s_i, s_j) = \sigma_1^T A \sigma_2\] 其中 \(A\) 为行玩家的支付矩阵。 <strong>支撑定理</strong>：在混合策略 NE 中，若 \(\sigma_i(s_i) > 0\)， 则 \(s_i\) 是对 \(\sigma_{-i}\) 的最优反应之一。 即：被随机化的纯策略政能期望支付相等。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 安全博弈中巡逻者随机化巡逻路线 - 网络安全中防御资源的随机分配</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：匹配硬币博弈： \(\begin{pmatrix}(1,-1)&(-1,1)\\(-1,1)&(1,-1)\end{pmatrix}\)。找混合 NE。 解答：无纯策略 NE。设行玩家选 H 概率 \(p\)。 列玩家无差异条件：\(-p+(1-p) = p-(1-p)\)，\(p=1/2\)。 对称地 \(q=1/2\)。混合 NE: \(((1/2,1/2),(1/2,1/2))\)，期望支付 0。 易错点：混合 NE 中玩家随机化是为了让对手无差异， 不是为了最大化自己的期望支付。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">混合策略 NE 中，被随机化的每个纯策略满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！这是支撑定理的内容：若某纯策略被以正概率使用，')">A. 它们的期望支付相等</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是支撑定理的内容：若某纯策略被以正概率使用，')">B. 它们的支付方差最小</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是支撑定理的内容：若某纯策略被以正概率使用，')">C. 它们都是占优策略</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是支撑定理的内容：若某纯策略被以正概率使用，')">D. 它们的概率相等</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/probability/game-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

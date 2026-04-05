@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 信道容量 — 信息论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "info-theory-ch03-q1",
+        "question": "离散无记忆信道（DMC）由什么决定？",
+        "options": [
+          "转移概率矩阵 \\(P(Y|X)\\)  B) 输入分布 \\(P(X)\\)  C) 输出分布 \\(P(Y)\\)  D) 密钥"
+        ],
+        "answer": 0,
+        "explanation": "DMC 完全由条件概率 \\(P(Y=j|X=i)\\) 定义——给定输入 \\(i\\)，输出 \\(j\\) 的概率。信道是\"无记忆\"的：每次传输独立于过去。二元对称信道（BSC）：\\(P(Y\\neq X)=p\\)（错误率 \\(p\\)）。输入分布 \\(P(X)\\) 由发送者选择，不是信道属性。"
+      },
+      {
+        "id": "info-theory-ch03-q2",
+        "question": "二元对称信道（BSC）错误率 \\(p=0.1\\)。输入 \\(X=0\\) 被翻转的概率是？",
+        "options": [
+          "\\(0.1\\)  B) \\(0.9\\)  C) \\(0.5\\)  D) \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(Y=1|X=0)=p=0.1\\)，\\(P(Y=0|X=0)=1-p=0.9\\)。对称性：\\(P(Y=0|X=1)=p=0.1\\)，\\(P(Y=1|X=1)=0.9\\)。BSC 是最简单的有噪声信道模型。信道容量 \\(C=1-h(p)\\)，\\(p=0.1\\) 时 \\(C=1-h(0.1)\\approx1-0.469=0.531\\) bit/use。"
+      },
+      {
+        "id": "info-theory-ch03-q3",
+        "question": "Shannon 第二定理（信道编码定理）的核心结论：若 \\(R<C\\)，则？",
+        "options": [
+          "存在编码使错误概率 \\(P_e\\to0\\)（\\(n\\to\\infty\\)）  B) \\(P_e\\) 恒为 0  C) 不可能通信  D) \\(P_e=0.5\\)"
+        ],
+        "answer": 0,
+        "explanation": "Shannon 1948 年：对于码率 \\(R<C\\) 的编码，存在长度 \\(n\\) 的编码方案使 \\(P_e\\leq2^{-nE(R)}\\)（\\(E(R)>0\\) 为错误指数）。\\(P_e\\) 随 \\(n\\) 指数下降。革命性结论：有噪信道可实现（近乎）无错通信！反定理：\\(R>C\\) 时 \\(P_e\\to1\\)。Shannon 没给出构造性方法——信道编码理论用了 50 年找到接近容量的码（Turbo 码 1993, LDPC, Polar 码 2009）。"
+      },
+      {
+        "id": "info-theory-ch03-q4",
+        "question": "BSC（\\(p=0.1\\)）的信道容量 \\(C=1-h(0.1)\\)。\\(C\\approx?\\)",
+        "options": [
+          "\\(\\approx0.531\\) bit  B) \\(\\approx1\\) bit  C) \\(\\approx0.1\\) bit  D) \\(\\approx0.9\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(h(0.1)=-0.1\\log_2 0.1-0.9\\log_2 0.9=0.332+0.137=0.469\\)。\\(C=1-0.469=0.531\\) bit/use。意味着每次使用 BSC 可靠传输约 0.531 bit 信息。若要传 1000 bit 信息，至少需 \\(1000/0.531\\approx1884\\) 次信道使用。"
+      },
+      {
+        "id": "info-theory-ch03-q5",
+        "question": "Blahut-Arimoto 算法用于计算什么？",
+        "options": [
+          "数值计算离散信道的容量 \\(C=\\max_{P(X)}I(X;Y)\\)  B) 编码数据  C) 解码信号  D) 压缩文件"
+        ],
+        "answer": 0,
+        "explanation": "信道容量 \\(C=\\max_{P(X)}I(X;Y)\\) 是关于输入分布 \\(P(X)\\) 的凹优化问题。Blahut-Arimoto 交替更新 \\(P(X)\\) 和辅助分布 \\(Q(X|Y)\\)，保证收敛到全局最优。复杂度 \\(O(|\\mathcal{X}||\\mathcal{Y}|/\\epsilon)\\)（\\(\\epsilon\\) 精度）。对称信道（如 BSC）可解析求解，非对称信道需数值方法。"
+      },
+      {
+        "id": "info-theory-ch03-q6",
+        "question": "二元删除信道（BEC）中每个输入比特以概率 \\(\\epsilon\\) 被\"擦除\"（接收 ?），以概率 \\(1-\\epsilon\\) 正确接收。\\(C=?\\)",
+        "options": [
+          "\\(1-\\epsilon\\)  B) \\(\\epsilon\\)  C) \\(1-h(\\epsilon)\\)  D) \\(h(\\epsilon)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(C=1-\\epsilon\\)。直觉：\\(\\epsilon\\) 比例的比特丢失，\\(1-\\epsilon\\) 比例正确到达。BEC 是最容易分析的信道——被擦除的位完全不提供信息，未擦除的位提供完整信息。\\(C=\\max I(X;Y)=1-\\epsilon\\)（均匀输入最优）。Polar 码在 BEC 上可以构造性达到容量。"
+      },
+      {
+        "id": "info-theory-ch03-q7",
+        "question": "线性码 \\([n,k]\\) 的码率 \\(R=?\\)",
+        "options": [
+          "\\(R=k/n\\)  B) \\(R=n/k\\)  C) \\(R=k\\)  D) \\(R=n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(k\\) 信息位编码为 \\(n\\) 码字位。码率 \\(R=k/n\\leq1\\)。\\(R\\) 接近 1 意味着高效但纠错能力弱。\\(R\\) 接近 0 意味着大量冗余，强纠错但低效。Shannon 定理：\\(R<C\\) 时可实现 \\(P_e\\to0\\)。汉明码 \\([7,4]\\) 的 \\(R=4/7\\approx0.571\\)。"
+      },
+      {
+        "id": "info-theory-ch03-q8",
+        "question": "加性高斯白噪声（AWGN）信道：\\(Y=X+Z\\)，\\(Z\\sim\\mathcal{N}(0,N)\\)，功率约束 \\(E[X^2]\\leq P\\)。信道容量 \\(C=?\\)",
+        "options": [
+          "\\(C=\\frac{1}{2}\\log_2(1+P/N)\\) bit/use  B) \\(C=P/N\\)  C) \\(C=\\log_2 P\\)  D) \\(C=1-P/N\\)"
+        ],
+        "answer": 0,
+        "explanation": "Shannon-Hartley 公式。\\(\\text{SNR}=P/N\\)。\\(C=\\frac{1}{2}\\log_2(1+\\text{SNR})\\)。当 \\(\\text{SNR}=7\\)（\\(\\approx8.45\\) dB）时 \\(C=\\frac{1}{2}\\log_2 8=1.5\\) bit/use。最优输入分布是高斯 \\(X\\sim\\mathcal{N}(0,P)\\)——最大熵输入。WiFi、5G 的设计极限就是此公式。"
+      },
+      {
+        "id": "info-theory-ch03-q9",
+        "question": "BSC（\\(p=0\\)）的容量为 \\(C=1\\) bit。若 \\(p=0.5\\)（完全噪声），\\(C=?\\)",
+        "options": [
+          "\\(0\\) bit  B) \\(0.5\\) bit  C) \\(1\\) bit  D) \\(-1\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(C=1-h(0.5)=1-1=0\\) bit。\\(p=0.5\\) 时输出完全随机（与输入独立），\\(Y\\) 不携带 \\(X\\) 的任何信息。不管怎么编码，都无法从输出推断输入。\\(I(X;Y)=H(Y)-H(Y|X)=H(Y)-1\\)，最大 \\(H(Y)=1\\)，\\(I=0\\)。完全噪声信道无法通信。"
+      },
+      {
+        "id": "info-theory-ch03-q10",
+        "question": "Blahut-Arimoto 算法中每轮迭代更新 \\(P(x)\\propto\\exp\\left(\\sum_y P(y|x)\\log\\frac{Q(x|y)}{\\sum_{x'}P(x')Q(x'|y)}\\right)\\)。算法收敛的理论基础是什么？",
+        "options": [
+          "\\(I(X;Y)\\) 关于 \\(P(X)\\) 是凹函数，交替优化保证单调不降  B) 牛顿法收敛  C) 梯度下降  D) 随机搜索"
+        ],
+        "answer": 0,
+        "explanation": "关键数学：\\(I(X;Y)\\) 关于 \\(P(X)\\)（固定 \\(P(Y|X)\\)）是凹函数；关于 \\(Q(X|Y)\\)（固定 \\(P(X)\\)）也是凹函数。交替最大化这两个凹子问题，目标值单调递增且有上界 \\(C\\)，故收敛。类似 EM 算法的结构。收敛速率为线性。"
+      },
+      {
+        "id": "info-theory-ch03-q11",
+        "question": "汉明码 \\([7,4,3]\\) 可纠正 \\(t\\) 个错误。\\(t=?\\)",
+        "options": [
+          "\\(1\\)  B) \\(2\\)  C) \\(3\\)  D) \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "最小距离 \\(d_{\\min}=3\\)，可纠正 \\(t=\\lfloor(d-1)/2\\rfloor=1\\) 个错误。汉明码是完美码——球填不等式取等号：\\(\\sum_{i=0}^{1}\\binom{7}{i}=1+7=8=2^{7-4}=2^3\\)。每个码字周围半径 1 的球恰好覆盖整个空间。码率 \\(R=4/7\\approx0.571\\)。"
+      },
+      {
+        "id": "info-theory-ch03-q12",
+        "question": "离散无记忆信道 \\(X\\in\\{0,1\\},Y\\in\\{0,1,e\\}\\)：\\(P(Y=x|X=x)=0.8,P(Y=e|X=x)=0.2\\)（\\(e\\) 为擦除）。这是什么类型的信道？",
+        "options": [
+          "二元擦除信道（BEC），\\(\\epsilon=0.2\\)  B) BSC  C) Z 信道  D) AWGN"
+        ],
+        "answer": 0,
+        "explanation": "BEC(\\(\\epsilon=0.2\\))：每个输入以 0.2 概率被擦除（接收 \\(e\\)），以 0.8 概率正确传输。容量 \\(C=1-\\epsilon=0.8\\) bit/use。BEC 的特点：知道哪些位出错了（\\(e\\) 标记），不知道的只是该位的值。这比 BSC 好——BSC 不知道哪些位出错。"
+      },
+      {
+        "id": "info-theory-ch03-q13",
+        "question": "AWGN 信道，带宽 \\(W=1\\) MHz，\\(\\text{SNR}=31\\)。Shannon 容量为？",
+        "options": [
+          "\\(5\\) Mbps  B) \\(1\\) Mbps  C) \\(31\\) Mbps  D) \\(0.5\\) Mbps"
+        ],
+        "answer": 0,
+        "explanation": "\\(C=W\\log_2(1+\\text{SNR})=10^6\\times\\log_2 32=10^6\\times5=5\\) Mbps。这是理论极限——实际系统可达约 \\(0.7C-0.9C\\)。5G NR 使用 LDPC 和 Polar 码，在 100 MHz 带宽 + 高 SNR 下可达数 Gbps。Shannon 公式指导了整个现代通信系统设计。"
+      },
+      {
+        "id": "info-theory-ch03-q14",
+        "question": "信道编码中\"随机编码\"的论证：随机选 \\(2^{nR}\\) 个长度 \\(n\\) 的码字，期望 \\(P_e\\) 可以任意小当 \\(R<C\\)。为什么现实中不用随机码？",
+        "options": [
+          "编码和解码复杂度 \\(O(2^{nR})\\)——指数复杂度不可行  B) 性能太差  C) 不存在  D) 随机码达不到容量"
+        ],
+        "answer": 0,
+        "explanation": "随机码的最大似然解码需比较 \\(2^{nR}\\) 个码字——\\(R=0.5,n=1000\\) 时有 \\(2^{500}\\) 个码字，计算不可行。Shannon 定理是存在性结果——证明好码存在但不提供高效构造。1993 年 Turbo 码首次逼近容量（\\(<1\\) dB 差距），2009 年 Polar 码首次可证明达到容量且有 \\(O(n\\log n)\\) 编解码复杂度。"
+      },
+      {
+        "id": "info-theory-ch03-q15",
+        "question": "Polar 码（极化码）如何达到信道容量？",
+        "options": [
+          "信道极化：将 \\(n\\) 个独立信道变换为部分近乎无噪+部分近乎无用的信道，在好信道上传信息  B) 暴力搜索好码  C) 随机编码  D) 增加功率"
+        ],
+        "answer": 0,
+        "explanation": "Arıkan 2009 年：递归蝶形变换将 \\(N=2^n\\) 个 BSC(\\(p\\)) 极化为两类——互信息趋向 1 的\"好\"子信道和趋向 0 的\"坏\"子信道。好信道比例 \\(\\to C\\)。在好信道传数据位（\\(k\\) 个），坏信道传冻结位（已知的 0/1）。编码 \\(O(N\\log N)\\)，SC 解码 \\(O(N\\log N)\\)。5G NR 的控制信道使用 Polar 码。"
+      },
+      {
+        "id": "info-theory-ch03-q16",
+        "question": "Z 信道：\\(P(Y=0|X=0)=1,P(Y=0|X=1)=p,P(Y=1|X=1)=1-p\\)。\\(p=0.5\\) 时容量 \\(C\\approx?\\)",
+        "options": [
+          "\\(\\approx0.322\\) bit  B) \\(\\approx0.5\\) bit  C) \\(\\approx1\\) bit  D) \\(\\approx0\\) bit"
+        ],
+        "answer": 0,
+        "explanation": "Z 信道不对称：\\(0\\to0\\) 确定，\\(1\\to0\\) 概率 \\(p\\)，\\(1\\to1\\) 概率 \\(1-p\\)。最优 \\(P(X=1)=\\alpha^*\\) 需优化 \\(I(X;Y)\\)。\\(p=0.5\\) 时 \\(C\\approx0.322\\) bit（可用 Blahut-Arimoto 数值验证）。Z 信道建模光通信中\"暗电流\"（\\(0\\) 不会变 \\(1\\)，但 \\(1\\) 可能丢失）。"
+      },
+      {
+        "id": "info-theory-ch03-q17",
+        "question": "Shannon 容量 \\(C=\\frac{1}{2}\\log_2(1+\\text{SNR})\\) 中 \\(\\text{SNR}\\to0\\) 时 \\(C\\approx?\\)（用泰勒展开）",
+        "options": [
+          "\\(C\\approx\\frac{\\text{SNR}}{2\\ln 2}\\approx0.72\\cdot\\text{SNR}\\)  B) \\(C\\approx\\text{SNR}\\)  C) \\(C\\to\\infty\\)  D) \\(C=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log_2(1+x)\\approx x/\\ln 2\\)（\\(x\\to0\\)）。\\(C\\approx\\frac{1}{2}\\cdot\\frac{\\text{SNR}}{\\ln 2}=\\frac{\\text{SNR}}{2\\ln 2}\\approx0.7213\\cdot\\text{SNR}\\)。低 SNR 时容量与 SNR 线性关系。这对应\"功率受限\"区域（深空通信等）。每比特最小能量 \\(E_b/N_0\\geq\\ln 2\\approx-1.59\\) dB（Shannon limit）。"
+      },
+      {
+        "id": "info-theory-ch03-q18",
+        "question": "纠错码的 Singleton 界：线性码 \\([n,k,d]\\) 满足 \\(d\\leq n-k+1\\)。达到此界的码称为什么？",
+        "options": [
+          "MDS（Maximum Distance Separable）码，如 Reed-Solomon 码  B) 完美码  C) Turbo 码  D) LDPC 码"
+        ],
+        "answer": 0,
+        "explanation": "\\(d_{\\max}=n-k+1\\)（Singleton 界）。Reed-Solomon 码 \\(\\text{RS}(n,k)\\) 在 \\(GF(q)\\) 上达到此界——\\(n-k\\) 个校验符号提供最大距离 \\(d=n-k+1\\)，可纠正 \\(\\lfloor(n-k)/2\\rfloor\\) 个符号错误。RS 码用于 CD/DVD（纠正划痕）、QR 码、深空通信（Voyager、Mars Rovers）。"
+      },
+      {
+        "id": "info-theory-ch03-q19",
+        "question": "LDPC（低密度奇偶校验）码的校验矩阵 \\(H\\) 的特点是什么？",
+        "options": [
+          "\\(H\\) 是稀疏矩阵——大部分元素为 0  B) \\(H\\) 是稠密矩阵  C) \\(H\\) 是单位矩阵  D) \\(H\\) 是对角矩阵"
+        ],
+        "answer": 0,
+        "explanation": "LDPC 码的奇偶校验矩阵 \\(H\\) 每行/列只有少量 1（低密度）。稀疏性使迭代\"置信传播\"（Belief Propagation）解码在 Tanner 图上高效运行——\\(O(n)\\) 每次迭代，\\(O(1)\\) 次迭代收敛。Gallager 1963 年发明，2000 年代重新发现后接近可达 Shannon 极限的性能。DVB-S2（卫星电视）、WiFi 6、5G NR 数据信道都使用 LDPC 码。"
+      },
+      {
+        "id": "info-theory-ch03-q20",
+        "question": "Turbo 码的解码使用\"迭代解码\"（Turbo principle）。核心思想是什么？",
+        "options": [
+          "两个分量解码器交替传递\"外部信息\"（extrinsic info），迭代提升综合解码准确率  B) 增加码长  C) 使用更大的码本  D) 暴力搜索"
+        ],
+        "answer": 0,
+        "explanation": "Turbo 码 = 两个卷积编码器 + 随机交织。解码：SISO（软输入软输出）解码器 1 产生关于每个比特的后验 LLR，减去先验得到\"外部信息\"，传递给解码器 2 作为新先验。解码器 2 更新后再传回。迭代 6-12 次通常收敛。1993 年 Berrou 等人首次演示距 Shannon 极限 0.5 dB 的性能，震惊编码界。3G/4G 使用 Turbo 码。"
+      },
+      {
+        "id": "info-theory-ch03-q21",
+        "question": "并行高斯信道：\\(n\\) 个独立 AWGN 子信道噪声分别为 \\(N_1,...,N_n\\)，总功率约束 \\(\\sum P_i\\leq P\\)。最优功率分配策略是？",
+        "options": [
+          "注水（Water-filling）：\\(P_i=(\\nu-N_i)^+\\)，\\(\\nu\\) 使 \\(\\sum P_i=P\\)  B) 均匀分配  C) 全部分给最好的信道  D) 随机分配"
+        ],
+        "answer": 0,
+        "explanation": "\\(C=\\sum\\frac{1}{2}\\log(1+P_i/N_i)\\) 在 \\(\\sum P_i=P\\) 约束下最大化。Lagrange 乘数法得 \\(P_i+N_i=\\nu\\)（常数\"水位\"），\\(P_i=\\max(\\nu-N_i,0)\\)。噪声大的信道分配更少功率甚至不分配（\\(N_i>\\nu\\) 时干脆关闭）。OFDM（WiFi/LTE）子载波功率分配遵循注水原则的变体（实际中 bit-loading 更常用）。"
+      },
+      {
+        "id": "info-theory-ch03-q22",
+        "question": "Shannon 第二定理的证明核心是什么？",
+        "options": [
+          "随机码本 + 联合典型解码——典型序列的性质保证 \\(P_e\\to0\\)  B) 穷举搜索  C) Huffman 编码  D) 信源编码"
+        ],
+        "answer": 0,
+        "explanation": "证明框架：(1)随机选 \\(2^{nR}\\) 个码字 \\(\\sim\\prod P(X)\\)；(2)发送 \\(x^n(m)\\)，接收 \\(y^n\\)；(3)解码：找与 \\(y^n\\) 联合典型的唯一码字；(4)\\(P_e\\) 分析——错误发生仅当另一个码字与 \\(y^n\\) 也联合典型。\\(P(\\text{某对联合典型})\\approx2^{-nI(X;Y)}\\)，\\(2^{nR}-1\\) 个错误码字→ 总错误概率 \\(\\approx2^{n(R-I)}\\to0\\) 当 \\(R<I\\)（\\(I\\) 在最优输入分布下为 \\(C\\)）。"
+      },
+      {
+        "id": "info-theory-ch03-q23",
+        "question": "Belief Propagation（BP）解码 LDPC 码的消息传递规则中，校验节点到变量节点的消息基于什么运算？",
+        "options": [
+          "tanh 域中的乘法（log 域中的 boxplus 运算）  B) 简单加法  C) 乘法  D) 取最大值"
+        ],
+        "answer": 0,
+        "explanation": "校验节点约束：\\(\\bigoplus x_i=0\\)（XOR = 0）。在 LLR（对数似然比）域中，check-to-variable 消息：\\(L_{c\\to v}=2\\tanh^{-1}\\prod_{v'\\neq v}\\tanh(L_{v'\\to c}/2)\\)（boxplus）。变量节点消息是简单求和：\\(L_{v\\to c}=L_{\\text{ch}}+\\sum_{c'\\neq c}L_{c'\\to v}\\)。BP 利用 LDPC 图的稀疏性——每次更新仅涉及少量邻居。理论上 BP 在树状图上精确，LDPC 图近似树状故效果好。"
+      },
+      {
+        "id": "info-theory-ch03-q24",
+        "question": "Reed-Solomon 码 \\(\\text{RS}(255,223)\\) 在 \\(GF(256)\\) 上。可纠正多少个符号错误？",
+        "options": [
+          "\\(16\\)  B) \\(32\\)  C) \\(223\\)  D) \\(255\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n-k=255-223=32\\) 校验符号。\\(d=n-k+1=33\\)。\\(t=\\lfloor(d-1)/2\\rfloor=16\\) 个符号错误。每个符号 8 bit（\\(GF(256)\\)），16 个符号 = 128 bit 错误可纠正。此码用于深空通信标准（CCSDS）和 CD-ROM。码率 \\(R=223/255\\approx0.875\\)。"
+      },
+      {
+        "id": "info-theory-ch03-q25",
+        "question": "信道容量是共凸的（jointly convex?）。\\(C=\\max_{P(X)}I(X;Y)\\) 中 \\(I(X;Y)\\) 关于 \\(P(X)\\) 的凹凸性如何？",
+        "options": [
+          "\\(I(X;Y)\\) 关于 \\(P(X)\\)（固定 \\(P(Y|X)\\)）是凹函数  B) 凸函数  C) 既凹又凸  D) 非凹非凸"
+        ],
+        "answer": 0,
+        "explanation": "\\(I(X;Y)=H(Y)-H(Y|X)\\)。\\(H(Y|X)=\\sum_x P(x)H(Y|X=x)\\) 关于 \\(P(X)\\) 线性（\\(H(Y|X=x)\\) 固定）。\\(H(Y)\\) 是 \\(P(Y)=\\sum_x P(x)P(y|x)\\) 的凹函数，\\(P(Y)\\) 是 \\(P(X)\\) 的线性函数，凹函数的仿射复合仍凹。故 \\(I=H(Y)-H(Y|X)\\) 是凹减线性 = 凹。最大化凹函数有唯一全局最大值，保证 Blahut-Arimoto 收敛到正确答案。"
+      },
+      {
+        "id": "info-theory-ch03-q26",
+        "question": "5G NR 标准中控制信道使用 Polar 码，数据信道使用 LDPC 码。这种选择背后的技术原因是什么？",
+        "options": [
+          "Polar 码短码性能好（控制信息短），LDPC 码长码性能好且吞吐量高（数据量大）  B) 随机选择  C) 政治原因  D) Polar 码更老"
+        ],
+        "answer": 0,
+        "explanation": "控制信道（几十到几百 bit）：Polar + CRC + SCL 解码在短码长下性能优异。数据信道（数千 bit）：LDPC 码在长码长下逼近容量，且 BP 解码高度可并行化→高吞吐量。Turbo 码（4G）被替换因为并行度不如 LDPC、短码不如 Polar。5G 的编码选择是理论性能+实现复杂度的综合权衡。"
+      },
+      {
+        "id": "info-theory-ch03-q27",
+        "question": "深空通信（如火星探测器）面临极低 \\(\\text{SNR}\\)（\\(\\approx-1\\) dB）。如何在这种条件下可靠通信？",
+        "options": [
+          "使用低码率纠错码（如 \\(R\\approx1/6\\) Turbo 码）+ 大天线 + 窄带宽  B) 增大发射功率到 MW 级  C) 不使用纠错码  D) 使用更高频率"
+        ],
+        "answer": 0,
+        "explanation": "火星距地球 \\(\\sim5\\) 光分，信号衰减 \\(\\sim260\\) dB。策略：(1)低码率码（\\(R=1/6\\) Turbo/LDPC）在接近 Shannon 极限 \\(E_b/N_0\\approx-1.59\\) dB 的条件下工作；(2)35m/70m 深空网（DSN）天线增益 \\(>70\\) dBi；(3)窄带宽（100 kbps 量级）降低噪声；(4)长积分时间。Voyager 1 在 \\(\\sim240\\) 亿公里外仍以 160 bps 通信！"
+      },
+      {
+        "id": "info-theory-ch03-q28",
+        "question": "QR 码使用 Reed-Solomon 纠错。一个 QR 码（Level L）的纠错能力约为 7% 的码字恢复。在实际使用中这意味着什么？",
+        "options": [
+          "即使 QR 码被遮挡/污损约 7%，仍能正确读取  B) 仅美观  C) 加密保护  D) 缩短扫描时间"
+        ],
+        "answer": 0,
+        "explanation": "QR 码四级纠错：L(7%), M(15%), Q(25%), H(30%)。RS 码在符号级纠错——一个\"符号\"错误不管错了多少 bit 都算一次。H 级可在 30% 面积被覆盖（如叠加 logo）后仍正确解码。代价：更高纠错级 → 更多冗余 → QR 码更大。Level M(15%) 是最常用的平衡选择。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="info-theory"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/info-theory.html" class="module-name">信息论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 离散无记忆信道与信道容量</a></li>
+      <li><a href="#kp2">02 · Shannon 第二定理（信道编码定理）</a></li>
+      <li><a href="#kp3">03 · 信道容量的计算方法</a></li>
+      <li><a href="#kp4">04 · 纠错编码简介</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>信道容量</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>离散无记忆信道与信道容量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>通信中信道不可避免地引入噪声——发送 0 可能收到 1。信道容量 \(C\) 回答了最根本的问题：通过噪声信道可靠传输的最大速率是多少？ Shannon 的天才在于证明 \(C\) 存在且可精确计算，而非仅给出界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>信道 = 条件概率 \(p(y|x)\)。信道容量 = 输入输出间互信息的最大值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>离散无记忆信道(DMC)</strong>：\((\mathcal{X}, p(y|x), \mathcal{Y})\)， 每次使用独立。 <strong>信道容量</strong>： \[C = \max_{p(x)} I(X; Y) = \max_{p(x)} [H(Y) - H(Y|X)]\] 对于 <strong>BSC</strong>（二元对称信道，翻转概率 \(p\)）： \(H(Y|X) = H(p)\)（由信道决定，与输入无关）。 \(H(Y) \leq 1\)，当 \(X \sim \text{Bernoulli}(1/2)\) 时取等。 \[C_{\text{BSC}} = 1 - H(p)\] 对于 <strong>BEC</strong>（二元删除信道，删除概率 \(\epsilon\)）： \[C_{\text{BEC}} = 1 - \epsilon\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 5G 通信标准中信道编码速率的理论上限 - 光纤通信容量的计算</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：BSC 翻转概率 \(p=0.1\)，求信道容量。 解答：\(H(0.1) = -0.1\log 0.1 - 0.9\log 0.9 \approx 0.469\) bit。 \(C = 1 - 0.469 = 0.531\) bit/use。 易错点：信道容量的单位是 bit/信道使用次数，不是 bit/秒。 bit/秒 = \(C \times\) 信道使用速率。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">BSC 翻转概率 \(p=0.5\) 时信道容量为多少？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(p=0.5\\) 时输出完全随机，与输入独立，\\(I(X;Y)=0\\)。')">A. 0.5 bit</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(p=0.5\\) 时输出完全随机，与输入独立，\\(I(X;Y)=0\\)。')">B. 1 bit</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(p=0.5\\) 时输出完全随机，与输入独立，\\(I(X;Y)=0\\)。')">C. 0 bit</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(p=0.5\\) 时输出完全随机，与输入独立，\\(I(X;Y)=0\\)。')">D. 取决于输入分布</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Shannon 第二定理（信道编码定理）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>信道容量给出了速率上限，但能否真正达到？Shannon 第二定理给出了 惊人的肯定回答：只要传输速率 \(R < C\)，就存在编码方案使错误 概率趋于零。这是 20 世纪最深刻的数学定理之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>可达性：\(R < C \Rightarrow\) 存在可靠编码。 逆定理：\(R > C \Rightarrow\) 任何编码的错误概率趋于 1。 费率 \(R\) 是信息比特数与编码块长之比。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>信道编码定理（正部分）</strong>：对任意 \(R < C\) 和 \(\epsilon > 0\)， 存在块长 \(n\) 和编码 \((2^{nR}\) 码字) 使得最大错误概率 \(< \epsilon\)。 <strong>随机编码论证</strong>（Shannon 的证明思路）： (1) 随机独立选择 \(2^{nR}\) 个码字 \(\sim p^*(x)\)（容量达到分布） (2) 联合典型序列译码：\((x^n, y^n)\) 联合典型则译为 \(x^n\) (3) 由 AEP 和联合典型性，错误概率 \[P_e \leq 2^{-n(I(X;Y) - R - \delta)} \to 0 \quad (R < C)\] <strong>逆定理</strong>：\(R > C \Rightarrow P_e \to 1\)。 基于 Fano 不等式：\(H(W|\hat{W}) \leq 1 + P_e \cdot nR\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 5G 中 Polar 码和 LDPC 码逼近 Shannon 极限 - 深空通信（旅行者号）使用接近容量的 turbo 码</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：BSC(\(p=0.1\)) 上以 \(R=0.4\) bit/use 传输，是否可靠？ 解答：\(C = 1 - H(0.1) \approx 0.531\)。\(R=0.4 < C\)， 由信道编码定理，存在可靠的编码方案。 易错点：定理只证明存在性，不给出具体编码。实际逼近容量的 编码（LDPC、Polar）是 Shannon 之后数十年的成果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Shannon 第二定理的核心含义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(C\\) 是可靠通信的sharp threshold。低于 \\(C\\) 可靠；')">A. 任何信道都可以无错传输</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(C\\) 是可靠通信的sharp threshold。低于 \\(C\\) 可靠；')">B. \(R < C\) 时存在可靠编码，\(R > C\) 时不存在</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(C\\) 是可靠通信的sharp threshold。低于 \\(C\\) 可靠；')">C. 编码越长越不可靠</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(C\\) 是可靠通信的sharp threshold。低于 \\(C\\) 可靠；')">D. 信道容量等于信道带宽</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>信道容量的计算方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>BSC 和 BEC 的容量有闭式解，但一般 DMC 的容量需要数值方法。 Blahut-Arimoto 算法是计算信道容量的经典迭代算法。理解它有 助于把握「容量 = 优化问题」的本质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一般 DMC 的容量</strong>： \[C = \max_{p(x)} I(X;Y) = \max_{p(x)} \sum_{x,y} p(x)p(y|x) \log\frac{p(y|x)}{\sum_{x'} p(x')p(y|x')}\] 这是关于 \(p(x)\) 的凸优化问题（\(I(X;Y)\) 关于 \(p(x)\) 是凹函数）。 <strong>对称信道</strong>：若 \(p(y|x)\) 的每行是同一集合的排列， 每列也是同一集合的排列，则均匀输入达到容量。 <strong>Blahut-Arimoto 算法</strong>：交替优化输入分布 \(p(x)\) 和辅助分布 \(q(x|y)\)： \[q(x|y) = \frac{p(x)p(y|x)}{\sum_{x'}p(x')p(y|x')}\] \[p(x) \propto \exp\left(\sum_y p(y|x)\log q(x|y)\right)\] 保证单调收敛到 \(C\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 用于计算实际通信系统中调制方案的理论极限</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Z 信道（\(0 \to 0\) 确定，\(1 \to 0\) 概率 \(p\)，\(1 \to 1\) 概率 \(1-p\)）。 求容量。 解答：\(H(Y|X=0)=0, H(Y|X=1)=H(p)\)。 \(H(Y|X) = (1-\pi)\cdot 0 + \pi H(p)\)（\(\pi = P(X=1)\)）。 \(Y=0\) 概率 \(1-\pi(1-p)\)，\(Y=1\) 概率 \(\pi(1-p)\)。 \(C = \max_\pi [H(\pi(1-p)) - \pi H(p)]\)，需数值优化或 KKT 求解。 易错点：Z 信道不对称，最优输入不是均匀分布。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(I(X;Y)\) 关于输入分布 \(p(x)\) 是什么性质的函数？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这保证了容量优化问题有唯一全局最大值，')">A. 凸函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！这保证了容量优化问题有唯一全局最大值，')">B. 凹函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这保证了容量优化问题有唯一全局最大值，')">C. 线性函数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这保证了容量优化问题有唯一全局最大值，')">D. 既非凸也非凹</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>纠错编码简介</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Shannon 定理只证明了好编码的存在性，实际构造高效逼近容量的 纠错码是编码理论数十年的核心任务。从 Hamming 码到 LDPC 码 和 Polar 码，编码理论不断逼近 Shannon 极限。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>线性码</strong>：\([n, k]\) 码将 \(k\) 比特编为 \(n\) 比特，码率 \(R = k/n\)。 生成矩阵 \(G \in \mathbb{F}_2^{k\times n}\)，编码 \(c = mG\)。 校验矩阵 \(H\)：\(cH^T = 0\) iff \(c\) 为合法码字。 <strong>Hamming 界</strong>：\([n,k,d]\) 码满足 \[\sum_{i=0}^{t} \binom{n}{i} \leq 2^{n-k}\] 其中 \(t = \lfloor(d-1)/2\rfloor\) 为纠错能力。 <strong>现代码</strong>（概念）： - LDPC 码：稀疏校验矩阵，置信传播译码，逼近容量 - Polar 码：基于信道极化，可证明达到容量（Arıkan, 2009） 5G NR 中：数据信道用 LDPC，控制信道用 Polar。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 5G 数据传输使用 LDPC 码 - 5G 控制信道使用 Polar 码 - QR 码使用 Reed-Solomon 纠错</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：[7,4] Hamming 码的纠错能力是多少？ 解答：最小距离 \(d=3\)，\(t = \lfloor(3-1)/2\rfloor = 1\)。 可纠正 1 个比特错误。码率 \(R = 4/7 \approx 0.571\)。 易错点：混淆「检错」和「纠错」。\(d=3\) 可检出 2 个错误， 但只能纠正 1 个。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Polar 码的理论意义在于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Arıkan 2009 年的 Polar 码是第一个有显式构造、')">A. 它是最古老的纠错码</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Arıkan 2009 年的 Polar 码是第一个有显式构造、')">B. 它是第一个被证明可达到任意 DMC 容量的显式构造</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Arıkan 2009 年的 Polar 码是第一个有显式构造、')">C. 它不需要解码器</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Arıkan 2009 年的 Polar 码是第一个有显式构造、')">D. 它的码率总是 1/2</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/discrete/info-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

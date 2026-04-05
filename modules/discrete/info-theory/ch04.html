@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 率失真理论 — 信息论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "info-theory-ch04-q1",
+        "question": "率失真理论解决的核心问题是什么？",
+        "options": [
+          "在给定失真上限 \\(D\\) 下，有损压缩的最小码率 \\(R(D)\\)  B) 无损压缩极限  C) 信道容量  D) 加密强度"
+        ],
+        "answer": 0,
+        "explanation": "无损压缩下界 \\(R\\geq H\\)。若允许失真 \\(\\leq D\\)，率失真函数 \\(R(D)=\\min_{P(\\hat{X}|X):E[d(X,\\hat{X})]\\leq D}I(X;\\hat{X})\\) 给出最小码率。\\(D=0\\) 时 \\(R(0)=H\\)（退化为无损）。\\(D\\) 增大 \\(\\Rightarrow\\) \\(R(D)\\) 减小（允许更多失真→需要更少比特）。"
+      },
+      {
+        "id": "info-theory-ch04-q2",
+        "question": "常用失真度量：方均误差（MSE）的定义是什么？",
+        "options": [
+          "\\(d(x,\\hat{x})=(x-\\hat{x})^2\\)  B) \\(d(x,\\hat{x})=|x-\\hat{x}|\\)  C) \\(d(x,\\hat{x})=\\mathbb{1}[x\\neq\\hat{x}]\\)  D) \\(d(x,\\hat{x})=\\max(x,\\hat{x})\\)"
+        ],
+        "answer": 0,
+        "explanation": "MSE：\\(d(x,\\hat{x})=(x-\\hat{x})^2\\)，平均失真 \\(D=E[(X-\\hat{X})^2]\\)。MAE（绝对误差）：\\(d=|x-\\hat{x}|\\)。Hamming 失真：\\(d=\\mathbb{1}[x\\neq\\hat{x}]\\)（用于离散源）。不同失真度量对应不同应用——MSE 最常见（信号处理中 PSNR 基于此），但 MSE 与人类感知不完全对齐。"
+      },
+      {
+        "id": "info-theory-ch04-q3",
+        "question": "二元均匀源 \\(X\\sim\\text{Bernoulli}(1/2)\\)，Hamming 失真。率失真函数 \\(R(D)=?\\)",
+        "options": [
+          "\\(R(D)=1-h(D),\\quad0\\leq D\\leq1/2\\)  B) \\(R(D)=h(D)\\)  C) \\(R(D)=1/D\\)  D) \\(R(D)=D\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(D)=H(X)-h(D)=1-h(D)\\)，\\(0\\leq D\\leq1/2\\)。\\(R(0)=1\\)（无损需 1 bit），\\(R(1/2)=0\\)（允许 50% 错误率则不需编码——直接输出随机猜测）。\\(R(D)\\) 是 \\(D\\) 的非递增凸函数。Hamming 失真的率失真函数与 BSC 容量恰好\"镜像\"——\\(C(p)=1-h(p)\\)。"
+      },
+      {
+        "id": "info-theory-ch04-q4",
+        "question": "高斯源 \\(X\\sim\\mathcal{N}(0,\\sigma^2)\\)，MSE 失真。\\(R(D)=?\\)",
+        "options": [
+          "\\(R(D)=\\frac{1}{2}\\log_2\\frac{\\sigma^2}{D},\\quad0<D\\leq\\sigma^2\\)  B) \\(R(D)=\\sigma^2/D\\)  C) \\(R(D)=D\\)  D) \\(R(D)=\\log_2 D\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(D)=\\frac{1}{2}\\log_2(\\sigma^2/D)\\)。\\(D=\\sigma^2\\) 时 \\(R=0\\)（不传任何信息，重构为均值 0，MSE \\(=\\sigma^2\\)）。每增加 1 bit 码率，\\(D\\) 减半（6 dB SNR gain/bit）。音频 CD：16 bit/sample → MSE 降低 \\(2^{-32}\\sigma^2\\)（96 dB SNR）。"
+      },
+      {
+        "id": "info-theory-ch04-q5",
+        "question": "率失真编码定理（Shannon 第三定理）的结论是什么？",
+        "options": [
+          "码率 \\(R>R(D)\\) 时存在码使失真 \\(\\leq D\\)；\\(R<R(D)\\) 时不存在  B) 任何码率都可以  C) 仅 \\(R=R(D)\\) 可行  D) 仅适用于无损情况"
+        ],
+        "answer": 0,
+        "explanation": "正定理：\\(\\forall\\epsilon>0,\\exists n\\) 和 \\((2^{n(R(D)+\\epsilon)},n)\\) 码使 \\(E[d(X^n,\\hat{X}^n)]\\leq D+\\epsilon\\)。逆定理：\\(R<R(D)\\) 时任何码的失真必 \\(>D\\)。证明类似信道编码——随机码本 + 典型集论证。有损压缩的理论极限完全由 \\(R(D)\\) 确定。"
+      },
+      {
+        "id": "info-theory-ch04-q6",
+        "question": "量化器将连续值映射到有限个代表点。1 bit 均匀量化 \\([0,1]\\) 信号（阈值 0.5）的量化误差上界为？",
+        "options": [
+          "\\(0.25\\)  B) \\(0.5\\)  C) \\(1\\)  D) \\(0.125\\)"
+        ],
+        "answer": 0,
+        "explanation": "均匀量化 \\([0,1]\\) 分为 \\([0,0.5)\\to0.25\\) 和 \\([0.5,1]\\to0.75\\)（取区间中点）。最大量化误差 \\(=0.25\\)。若 \\(X\\sim\\text{Uniform}[0,1]\\)，MSE \\(=\\int_0^1(x-\\hat{x})^2dx=2\\int_0^{0.5}(x-0.25)^2dx=2\\times\\frac{(0.25)^3}{3}\\times2=\\frac{1}{48}\\approx0.021\\)。\\(1/12\\) 是 \\(\\Delta^2/12\\)（\\(\\Delta=0.5\\) 量化步长）。"
+      },
+      {
+        "id": "info-theory-ch04-q7",
+        "question": "PSNR（峰值信噪比）的定义中使用 MSE。\\(\\text{PSNR}=10\\log_{10}\\frac{\\text{MAX}^2}{\\text{MSE}}\\) dB。对 8 bit 图像，若 \\(\\text{MSE}=1\\)，\\(\\text{PSNR}=?\\)",
+        "options": [
+          "\\(48.13\\) dB  B) \\(30\\) dB  C) \\(0\\) dB  D) \\(255\\) dB"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{MAX}=255\\)。\\(\\text{PSNR}=10\\log_{10}(255^2/1)=10\\log_{10}65025=10\\times4.813=48.13\\) dB。\\(\\text{PSNR}>40\\) dB 通常认为质量优良。JPEG 压缩下 PSNR \\(\\sim30\\)-\\(40\\) dB 为常见范围。PSNR 虽简单但与主观视觉质量不完全对齐——SSIM 等更先进度量有更好相关性。"
+      },
+      {
+        "id": "info-theory-ch04-q8",
+        "question": "高斯源 \\(\\sigma^2=4\\)，要达到 MSE \\(\\leq D=1\\)。最小码率 \\(R(1)=?\\)",
+        "options": [
+          "\\(1\\) bit/sample  B) \\(2\\) bit/sample  C) \\(0.5\\) bit/sample  D) \\(4\\) bit/sample"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(D)=\\frac{1}{2}\\log_2(\\sigma^2/D)=\\frac{1}{2}\\log_2(4/1)=\\frac{1}{2}\\times2=1\\) bit/sample。每样本至少 1 bit 才能将失真控制在 \\(D=1\\)。若要 \\(D=0.25\\)，\\(R=\\frac{1}{2}\\log_2 16=2\\) bit——每多 1 bit，失真减半。"
+      },
+      {
+        "id": "info-theory-ch04-q9",
+        "question": "率失真编码定理中的\"率失真码本\"有 \\(2^{nR}\\) 个码字，每个码字 \\(\\hat{x}^n\\) 长 \\(n\\)。高斯源的最优码字分布是什么？",
+        "options": [
+          "\\(\\hat{X}\\sim\\mathcal{N}(0,\\sigma^2-D)\\)，与 \\(X\\) 的差异 \\(X-\\hat{X}\\sim\\mathcal{N}(0,D)\\)  B) 均匀分布  C) 直接复制 \\(X\\)  D) 全零"
+        ],
+        "answer": 0,
+        "explanation": "最优 test channel：\\(\\hat{X}=X+Z\\)？不，正确的是：\\(\\hat{X}=\\frac{\\sigma^2-D}{\\sigma^2}X\\)（线性缩放），噪声 \\(X-\\hat{X}\\sim\\mathcal{N}(0,D)\\) 与 \\(\\hat{X}\\) 独立。\\(\\hat{X}\\sim\\mathcal{N}(0,\\sigma^2-D)\\)。\\(I(X;\\hat{X})=h(X)-h(X|\\hat{X})=h(X)-h(X-\\hat{X})=\\frac{1}{2}\\log(2\\pi e\\sigma^2)-\\frac{1}{2}\\log(2\\pi eD)=\\frac{1}{2}\\log(\\sigma^2/D)=R(D)\\)✓。"
+      },
+      {
+        "id": "info-theory-ch04-q10",
+        "question": "Lloyd-Max 量化器与均匀量化器的区别是什么？",
+        "options": [
+          "Lloyd-Max 优化代表点和边界使 MSE 最小，适应非均匀分布  B) 两者相同  C) Lloyd-Max 仅适用于均匀分布  D) 均匀量化更优"
+        ],
+        "answer": 0,
+        "explanation": "Lloyd-Max 迭代：(1)固定代表点 \\(\\hat{x}_i\\)，最优边界取相邻代表点中点；(2)固定边界，最优代表点取区内期望。交替直到收敛。高斯分布下 Lloyd-Max 比均匀量化 MSE 低约 1-2 dB。类似 K-means 聚类的 1D 版本。"
+      },
+      {
+        "id": "info-theory-ch04-q11",
+        "question": "向量量化（VQ）相比标量量化有什么优势？",
+        "options": [
+          "可以利用样本间的相关性，逼近率失真极限  B) 实现更简单  C) 码本更小  D) 延迟更低"
+        ],
+        "answer": 0,
+        "explanation": "标量量化独立处理每个样本，忽略样本间相关性。VQ 将 \\(k\\) 个样本组成向量 \\(\\mathbf{x}\\in\\mathbb{R}^k\\)，在高维空间中量化。定理（Gersho）：\\(k\\to\\infty\\) 时 VQ 可逼近 \\(R(D)\\)。代价：码本大小 \\(2^{kR}\\) 指数增长——\\(k=16,R=2\\) 时码本有 \\(2^{32}\\approx4\\times10^9\\) 个向量，搜索不可行。实际中限制 \\(k\\leq16\\)，用树搜索或乘积量化。"
+      },
+      {
+        "id": "info-theory-ch04-q12",
+        "question": "对并行高斯源 \\(X_1,...,X_n\\)（独立，方差 \\(\\sigma_i^2\\)），总码率 \\(R\\) 下最优率分配满足什么原则？",
+        "options": [
+          "反向注水：\\(D_i=\\min(\\theta,\\sigma_i^2)\\)，\\(\\theta\\) 使 \\(\\sum R_i=R\\)  B) 均匀分配  C) 只编码最大方差的分量  D) 正向注水"
+        ],
+        "answer": 0,
+        "explanation": "\\(R_i=\\frac{1}{2}\\log_2(\\sigma_i^2/D_i)\\) 当 \\(D_i<\\sigma_i^2\\)，否则 \\(R_i=0\\)（不编码）。总码率 \\(R=\\sum R_i\\)。最优：\\(D_i=\\min(\\theta,\\sigma_i^2)\\)，\"水位\" \\(\\theta\\) 使约束满足。方差小于 \\(\\theta\\) 的分量不编码——与信道注水\"好信道多分配\"对偶：这里是\"方差小的源少编码\"。"
+      },
+      {
+        "id": "info-theory-ch04-q13",
+        "question": "JPEG 量化表中 DCT 低频系数量化步长小，高频系数步长大。这种设计的率失真理论解释是什么？",
+        "options": [
+          "低频系数方差大→更多比特（精细量化），高频系数方差小→更少比特（粗糙量化）  B) 高频更重要  C) 随机设计  D) 低频不重要"
+        ],
+        "answer": 0,
+        "explanation": "自然图像的 DCT 功率谱随频率递减——低频系数携带大部分能量。率失真最优：对高方差分量分配更多比特。此外人眼对高频不敏感（CSF 对比度敏感函数）→ 高频量化更粗。JPEG 量化表设计是率失真理论+人类视觉感知模型的结合。"
+      },
+      {
+        "id": "info-theory-ch04-q14",
+        "question": "变换编码（如 DCT/KLT）+ 标量量化的流程。KLT（Karhunen-Loève Transform）的特殊意义是什么？",
+        "options": [
+          "KLT 使变换系数互不相关，标量量化在 KLT 域最优（等价于向量量化在不相关源上的最优）  B) KLT 计算最快  C) KLT 压缩率最低  D) KLT 与 DCT 相同"
+        ],
+        "answer": 0,
+        "explanation": "KLT = 信号协方差矩阵的特征值分解，变换后系数不相关。对高斯源，不相关等价于独立，此时标量量化 = 向量量化（独立分量无需联合量化）。问题：KLT 依赖于信号统计（数据相关），不能预定义。DCT 近似 KLT 对平稳 Markov-1 过程的结果，且有快速算法——这就是 JPEG/H.264 使用 DCT 的原因。"
+      },
+      {
+        "id": "info-theory-ch04-q15",
+        "question": "感知失真度量（如 SSIM）与 MSE 的本质区别是什么？",
+        "options": [
+          "SSIM 考虑亮度、对比度和结构相似性，更接近人类视觉感知  B) SSIM 更简单  C) MSE 更好  D) 两者等价"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{SSIM}(x,y)=l(x,y)\\cdot c(x,y)\\cdot s(x,y)\\)（亮度/对比度/结构项的乘积）。MSE 对每个像素误差平等加权——不区分结构失真（视觉严重）和均匀噪声（视觉可忍受）。两张图可以有相同 MSE 但完全不同的视觉质量。率失真理论框架中可替换 \\(d\\) 为感知度量，但数学处理更复杂。"
+      },
+      {
+        "id": "info-theory-ch04-q16",
+        "question": "率失真函数 \\(R(D)\\) 是 \\(D\\) 的什么类型的函数？",
+        "options": [
+          "非递增凸函数  B) 递增凹函数  C) 线性函数  D) 常数"
+        ],
+        "answer": 0,
+        "explanation": "\\(R(D)\\) 非递增（更大失真→更少比特需求）且凸（边际收益递减：同样增加 \\(\\Delta D\\)，\\(D\\) 小时码率降更多）。凸性来自 \\(I(X;\\hat{X})\\) 关于 \\(P(\\hat{X}|X)\\) 在失真约束下的拉格朗日对偶理论——对偶函数是凸的。\\(R(D)\\) 的斜率 \\(=-\\lambda\\)（拉格朗日乘子），控制率失真曲线上的工作点。"
+      },
+      {
+        "id": "info-theory-ch04-q17",
+        "question": "成功的图像压缩标准 JPEG 2000 使用什么代替 DCT？",
+        "options": [
+          "离散小波变换（DWT）  B) 傅里叶变换  C) 哈希函数  D) 随机变换"
+        ],
+        "answer": 0,
+        "explanation": "DWT 通过多尺度分解实现时频局部化——大特征用低频表示，细节用高频表示。优势：(1)避免 DCT 的块效应（block artifact）；(2)更好的空间定位性。JPEG 2000 使用 CDF 9/7 浮点小波（有损）或 Le Gall 5/3 整数小波（无损）+ EBCOT 算术编码。压缩率在同等 PSNR 下优于 JPEG 约 20-30%。"
+      },
+      {
+        "id": "info-theory-ch04-q18",
+        "question": "高斯源 \\(R(D)=\\frac{1}{2}\\log_2(\\sigma^2/D)\\)。若源维度 \\(n\\) 各分量独立同分布，联合 \\(R(D)\\) 与逐分量 \\(R(D)\\) 的关系？",
+        "options": [
+          "相等——i.i.d. 分量的联合率失真等于单分量的  B) 联合更低  C) 联合更高  D) 无关系"
+        ],
+        "answer": 0,
+        "explanation": "i.i.d. 源的联合率失真 = 单分量率失真 \\(\\times n\\)（因为最优策略就是独立处理每个分量）。\\(R_{\\text{total}}(D)=\\frac{n}{2}\\log_2(\\sigma^2/D)\\)，平均每分量 \\(R=\\frac{1}{2}\\log_2(\\sigma^2/D)\\)。但若分量不独立（有相关性），联合编码可利用相关性降低码率——这就是变换编码（KLT/DCT）的理论基础。"
+      },
+      {
+        "id": "info-theory-ch04-q19",
+        "question": "Blahut-Arimoto 算法也可计算 \\(R(D)\\)。其对偶问题的结构是什么？",
+        "options": [
+          "\\(R(D)=\\max_{\\lambda\\geq0}[\\min_{P(\\hat{X}|X)}(I(X;\\hat{X})+\\lambda(E[d]-D))]\\)——拉格朗日对偶  B) 线性规划  C) 整数规划  D) 无对偶"
+        ],
+        "answer": 0,
+        "explanation": "引入 Lagrange 乘子 \\(\\lambda\\geq0\\)：\\(\\min_{P(\\hat{X}|X)}I(X;\\hat{X})+\\lambda E[d(X,\\hat{X})]\\)。固定 \\(\\lambda\\) 时最优 \\(P(\\hat{X}|X)\\propto P(\\hat{X})\\exp(-\\lambda d(x,\\hat{x}))\\)（类似 Gibbs 分布）。B-A 迭代：更新 \\(P(\\hat{X}|X)\\) 和 \\(P(\\hat{X})\\) 交替。\\(\\lambda\\) 的选择决定 \\(R(D)\\) 曲线上的切线斜率——\\(\\lambda\\) 大→更重视低失真→\\(R\\) 高→\\(D\\) 低。"
+      },
+      {
+        "id": "info-theory-ch04-q20",
+        "question": "熵编码量化器（TCQ/ECTCQ）接近高斯源 \\(R(D)\\) 的差距约为多少 dB？",
+        "options": [
+          "\\(\\approx0.2\\) dB  B) \\(\\approx6\\) dB  C) \\(\\approx1.53\\) dB  D) \\(\\approx10\\) dB"
+        ],
+        "answer": 2,
+        "explanation": "标量量化（均匀）的 MSE 性能比 \\(R(D)\\) 差约 1.53 dB（\"Shannon gap\"——\\(10\\log_{10}(\\pi e/6)\\approx1.53\\) dB）。高维 VQ 可逼近 0 dB gap 但复杂度指数增长。TCQ（格子编码量化）利用卷积码结构在适中复杂度下将 gap 降至 \\(\\sim0.2\\) dB。ECTCQ（熵约束 TCQ）进一步逼近 \\(R(D)\\)。实际编解码器（如 x265）使用变换+标量量化+熵编码，综合 gap 约 1-2 dB。"
+      },
+      {
+        "id": "info-theory-ch04-q21",
+        "question": "若失真度量取 Hamming 距离（\\(d(x,\\hat{x})=\\mathbb{1}[x\\neq\\hat{x}]\\)），非二元等概率源 \\(X\\sim\\text{Uniform}\\{1,...,M\\}\\) 的 \\(R(D)=?\\)",
+        "options": [
+          "\\(R(D)=\\log_2 M-h(D)-D\\log_2(M-1),\\quad0\\leq D\\leq1-1/M\\)  B) \\(R(D)=\\log_2 M\\)  C) \\(R(D)=D\\)  D) \\(R(D)=1-h(D)\\)"
+        ],
+        "answer": 0,
+        "explanation": "最优 test channel：以概率 \\(1-D\\) 正确复制，以概率 \\(D\\) 均匀随机选错（\\(M-1\\) 个错误符号等概率 \\(D/(M-1)\\)）。\\(I(X;\\hat{X})=H(X)-H(X|\\hat{X})=\\log M-[h(D)+D\\log(M-1)]\\)。\\(M=2\\) 时退化为 \\(R(D)=1-h(D)\\)（二元源，之前的结果）。\\(D=1-1/M\\) 时 \\(R=0\\)（随机猜测的错误率）。"
+      },
+      {
+        "id": "info-theory-ch04-q22",
+        "question": "Shannon 率失真定理的正部分（achievability）使用什么核心技术？",
+        "options": [
+          "随机码本生成——\\(2^{nR}\\) 个码字 \\(\\hat{x}^n\\) i.i.d. \\(\\sim P(\\hat{X})\\)，找与源 \\(x^n\\) 联合典型的码字  B) Huffman 编码  C) 暴力搜索  D) 线性编码"
+        ],
+        "answer": 0,
+        "explanation": "证明骨架：生成 \\(2^{nR}\\) 个码字 \\(\\hat{X}^n(1),...,\\hat{X}^n(2^{nR})\\)，每个 \\(\\sim\\prod P^*(\\hat{x}_i)\\)（\\(P^*\\) 是达到 \\(R(D)\\) 的最优边际分布）。编码器找与 \\(X^n\\) 联合典型的码字（若存在），解码器直接输出该码字。\\(R>R(D)\\) 时联合典型码字以高概率存在，失真 \\(E[d]\\leq D+\\epsilon\\)。与信道编码定理镜像——一个找好码字匹配信道输出，一个找好码字匹配源输入。"
+      },
+      {
+        "id": "info-theory-ch04-q23",
+        "question": "感知压缩中的\"率-失真-感知\"三元折衷（Blau-Michaeli 2019）增加了什么新维度？",
+        "options": [
+          "感知质量（重构分布与源分布的距离），在率和失真之外引入第三个约束  B) 计算复杂度  C) 延迟  D) 功耗"
+        ],
+        "answer": 0,
+        "explanation": "传统 \\(R(D)\\) 仅考虑逐样本失真。Blau-Michaeli 证明：同时要求 \\(d(P_X,P_{\\hat{X}})\\leq P\\)（分布距离小）和 \\(E[d(X,\\hat{X})]\\leq D\\) 时，\\(R\\geq R(D,P)>R(D)\\)——感知质量有额外代价。这解释了 GAN 生成图像\"看起来漂亮但不精确\"的现象：低失真和高感知质量不可兼得（在有限码率下）。"
+      },
+      {
+        "id": "info-theory-ch04-q24",
+        "question": "Neural compression（神经网络压缩）中 VAE-based 模型的损失函数与率失真的关系是什么？",
+        "options": [
+          "ELBO = \\(-R-D\\)，最大化 ELBO 等价于最小化 \\(R+\\lambda D\\)（率失真 Lagrangian）  B) 交叉熵损失  C) L2 正则化  D) 无关系"
+        ],
+        "answer": 0,
+        "explanation": "VAE loss \\(=-\\text{ELBO}=D_{\\text{KL}}(q(z|x)\\|p(z))+E[-\\log p(x|z)]\\)。第一项 \\(\\approx R\\)（编码 \\(z\\) 的比特数，即码率）。第二项 \\(\\approx D\\)（重构质量）。最小化 \\(-\\text{ELBO}=R+D\\) 正是率失真 Lagrangian（\\(\\lambda=1\\)）。Ballé 等人 2018 年在此基础上通过超先验实现了超越 BPG/HEVC intra 的图像压缩。"
+      },
+      {
+        "id": "info-theory-ch04-q25",
+        "question": "\\(6\\) dB/bit 法则：高斯源 MSE 量化中每增加 1 bit/sample 的码率，MSE 下降约 \\(6\\) dB。推导该法则。",
+        "options": [
+          "\\(R=\\frac{1}{2}\\log_2(\\sigma^2/D)\\Rightarrow D=\\sigma^2\\cdot2^{-2R}\\)。\\(\\Delta R=1\\Rightarrow D\\) 缩小 \\(4\\) 倍 \\(=6.02\\) dB  B) 经验规则  C) 仅适用于均匀分布  D) \\(3\\) dB/bit"
+        ],
+        "answer": 0,
+        "explanation": "\\(D=\\sigma^2 2^{-2R}\\)。增加 1 bit：\\(D'=\\sigma^2 2^{-2(R+1)}=D/4\\)。\\(10\\log_{10}(D/D')=10\\log_{10}4=6.02\\) dB。这是信号处理中最常用的估算规则。16 bit 音频（CD quality）：\\(\\text{SNR}\\approx16\\times6=96\\) dB。8 bit 图像：\\(\\text{SNR}\\approx48\\) dB。6 dB/bit 是高斯源的极限——实际量化器的表现取决于源分布和量化器设计。"
+      },
+      {
+        "id": "info-theory-ch04-q26",
+        "question": "Netflix 视频流使用自适应码率（ABR）算法。当网络带宽下降时，ABR 如何利用率失真原理？",
+        "options": [
+          "在率失真曲线上选择更低的码率点（更低质量），保持流畅播放  B) 暂停播放  C) 降低帧率到 1 fps  D) 切换到音频模式"
+        ],
+        "answer": 0,
+        "explanation": "Netflix 为每个视频预编码多个码率版本（如 0.5/1/3/5/10 Mbps）。ABR 算法（如 MPC、buffer-based）监控缓冲区和带宽，沿率失真曲线选择最高可持续质量——带宽降→降级到更低码率版本（更高失真但不卡顿）。Per-shot 编码优化（Netflix VMAF-based）确保每个场景在该码率下的率失真最优。"
+      },
+      {
+        "id": "info-theory-ch04-q27",
+        "question": "语音编码标准 AMR-WB（自适应多速率宽带）支持 9 种码率（6.6-23.85 kbps）。从率失真理论看，为什么需要多种码率？",
+        "options": [
+          "不同网络条件下在率失真曲线上灵活选择工作点  B) 仅兼容性  C) 提高安全性  D) 降低延迟"
+        ],
+        "answer": 0,
+        "explanation": "蜂窝网络带宽动态变化（信号强弱、拥塞程度）。AMR 每 20ms 帧可切换码率：带宽充裕→23.85 kbps（高质量），拥塞→6.6 kbps（可理解但质量降低）。这正是率失真曲线上的多工作点选择。现代编码器（Opus/Lyra）使用神经网络编码器在极低码率（3 kbps）下仍保持可理解语音——逼近语音信号的率失真极限。"
+      },
+      {
+        "id": "info-theory-ch04-q28",
+        "question": "医学影像（CT/MRI）存储使用 DICOM 标准。为什么医学影像通常使用无损压缩而非有损压缩？",
+        "options": [
+          "有损压缩可能丢失微小病变信息（如 1mm 肿瘤），诊断安全要求 \\(D=0\\)  B) 无损压缩率更高  C) DICOM 不支持有损  D) 有损更慢"
+        ],
+        "answer": 0,
+        "explanation": "率失真理论告诉我们 \\(D=0\\) 时 \\(R=H\\)（最高码率）。医学影像的无损压缩（JPEG-LS、JPEG 2000 lossless）虽然压缩率有限（\\(\\sim2:1\\)-\\(3:1\\)），但保证零信息丢失。法律和伦理要求：FDA 指南规定诊断用影像必须使用\"无诊断影响\"的压缩。部分场景允许\"视觉无损\"有损压缩（如放射科认证通过的 \\(\\sim5:1\\) JPEG 2000），但仍需要严格验证。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="info-theory"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/info-theory.html" class="module-name">信息论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 有损压缩的数学框架</a></li>
+      <li><a href="#kp2">02 · 高斯源的率失真</a></li>
+      <li><a href="#kp3">03 · 率失真理论的信息论证明</a></li>
+      <li><a href="#kp4">04 · 率失真理论的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>率失真理论</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>有损压缩的数学框架</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>无损压缩有极限（\(\geq H\)），但许多场景允许一定失真——图像、 音频、视频都接受有损压缩。率失真理论回答：要求失真不超过 \(D\) 时，最少需要多少比特？这是 JPEG、MP3、H.265 等标准的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>将「质量」量化为失真函数 \(d(x, \hat{x})\)，将「压缩率」量化为 编码速率 \(R\)。率失真函数 \(R(D)\) 刻画两者的最优权衡。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>失真函数</strong>：\(d: \mathcal{X} \times \hat{\mathcal{X}} \to [0, \infty)\)。 常见：汉明失真 \(d(x,\hat{x}) = \mathbf{1}_{x \neq \hat{x}}\)； 均方失真 \(d(x,\hat{x}) = (x-\hat{x})^2\)。 <strong>率失真函数</strong>： \[R(D) = \min_{p(\hat{x}|x):\; \mathbb{E}[d(X,\hat{X})] \leq D} I(X; \hat{X})\] <strong>性质</strong>：\(R(D)\) 是 \(D\) 的凸递减函数。 \(R(0) = H(X)\)（无损）；\(R(D_{\max}) = 0\)（完全忽略源）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 视频编码标准（H.265/VVC）的理论性能极限 - 图像质量评估中的率失真曲线</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：二元源 \(X \sim \text{Bernoulli}(1/2)\)，汉明失真。 \(R(D) = ?\)（\(D \in [0, 1/2]\)）。 解答：\(R(D) = 1 - H(D) = 1 + D\log D + (1-D)\log(1-D)\)。 \(R(0) = 1\) bit（无损）；\(R(1/2) = 0\)（随机猜测即可）。 易错点：\(R(D)\) 仅对 \(D \in [0, D_{\max}]\) 有意义，\(D > D_{\max}\) 时 \(R=0\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(R(0)\) 等于什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(D=0\\) 要求完全无失真，等价于无损压缩，速率下限 \\(= H(X)\\)。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(D=0\\) 要求完全无失真，等价于无损压缩，速率下限 \\(= H(X)\\)。')">B. \(H(X)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(D=0\\) 要求完全无失真，等价于无损压缩，速率下限 \\(= H(X)\\)。')">C. \(\log|\mathcal{X}|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(D=0\\) 要求完全无失真，等价于无损压缩，速率下限 \\(= H(X)\\)。')">D. 无穷大</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>高斯源的率失真</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>连续源的率失真函数计算通常困难，但高斯源在均方失真下有优美的 闭式解。它不仅是率失真理论的核心范例，也是量化器设计和 信息论学习中的关键参考点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>高斯源</strong> \(X \sim \mathcal{N}(0, \sigma^2)\)，均方失真 \(d = (x-\hat{x})^2\)： \[R(D) = \frac{1}{2}\log_2\frac{\sigma^2}{D}, \quad 0 \leq D \leq \sigma^2\] 推导：最优 \(\hat{X} = X + Z\)，\(Z \sim \mathcal{N}(0, D)\) 独立于 \(\hat{X}\)。 \(I(X; \hat{X}) = h(X) - h(X|\hat{X}) = h(X) - h(Z) = \frac{1}{2}\log(2\pi e \sigma^2) - \frac{1}{2}\log(2\pi e D)\)。 <strong>含义</strong>：每多用 1 bit，失真减半（\(D = \sigma^2 2^{-2R}\)）。 这就是「每 bit 提供 6 dB 信噪比改善」的来源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 音频/视频编码中码率-质量权衡的理论基准 - 量化精度设计的参考</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\sigma^2 = 16\)，允许失真 \(D = 1\)。最低编码速率？ 解答：\(R = \frac{1}{2}\log_2(16/1) = \frac{1}{2}\log_2 16 = 2\) bit/sample。 易错点：公式中的 \(\log\) 底数。用 \(\log_2\) 得到 bit，用 \(\ln\) 得到 nat。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">高斯源率失真 \(R(D) = \frac{1}{2}\log(\sigma^2/D)\) 中，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(D = \\sigma^2 2^{-2R}\\)，\\(R\\) 增 1 则 \\(D\\) 乘 \\(2^{-2} = 1/4\\)。')">A. 减半</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(D = \\sigma^2 2^{-2R}\\)，\\(R\\) 增 1 则 \\(D\\) 乘 \\(2^{-2} = 1/4\\)。')">B. 减少到 1/4</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(D = \\sigma^2 2^{-2R}\\)，\\(R\\) 增 1 则 \\(D\\) 乘 \\(2^{-2} = 1/4\\)。')">C. 不变</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(D = \\sigma^2 2^{-2R}\\)，\\(R\\) 增 1 则 \\(D\\) 乘 \\(2^{-2} = 1/4\\)。')">D. 减少到 \(1/e\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>率失真理论的信息论证明</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(R(D)\) 是可达的吗？率失真定理的正部和逆部给出完整答案： 速率高于 \(R(D)\) 时可实现失真 \(\leq D\)，低于 \(R(D)\) 时不可能。 这是 Shannon 第一定理在有损情形的推广。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>率失真编码定理：\(R(D)\) 是有损压缩的 sharp threshold， 类似于信道容量是可靠通信的 sharp threshold。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>正部（可达性）</strong>：对任意 \(R > R(D)\)，存在块长 \(n\) 的 编码-解码对使得 \(\mathbb{E}[d(X^n, \hat{X}^n)] \leq D + \epsilon\)。 证明思路：随机编码 \(2^{nR}\) 个重构序列， 找到与源序列联合典型的重构。 \[P(\text{\u5931\u8d25}) \leq 2^{-n(R - R(D) - \delta)} \to 0\] <strong>逆部</strong>：对任意编码，若速率 \(R < R(D)\)， 则 \(\mathbb{E}[d] > D - \epsilon\) 对充分大的 \(n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 验证实际编码器（H.265 等）离理论极限的差距</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：解释为什么视频压缩可以做到很高的压缩比而图像质量可接受。 解答：自然视频的率失真函数值很低——由于时间和空间冗余， 高质量重构所需的速率 \(R(D)\) 远小于原始数据率。 例如 4K 视频原始约 12 Gbps，H.265 压缩到 20 Mbps（600:1）。 易错点：率失真函数是源的固有属性，与编码方案无关。 实际编码器的性能只能接近但不能超越 \(R(D)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">率失真函数 \(R(D)\) 是 \(D\) 的什么类型的函数？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(R(D)\\) 随失真容忍度增加而递减（需要更少的比特），')">A. 凸递增</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(R(D)\\) 随失真容忍度增加而递减（需要更少的比特），')">B. 凸递减</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(R(D)\\) 随失真容忍度增加而递减（需要更少的比特），')">C. 凹递增</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(R(D)\\) 随失真容忍度增加而递减（需要更少的比特），')">D. 线性</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>率失真理论的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>率失真理论不仅是理论框架，还直接指导了量化器设计、视频编码中的 码率控制算法、以及机器学习中的信息瓶颈方法。理解 \(R(D)\) 的 实际含义有助于评估和改进压缩系统。</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/discrete/info-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

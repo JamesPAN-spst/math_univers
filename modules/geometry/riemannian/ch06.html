@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 子流形几何 — 黎曼几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "riemannian-ch06-q1",
+        "question": "子流形 \\(\\Sigma^k \\hookrightarrow (M^n, g)\\) 的诱导度量是什么？",
+        "options": [
+          "\\(g|_\\Sigma\\)（限制度量 = 拉回 \\(\\iota^*g\\), \\(\\iota: \\Sigma \\to M\\) 嵌入）",
+        "独立于 \\(M\\) 的度量",
+        "A（\\(\\Sigma\\) 成为黎曼流形 \\((\\Sigma, g|_\\Sigma)\\)——\"第一基本形式\"）",
+        "零度量"
+        ],
+        "answer": 2,
+        "explanation": "嵌入 \\(\\iota: \\Sigma \\hookrightarrow M\\), 诱导度量 \\((\\iota^*g)(v,w) = g(d\\iota(v), d\\iota(w))\\)。对超曲面 \\(\\Sigma^{n-1} \\subseteq \\mathbb{R}^n\\)：\\(g|_\\Sigma = \\) 欧氏度量限制。\\(S^2 \\subseteq \\mathbb{R}^3\\)：\\(g|_{S^2} = d\\theta^2 + \\sin^2\\theta d\\phi^2\\)。第一基本形式完全决定 \\(\\Sigma\\) 的内蕴几何（不依赖嵌入方式——Gauss 绝妙定理）。"
+      },
+      {
+        "id": "riemannian-ch06-q2",
+        "question": "第二基本形式 \\(\\mathrm{II}(X,Y)\\) 的定义？",
+        "options": [
+          "\\(\\mathrm{II}(X,Y) = (\\nabla^M_X Y)^\\perp\\)（环境空间协变导数的法向分量）",
+        "\\(\\nabla_X Y\\)",
+        "A（\\(\\mathrm{II}: T\\Sigma \\times T\\Sigma \\to N\\Sigma\\)——衡量 \\(\\Sigma\\) 在 \\(M\\) 中的\"弯曲程度\"）",
+        "与度量无关"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\nabla^M_X Y = \\nabla^\\Sigma_X Y + \\mathrm{II}(X,Y)\\)（切向 + 法向分解）——Gauss 公式。\\(\\mathrm{II}\\) 对称（\\(\\mathrm{II}(X,Y) = \\mathrm{II}(Y,X)\\), 无挠联络保证）。超曲面 \\(\\Sigma \\subseteq \\mathbb{R}^n\\)：\\(\\mathrm{II}(X,Y) = \\langle dN(X), Y\\rangle \\mathbf{n}\\) = 形状算子。平面的 II \\(= 0\\), 球面 II \\(= \\frac{1}{r}g\\)。"
+      },
+      {
+        "id": "riemannian-ch06-q3",
+        "question": "Gauss 方程联系什么？",
+        "options": [
+          "\\(\\Sigma\\) 的内蕴曲率 \\(R^\\Sigma\\) 与 \\(M\\) 的曲率 \\(R^M\\) 和第二基本形式 \\(\\mathrm{II}\\)",
+        "\\(R^\\Sigma = R^M\\)",
+        "A（\\(R^\\Sigma(X,Y,Z,W) = R^M(X,Y,Z,W) + \\langle\\mathrm{II}(X,W),\\mathrm{II}(Y,Z)\\rangle - \\langle\\mathrm{II}(X,Z),\\mathrm{II}(Y,W)\\rangle\\)）",
+        "只有 Codazzi 方程"
+        ],
+        "answer": 2,
+        "explanation": "Gauss 方程：\\(\\langle R^\\Sigma(X,Y)Z, W\\rangle = \\langle R^M(X,Y)Z, W\\rangle + \\langle\\mathrm{II}(X,W), \\mathrm{II}(Y,Z)\\rangle - \\langle\\mathrm{II}(X,Z), \\mathrm{II}(Y,W)\\rangle\\)。\\(M = \\mathbb{R}^n\\)（\\(R^M = 0\\)）：\\(K^\\Sigma(\\sigma) = \\det(\\mathrm{II}|_\\sigma)\\)（即 \\(\\kappa_1\\kappa_2\\) 对曲面——Gauss 曲率用主曲率积表达）。"
+      },
+      {
+        "id": "riemannian-ch06-q4",
+        "question": "形状算子 (shape operator / Weingarten map) \\(S_\\nu: T_p\\Sigma \\to T_p\\Sigma\\) 的定义（超曲面，单位法向 \\(\\nu\\)）？",
+        "options": [
+          "\\(S_\\nu(X) = -\\nabla^M_X \\nu\\)（法向量沿切向的变化率）",
+        "\\(S_\\nu = \\nabla \\nu\\)",
+        "A（\\(S_\\nu\\) 自伴，特征值 = 主曲率 \\(\\kappa_1, \\ldots, \\kappa_{n-1}\\)）",
+        "投影"
+        ],
+        "answer": 2,
+        "explanation": "\\(S_\\nu(X) = -(\\nabla^M_X \\nu)^\\top = -\\nabla^M_X \\nu\\)（\\(\\nu\\) 单位法向, \\(\\nabla_X\\nu\\) 自动切向因为 \\(g(\\nu,\\nu)=1 \\Rightarrow g(\\nabla_X\\nu, \\nu)=0\\)）。\\(\\langle S_\\nu X, Y\\rangle = \\mathrm{II}(X,Y)\\)（标量第二基本形式）。\\(S_\\nu\\) 自伴随（\\(\\mathrm{II}\\) 对称）。主曲率 \\(\\kappa_i\\) 是 \\(S_\\nu\\) 的特征值——曲面弯曲的方向和程度。"
+      },
+      {
+        "id": "riemannian-ch06-q5",
+        "question": "球面 \\(S^{n-1}(r) \\subseteq \\mathbb{R}^n\\) 的主曲率？",
+        "options": [
+          "\\(\\kappa_1 = \\cdots = \\kappa_{n-1} = 1/r\\)（所有方向等同弯曲——脐点超曲面）",
+        "\\(\\kappa = r\\)",
+        "A（形状算子 \\(S = \\frac{1}{r}\\mathrm{id}\\)）",
+        "\\(\\kappa = 0\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\nu = x/r\\)（外法向）。\\(S(X) = -\\nabla_X(x/r) = -X/r\\)... 符号取决于法向方向。外法向：\\(S_\\nu = \\frac{1}{r}\\mathrm{id}\\), \\(\\kappa_i = 1/r\\)。所有点都是脐点（\\(S\\) 是数量乘法）。平均曲率 \\(H = \\frac{1}{n-1}\\text{tr}(S) = 1/r\\)。Gauss 曲率 \\(K = \\det(S) = 1/r^{n-1}\\)（\\(n-1\\) 维曲面）。\\(n=3\\)：\\(K = 1/r^2\\) ✓。"
+      },
+      {
+        "id": "riemannian-ch06-q6",
+        "question": "Codazzi 方程约束什么？",
+        "options": [
+          "\\(\\mathrm{II}\\) 的协变导数的对称性：\\((\\nabla_X \\mathrm{II})(Y,Z) = (\\nabla_Y \\mathrm{II})(X,Z)\\)（\\(M\\) 常曲率时）",
+        "曲率的切向分量",
+        "A（Gauss 方程约束法向分量, Codazzi 约束\"扭曲\"——两者合称 Gauss-Codazzi 方程）",
+        "无约束"
+        ],
+        "answer": 2,
+        "explanation": "Codazzi-Mainardi 方程：\\((R^M(X,Y)Z)^\\perp = (\\nabla_X \\mathrm{II})(Y,Z) - (\\nabla_Y \\mathrm{II})(X,Z)\\)。\\(M\\) 常曲率：\\(R^M\\) 已知, \\((R^M(X,Y)Z)^\\perp = 0\\)（余维 1）, \\((\\nabla_X\\mathrm{II})(Y,Z) = (\\nabla_Y\\mathrm{II})(X,Z)\\)。Gauss-Codazzi 是子流形存在和唯一的必要条件（加上 Ricci 方程——高余维时）。"
+      },
+      {
+        "id": "riemannian-ch06-q7",
+        "question": "极小子流形 (minimal submanifold) 的定义？",
+        "options": [
+          "平均曲率向量 \\(\\vec{H} = 0\\)（\\(\\text{tr}_g \\mathrm{II} = 0\\)）",
+        "面积最小",
+        "A（极小 = 面积泛函的临界点, 不一定面积最小）",
+        "曲率为零"
+        ],
+        "answer": 2,
+        "explanation": "平均曲率向量 \\(\\vec{H} = \\frac{1}{k}\\text{tr}(\\mathrm{II}) \\in N\\Sigma\\)。极小：\\(\\vec{H} = 0\\) \\(\\iff\\) 面积泛函 \\(\\text{Vol}(\\Sigma)\\) 的一阶变分为零。例：测地线（\\(k=1\\)）, 极小曲面（\\(k=2\\), 如 catenoid, helicoid）。极小 \\(\\neq\\) 面积最小——鞍面是极小曲面但不是面积最小。皂膜是极小曲面的物理实现。"
+      },
+      {
+        "id": "riemannian-ch06-q8",
+        "question": "Gauss 绝妙定理 (Theorema Egregium) 说什么？",
+        "options": [
+          "曲面的 Gauss 曲率 \\(K\\) 只依赖第一基本形式（内蕴度量），不依赖嵌入",
+        "由 Gauss 方程推出：\\(K = R^{\\mathbb{R}^3}(\\cdots) + \\kappa_1\\kappa_2\\), \\(R^{\\mathbb{R}^3} = 0\\), \\(K = \\kappa_1\\kappa_2\\)",
+        "A 和 B（\\(K\\) 可以纯粹用 \\(g_{ij}\\) 及其导数表达——不需要知道嵌入法向）",
+        "\\(K\\) 依赖嵌入"
+        ],
+        "answer": 2,
+        "explanation": "\\(K = \\kappa_1\\kappa_2\\)（外在定义——需要法向和主曲率）。但 Gauss 方程：\\(K = R^\\Sigma_{1212}/(g_{11}g_{22}-g_{12}^2)\\)。\\(R^\\Sigma\\) 只依赖 \\(g^\\Sigma\\) 及其 1,2 阶导数 \\(\\Rightarrow K\\) 是内蕴量。\\(K\\) 在等距变换下不变——即使弯曲\"外形\"改变（如平面卷成柱面 \\(K = 0\\) 不变）。这是黎曼几何的起点。"
+      },
+      {
+        "id": "riemannian-ch06-q9",
+        "question": "Gauss-Bonnet 定理（紧致曲面 \\(\\Sigma\\) 无边界）：\\(\\int_\\Sigma K \\, dA = ?\\)",
+        "options": [
+          "\\(2\\pi\\chi(\\Sigma)\\)",
+        "\\(0\\)",
+        "\\(4\\pi\\)",
+        "A（\\(\\chi = 2 - 2g\\), 曲率积分 = 拓扑不变量！）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\int_\\Sigma K \\, dA = 2\\pi\\chi(\\Sigma)\\)。\\(S^2\\)：\\(K = 1\\), \\(\\int = 4\\pi = 2\\pi \\cdot 2\\)。\\(T^2\\)：\\(\\chi = 0\\), \\(\\int K = 0\\)（无论怎么弯曲）。亏格 \\(g\\) 曲面：\\(\\int K = 2\\pi(2-2g)\\)。高维推广：Chern-Gauss-Bonnet \\(\\int_M \\text{Pf}(\\Omega) = (2\\pi)^n \\chi(M)\\)。几何（曲率）= 拓扑（Euler 数）。"
+      },
+      {
+        "id": "riemannian-ch06-q10",
+        "question": "在计算机图形学中，离散微分几何如何处理三角网格上的曲率？",
+        "options": [
+          "离散 Gauss 曲率：\\(K(v) = 2\\pi - \\sum \\theta_i\\)（\\(\\theta_i\\) = 顶点 \\(v\\) 处的角度和的角亏损）",
+        "离散平均曲率：\\(\\vec{H}(v) = \\frac{1}{2A}\\sum (\\cot\\alpha_j + \\cot\\beta_j)(x_j - x_v)\\)（cotangent 权 Laplacian）",
+        "A 和 B",
+        "不能离散化"
+        ],
+        "answer": 2,
+        "explanation": "(A) Descartes 角亏损定理：\\(K(v) = 2\\pi - \\sum_i \\theta_i\\)。\\(\\sum_v K(v) = 2\\pi\\chi\\) (Gauss-Bonnet 离散版)。(B) 余切 Laplacian：\\(\\Delta x = 2\\vec{H}\\)——Bélanger-Laplacian 公式的离散化。图形学中广泛用于网格平滑、参数化、形状分析。子流形几何的离散版本是计算几何和图形学的数学基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="riemannian"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/riemannian.html" class="module-name">黎曼几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 子流形与诱导度量</a></li>
+      <li><a href="#kp2">02 · 第二基本形式</a></li>
+      <li><a href="#kp3">03 · Gauss 方程与 Codazzi 方程</a></li>
+      <li><a href="#kp4">04 · 极小曲面与调和映射</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>子流形几何</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>子流形与诱导度量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>将一个黎曼流形嵌入另一个（如曲面嵌入 \(\mathbb{R}^3\)）时，子流形 继承了环境空间的度量——诱导度量。子流形几何研究"弯曲空间中的 弯曲子集"：内在几何（Gauss 曲率）和外在几何（法向弯曲/第二 基本形式）如何交互。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>子流形 = 嵌入的流形。诱导度量 = 限制环境度量到切空间。 内在 vs 外在几何的区别是子流形理论的核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>等距嵌入</strong>：\(f: (M, g) \hookrightarrow (\bar{M}, \bar{g})\)，\(f^*\bar{g} = g\)。 \(f\) 是嵌入且保持度量。 <strong>诱导度量</strong>：\(M \subseteq \bar{M}\) 子流形，\(g = \bar{g}|_{TM \times TM}\)。 坐标中：若 \(f: U \to \bar{M}\)，\(f(u^1, \ldots, u^m)\)， \[g_{\alpha\beta} = \bar{g}_{ij} \frac{\partial f^i}{\partial u^\alpha}\frac{\partial f^j}{\partial u^\beta}\] <strong>正交分解</strong>：\(T_p\bar{M} = T_pM \oplus N_pM\)（切空间 \(\oplus\) 法空间）， \(\bar{g}\)-正交。\(N_pM\) = 法丛在 \(p\) 处的纤维。 <strong>Gauss 公式</strong>：\(\bar{\nabla}_X Y = \nabla_X Y + \mathrm{I\!I}(X,Y)\) （环境协变导数 = 切向分量 + 法向分量）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Nash 嵌入定理：任何黎曼流形都可以等距嵌入到足够高维的 \(\mathbb{R}^N\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(R) \hookrightarrow \mathbb{R}^3\)。 参数化 \(f(\theta,\varphi) = (R\sin\theta\cos\varphi, R\sin\theta\sin\varphi, R\cos\theta)\)。 验证诱导度量。 解答：\(g_{\theta\theta} = R^2\)，\(g_{\varphi\varphi} = R^2\sin^2\theta\)，\(g_{\theta\varphi} = 0\)。 \(ds^2 = R^2(d\theta^2 + \sin^2\theta\,d\varphi^2)\)。✓ 与球面度量一致。 易错点：不同嵌入可能给出不同的诱导度量。Nash 嵌入定理的维数 \(N\) 可能很大（\(n\) 维流形需要 \(N \sim n^2\) 维空间）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: M \to \bar{M}\) 是等距嵌入意味着？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。等距嵌入 = 嵌入 + 拉回度量等于原度量。不一定保持曲率')">A. \(f\) 是微分同胚</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！等距嵌入 = 嵌入 + 拉回度量等于原度量。不一定保持曲率')">B. \(f^*\bar{g} = g\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。等距嵌入 = 嵌入 + 拉回度量等于原度量。不一定保持曲率')">C. \(f\) 保持曲率</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。等距嵌入 = 嵌入 + 拉回度量等于原度量。不一定保持曲率')">D. \(f\) 保持法向量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>第二基本形式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>子流形的"弯曲方式"有两层含义：内在弯曲（Gauss 曲率）和外在弯曲 （它在环境空间中如何"翘起来"）。第二基本形式 \(\mathrm{I\!I}\) 精确 测量外在弯曲——它是 Gauss 公式中的法向分量。平面中的直线 \(\mathrm{I\!I} = 0\)，圆的 \(\mathrm{I\!I} \neq 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>第二基本形式 = \(\bar{\nabla}_X Y\) 的法向分量 = 子流形在环境空间中 的"加速度"。全测地子流形 (\(\mathrm{I\!I} = 0\)) 的测地线也是 环境空间的测地线。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>第二基本形式</strong>：\(\mathrm{I\!I}: \Gamma(TM) \times \Gamma(TM) \to \Gamma(NM)\)， \[\mathrm{I\!I}(X,Y) = (\bar{\nabla}_X Y)^\perp = \bar{\nabla}_X Y - \nabla_X Y\] \(\mathrm{I\!I}\) 是 \(C^\infty(M)\)-双线性对称的。 <strong>法曲率</strong>：选法方向 \(\nu\)，\(\mathrm{I\!I}_\nu(X,Y) = \bar{g}(\mathrm{I\!I}(X,Y), \nu)\)， 是 \(TM\) 上的对称双线性形式。 其特征值 \(\kappa_1, \ldots, \kappa_m\) = 主曲率（\(m = \dim M\)）。 <strong>平均曲率</strong>：\(H = \frac{1}{m}\mathrm{tr}_g \mathrm{I\!I} = \frac{1}{m}\sum \kappa_i \cdot \nu\)。 \(H = 0\) \(\iff\) 极小子流形（面积临界点）。 <strong>全测地子流形</strong>：\(\mathrm{I\!I} \equiv 0\)。\(M\) 的测地线 = \(\bar{M}\) 的测地线。 例：\(S^1\) 大圆是 \(S^2\) 中的全测地子流形。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 极小曲面（\(H = 0\)）在肥皂膜实验和材料科学中自然出现</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(R) \hookrightarrow \mathbb{R}^3\)。法方向 \(\nu = (x,y,z)/R\)（外法向）。 求 \(\mathrm{I\!I}\) 和主曲率。 解答：\(\mathrm{I\!I}(X,Y) = -\frac{1}{R}g(X,Y)\nu\)（球面等距于 \(\kappa = 1/R\)）。 所有主曲率 \(= 1/R\)（脐点：所有方向曲率相等）。 \(H = 1/R\)，Gauss 曲率 \(K = \kappa_1 \kappa_2 = 1/R^2\)。 易错点：法方向约定（内/外法向）影响主曲率的符号。 约定外法向时，凸曲面主曲率为正。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">极小子流形的定义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。平均曲率 \\(H = 0\\) 定义极小子流形。\\(\\mathrm{I\\!I} = 0\\) 是全测地')">A. \(\mathrm{I\!I} = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！平均曲率 \\(H = 0\\) 定义极小子流形。\\(\\mathrm{I\\!I} = 0\\) 是全测地')">B. \(H = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。平均曲率 \\(H = 0\\) 定义极小子流形。\\(\\mathrm{I\\!I} = 0\\) 是全测地')">C. \(K = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。平均曲率 \\(H = 0\\) 定义极小子流形。\\(\\mathrm{I\\!I} = 0\\) 是全测地')">D. \(\kappa_1 = \kappa_2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Gauss 方程与 Codazzi 方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>子流形的内在曲率（Gauss 曲率）和外在曲率（第二基本形式）如何 联系？Gauss 方程用 \(\mathrm{I\!I}\) 将子流形的 Riemann 曲率表示为 环境空间曲率 + 修正项。Codazzi 方程则约束 \(\mathrm{I\!I}\) 的 协变导数。两者是"子流形基本定理"的核心方程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Gauss 方程 = 内在曲率与外在曲率的关系式。 Codazzi 方程 = 第二基本形式的"可积性条件"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Gauss 方程</strong>： \[R(X,Y,Z,W) = \bar{R}(X,Y,Z,W) + \bar{g}(\mathrm{I\!I}(X,Z), \mathrm{I\!I}(Y,W)) - \bar{g}(\mathrm{I\!I}(X,W), \mathrm{I\!I}(Y,Z))\] <strong>余维 1 特例</strong>（超曲面 \(M^{n-1} \subseteq \bar{M}^n\)）： \(\bar{M} = \mathbb{R}^n\)（\(\bar{R} = 0\)）时： \[K_M(\Pi) = \kappa_i \kappa_j\] （\(\kappa_i, \kappa_j\) = \(\Pi\) 方向的主曲率）。 <strong>Codazzi 方程</strong>（Codazzi-Mainardi）： \[(\bar{R}(X,Y)Z)^\perp = (\bar{\nabla}_X \mathrm{I\!I})(Y,Z) - (\bar{\nabla}_Y \mathrm{I\!I})(X,Z)\] \(\bar{M} = \mathbb{R}^n\) 时：\((\nabla_X \mathrm{I\!I})(Y,Z) = (\nabla_Y \mathrm{I\!I})(X,Z)\)。 <strong>子流形基本定理</strong>（陈述）：给定满足 Gauss、Codazzi（和 Ricci）方程的 度量 \(g\) 和对称张量 \(\mathrm{I\!I}\)，可以（局部地）将 \(M\) 等距嵌入 \(\bar{M}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Gauss 方程推导经典的 Gauss Theorema Egregium（Gauss 曲率是内在量）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(M^2 \subseteq \mathbb{R}^3\)，主曲率 \(\kappa_1, \kappa_2\)。 验证 Gauss 方程给出 \(K = \kappa_1 \kappa_2\)。 解答：\(\bar{R} = 0\)（\(\mathbb{R}^3\) 平坦）。取主方向 \(e_1, e_2\)。 \(R(e_1, e_2, e_2, e_1) = 0 + \mathrm{I\!I}(e_1, e_2) \cdot \mathrm{I\!I}(e_2, e_1) - \mathrm{I\!I}(e_1, e_1) \cdot \mathrm{I\!I}(e_2, e_2)\)。 但 \(\mathrm{I\!I}(e_i, e_j) = \kappa_i \delta_{ij} \nu\)， 所以 \(R_{1221} = 0 - \kappa_1 \kappa_2 = -\kappa_1\kappa_2\)。 \(K = R_{1221}/(g_{11}g_{22}-g_{12}^2) = \kappa_1\kappa_2\)（符号约定调整后）。 易错点：Gauss 方程中的符号约定（\(R\) 的定义）在不同教材中不同， 可能差一个整体符号。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Gauss 的 Theorema Egregium 说什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Gauss 曲率仅由诱导度量 \\(g\\) 决定，不依赖于嵌入——')">A. Gauss 曲率依赖于嵌入方式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Gauss 曲率仅由诱导度量 \\(g\\) 决定，不依赖于嵌入——')">B. Gauss 曲率是内在不变量</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Gauss 曲率仅由诱导度量 \\(g\\) 决定，不依赖于嵌入——')">C. 第二基本形式是内在不变量</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Gauss 曲率仅由诱导度量 \\(g\\) 决定，不依赖于嵌入——')">D. 平均曲率是内在不变量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>极小曲面与调和映射</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>极小曲面（\(H = 0\)）是面积泛函的临界点——肥皂膜形成的曲面就是 极小曲面。它们是微分几何和变分学的经典研究对象。调和映射是 极小曲面的推广：\(f: (M,g) \to (N,h)\) 使能量泛函 \(E(f)\) 临界。 测地线、极小曲面、调和函数都是调和映射的特例。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>极小曲面 = 面积临界 = 平均曲率为零。 调和映射 = 能量临界 = 张力场为零。两者都是变分问题的解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>极小曲面</strong>：\(M^m \hookrightarrow \bar{M}^n\)，\(H = 0\)。 等价地，\(M\) 是面积泛函 \(A(M) = \int_M dV\) 在保边界变分下的临界点。 <strong>第一变分公式</strong>（面积）： \(\delta A = -m\int_M g(H, V^\perp)\, dV\) （\(V\) = 变分场，\(V^\perp\) = 法向分量）。 \(\delta A = 0\) \(\forall V \iff H = 0\)。 <strong>调和映射</strong>：\(f: (M, g) \to (N, h)\)，\(E(f) = \frac{1}{2}\int_M |df|^2\, dV_g\)。 Euler-Lagrange 方程：张力场 \(\tau(f) = \mathrm{tr}_g(\nabla df) = 0\)。 坐标中：\(\tau^\alpha(f) = \Delta_g f^\alpha + g^{ij}\Gamma^\alpha_{\beta\gamma}(f) \frac{\partial f^\beta}{\partial x^i}\frac{\partial f^\gamma}{\partial x^j} = 0\)。 <strong>特例</strong>： - \(\dim M = 1\)：调和映射 = 测地线 - \(N = \mathbb{R}\)：调和映射 = 调和函数 \(\Delta f = 0\) - 等距浸入 \(f: M \to N\)，\(\tau(f) = mH\)：调和 \(\iff\) 极小</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Plateau 问题：给定 \(\mathbb{R}^3\) 中的闭曲线，找面积最小的曲面 - 弦论中世界面的运动方程是调和映射方程</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^3\) 中的 catenoid \(r(u,v) = (\cosh u \cos v, \cosh u \sin v, u)\) 是极小曲面吗？ 解答：\(E = \cosh^2 u\)，\(F = 0\)，\(G = \cosh^2 u\)。 \(e = -\mathrm{sech}\,u\)（法曲率分量），\(f = 0\)，\(g = \mathrm{sech}\,u\)。 \(H = \frac{eG - 2fF + gE}{2(EG-F^2)} = \frac{-\mathrm{sech}\,u \cdot \cosh^2 u + \mathrm{sech}\,u \cdot \cosh^2 u}{2\cosh^4 u} = 0\)。 是极小曲面。 易错点：catenoid 是极小曲面但不是面积最小的（它只是临界点/鞍点）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">调和映射 \(f: (M,g) \to (N,h)\) 的 Euler-Lagrange 方程是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\tau(f) = \\mathrm{tr}_g(\\nabla df) = 0\\) 是调和映射方程。')">A. \(\Delta f = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\tau(f) = \\mathrm{tr}_g(\\nabla df) = 0\\) 是调和映射方程。')">B. \(\tau(f) = 0\)（张力场为零）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\tau(f) = \\mathrm{tr}_g(\\nabla df) = 0\\) 是调和映射方程。')">C. \(H = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\tau(f) = \\mathrm{tr}_g(\\nabla df) = 0\\) 是调和映射方程。')">D. \(R = 0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/geometry/riemannian.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

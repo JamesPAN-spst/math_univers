@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 零知识证明 — 密码学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "cryptography-ch06-q1",
+        "question": "零知识证明（ZKP）的三个核心性质是什么？",
+        "options": [
+          "完备性、可靠性、零知识性  B) 机密性、完整性、可用性  C) 正确性、高效性、安全性  D) 加密性、认证性、不可否认性"
+        ],
+        "answer": 0,
+        "explanation": "完备性（Completeness）：诚实证明者能说服验证者。可靠性（Soundness）：欺骗者不能说服验证者（除以可忽略概率）。零知识性（Zero-Knowledge）：验证者除\"命题为真\"外不获得任何信息。ZKP 在隐私保护（身份认证、区块链隐私交易）中具有变革意义。"
+      },
+      {
+        "id": "cryptography-ch06-q2",
+        "question": "交互式零知识证明中，验证者的角色是什么？",
+        "options": [
+          "发送随机挑战（challenge），检验证明者的响应  B) 生成证明  C) 加密消息  D) 存储密钥"
+        ],
+        "answer": 0,
+        "explanation": "典型交互式 ZKP 协议（如 Schnorr 协议）：(1) 证明者发送承诺（commitment）；(2) 验证者发送随机挑战；(3) 证明者发送响应（response）；(4) 验证者检验。随机挑战确保证明者不能预先准备答案——不知道秘密就无法在随机挑战下始终给出正确响应。"
+      },
+      {
+        "id": "cryptography-ch06-q3",
+        "question": "Schnorr 识别协议中，证明者知道 \\(x\\) 满足 \\(h=g^x\\bmod p\\)。证明者发送 \\(r=g^k\\)，验证者发送挑战 \\(c\\)。证明者响应 \\(s=k-cx\\)。验证者检验什么等式？",
+        "options": [
+          "\\(g^s\\cdot h^c\\stackrel{?}{=}r\\)  B) \\(g^s\\stackrel{?}{=}r\\)  C) \\(h^s\\stackrel{?}{=}r\\)  D) \\(g^c\\stackrel{?}{=}r\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(g^s\\cdot h^c=g^{k-cx}\\cdot g^{xc}=g^k=r\\)✓。验证者无需知道 \\(x\\)，仅用公开值 \\((g,h,r,c,s)\\) 即可验证。零知识性：可构造模拟器——先选 \\(s,c\\)，计算 \\(r=g^s h^c\\)，输出 \\((r,c,s)\\)——分布与真实交互不可区分。因此验证者不获得关于 \\(x\\) 的信息。"
+      },
+      {
+        "id": "cryptography-ch06-q4",
+        "question": "非交互式零知识证明（NIZK）如何消除验证者的交互？",
+        "options": [
+          "用哈希函数代替验证者的随机挑战：\\(c=H(r\\|m)\\)（Fiat-Shamir 变换）  B) 不需要挑战  C) 使用可信第三方  D) 多轮重复"
+        ],
+        "answer": 0,
+        "explanation": "Fiat-Shamir 启发式：将交互式协议中验证者的随机挑战 \\(c\\) 替换为 \\(c=H(\\text{承诺}\\|\\text{公开参数})\\)。哈希函数在随机预言模型下模拟了\"诚实但好奇\"的验证者。证明者独立生成完整证明 \\((r,s)\\)（其中 \\(c\\) 隐含在计算中），验证者仅需哈希即可验证。Schnorr 签名就是 Schnorr 协议的 Fiat-Shamir 变体。"
+      },
+      {
+        "id": "cryptography-ch06-q5",
+        "question": "同态加密中\"加法同态\"的含义是什么？",
+        "options": [
+          "\\(E(m_1)\\cdot E(m_2)=E(m_1+m_2)\\)（密文相乘=明文相加的加密）  B) 可以解密任意密文  C) 加密速度与明文长度无关  D) 密钥可以公开"
+        ],
+        "answer": 0,
+        "explanation": "Paillier 加密满足加法同态：\\(E(m_1)\\cdot E(m_2)\\bmod n^2=E(m_1+m_2\\bmod n)\\)。这允许在不解密的情况下对加密数据求和——电子投票中各选票加密后相乘即得总票数的加密。ElGamal 则满足乘法同态：\\(E(m_1)\\cdot E(m_2)=E(m_1\\cdot m_2)\\)。"
+      },
+      {
+        "id": "cryptography-ch06-q6",
+        "question": "格密码（LWE-based）为什么是后量子安全的候选方案？",
+        "options": [
+          "目前无已知量子算法能有效求解 LWE 问题  B) 密钥特别长  C) 不使用数学  D) 基于 RSA 问题"
+        ],
+        "answer": 0,
+        "explanation": "LWE 问题：\\(\\mathbf{b}=A\\mathbf{s}+\\mathbf{e}\\pmod{q}\\)，给定 \\((A,\\mathbf{b})\\)（\\(\\mathbf{e}\\) 为小高斯噪声），恢复 \\(\\mathbf{s}\\) 是困难的。Shor 算法（量子多项式时间）攻击的是\"隐子群\"结构（因式分解/离散对数），LWE 不具备此结构。最优量子算法对 LWE 仅提供微小加速（\\(\\sim\\sqrt\\text{筛法}\\)），不改变指数级难度。"
+      },
+      {
+        "id": "cryptography-ch06-q7",
+        "question": "Schnorr 协议的可靠性（soundness）通过什么技术证明？",
+        "options": [
+          "特殊可靠性——两次不同挑战的响应可提取秘密 \\(x\\)  B) 暴力验证  C) 数学归纳  D) 概率分析"
+        ],
+        "answer": 0,
+        "explanation": "假设欺骗者对同一承诺 \\(r\\) 回答了两个不同挑战 \\(c_1,c_2\\) 的响应 \\(s_1,s_2\\)。\\(g^{s_1}h^{c_1}=r=g^{s_2}h^{c_2}\\)，故 \\(g^{s_1-s_2}=h^{c_2-c_1}=g^{x(c_2-c_1)}\\)。\\(x=(s_1-s_2)/(c_2-c_1)\\bmod q\\)。因此能回答两次挑战的人必须知道 \\(x\\)——这就是\"知识提取\"（Knowledge Extraction），证明了协议的知识可靠性。"
+      },
+      {
+        "id": "cryptography-ch06-q8",
+        "question": "Schnorr 协议中 \\(p=23,q=11,g=4\\)（\\(4^{11}\\equiv1\\bmod23\\)）。证明者的秘密 \\(x=3\\)，\\(h=g^x=4^3=64\\bmod23=18\\)。选 \\(k=7\\)，\\(r=4^7\\bmod23=?\\)",
+        "options": [
+          "\\(7\\)  B) \\(18\\)  C) \\(4\\)  D) \\(8\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(4^1=4, 4^2=16, 4^3=64\\equiv18, 4^4=72\\equiv3, 4^5=12, 4^6=48\\equiv2, 4^7=8\\bmod23\\)。若挑战 \\(c=5\\)，响应 \\(s=k-cx=7-15=-8\\equiv3\\bmod11\\)。验证：\\(g^s h^c=4^3\\cdot18^5\\bmod23=18\\cdot(18^5\\bmod23)\\)。\\(18^2=324\\equiv2, 18^4\\equiv4, 18^5\\equiv72\\equiv3\\bmod23\\)。\\(4^3\\cdot18^5=18\\times3=54\\equiv8\\bmod23=r\\)✓。"
+      },
+      {
+        "id": "cryptography-ch06-q9",
+        "question": "零知识证明中\"模拟器\"的作用是什么？",
+        "options": [
+          "在不知道秘密的情况下生成与真实证明不可区分的伪证明  B) 加速验证  C) 存储秘密  D) 加密通信"
+        ],
+        "answer": 0,
+        "explanation": "零知识性的形式化定义：存在 PPT 模拟器 \\(\\mathcal{S}\\) 使 \\(\\text{View}(P,V)\\approx\\mathcal{S}(\\text{公开输入})\\)。模拟器不知道秘密 \\(x\\)，但能产生与真实交互计算不可区分的输出——这意味着真实交互中没有泄露 \\(x\\) 的任何信息（因为不知道 \\(x\\) 也能生成相同分布的视图）。"
+      },
+      {
+        "id": "cryptography-ch06-q10",
+        "question": "Paillier 加密中 \\(n=p\\cdot q\\)，公钥 \\((n,g)\\)，\\(E(m,r)=g^m\\cdot r^n\\bmod n^2\\)。\\(E(3)\\cdot E(5)\\bmod n^2=?\\)",
+        "options": [
+          "\\(E(8)\\)  B) \\(E(15)\\)  C) \\(E(3)\\)  D) \\(E(0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E(3)\\cdot E(5)=g^3 r_1^n\\cdot g^5 r_2^n=g^{3+5}(r_1 r_2)^n=g^8(r_1 r_2)^n\\bmod n^2=E(8,r_1 r_2)\\)。加法同态！不解密即可计算密文的\"和\"。应用：安全多方计算中各方提交加密投票，纯密文操作得到总和的加密，由可信方解密公布结果。"
+      },
+      {
+        "id": "cryptography-ch06-q11",
+        "question": "Ring-LWE 与标准 LWE 的关系是什么？",
+        "options": [
+          "Ring-LWE 在多项式环 \\(\\mathbb{Z}_q[x]/(f(x))\\) 上定义，比标准 LWE 更高效  B) Ring-LWE 更安全  C) 两者完全相同  D) Ring-LWE 不基于格"
+        ],
+        "answer": 0,
+        "explanation": "标准 LWE：\\(\\mathbf{b}=A\\mathbf{s}+\\mathbf{e}\\)，\\(A\\) 是无结构随机矩阵，密钥大小 \\(O(n^2)\\)。Ring-LWE：\\(b(x)=a(x)\\cdot s(x)+e(x)\\) 在环 \\(R_q=\\mathbb{Z}_q[x]/(x^n+1)\\) 中，利用 NTT 加速到 \\(O(n\\log n)\\)，密钥 \\(O(n)\\)。CRYSTALS-Kyber 使用 Module-LWE（Ring 和标准之间的折中）。效率提升约 \\(n\\) 倍。"
+      },
+      {
+        "id": "cryptography-ch06-q12",
+        "question": "图着色问题的零知识证明：证明者将图的 3 着色随机置换颜色后用承诺隐藏，验证者选一条边检查两端颜色不同。欺骗者（无合法着色）被检测到的概率每轮是？",
+        "options": [
+          "\\(\\geq1/|E|\\)（\\(E\\) 为边集）  B) \\(1/2\\)  C) \\(1/3\\)  D) \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "若着色不合法，至少一条边两端同色。验证者随机选边，选中该违规边的概率 \\(\\geq1/|E|\\)。\\(t\\) 轮后欺骗概率 \\(\\leq(1-1/|E|)^t\\)，指数衰减。\\(t=|E|\\ln(1/\\epsilon)\\) 轮将欺骗概率降至 \\(\\epsilon\\)。每轮独立重新置换颜色是零知识性的关键——验证者只看到一对不同颜色，学不到着色方案。"
+      },
+      {
+        "id": "cryptography-ch06-q13",
+        "question": "全同态加密（FHE）支持加法和乘法同态。Gentry 2009 年方案的关键技术是什么？",
+        "options": [
+          "自举（bootstrapping）——用 FHE 同态解密自身来降低噪声  B) 使用更大的密钥  C) 多次加密  D) 分块处理"
+        ],
+        "answer": 0,
+        "explanation": "LWE-based FHE 中每次运算增加噪声，\\(L\\) 次运算后噪声溢出（\\(|\\mathbf{e}|>q/2\\)）导致解密失败。自举：将自身的解密电路表示为同态运算，同态执行\"解密\"来刷新噪声。条件：加密方案能\"同态计算\"自身的解密函数（电路深度 \\(\\leq L\\)）。TFHE 等现代 FHE 库实现了门级自举。"
+      },
+      {
+        "id": "cryptography-ch06-q14",
+        "question": "将 Schnorr 协议转换为签名方案（Fiat-Shamir），挑战变为 \\(c=H(r\\|m)\\)。签名 \\((s,c)\\) 的验证等式是？",
+        "options": [
+          "\\(c\\stackrel{?}{=}H(g^s h^c\\|m)\\)  B) \\(g^s\\stackrel{?}{=}h^c\\)  C) \\(s\\stackrel{?}{=}H(c)\\)  D) \\(r\\stackrel{?}{=}g^c\\)"
+        ],
+        "answer": 0,
+        "explanation": "验证者从签名 \\((s,c)\\) 重构 \\(r=g^s h^c\\)，然后检查 \\(c=H(r\\|m)\\)。若正确则接受。不需要传输 \\(r\\)（从 \\(s,c\\) 可重构）。安全性：在随机预言模型下，Schnorr 签名的 EUF-CMA 安全归约到离散对数问题。签名仅两个群元素大小，比 RSA 紧凑得多。"
+      },
+      {
+        "id": "cryptography-ch06-q15",
+        "question": "CRYSTALS-Kyber（NIST 后量子加密标准）的密钥封装中公钥大小约为？（安全级别 3，\\(n=256,k=3,q=3329\\)）",
+        "options": [
+          "\\(\\approx1184\\) 字节  B) \\(\\approx32\\) 字节  C) \\(\\approx256\\) 字节  D) \\(\\approx10000\\) 字节"
+        ],
+        "answer": 0,
+        "explanation": "Kyber-768 公钥 = 压缩后的矩阵 \\(A\\) 的种子（32B）+ \\(k=3\\) 个多项式 \\(\\hat{t}\\)（每个 \\(256\\times12/8=384\\)B）\\(=32+1152=1184\\) 字节。相比 ECDH-256 的公钥 32 字节，Kyber 大约 37 倍。但 1184B 对现代网络完全可接受。TLS 中 Kyber 已被 Chrome/Firefox 实验性部署（混合模式 X25519+Kyber768）。"
+      },
+      {
+        "id": "cryptography-ch06-q16",
+        "question": "Paillier 加密中标量乘法如何实现？即 \\(E(cm)\\) 从 \\(E(m)\\) 和明文 \\(c\\) 计算。",
+        "options": [
+          "\\(E(m)^c\\bmod n^2=E(cm)\\)  B) \\(c\\cdot E(m)\\)  C) \\(E(c)\\cdot E(m)\\)  D) 不可能"
+        ],
+        "answer": 0,
+        "explanation": "\\(E(m)^c=(g^m r^n)^c=g^{cm}(r^c)^n=E(cm,r^c)\\bmod n^2\\)。利用加法同态 + 标量乘，可以在加密状态下计算线性函数 \\(f(\\mathbf{x})=\\sum a_i x_i\\)。这足以实现隐私保护的线性回归、加权投票等。但非线性运算（乘法）需要额外协议（如加密乘法三元组）或转向 FHE。"
+      },
+      {
+        "id": "cryptography-ch06-q17",
+        "question": "Sigma 协议（Σ 协议）的三步交互是什么？",
+        "options": [
+          "承诺（Prover→Verifier）→ 挑战（V→P）→ 响应（P→V）  B) 加密→解密→验证  C) 签名→验证→确认  D) 密钥交换→加密→签名"
+        ],
+        "answer": 0,
+        "explanation": "Sigma 协议是 3 轮公共硬币（public-coin）交互：(1)证明者发送承诺 \\(a\\)（随机化的声明）；(2)验证者发送随机挑战 \\(c\\)；(3)证明者发送响应 \\(z\\)（结合秘密和挑战计算）。Schnorr 协议是最经典的 Sigma 协议实例。所有 Sigma 协议都通过 Fiat-Shamir 变换转为 NIZK。"
+      },
+      {
+        "id": "cryptography-ch06-q18",
+        "question": "Schnorr 协议的零知识模拟器如何工作？（提示：选择 \\(s,c\\) 后逆算 \\(r\\)）",
+        "options": [
+          "先随机选 \\(s,c\\)，计算 \\(r=g^s h^c\\)，输出 \\((r,c,s)\\)  B) 先选 \\(r\\)，再选 \\(c,s\\)  C) 直接输出随机字符串  D) 需要知道 \\(x\\)"
+        ],
+        "answer": 0,
+        "explanation": "模拟器 \\(\\mathcal{S}\\)：(1) 随机选 \\(s\\xleftarrow{R}\\mathbb{Z}_q,c\\xleftarrow{R}\\{0,\\ldots,2^t-1\\}\\)；(2) 计算 \\(r=g^s h^c\\)；(3) 输出 \\((r,c,s)\\)。验证：\\(g^s h^c=r\\)✓。分布分析：真实交互中 \\(r=g^k\\)（\\(k\\) 随机），\\(c\\) 随机独立，\\(s=k-cx\\)；模拟中 \\((r,c,s)\\) 由 \\((s,c)\\) 均匀生成。两者分布相同（因为 \\((s,c,r)\\) 间存在相同的确定性关系）。不需要 \\(x\\)！"
+      },
+      {
+        "id": "cryptography-ch06-q19",
+        "question": "FHE 方案中\"噪声增长\"的主要来源是什么操作？",
+        "options": [
+          "同态乘法——噪声近似平方  B) 同态加法——噪声翻倍  C) 密钥生成  D) 解密"
+        ],
+        "answer": 0,
+        "explanation": "加法：\\(E(m_1)+E(m_2)\\) 噪声 \\(\\approx e_1+e_2\\)（线性增长）。乘法：\\(E(m_1)\\times E(m_2)\\) 噪声 \\(\\approx m_1 e_2+m_2 e_1+e_1 e_2\\approx O(e^2)\\)（近似平方增长）。因此乘法深度 \\(L\\) 后噪声 \\(\\approx e^{2^L}\\)，指数爆炸。自举在每次乘法后\"刷新\"噪声才能实现无限深度。加法噪声增长温和，纯加法电路不需要自举。"
+      },
+      {
+        "id": "cryptography-ch06-q20",
+        "question": "Learning with Errors：\\(\\mathbf{b}=A\\mathbf{s}+\\mathbf{e}\\pmod{q}\\)，\\(A\\in\\mathbb{Z}_q^{m\\times n}\\)，\\(\\mathbf{e}\\sim\\chi^m\\)（高斯噪声）。若无噪声（\\(\\mathbf{e}=\\mathbf{0}\\)），问题变为什么？",
+        "options": [
+          "线性方程组，高斯消元 \\(O(n^3)\\) 解  B) 仍然困难  C) NP 完全  D) 无法求解"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbf{b}=A\\mathbf{s}\\pmod{q}\\) 是模 \\(q\\) 的线性方程组，\\(m\\geq n\\) 且 \\(A\\) 满秩时高斯消元 \\(O(mn^2)\\) 即可恢复 \\(\\mathbf{s}\\)。噪声 \\(\\mathbf{e}\\) 是 LWE 安全性的关键——将简单线性代数问题变为困难的格问题。噪声分布 \\(\\chi\\) 通常是离散高斯 \\(D_{\\mathbb{Z},\\sigma}\\)，标准差 \\(\\sigma\\approx\\sqrt{n}\\)。"
+      },
+      {
+        "id": "cryptography-ch06-q21",
+        "question": "\"知识的证明\"（Proof of Knowledge）与\"命题的证明\"（Proof of Statement）的区别是什么？",
+        "options": [
+          "PoK 证明证明者\"知道\"witness \\(w\\)（可提取），不仅仅是 \\(w\\) 存在  B) 两者相同  C) PoK 更弱  D) 命题证明可提取 witness"
+        ],
+        "answer": 0,
+        "explanation": "命题证明：\\(\\exists w\\) 使 \\(R(x,w)=1\\)（存在性）。知识证明：证明者\"持有\" \\(w\\)（可用提取器 \\(\\mathcal{E}\\) 从其中提取 \\(w\\)）。形式化：知识可靠性(knowledge soundness)——存在 PPT 提取器 \\(\\mathcal{E}\\) 与成功证明者交互后输出 \\(w\\)。Schnorr 协议是知识证明（\\(w=x\\)）：两次挑战可提取 \\(x\\)。"
+      },
+      {
+        "id": "cryptography-ch06-q22",
+        "question": "zk-SNARK 中\"S\"代表 Succinct（简洁），具体指什么？",
+        "options": [
+          "证明大小为常数 \\(O(1)\\)，验证时间 \\(O(|x|)\\)（关于陈述大小线性）  B) 生成时间短  C) 不需要信任设置  D) 安全级别高"
+        ],
+        "answer": 0,
+        "explanation": "zk-SNARK（Zero-Knowledge Succinct Non-interactive Argument of Knowledge）：证明大小约 128-256 字节（与被证明的计算规模无关!），验证 \\(\\sim O(\\text{ms})\\)。代价：证明生成时间 \\(O(|C|\\log|C|)\\)（\\(C\\) 是算术电路大小），需要可信设置（trusted setup）生成公共参考串（CRS）。Zcash/zkSync 使用 SNARK 实现隐私交易——验证链上交易仅几毫秒。"
+      },
+      {
+        "id": "cryptography-ch06-q23",
+        "question": "Regev 的 LWE 加密方案：公钥 \\((A,\\mathbf{b}=A\\mathbf{s}+\\mathbf{e})\\)，加密 1 位消息 \\(\\mu\\in\\{0,1\\}\\)：\\(\\mathbf{c}_1=A^T\\mathbf{r},c_2=\\mathbf{b}^T\\mathbf{r}+\\mu\\lfloor q/2\\rfloor\\)。解密为 \\(c_2-\\mathbf{s}^T\\mathbf{c}_1\\) 并四舍五入。为什么需要 \\(\\lfloor q/2\\rfloor\\) 而非 \\(\\mu\\) 本身？",
+        "options": [
+          "噪声使解密结果偏离精确值，\\(\\lfloor q/2\\rfloor\\) 提供足够大的间距以容忍噪声  B) 使密文更长  C) 提高加密速度  D) 无特殊原因"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_2-\\mathbf{s}^T\\mathbf{c}_1=\\mathbf{e}^T\\mathbf{r}+\\mu\\lfloor q/2\\rfloor\\)。噪声项 \\(\\mathbf{e}^T\\mathbf{r}\\) 的量级 \\(\\approx\\sigma\\sqrt{m}\\)（高斯噪声的内积）。\\(\\mu=0\\)：结果 \\(\\approx\\mathbf{e}^T\\mathbf{r}\\approx0\\)（接近 0）。\\(\\mu=1\\)：结果 \\(\\approx q/2\\)（远离 0）。只要 \\(|\\mathbf{e}^T\\mathbf{r}|<q/4\\)，解密正确。编码间距 \\(q/2 \\gg\\) 噪声标准差，保证解密正确性。"
+      },
+      {
+        "id": "cryptography-ch06-q24",
+        "question": "Groth16（最流行的 zk-SNARK）的证明由 3 个椭圆曲线群元素组成。在 BN254 曲线上，证明大小约为多少字节？",
+        "options": [
+          "\\(\\approx128\\) 字节（3 个压缩点）  B) \\(\\approx1\\) KB  C) \\(\\approx32\\) 字节  D) \\(\\approx10\\) KB"
+        ],
+        "answer": 0,
+        "explanation": "BN254 曲线上 \\(G_1\\) 点压缩为 32 字节，\\(G_2\\) 点 64 字节。Groth16 证明 \\((\\pi_A\\in G_1,\\pi_B\\in G_2,\\pi_C\\in G_1)\\)：\\(32+64+32=128\\) 字节。验证需 3 次双线性对运算 \\(\\sim2\\)ms。这使得链上验证极其高效——以太坊中一次 Groth16 验证约消耗 \\(\\sim30\\) 万 gas（约 $0.5 ）。"
+      },
+      {
+        "id": "cryptography-ch06-q25",
+        "question": "ZKP 的计算可靠性（computational soundness）与统计可靠性（statistical soundness）的区别是什么？",
+        "options": [
+          "计算可靠性仅对 PPT 攻击者成立，统计可靠性对无限计算能力攻击者也成立  B) 两者相同  C) 计算可靠性更强  D) 统计可靠性仅在标准模型下"
+        ],
+        "answer": 0,
+        "explanation": "统计可靠性（proof）：即使全能攻击者也不能欺骗（仅以可忽略概率）。计算可靠性（argument）：仅 PPT 攻击者不能欺骗。zk-SNARK 使用计算假设（如 Knowledge-of-Exponent），属于 argument。交互式 ZKP（如图着色）通常有统计可靠性。零知识性方面也有对称区分：计算零知识 vs 统计零知识 vs 完美零知识。"
+      },
+      {
+        "id": "cryptography-ch06-q26",
+        "question": "Zcash 加密货币使用 zk-SNARK 实现隐藏交易。具体隐藏了什么信息？",
+        "options": [
+          "发送者、接收者地址和交易金额，同时证明交易合法（余额充足、无双重花费）  B) 仅隐藏金额  C) 仅隐藏发送者  D) 不隐藏任何信息"
+        ],
+        "answer": 0,
+        "explanation": "Zcash 的 Sapling 协议：交易生成 zk-SNARK 证明，声明\"我有一个合法的 UTXO，值 \\(\\geq\\) 发送金额，nullifier 未使用过\"。链上只看到证明（\\(\\sim128\\) 字节）和加密后的 note。矿工验证证明正确即接受交易，不知道谁发给谁多少钱。隐私保护的革命性应用——但也引发了合规争议（执法机构的担忧）。"
+      },
+      {
+        "id": "cryptography-ch06-q27",
+        "question": "zkRollup（如 zkSync、StarkNet）使用零知识证明扩展区块链。其核心思想是什么？",
+        "options": [
+          "链下执行大批交易并生成正确性证明，链上仅验证一个证明  B) 增加区块大小  C) 减少节点数量  D) 使用更快的共识"
+        ],
+        "answer": 0,
+        "explanation": "zkRollup 将 \\(N\\) 笔交易在链下批量执行，生成一个 zk-SNARK/STARK 证明（\\(\\sim\\)毫秒验证），仅 \\(O(1)\\) 大小的证明+状态根上链。以太坊主链验证一个证明即确认 \\(N\\) 笔交易全部正确。安全性等同主链（不信任执行者，信验证的数学）。吞吐量提升 100-1000 倍。zkSync Era 和 Polygon zkEVM 已在生产环境运行。"
+      },
+      {
+        "id": "cryptography-ch06-q28",
+        "question": "某公司想验证员工年龄 \\(\\geq18\\) 岁而不透露具体生日。哪种密码学工具最适合？",
+        "options": [
+          "范围证明（Range Proof）——零知识证明 \\(x\\in[18,\\infty)\\) 而不透露 \\(x\\)  B) 全同态加密  C) RSA 加密  D) 发送 ID 照片"
+        ],
+        "answer": 0,
+        "explanation": "范围证明是 ZKP 的具体应用：证明者证明\"我持有的秘密值 \\(x\\) 满足 \\(x\\geq18\\)\"而不泄露 \\(x\\)。Bulletproofs（无需可信设置的范围证明，\\(O(\\log n)\\) 大小）特别适合此场景。应用：隐私保护的身份验证（年龄/薪资/信用评分验证）、金融合规（证明交易金额在合法范围内而不泄露金额）。这是\"选择性披露\"（selective disclosure）的基础技术。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="cryptography"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/cryptography.html" class="module-name">密码学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 交互式证明与零知识性质</a></li>
+      <li><a href="#kp2">02 · 零知证明构造（Schnorr 协议与 zk-SNARKs）</a></li>
+      <li><a href="#kp3">03 · 同态加密</a></li>
+      <li><a href="#kp4">04 · 格密码与后量子密码</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>零知识证明</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>交互式证明与零知识性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>能否向他人证明自己知道某个秘密，而不泄露秘密本身？零知识证明(ZKP) 给出了肯定的回答。它是现代密码学最深刻的概念之一，在95年获得 Gödel 奖。ZKP 如今在区块链隐私（Zcash）、身份认证、可验证计算 等领域有广泛应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>交互式证明：证明者(P)与验证者(V)多轮交互。三个性质： 完备性（诚实者能证明）、可靠性（作弊者被拒绝）、零知识性（V学不到 除「命题为真」外的任何信息）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>交互式证明系统</strong> \((P, V)\) 对语言 \(L\)： (1) 完备性：\(x \in L \Rightarrow \Pr[V \text{ accepts}] \geq 2/3\) (2) 可靠性：\(x \notin L \Rightarrow \forall P^*,\; \Pr[V \text{ accepts}] \leq 1/3\) <strong>零知识性</strong>：存在多项式时间模拟器 \(S\)，使得 \[\text{View}_V(P(w) \leftrightarrow V(x)) \approx S(x)\] 即 V 的视图可以在不知道证据 \(w\) 的情况下被模拟。 <strong>三着色 ZKP 示例</strong>：P 知道图 \(G\) 的 3-着色 \(c\)。 每轮：(1) P 随机置换颜色并加密每个点的颜色； (2) V 随机选择一条边 \((u,v)\)； (3) P 揭示 \(c(u)\) 和 \(c(v)\) 的颜色，V 检查不同。 可靠性：若不是 3-可着色，存在同色边，被发现概率 \(\geq 1/|E|\)。 零知识：只揭示两个点的颜色且每轮重新置换，无法推断其他点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Zcash 使用 zk-SNARKs 实现交易隐私 - 身份认证：证明「我知道密码」而不发送密码</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：三着色 ZKP 中重复 \(n\) 轮后，作弊者通过的概率是多少？ 解答：每轮作弊者通过的概率 \(\leq 1 - 1/|E|\)。 \(n\) 轮后 \(\leq (1 - 1/|E|)^n\)。 若 \(|E| = 100\)，\(n = 500\) 轮：\((99/100)^{500} \approx 0.0066\)， 作弊成功概率已忽略不计。 易错点：认为一轮就能完全验证。实际需要反复多轮将作弊概率 压到足够小。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">零知识证明的「零知识性」保证的是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。零知识性的核心是模拟器的存在性——V 的视图可以')">A. 验证者无法确定命题的真假</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。零知识性的核心是模拟器的存在性——V 的视图可以')">B. 证明者不需要知道证据</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！零知识性的核心是模拟器的存在性——V 的视图可以')">C. 验证者除「命题为真」外什么也学不到</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。零知识性的核心是模拟器的存在性——V 的视图可以')">D. 通信不可被窃听</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>零知证明构造（Schnorr 协议与 zk-SNARKs）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>三着色示例仅用于概念展示，实际中最常用的 ZKP 是 Schnorr 协议—— 证明知道离散对数。而 zk-SNARKs 将交互式ZKP压缩为非交互式的短 证明，是区块链扩容和隐私的核心技术。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fiat-Shamir 变换：用哈希函数代替验证者的随机挑战， 将交互式证明变为非交互式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Schnorr 协议</strong>（证明知道 \(x\) 使得 \(h = g^x\)）： (1) P 选 \(r\)，发送 \(a = g^r\) (2) V 发送随机挑战 \(e\) (3) P 发送 \(z = r + ex \bmod q\) 验证：\(g^z \stackrel{?}{=} a \cdot h^e\)。 正确性：\(g^{r+ex} = g^r \cdot (g^x)^e = a \cdot h^e\)。✓ <strong>零知识性</strong>：模拟器先选 \(z, e\)，令 \(a = g^z h^{-e}\)， 产生的 \((a, e, z)\) 与真实交互不可区分。 <strong>Fiat-Shamir 变换</strong>：\(e = H(a \| m)\) 代替 V 的随机挑战， 证明变为非交互式 \((a, z)\) 即可验证。 <strong>zk-SNARKs</strong>（概念）： - S: Succinct（证明短，~200字节） - N: Non-interactive - ARK: Argument of Knowledge 将任意 NP 计算编码为算术电路，生成短小可验证证明。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Schnorr 签名是 EdDSA 的基础 - zk-Rollups（如 StarkNet）用 ZKP 压缩交易验证</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Schnorr 协议中，\(g=2, p=11, q=5, x=3, h=2^3=8\)。 P 选 \(r=4\)，\(a=2^4=16 \bmod 11=5\)。V 选 \(e=2\)。 P 计算 \(z = 4 + 2 \times 3 = 10 \bmod 5 = 0\)。 验证：\(g^z = 2^0 = 1\)，\(a \cdot h^e = 5 \times 8^2 = 5 \times 64 = 320 \bmod 11 = 1\)。\(1 = 1\)。✓ 易错点：\(z\) 的计算是模 \(q\)（子群的阶），不是模 \(p\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fiat-Shamir 变换的作用是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。用哈希函数 \\(e=H(a)\\) 代替验证者的随机挑战，')">A. 提高证明的安全性</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！用哈希函数 \\(e=H(a)\\) 代替验证者的随机挑战，')">B. 将交互式证明转为非交互式</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。用哈希函数 \\(e=H(a)\\) 代替验证者的随机挑战，')">C. 压缩证明长度</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。用哈希函数 \\(e=H(a)\\) 代替验证者的随机挑战，')">D. 增加零知识性</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>同态加密</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>能否在不解密的情况下对密文直接计算？同态加密(HE)让这成为可能， 它是云计算隐私保护的终极解决方案：用户加密数据上传到云， 云在密文上计算，结果解密后与明文计算结果相同。Gentry 在 2009 年 首次构造了全同态加密(FHE)方案，是密码学里程碑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同态加密保留代数结构：\(E(a \odot b) = E(a) \otimes E(b)\)。 部分同态仅保留加法或乘法，全同态同时保留两者，支持任意计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>加法同态</strong>（Paillier）：\(E(m_1) \cdot E(m_2) = E(m_1 + m_2)\)。 <strong>乘法同态</strong>（教科书 RSA）：\(E(m_1) \cdot E(m_2) = (m_1 m_2)^e = E(m_1 m_2)\)。 <strong>全同态加密</strong>（FHE）：支持加法和乘法 \(\Rightarrow\) 任意布尔电路。 <strong>Gentry 方案框架</strong>（概念）： (1) 构造「某种程度同态」(Somewhat HE)，支持有限次加/乘 (2) Bootstrapping：在密文上执行解密电路（​许可的嵌套解密） 刷新密文的“噪声”，从而支持无限次运算。 效率：当前 FHE 比明文计算慢 \(10^4\)–\(10^6\) 倍，仍在快速改进中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 联邦学习：多方在加密数据上联合训练模型 - 医疗数据分析：医院密文数据上云计算统计结果</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Paillier 加密 \(m_1=3, m_2=5\)。 若 \(E(3)=42, E(5)=67\)，则 \(E(3) \cdot E(5) \bmod n^2 = E(8)\)。 解密后得 8 = 3+5。✓ 服务器全程未解密，不知 3 和 5 的值。 易错点：部分同态加密不等于全同态。Paillier 仅支持加法， 不能直接计算乘法，无法执行任意计算。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">全同态加密(FHE)相比部分同态加密的核心改进是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。加法+乘法 = 完整的布尔电路，因此可实现任意计算。')">A. 加密速度更快</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！加法+乘法 = 完整的布尔电路，因此可实现任意计算。')">B. 同时支持加法和乘法，实现任意计算</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。加法+乘法 = 完整的布尔电路，因此可实现任意计算。')">C. 密钥更短</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。加法+乘法 = 完整的布尔电路，因此可实现任意计算。')">D. 不需要解密</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>格密码与后量子密码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Shor 算法威胁所有基于分解/DLP 的密码。后量子密码学（PQC）寻找 量子计算机也无法有效解决的数学难题。格密码基于格中的难题（SVP、 LWE），是 NIST PQC 标准化的主要方向。CRYSTALS-Kyber 已成为 NIST PQC 加密标准，将在未来 10-20 年内替代 RSA/ECC。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>格(Lattice) \(\mathcal{L} = \{\sum a_i \mathbf{b}_i : a_i \in \mathbb{Z}\}\)。 在高维格中找最短向量或最近向量是计算困难的， 即使对量子计算机也是如此。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>格问题</strong>： - SVP（最短向量）：找 \(\mathbf{v} \in \mathcal{L} \setminus \{0\}\) 使 \(\|\mathbf{v}\|\) 最小。 - CVP（最近向量）：给定 \(\mathbf{t}\)，找最近的格点。 两者在高维时是 NP-hard（近似版本）。 <strong>LWE 问题</strong>（Regev）：给定 \(\mathbf{A} \in \mathbb{Z}_q^{m \times n}\)， \(\mathbf{b} = \mathbf{A}\mathbf{s} + \mathbf{e} \bmod q\)（\(\mathbf{e}\) 为小噪声）， 求 \(\mathbf{s}\)。 Regev 证明：解决 LWE \(\Rightarrow\) 解决最坏情况的近似 SVP。 \[\text{LWE}_\text{avg} \geq \text{GapSVP}_\text{worst}\] <strong>CRYSTALS-Kyber</strong>：基于 Module-LWE，加密流程： 公钥 \((\mathbf{A}, \mathbf{b})\)，加密：\(\mathbf{u} = \mathbf{A}^T\mathbf{r} + \mathbf{e}_1\)， \(v = \mathbf{b}^T\mathbf{r} + e_2 + \lceil q/2 \rceil m\)。 密文 \((\mathbf{u}, v)\)，解密恢复 \(m\) 通过四舍五入消除噪声。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- NIST PQC 标准: Kyber(加密), Dilithium(签名), SPHINCS+(签名) - Google Chrome 已在 TLS 中实验性部署 Kyber</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：简化 LWE：\(q=17, \mathbf{s}=3\)，\(A=(6,9,14)\)， \(\mathbf{e}=(1,-1,0)\)。计算 \(\mathbf{b}\)。 解答：\(\mathbf{b} = (6\times3+1,\; 9\times3-1,\; 14\times3+0) = (19, 26, 42) \bmod 17 = (2, 9, 8)\)。 给定 \((A, \mathbf{b})\)，因噪声 \(\mathbf{e}\) 的存在，无法直接求解线性方程组。 易错点：忽视噪声 \(\mathbf{e}\) 的作用。若无噪声，LWE 退化为普通 线性方程组，可用高斯消元轻松求解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">后量子密码的安全性基于什么假设？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。格问题目前没有已知的高效量子算法，这与 RSA/ECC')">A. 大整数分解困难</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。格问题目前没有已知的高效量子算法，这与 RSA/ECC')">B. 离散对数困难</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！格问题目前没有已知的高效量子算法，这与 RSA/ECC')">C. 格问题（如 SVP/LWE）困难，即使对量子计算机</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。格问题目前没有已知的高效量子算法，这与 RSA/ECC')">D. 哈希函数不可逆</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/discrete/cryptography.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

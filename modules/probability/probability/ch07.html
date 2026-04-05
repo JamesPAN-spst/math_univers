@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.7 条件期望 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch07-q1",
+        "question": "\\(E[X|\\mathcal{G}]\\) 的严格定义中，\\(E[X|\\mathcal{G}]\\) 必须满足？",
+        "options": [
+          "\\(\\mathcal{G}\\)-可测 + \\(\\forall G \\in \\mathcal{G}: \\int_G E[X|\\mathcal{G}]\\,dP=\\int_G X\\,dP\\)",
+        "\\(\\mathcal{F}\\)-可测 + \\(E[E[X|\\mathcal{G}]]=0\\)",
+        "是 \\(X\\) 的众数",
+        "\\(\\sigma(X)\\)-可测"
+        ],
+        "answer": 0,
+        "explanation": "条件期望由两个性质定义：(1) 关于 \\(\\mathcal{G}\\) 可测；(2) 在每个 \\(G \\in \\mathcal{G}\\) 上与 \\(X\\) 有相同积分。Radon-Nikodym 定理保证存在性（a.s. 唯一）。D 是 \\(E[X|\\sigma(X)]\\) 的情形。"
+      },
+      {
+        "id": "probability-ch07-q2",
+        "question": "\\(X \\sim U(0,1)\\)，\\(\\mathcal{G}=\\{\\emptyset,\\Omega\\}\\)（平凡 \\(\\sigma\\)-代数）。\\(E[X|\\mathcal{G}]=\\)？",
+        "options": [
+          "\\(1/2\\)（常数）",
+        "\\(X\\)",
+        "\\(0\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{G}\\) 无信息，条件期望退化为无条件期望：\\(E[X|\\{\\emptyset,\\Omega\\}]=E[X]=1/2\\)。条件期望 = 在给定信息下的最佳 \\(L^2\\) 预测。"
+      },
+      {
+        "id": "probability-ch07-q3",
+        "question": "塔性质 (tower property): \\(E[E[X|\\mathcal{G}]]=\\)？",
+        "options": [
+          "\\(E[X]\\)",
+        "\\(E[X|\\mathcal{G}]\\)",
+        "\\(0\\)",
+        "\\(\\text{Var}(X)\\)"
+        ],
+        "answer": 0,
+        "explanation": "取 \\(G=\\Omega\\) 在定义中：\\(\\int_\\Omega E[X|\\mathcal{G}]dP=\\int_\\Omega XdP=E[X]\\)。即 \\(E[E[X|\\mathcal{G}]]=E[X]\\)。这是全期望公式的抽象版。迭代条件期望\"最终\"还原无条件期望。"
+      },
+      {
+        "id": "probability-ch07-q4",
+        "question": "若 \\(\\mathcal{H} \\subseteq \\mathcal{G}\\)，\\(E[E[X|\\mathcal{G}]|\\mathcal{H}]=\\)？",
+        "options": [
+          "\\(E[X|\\mathcal{H}]\\)",
+        "\\(E[X|\\mathcal{G}]\\)",
+        "\\(E[X]\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "广义塔性质：\"粗\"信息内的条件期望 = 直接用\"粗\"信息条件化。先精细再粗化 = 直接粗化。\\(\\mathcal{H} \\subseteq \\mathcal{G}\\) 意味着 \\(\\mathcal{H}\\) 信息更少。"
+      },
+      {
+        "id": "probability-ch07-q5",
+        "question": "全方差公式 \\(\\text{Var}(X)=\\)？",
+        "options": [
+          "\\(E[\\text{Var}(X|Y)]+\\text{Var}(E[X|Y])\\)",
+        "\\(\\text{Var}(E[X|Y])\\)",
+        "\\(E[\\text{Var}(X|Y)]\\)",
+        "\\(E[X^2]-E[X]^2\\)（非条件分解）"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(X)=\\underbrace{E[\\text{Var}(X|Y)]}_{\\text{组内方差均值}}+\\underbrace{\\text{Var}(E[X|Y])}_{\\text{组间方差}}\\)。D 虽正确但不是条件分解。全方差公式（Eve's law）将总变异分解为内+间。"
+      },
+      {
+        "id": "probability-ch07-q6",
+        "question": "\\(X|N=n \\sim N(\\mu, \\sigma^2/n)\\)，\\(N \\sim \\text{Poisson}(\\lambda)\\)。\\(\\text{Var}(E[X|N])=\\)？",
+        "options": [
+          "\\(0\\)（因为 \\(E[X|N]=\\mu\\)，常数）",
+        "\\(\\sigma^2/\\lambda\\)",
+        "\\(\\mu^2/\\lambda\\)",
+        "\\(\\sigma^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X|N]=\\mu\\)（与 \\(N\\) 无关），\\(\\text{Var}(\\mu)=0\\)。全方差：\\(\\text{Var}(X)=E[\\sigma^2/N]+0\\)... 注意 \\(E[1/N]\\) 对 Poisson 不好定义（\\(P(N=0)>0\\)）。答案 A 正确：组间方差为零。"
+      },
+      {
+        "id": "probability-ch07-q7",
+        "question": "正则条件分布 \\(P(X \\in B | Y=y)\\) 的严格含义？",
+        "options": [
+          "对固定 \\(B\\) 是 \\(Y\\) 的函数（a.e. 版本），对固定 \\(y\\) 是 \\(B\\) 上的概率测度",
+        "只在离散情形有意义",
+        "就是 \\(P(X \\in B \\cap Y=y)/P(Y=y)\\)",
+        "条件 CDF 的导数"
+        ],
+        "answer": 0,
+        "explanation": "正则条件分布 \\(\\mu_{X|Y}(\\cdot|y)\\) 满足两个条件：(1) 对每个 \\(y\\) 是 \\(\\mathcal{B}(\\mathbb{R})\\) 上的概率测度；(2) 对每个 \\(B\\)，\\(y \\mapsto \\mu(B|y)\\) 是条件期望的版本。C 对连续 \\(Y\\) 分母 \\(=0\\)。"
+      },
+      {
+        "id": "probability-ch07-q8",
+        "question": "\\(X \\perp \\mathcal{G}\\)（\\(X\\) 独立于 \\(\\mathcal{G}\\)），\\(E[X|\\mathcal{G}]=\\)？",
+        "options": [
+          "\\(E[X]\\)",
+        "\\(X\\)",
+        "\\(0\\)",
+        "\\(\\text{Var}(X)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 与 \\(\\mathcal{G}\\) 独立时，条件期望不提供额外信息：\\(E[X|\\mathcal{G}]=E[X]\\)（常数）。验证：\\(\\mathcal{G}\\)-可测（常数 ✓），\\(\\int_G E[X]dP=E[X]P(G)=\\int_G XdP\\)（独立性 ✓）。"
+      },
+      {
+        "id": "probability-ch07-q9",
+        "question": "\\(Y\\) 是 \\(\\mathcal{G}\\)-可测的，\\(E[XY|\\mathcal{G}]=\\)？",
+        "options": [
+          "\\(Y \\cdot E[X|\\mathcal{G}]\\)",
+        "\\(E[X]E[Y]\\)",
+        "\\(E[XY]\\)",
+        "\\(Y+E[X|\\mathcal{G}]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{G}\\)-可测的 \\(Y\\) 可从条件期望中\"提出\"：\\(E[XY|\\mathcal{G}]=YE[X|\\mathcal{G}]\\)（pull-out property）。需 \\(E[|XY|]<\\infty\\)。这相当于条件期望是 \\(L^2(\\mathcal{G})\\) 上的投影。"
+      },
+      {
+        "id": "probability-ch07-q10",
+        "question": "\\(E[X|\\mathcal{G}]\\) 是 \\(X\\) 在 \\(L^2(\\mathcal{G})\\) 上的正交投影。\"正交\"意味着？",
+        "options": [
+          "\\(E[(X-E[X|\\mathcal{G}])Z]=0\\)（\\(\\forall Z \\in L^2(\\mathcal{G})\\)）",
+        "\\(E[X|\\mathcal{G}] \\perp X\\)",
+        "\\(\\text{Cov}(X,E[X|\\mathcal{G}])=0\\)",
+        "\\(E[X|\\mathcal{G}]\\) 与 \\(X\\) 独立"
+        ],
+        "answer": 0,
+        "explanation": "残差 \\(X-E[X|\\mathcal{G}]\\) 与所有 \\(\\mathcal{G}\\)-可测变量正交（零协方差/零内积）。这是 Hilbert 空间投影定理在概率中的体现。C 不对：\\(\\text{Cov}(X,E[X|\\mathcal{G}])=\\text{Var}(E[X|\\mathcal{G}]) \\geq 0\\)。"
+      },
+      {
+        "id": "probability-ch07-q11",
+        "question": "\\(E[X|Y]=aY+b\\)（线性情形）。对联合正态 \\((X,Y)\\)，\\(a\\) 和 \\(b=\\)？",
+        "options": [
+          "\\(a=\\rho\\sigma_X/\\sigma_Y\\)，\\(b=\\mu_X-a\\mu_Y\\)",
+        "\\(a=\\text{Cov}(X,Y)/\\text{Var}(X)\\)",
+        "\\(a=\\rho\\)，\\(b=0\\)",
+        "\\(a=\\sigma_Y/\\sigma_X\\)，\\(b=\\mu_Y\\)"
+        ],
+        "answer": 0,
+        "explanation": "正态线性条件期望：\\(E[X|Y]=\\mu_X+\\rho\\frac{\\sigma_X}{\\sigma_Y}(Y-\\mu_Y)\\)。\\(a=\\rho\\sigma_X/\\sigma_Y\\)，\\(b=\\mu_X-a\\mu_Y\\)。这是线性回归系数的理论基础。B 把 \\(X,Y\\) 搞反了。"
+      },
+      {
+        "id": "probability-ch07-q12",
+        "question": "\\(X|Y=y \\sim \\text{Poisson}(y)\\)，\\(Y \\sim \\text{Gamma}(2,1)\\)。\\(E[X]\\) 和 \\(\\text{Var}(X)\\)？",
+        "options": [
+          "\\(E[X]=2\\)，\\(\\text{Var}(X)=4\\)",
+        "\\(E[X]=2\\)，\\(\\text{Var}(X)=2\\)",
+        "\\(E[X]=1\\)，\\(\\text{Var}(X)=3\\)",
+        "\\(E[X]=2\\)，\\(\\text{Var}(X)=6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X]=E[E[X|Y]]=E[Y]=2\\)。\\(\\text{Var}(X)=E[\\text{Var}(X|Y)]+\\text{Var}(E[X|Y])=E[Y]+\\text{Var}(Y)=2+2=4\\)。Poisson 混合模型：条件方差 = 条件均值 \\(Y\\)，全方差公式分解为内 \\((E[Y])\\) + 间 \\((\\text{Var}(Y))\\)。"
+      },
+      {
+        "id": "probability-ch07-q13",
+        "question": "全方差公式的 ANOVA 解读：组间方差占总方差的比 \\(R^2=\\)？",
+        "options": [
+          "\\(\\text{Var}(E[X|Y])/\\text{Var}(X)\\)",
+        "\\(E[\\text{Var}(X|Y)]/\\text{Var}(X)\\)",
+        "\\(\\rho^2(X,Y)\\)",
+        "A 和 C 对正态等价"
+        ],
+        "answer": 3,
+        "explanation": "\\(R^2=\\text{Var}(E[X|Y])/\\text{Var}(X)\\) 度量 \\(Y\\) 解释 \\(X\\) 的比例。对联合正态 \\(R^2=\\rho^2\\)。非正态时 \\(R^2\\) 和 \\(\\rho^2\\) 可不同（\\(E[X|Y]\\) 非线性）。\\(R^2=1-E[\\text{Var}(X|Y)]/\\text{Var}(X)\\)。"
+      },
+      {
+        "id": "probability-ch07-q14",
+        "question": "条件期望引出鞅的方式：若 \\(E[X_{n+1}|\\mathcal{F}_n]=X_n\\)，则 \\(\\{X_n\\}\\) 称为？",
+        "options": [
+          "鞅",
+        "上鞅",
+        "下鞅",
+        "Markov 链"
+        ],
+        "answer": 0,
+        "explanation": "鞅定义：\\(E[X_{n+1}|\\mathcal{F}_n]=X_n\\) a.s.。\"给定当前信息，未来的期望不变\"——公平赌博。上鞅 \\(\\leq\\)（平均趋降），下鞅 \\(\\geq\\)（平均趋升）。Markov 不同（无期望等式约束）。"
+      },
+      {
+        "id": "probability-ch07-q15",
+        "question": "\\(S_n=\\sum_{k=1}^n X_k\\)（\\(X_k\\) iid，\\(E[X_k]=0\\)）。\\(E[S_{n+1}|\\mathcal{F}_n]=\\)？",
+        "options": [
+          "\\(S_n\\)",
+        "\\(S_n+\\mu\\)",
+        "\\(0\\)",
+        "\\(S_{n+1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[S_{n+1}|\\mathcal{F}_n]=E[S_n+X_{n+1}|\\mathcal{F}_n]=S_n+E[X_{n+1}|\\mathcal{F}_n]=S_n+0=S_n\\)。\\(X_{n+1}\\) 独立于 \\(\\mathcal{F}_n\\)，条件期望 = 无条件期望。故 \\(S_n\\) 是鞅。"
+      },
+      {
+        "id": "probability-ch07-q16",
+        "question": "条件期望算子 \\(E[\\cdot|\\mathcal{G}]\\) 是哪种空间上的投影？",
+        "options": [
+          "\\(L^2(\\Omega) \\to L^2(\\mathcal{G})\\)",
+        "\\(L^1 \\to L^\\infty\\)",
+        "\\(\\mathbb{R}^n \\to \\mathbb{R}^m\\)",
+        "只对离散变量有意义"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[\\cdot|\\mathcal{G}]: L^2(\\Omega,\\mathcal{F},P) \\to L^2(\\Omega,\\mathcal{G},P)\\) 是正交投影。\\(L^2(\\mathcal{G})\\) 是闭子空间。最小 \\(L^2\\) 距离：\\(E[X|\\mathcal{G}]=\\arg\\min_{Z \\in L^2(\\mathcal{G})} E[(X-Z)^2]\\)。"
+      },
+      {
+        "id": "probability-ch07-q17",
+        "question": "条件 Jensen 不等式：\\(g\\) 凸，\\(E[g(X)|\\mathcal{G}] \\geq g(E[X|\\mathcal{G}])\\)？",
+        "options": [
+          "是（条件版 Jensen）",
+        "否",
+        "仅当 \\(g\\) 线性",
+        "仅当 \\(g\\) 递增"
+        ],
+        "answer": 0,
+        "explanation": "条件 Jensen 成立：\\(E[g(X)|\\mathcal{G}] \\geq g(E[X|\\mathcal{G}])\\) a.s.（\\(g\\) 凸）。这在鞅论中很关键：若 \\(X_n\\) 是鞅且 \\(g\\) 凸，\\(g(X_n)\\) 是下鞅。"
+      },
+      {
+        "id": "probability-ch07-q18",
+        "question": "条件期望的存在性通过什么定理保证？",
+        "options": [
+          "Radon-Nikodym 定理",
+        "Hahn-Banach 定理",
+        "Riesz 表示定理",
+        "A 或 C（\\(L^2\\) 投影等价于 RN）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\nu(G)=\\int_G XdP\\) 定义 \\(\\mathcal{G}\\) 上的符号测度，\\(\\nu \\ll P|_\\mathcal{G}\\)。RN 导数 \\(d\\nu/dP|_\\mathcal{G}=E[X|\\mathcal{G}]\\)。等价地，在 \\(L^2\\) 中由 Riesz 投影定理得到闭子空间上的投影。"
+      },
+      {
+        "id": "probability-ch07-q19",
+        "question": "\\(E[X|\\mathcal{G}]\\) 的 a.s. 唯一性意味着两个版本 \\(Y_1, Y_2\\) 满足？",
+        "options": [
+          "\\(P(Y_1=Y_2)=1\\)",
+        "\\(Y_1=Y_2\\) 处处",
+        "\\(E[Y_1]=E[Y_2]\\)",
+        "\\(P(Y_1 \\neq Y_2)=1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "条件期望仅在 \\(P\\)-零测集上可以不同。两个版本 \\(Y_1, Y_2\\) 满足 \\(P(Y_1 \\neq Y_2)=0\\)。这是 RN 导数唯一性的直接推论。修改零测集上的值不影响条件期望。"
+      },
+      {
+        "id": "probability-ch07-q20",
+        "question": "广义塔性质的非直觉推论：\\(\\mathcal{G} \\subseteq \\mathcal{H}\\)，\\(Y\\) \\(\\mathcal{G}\\)-可测。\\(E[Y|\\mathcal{H}]=\\)？",
+        "options": [
+          "\\(Y\\)",
+        "\\(E[Y]\\)",
+        "\\(E[Y|\\mathcal{G}]\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y\\) 已经 \\(\\mathcal{G}\\)-可测 \\(\\Rightarrow\\) \\(\\mathcal{H}\\)-可测（因 \\(\\mathcal{G} \\subseteq \\mathcal{H}\\)）。条件期望的自身投影恒等：\\(E[Y|\\mathcal{H}]=Y\\)。\"用更多信息条件化已知量不改变它\"。"
+      },
+      {
+        "id": "probability-ch07-q21",
+        "question": "\\(\\text{Var}(X|Y)=E[X^2|Y]-(E[X|Y])^2\\)。证明全方差公式用到条件期望的哪些性质？",
+        "options": [
+          "塔性质 + pull-out + 线性性",
+        "仅塔性质",
+        "Jensen 不等式",
+        "单调收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}(X)=E[X^2]-E[X]^2\\)。\\(E[X^2]=E[E[X^2|Y]]\\)（塔）。\\(E[E[X|Y]^2]=\\text{Var}(E[X|Y])+E[X]^2\\)。\\(E[\\text{Var}(X|Y)]=E[E[X^2|Y]]-E[E[X|Y]^2]\\)。组合得全方差公式。"
+      },
+      {
+        "id": "probability-ch07-q22",
+        "question": "保险中 \\(N\\) 条赔案数随机，各赔额 \\(X_i\\) iid。\\(S=\\sum_{i=1}^N X_i\\) 的方差（用全方差公式）？",
+        "options": [
+          "\\(E[N]\\text{Var}(X)+\\text{Var}(N)(E[X])^2\\)",
+        "\\(N \\cdot \\text{Var}(X)\\)",
+        "\\(\\text{Var}(N)+\\text{Var}(X)\\)",
+        "\\(E[N] \\cdot E[X^2]\\)"
+        ],
+        "answer": 0,
+        "explanation": "条件在 \\(N\\): \\(\\text{Var}(S|N)=N\\text{Var}(X)\\)，\\(E[S|N]=NE[X]\\)。全方差：\\(\\text{Var}(S)=E[N]\\text{Var}(X)+\\text{Var}(N)(E[X])^2\\)。这是复合风险模型的核心公式，用于保险储备金计算。"
+      },
+      {
+        "id": "probability-ch07-q23",
+        "question": "正则条件分布存在的充分条件？",
+        "options": [
+          "\\((\\Omega,\\mathcal{F})\\) 是 Polish 空间上的 Borel \\(\\sigma\\)-代数",
+        "总是存在",
+        "\\(\\Omega\\) 有限",
+        "\\(X\\) 离散"
+        ],
+        "answer": 0,
+        "explanation": "Polish 空间（完备可分度量空间）上正则条件分布总存在。一般测度空间中不保证（Kolmogorov 反例）。\\(\\mathbb{R}^n\\) 是 Polish 的，所以大多数实际概率模型中存在。"
+      },
+      {
+        "id": "probability-ch07-q24",
+        "question": "\\(E[X|Y=y]\\) 作为 \\(y\\) 的函数，是否总连续？",
+        "options": [
+          "不一定，可以不连续",
+        "一定连续",
+        "仅对正态分布连续",
+        "一定光滑"
+        ],
+        "answer": 0,
+        "explanation": "反例：\\(X=\\mathbf{1}_{Y>0}\\)，\\(Y \\sim N(0,1)\\)。\\(E[X|Y=y]=\\mathbf{1}_{y>0}\\)，在 \\(y=0\\) 不连续。条件期望作为\"版本\"只需满足 a.e. 性质，不保证连续。联合正态时 \\(E[X|Y]\\) 线性（连续）。"
+      },
+      {
+        "id": "probability-ch07-q25",
+        "question": "条件期望的 contraction 性质：\\(\\|E[X|\\mathcal{G}]\\|_p \\leq\\)？（\\(p \\geq 1\\)）",
+        "options": [
+          "\\(\\|X\\|_p\\)",
+        "\\(\\|X\\|_\\infty\\)",
+        "\\(p \\cdot \\|X\\|_1\\)",
+        "\\(\\|X\\|_p / p\\)"
+        ],
+        "answer": 0,
+        "explanation": "条件 Jensen: \\(|E[X|\\mathcal{G}]|^p \\leq E[|X|^p|\\mathcal{G}]\\)。取期望：\\(E[|E[X|\\mathcal{G}]|^p] \\leq E[|X|^p]\\)。即条件期望的 \\(L^p\\) 范数不增。投影永远缩短距离。"
+      },
+      {
+        "id": "probability-ch07-q26",
+        "question": "学生成绩 \\(X\\)，学校类型 \\(Y \\in \\{A,B,C\\}\\)。\\(\\text{Var}(X)=100\\)，\\(\\text{Var}(E[X|Y])=20\\)。学校类型解释了成绩方差的百分比？",
+        "options": [
+          "\\(20\\%\\)",
+        "\\(80\\%\\)",
+        "\\(50\\%\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(R^2=\\text{Var}(E[X|Y])/\\text{Var}(X)=20/100=20\\%\\)。组内方差 \\(=E[\\text{Var}(X|Y)]=80\\)。学校类型解释 \\(20\\%\\) 变异，\\(80\\%\\) 是校内个体差异。ANOVA 的核心思想。"
+      },
+      {
+        "id": "probability-ch07-q27",
+        "question": "信号处理：含噪信号 \\(Y=X+N\\)（\\(X \\perp N\\)，\\(N \\sim N(0,\\sigma_N^2)\\)）。最小均方误差 (MMSE) 估计 \\(\\hat{X}=E[X|Y]\\)。对 \\(X \\sim N(\\mu,\\sigma_X^2)\\) 的 MMSE？",
+        "options": [
+          "\\(\\hat{X}=\\mu+\\frac{\\sigma_X^2}{\\sigma_X^2+\\sigma_N^2}(Y-\\mu)\\)",
+        "\\(\\hat{X}=Y\\)",
+        "\\(\\hat{X}=\\mu\\)",
+        "\\(\\hat{X}=(Y+\\mu)/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "联合正态条件期望：\\(E[X|Y]=\\mu+\\frac{\\text{Cov}(X,Y)}{\\text{Var}(Y)}(Y-E[Y])\\)。\\(\\text{Cov}(X,Y)=\\sigma_X^2\\)，\\(\\text{Var}(Y)=\\sigma_X^2+\\sigma_N^2\\)。低信噪比时 \\(\\hat{X} \\approx \\mu\\)（先验），高信噪比时 \\(\\hat{X} \\approx Y\\)。"
+      },
+      {
+        "id": "probability-ch07-q28",
+        "question": "Kalman 滤波中，状态量的后验分布由条件期望给出。其递推结构依赖？",
+        "options": [
+          "条件期望的塔性质和 Markov 性",
+        "遍历定理",
+        "大数律",
+        "极大似然估计"
+        ],
+        "answer": 0,
+        "explanation": "Kalman 滤波: \\(\\hat{x}_{t|t}=E[x_t|\\mathcal{Y}_t]\\)，递推用塔性质 \\(E[x_t|\\mathcal{Y}_t]=E[E[x_t|x_{t-1}]|\\mathcal{Y}_t]\\)（Markov: \\(x_t|x_{t-1}\\) 与 \\(\\mathcal{Y}_{t-1}\\) 独立）。线性高斯系统下条件分布始终正态。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.7 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 条件期望的定义</a></li>
+      <li><a href="#kp2">02 · 条件期望的核心性质</a></li>
+      <li><a href="#kp3">03 · 条件方差公式</a></li>
+      <li><a href="#kp4">04 · 正则条件分布与鞅的引入</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 7</p>
+      <h1>条件期望</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>条件期望的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在获得部分信息 \(\mathcal{G}\) 后，对 \(X\) 的「最佳预测」是什么？ 条件期望 \(E[X|\mathcal{G}]\) 给出了答案：它是 \(\mathcal{G}\)-可测的 随机变量，在 \(L^2\) 意义下最佳逼近 \(X\)。这个概念是鞅论、 随机过程和贝叶斯统计的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(E[X|\mathcal{G}]\) 是 \(X\) 在 \(L^2(\Omega, \mathcal{G}, P)\) 上的正交投影。 它保留了 \(\mathcal{G}\) 能「看见」的信息，丢弃了其余部分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：\(E[X|\mathcal{G}]\) 是满足以下两条的随机变量： (1) \(E[X|\mathcal{G}]\) 是 \(\mathcal{G}\)-可测的 (2) 对所有 \(A \in \mathcal{G}\)， \[\int_A E[X|\mathcal{G}]\,dP = \int_A X\,dP\] 存在唯一性：由 Radon-Nikodym 定理保证（a.s. 唯一）。 \(L^2\) 投影解释：若 \(X \in L^2\)，则 \[E[X|\mathcal{G}] = \arg\min_{Y \in L^2(\mathcal{G})} E[(X - Y)^2]\] 即 \(E[X|\mathcal{G}]\) 是 \(X\) 在闭子空间 \(L^2(\mathcal{G})\) 上的 正交投影。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融中，\(E[X|\mathcal{F}_t]\) 是基于 \(t\) 时刻信息对未来收益的 最佳预测；机器学习中的敏慏性分析也涉及条件期望。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X \sim U(0,1)\)，\(\mathcal{G} = \sigma(\mathbf{1}_{X > 1/2})\) （只知 \(X\) 是否大于 \(1/2\)）。求 \(E[X|\mathcal{G}]\)。 解答：\(\mathcal{G} = \{\emptyset, [0,1/2], (1/2,1], \Omega\}\)。 在 \(\{X \leq 1/2\}\) 上：\(E[X|\mathcal{G}] = E[X|X \leq 1/2] = 1/4\)。 在 \(\{X > 1/2\}\) 上：\(E[X|\mathcal{G}] = E[X|X > 1/2] = 3/4\)。 易错点：\(E[X|\mathcal{G}]\) 是随机变量（依赖于 \(\omega\)），不是常数！</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(E[X|\mathcal{G}]\) 是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(E[X|\\mathcal{G}]\\) 必须是 \\(\\mathcal{G}\\)-可测的（只用 \\(\\mathcal{G}\\) 中的信息来表达），这是塔性质和鞅论的基础。')">A. 一个常数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(E[X|\\mathcal{G}]\\) 必须是 \\(\\mathcal{G}\\)-可测的（只用 \\(\\mathcal{G}\\) 中的信息来表达），这是塔性质和鞅论的基础。')">B. 一个 \(\mathcal{F}\)-可测随机变量</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(E[X|\\mathcal{G}]\\) 必须是 \\(\\mathcal{G}\\)-可测的（只用 \\(\\mathcal{G}\\) 中的信息来表达），这是塔性质和鞅论的基础。')">C. 一个 \(\mathcal{G}\)-可测随机变量</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(E[X|\\mathcal{G}]\\) 必须是 \\(\\mathcal{G}\\)-可测的（只用 \\(\\mathcal{G}\\) 中的信息来表达），这是塔性质和鞅论的基础。')">D. 一个事件</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>条件期望的核心性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>条件期望的强大之处在于它的一系列代数性质：线性性、塔性质、 可测抽出、独立时的简化。这些性质使得复杂的条件期望计算 可以逐步化简，是鞅论和随机过程的计算工具箱。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>核心性质（设 \(\mathcal{G}_2 \subseteq \mathcal{G}_1 \subseteq \mathcal{F}\)）： (i) 线性性：\(E[aX + bY | \mathcal{G}] = aE[X|\mathcal{G}] + bE[Y|\mathcal{G}]\) (ii) 塔性质(Tower property)： \[E[E[X|\mathcal{G}_1] | \mathcal{G}_2] = E[X|\mathcal{G}_2]\] 特别地：\(E[E[X|\mathcal{G}]] = E[X]\)（全期望公式）。 (iii) 独立时：若 \(X \perp\!\!\!\perp \mathcal{G}\)，则 \(E[X|\mathcal{G}] = E[X]\)。 (iv) 可测抽出：若 \(Y\) 是 \(\mathcal{G}\)-可测的，则 \[E[XY|\mathcal{G}] = Y \cdot E[X|\mathcal{G}]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>塔性质是动态规划中 Bellman 方程的数学基础； 可测抽出在金融定价中广泛使用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(X, Y\) 独立，\(E[X] = 3\)。求 \(E[X + Y^2 | Y]\)。 解答：由线性性：\(E[X + Y^2 | Y] = E[X|Y] + E[Y^2|Y]\)。 \(X \perp\!\!\!\perp Y\)，故 \(E[X|Y] = E[X] = 3\)。 \(Y^2\) 是 \(\sigma(Y)\)-可测的，故 \(E[Y^2|Y] = Y^2\)。 结果：\(E[X + Y^2 | Y] = 3 + Y^2\)。 易错点：将 \(E[Y^2|Y]\) 误算为 \(E[Y^2] = E[Y]^2 + \text{Var}(Y)\)。 \(Y^2\) 已是 \(\sigma(Y)\)-可测的，可立即抽出。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(E[E[X|\mathcal{G}]] = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。这是塔性质的特例（取 \\(\\mathcal{G}_2 = \\{\\emptyset, \\Omega\\}\\)），')">A. \(E[X|\mathcal{G}]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！这是塔性质的特例（取 \\(\\mathcal{G}_2 = \\{\\emptyset, \\Omega\\}\\)），')">B. \(E[X]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。这是塔性质的特例（取 \\(\\mathcal{G}_2 = \\{\\emptyset, \\Omega\\}\\)），')">C. \(E[X^2]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。这是塔性质的特例（取 \\(\\mathcal{G}_2 = \\{\\emptyset, \\Omega\\}\\)），')">D. 0</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>条件方差公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>总方差可以分解为两部分：「组间方差」和「组内方差的期望」。这个 分解在方差分析(ANOVA)、Rao-Blackwell 定理和混合模型中都 起关键作用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>条件方差公式(Eve’s law / Law of Total Variance)： \[\text{Var}(X) = E[\text{Var}(X|\mathcal{G})] + \text{Var}(E[X|\mathcal{G}])\] 证明：记 \(\mu_G = E[X|\mathcal{G}]\)。 \(\text{Var}(X) = E[X^2] - (E[X])^2\)。 \(E[\text{Var}(X|\mathcal{G})] = E[E[X^2|\mathcal{G}] - \mu_G^2] = E[X^2] - E[\mu_G^2]\)。 \(\text{Var}(\mu_G) = E[\mu_G^2] - (E[\mu_G])^2 = E[\mu_G^2] - (E[X])^2\)。 两式相加即得。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>ANOVA 中 SST = SSB + SSW 恰好是条件方差公式的离散版本； Rao-Blackwell 定理用它证明充分统计量降低方差。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(N \sim \text{Poisson}(\lambda)\)，给定 \(N = n\) 时 \(X | N \sim \text{Binomial}(n, p)\)。求 \(\text{Var}(X)\)。 解答：\(E[X|N] = Np\)，\(\text{Var}(X|N) = Np(1-p)\)。 \(E[\text{Var}(X|N)] = E[Np(1-p)] = \lambda p(1-p)\)。 \(\text{Var}(E[X|N]) = \text{Var}(Np) = p^2 \lambda\)。 \(\text{Var}(X) = \lambda p(1-p) + p^2 \lambda = \lambda p\)。 易错点：将 \(\text{Var}(X|N)\) 当作常数而非随机变量。 \(\text{Var}(X|N) = Np(1-p)\) 是依赖于 \(N\) 的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">条件方差公式 \(\text{Var}(X) = E[\text{Var}(X|Y)] + \text{Var}(E[X|Y])\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\text{Var}(E[X|Y])\\) 衡量了条件均值随 \\(Y\\) 的变化（组间差异），')">A. \(E[\text{Var}(X|Y)]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\text{Var}(E[X|Y])\\) 衡量了条件均值随 \\(Y\\) 的变化（组间差异），')">B. \(\text{Var}(E[X|Y])\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\text{Var}(E[X|Y])\\) 衡量了条件均值随 \\(Y\\) 的变化（组间差异），')">C. 两项之和</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>正则条件分布与鞅的引入</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>条件期望自然引向条件分布，而正则条件分布将条件概率从事件 提升到分布的层次。更重要的是，条件期望开启了鞅论的大门： \(E[X_{n+1}|\mathcal{F}_n] = X_n\) 就是鞅的定义，它描述了 「公平赌博」的数学结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>条件期望→滤→适应过程→鞅，这条概念链构成了 现代概率论与随机过程的核心主线。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>正则条件分布：给定 \(\mathcal{G}\)，如何定义 \(P(X \in B | \mathcal{G})\)？形式上，它是一个随机核 \(K(\omega, B)\)，满足： (a) 对固定 \(\omega\)，\(B \mapsto K(\omega, B)\) 是概率测度 (b) 对固定 \(B\)，\(\omega \mapsto K(\omega, B) = E[\mathbf{1}_{X \in B}|\mathcal{G}]\) 鞅的预告：设 \(\{\mathcal{F}_n\}\) 为滤，过程 \(\{X_n\}\) 适应于 \(\{\mathcal{F}_n\}\)。 若对所有 \(n\)： \[E[X_{n+1}|\mathcal{F}_n] = X_n \quad \text{a.s.}\] 则 \(\{X_n\}\) 为鞅。鞅的直觉：「知道过去后，对未来的 最佳预测就是当前值」——公平赌博。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>股价的“有效市场假说”可用鞅建模；赌博中赌徒财富过程是 （上）鞅，解释了为什么没有必胜策略。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n\) 为简单随机游走 \(X_n = \sum_{i=1}^{n} Y_i\)， \(Y_i = \pm 1\) 等概率。证明 \(\{X_n\}\) 是鞅。 解答：\(E[X_{n+1}|\mathcal{F}_n] = E[X_n + Y_{n+1}|\mathcal{F}_n] = X_n + E[Y_{n+1}] = X_n + 0 = X_n\)。 （用了 \(Y_{n+1} \perp\!\!\!\perp \mathcal{F}_n\) 和可测抽出） 易错点：验证鞅时忘记检查可积性 \(E[|X_n|] < \infty\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(E[X_{n+1}|\mathcal{F}_n] \leq X_n\) a.s.，则 \(\{X_n\}\) 是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(E[X_{n+1}|\\mathcal{F}_n] \\leq X_n\\) 为上鞅（均值趋降）；')">A. 鞅</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(E[X_{n+1}|\\mathcal{F}_n] \\leq X_n\\) 为上鞅（均值趋降）；')">B. 上鞅</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(E[X_{n+1}|\\mathcal{F}_n] \\leq X_n\\) 为上鞅（均值趋降）；')">C. 下鞅</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch06.html" class="nav-prev">← Ch.6</a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

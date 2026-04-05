@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 随机变量与分布 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch02-q1",
+        "question": "CDF \\(F(x)=0\\)（\\(x<0\\)），\\(F(x)=x^2\\)（\\(0 \\leq x \\leq 1\\)），\\(F(x)=1\\)（\\(x>1\\)）。求 \\(P(0.5 < X \\leq 0.8)\\)。",
+        "options": [
+          "\\(0.39\\)",
+        "\\(0.30\\)",
+        "\\(0.64\\)",
+        "\\(0.25\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(a<X \\leq b)=F(b)-F(a)=0.64-0.25=0.39\\)。CDF 的性质\"右连续\"保证区间概率直接用差值计算。选 B 是用了 \\((b-a)^2\\) 而非 \\(b^2-a^2\\)。"
+      },
+      {
+        "id": "probability-ch02-q2",
+        "question": "CDF \\(F(x)\\) 必须满足哪些性质？",
+        "options": [
+          "非递减、左连续、\\(\\lim_{x\\to-\\infty}F=0\\)、\\(\\lim_{x\\to+\\infty}F=1\\)",
+        "非递减、右连续、\\(\\lim_{x\\to-\\infty}F=0\\)、\\(\\lim_{x\\to+\\infty}F=1\\)",
+        "严格递增、连续、值域 \\([0,1]\\)",
+        "递增、可微、积分为 \\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "CDF 按公理是(1)非递减(2)右连续(3)两端极限 \\(0,1\\)。左连续是法国流派惯例（càglàd），但国际标准取右连续（càdlàg）。C 错：可以有平台与跳跃。D 错：可不可微。"
+      },
+      {
+        "id": "probability-ch02-q3",
+        "question": "\\(X \\sim \\text{Bin}(10, 0.3)\\)，求 \\(P(X=3)\\)。",
+        "options": [
+          "\\(\\binom{10}{3}(0.3)^3(0.7)^7\\)",
+        "\\((0.3)^3(0.7)^7\\)",
+        "\\(\\binom{10}{3}(0.3)^{10}\\)",
+        "\\(3 \\times 0.3\\)"
+        ],
+        "answer": 0,
+        "explanation": "Binomial PMF: \\(P(X=k)=\\binom{n}{k}p^k(1-p)^{n-k}\\)。\\(=\\binom{10}{3}(0.3)^3(0.7)^7 \\approx 0.267\\)。选 B 漏掉组合数（不考虑排列方式）是最常见错误。"
+      },
+      {
+        "id": "probability-ch02-q4",
+        "question": "\\(X \\sim \\text{Poisson}(4)\\)，\\(P(X=0)=\\)？",
+        "options": [
+          "\\(e^{-4}\\)",
+        "\\(4e^{-4}\\)",
+        "\\(0\\)",
+        "\\(1/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X=k)=e^{-\\lambda}\\lambda^k/k!\\)。\\(k=0\\): \\(P=e^{-4} \\cdot 1/1=e^{-4}\\approx 0.0183\\)。\\(0!=1\\) 和 \\(\\lambda^0=1\\) 是此处的关键。选 B 是 \\(P(X=1)\\) 的值。"
+      },
+      {
+        "id": "probability-ch02-q5",
+        "question": "\\(X \\sim U(0,1)\\)，\\(Y=X^2\\)。求 \\(Y\\) 的 CDF。",
+        "options": [
+          "\\(F_Y(y)=\\sqrt{y}\\)（\\(0 \\leq y \\leq 1\\)）",
+        "\\(F_Y(y)=y^2\\)",
+        "\\(F_Y(y)=y\\)",
+        "\\(F_Y(y)=2y\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(F_Y(y)=P(X^2 \\leq y)=P(X \\leq \\sqrt{y})=\\sqrt{y}\\)（\\(0 \\leq y \\leq 1\\)，因 \\(X>0\\)）。密度 \\(f_Y=1/(2\\sqrt{y})\\)。选 B 是 \\(F_X(x)=x\\) 的误应用。CDF 法是求变量函数分布的基本方法。"
+      },
+      {
+        "id": "probability-ch02-q6",
+        "question": "若 \\(X \\sim N(0,1)\\)，\\(Y=-X\\)，则 \\(Y\\) 的分布？",
+        "options": [
+          "\\(N(0,1)\\)",
+        "\\(N(0,-1)\\)",
+        "\\(-N(0,1)\\)（不是分布）",
+        "\\(U(-1,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "标准正态对称于 \\(0\\)，\\(-X\\) 与 \\(X\\) 同分布。\\(P(-X \\leq y)=P(X \\geq -y)=1-\\Phi(-y)=\\Phi(y)\\)。这是正态分布对称性的直接体现。"
+      },
+      {
+        "id": "probability-ch02-q7",
+        "question": "\\((X,Y)\\) 联合密度 \\(f(x,y)=6x\\)（\\(0<x<y<1\\)），其余 \\(0\\)。求边缘密度 \\(f_X(x)\\)。",
+        "options": [
+          "\\(f_X(x)=6x(1-x)\\)",
+        "\\(f_X(x)=3x^2\\)",
+        "\\(f_X(x)=6x\\)",
+        "\\(f_X(x)=3(1-x^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_X(x)=\\int_x^1 6x \\, dy=6x(1-x)\\)（\\(0<x<1\\)）。积分范围由 \\(x<y<1\\) 确定。选 C 漏掉积分，选 B 积分上限取错。边缘密度对自身变量无关维度积分。"
+      },
+      {
+        "id": "probability-ch02-q8",
+        "question": "混合 CDF \\(F(x)=0.3 \\cdot \\mathbf{1}_{x \\geq 0}+0.7(1-e^{-x})\\mathbf{1}_{x \\geq 0}\\)。\\(P(X=0)=\\)？",
+        "options": [
+          "\\(0.3\\)",
+        "\\(0\\)",
+        "\\(0.7\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(F\\) 在 \\(x=0\\) 处跳跃：\\(F(0)=0.3+0=0.3\\)，\\(F(0^-)=0\\)。跳跃量 \\(P(X=0)=0.3\\)。这是混合分布：\\(30\\%\\) 原子在 \\(0\\)，\\(70\\%\\) 连续在 \\((0,\\infty)\\)。连续分布无点质量。"
+      },
+      {
+        "id": "probability-ch02-q9",
+        "question": "\\(X\\) 的 CDF 为 \\(F(x)=1-(1+x)e^{-x}\\)（\\(x \\geq 0\\)），\\(F(x)=0\\)（\\(x<0\\)）。其密度和 \\(P(X>2)\\)？",
+        "options": [
+          "\\(f(x)=xe^{-x}\\)，\\(P=3e^{-2}\\)",
+        "\\(f(x)=(1+x)e^{-x}\\)，\\(P=e^{-2}\\)",
+        "\\(f(x)=xe^{-x}\\)，\\(P=1-3e^{-2}\\)",
+        "\\(f(x)=e^{-x}\\)，\\(P=e^{-2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x)=F'(x)=-e^{-x}+(1+x)e^{-x}=xe^{-x}\\)（Gamma(2,1)）。\\(P(X>2)=1-F(2)=(1+2)e^{-2}=3e^{-2} \\approx 0.406\\)。此即 Gamma 分布的生存函数。"
+      },
+      {
+        "id": "probability-ch02-q10",
+        "question": "\\(X \\sim \\text{Geom}(p)\\)（\\(P(X=k)=(1-p)^{k-1}p\\)）。\\(P(X>n)=\\)？",
+        "options": [
+          "\\((1-p)^n\\)",
+        "\\(1-(1-p)^n\\)",
+        "\\(p^n\\)",
+        "\\(np(1-p)^{n-1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X>n)=\\sum_{k=n+1}^{\\infty}(1-p)^{k-1}p=(1-p)^n\\)。这就是几何分布的\"无记忆性\"来源：\\(P(X>n+m|X>n)=(1-p)^m=P(X>m)\\)。选 B 是 \\(P(X \\leq n)\\)。"
+      },
+      {
+        "id": "probability-ch02-q11",
+        "question": "\\(X \\sim \\text{Exp}(\\lambda=2)\\)。求中位数 \\(m\\) 和 \\(P(X>E[X])\\)。",
+        "options": [
+          "\\(m=\\ln(2)/2\\)，\\(P=e^{-1}\\)",
+        "\\(m=1/2\\)，\\(P=1/2\\)",
+        "\\(m=\\ln(2)\\)，\\(P=e^{-2}\\)",
+        "\\(m=1\\)，\\(P=e^{-1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "中位数：\\(1-e^{-2m}=1/2 \\Rightarrow m=\\ln(2)/2 \\approx 0.347\\)。\\(E[X]=1/2\\)。\\(P(X>1/2)=e^{-1} \\approx 0.368\\)。指数分布中位数 \\(<\\) 均值（右偏），\\(P(X>E[X])=e^{-1}\\) 恒成立。"
+      },
+      {
+        "id": "probability-ch02-q12",
+        "question": "\\(X \\sim U(0,1)\\)，\\(Y=-\\ln X\\)。\\(Y\\) 的分布？",
+        "options": [
+          "\\(\\text{Exp}(1)\\)",
+        "\\(U(0,\\infty)\\)",
+        "\\(N(0,1)\\)",
+        "\\(\\text{Gamma}(2,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(Y \\leq y)=P(-\\ln X \\leq y)=P(X \\geq e^{-y})=1-e^{-y}\\)（\\(y>0\\)），即 \\(\\text{Exp}(1)\\) 的 CDF。这是逆变换抽样的基础：从均匀分布生成指数分布。"
+      },
+      {
+        "id": "probability-ch02-q13",
+        "question": "\\(X \\sim N(\\mu, \\sigma^2)\\)，\\(Y=aX+b\\)（\\(a \\neq 0\\)）。\\(Y\\) 的分布？",
+        "options": [
+          "\\(N(a\\mu+b, a^2\\sigma^2)\\)",
+        "\\(N(a\\mu, a\\sigma)\\)",
+        "\\(N(\\mu+b, a^2\\sigma^2)\\)",
+        "\\(N(a\\mu+b, a\\sigma^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[Y]=aE[X]+b=a\\mu+b\\)，\\(\\text{Var}(Y)=a^2\\text{Var}(X)=a^2\\sigma^2\\)。正态族对线性变换封闭：\\(Y \\sim N(a\\mu+b,a^2\\sigma^2)\\)。最常见错误：方差忘了平方 \\(a\\)（选 D）。"
+      },
+      {
+        "id": "probability-ch02-q14",
+        "question": "\\((X,Y) \\sim N_2(0,0,1,1,\\rho)\\)。\\(P(X>0, Y>0)\\) 用 \\(\\rho\\) 表示？",
+        "options": [
+          "\\(1/4+\\arcsin(\\rho)/(2\\pi)\\)",
+        "\\(1/4\\)",
+        "\\((1+\\rho)/4\\)",
+        "\\(\\rho/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "对标准二元正态 \\(P(X>0,Y>0)=1/4+\\arcsin(\\rho)/(2\\pi)\\)（Sheppard 公式）。\\(\\rho=0\\) 时为 \\(1/4\\)（独立），\\(\\rho=1\\) 时为 \\(1/2\\)。选 C 在 \\(\\rho=1\\) 时给 \\(1/2\\) 但 \\(\\rho=-1\\) 时给 \\(0\\)，巧合但公式错。"
+      },
+      {
+        "id": "probability-ch02-q15",
+        "question": "\\((X,Y)\\) 联合密度 \\(f(x,y)=e^{-x-y}\\)（\\(x,y>0\\)）。\\(X,Y\\) 是否独立？",
+        "options": [
+          "独立，\\(f=f_X \\cdot f_Y\\)",
+        "不独立，积分域相关",
+        "不独立，\\(f\\) 不可分离",
+        "需要额外信息"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_X=\\int_0^\\infty e^{-x-y}dy=e^{-x}\\)，\\(f_Y=e^{-y}\\)。\\(f(x,y)=f_X(x)f_Y(y)\\)，且定义域 \\((0,\\infty)^2\\) 是矩形。满足独立充要条件：联合密度可分离且支撑是乘积集。"
+      },
+      {
+        "id": "probability-ch02-q16",
+        "question": "\\(X \\sim \\text{Exp}(1)\\)，\\(Y \\sim \\text{Exp}(1)\\)，独立。\\(\\min(X,Y)\\) 服从？",
+        "options": [
+          "\\(\\text{Exp}(2)\\)",
+        "\\(\\text{Exp}(1)\\)",
+        "\\(U(0,1)\\)",
+        "\\(\\text{Gamma}(2,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\min>t)=P(X>t)P(Y>t)=e^{-t} \\cdot e^{-t}=e^{-2t}\\)，即 \\(\\text{Exp}(2)\\)。独立指数变量最小值的参数相加，这是排队论、可靠性理论的基本引理。"
+      },
+      {
+        "id": "probability-ch02-q17",
+        "question": "\\((X,Y)\\) 联合密度 \\(f(x,y)=2\\)（\\(0<x<y<1\\)），边缘 \\(f_Y(y)=\\)？",
+        "options": [
+          "\\(2y\\)",
+        "\\(2(1-y)\\)",
+        "\\(2\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_Y(y)=\\int_0^y 2\\,dx=2y\\)（\\(0<y<1\\)）。积分关于 \\(X\\) 在 \\((0,y)\\) 上。选 B 积分上下限搞反（\\(\\int_y^1\\)）。验证：\\(\\int_0^1 2y\\,dy=1\\) ✓。"
+      },
+      {
+        "id": "probability-ch02-q18",
+        "question": "\\(X\\) 有 CDF \\(F(x)=1-e^{-x^2}\\)（\\(x \\geq 0\\)）。该分布的分位数函数 \\(Q(p)=\\)？",
+        "options": [
+          "\\(\\sqrt{-\\ln(1-p)}\\)",
+        "\\(-\\ln(1-p)\\)",
+        "\\((1-p)^2\\)",
+        "\\(\\sqrt{p}\\)"
+        ],
+        "answer": 0,
+        "explanation": "解 \\(F(x)=p\\)：\\(1-e^{-x^2}=p \\Rightarrow x=\\sqrt{-\\ln(1-p)}\\)。分位数函数 \\(Q=F^{-1}\\) 在连续严格递增时可直接求逆。该分布是 Rayleigh 族特例。"
+      },
+      {
+        "id": "probability-ch02-q19",
+        "question": "混合分布 \\(F=0.4 F_1+0.6 F_2\\)，\\(F_1=\\text{CDF of}\\ N(0,1)\\)，\\(F_2=\\text{CDF of}\\ N(3,1)\\)。\\(P(X>3)\\) 近似为？",
+        "options": [
+          "\\(\\approx 0.301\\)",
+        "\\(\\approx 0.5\\)",
+        "\\(\\approx 0.6\\)",
+        "\\(\\approx 0.001\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X>3)=0.4 P(Z>3)+0.6 P(Z>0)=0.4\\times 0.0013+0.6 \\times 0.5 \\approx 0.0005+0.3=0.301\\)。混合分布的生存函数是各成分的加权和。选 B 只看了第二成分。"
+      },
+      {
+        "id": "probability-ch02-q20",
+        "question": "\\(X \\sim \\text{Poisson}(\\lambda)\\)，\\(X|N=n \\sim \\text{Bin}(n,p)\\)，\\(N \\sim \\text{Poisson}(\\mu)\\)。则 \\(X\\) 的（无条件）分布？",
+        "options": [
+          "\\(\\text{Poisson}(\\mu p)\\)",
+        "\\(\\text{Bin}(\\mu, p)\\)",
+        "\\(\\text{Poisson}(\\mu+p)\\)",
+        "\\(\\text{NegBin}(\\mu, p)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 的 PGF：\\(E[s^X]=E[E[s^X|N]]=E[(ps+1-p)^N]=e^{\\mu((ps+1-p)-1)}=e^{\\mu p(s-1)}\\)，恰好是 \\(\\text{Poisson}(\\mu p)\\) 的 PGF。这是 Poisson 分解定理（thinning lemma）。"
+      },
+      {
+        "id": "probability-ch02-q21",
+        "question": "哪个离散分布具有无记忆性？",
+        "options": [
+          "Binomial",
+        "Poisson",
+        "Geometric",
+        "Hypergeometric"
+        ],
+        "answer": 2,
+        "explanation": "\\(P(X>n+m|X>n)=P(X>m)\\) 仅几何分布满足（离散）。\\(P(X>n)=(1-p)^n\\)，推知条件概率 \\(=(1-p)^{n+m}/(1-p)^n=(1-p)^m\\)。指数分布是连续情形的无记忆分布。"
+      },
+      {
+        "id": "probability-ch02-q22",
+        "question": "\\(f_X(x)=2x\\)（\\(0<x<1\\)），\\(Y=1-X\\)。\\(Y\\) 的密度？",
+        "options": [
+          "\\(f_Y(y)=2(1-y)\\)",
+        "\\(f_Y(y)=2y\\)",
+        "\\(f_Y(y)=1\\)",
+        "\\(f_Y(y)=2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y=1-X\\)，\\(X=1-Y\\)，\\(|dX/dY|=1\\)。\\(f_Y(y)=f_X(1-y)\\times 1=2(1-y)\\)（\\(0<y<1\\)）。变量变换公式要求乘以 Jacobian 绝对值。验证：\\(\\int_0^1 2(1-y)dy=1\\) ✓。"
+      },
+      {
+        "id": "probability-ch02-q23",
+        "question": "概率积分变换说：若 \\(X\\) 连续且 CDF \\(F\\) 严格递增，则 \\(U=F(X)\\) 服从什么？",
+        "options": [
+          "与 \\(X\\) 相同的分布",
+        "\\(U(0,1)\\)",
+        "\\(\\text{Exp}(1)\\)",
+        "\\(N(0,1)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P(F(X) \\leq u)=P(X \\leq F^{-1}(u))=F(F^{-1}(u))=u\\)（\\(0<u<1\\)），恰是 \\(U(0,1)\\) 的 CDF。概率积分变换是蒙特卡洛抽样、Copula 理论和 KS 检验的数学基础。"
+      },
+      {
+        "id": "probability-ch02-q24",
+        "question": "\\((X,Y)\\) 联合密度 \\(f(x,y)=e^{-y}\\)（\\(0<x<y<\\infty\\)）。\\(\\text{Cov}(X,Y)=\\)？",
+        "options": [
+          "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[X]=\\int_0^\\infty\\int_0^y xe^{-y}dx\\,dy=\\int_0^\\infty y^2e^{-y}/2\\,dy=1\\)。\\(E[Y]=\\int_0^\\infty ye^{-y}\\cdot y\\,dy\\) 需 \\(f_Y(y)=ye^{-y}\\)，\\(E[Y]=2\\)。\\(E[XY]=\\int\\int xye^{-y}=\\int_0^\\infty y\\cdot y^2/2\\cdot e^{-y}dy=3\\)。\\(\\text{Cov}=3-1\\cdot 2=1\\)。"
+      },
+      {
+        "id": "probability-ch02-q25",
+        "question": "Copula 理论的核心 Sklar 定理说：任何联合 CDF \\(F(x,y)\\) 可以表示为？",
+        "options": [
+          "\\(F(x,y)=F_X(x)+F_Y(y)\\)",
+        "\\(F(x,y)=C(F_X(x),F_Y(y))\\)（\\(C\\) 为 Copula）",
+        "\\(F(x,y)=F_X(x) \\cdot F_Y(y)\\)",
+        "\\(F(x,y)=\\min(F_X(x),F_Y(y))\\)"
+        ],
+        "answer": 1,
+        "explanation": "Sklar 定理将联合分布分离为边缘 + 依赖结构 \\(C:[0,1]^2 \\to [0,1]\\)。C 独立 Copula（乘积），D 是 Fréchet 上界（完全正相依)。该定理是风险管理和金融中对相依性建模的基石。"
+      },
+      {
+        "id": "probability-ch02-q26",
+        "question": "某药物治疗有效率 \\(p\\) 的先验为 \\(\\text{Beta}(2,2)\\)，临床试验 10 人中 8 人有效。后验分布？",
+        "options": [
+          "\\(\\text{Beta}(10, 4)\\)",
+        "\\(\\text{Beta}(8, 2)\\)",
+        "\\(\\text{Beta}(3, 3)\\)",
+        "\\(\\text{Beta}(2, 8)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Beta-Binomial 共轭：先验 \\(\\text{Beta}(2,2)\\)＋数据 \\(x=8,n=10\\) → 后验 \\(\\text{Beta}(2+8,2+2)=\\text{Beta}(10,4)\\)。后验均值 \\(10/14 \\approx 0.71\\)，在 MLE \\(0.8\\) 与先验均值 \\(0.5\\) 之间。"
+      },
+      {
+        "id": "probability-ch02-q27",
+        "question": "保险公司用混合 Gamma 分布拟合理赔额：\\(f=0.7\\,\\text{Gamma}(2,1)+0.3\\,\\text{Gamma}(5,2)\\)。混合分布的均值？",
+        "options": [
+          "\\(0.7 \\times 2+0.3 \\times 10=4.4\\)",
+        "\\(2+10=12\\)",
+        "\\(0.7 \\times 2+0.3 \\times 5=2.9\\)",
+        "\\(\\sqrt{2 \\times 10}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Gamma}(\\alpha,\\beta)\\) 均值 \\(=\\alpha\\beta\\)。混合均值 \\(=0.7 \\times 2\\times 1+0.3 \\times 5\\times 2=1.4+3.0=4.4\\)。混合分布期望是各成分期望的加权和（全期望公式）。选 C 漏了尺度参数 \\(\\beta\\)。"
+      },
+      {
+        "id": "probability-ch02-q28",
+        "question": "蒙特卡洛估计 \\(\\pi\\)：在 \\([0,1]^2\\) 上均匀抽 \\(N\\) 点，计算落在单位圆内的比例 \\(\\hat{p}\\)。\\(E[\\hat{p}]\\) 和 \\(4\\hat{p}\\) 作为 \\(\\pi\\) 估计的理论基础？",
+        "options": [
+          "\\(E[\\hat{p}]=\\pi/4\\)，由大数律 \\(4\\hat{p} \\xrightarrow{a.s.} \\pi\\)",
+        "\\(E[\\hat{p}]=\\pi\\)",
+        "\\(E[\\hat{p}]=1/\\pi\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\text{点在圆内})=\\pi/4\\)（四分之一圆面积 vs 正方形面积）。\\(\\hat{p} \\to \\pi/4\\) a.s.（SLLN），\\(4\\hat{p} \\to \\pi\\)。这是概率积分变换+大数律在数值计算中的经典应用。误差 \\(\\sim 1/\\sqrt{N}\\)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 随机变量与分布函数</a></li>
+      <li><a href="#kp2">02 · 离散型与连续型随机变量</a></li>
+      <li><a href="#kp3">03 · 随机变量的函数</a></li>
+      <li><a href="#kp4">04 · 联合分布与边缘分布</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>随机变量与分布</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>随机变量与分布函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>概率空间描述了事件的概率，但实际问题通常关心的是数值结果：掷骰子 的点数、股价的涨幅、等待时间的长短。随机变量 \(X: \Omega \to \mathbb{R}\) 是从「抽象结果」到「数值」的桥梁，分布函数 \(F_X\) 则完整刻画了 \(X\) 取各种值的概率规律。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>随机变量的本质是可测函数：\(X^{-1}(B) \in \mathcal{F}\)， \(\forall B \in \mathcal{B}(\mathbb{R})\)。可测性保证了「\(X \leq x\)」 这类事件具有良定义的概率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：\(X: (\Omega, \mathcal{F}) \to (\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 为随机变量 iff \(\{\omega: X(\omega) \leq x\} \in \mathcal{F}\)， \(\forall x \in \mathbb{R}\)。 分布函数(CDF)： \[F_X(x) = P(X \leq x) = P(\{\omega: X(\omega) \leq x\})\] CDF 的三大性质： (1) 单调递增：\(x_1 < x_2 \Rightarrow F(x_1) \leq F(x_2)\) (2) 右连续：\(\lim_{x \downarrow x_0} F(x) = F(x_0)\) (3) 极限：\(\lim_{x \to -\infty} F(x) = 0\)， \(\lim_{x \to +\infty} F(x) = 1\) 反之，满足 (1)-(3) 的函数唯一确定一个概率分布。 跳跃点对应概率质量：\(P(X = x_0) = F(x_0) - F(x_0^-)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>可靠性工程中，设备寿命 \(T\) 的分布函数 \(F_T(t) = P(T \leq t)\) 直接给出失效概率，指导维护策略和保修定价。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X\) 的分布函数为 \(F(x) = 0\)（\(x<0\)），\(F(x) = x^2\)（\(0 \leq x \leq 1\)），\(F(x)=1\)（\(x>1\)）。 求 \(P(1/4 < X \leq 3/4)\)。 解答：\(P(1/4 < X \leq 3/4) = F(3/4) - F(1/4) = 9/16 - 1/16 = 1/2\)。 易错点：写成 \(F(3/4) - F(1/4)\) 还是 \(F(3/4^-) - F(1/4)\)？ 当 CDF 连续时两者相同。但若有跳跃点，\((a,b]\) 对应 \(F(b)-F(a)\)， \([a,b]\) 对应 \(F(b)-F(a^-)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">分布函数 \(F_X\) 为什么要求右连续而非左连续？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。约定 \\(F(x) = P(X \\leq x)\\)，由概率的连续性（\\(A_n \\downarrow A\\) 时 \\(P(A_n) \\to P(A)\\)），\\(F\\) 右连续。')">A. 纯粹是数学约定，左连续同样可行</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！约定 \\(F(x) = P(X \\leq x)\\)，由概率的连续性（\\(A_n \\downarrow A\\) 时 \\(P(A_n) \\to P(A)\\)），\\(F\\) 右连续。')">B. 保证 \(P(X \leq x) = F(x)\)（闭区间端点）的一致性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。约定 \\(F(x) = P(X \\leq x)\\)，由概率的连续性（\\(A_n \\downarrow A\\) 时 \\(P(A_n) \\to P(A)\\)），\\(F\\) 右连续。')">C. 只有右连续函数才是单调的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>离散型与连续型随机变量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>随机变量分为两大类：离散型（取可数多个值）和连续型（取连续范围的 值）。二项分布、Poisson 分布是离散的经典；正态分布、指数分布是 连续的代表。掌握常见分布族是应用概率论的基本功。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>离散型随机变量：\(X\) 取至多可数个值 \(\{x_1, x_2, \ldots\}\)， 由概率质量函数(PMF) \(p(x_i) = P(X = x_i)\) 完全刻画， 满足 \(\sum_i p(x_i) = 1\)。 连续型随机变量：存在密度函数 \(f_X(x) \geq 0\) 使得 \[F_X(x) = \int_{-\infty}^{x} f_X(t)\,dt\] 此时 \(P(X = x_0) = 0\)，\(P(a < X \leq b) = \int_a^b f_X(t)\,dt\)。 常见离散分布： - Bernoulli(\(p\))：\(P(X=1)=p\)，\(P(X=0)=1-p\) - 二项 \(B(n,p)\)：\(P(X=k)=\binom{n}{k}p^k(1-p)^{n-k}\) - Poisson(\(\lambda\))：\(P(X=k)=e^{-\lambda}\lambda^k/k!\) 常见连续分布： - 均匀 \(U(a,b)\)：\(f(x)=1/(b-a)\)，\(x \in [a,b]\) - 指数 \(\text{Exp}(\lambda)\)：\(f(x)=\lambda e^{-\lambda x}\)，\(x \geq 0\) - 正态 \(N(\mu,\sigma^2)\)： \[f(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Poisson 分布模拟呼叫中心来电数、放射性衰变计数；指数分布 建模电子元件寿命（无记忆性）；正态分布在中心极限定理下成为 大样本统计的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：某服务器每小时平均收到 5 个请求（Poisson 分布）。 求一小时内恰好收到 3 个请求的概率。 解答：\(\lambda = 5\)，\(P(X=3) = e^{-5} \cdot 5^3 / 3! = 125e^{-5}/6 \approx 0.1404\)。 易错点：混淆 Poisson 的参数 \(\lambda\)（均值=方差）与指数分布的 参数 \(\lambda\)（速率）。两者关系：Poisson 的事件间隔服从 \(\text{Exp}(\lambda)\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">连续型随机变量 \(X\) 满足 \(P(X = 5) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。连续型 \\(X\\) 对任意单点 \\(P(X=a) = \\int_a^a f(t)dt = 0\\)。')">A. 取决于密度函数 \(f(5)\) 的值</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。连续型 \\(X\\) 对任意单点 \\(P(X=a) = \\int_a^a f(t)dt = 0\\)。')">B. 等于 \(f(5)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！连续型 \\(X\\) 对任意单点 \\(P(X=a) = \\int_a^a f(t)dt = 0\\)。')">C. 恒等于 0</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。连续型 \\(X\\) 对任意单点 \\(P(X=a) = \\int_a^a f(t)dt = 0\\)。')">D. 取决于分布类型</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>随机变量的函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>已知 \(X\) 的分布，\(g(X)\) 的分布是什么？例如 \(X \sim N(0,1)\)， \(Y = X^2\) 服从什么分布？再如收入 \(X\) 已知，税后收入 \(g(X)\) 的 分布如何？变量变换是连接已知分布与实际需求的桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>离散情形：若 \(Y = g(X)\)，\(X\) 取值 \(\{x_i\}\)，则 \(P(Y = y) = \sum_{i: g(x_i) = y} P(X = x_i)\)。 连续情形（\(g\) 严格单调可微）：设 \(Y = g(X)\)，\(h = g^{-1}\)， \[f_Y(y) = f_X(h(y)) \cdot |h'(y)|\] 推导（以 \(g\) 严格递增为例）： \(F_Y(y) = P(g(X) \leq y) = P(X \leq h(y)) = F_X(h(y))\)。 两边对 \(y\) 求导：\(f_Y(y) = f_X(h(y)) \cdot h'(y)\)。 若 \(g\) 递减则取绝对值。 非单调情形：分段处理。如 \(Y = X^2\)： \[F_Y(y) = P(X^2 \leq y) = P(-\sqrt{y} \leq X \leq \sqrt{y}) = F_X(\sqrt{y}) - F_X(-\sqrt{y})\] 求导得 \(f_Y(y) = \frac{1}{2\sqrt{y}}[f_X(\sqrt{y}) + f_X(-\sqrt{y})]\)，\(y > 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>若 \(X \sim N(0,1)\)，则 \(X^2 \sim \chi^2(1)\)（自由度 1 的卡方分布）， 这是假设检验中卡方检验的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X \sim \text{Exp}(1)\)（\(f_X(x) = e^{-x}\)，\(x \geq 0\)）。 求 \(Y = \sqrt{X}\) 的密度。 解答：\(g(x) = \sqrt{x}\) 在 \(x > 0\) 上递增，\(h(y) = y^2\)，\(h'(y) = 2y\)。 \(f_Y(y) = f_X(y^2) \cdot 2y = e^{-y^2} \cdot 2y\)，\(y > 0\)。 （这是 Rayleigh 分布！） 易错点：忘记乘以 \(|h'(y)|\) 因子（Jacobian），导致密度不归一。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(X \sim U(0,1)\)，\(Y = -\ln X\)。\(Y\) 服从什么分布？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(h(y) = e^{-y}\\)，\\(|h\\'(y)| = e^{-y}\\)。')">A. \(U(0,+\infty)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(h(y) = e^{-y}\\)，\\(|h\\'(y)| = e^{-y}\\)。')">B. \(N(0,1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(h(y) = e^{-y}\\)，\\(|h\\'(y)| = e^{-y}\\)。')">C. \(\text{Exp}(1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(h(y) = e^{-y}\\)，\\(|h\\'(y)| = e^{-y}\\)。')">D. \(\chi^2(1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>联合分布与边缘分布</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>单个随机变量不足以描述多维随机现象：身高与体重、温度与湿度、 资产收益率之间的联合波动。联合分布刻画了多个随机变量之间的 全部概率关系，而边缘分布是从联合分布「投影」到单个变量的视角。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>联合分布函数：\(F_{X,Y}(x,y) = P(X \leq x, Y \leq y)\)。 联合密度（连续情形）：存在 \(f_{X,Y}(x,y) \geq 0\) 使得 \[F_{X,Y}(x,y) = \int_{-\infty}^{x}\int_{-\infty}^{y} f_{X,Y}(s,t)\,dt\,ds\] 边缘密度：通过「积掉」另一个变量获得： \[f_X(x) = \int_{-\infty}^{\infty} f_{X,Y}(x,y)\,dy\] 注意：边缘分布不能唯一确定联合分布！相同的边缘分布可对应 不同的联合分布（不同的相关结构）。 独立性等价条件：\(X \perp\!\!\!\perp Y\) iff \(f_{X,Y}(x,y) = f_X(x) \cdot f_Y(y)\)，\(\forall x,y\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融中 Copula 理论就是在固定边缘分布的前提下，研究联合分布 如何刻画资产之间的尾部相关性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\((X,Y)\) 在三角形 \(\{(x,y): 0 \leq x \leq 1, 0 \leq y \leq x\}\) 上均匀分布。求边缘密度 \(f_X(x)\)。 解答：三角形面积 \(= 1/2\)，故 \(f_{X,Y}(x,y) = 2\)。 \(f_X(x) = \int_0^x 2\,dy = 2x\)，\(0 \leq x \leq 1\)。 易错点：均匀分布的密度不是 1 而是 \(1/\text{面积}\)。 此处面积 \(= 1/2\)，故密度 \(= 2\)，不是 1。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">已知 \(f_X\) 和 \(f_Y\)，能否唯一确定 \(f_{X,Y}\)？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f_{X,Y} = f_X \\cdot f_Y\\) 仅在独立时成立。一般情况下')">A. 能，\(f_{X,Y} = f_X \cdot f_Y\) 总成立</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(f_{X,Y} = f_X \\cdot f_Y\\) 仅在独立时成立。一般情况下')">B. 不能，除非 \(X, Y\) 独立</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(f_{X,Y} = f_X \\cdot f_Y\\) 仅在独立时成立。一般情况下')">C. 能，通过卷积公式</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

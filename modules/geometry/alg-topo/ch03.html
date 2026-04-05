@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 单纯同调 — 代数拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "alg-topo-ch03-q1",
+        "question": "单纯复形 (simplicial complex) \\(K\\) 是什么？",
+        "options": [
+          "顶点的有限集合",
+        "由顶点、边、三角形等\"单纯形\"组成，满足任何面也在 \\(K\\) 中的组合结构",
+        "一个流形",
+        "一个向量空间"
+        ],
+        "answer": 1,
+        "explanation": "\\(n\\)-单纯形 \\(\\sigma = [v_0, \\ldots, v_n]\\)（\\(n+1\\) 个顶点的凸包）。单纯复形 \\(K\\)：(1) \\(\\sigma \\in K\\) 的每个面也在 \\(K\\) 中；(2) 两个单纯形交集是公共面或空。\\(K\\) 是空间的\"三角剖分\"——将空间分解为简单的积木。\\(K\\) 的几何实现 \\(|K|\\) 是拓扑空间。"
+      },
+      {
+        "id": "alg-topo-ch03-q2",
+        "question": "二维球面 \\(S^2\\) 的最简单三角剖分包含多少单纯形？",
+        "options": [
+          "4 个顶点, 6 条边, 4 个三角形（正四面体边界）",
+        "3 个顶点, 3 条边, 1 个三角形",
+        "2 个顶点, 1 条边",
+        "无穷多"
+        ],
+        "answer": 0,
+        "explanation": "正四面体边界：\\(V = 4, E = 6, F = 4\\)。\\(\\chi = V - E + F = 4 - 6 + 4 = 2 = \\chi(S^2)\\) ✓。但这不是 \\(S^2\\) 的最少三角剖分——\\(V = 4, E = 6, F = 4\\) 已经是最少顶点数。\\(B\\) 是 \\(D^2\\) 的三角剖分。"
+      },
+      {
+        "id": "alg-topo-ch03-q3",
+        "question": "\\(n\\)-链群 \\(C_n(K)\\) 是什么？",
+        "options": [
+          "\\(K\\) 中所有 \\(n\\)-单纯形的形式整系数组合所成的自由 Abel 群",
+        "连续映射的集合",
+        "\\(K\\) 的子复形",
+        "同伦类"
+        ],
+        "answer": 0,
+        "explanation": "给定有向单纯复形 \\(K\\)。\\(C_n(K) = \\bigoplus_{\\sigma \\in K_n} \\mathbb{Z}\\sigma\\)（\\(K_n\\) = \\(n\\)-单纯形集合）。\\(n\\)-链 \\(c = \\sum a_i \\sigma_i\\)（\\(a_i \\in \\mathbb{Z}\\)）。\\(C_n\\) 是自由 Abel 群，秩 = \\(n\\)-单纯形个数。方向（定向）：\\([v_0, v_1] = -[v_1, v_0]\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q4",
+        "question": "边界算子 \\(\\partial_n: C_n \\to C_{n-1}\\) 的定义是什么？",
+        "options": [
+          "\\(\\partial_n[v_0, \\ldots, v_n] = \\sum_{i=0}^n (-1)^i [v_0, \\ldots, \\hat{v}_i, \\ldots, v_n]\\)",
+        "\\(\\partial_n(\\sigma) = \\sigma\\)",
+        "\\(\\partial_n = 0\\)",
+        "\\(\\partial_n\\) 取最长边"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat{v}_i\\) = 删去 \\(v_i\\)。一维：\\(\\partial_1[v_0, v_1] = v_1 - v_0\\)。二维：\\(\\partial_2[v_0,v_1,v_2] = [v_1,v_2] - [v_0,v_2] + [v_0,v_1]\\)（三条边，交替符号）。关键性质：\\(\\partial_{n-1} \\circ \\partial_n = 0\\)（\"边界的边界为空\"），使得链复形 \\(\\cdots \\to C_n \\xrightarrow{\\partial_n} C_{n-1} \\to \\cdots\\) 良定。"
+      },
+      {
+        "id": "alg-topo-ch03-q5",
+        "question": "\\(n\\)-阶同调群 \\(H_n(K)\\) 的定义？",
+        "options": [
+          "\\(H_n = \\ker \\partial_n / \\text{im} \\partial_{n+1}\\)（\\(n\\)-闭链模 \\(n\\)-边界链）",
+        "\\(H_n = C_n\\)",
+        "\\(H_n = \\partial_n(C_n)\\)",
+        "\\(H_n = C_n / C_{n-1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Z_n = \\ker \\partial_n\\)（\\(n\\)-闭链 / cycles），\\(B_n = \\text{im} \\partial_{n+1}\\)（\\(n\\)-边界链 / boundaries）。\\(\\partial^2 = 0 \\Rightarrow B_n \\subseteq Z_n\\)。\\(H_n = Z_n/B_n\\)：闭链中等价掉边界——\"有洞但不能填\"的等价类。\\(H_0\\) = 连通分量计数，\\(H_1\\) = 独立 1-洞，\\(H_2\\) = 独立 2-洞（封闭腔）。"
+      },
+      {
+        "id": "alg-topo-ch03-q6",
+        "question": "Euler 特征数 \\(\\chi(K) = \\sum_{n=0}^{\\dim K} (-1)^n c_n\\)（\\(c_n\\) = \\(n\\)-单纯形数）。这和同调群的关系？",
+        "options": [
+          "\\(\\chi(K) = \\sum (-1)^n \\text{rank} H_n(K)\\)（交替 Betti 数之和）",
+        "\\(\\chi(K) = \\text{rank} H_0\\)",
+        "无关系",
+        "\\(\\chi(K) = |K|\\)（单纯形总数）"
+        ],
+        "answer": 0,
+        "explanation": "Euler-Poincaré 公式：\\(\\chi = \\sum (-1)^n \\beta_n\\)（\\(\\beta_n = \\text{rank} H_n\\), Betti 数）。\\(\\beta_0\\) = 连通分量数，\\(\\beta_1\\) = 独立环数，\\(\\beta_2\\) = 封闭腔数。\\(S^2\\)：\\(\\chi = 2\\), \\(\\beta_0 = 1, \\beta_1 = 0, \\beta_2 = 1\\), \\(1 - 0 + 1 = 2\\)。\\(T^2\\)：\\(\\chi = 0\\), \\(1 - 2 + 1 = 0\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q7",
+        "question": "计算线段 \\([0,1]\\)（两个顶点一条边的单纯复形）的同调群。",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}, H_n = 0\\)（\\(n \\geq 1\\)）",
+        "\\(H_0 = \\mathbb{Z}^2, H_1 = \\mathbb{Z}\\)",
+        "所有 \\(H_n = 0\\)",
+        "\\(H_0 = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\)：2 顶点 \\(v_0, v_1\\)，1 边 \\([v_0,v_1]\\)。\\(C_0 = \\mathbb{Z}^2, C_1 = \\mathbb{Z}\\)。\\(\\partial_1[v_0,v_1] = v_1 - v_0\\)。\\(Z_0 = C_0 = \\mathbb{Z}^2\\)，\\(B_0 = \\langle v_1 - v_0\\rangle\\)。\\(H_0 = \\mathbb{Z}^2/\\langle v_1 - v_0\\rangle \\cong \\mathbb{Z}\\)（1 个连通分量）。\\(Z_1 = \\ker \\partial_1 = 0\\)（\\(\\partial_1\\) 单射），\\(H_1 = 0\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q8",
+        "question": "计算圆 \\(S^1\\)（三角剖分：3 顶点 3 边形成三角形边界）的同调群。",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}\\)",
+        "\\(H_0 = \\mathbb{Z}^3\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = 0\\)",
+        "\\(H_0 = 0, H_1 = \\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(K\\)：\\(v_0, v_1, v_2\\)（顶点），\\(e_0 = [v_0,v_1], e_1 = [v_1,v_2], e_2 = [v_0,v_2]\\)（边，无 2-面）。\\(\\partial_1(e_0) = v_1 - v_0\\), \\(\\partial_1(e_1) = v_2 - v_1\\), \\(\\partial_1(e_2) = v_2 - v_0\\)。\\(\\ker \\partial_1\\)：\\(ae_0 + be_1 + ce_2\\) 使 \\((-a-c)v_0 + (a-b)v_1 + (b+c)v_2 = 0\\)。\\(a = b = -c\\)，即 \\(Z_1 = \\langle e_0 + e_1 - e_2 \\rangle \\cong \\mathbb{Z}\\)（\\(= S^1\\) 的基本圈）。\\(H_1 = \\mathbb{Z}\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q9",
+        "question": "\\(\\partial_{n-1} \\circ \\partial_n = 0\\) 的证明思路？",
+        "options": [
+          "每个面被删除两次，符号相反，抵消",
+        "由定义直接得",
+        "用反证法",
+        "A 就是直接计算的思路"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\partial_{n-1}\\partial_n[v_0,\\ldots,v_n] = \\sum_{i} (-1)^i \\partial_{n-1}[v_0,\\ldots,\\hat{v}_i,\\ldots,v_n] = \\sum_{i<j} (-1)^i(-1)^{j-1}[\\ldots\\hat{v}_i\\ldots\\hat{v}_j\\ldots] + \\sum_{j<i}(-1)^i(-1)^j[\\ldots\\hat{v}_j\\ldots\\hat{v}_i\\ldots]\\)。每个 \\((n-2)\\)-面 \\([v_0\\ldots\\hat{v}_i\\ldots\\hat{v}_j\\ldots]\\) 出现两次，系数 \\((-1)^{i+j-1}\\) 和 \\((-1)^{i+j}\\)——和为零。"
+      },
+      {
+        "id": "alg-topo-ch03-q10",
+        "question": "\\(S^2\\)（正四面体边界三角剖分）的同调群？",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}, H_1 = 0, H_2 = \\mathbb{Z}\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}^2, H_2 = 0\\)",
+        "所有 \\(= 0\\)",
+        "\\(H_0 = \\mathbb{Z}^4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(V = 4, E = 6, F = 4\\)。\\(C_0 = \\mathbb{Z}^4, C_1 = \\mathbb{Z}^6, C_2 = \\mathbb{Z}^4\\)（4 个三角形）。计算 \\(\\partial_2\\)（4 个三角形的边界）：\\(\\text{rank}(\\partial_2) = 3\\)，\\(\\ker \\partial_2 = \\mathbb{Z}\\)（所有 4 个三角形定向一致的总和 = 唯一 2-cycle）。\\(H_2 = \\mathbb{Z}\\)。\\(H_1 = \\ker\\partial_1/\\text{im}\\partial_2\\)：\\(\\ker\\partial_1 = \\mathbb{Z}^3\\), \\(\\text{im}\\partial_2 = \\mathbb{Z}^3\\), \\(H_1 = 0\\)。\\(\\chi = 1 - 0 + 1 = 2\\) ✓。"
+      },
+      {
+        "id": "alg-topo-ch03-q11",
+        "question": "\\(T^2\\) 的 Betti 数 \\(\\beta_0, \\beta_1, \\beta_2\\) 是什么？",
+        "options": [
+          "\\(1, 2, 1\\)",
+        "\\(1, 1, 1\\)",
+        "\\(1, 0, 1\\)",
+        "\\(2, 2, 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^2\\)：\\(H_0 = \\mathbb{Z}\\)（连通），\\(H_1 = \\mathbb{Z}^2\\)（两个独立环：经线和纬线），\\(H_2 = \\mathbb{Z}\\)（一个封闭腔）。\\(\\beta_0 = 1, \\beta_1 = 2, \\beta_2 = 1\\)。\\(\\chi = 1 - 2 + 1 = 0\\) ✓。\\(H_1 \\cong \\pi_1^{\\text{ab}} = (\\mathbb{Z}^2)^{\\text{ab}} = \\mathbb{Z}^2\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q12",
+        "question": "单纯映射 \\(f: K \\to L\\) 诱导链映射 \\(f_\\#: C_n(K) \\to C_n(L)\\)。它满足什么？",
+        "options": [
+          "\\(f_\\# \\circ \\partial = \\partial \\circ f_\\#\\)（与边界算子交换）",
+        "\\(f_\\# \\circ \\partial = 0\\)",
+        "\\(f_\\#\\) 是同构",
+        "无关系"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_\\#[v_0, \\ldots, v_n] = [f(v_0), \\ldots, f(v_n)]\\)（若顶点不全不同则 = 退化单纯形 = 0）。\\(\\partial f_\\#(\\sigma) = \\partial[f(v_0),\\ldots,f(v_n)] = \\sum (-1)^i [f(v_0),\\ldots,\\widehat{f(v_i)},\\ldots,f(v_n)] = f_\\#(\\partial\\sigma)\\)。链映射 \\(\\Rightarrow\\) 诱导同调映射 \\(f_*: H_n(K) \\to H_n(L)\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q13",
+        "question": "增广链复形 \\(\\cdots \\to C_1 \\to C_0 \\xrightarrow{\\epsilon} \\mathbb{Z} \\to 0\\)（\\(\\epsilon(\\sum a_i v_i) = \\sum a_i\\)）的约化同调 \\(\\tilde{H}_n\\) 与普通同调的关系？",
+        "options": [
+          "\\(\\tilde{H}_0 = H_0 / \\mathbb{Z}\\)（去掉\"连通\"的贡献），\\(\\tilde{H}_n = H_n\\)（\\(n \\geq 1\\)）",
+        "\\(\\tilde{H}_n = H_n\\) 对所有 \\(n\\)",
+        "\\(\\tilde{H}_n = 0\\)",
+        "\\(\\tilde{H}_0 = H_0 \\oplus \\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "连通空间：\\(H_0 = \\mathbb{Z}\\)（常数 0-链/连通分量），\\(\\tilde{H}_0 = 0\\)。非连通空间（\\(k\\) 个分量）：\\(H_0 = \\mathbb{Z}^k\\), \\(\\tilde{H}_0 = \\mathbb{Z}^{k-1}\\)。约化同调在计算中更方便（如 Mayer-Vietoris、悬挂公式 \\(\\tilde{H}_n(\\Sigma X) = \\tilde{H}_{n-1}(X)\\)）。"
+      },
+      {
+        "id": "alg-topo-ch03-q14",
+        "question": "\\(\\mathbb{RP}^2\\) 的同调群（整系数）是什么？",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}/2, H_2 = 0\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = 0, H_2 = \\mathbb{Z}\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}, H_2 = \\mathbb{Z}\\)",
+        "全部为零"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{RP}^2\\) CW 结构：\\(e^0 \\cup e^1 \\cup e^2\\)，\\(e^2\\) 的粘合度为 2。\\(C_0 = \\mathbb{Z}, C_1 = \\mathbb{Z}, C_2 = \\mathbb{Z}\\)。\\(\\partial_2: \\mathbb{Z} \\to \\mathbb{Z}\\), \\(\\partial_2(e^2) = 2 e^1\\)。\\(H_2 = \\ker \\partial_2 = 0\\), \\(H_1 = \\ker\\partial_1/\\text{im}\\partial_2 = \\mathbb{Z}/2\\mathbb{Z}\\)。\\(\\pi_1 = \\mathbb{Z}/2\\), \\(H_1 = \\pi_1^{\\text{ab}} = \\mathbb{Z}/2\\) ✓。挠部分 \\(\\mathbb{Z}/2\\) 反映不可定向性。"
+      },
+      {
+        "id": "alg-topo-ch03-q15",
+        "question": "对紧致有向闭 \\(n\\)-流形 \\(M\\)，\\(H_n(M; \\mathbb{Z}) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "取决于 \\(M\\)"
+        ],
+        "answer": 0,
+        "explanation": "紧致有向连通闭 \\(n\\)-流形：\\(H_n = \\mathbb{Z}\\)（由基本类 \\([M]\\) 生成）。基本类代表\"整个 \\(M\\)\"的同调类。不可定向闭流形：\\(H_n = 0\\)（整系数），\\(H_n(\\mathbb{Z}/2) = \\mathbb{Z}/2\\)。非紧致或有边界：\\(H_n = 0\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q16",
+        "question": "单纯复形 \\(K\\) 的重心细分 \\(K'\\) 的性质？",
+        "options": [
+          "\\(|K'| \\cong |K|\\)（同胚），网格更细",
+        "\\(|K'|\\) 的拓扑类型改变",
+        "\\(H_n(K') \\neq H_n(K)\\)",
+        "A 且同调不变：\\(H_n(K') \\cong H_n(K)\\)"
+        ],
+        "answer": 3,
+        "explanation": "重心细分将每个 \\(n\\)-单纯形细分为 \\((n+1)!\\) 个小单纯形。\\(|K'| \\cong |K|\\)（同胚）因此同调同构。细分使网格直径 \\(\\leq \\frac{n}{n+1} \\cdot \\text{原直径}\\)——多次细分可任意小。这在证明同调不变性和单纯逼近定理中关键。"
+      },
+      {
+        "id": "alg-topo-ch03-q17",
+        "question": "Klein 瓶 \\(K\\) 的奇异同调（整系数）？",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z} \\oplus \\mathbb{Z}/2, H_2 = 0\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}^2, H_2 = \\mathbb{Z}\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}, H_2 = 0\\)",
+        "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}/2, H_2 = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_1(K) = \\langle a, b \\mid abab^{-1}\\rangle\\)。\\(H_1 = \\pi_1^{\\text{ab}}\\)：Abel 化关系 \\(a + b + a - b = 2a = 0\\)，所以 \\(H_1 = \\langle a, b \\mid 2a = 0\\rangle = \\mathbb{Z}/2 \\oplus \\mathbb{Z}\\)。不可定向所以 \\(H_2 = 0\\)（整系数）。\\(\\chi = 1 - 1 + 0 = 0\\)（\\(\\text{rank} H_1 = 1\\)，\\(1 - 1 + 0 = 0\\) ✓）。"
+      },
+      {
+        "id": "alg-topo-ch03-q18",
+        "question": "链同伦 (chain homotopy) 的定义和作用？",
+        "options": [
+          "\\(D_n: C_n \\to C_{n+1}\\), 满足 \\(f_\\# - g_\\# = \\partial D + D\\partial\\) \\(\\Rightarrow f_* = g_*: H_n \\to H_n\\)",
+        "\\(D\\) 是同构",
+        "链同伦意味着 \\(f = g\\)",
+        "A 正确，这是同调不变性的核心工具"
+        ],
+        "answer": 3,
+        "explanation": "\\(D = \\{D_n\\}\\) 使得 \\(f_\\# - g_\\# = \\partial_{n+1} D_n + D_{n-1} \\partial_n\\)。对闭链 \\(z\\)（\\(\\partial z = 0\\)）：\\((f_\\# - g_\\#)(z) = \\partial(Dz)\\)（边界）。\\(f_*(z) - g_*(z) = 0\\) 在 \\(H_n\\) 中。链同伦是代数版本的同伦——同伦的映射诱导相同的同调映射。核心技术：棱柱算子 \\(P: C_n(K) \\to C_{n+1}(K \\times I)\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q19",
+        "question": "悬挂 (suspension) \\(\\Sigma X\\) 的约化同调？",
+        "options": [
+          "\\(\\tilde{H}_n(\\Sigma X) \\cong \\tilde{H}_{n-1}(X)\\)",
+        "\\(H_n(\\Sigma X) = H_n(X)\\)",
+        "\\(H_n(\\Sigma X) = 0\\)",
+        "\\(\\tilde{H}_n(\\Sigma X) = \\tilde{H}_{n+1}(X)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Sigma X = CX_+ \\cup_X CX_-\\)（两个锥粘合）。每个锥可缩，\\(CX_+ \\cap CX_- = X\\)。Mayer-Vietoris：\\(\\tilde{H}_n(\\Sigma X) \\cong \\tilde{H}_{n-1}(X)\\)。应用：\\(\\Sigma S^n = S^{n+1}\\)，\\(\\tilde{H}_k(S^{n+1}) = \\tilde{H}_{k-1}(S^n)\\)，递推得 \\(H_n(S^n) = \\mathbb{Z}\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q20",
+        "question": "Euler-Poincaré 公式 \\(\\chi = \\sum (-1)^n \\beta_n\\) 的证明思路？",
+        "options": [
+          "秩-零化度定理和交替求和消去",
+        "归纳法",
+        "拓扑方法",
+        "A 正确——\\(c_n = \\beta_n + r_n + r_{n-1}\\)（\\(r_n = \\mathrm{rank}(\\partial_{n+1})\\)），交替和中 \\(r\\) 项消去"
+        ],
+        "answer": 3,
+        "explanation": "\\(c_n = \\dim C_n = \\dim Z_n + \\dim B_{n-1} = (\\beta_n + \\dim B_n) + r_{n-1}\\)（\\(r_k = \\dim B_k = \\mathrm{rank}\\partial_{k+1}\\)）。\\(c_n = \\beta_n + r_n + r_{n-1}\\)。\\(\\sum (-1)^n c_n = \\sum (-1)^n \\beta_n + \\sum(-1)^n r_n + \\sum(-1)^n r_{n-1}\\)。后两项交替消去为零。\\(\\chi = \\sum (-1)^n \\beta_n\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q21",
+        "question": "\\(H_n(\\text{pt}) = ?\\)（一个点的同调群）",
+        "options": [
+          "\\(H_0 = \\mathbb{Z}, H_n = 0\\)（\\(n \\geq 1\\)）",
+        "全部 \\(\\mathbb{Z}\\)",
+        "全部 \\(0\\)",
+        "\\(H_0 = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{pt}\\)：1 个 0-单纯形，无高维单纯形。\\(C_0 = \\mathbb{Z}, C_n = 0\\)（\\(n \\geq 1\\)）。\\(H_0 = \\mathbb{Z}, H_n = 0\\)。任何可缩空间（\\(\\simeq \\text{pt}\\)）有相同同调。约化版：\\(\\tilde{H}_n(\\text{pt}) = 0\\) 对所有 \\(n\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q22",
+        "question": "同调论的 Eilenberg-Steenrod 公理不包括以下哪个？",
+        "options": [
+          "同伦公理",
+        "切除公理",
+        "维度公理：\\(H_n(\\text{pt}) = 0\\)（\\(n \\neq 0\\)）",
+        "乘积公理：\\(H_n(X \\times Y) = H_n(X) \\otimes H_n(Y)\\)"
+        ],
+        "answer": 3,
+        "explanation": "Eilenberg-Steenrod 公理：(1) 函子性，(2) 同伦不变性 (A)，(3) 长正合序列 (\\(\\to H_n(A) \\to H_n(X) \\to H_n(X,A) \\to H_{n-1}(A) \\to\\))，(4) 切除 (B)，(5) 维度 (C)。D 是 Künneth 公式的一种（但不精确——\\(H_n(X \\times Y) \\cong \\bigoplus_{i+j=n} H_i(X) \\otimes H_j(Y)\\) + Tor 修正项），不是公理。"
+      },
+      {
+        "id": "alg-topo-ch03-q23",
+        "question": "Betti 数 \\(\\beta_1\\) 的几何含义是什么？",
+        "options": [
+          "空间中独立\"1-维洞\"的数目",
+        "连通分量数",
+        "边数",
+        "维数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\beta_1 = \\text{rank} H_1\\)。\\(S^1\\)：\\(\\beta_1 = 1\\)（一个洞）。\\(T^2\\)：\\(\\beta_1 = 2\\)（两个独立洞——经线纬线）。\\(\\Sigma_g\\)：\\(\\beta_1 = 2g\\)（\\(g\\) 个\"手柄\"各贡献两个独立环）。\\(\\beta_0\\) = 连通分量数（B），\\(\\beta_2\\) = 独立封闭腔数。Betti 数是拓扑不变量，不依赖三角剖分。"
+      },
+      {
+        "id": "alg-topo-ch03-q24",
+        "question": "同调群对同伦等价不变的证明关键步骤（同调不变性）？",
+        "options": [
+          "构造链同伦，证明 \\(f \\simeq g \\Rightarrow f_* = g_*\\)",
+        "直接定义",
+        "用度量",
+        "A 正确，具体用棱柱算子或 acyclic models"
+        ],
+        "answer": 3,
+        "explanation": "Step 1: 证明对同伦映射 \\(f \\simeq g: X \\to Y\\)，存在链同伦 \\(D\\) 使 \\(f_\\# - g_\\# = \\partial D + D\\partial\\)。\\(\\Rightarrow f_* = g_*\\)。Step 2: \\(f: X \\xrightarrow{\\sim} Y\\)（同伦等价），\\(g: Y \\to X\\), \\(gf \\simeq \\mathrm{id}\\)。\\(g_*f_* = (gf)_* = \\mathrm{id}_*\\)。类似 \\(f_*g_* = \\mathrm{id}\\)。\\(f_*\\) 是同构。棱柱算子 \\(P: \\Delta^n \\times I \\to \\) 单纯链 是关键构造。"
+      },
+      {
+        "id": "alg-topo-ch03-q25",
+        "question": "\\(H_n(\\mathbb{RP}^n; \\mathbb{Z}/2) = ?\\)（\\(\\mathbb{Z}/2\\) 系数）",
+        "options": [
+          "\\(\\mathbb{Z}/2\\) 对所有 \\(0 \\leq n\\)",
+        "\\(\\mathbb{Z}/2\\) 对 \\(0 \\leq k \\leq n\\), \\(0\\) 否则",
+        "\\(\\mathbb{Z}\\)",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{RP}^n\\) 的 CW 结构：一个 \\(k\\)-胞腔（\\(0 \\leq k \\leq n\\)），边界映射 \\(\\partial_k\\) 在 \\(\\mathbb{Z}/2\\) 系数下为零。\\(H_k(\\mathbb{RP}^n; \\mathbb{Z}/2) = \\mathbb{Z}/2\\)（\\(0 \\leq k \\leq n\\)）。\\(\\mathbb{Z}/2\\) 系数下挠消失。整系数更复杂：\\(H_k = \\mathbb{Z}\\)（\\(k = 0\\)），\\(\\mathbb{Z}/2\\)（\\(k\\) 奇, \\(< n\\)），\\(0\\)（\\(k\\) 偶, \\(> 0\\)），\\(\\mathbb{Z}\\)（\\(k = n\\) 奇）或 \\(0\\)。"
+      },
+      {
+        "id": "alg-topo-ch03-q26",
+        "question": "在拓扑数据分析 (TDA) 中，从点云数据构建单纯复形的方法有？",
+        "options": [
+          "Vietoris-Rips 复形和 Čech 复形",
+        "Fourier 变换",
+        "主成分分析",
+        "A 正确，然后计算 persistent homology 追踪 Betti 数随尺度变化"
+        ],
+        "answer": 3,
+        "explanation": "Vietoris-Rips：点对距离 \\(\\leq \\epsilon\\) 时连边，任意完全子图填充为单纯形。Čech：\\(\\epsilon\\)-球有非空交集时形成单纯形。改变 \\(\\epsilon\\) 得嵌套复形族，persistent homology 追踪 \\(H_n\\) 的\"出生-死亡\"对。长寿命特征 = 真实拓扑特征，短寿命 = 噪声。"
+      },
+      {
+        "id": "alg-topo-ch03-q27",
+        "question": "计算机图形学中网格处理使用 Euler 公式 \\(V - E + F = \\chi\\) 做什么？",
+        "options": [
+          "验证网格拓扑正确性（封闭三角网格应满足 \\(\\chi = 2 - 2g\\)）",
+        "计算面积",
+        "渲染颜色",
+        "A 且用于检测网格缺陷（非流形顶点/边、孔洞）"
+        ],
+        "answer": 3,
+        "explanation": "三角网格是单纯 2-复形。封闭有向曲面 \\(\\chi = 2 - 2g\\)（\\(g\\) = 亏格）。\\(V - E + F \\neq\\) 期望值 \\(\\Rightarrow\\) 网格有缺陷。\\(\\beta_0 > 1\\)：不连通。\\(\\beta_1 > 2g\\)：额外孔洞。网格修复软件使用 Euler 公式和同调群检测问题。"
+      },
+      {
+        "id": "alg-topo-ch03-q28",
+        "question": "分布式计算中，覆盖网络的 homology 有什么用途？",
+        "options": [
+          "检测覆盖漏洞（传感器网络中未覆盖区域）",
+        "路由优化",
+        "负载均衡",
+        "A 正确，\\(H_1 \\neq 0\\) 指示\"洞\"的存在"
+        ],
+        "answer": 3,
+        "explanation": "传感器网络：每个传感器覆盖半径 \\(r\\) 的区域。构建 Rips 复形，\\(H_1 \\neq 0\\) 表示存在未覆盖区域（\"洞\"）。de Silva-Ghrist 定理：在适当条件下，Rips 复形的同调检测到覆盖漏洞。这是 TDA 在工程中的直接应用——不需要精确坐标，只需连通性。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="alg-topo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/alg-topo.html" class="module-name">代数拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 单纯复形与 \(\Delta\)-复形</a></li>
+      <li><a href="#kp2">02 · 链复形与边缘算子</a></li>
+      <li><a href="#kp3">03 · 单纯同调群的计算</a></li>
+      <li><a href="#kp4">04 · 同调群的拓扑不变性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>单纯同调</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>单纯复形与 \(\Delta\)-复形</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>为了计算空间的"洞"——不仅仅是一维的（基本群），还有二维、三维 及更高维的——需要一种系统方法。单纯复形将空间"三角化"为顶点、 边、三角形、四面体等简单积木（单纯形）的组合。\(\Delta\)-复形是 更灵活的简化版本，允许面的粘合更自由。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>单纯复形 = 组合化的拓扑空间。将连续问题（拓扑）转化为有限 组合问题（整数矩阵的线性代数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>标准 \(n\)-单纯形</strong>： \(\Delta^n = \{(t_0, \ldots, t_n) \in \mathbb{R}^{n+1} : \sum t_i = 1, t_i \geq 0\}\)。 顶点 \(e_i\)，边 \([e_i, e_j]\)，面 \([e_{i_0}, \ldots, e_{i_k}]\)。 <strong>单纯复形</strong>：\(K\) 是集合 \(V\)（顶点集）的有限子集的集合， 满足遗传性：\(\sigma \in K, \tau \subseteq \sigma \Rightarrow \tau \in K\)。 几何实现 \(|K|\)：将每个 \(\sigma \in K\) 实现为 \(\Delta^{|\sigma|-1}\)，按面关系粘合。 <strong>\(\Delta\)-复形</strong>：更宽泛——允许面的恒同粘合（如三角形两条边 黏合为一条）。有向单纯形，每个 \(n\)-单纯形有 \(n+1\) 个面映射 \(d_i: \Delta^{n-1} \to \Delta^n\)（删去第 \(i\) 个顶点）。 \[d_i[v_0, \ldots, v_n] = [v_0, \ldots, \hat{v}_i, \ldots, v_n]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 拓扑数据分析 (TDA) 中的 Rips 复形和 Čech 复形用单纯复形 表示数据点云的形状</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：将 \(T^2\)（环面）三角剖分为 \(\Delta\)-复形。 解答：用标准方法：取正方形 \([0,1]^2\)，对边识别。 最少需要 \(1\) 个顶点（所有角等价）、\(3\) 条边（\(a, b, c\)， 水平、垂直、对角）、\(2\) 个三角形。 面映射：\(\partial[012] = [12] - [02] + [01]\)（标准定向）。 易错点：\(\Delta\)-复形中允许一个单纯形多个面相同（如 \(S^1\) 可以 用 1 个顶点 + 1 条边构成），而传统单纯复形不允许。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">标准 \(2\)-单纯形 \(\Delta^2\) 有多少个面（包括所有维数）？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\emptyset\\)(1) + 顶点(3) + 边(3) + 面(1) = 8？不含 \\(\\emptyset\\) 则为 7。')">A. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\emptyset\\)(1) + 顶点(3) + 边(3) + 面(1) = 8？不含 \\(\\emptyset\\) 则为 7。')">B. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\emptyset\\)(1) + 顶点(3) + 边(3) + 面(1) = 8？不含 \\(\\emptyset\\) 则为 7。')">C. 7</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\emptyset\\)(1) + 顶点(3) + 边(3) + 面(1) = 8？不含 \\(\\emptyset\\) 则为 7。')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>链复形与边缘算子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>为了将"洞"代数化，定义链群 \(C_n\)（\(n\)-链 = \(n\)-单纯形的形式 整数线性组合）和边缘算子 \(\partial_n: C_n \to C_{n-1}\)（将每个单纯形 映为其边界之和）。关键性质 \(\partial^2 = 0\) 使得 \(\ker \partial\)（闭链） 包含 \(\mathrm{im}\,\partial\)（边界链），商群就是同调群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>链复形 \(\cdots \xrightarrow{\partial_{n+1}} C_n \xrightarrow{\partial_n} C_{n-1} \xrightarrow{\partial_{n-1}} \cdots\) 是代数拓扑的核心代数结构。\(\partial^2 = 0\) 产生"cycles mod boundaries"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>链群</strong>：\(C_n(K) = \bigoplus_{\sigma \in K_n} \mathbb{Z} \cdot \sigma\)（有向 \(n\)-单纯形自由生成的交换群）。 <strong>边缘算子</strong>： \[\partial_n[v_0, \ldots, v_n] = \sum_{i=0}^n (-1)^i [v_0, \ldots, \hat{v}_i, \ldots, v_n]\] <strong>\(\partial^2 = 0\)</strong>（关键引理）： \(\partial_{n-1} \circ \partial_n = 0\)。 证明：双重删除 \(\hat{v}_i\) 再 \(\hat{v}_j\) 出现两次（\(i < j\) 时 符号为 \((-1)^{i+j}\) 和 \((-1)^{i+j-1}\)），互相抵消。 <strong>链复形</strong>：\(\cdots \to C_2 \xrightarrow{\partial_2} C_1 \xrightarrow{\partial_1} C_0 \to 0\)。 \(Z_n = \ker \partial_n\)（\(n\)-闭链 / cycles）， \(B_n = \mathrm{im}\,\partial_{n+1}\)（\(n\)-边缘 / boundaries）。 \(B_n \subseteq Z_n\)（因为 \(\partial^2 = 0\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：三角形 \([v_0, v_1, v_2]\)，计算 \(\partial_2[v_0, v_1, v_2]\)。 解答：\(\partial_2[v_0, v_1, v_2] = [v_1, v_2] - [v_0, v_2] + [v_0, v_1]\)。 直觉：三角形的边界 = 三条边（按定向）。 验证 \(\partial_1 \circ \partial_2\)： \(\partial_1([v_1,v_2] - [v_0,v_2] + [v_0,v_1])\) \(= (v_2-v_1) - (v_2-v_0) + (v_1-v_0) = 0\)。✓ 易错点：符号交替 \((-1)^i\) 容易搞错。建议画图辅助理解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\partial^2 = 0\) 的根本原因是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\partial^2\\) 中每对 \\((i,j)\\) 被删的项出现两次，符号相反，')">A. 单纯形没有边界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\partial^2\\) 中每对 \\((i,j)\\) 被删的项出现两次，符号相反，')">B. 删除两个顶点的贡献互相抵消</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\partial^2\\) 中每对 \\((i,j)\\) 被删的项出现两次，符号相反，')">C. 链群是交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\partial^2\\) 中每对 \\((i,j)\\) 被删的项出现两次，符号相反，')">D. 边缘算子是零映射</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>单纯同调群的计算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同调群 \(H_n(K) = Z_n / B_n\) 将"闭链模边界"的概念精确化。 \(H_0\) 计数连通分量，\(H_1\) 检测一维洞（如圈），\(H_2\) 检测二维洞 （如空腔）。计算同调群就是做整数矩阵的行列变换（Smith 标准形）， 结果是有限生成交换群 \(\cong \mathbb{Z}^r \oplus T\)（自由部分+挠部分）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同调群 = 链复形的上同调。Betti 数 \(\beta_n = \mathrm{rank}\,H_n\) 计数 \(n\) 维独立的"洞"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>同调群</strong>：\(H_n(K; \mathbb{Z}) = \ker \partial_n / \mathrm{im}\,\partial_{n+1}\)。 <strong>计算方法</strong>： (1) 写出边缘矩阵 \([\partial_n]\)（整数矩阵） (2) 用 Smith 标准形化简：\([\partial_n] = U D_n V\)，\(D_n\) 对角 (3) \(\mathrm{rank}(\partial_n) = r_n\) (4) \(H_n \cong \mathbb{Z}^{z_n - r_{n+1}} \oplus \text{挠部分}\) 其中 \(z_n = \dim C_n - r_n\) <strong>经典结果</strong>： - \(H_n(S^k) = \begin{cases}\mathbb{Z} & n = 0, k \\ 0 & \text{otherwise}\end{cases}\) - \(H_0(X) \cong \mathbb{Z}^c\)（\(c\) = 连通分量数） - \(H_1(T^2) \cong \mathbb{Z}^2\), \(H_2(T^2) \cong \mathbb{Z}\) <strong>Euler 特征</strong>：\(\chi(K) = \sum (-1)^n |K_n| = \sum (-1)^n \beta_n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 拓扑数据分析中持续同调 (persistent homology) 追踪 Betti 数 随尺度变化——检测数据中的拓扑特征</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(S^1\)（三角剖分为 3 顶点 3 边的三角形边界）的同调群。 解答：\(C_0 = \mathbb{Z}^3\)（\(v_0, v_1, v_2\)），\(C_1 = \mathbb{Z}^3\)（\(e_{01}, e_{12}, e_{02}\)），\(C_2 = 0\)。 \(\partial_1: e_{01} \mapsto v_1 - v_0\), \(e_{12} \mapsto v_2 - v_1\), \(e_{02} \mapsto v_2 - v_0\)。 矩阵 \(\partial_1 = \begin{pmatrix}-1&0&-1\\1&-1&0\\0&1&1\end{pmatrix}\)。\(\mathrm{rank} = 2\)。 \(H_0 = \mathbb{Z}^3/\mathrm{im}\,\partial_1 = \mathbb{Z}^{3-2} = \mathbb{Z}\)（1 个连通分量）。 \(H_1 = \ker \partial_1 / 0 = \mathbb{Z}^{3-2} = \mathbb{Z}\)（1 个一维洞）。 易错点：\(e_{01} + e_{12} - e_{02}\) 是 1-cycle（边界为零）且非边界 （\(C_2 = 0\)），它生成 \(H_1 = \mathbb{Z}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(H_2(S^2; \mathbb{Z}) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2\\) 有一个 2 维"空腔"。\\(H_2(S^2) = \\mathbb{Z}\\)，')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(S^2\\) 有一个 2 维"空腔"。\\(H_2(S^2) = \\mathbb{Z}\\)，')">B. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2\\) 有一个 2 维"空腔"。\\(H_2(S^2) = \\mathbb{Z}\\)，')">C. \(\mathbb{Z}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2\\) 有一个 2 维"空腔"。\\(H_2(S^2) = \\mathbb{Z}\\)，')">D. \(\mathbb{Z}/2\mathbb{Z}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>同调群的拓扑不变性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同调群的威力在于它是拓扑不变量——不依赖于具体的三角剖分。 不同的三角剖分给出同构的同调群！这意味着同调是空间的内在性质， 不是剖分方式的人工产物。证明这个定理需要"单纯逼近"和 链映射诱导的同调映射的理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>链映射 \(f_\#: C_*(K) \to C_*(L)\)（\(\partial \circ f_\# = f_\# \circ \partial\)） 诱导同调映射 \(f_*: H_*(K) \to H_*(L)\)。链同伦的映射诱导 相同的同调映射——这是同调的同伦不变性的代数机制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>链映射</strong>：\(f_\#: C_n(K) \to C_n(L)\)（每个 \(n\)）， \(\partial^L \circ f_\# = f_\# \circ \partial^K\)。 则 \(f_\#(Z_n) \subseteq Z_n\)，\(f_\#(B_n) \subseteq B_n\)， 诱导 \(f_*: H_n(K) \to H_n(L)\)。 <strong>链同伦</strong>：\(f_\#, g_\#: C_*(K) \to C_*(L)\)， \(D: C_n \to C_{n+1}\) 使 \(f_\# - g_\# = \partial D + D\partial\)。 则 \(f_* = g_*: H_* \to H_*\)。 <strong>同伦不变性</strong>：连续映射 \(f: |K| \to |L|\) 诱导链映射 \(f_\#\) （通过单纯逼近定理）。同伦的映射诱导链同伦的链映射。 \[f \simeq g \Rightarrow f_* = g_*: H_*(K) \to H_*(L)\] <strong>推论</strong>：\(X \simeq Y\) \(\Rightarrow\) \(H_n(X) \cong H_n(Y)\)。 特别地，不同三角剖分给出同构的同调群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(S^2\) 与 \(\mathbb{R}^3\) 不同伦等价。 解答：\(H_2(S^2) = \mathbb{Z} \neq 0 = H_2(\mathbb{R}^3)\) （\(\mathbb{R}^3\) 可缩，\(H_n = 0\) 对 \(n \geq 1\)）。 同伦等价保持同调，所以 \(S^2 \not\simeq \mathbb{R}^3\)。 易错点：同伦不变性比同胚不变性弱——它不能区分同伦等价 但不同胚的空间（如 \(\mathbb{R}^n\) 和 \(\{*\}\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(H_n\) 是以下哪种不变量？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。同调群是同伦不变量（比同胚不变量更强的不变性）。')">A. 仅同胚不变</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！同调群是同伦不变量（比同胚不变量更强的不变性）。')">B. 同伦不变</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。同调群是同伦不变量（比同胚不变量更强的不变性）。')">C. 仅等距不变</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。同调群是同伦不变量（比同胚不变量更强的不变性）。')">D. 仅微分同胚不变</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/geometry/alg-topo.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

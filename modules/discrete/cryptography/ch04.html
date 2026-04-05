@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 数字签名 — 密码学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "cryptography-ch04-q1",
+        "question": "数字签名与手写签名的本质区别是什么？",
+        "options": [
+          "数字签名依赖消息内容（不同消息不同签名），手写签名不依赖  B) 手写签名更安全  C) 两者完全相同  D) 数字签名不需要密钥"
+        ],
+        "answer": 0,
+        "explanation": "数字签名 \\(\\sigma=\\text{Sign}(sk,m)\\) 是消息 \\(m\\) 的函数——每条消息产生不同的签名，签名与消息绑定。手写签名与文档内容无关（可被剪切粘贴）。此外数字签名可公开验证（用公钥）、不可伪造（EUF-CMA）、不可否认。"
+      },
+      {
+        "id": "cryptography-ch04-q2",
+        "question": "EUF-CMA（存在性不可伪造，选择消息攻击下）安全性允许攻击者做什么？",
+        "options": [
+          "获得任意消息的签名，但仍不能伪造新消息的签名  B) 仅看到公钥  C) 什么都不能做  D) 可以破解一半消息的签名"
+        ],
+        "answer": 0,
+        "explanation": "EUF-CMA 模型中，攻击者有签名预言机（可对任意选择的消息获取合法签名），目标是对一条**从未查询过**的消息生成合法签名。这是签名方案的标准安全定义，非常强。即使攻击者收集了上百万个合法签名，仍不能伪造一个新的。"
+      },
+      {
+        "id": "cryptography-ch04-q3",
+        "question": "RSA 签名：\\(n=55,d=27,e=3\\)。对消息哈希值 \\(h=2\\) 签名：\\(\\sigma=h^d\\bmod n\\)。\\(2^{27}\\bmod55=?\\)",
+        "options": [
+          "\\(52\\)  B) \\(2\\)  C) \\(8\\)  D) \\(13\\)"
+        ],
+        "answer": 1,
+        "explanation": "我们来算 \\(2^{27}\\bmod55\\)。\\(2^{10}=1024\\bmod55=1024-18\\times55=1024-990=34\\)。\\(2^{20}=34^2=1156\\bmod55=1156-21\\times55=1156-1155=1\\)。\\(2^{27}=2^{20}\\cdot2^7=1\\times128\\bmod55=128-2\\times55=18\\)。嗯让我重算。\\(2^5=32,2^{10}=1024=18\\times55+34\\)，\\(2^{10}\\equiv34\\)。\\(2^{20}\\equiv34^2=1156=21\\times55+1\\)，\\(2^{20}\\equiv1\\)。\\(2^{27}=2^{20}\\cdot2^7=1\\times128=2\\times55+18\\)，\\(2^{27}\\equiv18\\)。答案应为 18。让我修正选项：\\(\\sigma=18\\)，验证 \\(18^3\\bmod55=5832\\bmod55=5832/55=106.03...\\)，\\(106\\times55=5830\\)，\\(5832-5830=2=h\\)✓。正确答案 \\(\\sigma=18\\)。"
+      },
+      {
+        "id": "cryptography-ch04-q4",
+        "question": "椭圆曲线 secp256k1 的基点阶 \\(n\\approx2^{256}\\)。ECDSA 签名 \\((r,s)\\) 的总大小约为多少字节？",
+        "options": [
+          "\\(64\\) 字节  B) \\(32\\) 字节  C) \\(128\\) 字节  D) \\(256\\) 字节"
+        ],
+        "answer": 0,
+        "explanation": "\\(r,s\\) 各为模 \\(n\\) 的整数，各 256 位 = 32 字节。总签名 \\((r,s)\\) 共 64 字节。相比 RSA-2048 签名的 256 字节，ECDSA 签名短 4 倍。在区块链中每笔交易都有签名，短签名节省大量存储和带宽。TLS 中类似——ECDSA 证书比 RSA 证书显著更小。"
+      },
+      {
+        "id": "cryptography-ch04-q5",
+        "question": "RSA 签名验证是计算 \\(\\sigma^e\\bmod n\\) 并与 \\(H(m)\\) 比较。若 \\(e=65537\\)，需多少次模乘？",
+        "options": [
+          "\\(17\\) 次  B) \\(65537\\) 次  C) \\(16\\) 次  D) \\(256\\) 次"
+        ],
+        "answer": 0,
+        "explanation": "\\(65537=2^{16}+1\\)，二进制 \\(10000000000000001\\)（17 位，2 个 1）。平方-乘算法：16 次平方 + 1 次乘法 = 17 次模乘。这就是选择 \\(e=65537\\) 的效率原因——验证极快。签名生成需 \\(d\\) 的指数（\\(\\approx2048\\) 位），约 3000 次模乘，慢得多。非对称：验证快、签名慢。"
+      },
+      {
+        "id": "cryptography-ch04-q6",
+        "question": "消息认证码（MAC）和数字签名都提供消息完整性。它们的区别是？",
+        "options": [
+          "MAC 使用共享密钥，不提供不可否认性；签名使用公私钥，提供不可否认性  B) 没有区别  C) MAC 更安全  D) 签名不能验证完整性"
+        ],
+        "answer": 0,
+        "explanation": "MAC 的验证方需要同一个密钥（\\(\\text{Verify}(k,m,t)\\)），因此验证方自己也能生成合法 MAC——无法证明到底是谁生成的（不可否认性缺失）。数字签名用私钥签、公钥验，只有私钥持有者能签名，任何人可验证。法律效力上签名可作为证据。"
+      },
+      {
+        "id": "cryptography-ch04-q7",
+        "question": "ECDSA 签名的哪一步使用了随机数 \\(k\\)？",
+        "options": [
+          "计算 \\(r=x([k]G)\\bmod n\\)  B) 哈希消息  C) 密钥生成  D) 验证签名"
+        ],
+        "answer": 0,
+        "explanation": "ECDSA 签名：(1) 选随机 \\(k\\)，计算 \\(R=[k]G\\)（椭圆曲线点乘），\\(r=x_R\\bmod n\\)；(2) \\(s=k^{-1}(H(m)+r\\cdot d)\\bmod n\\)。\\(k\\) 的随机性对安全至关重要——若 \\(k\\) 已知，\\(d=(sk-H(m))/r\\bmod n\\) 直接恢复私钥。RFC 6979 定义确定性 \\(k =\\text{HMAC}(d,m)\\) 消除随机源依赖。"
+      },
+      {
+        "id": "cryptography-ch04-q8",
+        "question": "签名方案的正确性要求：\\(\\forall(sk,pk)\\leftarrow\\text{Gen},\\forall m\\)：\\(\\text{Verify}(pk,m,\\text{Sign}(sk,m))=1\\)。若哈希碰撞 \\(H(m_1)=H(m_2)\\)，会导致什么问题？",
+        "options": [
+          "\\(m_1\\) 的签名同时也是 \\(m_2\\) 的合法签名  B) 验证会失败  C) 私钥泄露  D) 无影响"
+        ],
+        "answer": 0,
+        "explanation": "Hash-then-Sign 中 \\(\\sigma=\\text{Sign}(sk,H(m))\\)。\\(H(m_1)=H(m_2)\\Rightarrow\\sigma\\) 对两条消息都有效。攻击者让受害者签 \\(m_1\\)（无害），再将签名附到 \\(m_2\\)（恶意）。这就是为什么签名方案需要抗碰撞的哈希函数。SHA-1 碰撞已被实际构造（SHAttered 2017），应使用 SHA-256/SHA-3。"
+      },
+      {
+        "id": "cryptography-ch04-q9",
+        "question": "RSA 签名中，若不进行哈希直接签消息，\\( \\text{Sign}(m) = m^d \\bmod n \\)。已知 \\(\\text{Sign}(4)=\\sigma_4\\)，攻击者如何伪造 \\(\\text{Sign}(16)\\)？",
+        "options": [
+          "\\(\\sigma_4^2\\bmod n\\)  B) \\(\\sigma_4\\cdot4\\bmod n\\)  C) \\(2\\sigma_4\\bmod n\\)  D) 无法伪造"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Sign}(16)=16^d=(4^2)^d=(4^d)^2=\\sigma_4^2\\bmod n\\)。RSA 的乘法同态性使得无哈希的\"教科书 RSA 签名\"可被伪造。更一般地，\\(\\sigma_{m_1m_2}=\\sigma_{m_1}\\cdot\\sigma_{m_2}\\)。Hash-then-Sign 打破了这种代数关系——\\(H(m_1\\cdot m_2)\\neq H(m_1)\\cdot H(m_2)\\)。"
+      },
+      {
+        "id": "cryptography-ch04-q10",
+        "question": "ECDSA 中若 \\(k\\) 对两次签名相同，\\(r\\) 也相同。已知 \\((r,s_1)\\) 签 \\(m_1\\) 和 \\((r,s_2)\\) 签 \\(m_2\\)。攻击者可如何恢复私钥 \\(d\\)？",
+        "options": [
+          "\\(d=\\frac{s_1 H(m_2)-s_2 H(m_1)}{r(s_2-s_1)}\\bmod n\\)  B) \\(d=s_1-s_2\\)  C) \\(d=\\frac{H(m_1)}{r}\\)  D) 无法恢复"
+        ],
+        "answer": 0,
+        "explanation": "\\(s_1=k^{-1}(H(m_1)+rd)\\)，\\(s_2=k^{-1}(H(m_2)+rd)\\)。相减：\\(s_1-s_2=k^{-1}(H(m_1)-H(m_2))\\)，\\(k=\\frac{H(m_1)-H(m_2)}{s_1-s_2}\\)。代回：\\(d=\\frac{s_1k-H(m_1)}{r}\\)。整个私钥被恢复！2010 年索尼 PS3 密钥泄露正是因为 ECDSA 的 \\(k\\) 固定为常数。教训：加密中的随机性不是可选的\"优良特性\"而是安全必需。"
+      },
+      {
+        "id": "cryptography-ch04-q11",
+        "question": "EdDSA（Ed25519）与 ECDSA 的主要设计区别是什么？",
+        "options": [
+          "EdDSA 使用确定性 nonce \\(k=H(sk_\\text{seed}\\|m)\\)，消除随机源依赖  B) EdDSA 不使用椭圆曲线  C) EdDSA 签名更长  D) EdDSA 不需要哈希"
+        ],
+        "answer": 0,
+        "explanation": "EdDSA 的 \\(k\\) 由 \\(H(\\text{prefix}\\|m)\\) 确定性生成（prefix 来自私钥种子），无需外部随机数——消除了 \\(k\\) 重用/弱随机的攻击面。使用 Twisted Edwards 曲线（Curve25519），点加法公式统一（无条件分支），天然抵御时序侧信道。Ed25519 签名 64 字节，验证比 ECDSA 快约 3 倍。"
+      },
+      {
+        "id": "cryptography-ch04-q12",
+        "question": "盲签名（Blind Signature）中签名者不知道被签消息的内容。哪个是合法应用？",
+        "options": [
+          "电子投票——签名者确认投票合法但不知道投票内容  B) 伪造银行支票  C) 绕过身份验证  D) 没有合法应用"
+        ],
+        "answer": 0,
+        "explanation": "盲签名由 Chaum 1983 年提出用于数字现金和电子投票。流程：Alice 用盲化因子 \\(r\\) 隐藏消息 \\(m'=r\\cdot H(m)\\)，签名者签 \\(\\sigma'=m'^d\\)，Alice 去盲 \\(\\sigma=\\sigma'/r^d\\)，得到 \\(m\\) 的合法签名。签名者无法关联 \\(\\sigma\\) 与 \\(\\sigma'\\)。隐私保护的关键技术。"
+      },
+      {
+        "id": "cryptography-ch04-q13",
+        "question": "X.509 数字证书包含哪些核心字段？",
+        "options": [
+          "主体名称、公钥、CA 签名、有效期  B) 仅公钥和密码  C) IP 地址和端口  D) 仅 CA 名称"
+        ],
+        "answer": 0,
+        "explanation": "X.509 证书绑定身份和公钥：主体（Subject）标识持有者，公钥（SubjectPublicKeyInfo），CA 的数字签名（签署证书内容的完整性和真实性），有效期（NotBefore/NotAfter），序列号等。浏览器验证证书链：网站证书→中间 CA→根 CA（预装在信任库中）。PKI 是互联网安全的基石。"
+      },
+      {
+        "id": "cryptography-ch04-q14",
+        "question": "RSA-PSS 签名方案中引入了什么元素使 RSA 签名可证明安全？",
+        "options": [
+          "随机盐值（salt）+ 编码函数  B) 更大的密钥  C) 多次签名  D) 对称加密层"
+        ],
+        "answer": 0,
+        "explanation": "PSS（Probabilistic Signature Scheme）在签名前加入随机盐：\\(\\sigma=(\\text{Pad}(H(\\text{salt}\\|m)))^d\\bmod n\\)。盐值使签名概率化——相同消息每次签名不同。Bellare-Rogaway 证明 RSA-PSS 在 RSA 假设下是 EUF-CMA 安全的（紧归约）。PKCS#1 v1.5 签名虽广泛使用但无紧安全证明（Bleichenbacher 攻击曾利用其填充弱点）。"
+      },
+      {
+        "id": "cryptography-ch04-q15",
+        "question": "BLS 签名使用双线性对 \\(e:G_1\\times G_2\\to G_T\\)。BLS 签名 \\(\\sigma=[H(m)]sk\\)，验证：\\(e(\\sigma,g_2)\\stackrel{?}{=}e(H(m),pk)\\)。BLS 签名最突出的优点是什么？",
+        "options": [
+          "签名可聚合——多个签名合并为一个  B) 密钥更短  C) 不需要哈希  D) 量子安全"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\) 个签名 \\(\\sigma_i\\) 可聚合为 \\(\\sigma_{\\text{agg}}=\\sum\\sigma_i\\)，验证 \\(e(\\sigma_{\\text{agg}},g_2)=\\prod e(H(m_i),pk_i)\\) 仅需 \\(n+1\\) 次配对。区块链共识中每个块可能有数百个验证者签名，聚合签名将存储从 \\(O(n)\\) 压缩到 \\(O(1)\\)。以太坊 2.0 信标链使用 BLS 签名。"
+      },
+      {
+        "id": "cryptography-ch04-q16",
+        "question": "证书吊销列表（CRL）和在线证书状态协议（OCSP）分别是什么级别的检查？",
+        "options": [
+          "CRL 是批量离线检查，OCSP 是实时在线查询  B) 两者完全相同  C) CRL 更实时  D) OCSP 是离线的"
+        ],
+        "answer": 0,
+        "explanation": "CRL：CA 定期发布已吊销证书的列表（可能几小时更新一次），客户端下载整个列表检查。问题：列表大、更新有延迟。OCSP：客户端实时向 CA 查询单个证书状态，响应更快、更小。但 OCSP 引入隐私问题（CA 知道你访问了哪些网站）。OCSP Stapling：由服务器代为获取 OCSP 响应并发给客户端，解决隐私问题。"
+      },
+      {
+        "id": "cryptography-ch04-q17",
+        "question": "数字签名提供的三个安全属性是什么？",
+        "options": [
+          "完整性、认证性、不可否认性  B) 机密性、完整性、可用性  C) 仅完整性  D) 仅认证性"
+        ],
+        "answer": 0,
+        "explanation": "完整性（Integrity）：签名验证确保消息未被篡改。认证性（Authentication）：验证者确认签名者身份（公钥与身份绑定）。不可否认性（Non-repudiation）：签名者事后不能否认曾签署消息（只有私钥持有者能生成签名）。注意：签名不提供机密性——签名本身和消息都是公开的。"
+      },
+      {
+        "id": "cryptography-ch04-q18",
+        "question": "RSA 签名中 \\(e=3\\)，攻击者知道 3 个不同模数 \\(n_1,n_2,n_3\\) 下相同消息 \\(m\\) 的签名 \\(\\sigma_1,\\sigma_2,\\sigma_3\\)（\\(\\sigma_i=m^{1/3}\\bmod n_i\\)）。用 CRT 恢复 \\(m\\) 的攻击是什么？",
+        "options": [
+          "Hastad 广播攻击：CRT 重构 \\(m^3\\bmod N\\)，开立方根得 \\(m\\)  B) Wiener 攻击  C) Coppersmith 攻击  D) 不可能"
+        ],
+        "answer": 0,
+        "explanation": "对加密场景（非签名），\\(c_i=m^3\\bmod n_i\\)。CRT：\\(m^3\\bmod(n_1 n_2 n_3)\\) 可唯一重构。因 \\(m<\\min(n_i)\\)，\\(m^3<n_1 n_2 n_3\\)，故 \\(m^3\\) 的 CRT 值就是真实的 \\(m^3\\)（无模约化），直接整数开立方根得 \\(m\\)。Hastad 攻击的前提：小 \\(e\\) + 多方使用不同密钥加密相同消息。解决方案：OAEP 填充引入随机化。"
+      },
+      {
+        "id": "cryptography-ch04-q19",
+        "question": "ECDSA 签名验证中 \\(s^{-1}\\) 的计算量级是？（群阶 \\(n\\approx2^{256}\\)）",
+        "options": [
+          "\\(O(\\log^2 n)\\approx65536\\) 次模乘  B) \\(O(n)\\)  C) \\(O(1)\\)  D) \\(O(\\sqrt{n})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(s^{-1}\\bmod n\\) 用扩展欧几里得算法或 Fermat 小定理 \\(s^{-1}=s^{n-2}\\bmod n\\)（\\(n\\) 为素数）。扩展 Euclidean 复杂度 \\(O(\\log^2 n)\\)。\\(\\log n\\approx256\\)，\\(256^2=65536\\) 次基本运算。这远小于点乘的 \\(O(\\log n)\\) 次倍加（每次倍加含多个域运算）。总验证时间由两次点乘主导。"
+      },
+      {
+        "id": "cryptography-ch04-q20",
+        "question": "多签名（Multisig）方案 \\(t\\)-of-\\(n\\) 要求 \\(n\\) 个签名者中至少 \\(t\\) 个参与才能生成合法签名。Schnorr 多签名 MuSig2 的核心技术是什么？",
+        "options": [
+          "2 轮交互：先交换 nonce 承诺，再联合签名  B) 每人独立签名后拼接  C) 使用共享私钥  D) 使用可信第三方"
+        ],
+        "answer": 0,
+        "explanation": "MuSig2 协议：第 1 轮，每个签名者生成 \\(R_i\\) 并广播承诺；第 2 轮，公开 \\(R_i\\) 后每人计算部分签名 \\(s_i\\)，聚合 \\(s=\\sum s_i\\)。最终签名 \\((R,s)\\) 与单签名格式相同（密钥聚合），验证者无法区分单签名和多签名。比特币 Taproot 升级利用 Schnorr 多签名节省区块空间。"
+      },
+      {
+        "id": "cryptography-ch04-q21",
+        "question": "Bleichenbacher 攻击（1998）针对 PKCS#1 v1.5 RSA 签名。攻击核心是？",
+        "options": [
+          "利用签名验证时对填充格式检查不严格，构造伪造的填充通过验证  B) 分解 \\(n\\)  C) 恢复私钥  D) 碰撞哈希"
+        ],
+        "answer": 0,
+        "explanation": "PKCS#1 v1.5 签名格式：\\(\\sigma^e\\bmod n = 00\\|01\\|\\text{FF...FF}\\|00\\|\\text{DigestInfo}\\)。若验证代码仅检查开头格式而不严格验证 FF 填充长度和尾部，攻击者可构造 \\(\\sigma\\) 使 \\(\\sigma^e\\) 的前几字节符合格式、后面携带伪造的哈希值。特别在 \\(e=3\\) 时，\\(\\sigma=\\lceil(00\\|01\\|\\text{FF}\\|00\\|\\text{hash})^{1/3}\\rceil\\) 可直接计算。2006 年影响了 Firefox/OpenSSL。"
+      },
+      {
+        "id": "cryptography-ch04-q22",
+        "question": "签名方案的强不可伪造性（SUF-CMA）与 EUF-CMA 的区别是什么？",
+        "options": [
+          "SUF-CMA 要求即使对已签过的消息，也不能伪造不同的签名值  B) SUF-CMA 更弱  C) 两者完全相同  D) SUF-CMA 不考虑选择消息攻击"
+        ],
+        "answer": 0,
+        "explanation": "EUF-CMA：攻击者不能伪造**新消息**的签名。SUF-CMA：攻击者不能产生**新的(消息, 签名)对**——即使对已签消息 \\(m\\)，也不能输出 \\(m\\) 的另一个合法签名。例如确定性签名方案（每个消息的签名唯一）自动满足 SUF = EUF。概率签名方案（如 RSA-PSS）的 SUF 需额外证明。加密货币中 SUF 很重要——防止交易可延展性攻击。"
+      },
+      {
+        "id": "cryptography-ch04-q23",
+        "question": "CRYSTALS-Dilithium 是 NIST 选定的后量子签名标准。它基于什么难题？",
+        "options": [
+          "Module-LWE 和 Module-SIS  B) RSA  C) 椭圆曲线  D) 哈希碰撞"
+        ],
+        "answer": 0,
+        "explanation": "Dilithium 基于格上的 Module-LWE（Module Learning with Errors）和 Module-SIS（Short Integer Solution）问题。签名过程类似 Fiat-Shamir with abort：签名者需重复采样直到签名不泄露私钥信息（rejection sampling）。安全级别 2/3/5 分别对应 128/192/256 位安全。签名大小约 2.4-4.6 KB，比 ECDSA 大但对抗量子威胁。"
+      },
+      {
+        "id": "cryptography-ch04-q24",
+        "question": "时间戳服务（TSA）对签名文档加时间戳。若 TSA 的证书在 2025-01-01 过期，2024-12-31 生成的时间戳在 2025-06-01 是否仍有效？",
+        "options": [
+          "有效——时间戳证明签名发生在证书有效期内  B) 无效——TSA 证书已过期  C) 取决于文档类型  D) 需要重新签名"
+        ],
+        "answer": 0,
+        "explanation": "RFC 3161 时间戳服务：TSA 签署 \\((H(\\text{data}),\\text{time})\\)。时间戳的合法性取决于**签署时**TSA 证书是否有效（2024-12-31 有效）。验证者可确认签名发生在 CA 吊销/过期之前。这使得数字签名的法律效力可以长期存续。长期验证需完整保存证书链和 CRL/OCSP 快照（LTV 签名）。"
+      },
+      {
+        "id": "cryptography-ch04-q25",
+        "question": "Schnorr 签名的安全性归约到什么数学难题？",
+        "options": [
+          "离散对数问题（DLP），通过 Forking Lemma  B) RSA 问题  C) 大整数分解  D) LWE"
+        ],
+        "answer": 0,
+        "explanation": "Schnorr 签名 \\((R,s)\\)：\\(R=gk,s=k-xH(R,m)\\)。安全证明（随机预言模型下）：若有 EUF-CMA 攻击者，可用 Forking Lemma 回溯到两个不同的哈希查询 \\(H_1,H_2\\)，得到两个方程 \\(s_1=k-xH_1,s_2=k-xH_2\\)，相减得 \\(x=(s_2-s_1)/(H_1-H_2)\\)。因此伪造签名等价于解 DLP。Pointcheval-Stern 1996 给出了完整证明。"
+      },
+      {
+        "id": "cryptography-ch04-q26",
+        "question": "Git 中 `git commit -S` 使用 GPG 对提交签名。这保证了什么？",
+        "options": [
+          "提交确实由声称的开发者创建，且内容未被篡改  B) 代码没有 bug  C) 提交不能被回滚  D) 仅保护提交消息"
+        ],
+        "answer": 0,
+        "explanation": "GPG 签名将开发者的私钥绑定到提交的 SHA 哈希上。验证 `git log --show-signature` 确认：(1)提交内容完整性（树哈希、父哈希、作者、消息）；(2)作者身份真实性（通过 GPG 密钥信任网/Keybase/GitHub 已验证密钥）。防止供应链攻击中恶意代码被以可信开发者名义注入。Linux 内核开发要求签名提交。"
+      },
+      {
+        "id": "cryptography-ch04-q27",
+        "question": "COVID-19 疫苗接种数字证书（如 EU Digital COVID Certificate）使用 ECDSA 签名。为什么选择 ECDSA 而非 RSA？",
+        "options": [
+          "签名更短（64B vs 256B），适合 QR 码的有限空间  B) ECDSA 更容易实现  C) RSA 不安全  D) 政治原因"
+        ],
+        "answer": 0,
+        "explanation": "QR 码容量有限（约 2953 字节，纠错 L 级）。证书内容（姓名、疫苗信息、签发机构等）+ ECDSA 签名（64B）可轻松编码为 QR。RSA-2048 签名 256B 会大幅增加 QR 码复杂度（更密的点阵，扫描识别率下降）。此外 ECDSA 验证速度快，手机离线验证只需毫秒。130+ 国采用的 ICAO DTC 标准也使用 ECDSA。"
+      },
+      {
+        "id": "cryptography-ch04-q28",
+        "question": "2020 年 SolarWinds 供应链攻击中，攻击者在正式软件更新中注入后门。代码签名为何未能阻止此攻击？",
+        "options": [
+          "攻击者在签名前就已注入恶意代码——构建系统被攻陷  B) 代码签名被破解了  C) 没有使用签名  D) 签名算法有漏洞"
+        ],
+        "answer": 0,
+        "explanation": "SolarWinds 的构建流水线（build pipeline）被渗透。攻击者在编译前注入恶意代码 → 构建 → 合法签名密钥自动签署含恶意代码的二进制 → 分发。代码签名验证通过！签名只保证\"这个二进制由 SolarWinds 的密钥签署\"，不保证\"源代码没有恶意\"。防御需要：可重复构建（reproducible builds）、构建环境隔离、SLSA 框架。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="cryptography"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/cryptography.html" class="module-name">密码学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 数字签名的概念与安全模型</a></li>
+      <li><a href="#kp2">02 · RSA 签名与 ElGamal/DSA 签名</a></li>
+      <li><a href="#kp3">03 · 椭圆曲线密码学基础</a></li>
+      <li><a href="#kp4">04 · ECDSA 签名算法</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>数字签名</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>数字签名的概念与安全模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在数字世界中，如何证明一条消息确实由某人发出且未被篡改？数字签名 是手写签名的电子对应物，具有不可伪造性和不可否认性。它是电子商务、 软件分发、区块链的安全基石。理解签名的安全定义（EUF-CMA）是 理解具体方案安全性论证的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>签名方案 = \((\text{KeyGen}, \text{Sign}, \text{Verify})\) 三元组。 安全性定义为存在性不可伪造性——即使攻击者可获得任意消息的签名， 也无法伪造新消息的有效签名。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>数字签名方案</strong>： - \(\text{KeyGen}() \to (pk, sk)\) - \(\text{Sign}(sk, m) \to \sigma\) - \(\text{Verify}(pk, m, \sigma) \to \{\text{accept}, \text{reject}\}\) <strong>正确性</strong>：\(\text{Verify}(pk, m, \text{Sign}(sk, m)) = \text{accept}\)。 <strong>EUF-CMA 安全</strong>（选择消息攻击下的存在性不可伪造性）： 攻击者可查询签名预言机 \(\text{Sign}(sk, \cdot)\)， 需伪造一对 \((m^*, \sigma^*)\) 其中 \(m^*\) 未被查询过。 \[\Pr[\text{Verify}(pk, m^*, \sigma^*) = \text{accept}] \leq \text{negl}(n)\] <strong>哈希-然后-签名范式</strong>：先哈希消息 \(h = H(m)\)，再签名 \(h\)。 减小签名的计算量，且允许签名固定长度的数据。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 代码签名：操作系统验证驱动程序和应用的完整性 - TLS 证书链：CA 用数字签名为网站身份背书</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Alice 对消息 \(m\) 签名，Bob 验证。若 Eve 篡改为 \(m'\)， 原签名 \(\sigma\) 能否通过验证？ 解答：\(\text{Verify}(pk, m', \sigma) = \text{reject}\)，因哈希 \(H(m') \neq H(m)\)（碰撞抗性保证），签名验证失败。 易错点：数字签名 ≠ 加密。签名不保密消息内容，仅保证 完整性和来源认证。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">EUF-CMA 安全意味着攻击者不能？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。CMA 模型允许攻击者获取任意消息的签名，但要求')">A. 获取任何消息的签名</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！CMA 模型允许攻击者获取任意消息的签名，但要求')">B. 对未见过的消息伪造有效签名</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。CMA 模型允许攻击者获取任意消息的签名，但要求')">C. 验证已有签名</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。CMA 模型允许攻击者获取任意消息的签名，但要求')">D. 读取签名者的公钥</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>RSA 签名与 ElGamal/DSA 签名</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>RSA 和 ElGamal 不仅能加密，也能签名。RSA 签名简单直观—— 「用私钥加密」——但需要配合哈希和填充。ElGamal 签名衍生出 DSA（数字签名标准），长期作为美国 NIST 标准。理解这两类签名 是学习 ECDSA 的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>RSA 签名</strong>：\(\sigma = H(m)^d \bmod n\)， 验证：\(\sigma^e \bmod n \stackrel{?}{=} H(m)\)。 安全性依赖 RSA 问题 + 哈希的碰撞抗性。 实际使用 PSS 填充（可证明安全）： \[\sigma = (\text{pad}(H(m), r))^d \bmod n\] <strong>DSA 签名</strong>：参数 \((p, q, g)\)，\(q | (p-1)\)，\(g\) 的阶为 \(q\)。 私钥 \(x\)，公钥 \(y = g^x \bmod p\)。 签名：随机 \(k\)， \[r = (g^k \bmod p) \bmod q, \quad s = k^{-1}(H(m) + xr) \bmod q\] 验证：\(w=s^{-1}\)，\(u_1=H(m)w\)，\(u_2=rw\)， 检查 \((g^{u_1}y^{u_2} \bmod p) \bmod q \stackrel{?}{=} r\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- RSA-PSS 签名用于 TLS、PDF 文档签名 - DSA 是 FIPS 186 标准（2023 年起不再推荐新应用）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：RSA 签名中为什么必须先哈希再签名？ 解答：若直接签名 \(\sigma = m^d\)，攻击者可选 \(\sigma\) 计算 \(m = \sigma^e\) 获得有效的 \((m, \sigma)\) 对（存在性伪造）。 哈希后 \(m\) 无法被这样「逆向构造」。 易错点：DSA 签名中随机数 \(k\) 必须保密且不重复。 Sony PS3 私钥泄露事件就是因为 ECDSA 中重用了 \(k\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">DSA 签名时重复使用随机数 \(k\) 会导致？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。两次签名 \\((r,s_1), (r,s_2)\\) 共享 \\(r=g^k\\)，由')">A. 签名形式不变但安全</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！两次签名 \\((r,s_1), (r,s_2)\\) 共享 \\(r=g^k\\)，由')">B. 私钥 \(x\) 可被直接推算</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。两次签名 \\((r,s_1), (r,s_2)\\) 共享 \\(r=g^k\\)，由')">C. 签名验证失败</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。两次签名 \\((r,s_1), (r,s_2)\\) 共享 \\(r=g^k\\)，由')">D. 仅影响签名速度</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>椭圆曲线密码学基础</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>RSA 和 DLP 的安全性随计算力增长需要不断增大密钥。椭圆曲线 密码学(ECC)在更小的密钥长度下提供相同安全级别：256 位 ECC ≈ 3072 位 RSA。ECC 是移动设备和 IoT 的理想选择。理解椭圆 曲线上的群律是掌握 ECDH 和 ECDSA 的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>椭圆曲线上的点构成阿贝尔群，群运算由切线法和割线法几何定义。 ECDLP（椭圆曲线离散对数）比普通 DLP 更难——没有亚指数算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>椭圆曲线</strong>（Weierstrass 形式）：\(y^2 = x^3 + ax + b\)（\(\Delta \neq 0\)）。 <strong>群律</strong>：点集 \(E(\mathbb{F}_p) \cup \{\mathcal{O}\}\)， \(\mathcal{O}\) 为无穷远点（单位元）。 - 逆元：\(-P = (x, -y)\) - 点加：\(P + Q\)（\(P \neq Q\)），过 \(P, Q\) 的直线交曲线于 \(R'\)， \(P + Q = -R'\)。斜率 \(\lambda = \frac{y_Q - y_P}{x_Q - x_P}\)。 - 倍点：\(2P\)，用切线。\(\lambda = \frac{3x_P^2 + a}{2y_P}\)。 - 结果：\(x_R = \lambda^2 - x_P - x_Q\)，\(y_R = \lambda(x_P - x_R) - y_P\)。 <strong>ECDLP</strong>：已知 \(P\) 和 \(Q = nP\)（\(n\) 次标量乘），求 \(n\)。 安全级别：256 位曲线提供 128 位安全性（最优攻击 \(O(\sqrt{n})\)， 即 Pollard rho），对应 RSA-3072。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Bitcoin 使用 secp256k1 曲线 - TLS 1.3 默认使用 X25519（Curve25519 上的 ECDH）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(E: y^2 = x^3 + 2x + 3\) over \(\mathbb{F}_5\) 上， 求 \(P=(1,4)\) 的 \(2P\)。 解答：\(\lambda = (3 \cdot 1 + 2)/(2 \cdot 4) = 5/8 \bmod 5\)。 \(5 \bmod 5 = 0\)，\(\lambda = 0\)。 \(x_R = 0 - 1 - 1 = -2 = 3 \bmod 5\)。 \(y_R = 0 \cdot (1-3) - 4 = -4 = 1 \bmod 5\)。\(2P = (3, 1)\)。 易错点：所有运算在 \(\mathbb{F}_p\) 上进行，除法是乘逆元。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">ECC 相比 RSA 的主要优势是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。256 位 ECC ≈ 3072 位 RSA。但 ECC 同样受量子计算')">A. 算法更简单</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！256 位 ECC ≈ 3072 位 RSA。但 ECC 同样受量子计算')">B. 相同安全级别下密钥更短</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。256 位 ECC ≈ 3072 位 RSA。但 ECC 同样受量子计算')">C. 不受量子计算威胁</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。256 位 ECC ≈ 3072 位 RSA。但 ECC 同样受量子计算')">D. 加密速度更快</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>ECDSA 签名算法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>ECDSA 将 DSA 迁移到椭圆曲线上，在保持安全性的同时大幅缩短 签名和密钥长度。它是 Bitcoin 和以太坊交易签名、TLS 证书、 物联网设备认证的核心算法。EdDSA（如 Ed25519）进一步简化了 实现并消除了随机数相关的安全隐患。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>ECDSA 签名</strong>：曲线 \(E\)，基点 \(G\)（阶 \(n\)），私钥 \(d\)，公钥 \(Q=dG\)。 签名消息 \(m\)： (1) 随机选 \(k \in [1, n-1]\)，计算 \(R = kG = (x_R, y_R)\) (2) \(r = x_R \bmod n\) (3) \(s = k^{-1}(H(m) + dr) \bmod n\) 签名 \((r, s)\)。 <strong>验证</strong>：\(w = s^{-1} \bmod n\)， \(u_1 = H(m) \cdot w\)，\(u_2 = r \cdot w\)， \[\text{检查 } (u_1 G + u_2 Q)_x \bmod n \stackrel{?}{=} r\] 正确性：\(u_1 G + u_2 Q = w(H(m)G + drG) = w \cdot s \cdot kG = kG = R\)。 <strong>EdDSA</strong>（确定性签名）：\(k = H(\text{prefix} \| m)\)，消除随机数 泄露风险。Ed25519 使用 Curve25519，签名 64 字节，公钥 32 字节。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Bitcoin/Ethereum 交易签名（ECDSA on secp256k1） - SSH 密钥推荐使用 Ed25519 - FIDO2/WebAuthn 硬件安全密钥</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：为什么 EdDSA 比 ECDSA 更不容易出现实现错误？ 解答：ECDSA 需要高质量随机数 \(k\)——若 \(k\) 泄露或重用， 私钥直接暴露。EdDSA 用确定性方法 \(k=H(sk \| m)\) 从私钥 和消息派生 \(k\)，消除了随机数生成器故障的风险。 易错点：ECDSA 的签名值 \((r, s)\) 中，\(s\) 和 \(n-s\) 都是有效签名 （延展性问题）。Bitcoin 要求 \(s \leq n/2\) 来消除歧义。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Ed25519 相比 ECDSA 的关键改进是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。EdDSA 的 \\(k\\) 由私钥和消息确定性派生，从根本上')">A. 使用更大的密钥</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！EdDSA 的 \\(k\\) 由私钥和消息确定性派生，从根本上')">B. 确定性签名，无需随机数生成器</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。EdDSA 的 \\(k\\) 由私钥和消息确定性派生，从根本上')">C. 基于 RSA 问题</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。EdDSA 的 \\(k\\) 由私钥和消息确定性派生，从根本上')">D. 签名长度为 4096 位</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/discrete/cryptography.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

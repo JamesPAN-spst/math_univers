@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 切丛与向量场 — 微分几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "diffgeo-ch02-q1",
+        "question": "切丛 \\(TM\\) 的定义是什么？",
+        "options": [
+          "\\(TM = M \\times \\mathbb{R}^n\\)",
+        "\\(TM = \\bigsqcup_{p \\in M} T_pM\\)（所有切空间的不交并）",
+        "\\(TM = M \\times M\\)",
+        "\\(TM\\) 是 \\(M\\) 的一个开子集"
+        ],
+        "answer": 1,
+        "explanation": "\\(TM = \\{(p, v) : p \\in M, v \\in T_pM\\}\\) 有自然的 \\(2n\\)-维流形结构（\\(n = \\dim M\\)）。坐标卡：\\((U, \\varphi)\\) 诱导 \\(TU \\cong \\varphi(U) \\times \\mathbb{R}^n\\)，\\((p, v) \\mapsto (\\varphi(p), d\\varphi_p(v))\\)。\\(TM\\) 不一定是 \\(M \\times \\mathbb{R}^n\\)（A 是平凡丛），如 \\(TS^2 \\neq S^2 \\times \\mathbb{R}^2\\)（毛球定理）。"
+      },
+      {
+        "id": "diffgeo-ch02-q2",
+        "question": "\\(TS^1\\) 是否同构于（平凡丛）\\(S^1 \\times \\mathbb{R}\\)？",
+        "options": [
+          "是",
+        "否",
+        "只局部同构",
+        "取决于定向"
+        ],
+        "answer": 0,
+        "explanation": "\\(S^1\\) 是 1 维流形。\\(TS^1\\) 是秩 1 的向量丛。\\(S^1\\) 上存在处处非零的向量场（如逆时针的单位切向量 \\(\\gamma'(t)\\)）。全局非零截面存在 \\(\\Rightarrow\\) 丛平凡：\\(TS^1 \\cong S^1 \\times \\mathbb{R}\\)。一般地，所有 Lie 群的切丛平凡（左不变向量场给出全局标架）。"
+      },
+      {
+        "id": "diffgeo-ch02-q3",
+        "question": "向量场 \\(X\\) 在 \\(M\\) 上的定义是什么？",
+        "options": [
+          "\\(M\\) 上的实值函数",
+        "\\(TM\\) 的光滑截面：\\(X: M \\to TM\\)，\\(\\pi \\circ X = \\mathrm{id}_M\\)",
+        "\\(M\\) 上的一条曲线",
+        "\\(M\\) 的一个子集"
+        ],
+        "answer": 1,
+        "explanation": "向量场 \\(X\\) 在每点 \\(p\\) 指定一个切向量 \\(X_p \\in T_pM\\)，光滑依赖于 \\(p\\)。截面条件 \\(\\pi \\circ X = \\mathrm{id}\\) 保证 \\(X_p\\) 确实在 \\(T_pM\\) 中。坐标表示 \\(X = \\sum_i X^i(x) \\partial/\\partial x^i\\)，\\(X^i\\) 光滑。\\(\\mathfrak{X}(M)\\) = \\(M\\) 上光滑向量场全体，是 \\(C^\\infty(M)\\)-模。"
+      },
+      {
+        "id": "diffgeo-ch02-q4",
+        "question": "\\(\\mathbb{R}^2\\) 上向量场 \\(X = x \\partial/\\partial x + y \\partial/\\partial y\\) 在 \\((1,1)\\) 处的值是？",
+        "options": [
+          "\\((1, 1)\\)",
+        "\\(\\partial/\\partial x + \\partial/\\partial y\\)",
+        "\\((0, 0)\\)",
+        "\\(2\\partial/\\partial x\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(X_{(1,1)} = 1 \\cdot \\partial/\\partial x|_{(1,1)} + 1 \\cdot \\partial/\\partial y|_{(1,1)}\\)。在坐标分量中写作 \\((X^1, X^2)|_{(1,1)} = (1, 1)\\)。这是从原点\"向外指\"的径向向量场。零点在 \\((0,0)\\)。"
+      },
+      {
+        "id": "diffgeo-ch02-q5",
+        "question": "两个向量场 \\(X, Y\\) 的 Lie 括号 \\([X, Y]\\) 的定义是什么？",
+        "options": [
+          "\\([X, Y] = X + Y\\)",
+        "\\([X, Y] = XY - YX\\)（作为微分算子的交换子）",
+        "\\([X, Y](f) = X(f) \\cdot Y(f)\\)",
+        "\\([X, Y] = \\nabla_X Y\\)"
+        ],
+        "answer": 1,
+        "explanation": "将向量场看作一阶微分算子，\\(X(Y(f))\\) 是二阶算子，但 \\([X,Y](f) = X(Y(f)) - Y(X(f))\\) 恰好又是一阶的（二阶项抵消）。坐标中：\\(X = X^i \\partial_i\\), \\(Y = Y^j \\partial_j\\), \\([X,Y]^k = X^i \\partial_i Y^k - Y^i \\partial_i X^k\\)。Lie 括号使 \\(\\mathfrak{X}(M)\\) 成为无限维 Lie 代数。"
+      },
+      {
+        "id": "diffgeo-ch02-q6",
+        "question": "向量场 \\(X\\) 的流 (flow) \\(\\theta_t\\) 是什么？",
+        "options": [
+          "\\(X\\) 的积分：\\(\\int_M X\\)",
+        "由 ODE \\(\\frac{d}{dt}\\theta_t(p) = X_{\\theta_t(p)}\\), \\(\\theta_0(p) = p\\) 确定的单参数微分同胚族",
+        "\\(X\\) 的梯度",
+        "\\(X\\) 的散度"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\theta: (-\\varepsilon, \\varepsilon) \\times M \\to M\\)，\\(\\theta(t, p) = \\theta_t(p)\\) 满足 \\(\\dot{\\theta}_t(p) = X(\\theta_t(p))\\)。每条积分曲线 \\(t \\mapsto \\theta_t(p)\\) 是 \\(X\\) 在 \\(p\\) 出发的解曲线。\\(\\theta_t\\) 是微分同胚（当定义时），\\(\\theta_0 = \\mathrm{id}\\), \\(\\theta_{s+t} = \\theta_s \\circ \\theta_t\\)（单参数群）。"
+      },
+      {
+        "id": "diffgeo-ch02-q7",
+        "question": "一般向量丛 \\(E \\to M\\) 的秩 (rank) 是什么？",
+        "options": [
+          "\\(\\dim M\\)",
+        "纤维 \\(E_p\\) 的维数",
+        "\\(\\dim E\\)",
+        "\\(M\\) 的坐标卡数目"
+        ],
+        "answer": 1,
+        "explanation": "秩 \\(k\\) 向量丛：每个纤维 \\(E_p\\) 是 \\(k\\)-维向量空间。\\(\\dim E = \\dim M + k\\)。\\(TM\\) 是秩 \\(n\\) 丛（\\(n = \\dim M\\)）。法丛 \\(NM\\)（嵌入 \\(M \\hookrightarrow \\mathbb{R}^N\\)）秩 \\(N - n\\)。秩 1 丛叫\"线丛\"。"
+      },
+      {
+        "id": "diffgeo-ch02-q8",
+        "question": "\\(\\mathbb{R}^3\\) 上 \\(X = y\\partial_x - x\\partial_y\\), \\(Y = \\partial_z\\)。\\([X, Y] = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(\\partial_x\\)",
+        "\\(-\\partial_y\\)",
+        "\\(y\\partial_z\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([X,Y]^k = X^i \\partial_i Y^k - Y^i \\partial_i X^k\\)。\\(Y = (0,0,1)\\) 常数。\\(X^i \\partial_i Y^k = y \\partial_x(0) - x \\partial_y(0) + 0 = 0\\)。\\(Y^i \\partial_i X^k: Y^3 \\partial_z X^k\\)。\\(X^1 = y\\), \\(X^2 = -x\\), \\(X^3 = 0\\)，都不含 \\(z\\)，\\(\\partial_z X^k = 0\\)。所以 \\([X,Y] = 0\\)。物理：\\(X\\) 是绕 \\(z\\) 轴旋转，\\(Y\\) 是沿 \\(z\\) 平移，两者交换。"
+      },
+      {
+        "id": "diffgeo-ch02-q9",
+        "question": "\\(X = \\partial_x\\), \\(Y = x\\partial_y\\) 在 \\(\\mathbb{R}^2\\) 上。\\([X, Y] = ?\\)",
+        "options": [
+          "\\(\\partial_y\\)",
+        "\\(-\\partial_y\\)",
+        "\\(0\\)",
+        "\\(x\\partial_x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([X,Y](f) = X(Y(f)) - Y(X(f))\\)。\\(Y(f) = x \\partial_y f\\)。\\(X(Y(f)) = \\partial_x(x \\partial_y f) = \\partial_y f + x \\partial_{xy}f\\)。\\(X(f) = \\partial_x f\\)。\\(Y(X(f)) = x \\partial_y(\\partial_x f) = x \\partial_{xy} f\\)。\\([X,Y](f) = \\partial_y f\\)。所以 \\([X,Y] = \\partial_y\\)。交换子非零说明 \\(X\\) 和 \\(Y\\) 对应的流不交换。"
+      },
+      {
+        "id": "diffgeo-ch02-q10",
+        "question": "向量场 \\(X = -y\\partial_x + x\\partial_y\\) 在 \\(\\mathbb{R}^2\\) 上的流是什么？",
+        "options": [
+          "沿 \\(x\\) 轴平移",
+        "绕原点旋转 \\(\\theta_t(x,y) = (x\\cos t - y\\sin t, x\\sin t + y\\cos t)\\)",
+        "径向缩放",
+        "沿 \\(y\\) 轴平移"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\dot{x} = -y\\), \\(\\dot{y} = x\\)。这是旋转的 ODE：\\(\\frac{d}{dt}\\begin{pmatrix}x\\\\y\\end{pmatrix} = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix}\\)。解：\\(\\begin{pmatrix}x(t)\\\\y(t)\\end{pmatrix} = \\begin{pmatrix}\\cos t&-\\sin t\\\\\\sin t&\\cos t\\end{pmatrix}\\begin{pmatrix}x_0\\\\y_0\\end{pmatrix}\\)。即绕原点逆时针旋转角度 \\(t\\)。\\(X\\) 是旋转向量场。"
+      },
+      {
+        "id": "diffgeo-ch02-q11",
+        "question": "Möbius 带上的法线场（截面为 \\(\\mathbb{R}\\)-线丛）是否存在全局非零截面？",
+        "options": [
+          "是",
+        "否，Möbius 带是非平凡线丛",
+        "取决于参数化",
+        "Möbius 带不是流形"
+        ],
+        "answer": 1,
+        "explanation": "Möbius 带作为 \\(S^1\\) 上的线丛是非平凡的——绕一圈回来法向量反转。若存在全局非零截面，丛平凡。但 Möbius 带不同胚于 \\(S^1 \\times \\mathbb{R}\\)（Möbius 带不可定向，\\(S^1 \\times \\mathbb{R}\\) 可定向）。这是最简单的非平凡向量丛例子。"
+      },
+      {
+        "id": "diffgeo-ch02-q12",
+        "question": "毛球定理 (Hairy Ball Theorem): \\(S^{2n}\\) 上不存在处处非零的连续切向量场。\\(S^1\\) 和 \\(S^3\\) 呢？",
+        "options": [
+          "\\(S^1, S^3\\) 也没有",
+        "\\(S^1\\) 有但 \\(S^3\\) 没有",
+        "\\(S^1, S^3\\) 都有处处非零切向量场",
+        "只有 \\(S^3\\) 有"
+        ],
+        "answer": 2,
+        "explanation": "毛球定理只对偶数维球面 \\(S^{2n}\\) 成立。奇数维球面 \\(S^{2n+1}\\) 有处处非零切向量场：\\(S^1\\) 上 \\((-y, x)\\)（旋转），\\(S^3 \\subseteq \\mathbb{R}^4\\) 上 \\((-x_2, x_1, -x_4, x_3)\\)。\\(S^{2n+1}\\) 的 Euler 特征数 \\(\\chi = 0\\)，而 \\(\\chi(S^{2n}) = 2\\)。Poincaré-Hopf 定理：\\(\\chi \\neq 0 \\Rightarrow\\) 不存在处处非零向量场。"
+      },
+      {
+        "id": "diffgeo-ch02-q13",
+        "question": "Lie 括号 \\([X, Y]\\) 满足 Jacobi 恒等式。其形式是什么？",
+        "options": [
+          "\\([X, [Y, Z]] = [[X,Y], Z]\\)",
+        "\\([X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0\\)",
+        "\\([X, Y] = -[Y, X]\\) 且 \\([[X,Y],Z] = 0\\)",
+        "\\([X, [Y, Z]] = [X,Y] \\cdot Z\\)"
+        ],
+        "answer": 1,
+        "explanation": "Jacobi 恒等式：\\([X,[Y,Z]] + [Y,[Z,X]] + [Z,[X,Y]] = 0\\)（轮换求和 = 0）。这是 Lie 代数的公理之一（另一个是反对称 \\([X,Y] = -[Y,X]\\)）。A 是结合律（Lie 括号不满足）。B 替代了结合律的角色。验证方法：展开交换子的定义。"
+      },
+      {
+        "id": "diffgeo-ch02-q14",
+        "question": "\\(X = x\\partial_x + y\\partial_y\\) 在 \\(\\mathbb{R}^2\\) 上的积分曲线是什么？",
+        "options": [
+          "从原点出发的直线（射线）",
+        "同心圆",
+        "抛物线",
+        "双曲线"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dot{x} = x\\), \\(\\dot{y} = y\\)。解：\\(x(t) = x_0 e^t\\), \\(y(t) = y_0 e^t\\)。比例 \\(y/x = y_0/x_0\\) 恒定 = 直线通过原点。参数 \\(t\\) 增加时沿射线向外运动（指数增长）。\\(t \\to -\\infty\\) 时趋近原点（不动点）。\\(X\\) 是径向膨胀向量场。"
+      },
+      {
+        "id": "diffgeo-ch02-q15",
+        "question": "\\(TS^2\\) 的维数和结构是什么？",
+        "options": [
+          "2 维平凡丛",
+        "4 维流形，非平凡丛",
+        "3 维流形",
+        "2 维流形"
+        ],
+        "answer": 1,
+        "explanation": "\\(TS^2\\) 是 4 维流形（\\(\\dim S^2 + \\text{rank} = 2 + 2\\)）。\\(TS^2 \\ncong S^2 \\times \\mathbb{R}^2\\)（非平凡）——毛球定理说 \\(S^2\\) 上不存在处处非零切向量场，若丛平凡则存在（取常数截面）。\\(TS^2\\) 作为 4-流形微分同胚于 \\(T^*S^2\\)（余切丛），后者在辛几何中作为相空间出现。"
+      },
+      {
+        "id": "diffgeo-ch02-q16",
+        "question": "\\(\\mathbb{R}^3\\) 上 \\(X = \\partial_x\\)，\\(Y = \\partial_y\\)。\\([X,Y] = ?\\) Lie 括号为零意味着什么？",
+        "options": [
+          "\\(X, Y\\) 的流交换",
+        "需要更多信息",
+        "\\(X, Y\\) 线性相关",
+        "\\(X = Y\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\([X,Y] = 0\\)（常数向量场的 Lie 括号为零）。\\(X\\) 的流 \\(\\theta_t(x,y,z) = (x+t, y, z)\\)，\\(Y\\) 的流 \\(\\phi_s = (x, y+s, z)\\)。\\(\\theta_t \\circ \\phi_s = \\phi_s \\circ \\theta_t\\)（平移交换）。一般地 \\([X,Y] = 0 \\iff\\) 流交换（Frobenius 定理推论）。几何意义：沿 \\(X\\) 走 \\(t\\) 再沿 \\(Y\\) 走 \\(s\\) 等于先 \\(Y\\) 走 \\(s\\) 再 \\(X\\) 走 \\(t\\)。"
+      },
+      {
+        "id": "diffgeo-ch02-q17",
+        "question": "\\(f\\)-相关向量场：\\(F: M \\to N\\), \\(X \\in \\mathfrak{X}(M)\\), \\(Y \\in \\mathfrak{X}(N)\\), \\(X, Y\\) 是 \\(F\\)-相关的当且仅当？",
+        "options": [
+          "\\(dF \\circ X = Y \\circ F\\)",
+        "\\(X = Y\\)",
+        "\\(F\\) 是同胚",
+        "\\(X|_p = Y|_{F(p)}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 和 \\(Y\\) 是 \\(F\\)-相关的 \\(\\iff\\) 对每个 \\(p\\)，\\(dF_p(X_p) = Y_{F(p)}\\)，即 \\(dF \\circ X = Y \\circ F\\)（作为 \\(M \\to TN\\) 的映射相等）。D 缺少微分映射。\\(F\\)-相关性保证 \\(F\\) 将 \\(X\\) 的积分曲线映到 \\(Y\\) 的积分曲线。若 \\(F\\) 是微分同胚，每个 \\(X\\) 唯一对应一个 \\(Y = F_*X\\)（推前）。"
+      },
+      {
+        "id": "diffgeo-ch02-q18",
+        "question": "向量丛的平凡化需要什么？",
+        "options": [
+          "一个全局标架（\\(n\\) 个处处线性无关的截面）",
+        "一个坐标卡",
+        "流形紧致",
+        "流形单连通"
+        ],
+        "answer": 0,
+        "explanation": "秩 \\(n\\) 丛 \\(E \\to M\\) 平凡 \\(\\iff\\) 存在全局标架 \\(\\{e_1, \\ldots, e_n\\}\\)（\\(e_i\\) 是 \\(E\\) 的光滑截面，每点线性无关）。平凡化 \\(E \\cong M \\times \\mathbb{R}^n\\) 由 \\((p, a^1, \\ldots, a^n) \\mapsto \\sum a^i e_i(p)\\) 给出。单连通流形上的丛不一定平凡（\\(TS^2 \\neq S^2 \\times \\mathbb{R}^2\\)，\\(S^2\\) 单连通）。"
+      },
+      {
+        "id": "diffgeo-ch02-q19",
+        "question": "\\(\\mathbb{R}^2 \\setminus \\{0\\}\\) 上向量场 \\(X = \\frac{-y}{x^2+y^2}\\partial_x + \\frac{x}{x^2+y^2}\\partial_y\\) 的积分曲线是什么？",
+        "options": [
+          "以原点为心的同心圆",
+        "径向射线",
+        "螺旋线",
+        "双曲线"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dot{x} = \\frac{-y}{r^2}\\), \\(\\dot{y} = \\frac{x}{r^2}\\)。\\(\\frac{d}{dt}(x^2+y^2) = 2x\\dot{x} + 2y\\dot{y} = 2x \\cdot \\frac{-y}{r^2} + 2y \\cdot \\frac{x}{r^2} = 0\\)。\\(r\\) 恒定 \\(\\Rightarrow\\) 轨道是圆（等 \\(r\\) 线）。角速度 \\(\\dot{\\theta} = \\frac{x\\dot{y}-y\\dot{x}}{r^2} = \\frac{x^2+y^2}{r^4} = 1/r^2\\)。不同半径的圆有不同角速度。"
+      },
+      {
+        "id": "diffgeo-ch02-q20",
+        "question": "Frobenius 定理（向量场版本）：\\(X_1, \\ldots, X_k\\) 在 \\(M\\) 上逐点线性无关。这 \\(k\\) 个方向构成可积分布的充要条件是什么？",
+        "options": [
+          "\\(X_i\\) 处处平行",
+        "\\([X_i, X_j] = \\sum_l c_{ij}^l X_l\\)（Lie 括号在分布内闭合）",
+        "\\(X_i\\) 交换",
+        "\\(k = \\dim M\\)"
+        ],
+        "answer": 1,
+        "explanation": "分布 \\(\\Delta_p = \\text{span}\\{X_1|_p, \\ldots, X_k|_p\\}\\) 可积 \\(\\iff\\) 对合（involutive）：\\([X_i, X_j]\\) 仍在 \\(\\Delta\\) 中，即 \\([X_i, X_j]\\) 是 \\(X_l\\) 的 \\(C^\\infty\\)-线性组合。可积 \\(\\Rightarrow\\) 过每点存在 \\(k\\)-维积分子流形。C 是特例（\\(c_{ij}^l = 0\\)）。Frobenius 定理是微分几何中最基本的可积性判据。"
+      },
+      {
+        "id": "diffgeo-ch02-q21",
+        "question": "向量场 \\(X = x\\partial_x\\) 在 \\(\\mathbb{R}\\) 上。流 \\(\\theta_t\\) 在 \\(t \\to \\infty\\) 时存在吗？",
+        "options": [
+          "对所有初值 \\(\\theta_t(x_0)\\) 存在于全 \\(\\mathbb{R}\\)",
+        "只对 \\(x_0 = 0\\) 全局存在",
+        "对所有 \\(x_0\\) 全局存在（\\(\\theta_t(x_0) = x_0 e^t\\)）",
+        "不存在"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\dot{x} = x\\), \\(x(t) = x_0 e^t\\)。对所有 \\(x_0 \\in \\mathbb{R}\\)，\\(x(t)\\) 对所有 \\(t \\in \\mathbb{R}\\) 定义（指数函数全局存在）。\\(X\\) 是完备向量场（流全局定义）。对比：\\(Y = x^2 \\partial_x\\), \\(x(t) = x_0/(1-x_0 t)\\)，在 \\(t = 1/x_0\\) 爆破——不完备。紧流形上向量场总完备。"
+      },
+      {
+        "id": "diffgeo-ch02-q22",
+        "question": "切丛 \\(TM\\) 上连续非零截面存在的充要条件（用 Euler 数表述）是什么？",
+        "options": [
+          "\\(M\\) 连通",
+        "\\(\\chi(M) = 0\\)（Euler 特征数为零）",
+        "\\(\\dim M\\) 为奇数",
+        "B（充要）但只对紧致有向闭流形"
+        ],
+        "answer": 3,
+        "explanation": "Poincaré-Hopf 定理：紧致有向闭流形 \\(M\\) 上，处处非零向量场存在 \\(\\iff \\chi(M) = 0\\)。\\(\\chi(S^{2n}) = 2 \\neq 0\\)（无非零向量场 = 毛球定理）。\\(\\chi(T^2) = 0\\)（有非零向量场）。\\(\\chi(S^{2n+1}) = 0\\)。对非紧致或有边流形，\\(\\chi = 0\\) 不是充要条件——需要更细的障碍理论。"
+      },
+      {
+        "id": "diffgeo-ch02-q23",
+        "question": "推前 \\(F_*X\\) 的定义（\\(F\\) 是微分同胚）在坐标中是什么？",
+        "options": [
+          "\\((F_*X)^i = X^i\\)",
+        "\\((F_*X)^i|_{F(p)} = \\sum_j \\frac{\\partial F^i}{\\partial x^j}|_p X^j|_p\\)",
+        "\\((F_*X)^i = \\frac{\\partial}{\\partial x^i}\\)",
+        "\\((F_*X) = X \\circ F^{-1}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((F_*X)_{F(p)} = dF_p(X_p)\\)。坐标中 \\((F_*X)^i|_{F(p)} = \\sum_j \\frac{\\partial F^i}{\\partial x^j} X^j|_p\\)。这就是 Jacobian 矩阵乘以向量分量。\\(F\\) 必须是微分同胚（否则推前不定义全局向量场）。D 的说法在适当理解下也对：\\((F_*X)_q = dF_{F^{-1}(q)}(X_{F^{-1}(q)})\\)。"
+      },
+      {
+        "id": "diffgeo-ch02-q24",
+        "question": "Lie 导数 \\(\\mathcal{L}_X Y\\) 等于什么？",
+        "options": [
+          "\\([X, Y]\\)",
+        "\\(\\nabla_X Y\\)",
+        "\\(X(Y)\\)",
+        "\\(dY(X)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{L}_X Y = \\lim_{t \\to 0} \\frac{(\\theta_{-t})_* Y - Y}{t} = [X, Y]\\)。Lie 导数衡量 \\(Y\\) 沿 \\(X\\) 的流\"不变化\"的程度。\\(\\mathcal{L}_X Y = 0 \\iff [X,Y] = 0 \\iff\\) \\(Y\\) 在 \\(X\\) 的流下不变。\\(\\nabla_X Y\\)（B）需要联络（额外结构），而 Lie 导数只用流形的光滑结构。"
+      },
+      {
+        "id": "diffgeo-ch02-q25",
+        "question": "紧致流形上的向量场总是完备的（流全局存在）。证明的关键是什么？",
+        "options": [
+          "Heine-Borel 定理",
+        "紧致性保证解不爆破（有界性 + 存在性延拓定理）",
+        "Baire 范畴定理",
+        "Sard 定理"
+        ],
+        "answer": 1,
+        "explanation": "ODE 解的最大存在区间 \\((a, b)\\)：若 \\(b < \\infty\\)，则 \\(\\theta_t(p)\\) 在 \\(t \\to b^-\\) 时逃离每个紧集。\\(M\\) 紧致 \\(\\Rightarrow\\) 无处可逃，矛盾。所以 \\(b = +\\infty\\)（类似 \\(a = -\\infty\\)）。这是存在性延拓定理（ODE理论）+ 紧致性的结合。"
+      },
+      {
+        "id": "diffgeo-ch02-q26",
+        "question": "在流体力学中，流体的速度场是什么数学对象？",
+        "options": [
+          "标量场",
+        "流形上的切向量场",
+        "微分形式",
+        "张量场"
+        ],
+        "answer": 1,
+        "explanation": "流体速度 \\(\\mathbf{v}(x,t)\\) 在物理空间的每一点指定一个速度向量，即切向量场。流线（streamlines）= 向量场的积分曲线。Navier-Stokes 方程是速度向量场满足的 PDE。物质粒子的运动轨迹由流（flow map）\\(\\theta_t\\) 描述——正是向量场流的概念。"
+      },
+      {
+        "id": "diffgeo-ch02-q27",
+        "question": "在控制论中，系统 \\(\\dot{x} = f(x) + g(x)u\\) 的可控性与什么有关？",
+        "options": [
+          "\\(f\\) 和 \\(g\\) 的 Lie 括号生成的分布维数",
+        "\\(f\\) 的值域",
+        "\\(g\\) 的核",
+        "系统的特征值"
+        ],
+        "answer": 0,
+        "explanation": "Chow-Rashevskii 定理：若 \\(f, g, [f,g], [f,[f,g]], \\ldots\\) 生成的 Lie 代数在每点维数 = \\(\\dim M\\)（满秩条件），则系统可控。Lie 括号反映了\"两个运动方向不交换\"产生的新方向。在汽车转向中：直行 + 转向 + 它们的交换子 = 侧向移动（平行泊车）。"
+      },
+      {
+        "id": "diffgeo-ch02-q28",
+        "question": "在深度学习中，残差网络 (ResNet) 的连续极限 \\(\\dot{x} = f_\\theta(x, t)\\) 是流形上的什么结构？",
+        "options": [
+          "标量场",
+        "时间依赖的向量场及其流",
+        "度量张量",
+        "联络"
+        ],
+        "answer": 1,
+        "explanation": "Neural ODE：\\(\\dot{x}(t) = f_\\theta(x(t), t)\\) 是时间依赖的向量场。网络的前向传播 = 流 \\(\\theta_t\\) 的计算。残差块 \\(x_{k+1} = x_k + f_\\theta(x_k)\\) 是 Euler 离散化。向量场的流保持微分同胚性（保证信息不丢失）。这是微分几何在深度学习理论中的直接应用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="diffgeo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/diffgeo.html" class="module-name">微分几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 切丛与向量丛</a></li>
+      <li><a href="#kp2">02 · 向量场的局部表示与微分算子</a></li>
+      <li><a href="#kp3">03 · 流与积分曲线</a></li>
+      <li><a href="#kp4">04 · Lie 括号与相关向量场</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>切丛与向量场</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>切丛与向量丛</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>将每一点的切空间"黏合"在一起，得到切丛 \(TM = \bigsqcup_p T_pM\)。 切丛本身是一个 \(2n\) 维流形，是所有切向量"共存"的空间。更一般 地，向量丛将向量空间参数化地放在流形上每一点，是纤维丛理论的 起点，也是规范场论的数学语言。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>向量丛 = 流形 + 每点附着一个向量空间，整体构成光滑流形。 截面 = 为每一点选择一个向量（如向量场就是切丛的截面）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>切丛</strong>：\(TM = \bigsqcup_{p \in M} T_pM = \{(p, v) : p \in M, v \in T_pM\}\)。 自然投影 \(\pi: TM \to M\)，\(\pi(p, v) = p\)。 坐标卡 \((U, x^i)\) on \(M\) 诱导 \((TU, x^i, v^i)\) on \(TM\)： \(v = \sum v^i \partial/\partial x^i|_p\)。 \(\dim TM = 2 \dim M\)。 <strong>向量丛</strong>：\((E, \pi, M)\)，\(\pi: E \to M\)，每个纤维 \(E_p = \pi^{-1}(p)\) 同构于 \(\mathbb{R}^k\)（\(k\) = 秩），且局部平凡化 \(\Phi: \pi^{-1}(U) \to U \times \mathbb{R}^k\)。 <strong>截面 (Section)</strong>：\(s: M \to E\)，\(\pi \circ s = \mathrm{id}_M\)。 即为每个 \(p\) 选取 \(s(p) \in E_p\)。光滑截面记为 \(\Gamma(E)\)。 \[\text{向量场} = \Gamma(TM), \quad \text{余向量场} = \Gamma(T^*M)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 纤维丛是规范场论（Yang-Mills 理论）的数学框架 - 切丛的截面（向量场）描述物理中的速度场、力场</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(TS^1\) 与 \(S^1 \times \mathbb{R}\) 微分同胚（\(S^1\) 的切丛平凡）。 解答：\(S^1\) 是 1 维流形，\(T_\theta S^1 \cong \mathbb{R}\)。 定义 \(\Phi: TS^1 \to S^1 \times \mathbb{R}\)，\(\Phi(\theta, v\partial/\partial\theta) = (\theta, v)\)。 \(\Phi\) 是光滑双射且 \(\Phi^{-1}\) 光滑，所以 \(TS^1 \cong S^1 \times \mathbb{R}\)。 直觉：\(S^1\) 上存在处处不为零的切向量场（逆时针方向），所以切丛平凡。 易错点：\(TS^2\) 不平凡！（"毛球定理"：\(S^2\) 上不存在处处不为零 的连续切向量场。）</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim T\mathbb{R}^3 = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\dim TM = 2 \\dim M\\)。\\(\\mathbb{R}^3\\) 是 3 维流形，')">A. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\dim TM = 2 \\dim M\\)。\\(\\mathbb{R}^3\\) 是 3 维流形，')">B. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\dim TM = 2 \\dim M\\)。\\(\\mathbb{R}^3\\) 是 3 维流形，')">C. 9</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\dim TM = 2 \\dim M\\)。\\(\\mathbb{R}^3\\) 是 3 维流形，')">D. 1</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>向量场的局部表示与微分算子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>向量场不仅是几何对象（每点附着一个方向），还可以视为微分算子—— 对函数进行方向导数运算。这个"几何-代数"双重观点是微分几何的 精髓：向量场既能画成箭头（几何），也能作用于函数（代数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(X \in \Gamma(TM)\) 可视为 \(C^\infty(M) \to C^\infty(M)\) 的 \(\mathbb{R}\)-线性 映射，满足 Leibniz 法则。这将向量场"代数化"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>局部表示</strong>：坐标卡 \((U, x^i)\) 下， \(X|_U = \sum_{i=1}^n X^i(x) \frac{\partial}{\partial x^i}\)， \(X^i \in C^\infty(U)\)。 <strong>作为微分算子</strong>：\(X(f)(p) = \sum X^i(p) \frac{\partial f}{\partial x^i}(p)\)， 其中 \(f \in C^\infty(M)\)。 性质： (1) \(\mathbb{R}\)-线性：\(X(af + bg) = aX(f) + bX(g)\) (2) Leibniz 法则：\(X(fg) = X(f)g + fX(g)\) (3) \(C^\infty(M)\)-模结构：\((fX)(g) = f \cdot X(g)\) 反过来，满足 (1)(2) 的 \(C^\infty(M) \to C^\infty(M)\) 的映射 恰好是向量场（推导的整体版）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}^2\) 上，\(X = x \partial/\partial x + y \partial/\partial y\)。 求 \(X(x^2 + y^2)\)。 解答：\(X(x^2+y^2) = x \cdot 2x + y \cdot 2y = 2(x^2+y^2)\)。 几何意义：\(X\) 是径向向量场，\(x^2+y^2\) 沿径向每单位增加 \(2r^2\)。 易错点：\(X(f)\) 是函数（不是数），结果是 \(C^\infty(M)\) 中的元素。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">向量场 \(X\) 满足以下哪个性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。向量场作为导子（derivation）满足 Leibniz 法则。')">A. \(X(fg) = X(f) \cdot X(g)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！向量场作为导子（derivation）满足 Leibniz 法则。')">B. \(X(fg) = X(f)g + fX(g)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。向量场作为导子（derivation）满足 Leibniz 法则。')">C. \(X(f+g) = X(f) \cdot X(g)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。向量场作为导子（derivation）满足 Leibniz 法则。')">D. \(X(cf) = c^2 X(f)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>流与积分曲线</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定向量场 \(X\)，"沿着箭头走"会走出什么样的轨迹？积分曲线就是 向量场的"轨迹线"，它在每一点的切向量恰好是向量场在该点的值。 流 \(\phi_t\) 则是将积分曲线组织成一族变换——它描述了向量场驱动 的"连续对称运动"，是经典力学（Hamilton 流）和动力系统的核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>向量场 ↔ 一阶常微分方程 ↔ 单参数变换群（流）。 这是微分几何中微分方程与几何的核心联系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>积分曲线</strong>：\(\gamma: I \to M\) 是 \(X\) 的积分曲线 \(\iff\) \(\gamma'(t) = X_{\gamma(t)},\; \forall t \in I\)。 坐标中：\(\dot{x}^i(t) = X^i(x^1(t), \ldots, x^n(t))\)——一阶 ODE 组。 由 Picard-Lindelöf 定理，初始条件 \(\gamma(0) = p\) 下 局部存在唯一的积分曲线。 <strong>流 (Flow)</strong>：\(\phi: (-\varepsilon, \varepsilon) \times M \to M\)， \(\phi_t(p) = \gamma_p(t)\)。 \[\phi_0 = \mathrm{id}_M, \quad \phi_{t+s} = \phi_t \circ \phi_s\] （单参数变换群性质，在定义域内成立。） 紧流形上 \(X\) 的积分曲线可延拓到全 \(\mathbb{R}\)（完备向量场）， 此时 \(\{\phi_t\}_{t \in \mathbb{R}}\) 构成单参数微分同胚群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Hamilton 力学中相空间上的 Hamilton 向量场生成时间演化流 - 流体力学中速度场的积分曲线 = 流线</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X = -y\partial/\partial x + x\partial/\partial y\)（\(\mathbb{R}^2\) 上旋转场）。 求流 \(\phi_t\)。 解答：ODE：\(\dot{x} = -y\)，\(\dot{y} = x\)。 解：\(x(t) = x_0 \cos t - y_0 \sin t\)，\(y(t) = x_0 \sin t + y_0 \cos t\)。 即 \(\phi_t\) 是绕原点逆时针旋转角度 \(t\) 的变换。 易错点：流 \(\phi_t\) 不一定全局定义（若向量场不完备，解可能爆破）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">向量场 \(X = x \partial/\partial x\) 在 \(\mathbb{R}\) 上的流是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dot{x} = x \\Rightarrow x(t) = x_0 e^t\\)。')">A. \(\phi_t(x_0) = x_0 + t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\dot{x} = x \\Rightarrow x(t) = x_0 e^t\\)。')">B. \(\phi_t(x_0) = x_0 e^t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dot{x} = x \\Rightarrow x(t) = x_0 e^t\\)。')">C. \(\phi_t(x_0) = x_0 \cos t\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dot{x} = x \\Rightarrow x(t) = x_0 e^t\\)。')">D. \(\phi_t(x_0) = x_0 / (1-t)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Lie 括号与相关向量场</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>两个向量场 \(X, Y\) 的流 \(\phi_t, \psi_s\) 是否可交换？Lie 括号 \([X,Y]\) 精确测量了这种不可交换性：\([X,Y] = 0\) 当且仅当流可交 换。Lie 括号赋予向量场空间一个 Lie 代数结构，是 Lie 群与 Lie 代数理论的几何起源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\([X,Y]\) 作为导子的交换子：\([X,Y](f) = X(Y(f)) - Y(X(f))\)。 这将微分算子的"非交换性"几何化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\([X,Y] = XY - YX\) 作为微分算子的交换子。 即 \([X,Y](f) = X(Y(f)) - Y(X(f))\)。 <strong>关键事实</strong>：\([X,Y]\) 仍是向量场（一阶微分算子），虽然 \(XY\) 是二阶算子。 坐标中：若 \(X = X^i \partial_i\)，\(Y = Y^j \partial_j\)， \[[X,Y]^k = X^i \frac{\partial Y^k}{\partial x^i} - Y^i \frac{\partial X^k}{\partial x^i}\] <strong>性质</strong>： (1) 反对称：\([X,Y] = -[Y,X]\) (2) Jacobi 恒等式：\([[X,Y],Z] + [[Y,Z],X] + [[Z,X],Y] = 0\) (3) \([fX, gY] = fg[X,Y] + f(Xg)Y - g(Yf)X\) <strong>流的交换性</strong>：\([X,Y] = 0 \iff \phi_t \circ \psi_s = \psi_s \circ \phi_t\)。 <strong>\(f\)-相关</strong>：若 \(f: M \to N\) 光滑，\(X \in \Gamma(TM)\)，\(Y \in \Gamma(TN)\)， \(X, Y\) 是 \(f\)-相关的 \(\iff df \circ X = Y \circ f\)。 此时 \([X_1, X_2]\) 与 \([Y_1, Y_2]\) 也 \(f\)-相关。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Lie 括号 \([X,Y] = 0\) 的充要条件"流可交换"在经典力学中意味着 两个守恒量独立（Liouville 可积性）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X = \partial/\partial x\)，\(Y = x \partial/\partial y\)。 求 \([X,Y]\)。 解答：\([X,Y](f) = X(Y(f)) - Y(X(f))\)。 \(Y(f) = x \partial f/\partial y\)，\(X(Y(f)) = \partial/\partial x(x \partial f/\partial y) = \partial f/\partial y + x \partial^2 f/\partial x \partial y\)。 \(X(f) = \partial f/\partial x\)，\(Y(X(f)) = x \partial^2 f/\partial x \partial y\)。 \([X,Y](f) = \partial f/\partial y\)。即 \([X,Y] = \partial/\partial y\)。 易错点：计算 Lie 括号时必须使用 Leibniz 法则，不能直接对系数求导。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\([X,Y] = 0\) 意味着什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\([X,Y] = 0\\) \\(\\iff\\) \\(\\phi_t^X \\circ \\phi_s^Y = \\phi_s^Y \\circ \\phi_t^X\\)。')">A. \(X = Y\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\([X,Y] = 0\\) \\(\\iff\\) \\(\\phi_t^X \\circ \\phi_s^Y = \\phi_s^Y \\circ \\phi_t^X\\)。')">B. \(X\) 和 \(Y\) 的流可交换</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\([X,Y] = 0\\) \\(\\iff\\) \\(\\phi_t^X \\circ \\phi_s^Y = \\phi_s^Y \\circ \\phi_t^X\\)。')">C. \(X\) 和 \(Y\) 正交</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\([X,Y] = 0\\) \\(\\iff\\) \\(\\phi_t^X \\circ \\phi_s^Y = \\phi_s^Y \\circ \\phi_t^X\\)。')">D. \(X\) 或 \(Y\) 为零</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/geometry/diffgeo.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

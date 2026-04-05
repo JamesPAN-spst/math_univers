@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 信息论与 ML — 信息论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "info-theory-ch06-q1",
+        "question": "交叉熵损失 \\(H(p,q)=-\\sum_x p(x)\\log q(x)\\) 在分类任务中的含义是什么？",
+        "options": [
+          "用模型分布 \\(q\\) 编码真实分布 \\(p\\) 的平均比特数——最小化它等价于最小化 \\(D_{\\text{KL}}(p\\|q)\\)  B) 无信息含义  C) 等于 \\(H(p)\\)  D) 等于 \\(H(q)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(p,q)=H(p)+D_{\\text{KL}}(p\\|q)\\)。\\(H(p)\\) 是常数→最小化 \\(H(p,q)\\) ⇔ 最小化 \\(D_{\\text{KL}}(p\\|q)\\)。分类任务中 \\(p\\) = one-hot 真实标签，\\(q\\) = softmax 输出。\\(H(p,q)=-\\log q(y_{\\text{true}})\\)——即正确类别的负对数似然。交叉熵损失是极大似然估计的等价形式。"
+      },
+      {
+        "id": "info-theory-ch06-q2",
+        "question": "二分类中，真实标签 \\(y=1\\)，模型输出 \\(q=0.8\\)。交叉熵损失 \\(L=?\\)",
+        "options": [
+          "\\(-\\log_2 0.8\\approx0.322\\)  B) \\(-\\log_2 0.2\\)  C) \\(0.8\\)  D) \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(L=-[y\\log q+(1-y)\\log(1-q)]=-\\log0.8\\approx0.322\\) bit（自然对数：\\(-\\ln0.8\\approx0.223\\) nats）。若 \\(q=0.5\\)：\\(L=-\\log0.5=1\\) bit（最大不确定性）。若 \\(q=0.99\\)：\\(L=-\\log0.99\\approx0.014\\) bit（高置信度，低损失）。交叉熵对错误预测的惩罚随置信度指数增长——\\(q\\to0\\) 时 \\(L\\to\\infty\\)。"
+      },
+      {
+        "id": "info-theory-ch06-q3",
+        "question": "信息瓶颈（IB）方法的优化目标是什么？",
+        "options": [
+          "\\(\\min_{P(T|X)} I(X;T)-\\beta I(T;Y)\\)：压缩输入信息同时保留关于输出的信息  B) 最大化 \\(I(X;T)\\)  C) 最小化 \\(I(T;Y)\\)  D) 最大化 \\(H(T)\\)"
+        ],
+        "answer": 0,
+        "explanation": "信息瓶颈（Tishby 2000）：找中间表示 \\(T\\) 使 Markov 链 \\(Y\\to X\\to T\\) 成立。\\(I(X;T)\\) = 编码 \\(X\\) 的复杂度（越小越压缩）。\\(I(T;Y)\\) = 保留的标签信息（越大越有用）。\\(\\beta\\) 控制压缩-准确度折衷。\\(\\beta\\to\\infty\\)：\\(T=X\\)（不压缩）。\\(\\beta\\to0\\)：\\(T=\\)常数（最大压缩，丢失所有信息）。DNN 的隐藏层可被理解为逐层执行信息瓶颈——逐步丢弃与任务无关的信息。"
+      },
+      {
+        "id": "info-theory-ch06-q4",
+        "question": "信息平面（information plane）中 DNN 训练的两个阶段是什么（Shwartz-Ziv & Tishby 2017 假说）？",
+        "options": [
+          "拟合阶段：\\(I(T;Y)\\) 增加；压缩阶段：\\(I(X;T)\\) 减少  B) 仅拟合  C) 仅压缩  D) 两者同时"
+        ],
+        "answer": 0,
+        "explanation": "假说：(1) 初始训练——\\(I(T;Y)\\) 快速增加（学习标签信息），\\(I(X;T)\\) 也增加。(2) 后期训练——\\(I(T;Y)\\) 饱和，\\(I(X;T)\\) 开始减少（网络压缩输入中的冗余信息）。争议：Saxe et al. (2018) 指出压缩阶段可能依赖于激活函数（ReLU vs tanh 结果不同）。但核心直觉有价值：良好的泛化需要适当丢弃输入中与任务无关的信息。"
+      },
+      {
+        "id": "info-theory-ch06-q5",
+        "question": "最小描述长度（MDL）原理的核心思想是什么？",
+        "options": [
+          "最好的模型是使\"模型描述长度 + 数据在模型下的描述长度\"之和最小的模型  B) 选择最复杂模型  C) 选择最简单模型  D) 随机选择"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_{\\text{total}}=L(\\text{model})+L(\\text{data}|\\text{model})\\)。简单模型→\\(L(\\text{model})\\) 小但 \\(L(\\text{data}|\\text{model})\\) 大（欠拟合）。复杂模型→\\(L(\\text{model})\\) 大但 \\(L(\\text{data}|\\text{model})\\) 小（过拟合）。MDL 自动平衡——信息论版本的奥卡姆剃刀。与 BIC 的联系：\\(\\text{BIC}=-2\\ln L+k\\ln n\\) 可视为两部分码长度的近似。"
+      },
+      {
+        "id": "info-theory-ch06-q6",
+        "question": "模型 A 参数 \\(k_A=5\\)，对数据的负对数似然 \\(-\\log P(D|A)=100\\) nats。模型 B 参数 \\(k_B=50\\)，\\(-\\log P(D|B)=80\\) nats。\\(n=1000\\) 样本。BIC 选哪个？",
+        "options": [
+          "BIC\\(_A=200+5\\ln1000\\approx234.5\\)；BIC\\(_B=160+50\\ln1000\\approx505.3\\)。选 A  B) 选 B  C) 相同  D) 无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{BIC}=-2\\ln L+k\\ln n\\)。\\(\\text{BIC}_A=2\\times100+5\\times\\ln1000=200+34.5=234.5\\)。\\(\\text{BIC}_B=2\\times80+50\\times6.91=160+345.5=505.5\\)。\\(\\text{BIC}_A<\\text{BIC}_B\\) → 选 A。模型 B 虽然拟合好 20 nats，但 45 个额外参数的描述代价远超拟合收益。MDL/BIC 天然惩罚过拟合。"
+      },
+      {
+        "id": "info-theory-ch06-q7",
+        "question": "变分自编码器（VAE）的损失函数 ELBO 是什么？",
+        "options": [
+          "\\(\\text{ELBO}=E_{q(z|x)}[\\log p(x|z)]-D_{\\text{KL}}(q(z|x)\\|p(z))\\)：重构项 \\(-\\) 正则项  B) 仅 MSE  C) 仅 KL 散度  D) 交叉熵"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log p(x)\\geq\\text{ELBO}\\)（证据下界）。\\(\\text{ELBO}=E_q[\\log p(x|z)]-D_{\\text{KL}}(q(z|x)\\|p(z))\\)。第一项 = 重构质量（解码器好坏）。第二项 = 编码器 \\(q\\) 与先验 \\(p(z)\\) 的距离（正则化——鼓励学到的 \\(z\\) 接近 \\(\\mathcal{N}(0,I)\\)）。信息论视角：\\(D_{\\text{KL}}=\\) 编码 \\(z\\) 需要的额外比特 = 率 \\(R\\)，MSE = 失真 \\(D\\)。最大化 ELBO = 最小化率失真 Lagrangian \\(R+D\\)。"
+      },
+      {
+        "id": "info-theory-ch06-q8",
+        "question": "KL 散度 \\(D_{\\text{KL}}(p\\|q)\\) 的非对称性。\\(p=\\text{Bernoulli}(0.1)\\)，\\(q=\\text{Bernoulli}(0.5)\\)。\\(D_{\\text{KL}}(p\\|q)\\) vs \\(D_{\\text{KL}}(q\\|p)\\)？",
+        "options": [
+          "\\(D_{\\text{KL}}(p\\|q)=0.1\\log\\frac{0.1}{0.5}+0.9\\log\\frac{0.9}{0.5}\\approx0.368\\) bit; \\(D_{\\text{KL}}(q\\|p)\\approx0.510\\) bit  B) 相等  C) 均为 \\(0\\)  D) 均为 \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(D_{\\text{KL}}(p\\|q)=0.1\\log_2(0.2)+0.9\\log_2(1.8)=0.1(-2.322)+0.9(0.848)=-0.232+0.763=0.531\\) bit。（修正）\\(D_{\\text{KL}}(q\\|p)=0.5\\log_2(5)+0.5\\log_2(5/9)=0.5(2.322)+0.5(-0.848)=1.161-0.424=0.737\\) bit。\\(D_{\\text{KL}}(q\\|p)>D_{\\text{KL}}(p\\|q)\\)——把尖峰分布（\\(p\\)）用宽分布（\\(q\\)）近似的代价小于反过来的代价。GAN 使用 \\(D_{\\text{KL}}(p_{\\text{data}}\\|p_g)\\)（mode-seeking），VAE 使用 \\(D_{\\text{KL}}(q\\|p)\\)（mode-covering）。"
+      },
+      {
+        "id": "info-theory-ch06-q9",
+        "question": "Softmax 温度参数 \\(\\tau\\)：\\(p_i=\\frac{e^{z_i/\\tau}}{\\sum_j e^{z_j/\\tau}}\\)。\\(\\tau\\to0\\) 和 \\(\\tau\\to\\infty\\) 时输出熵的变化？",
+        "options": [
+          "\\(\\tau\\to0\\)：\\(H\\to0\\)（one-hot，最大值独赢）；\\(\\tau\\to\\infty\\)：\\(H\\to\\log K\\)（均匀分布）  B) \\(\\tau\\) 不影响  C) \\(\\tau\\to0\\) 时熵最大  D) \\(\\tau\\to\\infty\\) 时熵为 \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tau\\) 小→ logit 差异被放大→概率集中在最大 \\(z_i\\) 上→ \\(H\\to0\\)。\\(\\tau\\) 大→ logit 差异被缩小→趋于均匀 \\(1/K\\) → \\(H\\to\\log K\\)。知识蒸馏（Hinton 2015）使用 \\(\\tau\\sim5\\)-\\(20\\) 的\"软标签\"——保留类间关系信息（如\"猫\"更像\"狗\"而非\"卡车\"）。信息量：软标签的互信息 \\(I(T;Y)>\\) 硬标签的互信息。"
+      },
+      {
+        "id": "info-theory-ch06-q10",
+        "question": "IB 方法的解析解（高斯情况）：\\(X\\sim\\mathcal{N}(0,\\Sigma_X)\\)，\\(Y\\) 与 \\(X\\) 线性相关。最优压缩 \\(T\\) 的形式是什么？",
+        "options": [
+          "\\(T=AX+\\xi\\)（线性投影 + 高斯噪声），\\(A\\) 沿 CCA（典型相关分析）方向  B) 非线性变换  C) 恒等映射  D) 随机映射"
+        ],
+        "answer": 0,
+        "explanation": "高斯 IB（Chechik et al. 2005）：最优 \\(T\\) 是 \\(X\\) 在 CCA 方向上的投影加独立噪声。\\(I(T;Y)=\\sum_{i=1}^d\\frac{1}{2}\\log(1+\\text{SNR}_i)\\)，\\(\\text{SNR}_i\\) 与第 \\(i\\) 个典型相关系数 \\(\\rho_i\\) 和 \\(\\beta\\) 有关：\\(\\text{SNR}_i=\\max(0,\\beta\\rho_i^2/(1-\\rho_i^2)-1)\\)。这与 PCA 的关键区别：PCA 保留最高方差方向，而 IB 保留与 \\(Y\\) 最相关的方向。当 \\(\\beta\\) 小时，IB 只保留最大 \\(\\rho_i\\) 的方向。"
+      },
+      {
+        "id": "info-theory-ch06-q11",
+        "question": "归一化最大似然（NML）是 MDL 的精确版本。NML 的复杂度惩罚项是什么？",
+        "options": [
+          "\\(\\text{COMP}(n)=\\log\\sum_{x^n}\\max_\\theta P_\\theta(x^n)\\)——即所有可能数据上最大似然的对数和  B) 参数个数  C) \\(0\\)  D) \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "NML 分布：\\(P_{\\text{NML}}(x^n)=\\frac{\\max_\\theta P_\\theta(x^n)}{\\sum_{y^n}\\max_\\theta P_\\theta(y^n)}\\)。分母 = 参数模型的\"复杂度\"——\\(\\text{COMP}\\)。对正态分布模型，\\(\\text{COMP}\\approx\\frac{k}{2}\\log\\frac{n}{2\\pi}+\\log\\int\\sqrt{\\det I(\\theta)}d\\theta\\)（\\(I(\\theta)\\) = Fisher 信息矩阵）。这比 \\(\\frac{k}{2}\\log n\\)（BIC 的惩罚项）更精确。MDL/NML 是频率学派的模型选择框架，而 Bayesian model selection 使用先验。"
+      },
+      {
+        "id": "info-theory-ch06-q12",
+        "question": "VAE 中 \\(\\beta\\)-VAE 的修改：\\(\\text{ELBO}_\\beta=E_q[\\log p(x|z)]-\\beta D_{\\text{KL}}(q(z|x)\\|p(z))\\)。\\(\\beta>1\\) 的效果是什么？",
+        "options": [
+          "更强的正则化——\\(z\\) 更接近先验，学到更解耦的表征，但重构质量下降  B) 更好重构  C) 无影响  D) 模型坍缩"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\beta>1\\) 加重 KL 惩罚→迫使 \\(q(z|x)\\approx p(z)\\)→不同维度独立（解耦）。信息论视角：\\(I(X;Z)\\leq\\frac{1}{\\beta}E[\\log p(x|z)]+\\text{const}\\)——\\(\\beta\\) 大时信息瓶颈更紧。Higgins et al. (2017) 发现 \\(\\beta\\)-VAE 自动学习 disentangled 因子（如人脸的姿态/表情/光照独立编码）。代价：\\(\\beta\\) 太大→信息损失过多→重构模糊。"
+      },
+      {
+        "id": "info-theory-ch06-q13",
+        "question": "标签平滑（label smoothing）将 one-hot \\(y=(0,...,1,...,0)\\) 替换为 \\(y'=(1-\\alpha)\\cdot y+\\alpha/K\\)。用交叉熵看，这相当于什么？",
+        "options": [
+          "最小化 \\((1-\\alpha)H(y,q)+\\alpha H(u,q)\\)（\\(u\\) = 均匀分布），鼓励模型输出不要过于自信  B) 增加正确类别置信度  C) 不影响训练  D) 等价于 dropout"
+        ],
+        "answer": 0,
+        "explanation": "\\(H(y',q)=(1-\\alpha)\\cdot(-\\log q_c)+\\frac{\\alpha}{K}\\sum_{k=1}^K(-\\log q_k)\\)。第二项 = \\(\\frac{\\alpha}{K}H(u,q)\\)——鼓励 \\(q\\) 不要远离均匀分布。效果：防止 logit 爆炸（\\(z_c\\to\\infty\\)），保持模型校准。信息论解释：目标分布的熵 \\(H(y')>H(y)=0\\)——不要求确定性预测，对噪声标签更鲁棒。Transformer（Vaswani 2017）原论文使用 \\(\\alpha=0.1\\)。"
+      },
+      {
+        "id": "info-theory-ch06-q14",
+        "question": "深度学习中的互信息估计方法 MINE（Mutual Information Neural Estimation）的原理是什么？",
+        "options": [
+          "利用 Donsker-Varadhan 表示 \\(I(X;Y)=\\sup_{T}E[T(X,Y)]-\\log E[e^{T(X',Y)}]\\)，用神经网络参数化 \\(T\\)  B) 直接计算  C) 直方图估计  D) KNN 估计"
+        ],
+        "answer": 0,
+        "explanation": "DV 表示：\\(D_{\\text{KL}}(P\\|Q)=\\sup_T\\{E_P[T]-\\log E_Q[e^T]\\}\\)（对所有可测函数 \\(T\\)）。\\(I(X;Y)=D_{\\text{KL}}(P_{XY}\\|P_X\\otimes P_Y)\\)。MINE 用神经网络 \\(T_\\theta\\) 近似最优函数。训练：梯度上升最大化 \\(\\hat{I}\\)。优点：可处理高维连续变量。缺点：估计偏差——\\(\\log E[e^T]\\) 的梯度估计有偏。改进：SMILE 使用 clip 减少方差。"
+      },
+      {
+        "id": "info-theory-ch06-q15",
+        "question": "Kolmogorov 复杂度 \\(K(x)\\) 与 Shannon 熵 \\(H(X)\\) 的关系？",
+        "options": [
+          "\\(E[K(X)]\\approx H(X)\\)——Kolmogorov 复杂度的期望等于 Shannon 熵（渐近）  B) \\(K(x)=H(X)\\) 恒等  C) 无关  D) \\(K(x)>H(X)\\) 总成立"
+        ],
+        "answer": 0,
+        "explanation": "Shannon 熵是分布的性质（平均码长下界），Kolmogorov 复杂度是个体字符串的性质（最短程序长度）。\\(K(x)\\) 不可计算（停机问题归约），但 \\(E[K(X^n)]=nH(X)+O(\\log n)\\)。MDL 可视为用可计算的参数模型类近似 Kolmogorov 复杂度。\"所有模型都是错的，但有些是有用的\"——MDL 在可计算模型类中找最短描述。"
+      },
+      {
+        "id": "info-theory-ch06-q16",
+        "question": "扩散模型（DDPM）的训练损失与 VAE ELBO 的关系？",
+        "options": [
+          "DDPM 损失是多步 VAE 的 ELBO 分解——每步去噪对应一个 KL 散度项之和  B) 完全无关  C) 仅 MSE  D) 仅 KL 散度"
+        ],
+        "answer": 0,
+        "explanation": "DDPM 前向过程 \\(q(x_t|x_{t-1})=\\mathcal{N}(\\sqrt{1-\\beta_t}x_{t-1},\\beta_t I)\\)，\\(T\\) 步后 \\(x_T\\approx\\mathcal{N}(0,I)\\)。ELBO 分解：\\(\\log p(x_0)\\geq-\\sum_{t=1}^T D_{\\text{KL}}(q(x_{t-1}|x_t,x_0)\\|p_\\theta(x_{t-1}|x_t))\\)。每个 KL 项简化为 MSE：\\(\\|\\epsilon-\\epsilon_\\theta(x_t,t)\\|^2\\)（预测噪声 vs 真实噪声）。信息论意义：每步去噪恢复 \\(\\sim\\frac{1}{T}\\log p(x)\\) bit 信息。"
+      },
+      {
+        "id": "info-theory-ch06-q17",
+        "question": "表征学习中的 InfoNCE 损失（对比学习）与互信息的关系？",
+        "options": [
+          "InfoNCE 是 \\(I(X;Y)\\) 的下界：\\(I(X;Y)\\geq\\log K-L_{\\text{InfoNCE}}\\)（\\(K\\) 是负样本数）  B) InfoNCE = \\(I(X;Y)\\)  C) 上界  D) 无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_{\\text{NCE}}=-E\\left[\\log\\frac{f(x,y^+)}{\\frac{1}{K}\\sum_{i=1}^K f(x,y_i)}\\right]\\)（\\(y^+\\) 正样本，\\(y_1,...,y_K\\) 含正样本和负样本）。\\(I(X;Y)\\geq\\log K-L_{\\text{NCE}}\\)。\\(K\\to\\infty\\) 时界更紧——CPC/SimCLR 使用大 batch（\\(K\\sim4096\\)）以获得更好的互信息估计。信息论证明 InfoNCE bound 不能超过 \\(\\log K\\)——这限制了对比学习能捕获的信息量。"
+      },
+      {
+        "id": "info-theory-ch06-q18",
+        "question": "Focal Loss \\(L_{\\text{FL}}=-(1-p_t)^\\gamma\\log p_t\\) 中 \\(\\gamma\\) 的信息论解释？",
+        "options": [
+          "\\(\\gamma>0\\) 降低易分类样本（\\(p_t\\to1\\)）的权重，有效重新加权使训练集中在\"高信息量\"（低 \\(p_t\\)）样本  B) 增加所有样本权重  C) 不影响梯度  D) 等价于交叉熵"
+        ],
+        "answer": 0,
+        "explanation": "标准 CE：\\(L=-\\log p_t\\)。\\(p_t=0.9\\) 时 \\(L=0.105\\)。Focal（\\(\\gamma=2\\)）：\\(L=(1-0.9)^2\\times0.105=0.001\\)。高置信度样本的损失被大幅降低。信息论视角：\\(-\\log p_t\\) = 观察到真实标签的信息量（surprisal）。\\((1-p_t)^\\gamma\\) 进一步聚焦\"高惊奇度\"样本——这些样本提供的学习信号最多（Fisher 信息最大）。Lin et al. (2017) 在 RetinaNet 中用此解决目标检测的类别不平衡。"
+      },
+      {
+        "id": "info-theory-ch06-q19",
+        "question": "预训练语言模型（GPT）的训练目标 \\(\\min_\\theta -\\sum_t\\log P_\\theta(w_t|w_{<t})\\) 与信息论的关系？",
+        "options": [
+          "等价于最小化模型对文本的交叉熵率——逼近自然语言的熵率 \\(H(\\text{language})\\)  B) 仅是 NLP 技巧  C) 与信息论无关  D) 最大化熵"
+        ],
+        "answer": 0,
+        "explanation": "\\(L=\\frac{1}{n}\\sum_{t=1}^n(-\\log P_\\theta(w_t|w_{<t}))=\\hat{H}(p_{\\text{data}},P_\\theta)\\)（经验交叉熵率）。Shannon 估计英语熵率约 \\(1.0\\)-\\(1.3\\) bit/char。GPT-4 的 perplexity 在维基百科上约 8-15 tokens → \\(H\\approx\\log_2 PPL\\approx3\\)-\\(4\\) bit/token。\\(H(p,P_\\theta)\\geq H(p)\\) → 交叉熵率是自然语言熵率的上界。模型越好，上界越紧。"
+      },
+      {
+        "id": "info-theory-ch06-q20",
+        "question": "VAE 的后验坍缩（posterior collapse）问题：\\(q(z|x)\\approx p(z)\\)，\\(I(X;Z)\\to0\\)。信息论解释和解决方案？",
+        "options": [
+          "KL 项过度正则化使编码器放弃编码信息到 \\(z\\)→解码器退化为无条件生成模型。解决：KL annealing 或 \\(\\beta\\)-VAE(\\(\\beta<1\\))  B) 不是问题  C) 增大 \\(\\beta\\)  D) 去掉解码器"
+        ],
+        "answer": 0,
+        "explanation": "后验坍缩：\\(D_{\\text{KL}}(q(z|x)\\|p(z))=0\\) → \\(z\\) 不含 \\(x\\) 的信息。解码器完全从 \\(p(z)\\) 采样——ELBO 退化为 \\(E_{p(z)}[\\log p(x|z)]\\)（忽略输入）。原因：强大的自回归解码器不需要 \\(z\\)。解决：(1) KL annealing：训练初期 \\(\\beta=0\\to1\\) 逐渐增大；(2) δ-VAE：约束 \\(D_{\\text{KL}}\\geq\\delta>0\\)；(3) 用较弱的解码器。信息论保证：\\(I(X;Z)\\geq\\delta\\) 确保 \\(z\\) 有意义。"
+      },
+      {
+        "id": "info-theory-ch06-q21",
+        "question": "PAC-Bayes 界与 MDL 的联系。PAC-Bayes 泛化界的形式是什么？",
+        "options": [
+          "\\(L_{\\text{test}}(Q)\\leq L_{\\text{train}}(Q)+\\sqrt{\\frac{D_{\\text{KL}}(Q\\|P)+\\ln(n/\\delta)}{2n}}\\)——\\(Q\\) 为后验，\\(P\\) 为先验  B) \\(L_{\\text{test}}=L_{\\text{train}}\\)  C) 仅依赖参数数量  D) 仅依赖 VC 维"
+        ],
+        "answer": 0,
+        "explanation": "PAC-Bayes（McAllester 1999）：对任意 \\(Q\\)（权重后验分布），以概率 \\(\\geq1-\\delta\\)：\\(L_{\\text{test}}(Q)\\leq L_{\\text{train}}(Q)+\\sqrt{(D_{\\text{KL}}(Q\\|P)+\\ln(n/\\delta))/(2n)}\\)。\\(D_{\\text{KL}}(Q\\|P)\\) = 模型复杂度（类似 MDL 的码长）。过参数化网络可以有\"低描述复杂度\"——若 \\(Q\\) 集中在 \\(P\\) 的一个小区域。这解释了为什么大网络也能泛化——关键不是参数数量，而是后验与先验的 KL 距离。"
+      },
+      {
+        "id": "info-theory-ch06-q22",
+        "question": "Jensen-Shannon 散度 \\(\\text{JSD}(p\\|q)=\\frac{1}{2}D_{\\text{KL}}(p\\|m)+\\frac{1}{2}D_{\\text{KL}}(q\\|m)\\)（\\(m=\\frac{p+q}{2}\\)）在 GAN 训练中的角色？",
+        "options": [
+          "原始 GAN（Goodfellow 2014）的最优判别器下，生成器损失 \\(=2\\text{JSD}(p_{\\text{data}}\\|p_g)-\\log 4\\)  B) GAN 使用 \\(D_{\\text{KL}}\\)  C) GAN 使用 Wasserstein 距离  D) JSD 与 GAN 无关"
+        ],
+        "answer": 0,
+        "explanation": "最优判别器 \\(D^*(x)=\\frac{p_{\\text{data}}(x)}{p_{\\text{data}}(x)+p_g(x)}\\)。代入生成器目标：\\(V(G,D^*)=-\\log 4+2\\text{JSD}(p_{\\text{data}}\\|p_g)\\)。\\(\\text{JSD}\\in[0,\\log 2]\\)，\\(\\text{JSD}=0\\Leftrightarrow p_g=p_{\\text{data}}\\)。JSD 的对称性和有界性比 KL 更适合 GAN。问题：\\(p_g,p_{\\text{data}}\\) 在高维空间中不重叠时 \\(D^*\\) 完美分类→JSD\\(=\\log 2\\)（常数）→梯度消失。WGAN 用 Wasserstein 距离解决此问题。"
+      },
+      {
+        "id": "info-theory-ch06-q23",
+        "question": "Lempel-Ziv 复杂度（与 LZ78 压缩相关）可用于估计时间序列的熵率。如何用 LZ 复杂度估计 EEG 信号的复杂度？",
+        "options": [
+          "将 EEG 二值化后计算 LZ76 复杂度 \\(c(n)\\)，归一化 \\(C_{\\text{LZ}}=c(n)\\log_2 n/n\\) 趋近熵率  B) 直接 FFT  C) 计算均值  D) 计算方差"
+        ],
+        "answer": 0,
+        "explanation": "LZ76 算法顺序扫描序列，统计\"新词汇\"数量 \\(c(n)\\)。定理（Lempel-Ziv 1976）：遍历平稳过程 \\(C_{\\text{LZ}}=c(n)\\log_2 n/n\\to h\\)（熵率）。EEG 应用：清醒状态 \\(C_{\\text{LZ}}\\approx0.5\\)-\\(0.7\\)，深度麻醉 \\(\\approx0.2\\)-\\(0.3\\)（低复杂度=高可预测性=低熵率）。BIS 指数（麻醉深度监测）部分基于此原理。"
+      },
+      {
+        "id": "info-theory-ch06-q24",
+        "question": "Flow 模型（如 RealNVP、Glow）的训练目标与信息论的关系？",
+        "options": [
+          "精确计算 \\(\\log p(x)=\\log p(f^{-1}(x))+\\log|\\det\\frac{\\partial f^{-1}}{\\partial x}|\\)——最小化交叉熵 = 最大似然  B) 近似 ELBO  C) 对比损失  D) 重构损失"
+        ],
+        "answer": 0,
+        "explanation": "Flow：\\(x=f(z),z\\sim\\mathcal{N}(0,I)\\)，\\(f\\) 可逆。变量替换：\\(p(x)=p(z)|\\det J_f^{-1}|=\\mathcal{N}(f^{-1}(x);0,I)\\cdot|\\det\\frac{\\partial f^{-1}}{\\partial x}|\\)。精确对数似然→可直接最小化 \\(-E_{p_{\\text{data}}}[\\log p_\\theta(x)]=H(p_{\\text{data}},p_\\theta)\\)。优于 VAE（ELBO 只是下界）和 GAN（隐式密度，无法评价 \\(p(x)\\)）。RealNVP 使用耦合层使 Jacobian 为三角阵→\\(\\det\\) 计算 \\(O(d)\\)。"
+      },
+      {
+        "id": "info-theory-ch06-q25",
+        "question": "Deep InfoMax（DIM）通过最大化局部特征与全局特征的互信息来学习表征。这种方法与信息瓶颈的关系？",
+        "options": [
+          "DIM 聚焦最大化 \\(I(Z;X_{\\text{local}})\\)（下层特征→上层表征），可视为放松的信息瓶颈（无标签时不约束 \\(I(T;Y)\\)，仅最大化 \\(I(T;X)\\)）  B) 完全相同  C) 无关  D) DIM 最小化互信息"
+        ],
+        "answer": 0,
+        "explanation": "DIM（Hjelm 2019）：\\(\\max I(Z;X_L)\\)（\\(Z\\) 全局特征，\\(X_L\\) 局部 patch 特征）。与 IB 对比：IB 有标签 \\(Y\\) 约束 \\(I(T;Y)\\)，DIM 无标签→自监督。DIM 实质是 Infomax 原则（Linsker 1988）——最大化输入→表征的信息传输。后来的 BYOL、DINO 等方法不显式用 MI 估计但思想类似。核心张力：最大化 \\(I(Z;X)\\) 可能学到任何信息（包括噪声），需要架构约束或数据增强来诱导有用的不变性。"
+      },
+      {
+        "id": "info-theory-ch06-q26",
+        "question": "大语言模型（LLM）的 perplexity 评估。GPT 模型在测试集上 PPL \\(=15\\)。用信息论解释这个指标。",
+        "options": [
+          "平均每个 token 的有效分支因子为 15——等价于从 15 个等概率选项中猜一个。交叉熵率 \\(=\\log_2 15\\approx3.9\\) bit/token  B) 准确率 15%  C) 15 个参数  D) 15 层"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{PPL}=2^{H(p,P_\\theta)}\\)（\\(H\\) 为交叉熵率 bit/token）。PPL \\(=15\\) → \\(H\\approx3.9\\) bit/token。英语的熵率约 \\(1\\) bit/char \\(\\approx4\\)-\\(5\\) bit/token（BPE token \\(\\approx4\\)-\\(5\\) char）。GPT-4 PPL \\(\\sim8\\)-\\(10\\)（接近 3-3.5 bit/token）。下界 = 语言本身的熵率 \\(H\\)。PPL 越低→模型越好预测自然语言→生成文本越流畅。"
+      },
+      {
+        "id": "info-theory-ch06-q27",
+        "question": "联邦学习中的隐私保护。差分隐私（DP）与互信息的关系？",
+        "options": [
+          "\\((\\epsilon,\\delta)\\)-DP 意味着 \\(I(X;M)\\leq\\epsilon^2/2+O(\\delta)\\)（数据 \\(X\\) 与发布 \\(M\\) 的互信息被约束），限制了信息泄露  B) DP 与信息论无关  C) DP 不保护隐私  D) DP 增加信息"
+        ],
+        "answer": 0,
+        "explanation": "DP 定义：\\(P(M\\in S|x)\\leq e^\\epsilon P(M\\in S|x')\\)（相邻数据集）。信息论推论（Dwork 2014, Cuff-Yu 2016）：\\(\\epsilon\\)-DP→ \\(I(X_i;M)\\leq\\epsilon\\)（每个个体对输出的互信息被限制）。联邦学习中客户端上传梯度→服务器可能推测数据。加噪（\\(\\sigma\\propto\\sqrt{T}\\Delta/\\epsilon\\)）限制信息泄露。信息论给出最优 privacy-utility 折衷下界。"
+      },
+      {
+        "id": "info-theory-ch06-q28",
+        "question": "神经网络剪枝（pruning）从信息论角度看是什么操作？",
+        "options": [
+          "删除冗余参数 = 降低模型描述长度 \\(L(\\text{model})\\)，同时保持 \\(L(\\text{data}|\\text{model})\\) 基本不变——MDL 意义下的模型压缩  B) 增加参数  C) 随机操作  D) 增加训练数据"
+        ],
+        "answer": 0,
+        "explanation": "剪枝后权重矩阵稀疏→更少的非零参数→更短的描述长度。Lottery Ticket Hypothesis（Frankle & Carlin 2019）：密集网络中存在稀疏子网络（\"彩票\"），其表现与完整网络相当。信息论解释：有效信息维度（intrinsic dimension）远小于参数数量。\\(90\\%\\) 的参数可被剪除→模型的 Kolmogorov 复杂度远低于参数数量暗示的。描述长度从 \\(O(d)\\) 降至 \\(O(d_{\\text{eff}})\\)（\\(d_{\\text{eff}}\\ll d\\)）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="discrete" data-module="info-theory"
+      style="--domain-color: var(--c-discrete);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">DISCRET</span>
+      <a href="../../../modules/discrete/info-theory.html" class="module-name">信息论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 交叉熵损失与 KL 散度</a></li>
+      <li><a href="#kp2">02 · 信息瓶颈方法</a></li>
+      <li><a href="#kp3">03 · 最小描述长度（MDL）原则</a></li>
+      <li><a href="#kp4">04 · 变分推断与 ELBO</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>信息论与 ML</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>交叉熵损失与 KL 散度</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>深度学习中最常用的分类损失函数——交叉熵损失——直接来自信息论。 最小化交叉熵等价于最小化 KL 散度，即让模型分布尽量接近 真实分布。理解这一联系是理解模型训练目标的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>训练模型 = 最小化 \(D_{KL}(P_{\text{data}} \| P_\theta)\)， 交叉熵损失是其计算上的等价形式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>交叉熵</strong>： \[H(P, Q) = -\sum_x p(x) \log q(x) = H(P) + D_{KL}(P \| Q)\] 因为 \(H(P)\) 与模型参数无关， \[\arg\min_\theta H(P, P_\theta) = \arg\min_\theta D_{KL}(P \| P_\theta)\] <strong>分类中的交叉熵损失</strong>：数据 \(\{(x_i, y_i)\}\)，模型输出 \(q(y|x)\)， \[\mathcal{L} = -\frac{1}{N}\sum_{i=1}^N \log q(y_i | x_i)\] 这就是经验交叉熵，也等价于负对数似然 = MLE。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 几乎所有分类神经网络使用交叉熵损失 - 知识蒸馏的损失函数 = 学生与教师分布的 KL 散度</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：真实标签 \(y = [1,0,0]\)（独热），模型输出 \(q = [0.7, 0.2, 0.1]\)。 求交叉熵。 解答：\(H(P, Q) = -(1 \cdot \log 0.7 + 0 + 0) = -\log_2 0.7 \approx 0.515\) bit。 若 \(q = [0.99, 0.005, 0.005]\)：\(H \approx 0.014\) bit，更低更好。 易错点：\(H(P, Q) \neq H(Q, P)\)。训练中永远是 \(P\) = 真实，\(Q\) = 模型。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">最小化交叉熵损失等价于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H(P, Q) = H(P) + D_{KL}(P\\|Q)\\)，\\(H(P)\\) 不依赖 \\(\\theta\\)，')">A. 最小化模型熵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H(P, Q) = H(P) + D_{KL}(P\\|Q)\\)，\\(H(P)\\) 不依赖 \\(\\theta\\)，')">B. 最大化互信息</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(H(P, Q) = H(P) + D_{KL}(P\\|Q)\\)，\\(H(P)\\) 不依赖 \\(\\theta\\)，')">C. 最小化 \(D_{KL}(P_{\text{data}} \| P_\theta)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H(P, Q) = H(P) + D_{KL}(P\\|Q)\\)，\\(H(P)\\) 不依赖 \\(\\theta\\)，')">D. 最大化熵</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>信息瓶颈方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>特征提取的目标是什么？Tishby 提出的信息瓶颈（Information Bottleneck） 给出了优美的信息论回答：找到 \(X\) 的压缩表示 \(T\)，保留关于 \(Y\) 的信息同时最小化复杂度。这为理解深度学习的表示学习提供了 信息论视角，虎车不收。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>信息瓶颈：\(X \to T \to Y\) 的 Markov 链中，最小化 \(I(X;T)\) （压缩）同时最大化 \(I(T;Y)\)（保留相关信息）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>信息瓶颈目标</strong>： \[\min_{p(t|x)} I(X; T) - \beta I(T; Y)\] 其中 \(\beta > 0\) 控制压缩与保留的权衡。 \(\beta \to 0\)：最大压缩，\(T\) 与 \(X\) 独立。 \(\beta \to \infty\)：\(T\) 保留所有关于 \(Y\) 的信息。 <strong>与深度学习的联系</strong>：神经网络的每一层可视为 \(T\)。 训练过程中网络先拟合（增大 \(I(T;Y)\)）， 再压缩（减小 \(I(X;T)\) 去除无关细节）——这就是泰卤泰的「信息平面」理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 解释深度学习中隐藏层的压缩行为 - 特征选择的信息论框架</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X\) 为一张译像，\(Y\) 为诊断结果。信息瓶颈将如何提取特征？ 解答：IB 找到表示 \(T\) 保留与诊断相关的信息（瘨变/正常）， 丢弃无关细节（背景、姿态）。\(\beta\) 小时只保留最关键特征， \(\beta\) 大时保留更多细节。 易错点：信息瓶颈解释深度学习的理论仍有争议（连续情形下 \(I(X;T)\) 的定义与网络架构有关）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">信息瓶颈中 \(\beta\) 的角色是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\beta\\) 大时偏向保留信息，\\(\\beta\\) 小时偏向压缩标示。')">A. 学习率</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\beta\\) 大时偏向保留信息，\\(\\beta\\) 小时偏向压缩标示。')">B. 压缩与信息保留的权衡参数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\beta\\) 大时偏向保留信息，\\(\\beta\\) 小时偏向压缩标示。')">C. 正则化强度</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\beta\\) 大时偏向保留信息，\\(\\beta\\) 小时偏向压缩标示。')">D. 温度参数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>最小描述长度（MDL）原则</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何在模型复杂度与数据拟合之间取得平衡？MDL 原则来自信息论： 最佳模型是能最短描述数据的模型——参数编码 + 数据编码总长度 最小。这与 Occam 剃刀的理念一脉相承。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>​模型选择 = 压缩。好模型能用少的比特描述结构，多的比特 描述噪声。理想模型在两者之和上最优。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>MDL 原则</strong>：给定模型族 \(\{M_k\}\)，选择 \[\hat{k} = \arg\min_k \left[L(M_k) + L(D | M_k)\right]\] 其中 \(L(M_k)\) = 描述模型参数的比特数， \(L(D|M_k) = -\log P(D|\hat{\theta}_k)\) = 参数最优时数据的编码长度。 与 BIC 的关系：若 \(L(M_k) \approx \frac{d_k}{2}\log n\)（\(d_k\) 参数数）， \[\text{MDL} \approx -\log P(D|\hat{\theta}_k) + \frac{d_k}{2}\log n = \text{BIC}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 模型选择中的 BIC 准则是 MDL 的近似 - 决策树剪枝可用 MDL 视角理解</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：1000 个数据点，线性模型 (2参数) vs 三次多项式 (4参数)。 \(-\log P(D|M_1)=500\)，\(-\log P(D|M_2)=495\)。应选哪个？ 解答：MDL(\(M_1\)) \(\approx 500 + 1\log 1000 = 500 + 9.97 = 510.0\)。 MDL(\(M_2\)) \(\approx 495 + 2\log 1000 = 495 + 19.93 = 514.9\)。 选择 \(M_1\)（线性模型）。多出的拟合改善不值得复杂度增加。 易错点：L(M_k) 的具体定义取决于编码方案。BIC 是最常用的近似。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">MDL 原则与以下哪个概念最直接相关？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。MDL 的核心思想是「学习 = 压缩」，最佳模型就是能最短')">A. 正则化</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！MDL 的核心思想是「学习 = 压缩」，最佳模型就是能最短')">B. 数据压缩</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。MDL 的核心思想是「学习 = 压缩」，最佳模型就是能最短')">C. 梯度下降</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。MDL 的核心思想是「学习 = 压缩」，最佳模型就是能最短')">D. 交叉验证</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>变分推断与 ELBO</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>贝叶斯推断中后验 \(p(z|x)\) 通常无法解析计算。变分推断(VI)用 优化代替采样，找一个简单分布 \(q(z|x)\) 逼近后验。核心目标 ELBO 的推导完全基于 KL 散度的分解——信息论为现代概率模型 提供了计算工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>VI = 将推断问题转为优化问题：\(\min_{q} D_{KL}(q(z|x) \| p(z|x))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>ELBO 推导</strong>： \[\log p(x) = D_{KL}(q(z|x) \| p(z|x)) + \text{ELBO}(q)\] 因 \(D_{KL} \geq 0\)， \[\text{ELBO}(q) = \mathbb{E}_{q}[\log p(x,z) - \log q(z|x)] \leq \log p(x)\] 展开： \[\text{ELBO} = \mathbb{E}_q[\log p(x|z)] - D_{KL}(q(z|x) \| p(z))\] 第一项 = 重构质量，第二项 = 正则化（让后验接近先验）。 <strong>VAE</strong>：\(q(z|x) = \mathcal{N}(\mu_\phi(x), \sigma_\phi^2(x))\)， \(p(z) = \mathcal{N}(0, I)\)。KL 项有解析解， 重构项用重参数化技巧估计。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- VAE 生成模型 - 主题模型 (LDA) 的变分推断 - 贝叶斯神经网络</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：为什么最大化 ELBO 等价于最小化 \(D_{KL}(q\|p)\)？ 解答：\(\log p(x) = D_{KL}(q\|p_{z|x}) + \text{ELBO}\)。 \(\log p(x)\) 与 \(q\) 无关，所以 \(\max_q \text{ELBO} \Leftrightarrow \min_q D_{KL}\)。 ELBO 是对数边际似然的下界，故名 Evidence Lower Bound。 易错点：\(D_{KL}(q\|p)\) 与 \(D_{KL}(p\|q)\) 不同。 VI 用前者（mode-seeking），导致 \(q\) 倾向于集中在后验的一个峰。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">ELBO 中的两个项分别代表什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathbb{E}_q[\\log p(x|z)]\\) 鼓励好的重构，')">A. 拟合 + 压缩</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\mathbb{E}_q[\\log p(x|z)]\\) 鼓励好的重构，')">B. 重构质量 + 正则化（后验接近先验）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathbb{E}_q[\\log p(x|z)]\\) 鼓励好的重构，')">C. 偏差 + 方差</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathbb{E}_q[\\log p(x|z)]\\) 鼓励好的重构，')">D. 似然 + 先验</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/discrete/info-theory.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

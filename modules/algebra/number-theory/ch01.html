@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 整除与素数 — 数论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "number-theory-ch01-q1",
+        "question": "\\(-17\\) 除以 \\(5\\) 的带余除法形式 \\(-17 = 5q + r\\)（\\(0 \\leq r < 5\\)）中，\\(r\\) 等于多少？",
+        "options": [
+          "\\(-2\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(-3\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(-17 = 5 \\times (-4) + 3\\)，故 \\(q = -4\\)，\\(r = 3\\)。验证：\\(0 \\leq 3 < 5\\) ✓。易错点：用计算器得 \\(-17 / 5 = -3.4\\)，取整为 \\(-3\\)，余数 \\(-17 - 5(-3) = -2\\)，但余数必须非负，\\(r = -2\\) 不合法。"
+      },
+      {
+        "id": "number-theory-ch01-q2",
+        "question": "用欧几里得算法求 \\(\\gcd(84, 36)\\)。",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)",
+        "\\(18\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(84 = 36 \\times 2 + 12\\)，\\(36 = 12 \\times 3 + 0\\)。故 \\(\\gcd(84, 36) = 12\\)。欧几里得算法核心：\\(\\gcd(a, b) = \\gcd(b, a \\bmod b)\\)，直到余数为 \\(0\\)，此时除数即为最大公约数。"
+      },
+      {
+        "id": "number-theory-ch01-q3",
+        "question": "用扩展欧几里得求 \\(\\gcd(35, 12)\\) 的 Bézout 系数 \\(x, y\\)（使 \\(35x + 12y = 1\\)）。\\(x\\) 等于？",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(3\\)",
+        "\\(-3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(35 = 12 \\times 2 + 11\\)，\\(12 = 11 \\times 1 + 1\\)。回溯：\\(1 = 12 - 11 = 12 - (35 - 12 \\times 2) = 3 \\times 12 - 1 \\times 35\\)。即 \\(35 \\times (-1) + 12 \\times 3 = 1\\)，\\(x = -1\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q4",
+        "question": "\\(2520\\) 的标准素因子分解为？",
+        "options": [
+          "\\(2^2 \\times 3^2 \\times 5 \\times 7\\)",
+        "\\(2^3 \\times 3^2 \\times 5 \\times 7\\)",
+        "\\(2^3 \\times 3 \\times 5 \\times 7\\)",
+        "\\(2^3 \\times 3^2 \\times 5^2 \\times 7\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(2520 = 2 \\times 1260 = 2^2 \\times 630 = 2^3 \\times 315 = 2^3 \\times 3 \\times 105 = 2^3 \\times 3^2 \\times 35 = 2^3 \\times 3^2 \\times 5 \\times 7\\)。验证：\\(8 \\times 9 \\times 5 \\times 7 = 2520\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch01-q5",
+        "question": "以下哪个是整除关系的正确性质？",
+        "options": [
+          "\\(a \\mid b\\) 且 \\(b \\mid a \\Rightarrow a = b\\)",
+        "\\(a \\mid b\\) 且 \\(a \\mid c \\Rightarrow a \\mid (b + c)\\)",
+        "\\(a \\mid bc \\Rightarrow a \\mid b\\) 或 \\(a \\mid c\\)",
+        "\\(a \\mid b \\Rightarrow a < b\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(a \\mid b\\) 且 \\(a \\mid c \\Rightarrow a \\mid (bx + cy)\\) 对任意整数 \\(x, y\\)（线性组合性质），特别 \\(a \\mid (b+c)\\)。A 错：应为 \\(a = \\pm b\\)。C 错：需 \\(a\\) 为素数才有 Euclid 引理。D 错：\\(3 \\mid 3\\) 但 \\(3 \\not< 3\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q6",
+        "question": "Euclid 的素数无穷性证明中，\\(N = p_1 p_2 \\cdots p_n + 1\\) 一定是素数吗？",
+        "options": [
+          "是",
+        "不一定，但它的素因子不在 \\(\\{p_1, \\ldots, p_n\\}\\) 中",
+        "不一定，它可能被某个 \\(p_i\\) 整除",
+        "它一定是奇数"
+        ],
+        "answer": 1,
+        "explanation": "\\(N\\) 可以是合数。例如 \\(2 \\times 3 \\times 5 \\times 7 \\times 11 \\times 13 + 1 = 30031 = 59 \\times 509\\)。但 \\(N\\) 被任何 \\(p_i\\) 除余 \\(1\\)，故其素因子必不在原列表中。这是常见误解点。"
+      },
+      {
+        "id": "number-theory-ch01-q7",
+        "question": "\\(\\gcd(0, 12) = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(12\\)",
+        "未定义"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\gcd(a, 0) = |a|\\)。任何整数都整除 \\(0\\)（\\(a \\cdot 0 = 0\\)），故 \\(\\gcd(0, 12)\\) 是整除 \\(12\\) 的最大正整数，即 \\(12\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q8",
+        "question": "\\(a = 100\\)，\\(b = 7\\)。带余除法 \\(a = bq + r\\) 中 \\(q\\) 和 \\(r\\) 分别为？",
+        "options": [
+          "\\(q = 14, r = 0\\)",
+        "\\(q = 14, r = 2\\)",
+        "\\(q = 15, r = -5\\)",
+        "\\(q = 13, r = 9\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(100 = 7 \\times 14 + 2\\)，\\(0 \\leq 2 < 7\\) ✓。D 中虽然 \\(7 \\times 13 + 9 = 100\\)，但 \\(r = 9 \\geq 7\\) 不满足 \\(0 \\leq r < b\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q9",
+        "question": "\\(\\gcd(252, 105)\\) 的计算过程中，辗转相除的步数为？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(5\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(252 = 105 \\times 2 + 42\\)（第 1 步），\\(105 = 42 \\times 2 + 21\\)（第 2 步），\\(42 = 21 \\times 2 + 0\\)（第 3 步）。共 \\(3\\) 步。\\(\\gcd(252, 105) = 21\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q10",
+        "question": "Bézout 等式 \\(\\gcd(a, b) = ax + by\\) 中，若 \\(\\gcd(a, b) = d > 1\\)，\\(x, y\\) 是否一定满足 \\(ax + by = 1\\)？",
+        "options": [
+          "是",
+        "否，\\(ax + by = d\\)",
+        "否，\\(ax + by = 0\\)",
+        "x, y 不存在"
+        ],
+        "answer": 1,
+        "explanation": "Bézout 等式给出 \\(ax + by = \\gcd(a,b) = d\\)。若 \\(d > 1\\)，等式右边是 \\(d\\) 而非 \\(1\\)。只有当 \\(\\gcd(a,b) = 1\\)（互素）时才有 \\(ax + by = 1\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q11",
+        "question": "\\(n = 360\\) 的标准分解为 \\(2^3 \\times 3^2 \\times 5\\)。\\(360\\) 的正因子个数为？",
+        "options": [
+          "\\(12\\)",
+        "\\(18\\)",
+        "\\(24\\)",
+        "\\(36\\)"
+        ],
+        "answer": 2,
+        "explanation": "正因子个数 \\(= (3+1)(2+1)(1+1) = 4 \\times 3 \\times 2 = 24\\)。公式：若 \\(n = p_1^{a_1} \\cdots p_k^{a_k}\\)，因子数 \\(= \\prod(a_i + 1)\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q12",
+        "question": "Euclid 引理：若 \\(p\\) 素数且 \\(p \\mid ab\\)，则？",
+        "options": [
+          "\\(p \\mid a + b\\)",
+        "\\(p \\mid a\\) 或 \\(p \\mid b\\)",
+        "\\(p \\mid a\\) 且 \\(p \\mid b\\)",
+        "\\(p = a\\) 或 \\(p = b\\)"
+        ],
+        "answer": 1,
+        "explanation": "Euclid 引理是算术基本定理唯一性证明的关键。证明用 Bézout：若 \\(p \\nmid a\\)，则 \\(\\gcd(a, p) = 1\\)，\\(\\exists x, y\\) 使 \\(ax + py = 1\\)，两边乘 \\(b\\)：\\(abx + pby = b\\)，\\(p \\mid ab\\) 推出 \\(p \\mid b\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q13",
+        "question": "\\(\\gcd(a, b) \\cdot \\mathrm{lcm}(a, b)\\) 等于什么？",
+        "options": [
+          "\\(a + b\\)",
+        "\\(a \\cdot b\\)",
+        "\\(|a \\cdot b|\\)",
+        "\\(a^2 + b^2\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\gcd(a, b) \\cdot \\mathrm{lcm}(a, b) = |ab|\\)。如 \\(\\gcd(12, 8) = 4\\)，\\(\\mathrm{lcm}(12, 8) = 24\\)，\\(4 \\times 24 = 96 = |12 \\times 8|\\) ✓。用素因子分解可证：\\(\\gcd\\) 取幂次最小值，\\(\\mathrm{lcm}\\) 取幂次最大值，\\(\\min + \\max = \\) 各个幂次之和。"
+      },
+      {
+        "id": "number-theory-ch01-q14",
+        "question": "求满足 \\(21x + 15y = 12\\) 的一组特解。",
+        "options": [
+          "\\(x = 4, y = -4\\)",
+        "\\(x = 2, y = -2\\)",
+        "\\(x = -4, y = 4\\)",
+        "无整数解"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\gcd(21,15) = 3\\)，\\(3 \\mid 12\\)，有解。简化：\\(7x + 5y = 4\\)。取 \\(x = 2\\)：\\(14 + 5y = 4\\)，\\(y = -2\\)。验证原方程：\\(21(2) + 15(-2) = 42 - 30 = 12\\) ✓。通解为 \\(x = 2 + 5t, y = -2 - 7t\\)（\\(t \\in \\mathbb{Z}\\)）。易错点：A 选项 \\(21(4)+15(-4) = 24 \\neq 12\\)，代入验证很重要。"
+      },
+      {
+        "id": "number-theory-ch01-q15",
+        "question": "若 \\(a \\mid b\\) 且 \\(b \\mid a\\)，则以下哪个一定成立？",
+        "options": [
+          "\\(a = b\\)",
+        "\\(a = -b\\)",
+        "\\(|a| = |b|\\)",
+        "\\(a > 0\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(a \\mid b \\Rightarrow b = aq_1\\)，\\(b \\mid a \\Rightarrow a = bq_2\\)。\\(a = aq_1 q_2\\)，\\(a \\neq 0\\) 时 \\(q_1 q_2 = 1\\)，整数解为 \\(q_1 = q_2 = 1\\) 或 \\(q_1 = q_2 = -1\\)。故 \\(a = \\pm b\\)，即 \\(|a| = |b|\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q16",
+        "question": "欧几里得算法的时间复杂度（以 \\(b\\) 的位数计）为？",
+        "options": [
+          "\\(O(b)\\)",
+        "\\(O(\\sqrt{b})\\)",
+        "\\(O(\\log b)\\)",
+        "\\(O(b^2)\\)"
+        ],
+        "answer": 2,
+        "explanation": "每两步至少使较小数减半（Lamé 定理：步数 \\(\\leq 5 \\times \\) 较小数的十进制位数）。故复杂度为 \\(O(\\log(\\min(a,b)))\\)。这使欧几里得算法成为最古老也最高效的数论算法之一。"
+      },
+      {
+        "id": "number-theory-ch01-q17",
+        "question": "\\(\\gcd(n, n+1)\\) 等于多少（\\(n\\) 为正整数）？",
+        "options": [
+          "\\(1\\)",
+        "\\(n\\)",
+        "\\(n+1\\)",
+        "取决于 \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gcd(n, n+1) = \\gcd(n, 1) = 1\\)（欧几里得算法一步）。相邻整数总是互素的。"
+      },
+      {
+        "id": "number-theory-ch01-q18",
+        "question": "\\(n!\\) 的标准分解中，\\(p\\) 出现的幂次由 Legendre 公式给出：\\(v_p(n!) = ?\\)",
+        "options": [
+          "\\(\\lfloor n/p \\rfloor\\)",
+        "\\(\\sum_{k=1}^{\\infty} \\lfloor n/p^k \\rfloor\\)",
+        "\\(n - s_p(n)\\)（\\(s_p(n)\\) 为 \\(n\\) 的 \\(p\\) 进制数字之和）",
+        "B 和 C 等价"
+        ],
+        "answer": 3,
+        "explanation": "\\(v_p(n!) = \\sum_{k \\geq 1} \\lfloor n/p^k \\rfloor = \\frac{n - s_p(n)}{p - 1}\\)，两个公式等价。A 只数了被 \\(p\\) 整除的，没数被 \\(p^2, p^3, \\ldots\\) 整除的额外贡献。如 \\(v_2(10!) = 5 + 2 + 1 = 8\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q19",
+        "question": "方程 \\(ax + by = c\\) 有整数解的充要条件是？",
+        "options": [
+          "\\(a \\mid c\\) 且 \\(b \\mid c\\)",
+        "\\(\\gcd(a, b) \\mid c\\)",
+        "\\(c > 0\\)",
+        "\\(a, b\\) 互素"
+        ],
+        "answer": 1,
+        "explanation": "\\(ax + by\\) 能取到的值恰好是 \\(\\gcd(a,b)\\) 的倍数集合（\\(\\{ax + by\\} = \\gcd(a,b)\\mathbb{Z}\\)，Bézout 等式的推论）。故有解 \\(\\Leftrightarrow \\gcd(a,b) \\mid c\\)。互素只是 \\(\\gcd = 1\\) 的特例。"
+      },
+      {
+        "id": "number-theory-ch01-q20",
+        "question": "\\(\\sum_{d \\mid n} \\varphi(d) = ?\\)",
+        "options": [
+          "\\(\\varphi(n)\\)",
+        "\\(n\\)",
+        "\\(n - 1\\)",
+        "\\(2n\\)"
+        ],
+        "answer": 1,
+        "explanation": "经典恒等式 \\(\\sum_{d \\mid n} \\varphi(d) = n\\)。证明：将 \\(\\{1, 2, \\ldots, n\\}\\) 按 \\(\\gcd(k, n) = d\\) 分组。\\(\\gcd(k, n) = d \\Leftrightarrow \\gcd(k/d, n/d) = 1\\)，共 \\(\\varphi(n/d)\\) 个。\\(\\sum_{d \\mid n} \\varphi(n/d) = \\sum_{d \\mid n} \\varphi(d) = n\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q21",
+        "question": "Lamé 定理：欧几里得算法对 \\(\\gcd(a, b)\\)（\\(a > b\\)）的步数上界是？",
+        "options": [
+          "\\(\\leq 2 \\log_2 b\\)",
+        "\\(\\leq 5 \\times (\\text{\\)b\\( 的十进制位数})\\)",
+        "\\(\\leq b\\)",
+        "\\(\\leq \\sqrt{b}\\)"
+        ],
+        "answer": 1,
+        "explanation": "Lamé（1844）证明：使欧几里得算法恰好用 \\(n\\) 步的最小输入对是连续 Fibonacci 数 \\((F_{n+1}, F_n)\\)。由 \\(F_n \\approx \\phi^n / \\sqrt{5}\\)，步数 \\(\\leq 5 \\times \\lfloor \\log_{10} b \\rfloor + 1\\)。这是算法分析中最早的复杂度上界之一。"
+      },
+      {
+        "id": "number-theory-ch01-q22",
+        "question": "\\(600\\) 的正因子之和 \\(\\sigma(600)\\) 等于多少？\\(600 = 2^3 \\times 3 \\times 5^2\\)",
+        "options": [
+          "\\(1240\\)",
+        "\\(1860\\)",
+        "\\(1080\\)",
+        "\\(1512\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sigma\\) 是积性函数：\\(\\sigma(600) = \\sigma(2^3) \\times \\sigma(3) \\times \\sigma(5^2) = (1+2+4+8)(1+3)(1+5+25) = 15 \\times 4 \\times 31 = 1860\\)。"
+      },
+      {
+        "id": "number-theory-ch01-q23",
+        "question": "若 \\(\\gcd(a, n) = 1\\)，则 \\(a\\) 模 \\(n\\) 的逆元可通过什么方法求得？",
+        "options": [
+          "\\(a^{-1} = n - a\\)",
+        "扩展欧几里得算法",
+        "\\(a^{-1} = a\\)",
+        "直接除法 \\(1/a\\)"
+        ],
+        "answer": 1,
+        "explanation": "扩展欧几里得求 \\(ax + ny = 1\\)，则 \\(x\\) 即为 \\(a\\) 模 \\(n\\) 的逆元。这比逐个尝试高效得多，时间复杂度 \\(O(\\log n)\\)。A 一般不对（仅在特殊情况如 \\(a = n - 1\\) 时成立）。"
+      },
+      {
+        "id": "number-theory-ch01-q24",
+        "question": "设 \\(a, b, c\\) 为正整数。若 \\(a \\mid bc\\) 且 \\(\\gcd(a, b) = 1\\)，能否推出 \\(a \\mid c\\)？",
+        "options": [
+          "能",
+        "不能",
+        "仅当 \\(a\\) 为素数时",
+        "仅当 \\(b = 1\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\gcd(a,b) = 1\\)，由 Bézout：\\(ax + by = 1\\)。乘 \\(c\\)：\\(acx + bcy = c\\)。\\(a \\mid ac\\) 且 \\(a \\mid bc\\)，故 \\(a \\mid c\\)。这不需要 \\(a\\) 为素数——Euclid 引理的推广版本。"
+      },
+      {
+        "id": "number-theory-ch01-q25",
+        "question": "设 \\(p\\) 素数，\\(p > 2\\)。\\(p\\) 是 Mersenne 素数的条件是 \\(p = 2^q - 1\\)，其中 \\(q\\) 必须满足？",
+        "options": [
+          "\\(q\\) 是偶数",
+        "\\(q\\) 是素数",
+        "\\(q\\) 是完全平方数",
+        "\\(q\\) 是任意正整数"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(q = ab\\)（\\(a, b > 1\\)），则 \\(2^q - 1 = (2^a)^b - 1 = (2^a - 1)((2^a)^{b-1} + \\cdots + 1)\\)，\\(2^q - 1\\) 不是素数。故 \\(q\\) 必须是素数（必要条件，非充分条件：\\(q = 11\\) 时 \\(2^{11} - 1 = 2047 = 23 \\times 89\\)）。"
+      },
+      {
+        "id": "number-theory-ch01-q26",
+        "question": "在某校图书管理系统中，ISBN-13 的校验位使用加权和模 \\(10\\)：\\(\\sum_{i=1}^{12} w_i d_i + d_{13} \\equiv 0 \\pmod{10}\\)。这利用了什么数论概念？",
+        "options": [
+          "素因子分解",
+        "带余除法与模运算",
+        "Bézout 等式",
+        "欧几里得算法"
+        ],
+        "answer": 1,
+        "explanation": "ISBN 校验基于模 \\(10\\) 运算：将各位数字加权求和后取模 \\(10\\)，检查是否为 \\(0\\)。带余除法确保余数唯一，模运算的线性组合性质保证了检测单个数字错误的能力。"
+      },
+      {
+        "id": "number-theory-ch01-q27",
+        "question": "在数据传输中，CRC（循环冗余校验）的核心是多项式除法（类似带余除法），用于检测比特错误。若生成多项式 \\(g(x)\\) 的度为 \\(r\\)，则 CRC 码能检测所有长度不超过 \\(r\\) 的突发错误。这对应数论中的什么概念？",
+        "options": [
+          "素因子分解",
+        "多项式环上的带余除法",
+        "欧拉定理",
+        "Lagrange 定理"
+        ],
+        "answer": 1,
+        "explanation": "CRC 在 \\(\\mathbb{F}_2[x]\\) 上进行带余除法，余数即校验码。\\(\\mathbb{F}_2[x]\\) 的带余除法与 \\(\\mathbb{Z}\\) 上的带余除法具有完全相同的结构——它们都是欧几里得整环的实例。"
+      },
+      {
+        "id": "number-theory-ch01-q28",
+        "question": "Eratosthenes 筛法求 \\([2, N]\\) 中所有素数。时间复杂度为 \\(O(N \\log \\log N)\\)。筛掉 \\(N = 100\\) 以内的合数，只需筛掉哪些素数的倍数？",
+        "options": [
+          "\\(2, 3, 5, 7\\)",
+        "所有不超过 \\(100\\) 的素数",
+        "\\(2, 3, 5, 7, 11, 13\\)",
+        "\\(2, 3\\)"
+        ],
+        "answer": 0,
+        "explanation": "只需筛掉 \\(p \\leq \\lfloor\\sqrt{100}\\rfloor = 10\\) 的素数的倍数。\\(10\\) 以内的素数为 \\(2, 3, 5, 7\\)。若合数 \\(n \\leq 100\\) 的所有素因子 \\(> 10\\)，则 \\(n > 10^2 = 100\\)，矛盾。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="number-theory"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/number-theory.html" class="module-name">数论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 整除关系与带余除法</a></li>
+      <li><a href="#kp2">02 · 最大公约数与欧几里得算法</a></li>
+      <li><a href="#kp3">03 · Bézout 等式与扩展欧几里得算法</a></li>
+      <li><a href="#kp4">04 · 素数与算术基本定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>整除与素数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>整除关系与带余除法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>整数的整除关系是数论的基石。从古希腊开始，数学家就在研究“一个 整数能否被另一个整除”这个基本问题。带余除法是进行整除运算的核心 工具，它确保任何两个整数都能唯一地写成 \(a = bq + r\) 的形式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>整除关系是 \(\mathbb{Z}\) 上的偏序，带余除法是欧几里得整环的定义性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>整除</strong>: \(a \mid b\) 当且仅当 \(\exists q \in \mathbb{Z},\; b = aq\)。 性质: \(a \mid b,\; b \mid c \Rightarrow a \mid c\)（传递性）。 \(a \mid b,\; a \mid c \Rightarrow a \mid (bx + cy)\)（线性组合）。 <strong>带余除法</strong>: 对任意 \(a \in \mathbb{Z}\)，\(b \in \mathbb{Z}^+\)， 存在唯一的 \(q, r \in \mathbb{Z}\) 使 \[a = bq + r, \quad 0 \leq r < b\] 存在性: 考虑 \(\{a - bk : k \in \mathbb{Z}, a - bk \geq 0\}\) 的最小元。 唯一性: 若 \(a = bq_1 + r_1 = bq_2 + r_2\)，\(0 \leq r_1, r_2 < b\)， 则 \(|r_1 - r_2| < b\) 且 \(b \mid (r_1 - r_2)\)，故 \(r_1 = r_2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>带余除法是计算机中模运算的理论基础；哈希函数中的模运算直接 来源于此。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \(-17\) 除以 \(5\) 的商和余数。 解答: \(-17 = 5 \times (-4) + 3\)。故 \(q = -4\)，\(r = 3\)。 验证: \(0 \leq 3 < 5\)。✓ 易错点: 将 \(-17 \div 5\) 算为商 \(-3\) 余数 \(-2\)。 余数必须非负，\(r = -2 < 0\) 不符合带余除法要求。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(a = 37\)，\(b = 7\)，由带余除法得到的余数 \(r\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(37 = 7 \\times 5 + 2\\)，\\(r = 2\\)。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(37 = 7 \\times 5 + 2\\)，\\(r = 2\\)。')">B. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(37 = 7 \\times 5 + 2\\)，\\(r = 2\\)。')">C. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(37 = 7 \\times 5 + 2\\)，\\(r = 2\\)。')">D. 5</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>最大公约数与欧几里得算法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>两个整数的最大公约数 \(\gcd(a,b)\) 是整除理论的核心概念。欧几里得 算法（辗转相除法）提供了计算 \(\gcd\) 的高效方法，是已知最古老的 算法之一，其复杂度为 \(O(\log(\min(a,b)))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>算法的核心思想: \(\gcd(a,b) = \gcd(b, a \bmod b)\)， 将大问题递归地转化为更小的问题——这是分治法的原型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(\gcd(a,b)\) = 整除 \(a\) 和 \(b\) 的最大正整数。 约定 \(\gcd(a, 0) = |a|\)。 <strong>欧几里得算法</strong>: 基于 \(\gcd(a, b) = \gcd(b, a \bmod b)\)。 证: 设 \(a = bq + r\)。若 \(d \mid a\) 且 \(d \mid b\)， 则 \(d \mid (a - bq) = r\)。反之亦然。 故 \(a, b\) 的公因子集 = \(b, r\) 的公因子集。 算法终止: \(r\) 严格递减且非负，最终余数为 0， 此时除数即为 \(\gcd\)。 \[\gcd(a, b) \xrightarrow{\text{repeat}} \gcd(b, r) \to \cdots \to \gcd(d, 0) = d\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>密码学中 RSA 密钥生成需要 \(\gcd\) 计算；编程中分数约分依赖于此。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用欧几里得算法求 \(\gcd(252, 105)\)。 解答: \(252 = 105 \times 2 + 42\)，\(105 = 42 \times 2 + 21\)， \(42 = 21 \times 2 + 0\)。故 \(\gcd(252, 105) = 21\)。 易错点: 将欧几里得算法用于负数时忘记取绝对值。 \(\gcd(-12, 8) = \gcd(12, 8) = 4\)，不是 \(-4\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">欧几里得算法的核心原理是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 也正确但效率不高；B 是算法实际采用的更高效形式；')">A. \(\gcd(a,b) = \gcd(a-b, b)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！A 也正确但效率不高；B 是算法实际采用的更高效形式；')">B. \(\gcd(a,b) = \gcd(b, a \bmod b)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 也正确但效率不高；B 是算法实际采用的更高效形式；')">C. \(\gcd(a,b) = ab / \mathrm{lcm}(a,b)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 也正确但效率不高；B 是算法实际采用的更高效形式；')">D. \(\gcd(a,b) = \min(a,b)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Bézout 等式与扩展欧几里得算法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Bézout 等式 \(\gcd(a,b) = ax + by\) 揭示了最大公约数可以用 \(a, b\) 的线性组合表示这个深刻事实。扩展欧几里得算法不仅计算 \(\gcd\)， 还找出了具体的系数 \(x, y\)，这在求解同余方程和构造模逆元时至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Bézout 等式的代数本质: 理想 \((a, b) = (\gcd(a,b))\)， 即由 \(a, b\) 生成的理想是主理想——这反映了 \(\mathbb{Z}\) 是 PID。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Bézout 等式</strong>: 对任意 \(a, b \in \mathbb{Z}\)（不同时为 0）， 存在 \(x, y \in \mathbb{Z}\) 使 \[\gcd(a, b) = ax + by\] 证明: 考虑 \(S = \{ax + by : x, y \in \mathbb{Z},\; ax+by > 0\}\)。 \(S \neq \emptyset\)，取最小元 \(d = ax_0 + by_0\)。 用带余除法: \(a = dq + r\)，\(0 \leq r < d\)。 \(r = a - dq = a(1-qx_0) + b(-qy_0) \in S \cup \{0\}\)。 由 \(d\) 最小性，\(r = 0\)，故 \(d \mid a\)。同理 \(d \mid b\)。 若 \(c \mid a, c \mid b\)，则 \(c \mid d\)。故 \(d = \gcd(a,b)\)。 <strong>扩展欧几里得算法</strong>: 在辗转相除的同时回溯计算 \(x, y\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>求模逆元: 若 \(\gcd(a,n)=1\)，由 \(ax + ny = 1\) 得 \(ax \equiv 1 \pmod{n}\)。这是 RSA 密钥生成的核心步骤。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用扩展欧几里得求 \(\gcd(35, 12)\) 的 Bézout 系数。 解答: \(35 = 12 \times 2 + 11\)，\(12 = 11 \times 1 + 1\)， \(11 = 1 \times 11 + 0\)。回溯: \(1 = 12 - 11 = 12 - (35 - 12 \times 2) = 3 \times 12 - 1 \times 35\)。 故 \(\gcd(35,12) = 1 = 35 \times (-1) + 12 \times 3\)。 易错点: 回溯时符号错误。每步都需仔细替换，建议用矩阵形式组织计算。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Bézout 等式 \(\gcd(a,b) = ax + by\) 成立的充分必要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Bézout 等式对任意不同时为 0 的整数成立，')">A. \(a, b\) 互素</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Bézout 等式对任意不同时为 0 的整数成立，')">B. \(a, b\) 不同时为 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Bézout 等式对任意不同时为 0 的整数成立，')">C. \(a, b\) 都为正整数</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Bézout 等式对任意不同时为 0 的整数成立，')">D. \(a &gt; b\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>素数与算术基本定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>素数是整数的「原子」——算术基本定理说每个大于 1 的整数都可以 唯一地分解为素数之积。这是欧几里得的伟大发现之一，也是现代密码学 （如 RSA）的数学基础：分解容易而分解很难。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>素数是环论中「不可约元​」的原型。唯一分解说明 \(\mathbb{Z}\) 是 UFD（唯一分解整环）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>素数</strong>: \(p > 1\) 且只被 \(1\) 和 \(p\) 整除。 <strong>素数无穷性</strong>（Euclid）: 假设只有有限个素数 \(p_1 \ldots p_n\)。 令 \(N = p_1 p_2 \cdots p_n + 1\)。\(N\) 不被任何 \(p_i\) 整除 （余数为 1），但 \(N > 1\) 必有素因子，矛盾。 <strong>算术基本定理</strong>: 每个 \(n > 1\) 可唯一地写为 \[n = p_1^{a_1} p_2^{a_2} \cdots p_k^{a_k}\] 其中 \(p_1 < p_2 < \cdots < p_k\) 为素数，\(a_i \geq 1\)。 存在性: 归纳法。唯一性: 需用 Euclid 引理 （\(p \mid ab \Rightarrow p \mid a\) 或 \(p \mid b\)，证明用 Bézout）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RSA 密码体系基于大数分解的困难性；Eratosthenes 筛法为查找 素数的确定性算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 将 \(2520\) 分解为素因子。 解答: \(2520 = 2^3 \times 3^2 \times 5 \times 7\)。 验证: \(8 \times 9 \times 5 \times 7 = 72 \times 35 = 2520\)。✓ 易错点: 忘记 Euclid 的证明中 \(N = p_1 \cdots p_n + 1\) 本身 不一定是素数，只是它必须有不在原列表中的素因子。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Euclid 的素数无穷性证明中，\(N = p_1 \cdots p_n + 1\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(N\\) 可能是合数（如 \\(2 \\times 3 \\times 5 \\times 7 \\times 11 \\times 13 + 1 = 30031 = 59 \\times 509\\)），关键是 \\(N\\) 的每个素因子都不在列表中。')">A. 是</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(N\\) 可能是合数（如 \\(2 \\times 3 \\times 5 \\times 7 \\times 11 \\times 13 + 1 = 30031 = 59 \\times 509\\)），关键是 \\(N\\) 的每个素因子都不在列表中。')">B. 不一定，但它的素因子不在 \(\{p_1,\ldots,p_n\}\) 中</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(N\\) 可能是合数（如 \\(2 \\times 3 \\times 5 \\times 7 \\times 11 \\times 13 + 1 = 30031 = 59 \\times 509\\)），关键是 \\(N\\) 的每个素因子都不在列表中。')">C. 不一定，它可能被某个 \(p_i\) 整除</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(N\\) 可能是合数（如 \\(2 \\times 3 \\times 5 \\times 7 \\times 11 \\times 13 + 1 = 30031 = 59 \\times 509\\)），关键是 \\(N\\) 的每个素因子都不在列表中。')">D. 它一定是奇数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/algebra/number-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

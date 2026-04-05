@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 量子门与线路 — 量子计算 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "quantum-ch02-q1",
+        "question": "Hadamard 门 \\(H=\\frac{1}{\\sqrt{2}}\\begin{pmatrix}1&1\\\\1&-1\\end{pmatrix}\\) 的作用？为什么它是量子算法的\"标配起手式\"？",
+        "options": [
+          "\\(H|0\\rangle=|+\\rangle\\), \\(H|1\\rangle=|-\\rangle\\)——将计算基变为等权叠加, 创造量子并行性的起点",
+        "\\(H\\) 是恒等门",
+        "\\(H\\) 不可逆",
+        "\\(H\\) 只用于单比特"
+        ],
+        "answer": 0,
+        "explanation": "\\(H|0\\rangle=\\frac{1}{\\sqrt{2}}(|0\\rangle+|1\\rangle)=|+\\rangle\\)。对 \\(n\\) 个 qubit: \\(H^{\\otimes n}|0...0\\rangle=\\frac{1}{\\sqrt{2^n}}\\sum_{x\\in\\{0,1\\}^n}|x\\rangle\\)——所有 \\(2^n\\) 个基态等权叠加。这是 Deutsch-Jozsa, Grover, Shor 等算法的第一步: \"准备叠加态, 然后让 oracle 同时作用于所有输入\"。\\(H^2=I\\)(自逆), \\(H=\\frac{X+Z}{\\sqrt{2}}\\)(Pauli门的线性组合), 在 Bloch 球上是绕 \\((\\hat{x}+\\hat{z})/\\sqrt{2}\\) 轴旋转 \\(\\pi\\)。"
+      },
+      {
+        "id": "quantum-ch02-q2",
+        "question": "CNOT 门 \\(|a,b\\rangle\\to|a,a\\oplus b\\rangle\\) 的矩阵表示和作用？",
+        "options": [
+          "\\(\\text{CNOT}=\\begin{pmatrix}1&0&0&0\\\\0&1&0&0\\\\0&0&0&1\\\\0&0&1&0\\end{pmatrix}\\)——控制比特为 \\(|1\\rangle\\) 时翻转目标比特; 可以产生纠缠",
+        "CNOT 对两个比特都翻转",
+        "CNOT 是单比特门",
+        "CNOT 不能产生纠缠"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{CNOT}|0,0\\rangle=|0,0\\rangle\\), \\(\\text{CNOT}|1,0\\rangle=|1,1\\rangle\\)。制备 Bell 态: \\(\\text{CNOT}(H\\otimes I)|00\\rangle=\\text{CNOT}\\frac{|0\\rangle+|1\\rangle}{\\sqrt{2}}|0\\rangle=\\frac{|00\\rangle+|11\\rangle}{\\sqrt{2}}=|\\Phi^+\\rangle\\)。经典可逆逻辑的量子版本: XOR。\\(\\{H,\\text{CNOT},T\\}\\) 构成通用门集。CNOT 的物理实现: 超导(Cross-resonance), 离子阱(Mølmer-Sørensen), 光学(KLM)。两比特门是量子计算的核心资源——错误率也最高。"
+      },
+      {
+        "id": "quantum-ch02-q3",
+        "question": "Pauli 门 \\(X=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}\\), \\(Y=\\begin{pmatrix}0&-i\\\\i&0\\end{pmatrix}\\), \\(Z=\\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}\\) 满足什么代数关系？",
+        "options": [
+          "\\(X^2=Y^2=Z^2=I\\), \\(XY=iZ\\)(循环), 反对易 \\(\\{X,Y\\}=0\\)——构成 Lie 代数 \\(\\mathfrak{su}(2)\\) 的基",
+        "全部对易",
+        "\\(XY=YX\\)",
+        "不满足群结构"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma_x,\\sigma_y,\\sigma_z\\) 即 Pauli 矩阵。\\([\\sigma_i,\\sigma_j]=2i\\epsilon_{ijk}\\sigma_k\\)(对易子→\\(\\mathfrak{su}(2)\\))。\\(\\{\\sigma_i,\\sigma_j\\}=2\\delta_{ij}I\\)(反对易→Clifford 代数)。Bloch 球: \\(R_{\\hat{n}}(\\theta)=e^{-i\\theta\\hat{n}\\cdot\\vec\\sigma/2}\\)——任意单比特门是绕 Bloch 球某轴旋转。量子错误: 任意单 qubit 错误可分解为 \\(I,X,Y,Z\\) 的线性组合→纠错只需纠正 Pauli 错误。"
+      },
+      {
+        "id": "quantum-ch02-q4",
+        "question": "\\(T\\) 门 \\(T=\\begin{pmatrix}1&0\\\\0&e^{i\\pi/4}\\end{pmatrix}\\) 为什么是通用量子计算的关键？",
+        "options": [
+          "\\(\\{H,\\text{CNOT}\\}\\) 只能生成 Clifford 群(可经典模拟); 加入 \\(T\\) 门后才构成通用门集——\\(T\\) 门提供\"magic\"(非 Clifford 资源)",
+        "\\(T\\) 门可以被 \\(H,\\text{CNOT}\\) 替代",
+        "Clifford 门就已经通用",
+        "\\(T\\) 门不重要"
+        ],
+        "answer": 0,
+        "explanation": "Gottesman-Knill 定理: Clifford 门(\\(H,S,\\text{CNOT}\\))+计算基测量+Pauli 初态→可在经典计算机上高效模拟(稳定子形式)。\\(T=\\sqrt{S}\\), \\(S=\\sqrt{Z}\\)。\\(T\\) 不在 Clifford 群中。Solovay-Kitaev 定理: \\(\\{H,T\\}\\) 可以 \\(\\epsilon\\)-近似任意单比特门, 门数 \\(O(\\log^c(1/\\epsilon))\\)。容错量子计算: \\(T\\) 门不能直接横向实现→需要 magic state distillation (\\(|T\\rangle\\) 态蒸馏), 这是实现容错的主要开销。"
+      },
+      {
+        "id": "quantum-ch02-q5",
+        "question": "量子线路的深度(depth)和宽度(width)分别指什么？为什么深度是关键资源？",
+        "options": [
+          "宽度=qubit 数, 深度=最大串行门层数; 深度决定退相干前可执行的操作数——NISQ 时代最关键的限制",
+        "深度=qubit 数",
+        "宽度=门数",
+        "深度不影响计算能力"
+        ],
+        "answer": 0,
+        "explanation": "线路模型: 横轴=时间(门层), 纵轴=qubit。宽度=\\(n\\)(qubit数), 深度=\\(d\\)(时间步数)。每层可并行施加不相交的门。总门数\\(\\leq n\\cdot d\\)。NISQ (\\(n\\sim 50-1000, d\\sim 100-1000\\)): 退相干时间 \\(T_2\\sim 10-100\\mu s\\)(超导), 门时间 \\(\\sim 20-50ns\\) → 最大深度 \\(\\sim T_2/t_{gate}\\sim 200-5000\\)。量子纠错可增大有效深度但需更多物理 qubit。线路深度下界是计算复杂度理论中的重要问题(QNC vs BQP)。"
+      },
+      {
+        "id": "quantum-ch02-q6",
+        "question": "参数化量子线路(PQC) \\(U(\\theta)=\\prod_lU_l(\\theta_l)\\) 中，参数梯度如何计算？",
+        "options": [
+          "Parameter Shift Rule: \\(\\frac{\\partial\\langle O\\rangle}{\\partial\\theta_j}=\\frac{\\langle O\\rangle_{\\theta_j+\\pi/2}-\\langle O\\rangle_{\\theta_j-\\pi/2}}{2}\\)——只需两次量子线路执行即可得到精确梯度",
+        "用有限差分近似",
+        "不能对量子线路求梯度",
+        "反向传播直接适用"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(U_j(\\theta_j)=e^{-i\\theta_jG/2}\\)(\\(G\\) 有特征值 \\(\\pm 1\\)), 则 parameter shift 精确: \\(\\partial_\\theta\\langle\\psi|U^\\dagger OU|\\psi\\rangle=\\frac{1}{2}[\\langle O\\rangle_{\\theta+\\pi/2}-\\langle O\\rangle_{\\theta-\\pi/2}]\\)。这是量子-经典混合优化(VQE, QAOA)的核心。每个参数需 2 次线路执行→\\(p\\) 个参数需 \\(2p\\) 次。Barren Plateau 问题: 随机 PQC 中 \\(\\text{Var}[\\partial_\\theta\\langle O\\rangle]\\sim O(1/2^n)\\)——梯度指数衰减→优化困难。"
+      },
+      {
+        "id": "quantum-ch02-q7",
+        "question": "量子线路的通用性: 为什么 \\(\\{H, T, \\text{CNOT}\\}\\) 就能实现任意 \\(n\\)-qubit 酉矩阵？",
+        "options": [
+          "任意酉可分解为两比特门序列(Reck/Clements); 任意两比特门可用 CNOT+单比特门合成; 单比特门用 \\(H,T\\) 逼近(Solovay-Kitaev)",
+        "需要无穷多种基本门",
+        "不能实现所有酉矩阵",
+        "只需要 CNOT 就够"
+        ],
+        "answer": 0,
+        "explanation": "分步: (1) \\(U\\in SU(2^n)\\) 可用 \\(O(4^n)\\) 个 CNOT+单比特门精确分解(KAK/Cartan 分解)。(2) 任意 \\(SU(2)\\) 门: \\(U=e^{i\\alpha}R_z(\\beta)R_y(\\gamma)R_z(\\delta)\\), 用 \\(H,T\\) 的 \\(O(\\log^c(1/\\epsilon))\\) 个门 \\(\\epsilon\\)-逼近。总线路大小: \\(O(4^n\\log^c(1/\\epsilon))\\)。这是最坏情况——量子算法的目标是找到多项式深度线路完成特定任务(如 QFT: \\(O(n^2)\\))。下界: 几乎所有酉需要 \\(\\Omega(4^n/n)\\) 门。"
+      },
+      {
+        "id": "quantum-ch02-q8",
+        "question": "Toffoli 门(CCNOT) \\(|a,b,c\\rangle\\to|a,b,c\\oplus(a\\wedge b)\\rangle\\) 可以用多少个 CNOT 门+单比特门实现？",
+        "options": [
+          "至少 6 个 CNOT——Toffoli 是通用经典计算的基础(可实现 NAND), 但量子实现代价高",
+        "1 个 CNOT",
+        "3 个 CNOT",
+        "不能用 CNOT 实现"
+        ],
+        "answer": 0,
+        "explanation": "Toffoli 经典: \\(c'=c\\oplus(a\\cdot b)\\)——可逆 AND 门。Shende-Markov: Toffoli 的最优分解需 6 CNOT + 若干单比特门。标准分解: 用 \\(V=\\sqrt{X}\\) 构造 \\(|a,b\\rangle|c\\oplus(a\\cdot b)\\rangle=\\text{CNOT}_{bc}\\cdot CV^\\dagger_{ac}\\cdot\\text{CNOT}_{bc}\\cdot CV_{ac}\\cdot CV_{bc}\\)。量子纠错中大量使用 Toffoli→优化 Toffoli 分解是实际量子编译的热点。\\(T\\)-count: \\(\\text{Toffoli}\\) 需 7 个 \\(T\\) 门——容错计算中 \\(T\\) 门主导开销。"
+      },
+      {
+        "id": "quantum-ch02-q9",
+        "question": "量子线路中的 ZZ 相互作用门 \\(e^{-i\\theta Z\\otimes Z/2}\\) 在超导量子计算中自然实现。它的物理来源？",
+        "options": [
+          "超导 qubit 之间的电容/电感耦合自然产生 \\(H_{int}=JZ_1Z_2\\) 型 Ising 相互作用——\\(e^{-iJtZ_1Z_2}\\) 直接对应物理时间演化",
+        "ZZ 门需要额外操控",
+        "超导 qubit 之间无相互作用",
+        "ZZ 门不存在"
+        ],
+        "answer": 0,
+        "explanation": "超导 transmon qubit: \\(H=\\sum_i\\omega_ia_i^\\dagger a_i+\\sum_{ij}J_{ij}(a_i^\\dagger a_j+h.c.)\\)。在色散极限(\\(|\\omega_i-\\omega_j|\\gg J\\)): 有效 \\(H_{eff}=\\sum_i\\tilde\\omega_iZ_i+\\sum_{ij}\\zeta_{ij}Z_iZ_j\\)。\\(\\zeta_{ij}\\) 是残余 ZZ 耦合——既是资源(可做 ZZ 门)也是噪声(寄生 ZZ→crosstalk)。Cross-resonance 门: 利用 ZZ 实现 CNOT-like 操作。谷歌 Sycamore: 用可调耦合器控制 \\(\\zeta\\) 的开/关。"
+      },
+      {
+        "id": "quantum-ch02-q10",
+        "question": "量子编译(Quantum Compilation): 将目标酉 \\(U\\) 分解为硬件原生门集。为什么这是 NP-hard？",
+        "options": [
+          "在固定门集上精确合成给定酉的最短线路是 NP-hard; 实际用启发式: Solovay-Kitaev, CNOT 优化(模板匹配), 或机器学习编译",
+        "编译是 P 问题",
+        "不需要编译",
+        "所有酉分解长度相同"
+        ],
+        "answer": 0,
+        "explanation": "精确合成: 给定离散门集 \\(\\{g_i\\}\\), 找最短 \\(g_{i_1}\\cdots g_{i_k}=U\\) 是搜索问题, 一般 NP-hard。近似合成: Solovay-Kitaev→\\(O(\\log^{3.97}(1/\\epsilon))\\) 门; Ross-Selinger→\\(O(\\log(1/\\epsilon))\\) 门(optimal for \\(T\\)-count)。实际流程: (1) 高层→两比特门分解; (2) 路由(mapping到物理连接); (3) 两比特门→原生门; (4) 优化(门合并/消除)。IBM Qiskit、Google Cirq 都有编译器。编译质量直接影响 NISQ 算法成败。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="quantum"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/quantum.html" class="module-name">量子计算</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 单量子比特门</a></li>
+      <li><a href="#kp2">02 · 多量子比特门与受控操作</a></li>
+      <li><a href="#kp3">03 · 通用门集与 Solovay-Kitaev 定理</a></li>
+      <li><a href="#kp4">04 · 量子线路模型与复杂度</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>量子门与线路</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>单量子比特门</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子计算通过量子门操作量子比特来实现计算。单量子比特门是最基本 的构建模块——Pauli 门 \(X, Y, Z\)、Hadamard 门 \(H\)、相位门 \(S, T\) 分别完成翻转、叠加、相位旋转等操作。掌握这些门的矩阵表示和几 何含义是理解量子线路的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>量子门 \(=\) 酉矩阵 \(U \in U(2)\)，满足 \(U^\dagger U = I\)。酉性 保证概率守恒。Bloch 球上单量子比特门 \(\leftrightarrow\) SO(3) 旋转。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Pauli 门： \[X = \begin{pmatrix}0&1\\1&0\end{pmatrix},\; Y = \begin{pmatrix}0&-i\\i&0\end{pmatrix},\; Z = \begin{pmatrix}1&0\\0&-1\end{pmatrix}\] \(X|0\rangle = |1\rangle\)（NOT 门），\(Z|+\rangle = |-\rangle\)（相位翻转）。 Hadamard 门：\(H = \frac{1}{\sqrt{2}}\begin{pmatrix}1&1\\1&-1\end{pmatrix}\)， \(H|0\rangle = |+\rangle\)，\(H|1\rangle = |-\rangle\)。制备叠加态。 一般旋转门：\(R_{\hat{n}}(\theta) = e^{-i\theta\hat{n}\cdot\vec{\sigma}/2}\)， 任何单量子比特门可分解为 \(U = e^{i\alpha} R_z(\beta) R_y(\gamma) R_z(\delta)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(H\) 门在几乎所有量子算法开头用于创建均匀叠加； \(T\) 门是容错量子计算的关键非 Clifford 资源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(HXH\) 的矩阵。 解答：\(HXH = \frac{1}{2}\begin{pmatrix}1&1\\1&-1\end{pmatrix}\begin{pmatrix}0&1\\1&0\end{pmatrix}\begin{pmatrix}1&1\\1&-1\end{pmatrix}\) \(= \frac{1}{2}\begin{pmatrix}1&1\\-1&1\end{pmatrix}\begin{pmatrix}1&1\\1&-1\end{pmatrix} = \begin{pmatrix}1&0\\0&-1\end{pmatrix} = Z\)。 易错点：\(HXH = Z\), \(HZH = X\)——Hadamard 交换 \(X\) 和 \(Z\) 基。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(H|0\rangle\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H|1\\rangle = |-\\rangle\\) 才带负号。\\(H\\) 创建对称叠加。')">A. \(|1\rangle\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(H|1\\rangle = |-\\rangle\\) 才带负号。\\(H\\) 创建对称叠加。')">B. \((|0\rangle + |1\rangle)/\sqrt{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H|1\\rangle = |-\\rangle\\) 才带负号。\\(H\\) 创建对称叠加。')">C. \((|0\rangle - |1\rangle)/\sqrt{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H|1\\rangle = |-\\rangle\\) 才带负号。\\(H\\) 创建对称叠加。')">D. \(|0\rangle\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>多量子比特门与受控操作</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子计算的真正威力来自多量子比特门——它们在量子比特之间创建关 联（纠缠）。CNOT 门是最基本的两量子比特门，它与单量子比特门一 起构成通用门集。受控 U 操作模式是量子算法中实现条件逻辑的标准 方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>受控门 \(=\) 条件酉变换：控制位为 \(|1\rangle\) 时对目标位施加 \(U\)， 否则不变。数学上 \(CU = |0\rangle\langle 0| \otimes I + |1\rangle\langle 1| \otimes U\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>CNOT 门： \[\text{CNOT} = |0\rangle\langle 0| \otimes I + |1\rangle\langle 1| \otimes X = \begin{pmatrix}1&0&0&0\\0&1&0&0\\0&0&0&1\\0&0&1&0\end{pmatrix}\] 作用：\(|00\rangle \to |00\rangle\), \(|10\rangle \to |11\rangle\)——控制位不变，目标位异或。 Bell 态制备：\((H \otimes I) \cdot \text{CNOT}\)： \(|00\rangle \xrightarrow{H\otimes I} |+0\rangle \xrightarrow{\text{CNOT}} \frac{1}{\sqrt{2}}(|00\rangle+|11\rangle) = |\Phi^+\rangle\)。 Toffoli 门（CCNOT）：三量子比特受控门，两个控制位都为 \(|1\rangle\) 时翻转目标。 经典可逆计算的通用门，也是量子通用门集的一部分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>CNOT 是量子纠错编码线路、量子隐形传态线路的核心组件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\((H \otimes I) \cdot \text{CNOT} \cdot |10\rangle = ?\) 解答：\(|10\rangle \xrightarrow{\text{CNOT}} |11\rangle \xrightarrow{H\otimes I} |-\rangle|1\rangle = \frac{1}{\sqrt{2}}(|01\rangle - |11\rangle)\)。 注意这里 CNOT 先作用！ 易错点：线路从左到右读，但矩阵乘法从右到左。CNOT 的方向（控制/目标）很关键。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CNOT 作用于 \(|1+\rangle = |1\rangle \otimes |+\rangle\) 的结果是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！控制位 \\(|1\\rangle\\) 触发 \\(X\\) 作用于目标 \\(|+\\rangle\\)。')">A. \(|1+\rangle\)（不变）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。控制位 \\(|1\\rangle\\) 触发 \\(X\\) 作用于目标 \\(|+\\rangle\\)。')">B. \(|1-\rangle\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。控制位 \\(|1\\rangle\\) 触发 \\(X\\) 作用于目标 \\(|+\\rangle\\)。')">C. \(|\Phi^+\rangle\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。控制位 \\(|1\\rangle\\) 触发 \\(X\\) 作用于目标 \\(|+\\rangle\\)。')">D. \(|11\rangle\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>通用门集与 Solovay-Kitaev 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>能否用有限种类的门实现任意量子计算？通用门集的存在性是量子计算 可行性的基础。Solovay-Kitaev 定理进一步保证：用离散门集可以高 效逼近任意酉算子——这对物理实现至关重要，因为实验中只能精确操 控少数几种量子门。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>通用性 \(=\) 门集生成的群在 \(U(2^n)\) 中稠密。类比经典的 NAND 门完备性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>通用门集定理：\(\{H, T, \text{CNOT}\}\) 是通用门集。 \(H\) 和 \(T\) 生成单量子比特 Clifford+T 群，在 \(U(2)\) 中稠密。 加上 CNOT 可生成任意多量子比特酉算子。 Solovay-Kitaev 定理：若门集 \(\mathcal{G}\) 生成 \(SU(2)\) 的稠密子群， 则任意 \(U \in SU(2)\) 可被 \(\mathcal{G}\) 的长度 \(O(\log^c(1/\varepsilon))\) 的乘积 \(\varepsilon\)-逼近（算子范数）。常数 \(c \approx 3.97\)。 \[\|U - U_{\text{approx}}\| \leq \varepsilon \quad \text{只需} \quad O\!\left(\log^c\frac{1}{\varepsilon}\right) \text{个基本门}\] 这意味着门数关于精度仅多项式对数增长——逼近非常高效。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>容错量子计算中，连续旋转角被编译为 Clifford+T 门序列。 T 门的数量（T-count）是量子编译优化的主要目标。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 \(H\) 和 \(T\) 近似 \(R_z(\pi/8)\)。 解答：\(T = R_z(\pi/4)\)。\(T^{1/2}\) 不在门集中，但 \(HTH\) 也是非平凡旋转。 通过 Solovay-Kitaev 算法的递归构造，\(HT, TH, HTH, \ldots\) 的组合可逼近 任意 \(R_z(\theta)\)，长度为 \(O(\log^{3.97}(1/\varepsilon))\)。 易错点：SK 定理只保证存在性和长度上界，实际最优序列需搜索算法。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个不是通用门集的必要条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。纯 Clifford 门集（\\(H, S, \\text{CNOT}\\)）不是通用的（Gottesman-Knill 定理），必须加非 Clifford 门如 \\(T\\)。')">A. 包含至少一个两量子比特门</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。纯 Clifford 门集（\\(H, S, \\text{CNOT}\\)）不是通用的（Gottesman-Knill 定理），必须加非 Clifford 门如 \\(T\\)。')">B. 单量子比特门在 \(SU(2)\) 中稠密</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！纯 Clifford 门集（\\(H, S, \\text{CNOT}\\)）不是通用的（Gottesman-Knill 定理），必须加非 Clifford 门如 \\(T\\)。')">C. 所有门必须是 Clifford 门</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。纯 Clifford 门集（\\(H, S, \\text{CNOT}\\)）不是通用的（Gottesman-Knill 定理），必须加非 Clifford 门如 \\(T\\)。')">D. 门集可逼近任意酉变换</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>量子线路模型与复杂度</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子线路是量子算法的标准描述语言——就像经典布尔电路之于经典算 法。量子线路的深度和宽度决定了算法的时间和空间复杂度。理解量子 复杂度类 BQP 及其与经典复杂度类的关系，是评估量子计算能力边界 的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>量子线路 \(=\) 有向无环图，顶点为量子门，边为量子比特线。 复杂度 \(\leftrightarrow\) 门数量（时间）和量子比特数（空间）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>量子线路定义：\(n\) 量子比特输入 \(|x\rangle\)，经过 \(L\) 层门操作后测量。 \[|x\rangle \xrightarrow{U_1} \xrightarrow{U_2} \cdots \xrightarrow{U_L} \text{测量}\] 总酉算子 \(U = U_L \cdots U_2 U_1\)。 BQP 类（Bounded-error Quantum Polynomial time）：多项式量子线路 以 \(\geq 2/3\) 概率给出正确答案的判定问题集合。 \[\mathsf{P} \subseteq \mathsf{BPP} \subseteq \mathsf{BQP} \subseteq \mathsf{PSPACE}\] 关键问题：\(\mathsf{BQP} \stackrel{?}{\neq} \mathsf{BPP}\)——Shor 算法和量子模拟提供 强有力的证据支持严格包含。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子优越性实验（Google Sycamore 2019）：随机线路采样问题据信不在 BPP 中。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：一个 \(n\)-qubit 量子线路有 \(n\) 个 \(H\) 门（并行）后接 1 层测量。 深度和总门数？测量结果分布？ 解答：深度 \(= 1\)（所有 \(H\) 门并行），总门数 \(= n\)。 \(H^{\otimes n}|0\rangle^{\otimes n} = |+\rangle^{\otimes n} = \frac{1}{\sqrt{2^n}}\sum_{x \in \{0,1\}^n}|x\rangle\)。 测量得到均匀分布——每个 \(n\)-bit 串概率 \(1/2^n\)。 易错点：深度 \(\neq\) 总门数。并行门共享一层深度。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个复杂度类关系是已知的（非猜想）？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。经典多项式算法可在量子计算机上模拟，故 \\(\\mathsf{P} \\subseteq \\mathsf{BQP}\\) 是确定的。其他关系均未被证明。')">A. \(\mathsf{BQP} \neq \mathsf{NP}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！经典多项式算法可在量子计算机上模拟，故 \\(\\mathsf{P} \\subseteq \\mathsf{BQP}\\) 是确定的。其他关系均未被证明。')">B. \(\mathsf{P} \subseteq \mathsf{BQP}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。经典多项式算法可在量子计算机上模拟，故 \\(\\mathsf{P} \\subseteq \\mathsf{BQP}\\) 是确定的。其他关系均未被证明。')">C. \(\mathsf{BQP} = \mathsf{PSPACE}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。经典多项式算法可在量子计算机上模拟，故 \\(\\mathsf{P} \\subseteq \\mathsf{BQP}\\) 是确定的。其他关系均未被证明。')">D. \(\mathsf{NP} \subseteq \mathsf{BQP}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/applied/quantum.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

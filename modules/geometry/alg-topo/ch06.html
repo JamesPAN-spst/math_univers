@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 同调代数工具 — 代数拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "alg-topo-ch06-q1",
+        "question": "正合序列 (exact sequence) \\(A \\xrightarrow{f} B \\xrightarrow{g} C\\) 的含义？",
+        "options": [
+          "\\(\\text{im}(f) = \\ker(g)\\)",
+        "\\(f \\circ g = 0\\)",
+        "\\(A \\cong C\\)",
+        "\\(B = 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "正合 = \"像等于核\"。\\(\\text{im}(f) = \\ker(g)\\)：\\(f\\) 的输出恰好是 \\(g\\) 的\"可消去\"部分。短正合序列 \\(0 \\to A \\xrightarrow{f} B \\xrightarrow{g} C \\to 0\\)：\\(f\\) 单射，\\(g\\) 满射，\\(C \\cong B/A\\)。长正合序列来自蛇引理和同调理论。\\(B\\) 不必是 \\(A \\oplus C\\)——只有分裂时才是。"
+      },
+      {
+        "id": "alg-topo-ch06-q2",
+        "question": "短正合序列 \\(0 \\to \\mathbb{Z} \\xrightarrow{\\times 2} \\mathbb{Z} \\xrightarrow{\\pi} \\mathbb{Z}/2 \\to 0\\) 是否分裂？",
+        "options": [
+          "分裂（\\(\\mathbb{Z} \\cong \\mathbb{Z} \\oplus \\mathbb{Z}/2\\)）",
+        "不分裂",
+        "取决于映射",
+        "总分裂"
+        ],
+        "answer": 1,
+        "explanation": "分裂意味着存在截面 \\(s: \\mathbb{Z}/2 \\to \\mathbb{Z}\\), \\(\\pi \\circ s = \\mathrm{id}\\)。\\(s(1) = n\\)（奇数），\\(\\pi(n) = 1\\)。\\(s(0) = 0\\)。\\(s\\) 是群同态需 \\(s(1+1) = s(0) = 0 = 2n\\)，但 \\(n\\) 奇数 \\(\\Rightarrow 2n \\neq 0\\)。矛盾。不分裂。\\(\\mathbb{Z} \\not\\cong \\mathbb{Z} \\oplus \\mathbb{Z}/2\\)（后者有挠）。"
+      },
+      {
+        "id": "alg-topo-ch06-q3",
+        "question": "蛇引理 (Snake Lemma) 的输入和输出？",
+        "options": [
+          "输入：链映射交换图 + 行正合。输出：连接同态 \\(\\delta: \\ker(c) \\to \\text{coker}(a)\\) 的长正合序列",
+        "两个正合序列的直和",
+        "同构",
+        "A（蛇引理是同调代数的基本定理，用于构造同调长正合序列）"
+        ],
+        "answer": 3,
+        "explanation": "输入：\\(0 \\to A' \\to B' \\to C' \\to 0\\), \\(0 \\to A \\to B \\to C \\to 0\\)，竖直映射 \\(a, b, c\\)。输出：\\(0 \\to \\ker(a) \\to \\ker(b) \\to \\ker(c) \\xrightarrow{\\delta} \\text{coker}(a) \\to \\text{coker}(b) \\to \\text{coker}(c) \\to 0\\)。\\(\\delta\\) = \"蛇\"映射，图追踪 (diagram chasing) 构造。同调长正合序列是蛇引理的核心应用。"
+      },
+      {
+        "id": "alg-topo-ch06-q4",
+        "question": "链映射 (chain map) \\(f: C_* \\to D_*\\) 满足什么？",
+        "options": [
+          "\\(f_n \\circ \\partial^C_n = \\partial^D_n \\circ f_n\\)（与边界算子交换）",
+        "\\(f_n: C_n \\to D_n\\) 是同构",
+        "\\(f\\) 保持分级",
+        "A 和 C"
+        ],
+        "answer": 3,
+        "explanation": "链映射：\\(f = \\{f_n: C_n \\to D_n\\}\\) 保持分级（C），与边界交换（A）。交换性保证：\\(f\\) 将闭链映到闭链，将边界映到边界 \\(\\Rightarrow\\) 诱导同调映射 \\(f_*: H_n(C) \\to H_n(D)\\)。链映射是链复形范畴的态射。"
+      },
+      {
+        "id": "alg-topo-ch06-q5",
+        "question": "万有系数定理（同调版）：\\(H_n(X; G) \\cong ?\\)",
+        "options": [
+          "\\((H_n(X) \\otimes G) \\oplus \\text{Tor}_1(H_{n-1}(X), G)\\)",
+        "\\(H_n(X) \\otimes G\\)",
+        "\\(\\text{Hom}(H_n(X), G)\\)",
+        "A（短正合序列 \\(0 \\to H_n \\otimes G \\to H_n(X;G) \\to \\text{Tor}(H_{n-1}, G) \\to 0\\)，分裂）"
+        ],
+        "answer": 3,
+        "explanation": "万有系数定理（同调）：\\(0 \\to H_n(X; \\mathbb{Z}) \\otimes G \\to H_n(X; G) \\to \\text{Tor}_1(H_{n-1}(X; \\mathbb{Z}), G) \\to 0\\)。分裂（非典范）。\\(G\\) 无挠（如 \\(\\mathbb{Q}, \\mathbb{R}\\)）：\\(\\text{Tor} = 0\\), \\(H_n(X; G) = H_n(X) \\otimes G\\)。\\(G = \\mathbb{Z}/p\\)：Tor 检测 \\(p\\)-挠。"
+      },
+      {
+        "id": "alg-topo-ch06-q6",
+        "question": "\\(\\text{Tor}(\\mathbb{Z}/m, \\mathbb{Z}/n) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/\\gcd(m,n)\\)",
+        "\\(\\mathbb{Z}/(mn)\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}/m \\otimes \\mathbb{Z}/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Tor}_1(\\mathbb{Z}/m, \\mathbb{Z}/n)\\)：解析 \\(\\mathbb{Z}/m\\)（\\(0 \\to \\mathbb{Z} \\xrightarrow{\\times m} \\mathbb{Z} \\to \\mathbb{Z}/m \\to 0\\)），张量 \\(\\mathbb{Z}/n\\)：\\(0 \\to \\text{Tor} \\to \\mathbb{Z}/n \\xrightarrow{\\times m} \\mathbb{Z}/n\\)。\\(\\ker(\\times m: \\mathbb{Z}/n \\to \\mathbb{Z}/n) = \\{k : mk \\equiv 0 \\pmod{n}\\} = (n/\\gcd(m,n))\\mathbb{Z}/n \\cong \\mathbb{Z}/\\gcd(m,n)\\)。也有 \\(\\mathbb{Z}/m \\otimes \\mathbb{Z}/n = \\mathbb{Z}/\\gcd(m,n)\\)（D 与 A 不同对象）。"
+      },
+      {
+        "id": "alg-topo-ch06-q7",
+        "question": "\\(\\mathbb{Z}/2 \\otimes \\mathbb{Z}/3 = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/6\\)",
+        "\\(\\mathbb{Z}/\\gcd(2,3) = \\mathbb{Z}/1 = 0\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "\\(\\mathbb{Z}/3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}/m \\otimes_\\mathbb{Z} \\mathbb{Z}/n \\cong \\mathbb{Z}/\\gcd(m,n)\\)。\\(\\gcd(2,3) = 1\\)，\\(\\mathbb{Z}/2 \\otimes \\mathbb{Z}/3 = 0\\)。直觉：\\(a \\otimes b = a \\cdot 3 \\otimes b/3\\)... 更直接：\\(1 \\otimes 1 = 1 \\otimes (3 \\cdot k \\text{ for some } k) = 3(1 \\otimes k) = (3 \\cdot 1) \\otimes k\\)，但 \\(3 \\cdot 1 = 1\\) 在 \\(\\mathbb{Z}/2\\) 中，所以 \\(1 \\otimes 1 = 2(1 \\otimes k) + (1 \\otimes k) = 1 \\otimes k\\)... 正式证明用素因子分析。"
+      },
+      {
+        "id": "alg-topo-ch06-q8",
+        "question": "长正合序列 \\(\\cdots \\to H_n(A) \\xrightarrow{i_*} H_n(X) \\xrightarrow{j_*} H_n(X,A) \\xrightarrow{\\partial_*} H_{n-1}(A) \\to \\cdots\\) 中，\\(\\partial_*\\) 为零意味着什么？",
+        "options": [
+          "\\(0 \\to H_n(A) \\to H_n(X) \\to H_n(X,A) \\to 0\\) 正合（短正合）",
+        "\\(H_n(X) = 0\\)",
+        "\\(H_n(A) \\cong H_n(X)\\)",
+        "A（每一段变成短正合序列）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\partial_* = 0\\) 意味着 \\(\\text{im}(\\partial_*) = 0\\)，长正合序列断裂成短正合序列：\\(0 \\to H_n(A)/\\ker(i_*) \\hookrightarrow H_n(X) \\twoheadrightarrow H_n(X,A) \\to 0\\)。等价于 \\(i_*\\) 单射，\\(j_*\\) 满射。但不一定分裂（\\(H_n(X) \\ncong H_n(A) \\oplus H_n(X,A)\\)）。"
+      },
+      {
+        "id": "alg-topo-ch06-q9",
+        "question": "五引理 (Five Lemma)：如果交换图",
+        "options": [
+          "同构",
+        "单射",
+        "满射",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "五引理：\\(\\alpha_1\\) 满射 + \\(\\alpha_2\\) 同构 \\(\\Rightarrow \\alpha_3\\) 单射（图追踪）。\\(\\alpha_4\\) 同构 + \\(\\alpha_5\\) 单射 \\(\\Rightarrow \\alpha_3\\) 满射（图追踪）。合在一起：\\(\\alpha_1\\) 满/同构, \\(\\alpha_2, \\alpha_4\\) 同构, \\(\\alpha_5\\) 单/同构 \\(\\Rightarrow \\alpha_3\\) 同构。五引理在比较同调理论、证明 Poincaré 对偶等中无处不在。"
+      },
+      {
+        "id": "alg-topo-ch06-q10",
+        "question": "Künneth 公式（整系数）：\\(H_n(X \\times Y; \\mathbb{Z}) \\cong ?\\)",
+        "options": [
+          "\\(\\bigoplus_{i+j=n} H_i(X) \\otimes H_j(Y)\\)",
+        "\\(\\bigoplus_{i+j=n} (H_i(X) \\otimes H_j(Y)) \\oplus \\bigoplus_{i+j=n-1} \\text{Tor}(H_i(X), H_j(Y))\\)",
+        "A 只在无挠时",
+        "B（分裂短正合序列，含 Tor 修正项）"
+        ],
+        "answer": 3,
+        "explanation": "Künneth：\\(0 \\to \\bigoplus_{i+j=n} H_i(X) \\otimes H_j(Y) \\to H_n(X \\times Y) \\to \\bigoplus_{i+j=n-1}\\text{Tor}(H_i(X), H_j(Y)) \\to 0\\)。分裂。无挠时 Tor = 0，退化为 A。例如 \\(T^2 = S^1 \\times S^1\\)：\\(H_1(T^2) = H_0 \\otimes H_1 \\oplus H_1 \\otimes H_0 = \\mathbb{Z}^2\\)。"
+      },
+      {
+        "id": "alg-topo-ch06-q11",
+        "question": "分裂 (splitting) 短正合序列 \\(0 \\to A \\to B \\to C \\to 0\\) 意味着什么？",
+        "options": [
+          "\\(B \\cong A \\oplus C\\)",
+        "存在截面 \\(s: C \\to B\\), \\(g \\circ s = \\mathrm{id}_C\\)",
+        "存在收缩 \\(r: B \\to A\\), \\(r \\circ f = \\mathrm{id}_A\\)",
+        "全部等价"
+        ],
+        "answer": 3,
+        "explanation": "分裂条件（等价）：(A) \\(B \\cong A \\oplus C\\), (B) 右截面, (C) 左收缩。\\(\\mathbb{Z}\\) 上不总分裂（\\(0 \\to \\mathbb{Z} \\xrightarrow{2} \\mathbb{Z} \\to \\mathbb{Z}/2 \\to 0\\) 不分裂）。域上总分裂（向量空间的短正合总分裂）。万有系数定理和 Künneth 公式的短正合序列在 \\(\\mathbb{Z}\\) 上也分裂（非典范）。"
+      },
+      {
+        "id": "alg-topo-ch06-q12",
+        "question": "\\(\\text{Ext}^1(\\mathbb{Z}, G) = ?\\) 对任意 Abel 群 \\(G\\)?",
+        "options": [
+          "\\(G\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "取决于 \\(G\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}\\) 是自由（因此投射）群。投射对象的 \\(\\text{Ext}^n = 0\\)（\\(n \\geq 1\\)）。\\(\\text{Ext}^1(\\mathbb{Z}, G) = 0\\)。更一般：任何自由 Abel 群 \\(F\\) 的 \\(\\text{Ext}^1(F, G) = 0\\)。\\(\\text{Ext}\\) 衡量从 \\(G\\) 的扩张的非平凡性——\\(\\mathbb{Z}\\) 扩张总分裂。"
+      },
+      {
+        "id": "alg-topo-ch06-q13",
+        "question": "\\(\\text{Ext}^1(\\mathbb{Z}/n, \\mathbb{Z}/m) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/\\gcd(n,m)\\)",
+        "\\(\\mathbb{Z}/(nm)\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}/n \\oplus \\mathbb{Z}/m\\)"
+        ],
+        "answer": 0,
+        "explanation": "解析 \\(\\mathbb{Z}/n\\)：\\(0 \\to \\mathbb{Z} \\xrightarrow{\\times n} \\mathbb{Z} \\to \\mathbb{Z}/n \\to 0\\)。应用 \\(\\text{Hom}(-, \\mathbb{Z}/m)\\)：\\(\\text{Hom}(\\mathbb{Z}, \\mathbb{Z}/m) \\xrightarrow{\\times n} \\text{Hom}(\\mathbb{Z}, \\mathbb{Z}/m)\\), 即 \\(\\mathbb{Z}/m \\xrightarrow{\\times n} \\mathbb{Z}/m\\)。\\(\\text{Ext}^1 = \\text{coker}(\\times n) = \\mathbb{Z}/m / n\\mathbb{Z}/m = \\mathbb{Z}/\\gcd(n,m)\\)。与 \\(\\text{Tor}\\) 结果一样。"
+      },
+      {
+        "id": "alg-topo-ch06-q14",
+        "question": "\\(\\text{Tor}\\) 和 \\(\\text{Ext}\\) 的直觉关系？",
+        "options": [
+          "\\(\\text{Tor}\\) 衡量张量积的\"缺陷\"（左导出函子），\\(\\text{Ext}\\) 衡量 Hom 的\"缺陷\"（右导出函子）",
+        "\\(\\text{Tor} = \\text{Ext}\\)",
+        "无关系",
+        "A（\\(\\text{Tor}_n\\) = \\(n\\) 次左导出 \\(\\otimes\\), \\(\\text{Ext}^n\\) = \\(n\\) 次右导出 \\(\\text{Hom}\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{Tor}_n(A, B)\\) = 对 \\(A\\) 取投射解析 \\(\\to\\) 张量 \\(B\\) \\(\\to\\) 取同调。\\(\\text{Ext}^n(A, B)\\) = 对 \\(A\\) 取投射解析 \\(\\to\\) 应用 \\(\\text{Hom}(-, B)\\) \\(\\to\\) 取上同调。\\(\\text{Tor}_0 = \\otimes\\), \\(\\text{Ext}^0 = \\text{Hom}\\)。高阶项测量\"非正合\"程度。在同调代数和代数拓扑（万有系数定理）中核心。"
+      },
+      {
+        "id": "alg-topo-ch06-q15",
+        "question": "\\(\\mathbb{Z}/2 \\otimes_\\mathbb{Z} \\mathbb{Q} = ?\\)",
+        "options": [
+          "\\(\\mathbb{Q}/2\\mathbb{Q} = 0\\)",
+        "\\(\\mathbb{Z}/2\\)",
+        "\\(\\mathbb{Q}\\)",
+        "\\(\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}/2 \\otimes \\mathbb{Q}\\)：\\(1 \\otimes q = 1 \\otimes 2 \\cdot (q/2) = (2 \\cdot 1) \\otimes (q/2) = 0 \\otimes (q/2) = 0\\)。所以所有元素为零。\\(\\mathbb{Z}/n \\otimes \\mathbb{Q} = 0\\)（有限挠群张量 \\(\\mathbb{Q}\\) 总为零）。推论：\\(H_n(X; \\mathbb{Q}) = H_n(X; \\mathbb{Z}) \\otimes \\mathbb{Q}\\) 消去了所有挠信息。"
+      },
+      {
+        "id": "alg-topo-ch06-q16",
+        "question": "蛇引理中连接映射 \\(\\delta\\) 的构造（图追踪）？",
+        "options": [
+          "取 \\(c \\in \\ker(\\gamma)\\), 提升到 \\(b' \\in B'\\)（\\(g'\\) 满射），\\(\\beta(b') \\in B\\), \\(g(\\beta(b')) = \\gamma g'(b') = 0\\), 所以 \\(\\beta(b') = f(a)\\)（\\(f\\) 单射由正合），\\(\\delta(c) = [a] \\in \\text{coker}(\\alpha)\\)",
+        "直接赋值",
+        "用同构",
+        "A（图追踪是同调代数的核心技术）"
+        ],
+        "answer": 3,
+        "explanation": "步骤：(1) \\(c' \\in \\ker\\gamma \\subseteq C'\\)。(2) \\(g'\\) 满射：\\(\\exists b' \\in B'\\), \\(g'(b') = c'\\)。(3) \\(\\beta(b') \\in B\\)。\\(g(\\beta(b')) = \\gamma(g'(b')) = \\gamma(c') = 0\\)。(4) 正合 \\(\\Rightarrow \\beta(b') \\in \\text{im}(f) = \\ker(g)\\)。\\(\\exists! a \\in A\\), \\(f(a) = \\beta(b')\\)。(5) \\(\\delta(c') = a + \\text{im}(\\alpha) \\in \\text{coker}(\\alpha)\\)。验证良定和正合性需更多图追踪。"
+      },
+      {
+        "id": "alg-topo-ch06-q17",
+        "question": "链同伦等价 (chain homotopy equivalence) \\(f: C_* \\to D_*\\) 意味着什么？",
+        "options": [
+          "存在 \\(g: D_* \\to C_*\\) 使 \\(gf \\simeq \\mathrm{id}_{C_*}\\) 且 \\(fg \\simeq \\mathrm{id}_{D_*}\\)（链同伦）",
+        "\\(f_*: H_n(C) \\xrightarrow{\\cong} H_n(D)\\) 是同构",
+        "A \\(\\Rightarrow\\) B（但反之不然）",
+        "A 和 C"
+        ],
+        "answer": 3,
+        "explanation": "链同伦等价 \\(\\Rightarrow\\) 同调同构（C 中的 \\(\\Rightarrow\\)）。反之 \\(f_*\\) 同构不蕴含链同伦等价（链层面更精细）。但对自由链复形，拟同构（\\(f_*\\) 同构）\\(\\Leftrightarrow\\) 链同伦等价（当 \\(C, D\\) 是自由且有界时——模型范畴思想）。"
+      },
+      {
+        "id": "alg-topo-ch06-q18",
+        "question": "投射模 \\(P\\) 的等价定义？",
+        "options": [
+          "对满射 \\(B \\to C\\)，\\(\\text{Hom}(P, B) \\to \\text{Hom}(P, C)\\) 满射",
+        "\\(P\\) 是自由模的直和项",
+        "\\(\\text{Ext}^1(P, -) = 0\\)",
+        "全部等价（对 \\(\\mathbb{Z}\\)-模，投射 \\(\\iff\\) 自由）"
+        ],
+        "answer": 3,
+        "explanation": "(A) 提升性质（定义）。(B) \\(P \\oplus Q \\cong F\\)（自由模）。(C) 导出函子为零。三者等价。对 PID（如 \\(\\mathbb{Z}\\)）：投射 \\(\\iff\\) 自由（子模基定理）。对一般环：投射 \\(\\neq\\) 自由（如 \\(\\mathbb{Z}/6 \\cong \\mathbb{Z}/2 \\oplus \\mathbb{Z}/3\\)，每个直和项是投射但不自由的 \\(\\mathbb{Z}/6\\)-模）。"
+      },
+      {
+        "id": "alg-topo-ch06-q19",
+        "question": "\\(\\text{Tor}_1(\\mathbb{Z}/2, \\mathbb{Z}/2) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/2\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/4\\)"
+        ],
+        "answer": 0,
+        "explanation": "解析 \\(\\mathbb{Z}/2\\)：\\(0 \\to \\mathbb{Z} \\xrightarrow{2} \\mathbb{Z} \\to \\mathbb{Z}/2 \\to 0\\)。张量 \\(\\mathbb{Z}/2\\)：\\(\\mathbb{Z}/2 \\xrightarrow{2} \\mathbb{Z}/2\\)。\\(\\ker(\\times 2: \\mathbb{Z}/2 \\to \\mathbb{Z}/2) = \\mathbb{Z}/2\\)（因为 \\(2 \\cdot 1 = 0\\)）。\\(\\text{Tor}_1(\\mathbb{Z}/2, \\mathbb{Z}/2) = \\mathbb{Z}/2\\)。一般 \\(\\text{Tor}(\\mathbb{Z}/m, \\mathbb{Z}/n) = \\mathbb{Z}/\\gcd(m,n)\\)，\\(\\gcd(2,2) = 2\\) ✓。"
+      },
+      {
+        "id": "alg-topo-ch06-q20",
+        "question": "万有系数定理为什么有 Tor/Ext 修正项？",
+        "options": [
+          "因为 \\(\\otimes\\) 和 \\(\\text{Hom}\\) 不是正合函子（只是右/左正合），高阶导出函子补偿\"损失\"",
+        "因为空间有挠",
+        "A 是代数原因，B 是几何体现",
+        "C"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\otimes_\\mathbb{Z}\\) 右正合但不左正合：\\(0 \\to A \\to B\\) 张量后 \\(A \\otimes G \\to B \\otimes G\\) 可能不单射。\\(\\text{Tor}_1\\) 衡量单射性的\"缺陷\"。几何上：\\(H_1(\\mathbb{RP}^2) = \\mathbb{Z}/2\\)（挠），\\(H_1(\\mathbb{RP}^2; \\mathbb{Z}/2) = \\mathbb{Z}/2 \\oplus \\mathbb{Z}/2\\)（Tor 项增加一个 \\(\\mathbb{Z}/2\\)）。挠同调类和系数群的相互作用产生修正。"
+      },
+      {
+        "id": "alg-topo-ch06-q21",
+        "question": "Künneth 公式应用：\\(H_2(S^1 \\times S^1; \\mathbb{Z}) = ?\\)",
+        "options": [
+          "\\(H_0 \\otimes H_2 \\oplus H_1 \\otimes H_1 \\oplus H_2 \\otimes H_0 = 0 \\oplus \\mathbb{Z} \\oplus 0 = \\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^2\\)",
+        "\\(0\\)",
+        "A（Tor = 0 因为 \\(H_*(S^1)\\) 无挠）"
+        ],
+        "answer": 3,
+        "explanation": "\\(H_*(S^1) = (\\mathbb{Z}, \\mathbb{Z}, 0, \\ldots)\\)。\\(H_2(S^1 \\times S^1) = \\bigoplus_{i+j=2} H_i \\otimes H_j = (H_0 \\otimes H_2) \\oplus (H_1 \\otimes H_1) \\oplus (H_2 \\otimes H_0) = 0 \\oplus (\\mathbb{Z} \\otimes \\mathbb{Z}) \\oplus 0 = \\mathbb{Z}\\)。\\(T^2\\) 一个封闭腔 ✓。Tor = 0（所有 \\(H_*\\) 自由）。"
+      },
+      {
+        "id": "alg-topo-ch06-q22",
+        "question": "导出范畴 (derived category) 的基本思想？",
+        "options": [
+          "把链复形的拟同构（诱导同调同构的链映射）\"反转\"为同构",
+        "链复形模链同伦",
+        "A（形式化地：\\(D(R) = K(R)[\\text{quasi-iso}^{-1}]\\)——链复形同伦范畴关于拟同构的局部化）",
+        "与同调无关"
+        ],
+        "answer": 2,
+        "explanation": "导出范畴的对象 = 链复形，态射 = \"屋顶\"（通过拟同构的逆连接）。在 \\(D(R)\\) 中拟同构变成真正的同构。导出函子（\\(\\text{Tor}, \\text{Ext}\\), \\(L\\otimes, R\\text{Hom}\\)）在导出范畴中自然定义。现代同调代数和代数几何的基础语言（Grothendieck, Verdier）。"
+      },
+      {
+        "id": "alg-topo-ch06-q23",
+        "question": "内射模 \\(I\\) 的定义？\\(\\mathbb{Z}\\)-模中哪个是内射模？",
+        "options": [
+          "对单射 \\(A \\to B\\)，\\(\\text{Hom}(B, I) \\to \\text{Hom}(A, I)\\) 满射。\\(\\mathbb{Q}/\\mathbb{Z}\\) 是内射",
+        "所有 \\(\\mathbb{Z}\\)-模都内射",
+        "\\(\\mathbb{Z}\\) 是内射",
+        "A（\\(\\mathbb{Q}\\), \\(\\mathbb{Q}/\\mathbb{Z}\\) 是内射 \\(\\mathbb{Z}\\)-模；\\(\\mathbb{Z}\\) 不是）"
+        ],
+        "answer": 3,
+        "explanation": "内射 = 投射的对偶。\\(\\mathbb{Z}\\) 不内射：\\(\\mathbb{Z} \\hookrightarrow \\mathbb{Q}\\)，\\(\\text{Hom}(\\mathbb{Q}, \\mathbb{Z}) = 0\\) 但 \\(\\text{Hom}(\\mathbb{Z}, \\mathbb{Z}) = \\mathbb{Z} \\neq 0\\)，扩张不成立。\\(\\mathbb{Q}/\\mathbb{Z}\\) 是内射（Baer 判据：\\(\\mathbb{Z}\\)-模 \\(I\\) 内射 \\(\\iff\\) 可除——\\(nI = I\\) 对所有 \\(n \\geq 1\\)）。\\(\\text{Ext}^1(-, I) = 0\\) 对内射 \\(I\\)。"
+      },
+      {
+        "id": "alg-topo-ch06-q24",
+        "question": "自由解析 (free resolution) \\(\\cdots \\to F_2 \\to F_1 \\to F_0 \\to M \\to 0\\)（\\(F_i\\) 自由）在计算 Tor 和 Ext 中的角色？",
+        "options": [
+          "\\(\\text{Tor}_n(M, N)\\) = 对 \\(\\cdots \\to F_1 \\to F_0\\) 张量 \\(N\\) 后的同调",
+        "\\(\\text{Ext}^n(M, N)\\) = 对 \\(\\cdots \\to F_1 \\to F_0\\) 应用 \\(\\text{Hom}(-, N)\\) 后的上同调",
+        "A 和 B",
+        "C（自由解析是\"展开\" \\(M\\) 为自由模的链复形，计算导出函子的标准方法）"
+        ],
+        "answer": 3,
+        "explanation": "(A) \\(\\text{Tor}_n(M, N) = H_n(\\cdots \\to F_1 \\otimes N \\to F_0 \\otimes N)\\)。(B) \\(\\text{Ext}^n(M, N) = H^n(\\text{Hom}(F_0, N) \\to \\text{Hom}(F_1, N) \\to \\cdots)\\)。结果不依赖解析的选择（由链同伦比较定理保证）。\\(\\mathbb{Z}/n\\) 的解析 \\(\\cdots \\to \\mathbb{Z} \\xrightarrow{n} \\mathbb{Z} \\xrightarrow{n} \\mathbb{Z} \\to \\mathbb{Z}/n \\to 0\\) 是标准工具。"
+      },
+      {
+        "id": "alg-topo-ch06-q25",
+        "question": "\\(\\text{Tor}_1(\\mathbb{Z}/6, \\mathbb{Z}/4) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/\\gcd(6,4) = \\mathbb{Z}/2\\)",
+        "\\(\\mathbb{Z}/24\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}/12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Tor}_1(\\mathbb{Z}/m, \\mathbb{Z}/n) = \\mathbb{Z}/\\gcd(m,n)\\)。\\(\\gcd(6,4) = 2\\)。\\(\\text{Tor}_1(\\mathbb{Z}/6, \\mathbb{Z}/4) = \\mathbb{Z}/2\\)。计算：解析 \\(0 \\to \\mathbb{Z} \\xrightarrow{6} \\mathbb{Z} \\to \\mathbb{Z}/6 \\to 0\\)，张量 \\(\\mathbb{Z}/4\\)：\\(\\mathbb{Z}/4 \\xrightarrow{6} \\mathbb{Z}/4\\)。\\(6 \\equiv 2 \\pmod{4}\\), \\(\\ker(\\times 2: \\mathbb{Z}/4 \\to \\mathbb{Z}/4) = \\{0, 2\\} \\cong \\mathbb{Z}/2\\)。"
+      },
+      {
+        "id": "alg-topo-ch06-q26",
+        "question": "在代数几何中，层上同调 \\(H^n(X, \\mathcal{F})\\) 和 Ext 函子的关系？",
+        "options": [
+          "\\(H^n(X, \\mathcal{F}) = \\text{Ext}^n(\\mathcal{O}_X, \\mathcal{F})\\)（\\(\\mathcal{O}_X\\) = 结构层）",
+        "无关系",
+        "\\(H^n = \\text{Tor}_n\\)",
+        "A（层上同调是全局截面函子 \\(\\Gamma\\) 的右导出函子）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\Gamma(X, \\mathcal{F}) = \\text{Hom}(\\mathcal{O}_X, \\mathcal{F})\\)（全局截面）。\\(H^n(X, \\mathcal{F}) = R^n\\Gamma(\\mathcal{F}) = \\text{Ext}^n(\\mathcal{O}_X, \\mathcal{F})\\)。Serre 对偶定理、Riemann-Roch 定理都建立在层上同调之上。同调代数提供了代数几何的核心语言。"
+      },
+      {
+        "id": "alg-topo-ch06-q27",
+        "question": "在计算代数拓扑中，Smith 标准形 (Smith normal form) 用来做什么？",
+        "options": [
+          "计算同调群——将边界映射矩阵化简为 \\(\\text{diag}(d_1, d_2, \\ldots)\\)（\\(d_i | d_{i+1}\\)）",
+        "求矩阵特征值",
+        "解线性方程",
+        "A（\\(H_n \\cong \\mathbb{Z}^{\\beta_n} \\oplus \\bigoplus \\mathbb{Z}/d_i\\), 从 \\(\\partial_n, \\partial_{n+1}\\) 的 Smith 标准形读出）"
+        ],
+        "answer": 3,
+        "explanation": "整数矩阵 \\(\\partial: \\mathbb{Z}^m \\to \\mathbb{Z}^n\\) 的 Smith 标准形 \\(S = U\\partial V\\)（\\(U, V\\) 可逆整数矩阵）, \\(S = \\text{diag}(d_1, \\ldots, d_r, 0, \\ldots)\\)。\\(\\ker\\partial / \\text{im}\\partial_{+1}\\) 的挠和自由部分可以从不变因子 \\(d_i\\) 直接读出。这是同调群计算的算法基础。"
+      },
+      {
+        "id": "alg-topo-ch06-q28",
+        "question": "在同调持续性 (persistent homology) 的计算中，长正合序列用在什么地方？",
+        "options": [
+          "连接不同滤过层次的同调群",
+        "计算出生-死亡对",
+        "相对同调长正合序列分析 \\(H_n(K_\\epsilon, K_\\delta)\\)（\\(\\delta < \\epsilon\\)）",
+        "全部正确"
+        ],
+        "answer": 3,
+        "explanation": "Persistent homology：滤过 \\(K_{\\epsilon_1} \\subseteq K_{\\epsilon_2} \\subseteq \\cdots\\)。包含映射诱导 \\(H_n(K_{\\epsilon_i}) \\to H_n(K_{\\epsilon_j})\\)。相对同调 \\(H_n(K_\\epsilon, K_\\delta)\\) 的长正合序列：\\(\\cdots \\to H_n(K_\\delta) \\to H_n(K_\\epsilon) \\to H_n(K_\\epsilon, K_\\delta) \\to H_{n-1}(K_\\delta) \\to \\cdots\\) 追踪类的出生/死亡。算法实现用 Smith 标准形或持续配对。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="alg-topo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/alg-topo.html" class="module-name">代数拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 正合序列与蛇引理</a></li>
+      <li><a href="#kp2">02 · 五引理与同调代数的基本引理</a></li>
+      <li><a href="#kp3">03 · 同调的系数与 Tor/Ext</a></li>
+      <li><a href="#kp4">04 · 同调在代数拓扑中的综合应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>同调代数工具</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>正合序列与蛇引理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同调代数是代数拓扑的"引擎"——正合序列、蛇引理、五引理等纯 代数工具在同调论中无处不在。蛇引理从短正合序列自动生成长正合 序列中的连接同态——这正是相对同调长正合序列、Mayer-Vietoris 序列中 \(\partial_*\) 的来源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>蛇引理是同调代数的核心引擎——它将短正合序列的"局部信息" 自动组装为长正合序列的"全局信息"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>短正合序列</strong>：\(0 \to A \xrightarrow{f} B \xrightarrow{g} C \to 0\) （\(f\) 单射，\(g\) 满射，\(\mathrm{im}\,f = \ker g\)）。 <strong>链复形的短正合序列</strong>： \(0 \to A_* \xrightarrow{f} B_* \xrightarrow{g} C_* \to 0\)。 <strong>蛇引理</strong>：存在连接同态 \(\partial_*: H_n(C) \to H_{n-1}(A)\)， 使得下列序列正合： \[\cdots \to H_n(A) \xrightarrow{f_*} H_n(B) \xrightarrow{g_*} H_n(C) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\] <strong>构造 \(\partial_*\)</strong>（图追踪）：取 \([c] \in H_n(C)\)，\(c \in Z_n(C)\)。 \(g\) 满射 \(\Rightarrow\) \(\exists b \in B_n\)，\(g(b) = c\)。 \(g(\partial b) = \partial g(b) = \partial c = 0\)， \(\partial b \in \ker g = \mathrm{im}\,f\)，\(\partial b = f(a)\)。 \(f(\partial a) = \partial f(a) = \partial \partial b = 0\)，\(f\) 单射 \(\Rightarrow \partial a = 0\)。 定义 \(\partial_*[c] = [a] \in H_{n-1}(A)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(0 \to \mathbb{Z} \xrightarrow{\times 2} \mathbb{Z} \to \mathbb{Z}/2 \to 0\)。 这是（常值）链复形的短正合序列。对应的长正合序列？ 解答：\(H_0\) = 各群本身（常值复形同调 \(= H_0 =\) 群本身）。 \(\cdots \to H_0(\mathbb{Z}) \xrightarrow{\times 2} H_0(\mathbb{Z}) \to H_0(\mathbb{Z}/2) \to 0\)。 即 \(\mathbb{Z} \xrightarrow{\times 2} \mathbb{Z} \to \mathbb{Z}/2 \to 0\)。 易错点：蛇引理中 \(\partial_*\) 的构造涉及"图追踪"—— 每步选取的 \(b\) 不同，但 \([a]\) 不变（良定义）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">蛇引理的输入是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。从链复形的短正合序列自动生成同调层面的长正合序列。')">A. 长正合序列</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！从链复形的短正合序列自动生成同调层面的长正合序列。')">B. 链复形的短正合序列</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。从链复形的短正合序列自动生成同调层面的长正合序列。')">C. 两个链映射</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。从链复形的短正合序列自动生成同调层面的长正合序列。')">D. 同调群的直和</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>五引理与同调代数的基本引理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>五引理说：在两行正合、列映射大部分是同构的图中，中间列也必须 是同构。这是证明"两种同调理论同构"的标准工具。类似地， 短五引理判断短正合序列是否分裂。这些引理虽然纯代数，但在 代数拓扑中的应用极为频繁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>图追踪 (diagram chasing) 是同调代数的基本方法论——所有基本 引理的证明都归结为在交换图中追踪元素。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>五引理</strong>：交换图 \[\begin{array}{ccccccccc} A_1 & \to & A_2 & \to & A_3 & \to & A_4 & \to & A_5 \\ \downarrow f_1 & & \downarrow f_2 & & \downarrow f_3 & & \downarrow f_4 & & \downarrow f_5 \\ B_1 & \to & B_2 & \to & B_3 & \to & B_4 & \to & B_5 \end{array}\] 两行正合。若 \(f_1, f_2, f_4, f_5\) 是同构，则 \(f_3\) 也是同构。 <strong>证明</strong>（\(f_3\) 单射）：设 \(f_3(a_3) = 0\)。 \(f_4(a_3 \to a_4) = 0\)，\(f_4\) 同构 \(\Rightarrow a_4 = 0\)， 正合性 \(\Rightarrow a_3 \in \mathrm{im}\)。追踪到 \(f_2\) 的满射性， 再利用 \(f_1\) 的满射性得 \(a_3 = 0\)。 （满射类似。） <strong>推论</strong>：若比较两个同调理论的长正合序列，且对 \(A, C\) 已知同构， 则对 \((X,A)\) 也同构——归纳论证。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用五引理说明奇异同调与胞腔同调对 CW 复形同构。 解答（思路）：两种理论都有 \((X^n, X^{n-1})\) 的长正合序列。 对点空间同构已知（维数公理）。对 \((X^n, X^{n-1})\) 同构 （都是自由交换群，由 \(n\)-胞腔计数）。五引理归纳得一般同构。 易错点：五引理需要 \(f_1\) 满射和 \(f_5\) 单射（或两端是同构）， 条件略弱于"全部同构"。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">五引理中，如果只有 \(f_1, f_2, f_4, f_5\) 中三个是同构，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。五引理需要四端映射同构（或更精确地：\\(f_1\\) 满射、\\(f_2\\) 同构、\\(f_4\\) 同构、\\(f_5\\) 单射），方可推出 \\(f_3\\) 同构。')">A. 一定能</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！五引理需要四端映射同构（或更精确地：\\(f_1\\) 满射、\\(f_2\\) 同构、\\(f_4\\) 同构、\\(f_5\\) 单射），方可推出 \\(f_3\\) 同构。')">B. 不一定</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。五引理需要四端映射同构（或更精确地：\\(f_1\\) 满射、\\(f_2\\) 同构、\\(f_4\\) 同构、\\(f_5\\) 单射），方可推出 \\(f_3\\) 同构。')">C. 只有 \(f_2, f_4\) 同构就够</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。五引理需要四端映射同构（或更精确地：\\(f_1\\) 满射、\\(f_2\\) 同构、\\(f_4\\) 同构、\\(f_5\\) 单射），方可推出 \\(f_3\\) 同构。')">D. 需要额外条件</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>同调的系数与 Tor/Ext</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>改变系数（\(\mathbb{Z} \to \mathbb{Z}/p \to \mathbb{Q}\)）如何影响同调？ Tor 和 Ext 精确度量了信息损失。\(\mathrm{Tor}\) 出现在同调的系数变化中， \(\mathrm{Ext}\) 出现在上同调中。理解这两个函子就掌握了同调代数的"修正项"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Tor = 张量积的"左导出函子"（修正张量积不保正合性的缺陷）。 Ext = Hom 的"右导出函子"（修正 Hom 不保正合性的缺陷）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(\mathrm{Tor}_1(A, B)\) 的计算</strong>：取 \(A\) 的自由分解 \(0 \to F_1 \xrightarrow{d} F_0 \to A \to 0\)， \[\mathrm{Tor}_1(A, B) = \ker(d \otimes \mathrm{id}_B) / \mathrm{im}\] 对 \(A = \mathbb{Z}/n\)，分解 \(0 \to \mathbb{Z} \xrightarrow{\times n} \mathbb{Z} \to \mathbb{Z}/n \to 0\)。 \[\mathrm{Tor}_1(\mathbb{Z}/n, B) = \{b \in B : nb = 0\} = B[n]\] <strong>\(\mathrm{Ext}^1(A, B)\) 的计算</strong>： \[\mathrm{Ext}^1(\mathbb{Z}/n, B) = B / nB\] <strong>关键性质</strong>： - 自由模无 Tor：\(\mathrm{Tor}_1(\mathbb{Z}^r, B) = 0\) - 可除群无 Ext：\(\mathrm{Ext}^1(A, \mathbb{Q}) = 0\)（\(A\) 有限生成） - \(\mathrm{Tor}\) 对称：\(\mathrm{Tor}_1(A, B) \cong \mathrm{Tor}_1(B, A)\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(\mathrm{Tor}_1(\mathbb{Z}/6, \mathbb{Z}/4)\)。 解答：\(\mathrm{Tor}_1(\mathbb{Z}/6, \mathbb{Z}/4) = \{x \in \mathbb{Z}/4 : 6x = 0\} = \{x \in \mathbb{Z}/4 : 2x = 0\}\)（因 \(6 \equiv 2 \pmod{4}\)） \(= \{0, 2\} = \mathbb{Z}/2\)。 易错点：\(\mathrm{Tor}_1(\mathbb{Z}/m, \mathbb{Z}/n) = \mathbb{Z}/\gcd(m,n)\) 是通用公式。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{Ext}^1(\mathbb{Z}/2, \mathbb{Z}) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{Ext}^1(\\mathbb{Z}/2, \\mathbb{Z}) = \\mathbb{Z}/2\\mathbb{Z} = \\mathbb{Z}/2\\)。')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{Ext}^1(\\mathbb{Z}/2, \\mathbb{Z}) = \\mathbb{Z}/2\\mathbb{Z} = \\mathbb{Z}/2\\)。')">B. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathrm{Ext}^1(\\mathbb{Z}/2, \\mathbb{Z}) = \\mathbb{Z}/2\\mathbb{Z} = \\mathbb{Z}/2\\)。')">C. \(\mathbb{Z}/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{Ext}^1(\\mathbb{Z}/2, \\mathbb{Z}) = \\mathbb{Z}/2\\mathbb{Z} = \\mathbb{Z}/2\\)。')">D. \(\mathbb{Z}^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>同调在代数拓扑中的综合应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>将前面所有工具组合起来：正合序列、Mayer-Vietoris、万有系数、 Künneth、Poincaré 对偶——用于解决具体的拓扑问题。Euler 特征 的计算、Lefschetz 不动点定理、以及流形的分类都是同调理论的 综合应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同调理论的综合大图：链复形 \(\to\) 同调群 \(\to\) 不变量（Betti 数、 挠、Euler 特征、环结构）\(\to\) 分类与不可能性证明。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Euler 特征</strong>：\(\chi(X) = \sum_{n=0}^{\dim} (-1)^n \beta_n\)， 也等于 \(\sum (-1)^n c_n\)（\(c_n\) = \(n\)-胞腔数，CW 分解）。 \(\chi(S^n) = 1 + (-1)^n\)：\(\chi(S^{2k}) = 2\)，\(\chi(S^{2k+1}) = 0\)。 <strong>Lefschetz 不动点定理</strong>：\(f: X \to X\) 连续，\(X\) 紧多面体。 \(L(f) = \sum_{n} (-1)^n \mathrm{tr}(f_*: H_n(X;\mathbb{Q}) \to H_n(X;\mathbb{Q}))\)。 \[L(f) \neq 0 \Rightarrow f \text{ 有不动点}\] <strong>Brouwer 不动点 = 特例</strong>：\(f: D^n \to D^n\)。\(L(f) = 1 \neq 0\) （\(D^n\) 可缩，\(H_0 = \mathbb{Q}\)，\(f_*|_{H_0} = \mathrm{id}\)，\(L = 1\)）。 <strong>Poincaré-Hopf 定理</strong>（陈述）：闭流形上向量场零点指标之和 \(= \chi(M)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Lefschetz 定理在动力系统中检测周期轨道 - \(\chi(M) \neq 0\) \(\Rightarrow\) \(M\) 上不存在处处不为零的向量场</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: S^2 \to S^2\)，\(\deg(f) = -1\)。\(f\) 有不动点吗？ 解答：\(L(f) = \mathrm{tr}(f_*|_{H_0}) + \mathrm{tr}(f_*|_{H_2}) = 1 + (-1) = 0\)。 Lefschetz 定理不保证不动点。实际上，对径映射 \(x \mapsto -x\) 在 \(S^2\) 上没有不动点，且 \(\deg = -1\)。 但 \(\deg(f) = 2\)：\(L(f) = 1 + 2 = 3 \neq 0\)，必有不动点。 易错点：\(L(f) = 0\) 不意味着没有不动点——只是定理不能判定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\chi(T^2) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(T^2\\)：\\(\\beta_0 = 1\\)，\\(\\beta_1 = 2\\)，\\(\\beta_2 = 1\\)。')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(T^2\\)：\\(\\beta_0 = 1\\)，\\(\\beta_1 = 2\\)，\\(\\beta_2 = 1\\)。')">B. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(T^2\\)：\\(\\beta_0 = 1\\)，\\(\\beta_1 = 2\\)，\\(\\beta_2 = 1\\)。')">C. \(2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(T^2\\)：\\(\\beta_0 = 1\\)，\\(\\beta_1 = 2\\)，\\(\\beta_2 = 1\\)。')">D. \(-2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/geometry/alg-topo.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

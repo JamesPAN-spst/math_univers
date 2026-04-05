@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 插值与逼近 — 数值分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "numerical-ch02-q1",
+        "question": "Lagrange 插值多项式 \\(L_n(x)\\) 过 \\(n+1\\) 个插值节点的次数至多为？",
+        "options": [
+          "\\(n\\)",
+        "\\(n+1\\)",
+        "\\(2n\\)",
+        "\\(n-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_n(x)=\\sum_{i=0}^n y_i\\ell_i(x)\\)，\\(\\ell_i(x)=\\prod_{j\\neq i}\\frac{x-x_j}{x_i-x_j}\\)（次数 \\(n\\)）。\\(n+1\\) 个点唯一确定至多 \\(n\\) 次多项式。唯一性：差 \\(=n\\) 次多项式有 \\(n+1\\) 个零点 → 恒为零。"
+      },
+      {
+        "id": "numerical-ch02-q2",
+        "question": "Runge 现象：用等间距节点做高次多项式插值 \\(f(x)=\\frac{1}{1+25x^2}\\) 在 \\([-1,1]\\) 上会？",
+        "options": [
+          "在端点附近剧烈振荡，误差随次数增加而增大",
+        "一致收敛",
+        "收敛到零",
+        "无影响"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\to\\infty\\) 时 \\(\\max|f-L_n|\\to\\infty\\)（在 \\(|x|>0.726..\\) 处发散）。原因：等间距节点的 Lebesgue 常数 \\(\\Lambda_n\\sim 2^n/n\\) 指数增长。解决方案：Chebyshev 节点（\\(\\Lambda_n\\sim\\ln n\\)）或分段插值。"
+      },
+      {
+        "id": "numerical-ch02-q3",
+        "question": "Newton 插值公式 \\(N_n(x)=\\sum_{k=0}^n [y_0,...,y_k]\\prod_{j=0}^{k-1}(x-x_j)\\) 中，\\([y_0,...,y_k]\\) 是？",
+        "options": [
+          "差商（divided differences）",
+        "差分",
+        "导数",
+        "系数"
+        ],
+        "answer": 0,
+        "explanation": "\\([y_i]=f_i\\)，\\([y_i,y_{i+1}]=\\frac{f_{i+1}-f_i}{x_{i+1}-x_i}\\)，递推 \\([y_i,...,y_{i+k}]=\\frac{[y_{i+1},...,y_{i+k}]-[y_i,...,y_{i+k-1}]}{x_{i+k}-x_i}\\)。Newton 形式等价于 Lagrange 但更便于逐步添加新节点。"
+      },
+      {
+        "id": "numerical-ch02-q4",
+        "question": "三次样条 \\(S(x)\\) 在每个子区间上是三次多项式，在节点处满足？",
+        "options": [
+          "\\(S\\), \\(S'\\), \\(S''\\) 连续（\\(C^2\\) 光滑）",
+        "仅 \\(S\\) 连续",
+        "\\(S,S'\\) 连续",
+        "\\(S'''\\) 连续"
+        ],
+        "answer": 0,
+        "explanation": "\\(n+1\\) 个节点上 \\(n\\) 个区间 → \\(4n\\) 个未知系数。\\(n+1\\) 个插值条件 + \\(3(n-1)\\) 个内部连续性条件（\\(S, S', S''\\)） \\(= 4n-2\\)。还差 2 个 → 端点条件（自然样条 \\(S''=0\\), clamped \\(S'\\) 给定等）。"
+      },
+      {
+        "id": "numerical-ch02-q5",
+        "question": "最小二乘逼近：用 \\(\\phi_0,...,\\phi_m\\) 逼近 \\(f\\)，最小化 \\(\\int_a^b|f-\\sum c_j\\phi_j|^2\\,dx\\)。法方程？",
+        "options": [
+          "\\(Gc=b\\)，\\(G_{ij}=\\langle\\phi_i,\\phi_j\\rangle\\)，\\(b_i=\\langle f,\\phi_i\\rangle\\)（Gram 矩阵）",
+        "\\(c=f\\)",
+        "\\(c=b/G\\)",
+        "无方程"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{\\partial}{\\partial c_k}\\|f-\\sum c_j\\phi_j\\|^2=0\\) → \\(\\sum G_{kj}c_j=b_k\\)。\\(G\\) 对称正定（\\(\\phi\\) 线性无关时）。正交基 → \\(G=I\\) → \\(c_k=\\langle f,\\phi_k\\rangle\\)（Fourier 系数）。法方程的条件数决定数值计算难度。"
+      },
+      {
+        "id": "numerical-ch02-q6",
+        "question": "Chebyshev 节点 \\(x_k=\\cos\\frac{(2k+1)\\pi}{2(n+1)}\\)（\\(k=0,...,n\\)）的几何含义？",
+        "options": [
+          "单位圆上等间距点投影到 \\([-1,1]\\)（端点密集，中间稀疏）",
+        "等间距",
+        "随机",
+        "等比"
+        ],
+        "answer": 0,
+        "explanation": "在端点附近节点密集 → 抑制 Runge 现象。Chebyshev 节点最小化 \\(\\max|\\omega_{n+1}(x)|\\)，\\(\\omega_{n+1}=\\prod(x-x_k)\\)。\\(\\max|\\omega|=2^{-n}\\)（最优）。Lebesgue 常数 \\(\\Lambda_n\\sim\\frac{2}{\\pi}\\ln n+O(1)\\)。"
+      },
+      {
+        "id": "numerical-ch02-q7",
+        "question": "Weierstrass 逼近定理：\\([a,b]\\) 上的连续函数可以被什么一致逼近？",
+        "options": [
+          "多项式",
+        "仅分段线性",
+        "仅三角函数",
+        "仅有理函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\forall\\varepsilon>0\\)，\\(\\exists\\) 多项式 \\(p\\) 使 \\(\\max_{[a,b]}|f-p|<\\varepsilon\\)。构造性证明：Bernstein 多项式 \\(B_n f(x)=\\sum f(k/n)\\binom{n}{k}x^k(1-x)^{n-k}\\to f\\) 一致。但 Bernstein 逼近速率慢（\\(O(1/\\sqrt{n})\\)），实用中用插值或最佳逼近。"
+      },
+      {
+        "id": "numerical-ch02-q8",
+        "question": "插值余项：\\(f(x)-L_n(x)=\\frac{f^{(n+1)}(\\xi)}{(n+1)!}\\omega_{n+1}(x)\\)，\\(\\omega_{n+1}=\\prod(x-x_i)\\)。误差由什么控制？",
+        "options": [
+          "\\(f^{(n+1)}\\) 的大小和 \\(\\omega_{n+1}\\) 的大小",
+        "仅节点数",
+        "仅 \\(f\\) 的值",
+        "仅 \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|f-L_n|\\leq\\frac{\\|f^{(n+1)}\\|_\\infty}{(n+1)!}\\|\\omega_{n+1}\\|_\\infty\\)。减小误差：① 选好节点使 \\(\\|\\omega\\|\\) 小（Chebyshev 最优），② 用更多节点（若 \\(f\\) 光滑）。Runge 现象 = \\(\\|f^{(n+1)}\\|\\) 增长过快淹没 \\(1/(n+1)!\\)。"
+      },
+      {
+        "id": "numerical-ch02-q9",
+        "question": "Lebesgue 常数 \\(\\Lambda_n=\\max_x\\sum|\\ell_i(x)|\\) 在插值中的意义？",
+        "options": [
+          "\\(\\|f-L_n f\\|\\leq(1+\\Lambda_n)\\|f-p_n^*\\|\\)（\\(p_n^*\\) 为最佳逼近），\\(\\Lambda_n\\) 放大近最佳→实际误差",
+        "无意义",
+        "\\(\\Lambda_n\\) 越大越好",
+        "\\(\\Lambda_n=1\\) 恒成立"
+        ],
+        "answer": 0,
+        "explanation": "Lebesgue 不等式：插值误差 ≤ \\((1+\\Lambda_n)\\) 倍最佳逼近误差。等间距 \\(\\Lambda_n\\sim 2^n/n\\) → 灾难性。Chebyshev \\(\\Lambda_n\\sim\\frac{2}{\\pi}\\ln n\\) → 近最优。选节点本质上是在控制 \\(\\Lambda_n\\)。"
+      },
+      {
+        "id": "numerical-ch02-q10",
+        "question": "三次自然样条（\\(S''(a)=S''(b)=0\\)）的误差阶？",
+        "options": [
+          "\\(\\|f-S\\|_\\infty=O(h^4)\\)（\\(h\\) 为最大子区间长度，\\(f\\in C^4\\)）",
+        "\\(O(h)\\)",
+        "\\(O(h^2)\\)",
+        "\\(O(h^3)\\)"
+        ],
+        "answer": 0,
+        "explanation": "三次样条 \\(S\\in C^2\\) + 4次误差 → 每个区间上 Taylor 展开后 \\(O(h^4)\\)。且 \\(S\\) 是所有插值曲线中弯曲能量 \\(\\int|S''|^2\\) 最小的（最小曲率性质）。Clamped 样条（给 \\(S'\\) 端点值）也是 \\(O(h^4)\\)。"
+      },
+      {
+        "id": "numerical-ch02-q11",
+        "question": "离散最小二乘拟合 \\(m+1\\) 个基函数到 \\(N\\gg m\\) 个数据点。法方程 \\(A^TAc=A^Ty\\)，\\(A\\) 的大小？",
+        "options": [
+          "\\(A\\) 是 \\(N\\times(m+1)\\)，\\(A^TA\\) 是 \\((m+1)\\times(m+1)\\)",
+        "\\(N\\times N\\)",
+        "\\(m\\times N\\)",
+        "\\(1\\times N\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A_{ij}=\\phi_j(x_i)\\)。\\(A^TA\\) 通常是小矩阵（低维正规方程）。但 \\(\\kappa(A^TA)=\\kappa(A)^2\\) → 用 QR 分解或 SVD 求解更稳定（\\(A=QR\\) → \\(Rc=Q^Ty\\)，条件数 = \\(\\kappa(A)\\)）。"
+      },
+      {
+        "id": "numerical-ch02-q12",
+        "question": "Hermite 插值：要求 \\(H(x_i)=f_i\\) 且 \\(H'(x_i)=f'_i\\)（\\(i=0,...,n\\)）。\\(H\\) 的次数至多？",
+        "options": [
+          "\\(2n+1\\)",
+        "\\(n\\)",
+        "\\(2n\\)",
+        "\\(n+1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(2(n+1)\\) 个条件（值 + 导数） → \\(2n+1\\) 次多项式（\\(2n+2\\) 个系数）。余项 \\(f-H=\\frac{f^{(2n+2)}(\\xi)}{(2n+2)!}\\prod(x-x_i)^2\\)。Hermite 插值是样条的前身——保证一阶连续。"
+      },
+      {
+        "id": "numerical-ch02-q13",
+        "question": "Chebyshev 多项式 \\(T_n(x)=\\cos(n\\arccos x)\\) 的零点给出 Chebyshev 节点。\\(T_n\\) 满足什么递推？",
+        "options": [
+          "\\(T_{n+1}(x)=2xT_n(x)-T_{n-1}(x)\\)，\\(T_0=1\\)，\\(T_1=x\\)",
+        "\\(T_{n+1}=T_n+T_{n-1}\\)",
+        "\\(T_{n+1}=xT_n\\)",
+        "\\(T_{n+1}=T_n^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\cos((n+1)\\theta)=2\\cos\\theta\\cos(n\\theta)-\\cos((n-1)\\theta)\\)（三角恒等式）→ \\(T_{n+1}=2xT_n-T_{n-1}\\)。\\(T_n\\) 是 \\([-1,1]\\) 上首一 \\(n\\) 次多项式中 \\(\\|p\\|_\\infty\\) 最小者：\\(\\|T_n/2^{n-1}\\|_\\infty=2^{1-n}\\)。"
+      },
+      {
+        "id": "numerical-ch02-q14",
+        "question": "分段线性插值的误差阶？",
+        "options": [
+          "\\(O(h^2)\\)（\\(f\\in C^2\\)）",
+        "\\(O(h)\\)",
+        "\\(O(h^3)\\)",
+        "\\(O(h^4)\\)"
+        ],
+        "answer": 0,
+        "explanation": "每个子区间上线性 → \\(|f-S|\\leq\\frac{h^2}{8}\\|f''\\|_\\infty\\)（Taylor 余项）。全局 \\(C^0\\) 但非 \\(C^1\\)。增加光滑性：二次 \\(C^1\\) → \\(O(h^3)\\)，三次样条 \\(C^2\\) → \\(O(h^4)\\)。分段线性简单稳定，是有限元的基础。"
+      },
+      {
+        "id": "numerical-ch02-q15",
+        "question": "Legendre 多项式 \\(\\{P_n\\}\\) 在 \\([-1,1]\\) 上权 \\(w\\equiv 1\\) 下正交。\\(f\\) 的最佳 \\(L^2\\) 逼近 \\(=\\) 截断级数 \\(\\sum_{k=0}^n c_k P_k\\)，\\(c_k=\\)？",
+        "options": [
+          "\\(c_k=\\frac{2k+1}{2}\\int_{-1}^1 f(x)P_k(x)\\,dx\\)",
+        "\\(c_k=f(k)\\)",
+        "\\(c_k=\\int fP_k\\)",
+        "\\(c_k=f(0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle P_m,P_n\\rangle=\\frac{2}{2n+1}\\delta_{mn}\\)。\\(c_k=\\frac{\\langle f,P_k\\rangle}{\\|P_k\\|^2}=\\frac{(2k+1)/2\\int fP_k}{1}\\)。最佳 \\(L^2\\) 逼近是正交投影——在所有 \\(\\leq n\\) 次多项式中 \\(\\|f-p\\|_{L^2}\\) 最小。"
+      },
+      {
+        "id": "numerical-ch02-q16",
+        "question": "B-样条基函数的主要优点？",
+        "options": [
+          "紧支（局部性） + 非负 + 构成 partition of unity + 数值稳定",
+        "全局支撑",
+        "仅适用于等间距",
+        "无优点"
+        ],
+        "answer": 0,
+        "explanation": "\\(B_{i,k}(x)\\) 仅在 \\([x_i, x_{i+k+1}]\\) 非零 → 系数矩阵带状稀疏。de Boor 算法（类 Horner）用 \\(O(k^2)\\) 运算求值。\\(\\sum B_{i,k}=1\\)（partition of unity）→ 凸组合 → 曲线保持在控制点凸包内（几何设计核心）。"
+      },
+      {
+        "id": "numerical-ch02-q17",
+        "question": "Chebyshev 节点使得 \\(\\|\\omega_{n+1}\\|_\\infty\\) 达到最小值 \\(2^{-n}\\)。证明的关键？",
+        "options": [
+          "\\(\\omega_{n+1}=\\prod(x-x_k)=2^{-n}T_{n+1}(x)\\)（\\(T_{n+1}\\) 是 Chebyshev 多项式），且 \\(T_{n+1}\\) 是等振性质的极值多项式",
+        "直接计算",
+        "用 Lagrange 形式",
+        "随机搜索"
+        ],
+        "answer": 0,
+        "explanation": "\\(T_{n+1}\\) 的首一版本 \\(\\tilde T_{n+1}=T_{n+1}/2^n\\)。Chebyshev 定理：\\(\\tilde T_{n+1}\\) 在所有首一 \\((n+1)\\) 次多项式中 \\(\\|\\cdot\\|_\\infty\\) 最小。证明用等振定理（equioscillation）：\\(\\tilde T_{n+1}\\) 在 \\(n+2\\) 点交替取 \\(\\pm 2^{-n}\\)。"
+      },
+      {
+        "id": "numerical-ch02-q18",
+        "question": "重心形式（barycentric form）的 Lagrange 插值：\\(L(x)=\\frac{\\sum w_i f_i/(x-x_i)}{\\sum w_i/(x-x_i)}\\)，\\(w_i=\\)？",
+        "options": [
+          "\\(w_i=1/\\prod_{j\\neq i}(x_i-x_j)\\)（重心权）",
+        "\\(w_i=1\\)",
+        "\\(w_i=x_i\\)",
+        "\\(w_i=f_i\\)"
+        ],
+        "answer": 0,
+        "explanation": "重心形式：\\(O(n)\\) 求值（预计算 \\(w_i\\) 后）。数值稳定（前向稳定）。添加新节点：\\(O(n)\\) 更新所有 \\(w_i\\)。Chebyshev 节点的 \\(w_i\\) 有简单闭合形式：\\(w_i=(-1)^i\\delta_i\\)（\\(\\delta\\) 端点减半）。"
+      },
+      {
+        "id": "numerical-ch02-q19",
+        "question": "Padé 逼近 \\([m/n]\\)：用有理函数 \\(P_m(x)/Q_n(x)\\) 逼近 \\(f\\)，条件 \\(f-P/Q=O(x^{m+n+1})\\)。比多项式逼近的优势？",
+        "options": [
+          "能捕捉奇异性（极点、支切）",
+        "总是更精确",
+        "无优势",
+        "计算更简单"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^x\\) 的 \\([n/n]\\) Padé → \\(A\\) 稳定（有理逼近在 Re \\(z<0\\) 衰减），多项式做不到。\\(\\tan x\\) 有极点 → 多项式逼近差，Padé 自然捕捉极点。线性系统 \\(e^{A\\Delta t}\\) 的有理逼近 → 隐式 ODE 方法。"
+      },
+      {
+        "id": "numerical-ch02-q20",
+        "question": "三次样条的最小曲率性质：在所有经过给定数据点的 \\(C^2\\) 函数中，自然三次样条 \\(S\\) 最小化？",
+        "options": [
+          "\\(\\int_a^b|g''(x)|^2\\,dx\\)（弯曲能量）",
+        "\\(\\int|g'|^2\\)",
+        "\\(\\max|g|\\)",
+        "\\(\\int|g|^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "对任何 \\(g\\in C^2\\) 且 \\(g(x_i)=f_i\\)：\\(\\int|g''|^2=\\int|S''|^2+\\int|(g-S)''|^2+2\\int S''(g-S)''\\)。末项 \\(=0\\)（分部积分 + \\(S'''\\) 常数 + 端点条件）→ \\(\\int|g''|^2\\geq\\int|S''|^2\\)。样条是\"最不弯曲\"的插值。"
+      },
+      {
+        "id": "numerical-ch02-q21",
+        "question": "等间距节点上的 Lebesgue 常数增长率 \\(\\Lambda_n\\sim\\)？",
+        "options": [
+          "\\(\\frac{2^{n+1}}{en\\ln n}\\)（指数增长）",
+        "\\(\\ln n\\)",
+        "\\(n\\)",
+        "常数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Lambda_n\\) 指数增长是 Runge 现象的数学表达。对比：Chebyshev \\(\\sim\\frac{2}{\\pi}\\ln n\\)，Fekete 点 \\(\\sim\\ln^2 n\\)。没有节点集能使 \\(\\Lambda_n\\) 小于 \\(O(\\ln n)\\)——\\(\\frac{2}{\\pi}\\ln n\\) 是下界。"
+      },
+      {
+        "id": "numerical-ch02-q22",
+        "question": "差商 \\([x_0,...,x_n]\\) 和导数的关系：当所有节点合并 \\(x_i\\to a\\) 时？",
+        "options": [
+          "\\([a,a,...,a]=\\frac{f^{(n)}(a)}{n!}\\)",
+        "\\(f(a)\\)",
+        "\\(f'(a)\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n+1\\) 个相同节点的差商 \\(=\\frac{f^{(n)}(a)}{n!}\\)。这建立了差商和 Taylor 系数的联系。混合情况（部分合并）→ Hermite 插值的差商表。Newton 插值统一了 Lagrange 和 Hermite。"
+      },
+      {
+        "id": "numerical-ch02-q23",
+        "question": "最佳一致逼近 \\(p_n^*=\\arg\\min_{p\\in\\mathcal{P}_n}\\|f-p\\|_\\infty\\) 的特征？（Chebyshev 等振定理）",
+        "options": [
+          "\\(f-p_n^*\\) 在至少 \\(n+2\\) 个点上交替取 \\(\\pm\\|f-p_n^*\\|_\\infty\\)",
+        "\\(f-p_n^*=0\\)",
+        "无特征",
+        "\\(f-p_n^*>0\\)"
+        ],
+        "answer": 0,
+        "explanation": "等振（equioscillation）：\\(\\exists x_0<...<x_{n+1}\\) 使 \\(f(x_k)-p_n^*(x_k)=(-1)^k\\sigma\\|f-p_n^*\\|\\)（\\(\\sigma=\\pm 1\\)）。这是充要条件。Remez 算法基于此构造最佳逼近（迭代调整等振点）。"
+      },
+      {
+        "id": "numerical-ch02-q24",
+        "question": "二维张量积插值：\\(n+1\\) 个 \\(x\\) 节点和 \\(m+1\\) 个 \\(y\\) 节点。插值多项式的形式？",
+        "options": [
+          "\\(L(x,y)=\\sum_{i=0}^n\\sum_{j=0}^m f_{ij}\\ell_i(x)\\ell_j(y)\\)（\\((n+1)(m+1)\\) 项）",
+        "\\(nm\\) 项",
+        "\\(n+m\\) 项",
+        "单个多项式"
+        ],
+        "answer": 0,
+        "explanation": "张量积结构使二维插值分解为两个一维问题：先对 \\(x\\) 插值（固定 \\(y_j\\)），再对 \\(y\\) 插值结果。\\((n+1)(m+1)\\) 个数据点，多项式在 \\(x\\) 中 \\(\\leq n\\) 次，\\(y\\) 中 \\(\\leq m\\) 次。总次数 \\(\\leq n+m\\)。"
+      },
+      {
+        "id": "numerical-ch02-q25",
+        "question": "Not-a-knot 样条条件的作用？",
+        "options": [
+          "在第一个和最后一个内部节点处要求 \\(S'''\\) 连续 → 消除两个自由度，无需端点导数信息",
+        "\\(S=0\\) 在端点",
+        "\\(S'=0\\)",
+        "\\(S''=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "not-a-knot：第一个和最后一个内节点不是真正的\"结\"——\\(S\\) 在那里是同一个三次多项式（\\(S'''\\) 连续 → 4阶连续）。比自然样条\\(（S''=0\\)）端点处更准确（后者在端点引入人为约束）。MATLAB 的 `spline` 默认使用 not-a-knot。"
+      },
+      {
+        "id": "numerical-ch02-q26",
+        "question": "计算机字体渲染中，字形轮廓用什么数学工具描述？",
+        "options": [
+          "Bézier 曲线（TrueType 用二次，PostScript/OpenType 用三次）",
+        "Lagrange 插值",
+        "Taylor 展开",
+        "Fourier 级数"
+        ],
+        "answer": 0,
+        "explanation": "Bézier 曲线 \\(B(t)=\\sum P_i B_{i,n}(t)\\)（Bernstein 基），\\(t\\in[0,1]\\)。三次 Bézier = 4个控制点 → 直观几何操作。光栅化：de Casteljau 算法细分到像素级。字体缩放不失真（矢量图形的核心优势）。"
+      },
+      {
+        "id": "numerical-ch02-q27",
+        "question": "实验数据拟合中，过拟合（overfitting）的信号？以及如何避免？",
+        "options": [
+          "拟合曲线在数据点间剧烈振荡；用交叉验证选择模型复杂度或添加正则化",
+        "拟合完美 = 无问题",
+        "不存在过拟合",
+        "增加基函数始终有利"
+        ],
+        "answer": 0,
+        "explanation": "\\(N\\) 个数据点用 \\(N-1\\) 次多项式精确插值 → 数据之间可能极端振荡。最小二乘用 \\(m\\ll N\\) 个基函数避免过拟合。信息准则（AIC/BIC）或交叉验证平衡偏差-方差。正则化（Tikhonov）→ \\(\\min\\|Ac-y\\|^2+\\lambda\\|c\\|^2\\)。"
+      },
+      {
+        "id": "numerical-ch02-q28",
+        "question": "气象学中全球天气模型用球谐函数（球面 Chebyshev）展开而非等间距网格插值，因为？",
+        "options": [
+          "球面上等间距网格不存在（极点奇异性），球谐函数是球面 Laplacian 的特征函数 → 谱方法指数收敛",
+        "等间距更好",
+        "计算更简单",
+        "球谐函数不需要"
+        ],
+        "answer": 0,
+        "explanation": "球坐标经纬线在极点聚合 → CFL 条件限制极点附近时间步。球谐函数 \\(Y_l^m(\\theta,\\phi)\\) 分离变量 → 谱变换（FFT 在 \\(\\phi\\) + Legendre 在 \\(\\theta\\)）。ECMWF 的 IFS 模型用 \\(\\sim T_{1279}\\)（约 16km 分辨率）球谐截断。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="numerical"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/numerical.html" class="module-name">数值分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Lagrange 插值与 Newton 插值</a></li>
+      <li><a href="#kp2">02 · Runge 现象与 Chebyshev 节点</a></li>
+      <li><a href="#kp3">03 · 分段插值与样条</a></li>
+      <li><a href="#kp4">04 · 最佳逼近与最小二乘</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>插值与逼近</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Lagrange 插值与 Newton 插值</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定 \(n+1\) 个数据点 \((x_i, y_i)\)，如何找到过这些点的多项式？ 多项式插值是数据拟合、数值微分、数值积分的基础工具。 Lagrange 形式直接写出答案，Newton 形式便于递推添加新点。 理解插值误差是控制精度的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>插值是在多项式空间 \(\mathcal{P}_n\) 中求解线性方程组 \(p(x_i) = y_i\)。Vandermonde 矩阵的非奇异性（节点互不相同时） 保证了 \(n\) 次插值多项式的存在唯一性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Lagrange 插值公式</strong>：\(p(x) = \sum_{i=0}^n y_i L_i(x)\)，其中 \[L_i(x) = \prod_{j \neq i}\frac{x - x_j}{x_i - x_j}\] \(L_i(x_j) = \delta_{ij}\)，保证精确过点。 <strong>Newton 差商形式</strong>：\(p(x) = f[x_0] + f[x_0,x_1](x-x_0) + \cdots + f[x_0,\ldots,x_n]\prod_{k=0}^{n-1}(x-x_k)\)。 差商递推：\(f[x_i,\ldots,x_{i+k}] = \frac{f[x_{i+1},\ldots,x_{i+k}]-f[x_i,\ldots,x_{i+k-1}]}{x_{i+k}-x_i}\)。 <strong>插值误差</strong>：设 \(f \in C^{n+1}\)，则 \[f(x) - p(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}\prod_{i=0}^n(x-x_i) = \frac{f^{(n+1)}(\xi)}{(n+1)!}\omega_{n+1}(x)\] 其中 \(\xi \in [\min x_i, \max x_i]\)。误差由节点多项式 \(\omega_{n+1}(x)\) 和导数上界控制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 数值积分公式（Newton-Cotes）是先插值再积分 - 有限差分格式的推导基于局部多项式插值</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Lagrange 插值求过 \((0,1),(1,3),(2,7)\) 的二次多项式。 解答：\(L_0 = \frac{(x-1)(x-2)}{(0-1)(0-2)} = \frac{(x-1)(x-2)}{2}\)， \(L_1 = \frac{x(x-2)}{1\cdot(-1)} = -x(x-2)\)， \(L_2 = \frac{x(x-1)}{2\cdot1} = \frac{x(x-1)}{2}\)。 \(p(x) = 1\cdot L_0 + 3\cdot L_1 + 7\cdot L_2 = x^2 + x + 1\)。 验证：\(p(0)=1\)，\(p(1)=3\)，\(p(2)=7\)。✓ 易错点：高次多项式插值可能出现 Runge 现象（节点间剧烈振荡）， 等距节点尤其危险。应使用 Chebyshev 节点或分段插值。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(n+1\) 个互不相同的节点确定的插值多项式的最高次数是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(n+1\\) 个条件确定 \\(n\\) 次多项式（\\(n+1\\) 个未知系数），')">A. \(n+1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(n+1\\) 个条件确定 \\(n\\) 次多项式（\\(n+1\\) 个未知系数），')">B. \(n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(n+1\\) 个条件确定 \\(n\\) 次多项式（\\(n+1\\) 个未知系数），')">C. \(n-1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(n+1\\) 个条件确定 \\(n\\) 次多项式（\\(n+1\\) 个未知系数），')">D. 取决于数据</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Runge 现象与 Chebyshev 节点</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>等距节点高次插值的 Runge 现象（端点附近剧烈震荡）表明 「更多数据不一定更精确」。Chebyshev 节点是节点多项式 \(|\omega_{n+1}(x)|\) 最大值最小化的最优选择，从根本上消除 Runge 现象。这是逼近论中 minimax 思想的经典应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Chebyshev 节点是 \([-1,1]\) 上 Chebyshev 多项式 \(T_{n+1}(x)\) 的 零点。\(T_{n+1}\) 在所有首一 \(n+1\) 次多项式中 \(\|p\|_\infty\) 最小—— 这是等振定理（equioscillation theorem）的推论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Runge 现象</strong>：\(f(x) = 1/(1+25x^2)\) 在 \([-1,1]\) 上等距插值， 误差 \(\max|f-p_n| \to \infty\)（\(n \to \infty\)）。原因：\(\omega_{n+1}\) 在端点附近 呈指数增长。 <strong>Chebyshev 节点</strong>：\(x_k = \cos\frac{(2k+1)\pi}{2(n+1)}\)，\(k=0,1,\ldots,n\)。 它们是 \(T_{n+1}(x) = \cos((n+1)\arccos x)\) 的零点。 <strong>最优性定理</strong>：在所有首一 \(n+1\) 次多项式 \(p\) 中， \[\min_p \max_{x\in[-1,1]}|p(x)| = \frac{1}{2^n} = \max_{x}|T_{n+1}(x)/2^n|\] 用 Chebyshev 节点时 \(\|\omega_{n+1}\|_\infty = 2^{-n}\)， 等距节点时 \(\|\omega_{n+1}\|_\infty\) 随 \(n\) 指数增长。 <strong>误差估计</strong>：\(\|f-p_n\|_\infty \leq \frac{\|f^{(n+1)}\|_\infty}{2^n(n+1)!}\)（Chebyshev 节点）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 谱方法（Chebyshev 谱方法）使用 Chebyshev 节点作为配置点 - 数值积分中的 Clenshaw-Curtis 求积公式基于 Chebyshev 插值</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 \(f(x) = 1/(1+25x^2)\)，比较 \(n = 10\) 时等距节点和 Chebyshev 节点插值的最大误差（估计量级）。 解答：等距节点：Runge 现象导致端点附近误差 \(\approx 1\)（100% 相对误差）。 Chebyshev 节点：\(\|f^{(11)}\| \lesssim C \cdot 25^{5.5}\)， \(\|\omega_{12}\| = 2^{-11}\)，误差 \(\approx 10^{-2}\)（好 2 个数量级）。 易错点：Chebyshev 节点必须映射到计算区间 \([a,b]\)： \(\tilde{x}_k = \frac{a+b}{2} + \frac{b-a}{2}x_k\)。忘记映射会导致节点出界。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">什么是 Runge 现象？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Runge 现象是等距高次插值的固有缺陷，端点处')">A. 高次插值逼近光滑函数时收敛加速</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Runge 现象是等距高次插值的固有缺陷，端点处')">B. 等距节点高次插值在端点附近震荡发散</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Runge 现象是等距高次插值的固有缺陷，端点处')">C. 插值多项式在节点处不精确</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Runge 现象是等距高次插值的固有缺陷，端点处')">D. Chebyshev 节点导致的数值不稳定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>分段插值与样条</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>避免 Runge 现象的实用方法是分段低次插值。三次样条 （cubic spline）兼顾光滑性（\(C^2\) 连续）和低次多项式的稳定性， 是工程和计算机图形学中最广泛使用的插值工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>样条函数是分段多项式的全局优化：在所有 \(C^2\) 插值函数中， 自然三次样条使弯曲能量 \(\int|f''|^2\) 最小——它是变分问题的解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分段线性插值</strong>：每两个相邻节点间用直线连接。 \(C^0\) 连续，\(O(h^2)\) 逼近（\(h\) = 最大节点间距）。 <strong>三次样条</strong>：在每段 \([x_i, x_{i+1}]\) 上 \(S(x)\) 是三次多项式（\(4n\) 个未知数）， 约束： - 插值条件：\(S(x_i) = y_i\)（\(n+1\) 个） - \(C^2\) 连续：\(S\)，\(S'\)，\(S''\) 在内节点连续（\(3(n-1)\) 个） - 总条件 \(n+1+3(n-1) = 4n-2\)，还差 2 个 → 端点条件 <strong>自然样条</strong>：\(S''(x_0) = S''(x_n) = 0\)。 <strong>箝位样条</strong>：\(S'(x_0) = f'(x_0)\)，\(S'(x_n) = f'(x_n)\)。 <strong>最优性定理</strong>：在所有 \(C^2\) 插值函数中，自然三次样条使 \[\int_a^b |f''(x)|^2\,dx\] 最小。证明：\(\int(f''-S'')^2 = \int(f'')^2 - \int(S'')^2 \geq 0\)（利用分部积分和插值条件）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- CAD/CAM 中的曲线曲面设计（B 样条，NURBS） - 动画中的关键帧插值</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对数据 \((0,0),(1,1),(2,0)\) 构造自然三次样条。 解答：两段 \(S_0\)（\([0,1]\)），\(S_1\)（\([1,2]\)）。 设 \(M_i = S''(x_i)\)，自然条件 \(M_0 = M_2 = 0\)。 \(C^2\) 连续给出方程 \(M_0 + 4M_1 + M_2 = 6[(y_2-y_1)-(y_1-y_0)] = 6(-1-1) = -12\)。 \(M_1 = -3\)。 \(S_0(x) = 0 + (1+3/6)x + 0 - (3/6)x^3 = \frac{3}{2}x - \frac{1}{2}x^3\)。 验证：\(S_0(0) = 0\)，\(S_0(1) = 3/2-1/2 = 1\)。✓ 易错点：三次样条的端点条件（自然 vs 箝位 vs 周期）显著影响结果精度。 箝位样条（已知端点导数）精度为 \(O(h^4)\)，自然样条降为 \(O(h^2)\) 在端点附近。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">自然三次样条在所有 \(C^2\) 插值函数中有什么最优性？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。自然三次样条最小化「弯曲能量」\\(\\int|f\\'\\'|^2\\)，')">A. 逼近误差最小</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！自然三次样条最小化「弯曲能量」\\(\\int|f\\'\\'|^2\\)，')">B. \(\int|f''|^2\) 最小</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。自然三次样条最小化「弯曲能量」\\(\\int|f\\'\\'|^2\\)，')">C. 多项式次数最低</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。自然三次样条最小化「弯曲能量」\\(\\int|f\\'\\'|^2\\)，')">D. 计算复杂度最低</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>最佳逼近与最小二乘</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>插值要求过所有数据点，但数据有噪声时这不合理。最小二乘 拟合允许残差，找到最优的逼近函数。从最佳一致逼近（\(L^\infty\)） 到最佳均方逼近（\(L^2\)），不同范数下的最佳逼近理论给出了 逼近能力的理论极限。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>最佳逼近是 Hilbert 空间（\(L^2\)）或一般赋范空间中的 正交投影问题。正规方程 \(A^TAx = A^Tb\) 是投影的矩阵表示。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>最小二乘问题</strong>：给定 \(m\) 个数据点和 \(n\) 个基函数（\(m > n\)）， 找 \(c = (c_1,\ldots,c_n)^T\) 使 \(\|Ac - b\|_2^2\) 最小。 \(A_{ij} = \phi_j(x_i)\)，\(b_i = y_i\)。 <strong>正规方程</strong>：\(\nabla\|Ac-b\|^2 = 2A^T(Ac-b) = 0\)，即 \[A^TAc = A^Tb\] \(A^TA\) 对称正定（当 \(A\) 列满秩时）→ 唯一解 \(c = (A^TA)^{-1}A^Tb\)。 <strong>连续版本</strong>（\(L^2\) 最佳逼近）：在子空间 \(V_n \subset L^2\) 中找 \(p\) 使 \(\|f - p\|_{L^2}\) 最小。解是正交投影： \[\langle f - p, \phi_k\rangle = 0, \quad k=1,\ldots,n\] 若 \(\{\phi_k\}\) 正交（如 Legendre 多项式），\(c_k = \langle f,\phi_k\rangle/\|\phi_k\|^2\)（无需解方程组）。 <strong>Weierstrass 逼近定理</strong>：\([a,b]\) 上的连续函数可被多项式一致逼近。 即 \(\min_{p \in \mathcal{P}_n}\|f - p\|_\infty \to 0\)（\(n \to \infty\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 数据拟合/回归分析的数学基础 - 正交多项式在信号处理中的应用（Legendre、Chebyshev）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用最小二乘拟合直线 \(y = c_0 + c_1 x\) 过数据 \((0,1),(1,2),(2,4),(3,4)\)。 解答：\(A = \begin{pmatrix}1&0\\1&1\\1&2\\1&3\end{pmatrix}\)，\(b = (1,2,4,4)^T\)。 \(A^TA = \begin{pmatrix}4&6\\6&14\end{pmatrix}\)，\(A^Tb = \begin{pmatrix}11\\22\end{pmatrix}\)。 解 \(4c_0+6c_1=11\)，\(6c_0+14c_1=22\) → \(c_0 = 1.1\)，\(c_1 = 1.1\)。 拟合直线 \(y = 1.1 + 1.1x\)。 易错点：正规方程的条件数 \(\kappa(A^TA) = \kappa(A)^2\)， 直接求解可能不稳定。实际应使用 QR 分解求解最小二乘。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">为什么实际中不用正规方程求解最小二乘，而用 QR 分解？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\kappa(A^TA) = \\kappa(A)^2\\)，平方放大条件数。')">A. 正规方程无解</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\kappa(A^TA) = \\kappa(A)^2\\)，平方放大条件数。')">B. \(A^TA\) 的条件数是 \(A\) 的平方，放大舍入误差</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\kappa(A^TA) = \\kappa(A)^2\\)，平方放大条件数。')">C. QR 分解计算量更小</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\kappa(A^TA) = \\kappa(A)^2\\)，平方放大条件数。')">D. 正规方程不保证最小化残差</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/applied/numerical.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 遍历理论初步 — 随机过程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-ch06-q1",
+        "question": "保测变换 \\(T: (\\Omega,\\mathcal{F},\\mu) \\to (\\Omega,\\mathcal{F},\\mu)\\) 的条件？",
+        "options": [
+          "\\(\\mu(T^{-1}A)=\\mu(A)\\)（\\(\\forall A \\in \\mathcal{F}\\)）",
+        "\\(T(A)=A\\)",
+        "\\(\\mu(A)=1\\)",
+        "\\(T\\) 可逆"
+        ],
+        "answer": 0,
+        "explanation": "保测(measure-preserving)：\\(T\\) 的原像保持测度。\\(T\\) 不需可逆。典型例子：\\(T: [0,1) \\to [0,1)\\), \\(Tx=2x \\mod 1\\)（倍增映射），Lebesgue 测度保持。动力系统的基本设定。"
+      },
+      {
+        "id": "stochastic-ch06-q2",
+        "question": "不变集 \\(A\\)（\\(T^{-1}A=A\\)）的含义？",
+        "options": [
+          "\\(T\\) 作用不改变集合的测度结构：\\(x \\in A \\Leftrightarrow Tx \\in A\\)",
+        "\\(T(A)=\\emptyset\\)",
+        "\\(\\mu(A)=0\\)",
+        "\\(A\\) 是全集"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^{-1}A=A\\)：系统在 \\(A\\) 内循环。不变 \\(\\sigma\\)-代数 \\(\\mathcal{I}=\\{A:T^{-1}A=A\\}\\)。遍历性 \\(\\Leftrightarrow\\) \\(\\mathcal{I}\\) 是平凡的（所有不变集测度为 \\(0\\) 或 \\(1\\)）。"
+      },
+      {
+        "id": "stochastic-ch06-q3",
+        "question": "遍历性 (ergodicity) 的定义？",
+        "options": [
+          "所有不变集 \\(A\\)（\\(T^{-1}A=A\\)）满足 \\(\\mu(A)=0\\) 或 \\(\\mu(A)=1\\)",
+        "\\(T\\) 是恒等映射",
+        "\\(T^n x=x\\)（周期性）",
+        "\\(\\mu\\) 是 Lebesgue 测度"
+        ],
+        "answer": 0,
+        "explanation": "遍历 = \"不可约\"：系统不能分解为更小的不变部分。等价于时间平均 \\(=\\) 空间平均（几乎处处）。例：无理旋转 \\(Tx=x+\\alpha \\mod 1\\)（\\(\\alpha\\) 无理数）是遍历的。"
+      },
+      {
+        "id": "stochastic-ch06-q4",
+        "question": "Birkhoff 遍历定理的结论？",
+        "options": [
+          "\\(\\frac{1}{n}\\sum_{k=0}^{n-1}f(T^k x) \\to \\bar{f}(x)\\) a.e.（\\(\\bar{f}\\) 是不变函数）",
+        "\\(\\sum f(T^k x)\\) 收敛",
+        "\\(f(T^n x) \\to 0\\)",
+        "时间平均不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(f \\in L^1(\\mu)\\)，保测变换 \\(T\\)。时间平均 \\(\\bar{f}(x)=\\lim \\frac{1}{n}\\sum f(T^k x)\\) 几乎处处存在，且 \\(\\bar{f}\\) 是 \\(T\\)-不变的。遍历时 \\(\\bar{f}=\\int f d\\mu\\)（常数）。"
+      },
+      {
+        "id": "stochastic-ch06-q5",
+        "question": "遍历系统中 \\(\\frac{1}{n}\\sum_{k=0}^{n-1}f(T^k x) \\to\\)？",
+        "options": [
+          "\\(\\int f \\, d\\mu\\)（空间平均，对 a.e. \\(x\\)）",
+        "\\(f(x)\\)",
+        "\\(0\\)",
+        "\\(f(T^n x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "遍历性使 \\(\\bar{f}\\) 必为常数（不变函数 + 不变集平凡）。该常数 \\(= \\int \\bar{f}\\,d\\mu = \\int f\\,d\\mu\\)。\"时间平均 = 空间平均\"是遍历论的核心。统计物理的理论基础。"
+      },
+      {
+        "id": "stochastic-ch06-q6",
+        "question": "混合 (mixing) 比遍历性更强的地方？",
+        "options": [
+          "\\(\\lim_{n \\to \\infty}\\mu(A \\cap T^{-n}B)=\\mu(A)\\mu(B)\\)（渐近独立）",
+        "\\(\\mu(A \\cap T^{-1}B)=\\mu(A)\\mu(B)\\)",
+        "仅适用于有限空间",
+        "等价于遍历性"
+        ],
+        "answer": 0,
+        "explanation": "混合：远期事件 \\(T^{-n}B\\) 与当前 \\(A\\) 渐近独立。蕴含遍历（取 \\(A=B\\) 不变集）。强混合 \\(\\Rightarrow\\) 弱混合 \\(\\Rightarrow\\) 遍历。例：\\(Tx=2x \\mod 1\\) 是混合的，无理旋转遍历但不混合。"
+      },
+      {
+        "id": "stochastic-ch06-q7",
+        "question": "MCMC 中遍历定理的应用？",
+        "options": [
+          "\\(\\frac{1}{n}\\sum f(X_k) \\to E_\\pi[f]\\) a.s.（沿 Markov 链的经验平均趋于目标期望）",
+        "链必须可逆",
+        "只能用 Gibbs 采样",
+        "不需要不可约"
+        ],
+        "answer": 0,
+        "explanation": "不可约非周期正常返链：遍历定理保证 \\(\\frac{1}{n}\\sum f(X_k) \\to \\int f d\\pi\\)。MCMC 依赖此定理：从链的样本估计 \\(E_\\pi[f]\\)。相比独立采样，MCMC 样本相关但渐近无偏。"
+      },
+      {
+        "id": "stochastic-ch06-q8",
+        "question": "\\(Tx=2x \\mod 1\\)（倍增映射）。\\(T\\) 保 Lebesgue 测度吗？",
+        "options": [
+          "是：\\(\\lambda(T^{-1}[a,b])=\\lambda([a,b])\\)",
+        "否",
+        "仅保有理点",
+        "需额外条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^{-1}[a,b]=[a/2,b/2] \\cup [(a+1)/2,(b+1)/2]\\)。\\(\\lambda=\\frac{b-a}{2}+\\frac{b-a}{2}=b-a\\) ✓。倍增映射：混合、遍历、Bernoulli（同构于独立掷币）。与二进制展开相关。"
+      },
+      {
+        "id": "stochastic-ch06-q9",
+        "question": "无理旋转 \\(T_\\alpha x=x+\\alpha \\mod 1\\)（\\(\\alpha\\) 无理）。轨道 \\(\\{T_\\alpha^n x\\}\\) 的 Weyl 定理？",
+        "options": [
+          "轨道在 \\([0,1)\\) 上等分布：\\(\\frac{\\#\\{k<n: T^k x \\in [a,b]\\}}{n} \\to b-a\\)",
+        "轨道是周期的",
+        "轨道集中在某一点",
+        "Weyl 定理仅适用于有理 \\(\\alpha\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\alpha\\) 无理 ⟹ \\(T_\\alpha\\) 遍历（不变集平凡）。Birkhoff 定理 + \\(f=\\mathbf{1}_{[a,b]}\\)：时间平均 \\(\\to \\int \\mathbf{1}_{[a,b]}d\\lambda=b-a\\)。Weyl 等分布定理。\\(\\alpha\\) 有理时轨道周期——不遍历。"
+      },
+      {
+        "id": "stochastic-ch06-q10",
+        "question": "弱混合的等价条件（Cesàro 意义下）？",
+        "options": [
+          "\\(\\frac{1}{n}\\sum_{k=0}^{n-1}|\\mu(A \\cap T^{-k}B)-\\mu(A)\\mu(B)| \\to 0\\)",
+        "\\(\\mu(A \\cap T^{-k}B)=\\mu(A)\\mu(B)\\) 对所有 \\(k\\)",
+        "\\(\\mu(A \\cap T^{-k}B) \\to 0\\)",
+        "\\(\\mu(A)=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "弱混合：平均意义下渐近独立（允许个别项偏差）。强混合：逐项趋于 \\(\\mu(A)\\mu(B)\\)（更强）。弱混合 ⟺ \\(T \\times T\\) 遍历。无理旋转是遍历但非弱混合。"
+      },
+      {
+        "id": "stochastic-ch06-q11",
+        "question": "混合速率 (rate of mixing) 衡量什么？",
+        "options": [
+          "\\(|\\mu(A \\cap T^{-n}B)-\\mu(A)\\mu(B)|\\) 趋于 \\(0\\) 的速度",
+        "轨道密度",
+        "不变测度的数目",
+        "映射的周期"
+        ],
+        "answer": 0,
+        "explanation": "多项式衰减 vs 指数衰减。Markov 链：由谱间隙决定（\\(\\sim (1-\\gamma)^n\\)）。双曲动力系统（Anosov）：指数混合。慢混合意味着相关性衰减慢，MCMC 效率低。"
+      },
+      {
+        "id": "stochastic-ch06-q12",
+        "question": "Metropolis-Hastings 链满足遍历定理的三个条件？",
+        "options": [
+          "不可约 + 非周期 + 正常返（平稳分布存在）",
+        "仅不可约",
+        "仅非周期",
+        "无需条件"
+        ],
+        "answer": 0,
+        "explanation": "不可约+非周期+正常返 ⟹ 遍历（\\(P^n(x,\\cdot) \\to \\pi\\)）。MH 构造保证细致平衡（\\(\\pi\\) 是平稳分布）。需验证提议分布使链不可约。非周期通常由对角元 \\(P_{ii}>0\\) 保证。"
+      },
+      {
+        "id": "stochastic-ch06-q13",
+        "question": "Poincaré 回归定理的内容？",
+        "options": [
+          "保测变换下，几乎所有点无穷次回到其初始邻域",
+        "所有点精确回到原点",
+        "轨道最终停止",
+        "测度趋于零"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu(A)>0\\) ⟹ \\(\\mu\\)-a.e. \\(x \\in A\\) 满足 \\(T^n x \\in A\\) 对无穷多 \\(n\\)。回归不保证快——回归时间可以非常大（宇宙级）。统计物理中的\"几乎必然回归\"。证明用 \\(\\mu(\\{x \\in A: T^n x \\notin A, \\forall n\\})=0\\)。"
+      },
+      {
+        "id": "stochastic-ch06-q14",
+        "question": "Kac 引理：遍历系统中首次回到集合 \\(A\\) 的平均时间 \\(E[\\tau_A|x \\in A]=\\)？",
+        "options": [
+          "\\(1/\\mu(A)\\)",
+        "\\(\\mu(A)\\)",
+        "\\(1\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tau_A=\\min\\{n \\geq 1:T^n x \\in A\\}\\)。\\(E[\\tau_A|x \\in A]=1/\\mu(A)\\)。\\(A\\) 越小回归越慢。\\(\\mu(A)=0.01\\): 平均 \\(100\\) 步回来。与 Markov 链的 \\(\\pi_i=1/E[\\tau_i]\\) 一致。"
+      },
+      {
+        "id": "stochastic-ch06-q15",
+        "question": "MCMC 有效样本量 (ESS) 的定义？",
+        "options": [
+          "\\(\\text{ESS}=n/(1+2\\sum_{k=1}^\\infty \\rho_k)\\)（\\(\\rho_k\\) 自相关系数）",
+        "\\(\\text{ESS}=n\\)",
+        "\\(\\text{ESS}=n/2\\)",
+        "\\(\\text{ESS}=\\sqrt{n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "MCMC 样本相关，有效样本 \\(<\\) 总样本。\\(\\text{ESS}=n/\\tau_{\\text{int}}\\)（\\(\\tau_{\\text{int}}=1+2\\sum\\rho_k\\) 积分自相关时间）。强混合 ⟹ \\(\\rho_k\\) 快速衰减 ⟹ ESS 高。诊断工具：ESS 过低说明链混合差。"
+      },
+      {
+        "id": "stochastic-ch06-q16",
+        "question": "面包师变换 (baker's map) 的动力学特征？",
+        "options": [
+          "保面积、混合、Bernoulli（最强的随机性）",
+        "保面积但不遍历",
+        "不保面积",
+        "周期映射"
+        ],
+        "answer": 0,
+        "explanation": "面包师变换：水平拉伸 \\(\\times 2\\)，垂直压缩 \\(\\times 1/2\\)，堆叠。保 Lebesgue 测度。Bernoulli 性质（同构于独立抛币序列）⟹ 混合 ⟹ 遍历。Smale马蹄的简化模型。"
+      },
+      {
+        "id": "stochastic-ch06-q17",
+        "question": "Arnold 猫映射 \\(T\\begin{pmatrix}x\\\\y\\end{pmatrix}=\\begin{pmatrix}2&1\\\\1&1\\end{pmatrix}\\begin{pmatrix}x\\\\y\\end{pmatrix} \\mod 1\\)。\\(T\\) 是混合的吗？",
+        "options": [
+          "是（双曲自同构，指数混合）",
+        "否",
+        "仅遍历",
+        "不保测度"
+        ],
+        "answer": 0,
+        "explanation": "矩阵特征值 \\((3\\pm\\sqrt{5})/2\\)：一个 \\(>1\\)（不稳定方向），一个 \\(<1\\)（稳定方向）。双曲 ⟹ 指数混合（相关函数指数衰减）。\\(|\\det|=1\\) 保面积。Anosov 微分同胚的典型例子。"
+      },
+      {
+        "id": "stochastic-ch06-q18",
+        "question": "保测变换的 Koopman 算子 \\(Uf=f \\circ T\\) 在 \\(L^2(\\mu)\\) 上是？",
+        "options": [
+          "等距算子（\\(\\|Uf\\|_2=\\|f\\|_2\\)）",
+        "压缩算子",
+        "自伴算子",
+        "紧算子"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Uf\\|_2^2=\\int|f(Tx)|^2 d\\mu=\\int|f|^2 d\\mu=\\|f\\|_2^2\\)（保测度）。遍历性 ⟺ \\(Uf=f\\) 仅 \\(f=\\)常数。\\(U\\) 的谱分析连接遍历论与泛函分析。\\(T\\) 可逆时 \\(U\\) 酉。"
+      },
+      {
+        "id": "stochastic-ch06-q19",
+        "question": "Birkhoff 遍历定理的证明关键引理？",
+        "options": [
+          "极大遍历引理 (maximal ergodic lemma)：\\(\\int_{\\{\\sup_n S_n f>0\\}}f \\, d\\mu \\geq 0\\)",
+        "Borel-Cantelli",
+        "Doob 收敛",
+        "大数定律"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_n f=\\sum_{k=0}^{n-1}f \\circ T^k\\)。极大引理控制时间平均的涨落。\\(\\{S_n^*>0\\}\\) 上 \\(f\\) 积分非负。由此推出 \\(\\bar{f}\\) 存在 a.e.。然后用不变性证明 \\(\\bar{f}=E[f|\\mathcal{I}]\\)。"
+      },
+      {
+        "id": "stochastic-ch06-q20",
+        "question": "衰减相关函数 \\(C_n(f,g)=\\int (f \\circ T^n)g \\, d\\mu - \\int f \\, d\\mu \\int g \\, d\\mu\\)。混合等价于？",
+        "options": [
+          "\\(C_n(f,g) \\to 0\\)（\\(\\forall f,g \\in L^2\\)）",
+        "\\(C_n(f,g)=0\\)（\\(\\forall n\\)）",
+        "\\(C_n\\) 单调递减",
+        "\\(C_n(f,f)>0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_n \\to 0\\) 对所有 \\(L^2\\) 函数。等价于 \\(U^n \\to P_0\\)（弱算子拓扑，\\(P_0\\) 投影到常数函数）。指数衰减 \\(|C_n| \\leq Ce^{-\\gamma n}\\)：指数混合。双曲系统典型特征。"
+      },
+      {
+        "id": "stochastic-ch06-q21",
+        "question": "entropy（测度论熵 / Kolmogorov-Sinai 熵）衡量什么？",
+        "options": [
+          "动力系统每步产生的信息量（\\(h_\\mu(T)\\)）",
+        "轨道长度",
+        "不变测度的大小",
+        "映射的连续性"
+        ],
+        "answer": 0,
+        "explanation": "\\(h_\\mu(T)=\\sup_P H_\\mu(P|T^{-1}P \\vee ... \\vee T^{-n+1}P)/n\\)（精炼划分的条件熵率）。KS 熵 \\(=0\\)：确定性强（旋转）。\\(>0\\)：系统\"产生随机性\"（混沌）。Shannon 熵的动力学版本。"
+      },
+      {
+        "id": "stochastic-ch06-q22",
+        "question": "Metropolis 链的收敛速率主要由什么决定？",
+        "options": [
+          "转移矩阵（算子）的谱间隙 \\(\\gamma=1-|\\lambda_2|\\)",
+        "状态空间大小",
+        "接受率",
+        "初始分布"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|P^n(x,\\cdot)-\\pi\\|_{TV} \\leq C(1-\\gamma)^n\\)。\\(\\gamma\\) 大（间隙宽）→ 快收敛。调参目标：最大化谱间隙。等价于最小化混合时间 \\(t_{\\text{mix}} \\sim 1/\\gamma\\)。Poincaré 不等式给出 \\(\\gamma\\) 的界。"
+      },
+      {
+        "id": "stochastic-ch06-q23",
+        "question": "遍历分解定理：非遍历但保测的 \\(T\\)，\\(\\mu\\) 可以分解为？",
+        "options": [
+          "遍历测度的积分（凸组合）：\\(\\mu=\\int \\mu_\\omega \\, dP(\\omega)\\)",
+        "有限个遍历测度之和",
+        "Lebesgue 测度",
+        "不可分解"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu\\) 在对不变 \\(\\sigma\\)-代数 \\(\\mathcal{I}\\) 做条件化后得到遍历分量 \\(\\mu_\\omega\\)。每个 \\(\\mu_\\omega\\) 是遍历的。类似混合高斯：整体非遍历 = 各遍历分量的混合。极端点 = 遍历测度（Choquet 定理）。"
+      },
+      {
+        "id": "stochastic-ch06-q24",
+        "question": "\\(Tx=x+\\sqrt{2} \\mod 1\\)。轨道 \\(\\{T^n(0)\\}_{n=0}^\\infty\\) 在 \\([0,1)\\) 中是？",
+        "options": [
+          "稠密且等分布",
+        "最终周期",
+        "趋于不动点",
+        "有限集"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sqrt{2}\\) 无理 ⟹ \\(T\\) 遍历 ⟹ 轨道等分布（Weyl 定理）。\\(\\forall [a,b] \\subset [0,1)\\): \\(\\frac{1}{n}\\#\\{k<n: \\{k\\sqrt{2}\\} \\in [a,b]\\} \\to b-a\\)。Kronecker 定理的推论。"
+      },
+      {
+        "id": "stochastic-ch06-q25",
+        "question": "Hamiltonian Monte Carlo (HMC) 相比 Random Walk MH 的优势？",
+        "options": [
+          "利用梯度信息提议远距离跳转而保持高接受率，谱间隙更大",
+        "不需要计算梯度",
+        "总是比 MH 快",
+        "不需要目标分布可微"
+        ],
+        "answer": 0,
+        "explanation": "HMC 用 Hamiltonian 动力学模拟跳转。辛积分器（leapfrog）保体积 ⟹ 高接受率。\\(d\\) 维时混合时间 \\(O(d^{1/4})\\) vs RW-MH 的 \\(O(d)\\)。NUTS（No-U-Turn Sampler）自适应步数。Stan 软件的核心。"
+      },
+      {
+        "id": "stochastic-ch06-q26",
+        "question": "气体分子速度分布的长时间平均 = Maxwell-Boltzmann 分布（空间平均）。这是什么假设？",
+        "options": [
+          "遍历假设 (ergodic hypothesis)",
+        "中心极限定理",
+        "大数定律",
+        "热力学第三定律"
+        ],
+        "answer": 0,
+        "explanation": "Boltzmann 提出：Hamilton 系统的时间平均 \\(=\\) 微正则系综的相空间平均。Birkhoff 定理部分严格化了此假设。KAM 理论表明某些系统不遍历（可积系统）。遍历假设是统计力学的基础。"
+      },
+      {
+        "id": "stochastic-ch06-q27",
+        "question": "贝叶斯统计中 MCMC 收敛诊断：Gelman-Rubin \\(\\hat{R}\\) 统计量接近 \\(1\\) 说明？",
+        "options": [
+          "多条链的混合良好（链间方差 \\(\\approx\\) 链内方差）",
+        "链未收敛",
+        "只需一条链",
+        "\\(\\hat{R}\\) 越大越好"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat{R}=\\sqrt{\\frac{\\hat{V}}{W}}\\)（\\(\\hat{V}\\): 混合方差，\\(W\\): 链内方差）。\\(\\hat{R} \\approx 1\\)（通常 \\(<1.1\\)）表明多条链探索了同一分布。\\(\\hat{R} \\gg 1\\)：链未充分混合，需更多 burn-in 或改进算法。"
+      },
+      {
+        "id": "stochastic-ch06-q28",
+        "question": "数值模拟中\"时间平均≈空间平均\"被用于？",
+        "options": [
+          "分子动力学模拟：沿轨道计算热力学量（能量、压力等）",
+        "仅理论物理",
+        "无实际用途",
+        "仅适用于离散系统"
+        ],
+        "answer": 0,
+        "explanation": "MD 模拟：解 Hamilton 方程得轨道 \\(\\{q(t),p(t)\\}\\)。时间平均 \\(\\frac{1}{T}\\int_0^T A(q(t))dt\\) 估计系综平均 \\(\\langle A \\rangle\\)。前提：系统遍历。蛋白质折叠、材料科学、药物设计中广泛使用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic.html" class="module-name">随机过程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 保测变换与不变集</a></li>
+      <li><a href="#kp2">02 · 遍历性与 Birkhoff 遍历定理</a></li>
+      <li><a href="#kp3">03 · 混合条件</a></li>
+      <li><a href="#kp4">04 · 应用：MCMC 收敛与强大数定律的推广</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>遍历理论初步</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>保测变换与不变集</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>随机系统多次运行后，「时间平均」和「空间平均」会相等吗？ 这个问题的答案是遍历理论的核心。保测变换和不变集是定义 遍历性的基本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>保测变换是动力系统理论的基础：它描述了系统的时间演化， 而测度的保持意味着系统的统计结构不随时间改变。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>保测变换：\((\Omega, \mathcal{F}, P)\) 上的可测变换 \(T: \Omega \to \Omega\) 称为保测的 iff \(P(T^{-1}(A)) = P(A)\)，\(\forall A \in \mathcal{F}\)。 不变集：\(A \in \mathcal{F}\) 称为 \(T\)-不变的 iff \(T^{-1}(A) = A\)。 不变 \(\sigma\)-代数：\(\mathcal{I} = \{A \in \mathcal{F}: T^{-1}(A) = A\}\)。 \(\mathcal{I}\) 确实是 \(\sigma\)-代数（对补、可列并封闭）。 例子：平移 \(T: \Omega^{\mathbb{Z}} \to \Omega^{\mathbb{Z}}\)， \((T\omega)_n = \omega_{n+1}\)。i.i.d. 序列的联合分布在 平移下保测。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>平稳随机过程的定义就是平移下保测；统计力学中的平衡态是 时间演化的不动点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n\) i.i.d.，\(T(\omega)_n = \omega_{n+1}\)。 证明 \(A = \{\omega: \bar{X}_n(\omega) \to \mu\}\) 是不变集。 解答：\(\bar{X}_n(T\omega) = \frac{1}{n}\sum_{k=1}^{n} X_{k+1}(\omega) \to \mu\) iff \(\bar{X}_n(\omega) \to \mu\)。故 \(T^{-1}(A) = A\)。 易错点：不变集与尾事件的区别：尾事件与前有限项无关， 不变集与平移操作不变。对 i.i.d. 序列两者重合。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">保测变换 \(T\) 满足</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。保测性用原像定义（\\(T^{-1}(A)\\)），不是像 \\(T(A)\\)。')">A. \(P(T(A)) = P(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！保测性用原像定义（\\(T^{-1}(A)\\)），不是像 \\(T(A)\\)。')">B. \(P(T^{-1}(A)) = P(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。保测性用原像定义（\\(T^{-1}(A)\\)），不是像 \\(T(A)\\)。')">C. \(T(A) = A\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>遍历性与 Birkhoff 遍历定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>遍历性是“不可分解”的动力学性质：系统不能被分为两个有意义的 子系统。在此条件下，Birkhoff 遍历定理给出了概率论中最深刻 的结果之一：时间平均 = 空间平均。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>遍历性将 \(\mathcal{I}\) 简化为平凡的 \(\{\emptyset, \Omega\}\)（模零测集）， 使得条件期望 \(E[f|\mathcal{I}]\) 退化为 \(E[f]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>遍历性定义：保测变换 \(T\) 是遍历的 iff \(A \in \mathcal{I} \Rightarrow P(A) = 0 \text{ or } 1\)。 Birkhoff 遍历定理：设 \(T\) 保测，\(f \in L^1\)。则 \[\frac{1}{n}\sum_{k=0}^{n-1} f(T^k \omega) \xrightarrow{a.s.} E[f|\mathcal{I}]\] 若 \(T\) 遍历，则 \(E[f|\mathcal{I}] = E[f]\)（几乎必然），因此 \[\frac{1}{n}\sum_{k=0}^{n-1} f(T^k \omega) \xrightarrow{a.s.} E[f]\] 即“时间平均 = 空间平均”。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Birkhoff 定理推广了强大数定律（i.i.d. 是特殊情形）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n\) 平稳遍历过程，证 \(\frac{1}{n}\sum_{k=0}^{n-1} X_k \to E[X_0]\) a.s. 解答：令 \(f(\omega) = X_0(\omega)\)，\(X_k = f(T^k \omega)\)。 由 Birkhoff 遍历定理 + 遍历性：\(\frac{1}{n}\sum f(T^k\omega) \to E[f]\) a.s. 易错点：Birkhoff 定理不要求独立性，只要求保测和遍历。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Birkhoff 遍历定理是哪个定理的推广？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SLLN 是 Birkhoff 定理在 i.i.d. 序列 + 平移变换下的特例。')">A. 中心极限定理</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！SLLN 是 Birkhoff 定理在 i.i.d. 序列 + 平移变换下的特例。')">B. 强大数定律</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SLLN 是 Birkhoff 定理在 i.i.d. 序列 + 平移变换下的特例。')">C. Borel-Cantelli 引理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>混合条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>遍历性描述了「不可分解」，但混合(mixing)进一步要求「遥远事件 渐近独立」。混合性是比遍历性更强的条件，保证了系统的 “遗忘”能力——过去与未来渐近无关。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>混合定义：\(T\) 是混合的 iff 对所有 \(A, B \in \mathcal{F}\)， \[\lim_{n \to \infty} P(A \cap T^{-n}B) = P(A) P(B)\] 即「\(A\) 和 \(T^{-n}B\) 渐近独立」。 混合 \(\Rightarrow\) 遍历（反之不成立）。 证明：若 \(A \in \mathcal{I}\)，则 \(T^{-n}A = A\)。 \(P(A) = P(A \cap T^{-n}A) \to P(A)^2\)，故 \(P(A) \in \{0,1\}\)。 强混合：\(|P(A \cap T^{-n}B) - P(A)P(B)| \leq \alpha(n)\)， \(\alpha(n) \to 0\)。混合速率 \(\alpha(n)\) 决定了相关性衰减速度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>MCMC 的収敛速度分析直接依赖于混合率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 i.i.d. 序列在平移下是混合的。 解答：对 \(A \in \sigma(X_0, \ldots, X_k)\)，\(B \in \sigma(X_0, \ldots, X_m)\)， \(T^{-n}B \in \sigma(X_n, \ldots, X_{n+m})\)。 当 \(n > k\) 时，\(A\) 与 \(T^{-n}B\) 独立（不同指标）。 故 \(P(A \cap T^{-n}B) = P(A)P(B)\)。 易错点：混合不等于独立。混合是渐近性质，i.i.d. 是极端情形。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">混合性与遍历性的关系是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。混合是比遍历更强的条件。无理旋转是遍历但不混合的例子。')">A. 遍历 \(\Rightarrow\) 混合</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！混合是比遍历更强的条件。无理旋转是遍历但不混合的例子。')">B. 混合 \(\Rightarrow\) 遍历</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。混合是比遍历更强的条件。无理旋转是遍历但不混合的例子。')">C. 两者等价</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>应用：MCMC 收敛与强大数定律的推广</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>MCMC 为什么有效？因为遍历 Markov 链满足 Birkhoff 定理的条件， 时间平均收敛到平稳分布下的期望。这将遍历理论与实际计算 方法联接起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>MCMC 的遍历理论基础： 设 \(\{X_n\}\) 是不可约、非周期、正常返的 Markov 链， 平稳分布为 \(\pi\)。则对任意 \(f \in L^1(\pi)\)， \[\frac{1}{n}\sum_{k=0}^{n-1} f(X_k) \xrightarrow{a.s.} \sum_j f(j) \pi_j = E_\pi[f]\] 这就是 MCMC 的核心保证：运行链足够久后， 样本均值收敛到目标分布下的期望。 与 SLLN 的对比： - SLLN：i.i.d. 样本，\(\bar{X}_n \to E[X]\) - 遍历定理：平稳遍历样本（可相关），同样收敛</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>贝叶斯统计、统计物理、计算生物学中，MCMC 是从复杂分布 采样的标准工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Metropolis-Hastings 采样估计 \(E_\pi[f]\)。 设 \(\pi\) 为难以直接采样的分布。运行 M-H 链得到 \(X_0, \ldots, X_{N-1}\)。 解答：\(\hat{E} = \frac{1}{N}\sum_{k=0}^{N-1} f(X_k)\)。 由遍历定理，\(\hat{E} \to E_\pi[f]\) a.s. 易错点：MCMC 样本不是独立的，故不能直接用 i.i.d. 的 CLT 计算误差棒（需用 batch mean 或 spectral 方法）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">MCMC 样本与 i.i.d. 样本的主要区别</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。MCMC 样本 a.s. 收敛（由遍历定理），但因样本相关，')">A. MCMC 样本不收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！MCMC 样本 a.s. 收敛（由遍历定理），但因样本相关，')">B. MCMC 样本相关，收敛但方差估计更复杂</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。MCMC 样本 a.s. 收敛（由遍历定理），但因样本相关，')">C. MCMC 样本只能依分布收敛</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/probability/stochastic.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

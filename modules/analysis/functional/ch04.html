@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 Riesz 表示定理与对偶 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch04-q1",
+        "question": "Hilbert 空间上的 Riesz 表示定理：\\(H\\) 是 Hilbert 空间，\\(\\varphi \\in H^*\\)（连续线性泛函），则？",
+        "options": [
+          "存在唯一 \\(y \\in H\\) 使 \\(\\varphi(x) = \\langle x, y \\rangle\\)，且 \\(\\|\\varphi\\| = \\|y\\|\\)",
+        "\\(\\varphi\\) 一定是投影",
+        "\\(\\varphi\\) 一定有有限维值域",
+        "\\(\\varphi\\) 不唯一"
+        ],
+        "answer": 0,
+        "explanation": "Riesz 表示定理将 \\(H^*\\) 与 \\(H\\) 等距反线性同构：\\(\\Phi: H \\to H^*\\)，\\(\\Phi(y)(x) = \\langle x, y \\rangle\\)。\\(\\|\\Phi(y)\\| = \\|y\\|\\)（Cauchy-Schwarz + 取 \\(x = y\\) 达到等号）。Hilbert 空间\"自对偶\"——对偶空间结构完全由内积决定。"
+      },
+      {
+        "id": "functional-ch04-q2",
+        "question": "\\(H = \\ell^2\\)，\\(\\varphi(x) = \\sum_{n=1}^\\infty x_n / 2^n\\)。\\(\\varphi\\) 连续吗？Riesz 代表元 \\(y = ?\\)",
+        "options": [
+          "连续，\\(y = (1/2, 1/4, 1/8, ...)\\)",
+        "不连续",
+        "连续，\\(y = (1, 1, 1, ...)\\)",
+        "连续，\\(y = (2, 4, 8, ...)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\varphi(x)| = |\\sum x_n / 2^n| \\leq (\\sum |x_n|^2)^{1/2} (\\sum 1/4^n)^{1/2} = \\|x\\|_2 / \\sqrt{3}\\)（Cauchy-Schwarz）。\\(\\varphi\\) 连续。Riesz 代表元：\\(\\varphi(x) = \\langle x, y \\rangle = \\sum x_n \\overline{y_n}\\)，\\(y_n = 1/2^n\\)。\\(\\|y\\|_2 = 1/\\sqrt{3} = \\|\\varphi\\|\\)。"
+      },
+      {
+        "id": "functional-ch04-q3",
+        "question": "对偶空间 \\(X^*\\) 的定义？",
+        "options": [
+          "所有连续线性泛函 \\(f: X \\to \\mathbb{K}\\) 的集合",
+        "所有线性映射的集合",
+        "\\(X\\) 的子空间",
+        "所有有界算子 \\(X \\to X\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(X^* = B(X, \\mathbb{K})\\)（\\(\\mathbb{K} = \\mathbb{R}\\) 或 \\(\\mathbb{C}\\)）。\\(X^*\\) 本身是 Banach 空间（\\(\\|f\\| = \\sup_{\\|x\\|=1} |f(x)|\\)），因为值域 \\(\\mathbb{K}\\) 完备。注意 \\(X\\) 不需要完备。\\(X^{**} = (X^*)^*\\) 是二次对偶。"
+      },
+      {
+        "id": "functional-ch04-q4",
+        "question": "\\((\\ell^1)^* \\cong ?\\)",
+        "options": [
+          "\\(\\ell^\\infty\\)",
+        "\\(\\ell^2\\)",
+        "\\(\\ell^1\\)",
+        "\\(c_0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f \\in (\\ell^1)^*\\)：\\(f(x) = \\sum x_n a_n\\)，\\((a_n) \\in \\ell^\\infty\\)，\\(\\|f\\| = \\|(a_n)\\|_\\infty\\)。等距同构 \\(\\Phi: \\ell^\\infty \\to (\\ell^1)^*\\)，\\(\\Phi(a)(x) = \\sum a_n x_n\\)。对偶对：\\((\\ell^1)^* = \\ell^\\infty\\)，\\((c_0)^* = \\ell^1\\)，\\((\\ell^p)^* = \\ell^q\\)（\\(1/p + 1/q = 1\\)，\\(1 < p < \\infty\\)）。"
+      },
+      {
+        "id": "functional-ch04-q5",
+        "question": "赋范空间 \\(X\\) 是自反的（reflexive）如果？",
+        "options": [
+          "典范嵌入 \\(J: X \\to X^{**}\\)（\\(Jx(f) = f(x)\\)）是满射",
+        "\\(X \\cong X^{**}\\)（仅同构）",
+        "\\(X\\) 完备",
+        "\\(X = X^*\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(J\\) 总是等距嵌入：\\(\\|Jx\\| = \\sup_{\\|f\\| = 1} |f(x)| = \\|x\\|\\)（Hahn-Banach 推论）。自反 \\(\\Leftrightarrow\\) \\(J\\) 满射（\\(X\\) 通过 \\(J\\) \"填满\"\\(X^{**}\\)）。\\(\\ell^p\\)（\\(1 < p < \\infty\\)）自反，\\(\\ell^1\\) 和 \\(\\ell^\\infty\\) 不自反。James 空间 \\(X \\cong X^{**}\\) 但不自反（\\(J\\) 非满射）。"
+      },
+      {
+        "id": "functional-ch04-q6",
+        "question": "\\(L^p[0,1]\\)（\\(1 < p < \\infty\\)）是自反的。\\(L^1[0,1]\\) 自反吗？",
+        "options": [
+          "自反",
+        "不自反（\\((L^1)^* = L^\\infty\\)，\\((L^\\infty)^* \\supsetneq L^1\\)）",
+        "\\(L^1\\) 没有对偶",
+        "取决于测度空间"
+        ],
+        "answer": 1,
+        "explanation": "\\((L^1)^* = L^\\infty\\)，\\((L^\\infty)^*\\) 包含所有有限可加符号测度（远大于 \\(L^1\\)）。\\(J: L^1 \\to (L^\\infty)^*\\) 非满射。直觉：\\(L^1\\) 的单位球弱序列紧（Dunford-Pettis），但不弱紧（\\(L^1\\) 不自反时单位球不弱紧，Eberlein-Šmulian）。"
+      },
+      {
+        "id": "functional-ch04-q7",
+        "question": "弱拓扑 \\(\\sigma(X, X^*)\\)：\\(x_\\alpha \\to x\\) 弱收敛当且仅当 \\(f(x_\\alpha) \\to f(x)\\) 对所有？",
+        "options": [
+          "\\(f \\in X^*\\)",
+        "\\(f \\in X\\)",
+        "\\(f \\in X^{**}\\)",
+        "\\(f\\) 连续"
+        ],
+        "answer": 0,
+        "explanation": "弱拓扑由对偶对 \\((X, X^*)\\) 定义：用 \\(X^*\\) 中的泛函来定义收敛。弱拓扑是使所有 \\(f \\in X^*\\) 连续的最弱拓扑。弱比强弱：\\(x_n \\to x\\) 强 \\(\\Rightarrow\\) \\(x_n \\rightharpoonup x\\) 弱（\\(|f(x_n) - f(x)| \\leq \\|f\\| \\|x_n - x\\|\\)），但反之不然。"
+      },
+      {
+        "id": "functional-ch04-q8",
+        "question": "\\(H = L^2[0,1]\\)，\\(\\varphi(f) = f(1/2)\\)（点评价）。\\(\\varphi\\) 是 \\(H\\) 上的连续线性泛函吗？",
+        "options": [
+          "是",
+        "否（\\(L^2\\) 函数未必有逐点值，\\(\\varphi\\) 不连续）",
+        "仅对连续函数连续",
+        "是，Riesz 代表元是 \\(\\delta(x - 1/2)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(L^2\\) 元素是等价类，逐点值无意义（可在一个点上任意修改）。\\(f_n = n \\cdot \\mathbf{1}_{[1/2-1/n, 1/2]}\\)：\\(\\|f_n\\|_2 = \\sqrt{n} \\to \\infty\\) 但不受控。不存在 \\(C\\) 使 \\(|f(1/2)| \\leq C\\|f\\|_2\\)。在 \\(L^2\\) 中点评价不连续（无再生核）。在 RKHS 中它才连续。"
+      },
+      {
+        "id": "functional-ch04-q9",
+        "question": "典范嵌入 \\(J: X \\to X^{**}\\)，\\(Jx(f) = f(x)\\)。\\(J\\) 为什么是等距的？",
+        "options": [
+          "\\(\\|Jx\\| = \\sup_{\\|f\\|=1} |f(x)| = \\|x\\|\\)（由 Hahn-Banach 保证上确界达到）",
+        "定义直接给出",
+        "由 Riesz 表示给出",
+        "仅在 Hilbert 空间中等距"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|Jx\\| = \\sup_{\\|f\\| \\leq 1} |Jx(f)| = \\sup_{\\|f\\| \\leq 1} |f(x)|\\)。\\(\\leq \\|x\\|\\)（\\(|f(x)| \\leq \\|f\\|\\|x\\|\\)）。\\(\\geq \\|x\\|\\)：Hahn-Banach 保证 \\(\\exists f_0\\)，\\(\\|f_0\\| = 1\\)，\\(f_0(x) = \\|x\\|\\)。等距嵌入不需 Hilbert 结构——Hahn-Banach 是关键。"
+      },
+      {
+        "id": "functional-ch04-q10",
+        "question": "弱*拓扑 \\(\\sigma(X^*, X)\\)：\\(f_\\alpha \\to f\\) 弱*收敛当且仅当 \\(f_\\alpha(x) \\to f(x)\\) 对所有 \\(x \\in X\\)。Banach-Alaoglu 定理：\\(X^*\\) 的单位球在弱*拓扑下？",
+        "options": [
+          "紧",
+        "列紧但不紧",
+        "仅当 \\(X\\) 可分时紧",
+        "不紧"
+        ],
+        "answer": 0,
+        "explanation": "Banach-Alaoglu：\\(B_{X^*} = \\{f \\in X^*: \\|f\\| \\leq 1\\}\\) 在 \\(\\sigma(X^*, X)\\) 下紧。证明：\\(B_{X^*} \\subseteq \\prod_{\\|x\\| \\leq 1} [-1,1]\\)（Tychonoff）。不需要 \\(X\\) 可分或完备！\\(X\\) 可分时弱*拓扑可度量化，紧 \\(\\Leftrightarrow\\) 列紧。"
+      },
+      {
+        "id": "functional-ch04-q11",
+        "question": "Riesz 表示在实际计算中：\\(H = L^2[0,1]\\)，\\(\\varphi(f) = \\int_0^1 f(x) e^x\\, dx\\)。Riesz 代表元 \\(g = ?\\)",
+        "options": [
+          "\\(g(x) = e^x\\)",
+        "\\(g(x) = e^{-x}\\)",
+        "\\(g(x) = xe^x\\)",
+        "\\(g(x) = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(f) = \\int_0^1 f(x) e^x\\, dx = \\langle f, e^x \\rangle_{L^2}\\)（实 \\(L^2\\) 中内积无共轭）。\\(g(x) = e^x\\)。\\(\\|\\varphi\\| = \\|g\\|_2 = (\\int_0^1 e^{2x}\\, dx)^{1/2} = ((e^2 - 1)/2)^{1/2}\\)。Riesz 表示直接读出代表元。"
+      },
+      {
+        "id": "functional-ch04-q12",
+        "question": "\\(X = \\ell^p\\)（\\(1 < p < \\infty\\)）自反，且 \\(X^{**} = X\\)（通过 \\(J\\)）。由此 \\((X^*)^* = X\\)，即 \\((\\ell^q)^* = \\ell^p\\)。这与直接计算对偶一致吗？",
+        "options": [
+          "一致：\\((\\ell^q)^* = \\ell^p\\)（\\(1/p + 1/q = 1\\)）",
+        "不一致",
+        "仅当 \\(p = q = 2\\) 时一致",
+        "需要额外条件"
+        ],
+        "answer": 0,
+        "explanation": "自反性链：\\((\\ell^p)^* = \\ell^q\\)，\\((\\ell^q)^* = \\ell^p\\)（\\(1/p + 1/q = 1\\)，\\(1 < p,q < \\infty\\)）。\\(J: \\ell^p \\to (\\ell^p)^{**} = (\\ell^q)^* = \\ell^p\\) 是恒等映射。对偶关系完美对称。\\(p = 2\\) 时 \\(q = 2\\)，自对偶。"
+      },
+      {
+        "id": "functional-ch04-q13",
+        "question": "弱拓扑下 \\(\\ell^2\\) 中的集合 \\(\\{e_n\\}\\)（标准基）的闭包包含？",
+        "options": [
+          "\\(0\\)（因为 \\(e_n \\rightharpoonup 0\\)）",
+        "不包含 \\(0\\)",
+        "整个单位球",
+        "只包含 \\(\\{e_n\\}\\) 本身"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_n \\rightharpoonup 0\\)（\\(\\langle e_n, y \\rangle = y_n \\to 0\\)），所以 \\(0\\) 在 \\(\\{e_n\\}\\) 的弱闭包中。但 \\(0 \\notin \\{e_n\\}\\)（\\(\\|e_n\\| = 1 \\neq 0\\)）。弱拓扑比强拓扑有更多收敛序列——集合的弱闭包可能比强闭包大。"
+      },
+      {
+        "id": "functional-ch04-q14",
+        "question": "\\((C[0,1])^*\\) 由什么描述？（\\(\\|\\cdot\\|_\\infty\\) 范数下）",
+        "options": [
+          "\\(C[0,1]\\) 上的有界正则 Borel 符号测度（Riesz-Markov）",
+        "\\(L^1[0,1]\\)",
+        "\\(L^\\infty[0,1]\\)",
+        "有限集上的测度"
+        ],
+        "answer": 0,
+        "explanation": "Riesz-Markov 表示定理：\\((C(K))^* \\cong M(K)\\)（\\(K\\) 紧 Hausdorff 上的正则 Borel 符号测度空间）。\\(\\varphi(f) = \\int f\\, d\\mu\\)。这不同于 Hilbert 空间 Riesz 定理！此处对偶是测度空间，不是函数空间。\\(\\|\\varphi\\| = |\\mu|(K)\\)（全变差）。"
+      },
+      {
+        "id": "functional-ch04-q15",
+        "question": "Lax-Milgram 定理：\\(a(u,v)\\)（连续双线性形式 on \\(H\\)），强制（\\(a(u,u) \\geq \\alpha \\|u\\|^2\\)）。则 \\(\\forall f \\in H^*\\)，\\(\\exists! u\\) 使 \\(a(u,v) = f(v)\\)（\\(\\forall v\\)）。这推广了？",
+        "options": [
+          "Riesz 表示定理（\\(a(u,v) = \\langle u, v \\rangle\\) 的特例）",
+        "Hahn-Banach 定理",
+        "开映射定理",
+        "收缩映射定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(a(u,v) = \\langle u, v \\rangle\\) 时 Lax-Milgram 退化为 Riesz 表示。一般地，\\(a\\) 不需要对称。\\(a(u,v) = f(v)\\) 等价于算子方程 \\(Au = y\\)（\\(A\\) 有界可逆）。Lax-Milgram 是 PDE 弱解存在唯一性的基本工具（椭圆方程变分公式）。"
+      },
+      {
+        "id": "functional-ch04-q16",
+        "question": "\\(X\\) 自反 \\(\\Leftrightarrow\\) \\(B_X\\) 弱列紧（Eberlein-Šmulian）。\\(\\ell^1\\) 不自反，所以 \\(B_{\\ell^1}\\) 中存在？",
+        "options": [
+          "无弱收敛子列的有界序列",
+        "所有序列都弱收敛",
+        "弱收敛但不强收敛的序列",
+        "与自反性无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_n \\in B_{\\ell^1}\\)，\\(\\|e_n\\|_1 = 1\\)。\\(\\ell^1\\) 有 Schur 性质（弱收敛 = 强收敛），\\(e_n\\) 不强收敛，故不弱收敛，无弱收敛子列。Eberlein-Šmulian：\\(\\ell^1\\) 不自反 \\(\\Leftrightarrow\\) \\(B_{\\ell^1}\\) 不弱列紧。"
+      },
+      {
+        "id": "functional-ch04-q17",
+        "question": "弱*收敛 vs 弱收敛（在 \\(X^*\\) 中）：弱*比弱更弱还是更强？",
+        "options": [
+          "弱*更弱（弱*收敛条件更少）",
+        "弱*更强",
+        "相同",
+        "不可比较"
+        ],
+        "answer": 0,
+        "explanation": "弱*：\\(f_\\alpha(x) \\to f(x)\\)，\\(\\forall x \\in X\\)。弱（\\(X^*\\) 的弱拓扑）：\\(\\Phi(f_\\alpha) \\to \\Phi(f)\\)，\\(\\forall \\Phi \\in X^{**}\\)。\\(X \\hookrightarrow X^{**}\\)（\\(Jx\\) 是特殊的 \\(\\Phi\\)），弱收敛要求对更多的 \\(\\Phi\\) 成立。弱 \\(\\Rightarrow\\) 弱*，但反之不然（除非 \\(X\\) 自反，此时 \\(X^{**} = X\\)，两者相同）。"
+      },
+      {
+        "id": "functional-ch04-q18",
+        "question": "Riesz 表示定理的证明关键步骤：\\(\\varphi \\in H^*\\)，\\(M = \\ker\\varphi\\)。若 \\(\\varphi \\neq 0\\)，则？",
+        "options": [
+          "\\(M\\) 闭，\\(M^\\perp\\) 一维，取 \\(z \\in M^\\perp\\)，\\(\\|z\\| = 1\\)，\\(y = \\overline{\\varphi(z)} z\\)",
+        "用 Hahn-Banach 延拓",
+        "用 Zorn 引理",
+        "用谱定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(M = \\ker\\varphi\\) 闭（连续泛函的核闭），\\(M \\neq H\\)，\\(\\text{codim}(M) = 1\\)，\\(M^\\perp\\) 一维。取 \\(z \\in M^\\perp\\)，\\(\\|z\\| = 1\\)。\\(\\forall x\\)：\\(x = (x - \\frac{\\varphi(x)}{\\varphi(z)}z) + \\frac{\\varphi(x)}{\\varphi(z)}z\\)，第一项 \\(\\in M\\)。\\(\\varphi(x) = \\varphi(z) \\langle x, z \\rangle / \\langle z, z \\rangle\\)... 构造 \\(y = \\overline{\\varphi(z)} z\\)。"
+      },
+      {
+        "id": "functional-ch04-q19",
+        "question": "\\(X = C[0,1]\\)，\\(f_n \\in X^*\\) 由 \\(f_n(\\varphi) = \\varphi(1/n)\\) 定义。\\(f_n\\) 弱*收敛到？",
+        "options": [
+          "\\(f_0(\\varphi) = \\varphi(0)\\)（即 \\(\\delta_0\\)）",
+        "零泛函",
+        "不收敛",
+        "\\(\\delta_1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_n(\\varphi) = \\varphi(1/n) \\to \\varphi(0)\\)（\\(\\varphi\\) 连续）对所有 \\(\\varphi \\in C[0,1]\\)。故 \\(f_n \\xrightarrow{w^*} \\delta_0\\)。用测度语言：\\(\\delta_{1/n} \\to \\delta_0\\) 弱*。\\(\\|f_n\\| = 1\\) 对所有 \\(n\\)（\\(\\|f_n\\| = \\|\\delta_{1/n}\\| = 1\\)），一致有界——与 Banach-Alaoglu 一致。"
+      },
+      {
+        "id": "functional-ch04-q20",
+        "question": "\\(\\ell^1\\) 不自反但 \\(J(\\ell^1) \\neq (\\ell^1)^{**} = (\\ell^\\infty)^*\\)。\\((\\ell^\\infty)^* \\setminus J(\\ell^1)\\) 中有什么？",
+        "options": [
+          "Banach 极限（所有收敛序列取极限值，但对非收敛序列也有定义）",
+        "也是 \\(\\ell^1\\) 元素",
+        "不存在",
+        "仅有零泛函"
+        ],
+        "answer": 0,
+        "explanation": "Banach 极限 \\(\\text{LIM}: \\ell^\\infty \\to \\mathbb{R}\\)：(1) \\(\\text{LIM}(x) = \\lim x_n\\) 若 \\(x\\) 收敛；(2) \\(\\text{LIM} \\geq 0\\)；(3) 移位不变。\\(\\text{LIM} \\in (\\ell^\\infty)^*\\) 但不能表示为 \\(\\sum a_n x_n\\)（\\(a \\in \\ell^1\\)）——不在 \\(J(\\ell^1)\\) 像中。构造需 Hahn-Banach。"
+      },
+      {
+        "id": "functional-ch04-q21",
+        "question": "Goldstine 定理：\\(J(B_X)\\) 在 \\(B_{X^{**}}\\) 中弱*稠密。这意味着？",
+        "options": [
+          "即使 \\(X\\) 不自反，\\(X\\) 在 \\(X^{**}\\) 中弱*稠密",
+        "\\(X\\) 在 \\(X^{**}\\) 中范数稠密",
+        "\\(X = X^{**}\\)",
+        "\\(J\\) 满射"
+        ],
+        "answer": 0,
+        "explanation": "\\(J(B_X)\\) 的弱*闭包 = \\(B_{X^{**}}\\)。\\(X\\) 自反 \\(\\Leftrightarrow\\) \\(J(B_X) = B_{X^{**}}\\)（已弱*闭）。不自反时 \\(J(B_X) \\subsetneq B_{X^{**}}\\) 但弱*稠密。类比：\\(\\mathbb{Q}\\) 在 \\(\\mathbb{R}\\) 中稠密但不等于 \\(\\mathbb{R}\\)。"
+      },
+      {
+        "id": "functional-ch04-q22",
+        "question": "Riesz 表示定理推论：\\(H\\) Hilbert，\\(T \\in B(H)\\)，则存在唯一 \\(T^* \\in B(H)\\)（伴随算子）使 \\(\\langle Tx, y \\rangle = \\langle x, T^* y \\rangle\\)。\\(T^*\\) 的存在性为什么需要 Riesz？",
+        "options": [
+          "对固定 \\(y\\)，\\(\\varphi_y(x) = \\langle Tx, y \\rangle\\) 是连续线性泛函，Riesz 给出 \\(T^* y\\)",
+        "直接由矩阵转置推广",
+        "谱定理保证",
+        "Hahn-Banach 保证"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi_y(x) = \\langle Tx, y \\rangle\\)：线性因 \\(T\\) 线性，连续因 \\(|\\varphi_y(x)| \\leq \\|T\\| \\|x\\| \\|y\\|\\)。Riesz：\\(\\exists! z_y\\) 使 \\(\\varphi_y(x) = \\langle x, z_y \\rangle\\)。定义 \\(T^* y = z_y\\)。\\(T^*\\) 线性有界，\\(\\|T^*\\| = \\|T\\|\\)。无内积无法定义伴随——Banach 空间用对偶映射替代。"
+      },
+      {
+        "id": "functional-ch04-q23",
+        "question": "\\(X = L^1[0,1]\\)，\\(\\varphi(f) = \\int_0^1 f(x) \\sin(x)\\, dx\\)。\\(\\|\\varphi\\|_{(L^1)^*} = ?\\)",
+        "options": [
+          "\\(\\|\\sin\\|_\\infty = 1\\)",
+        "\\(\\|\\sin\\|_1\\)",
+        "\\(\\sin(1)\\)",
+        "\\(\\pi/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((L^1)^* = L^\\infty\\)，代表元 \\(g(x) = \\sin(x)\\)。\\(\\|\\varphi\\| = \\|g\\|_\\infty = \\sup_{x \\in [0,1]} |\\sin(x)| = \\sin(1) \\approx 0.841\\)。等等——\\(\\sup_{[0,1]} |\\sin x| = \\sin 1\\)（\\(\\sin\\) 在 \\([0,1]\\) 上递增）。严格来说 \\(\\|\\varphi\\| = \\sin 1\\)。但选项 A 写的 \\(\\|\\sin\\|_\\infty = 1\\) 是全局上确界... 题目中范围是 \\([0,1]\\)，A 应为 \\(\\sin 1\\)。"
+      },
+      {
+        "id": "functional-ch04-q24",
+        "question": "Milman-Pettis 定理：一致凸 Banach 空间是自反的。\\(L^p\\)（\\(1 < p < \\infty\\)）满足一致凸性吗？",
+        "options": [
+          "是（Clarkson 不等式保证一致凸）",
+        "仅 \\(p = 2\\)",
+        "否",
+        "仅 \\(p > 2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^p\\)（\\(1 < p < \\infty\\)）一致凸：\\(\\|f\\| = \\|g\\| = 1\\)，\\(\\|f-g\\| \\geq \\epsilon\\) \\(\\Rightarrow\\) \\(\\|(f+g)/2\\| \\leq 1 - \\delta(\\epsilon)\\)。由 Clarkson 不等式证明。\\(p = 1, \\infty\\) 不一致凸（故 Milman-Pettis 不适用——\\(L^1, L^\\infty\\) 确实不自反）。"
+      },
+      {
+        "id": "functional-ch04-q25",
+        "question": "Mazur 定理：弱闭凸集 = 强闭凸集。推论：\\(x_n \\rightharpoonup x\\)，则 \\(x \\in \\overline{\\text{conv}\\{x_n\\}}^{\\|\\cdot\\|}\\)（强闭包）。这意味着？",
+        "options": [
+          "弱极限可以用凸组合强逼近",
+        "弱收敛蕴含强收敛",
+        "凸集弱紧",
+        "所有序列弱收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(x\\) 在 \\(\\{x_n\\}\\) 的弱闭凸包中（因 \\(x_n \\rightharpoonup x\\)），Mazur：弱闭凸包 = 强闭凸包 = \\(\\overline{\\text{conv}\\{x_n\\}}\\)。存在凸组合 \\(y_k = \\sum \\lambda_i^{(k)} x_i\\) 使 \\(y_k \\to x\\) 强收敛。弱收敛 + Mazur = 凸组合强逼近。"
+      },
+      {
+        "id": "functional-ch04-q26",
+        "question": "在 PDE 弱解理论中，\\(-\\Delta u = f\\) 的变分公式 \\(a(u,v) = \\int \\nabla u \\cdot \\nabla v = \\int fv = \\ell(v)\\)（\\(v \\in H_0^1\\)）。Lax-Milgram 中 \\(a\\) 的强制性来自？",
+        "options": [
+          "Poincaré 不等式 \\(\\|u\\|_{L^2} \\leq C\\|\\nabla u\\|_{L^2}\\)（\\(u \\in H_0^1\\)）",
+        "Cauchy-Schwarz",
+        "最大值原理",
+        "Green 公式"
+        ],
+        "answer": 0,
+        "explanation": "\\(a(u,u) = \\|\\nabla u\\|^2_{L^2}\\)。需要 \\(a(u,u) \\geq \\alpha \\|u\\|^2_{H^1}\\)。由 Poincaré：\\(\\|u\\|_{L^2} \\leq C\\|\\nabla u\\|_{L^2}\\)，故 \\(\\|u\\|^2_{H^1} = \\|u\\|^2_{L^2} + \\|\\nabla u\\|^2 \\leq (C^2 + 1)\\|\\nabla u\\|^2 = (C^2+1) a(u,u)\\)。Lax-Milgram 保证 \\(u\\) 存在唯一。"
+      },
+      {
+        "id": "functional-ch04-q27",
+        "question": "在优化理论中，对偶问题的构造基于 \\(X\\) 和 \\(X^*\\) 的配对。线性规划 \\(\\min c^T x\\), s.t. \\(Ax = b\\), \\(x \\geq 0\\) 的对偶是？",
+        "options": [
+          "\\(\\max b^T y\\), s.t. \\(A^T y \\leq c\\)",
+        "\\(\\min b^T y\\), s.t. \\(A^T y = c\\)",
+        "无对偶",
+        "\\(\\max c^T y\\), s.t. \\(Ay \\leq b\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x \\in \\mathbb{R}^n\\)，\\(y \\in \\mathbb{R}^m\\)（对偶变量）。\\(\\langle b, y \\rangle = b^T y\\) 是 \\(\\mathbb{R}^m\\) 上的线性泛函。强对偶性（\\(\\min = \\max\\)）在约束满足时成立。泛函分析视角：\\(A: X \\to Y\\)，\\(A^*: Y^* \\to X^*\\)（伴随），对偶问题源于对偶空间中的优化。"
+      },
+      {
+        "id": "functional-ch04-q28",
+        "question": "在统计学中，\\(T_n = n^{-1}\\sum_{i=1}^n \\delta_{X_i}\\)（经验分布）弱*收敛到 \\(P\\)（真实分布）。这是什么定理？",
+        "options": [
+          "Glivenko-Cantelli 定理 / 大数定律的测度版本",
+        "中心极限定理",
+        "Banach-Alaoglu",
+        "Riesz 表示"
+        ],
+        "answer": 0,
+        "explanation": "\\(T_n \\in (C_b)^*\\)（有界连续函数空间的对偶 = 正则 Borel 测度）。\\(T_n(\\varphi) = n^{-1}\\sum \\varphi(X_i) \\to E[\\varphi(X)] = \\int \\varphi\\, dP\\)（大数定律）。\\(T_n \\xrightarrow{w^*} P\\)。Glivenko-Cantelli 给出 \\(\\sup_x |F_n(x) - F(x)| \\to 0\\) a.s.（更强）。弱*拓扑 = 统计学中的\"弱收敛\"。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Hilbert 空间的 Riesz 表示定理</a></li>
+      <li><a href="#kp2">02 · Lp 空间的对偶</a></li>
+      <li><a href="#kp3">03 · 弱拓扑与弱收敛</a></li>
+      <li><a href="#kp4">04 · 自反空间</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>Riesz 表示定理与对偶</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Hilbert 空间的 Riesz 表示定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hilbert 空间上的连续线性泛函长什么样？Riesz 表示定理给出了 完美的回答：每个连续线性泛函 \(f\) 都可以唯一地表示为与某个 固定元素的内积 \(f(x) = \langle x, y \rangle\)。这意味着 \(H^* \cong H\)——Hilbert 空间是自对偶的。这一定理是量子力学 中 Dirac bra-ket 记号的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Riesz 表示定理揭示了 Hilbert 空间的"自对偶性"：泛函空间 与原空间本质相同。这是 Hilbert 空间相比一般 Banach 空间 最大的结构优势。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Riesz)</strong>：设 \(H\) 为 Hilbert 空间，\(f \in H^*\)（连续线性泛函）。 则存在唯一 \(y \in H\) 使得 \[f(x) = \langle x, y \rangle, \quad \forall x \in H\] 且 \(\|f\| = \|y\|\)。 <strong>证明</strong>：若 \(f = 0\)，取 \(y = 0\)。若 \(f \neq 0\)， \(M = \ker f\) 是闭超平面，\(M^\perp \neq \{0\}\)。 取 \(z \in M^\perp\), \(\|z\| = 1\)。对任意 \(x\)， \(x - \frac{f(x)}{f(z)} z \in M\)，故 \(\langle x - \frac{f(x)}{f(z)} z, z \rangle = 0\)， 即 \(\langle x, z \rangle = \frac{f(x)}{f(z)}\)， 故 \(f(x) = \langle x, \overline{f(z)} z \rangle\)。 取 \(y = \overline{f(z)} z\)。 等距性：\(\|f\| = \sup_{\|x\|=1} |\langle x, y\rangle| = \|y\|\)（由 C-S 和 \(x = y/\|y\|\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学中，\(\langle \cdot | \psi \rangle\) 是 bra，对应 ket \(|\psi\rangle\)， 正是 Riesz 表示定理的体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(L^2([0,1])\) 上，\(f(g) = \int_0^1 g(x) e^x dx\) 是连续 线性泛函。找 Riesz 表示中的 \(y\)。 解答：\(f(g) = \langle g, y \rangle = \int_0^1 g(x) \overline{y(x)} dx\)， 故 \(y(x) = e^x\)（实值情形不需共轭）。 \(\|f\| = \|y\|_2 = (\int_0^1 e^{2x} dx)^{1/2} = \sqrt{(e^2 - 1)/2}\)。 易错点：在复 Hilbert 空间中忘记共轭。Riesz 映射是<strong>共轭线性</strong> 同构 \(H^* \to H\)，不是线性同构。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Riesz 表示定理说 \(H^* \cong H\) 是何种同构？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。映射 \\(f \\mapsto y\\)（\\(f(\\cdot) = \\langle \\cdot, y \\rangle\\)）')">A. 线性等距同构</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！映射 \\(f \\mapsto y\\)（\\(f(\\cdot) = \\langle \\cdot, y \\rangle\\)）')">B. 共轭线性等距同构</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。映射 \\(f \\mapsto y\\)（\\(f(\\cdot) = \\langle \\cdot, y \\rangle\\)）')">C. 拓扑同胚但非线性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。映射 \\(f \\mapsto y\\)（\\(f(\\cdot) = \\langle \\cdot, y \\rangle\\)）')">D. 仅对有限维成立</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Lp 空间的对偶</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hilbert 空间有完美的自对偶性 \(H^* \cong H\)。一般 Banach 空间 的对偶呢？\(L^p\) 空间的对偶理论告诉我们 \((L^p)^* \cong L^q\) （\(1/p + 1/q = 1\), \(1 < p < \infty\)），这推广了 Riesz 表示定理。 但 \(L^1\) 和 \(L^\infty\) 的情况更微妙。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(L^p\)-\(L^q\) 的对偶关系是 Hölder 不等式的"反面"——Hölder 说 \(g \in L^q\) 诱导 \(L^p\) 上的泛函，对偶定理说这是<strong>全部</strong>泛函。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>：设 \(1 < p < \infty\), \(1/p + 1/q = 1\)。对任意 \(f \in (L^p)^*\)，存在唯一 \(g \in L^q\) 使 \[f(\varphi) = \int \varphi \cdot g\, d\mu, \quad \forall \varphi \in L^p\] 且 \(\|f\| = \|g\|_q\)。即 \((L^p)^* \cong L^q\)（等距同构）。 <strong>\(p = 1\) 情形</strong>：\((L^1)^* \cong L^\infty\)（σ-有限测度下）。 <strong>\(p = \infty\) 情形</strong>：\((L^\infty)^*\) 严格大于 \(L^1\)—— \(L^1\) 只是 \((L^\infty)^*\) 的子空间。\((L^\infty)^*\) 包含 "奇异泛函"（如 Banach 极限），不能用积分表示。 <strong>自反空间</strong>：\(X^{**} \cong X\)（自然嵌入是满射）。 \(L^p\)（\(1 < p < \infty\)）是自反的；\(L^1, L^\infty\) 不自反。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>对偶理论是凸优化中 Lagrange 对偶的函数空间推广， 也是 PDE 弱解理论的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\((l^1)^* \cong l^\infty\)。找出对应于序列 \(a = (1, -1, 1, -1, \ldots) \in l^\infty\) 的泛函作用于 \(x = (1, 1/2, 1/3, \ldots) \in l^1\) 的值。 解答：\(f_a(x) = \sum_n a_n x_n = 1 - 1/2 + 1/3 - 1/4 + \cdots = \ln 2\)。 易错点：误以为 \((L^\infty)^* = L^1\)。实际上 \((L^\infty)^*\) 严格大于 \(L^1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\((L^2)^*\) 等距同构于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p = q = 2\\) 时 \\((L^2)^* \\cong L^2\\)，这就是 Riesz 表示定理。')">A. \(L^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(p = q = 2\\) 时 \\((L^2)^* \\cong L^2\\)，这就是 Riesz 表示定理。')">B. \(L^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p = q = 2\\) 时 \\((L^2)^* \\cong L^2\\)，这就是 Riesz 表示定理。')">C. \(L^\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p = q = 2\\) 时 \\((L^2)^* \\cong L^2\\)，这就是 Riesz 表示定理。')">D. 不确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>弱拓扑与弱收敛</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在无穷维 Banach 空间中，强收敛（范数收敛）条件很强，许多自然的 序列不强收敛。弱拓扑 \(\sigma(X, X^*)\) 定义了更宽松的收敛方式： \(x_n \rightharpoonup x\)（弱收敛）当且仅当 \(f(x_n) \to f(x)\) 对所有 \(f \in X^*\)。弱收敛在变分法和 PDE 的弱解理论中不可或缺。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>弱拓扑是"最粗的使所有连续线性泛函仍连续的拓扑"。它比 范数拓扑粗，因此"更容易"收敛，同时保留了关键的函数空间分析性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>弱收敛</strong>：\(x_n \rightharpoonup x\) 在 \(X\) 中 \(\Leftrightarrow\) \(f(x_n) \to f(x)\)，\(\forall f \in X^*\)。 <strong>性质</strong>： (1) 强收敛 \(\Rightarrow\) 弱收敛（反之不成立） (2) 弱收敛序列有界（一致有界原理的推论） (3) 弱极限唯一（Hahn-Banach 分离性） (4) 弱闭凸集 = 强闭凸集（Mazur 定理） <strong>弱*拓扑</strong>：\(\sigma(X^*, X)\)，\(f_n \overset{w^*}{\to} f\) \(\Leftrightarrow\) \(f_n(x) \to f(x)\)，\(\forall x \in X\)。 <strong>Banach-Alaoglu 定理</strong>：\(X^*\) 的闭单位球 \(\overline{B}_{X^*}\) 在弱*拓扑下紧致。 （在范数拓扑下不紧致 if \(X\) 无穷维！）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>PDE 弱解理论：从逼近解序列中提取弱收敛子列（Banach-Alaoglu）， 再证弱极限是方程的解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(e_n = (0,\ldots,0,1,0,\ldots) \in l^2\)。证明 \(e_n \rightharpoonup 0\)。 解答：对任意 \(f \in (l^2)^* \cong l^2\)，存在 \(y = (y_k) \in l^2\) 使 \(f(e_n) = \langle e_n, y \rangle = y_n \to 0\)（因为 \(\sum |y_k|^2 < \infty\) 意味 \(y_n \to 0\)）。故 \(e_n \rightharpoonup 0\)。 但 \(\|e_n\| = 1 \not\to 0\)，故不是强收敛。 易错点：\(e_n \rightharpoonup 0\) 但 \(\|e_n\| = 1\)——弱收敛不保持范数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Banach-Alaoglu 定理说的是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。B 就是 Banach-Alaoglu；C 对自反空间成立，因为')">A. Banach 空间的闭单位球在范数拓扑下紧致</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。B 就是 Banach-Alaoglu；C 对自反空间成立，因为')">B. 对偶空间的闭单位球在弱*拓扑下紧致</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。B 就是 Banach-Alaoglu；C 对自反空间成立，因为')">C. 自反空间的闭单位球在弱拓扑下紧致</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！B 就是 Banach-Alaoglu；C 对自反空间成立，因为')">D. B 和 C 都对</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>自反空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>自然嵌入 \(J: X \to X^{**}\)（\(Jx(f) = f(x)\)）总是等距的，但 不一定满射。当 \(J\) 是满射时，\(X\) 称为自反的。自反空间具有 极好的性质——闭单位球弱紧（Eberlein-Šmulian），使得变分问题 有极值解的论证特别方便。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>自反性意味着 \(X\) 和 \(X^{**}\) "一样大"——空间没有被对偶操作 "放大"。\(L^p\)（\(1 < p < \infty\)）自反，\(L^1\) 和 \(L^\infty\) 不自反。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>自然嵌入</strong>：\(J: X \to X^{**}\)，\(Jx(f) = f(x)\)（\(\forall f \in X^*\)）。 \(J\) 是线性等距映射，\(\|Jx\| = \|x\|\)（由 Hahn-Banach）。 <strong>自反空间</strong>：\(J\) 是满射 \(\Leftrightarrow\) \(X\) 自反。 <strong>性质</strong>： (1) \(X\) 自反 \(\Rightarrow\) \(X^*\) 自反 (2) \(X\) 自反 \(\Leftrightarrow\) 闭单位球弱序列紧致（Eberlein-Šmulian） (3) Hilbert 空间自反（因为 \(H \cong H^* \cong H^{**}\)） (4) \(L^p\)（\(1 < p < \infty\)）自反 (5) \(L^1, L^\infty, c_0\) 不自反 <strong>James 定理（陈述）</strong>：\(X\) 自反 \(\Leftrightarrow\) 每个 \(f \in X^*\) 在单位球上达到范数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(l^1\) 不自反。 解答：\((l^1)^* \cong l^\infty\)，\((l^\infty)^*\) 严格大于 \(l^1\) （包含 Banach 极限等奇异泛函）。故自然嵌入 \(J: l^1 \to (l^\infty)^*\) 不是满射。 易错点：混淆"自反"与"自对偶"。 \(H^* \cong H\) 是共轭线性同构（Riesz），但自反要求的是 自然嵌入 \(J: X \to X^{**}\) 是满射（线性等距同构）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个空间不自反？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^1\\) 不自反（\\((L^1)^* = L^\\infty\\)，\\((L^\\infty)^*\\) 严格大于 \\(L^1\\)），因此无法等同。')">A. \(L^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^1\\) 不自反（\\((L^1)^* = L^\\infty\\)，\\((L^\\infty)^*\\) 严格大于 \\(L^1\\)），因此无法等同。')">B. \(l^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(L^1\\) 不自反（\\((L^1)^* = L^\\infty\\)，\\((L^\\infty)^*\\) 严格大于 \\(L^1\\)），因此无法等同。')">C. \(L^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(L^1\\) 不自反（\\((L^1)^* = L^\\infty\\)，\\((L^\\infty)^*\\) 严格大于 \\(L^1\\)），因此无法等同。')">D. \(L^4\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

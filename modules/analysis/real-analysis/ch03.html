@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 Lebesgue 积分 — 实分析/测度论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "real-analysis-ch03-q1",
+        "question": "设 \\(\\varphi = 3 \\cdot \\mathbf{1}_{[0,1)} + 5 \\cdot \\mathbf{1}_{[1,3)}\\) 为简单函数，\\(\\mu\\) 为 Lebesgue 测度。求 \\(\\int \\varphi\\, d\\mu\\)。",
+        "options": [
+          "\\(8\\)",
+        "\\(13\\)",
+        "\\(15\\)",
+        "\\(10\\)"
+        ],
+        "answer": 1,
+        "explanation": "简单函数的积分：\\(\\int \\varphi\\, d\\mu = 3 \\cdot m([0,1)) + 5 \\cdot m([1,3)) = 3 \\times 1 + 5 \\times 2 = 3 + 10 = 13\\)。这是 Lebesgue 积分的基本定义——对简单函数，积分等于各取值乘以对应集合的测度之和。"
+      },
+      {
+        "id": "real-analysis-ch03-q2",
+        "question": "设 \\(f(x) = 2\\) 在 \\([0, 5]\\) 上。其 Lebesgue 积分 \\(\\int_{[0,5]} f\\, dm\\) 等于？",
+        "options": [
+          "\\(2\\)",
+        "\\(5\\)",
+        "\\(10\\)",
+        "\\(7\\)"
+        ],
+        "answer": 2,
+        "explanation": "常数函数是简单函数。\\(\\int_{[0,5]} 2\\, dm = 2 \\cdot m([0,5]) = 2 \\times 5 = 10\\)。这与 Riemann 积分一致。对于 Riemann 可积函数，两种积分给出相同的值。"
+      },
+      {
+        "id": "real-analysis-ch03-q3",
+        "question": "函数 \\(f(x) = \\mathbf{1}_{\\mathbb{Q} \\cap [0,1]}(x)\\)（Dirichlet 函数）的 Lebesgue 积分为多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "不存在",
+        "\\(1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f = \\mathbf{1}_{\\mathbb{Q} \\cap [0,1]}\\)。\\(\\int f\\, dm = 1 \\cdot m(\\mathbb{Q} \\cap [0,1]) = m(\\mathbb{Q} \\cap [0,1]) = 0\\)（有理数是可数集，测度为零）。这是 Lebesgue 积分的经典优势——Dirichlet 函数不 Riemann 可积，但 Lebesgue 可积（等于零函数 a.e.）。"
+      },
+      {
+        "id": "real-analysis-ch03-q4",
+        "question": "设 \\(f \\geq 0\\) 可测，\\(\\int f\\, d\\mu = 0\\)。则以下哪个成立？",
+        "options": [
+          "\\(f = 0\\) 处处",
+        "\\(f = 0\\) 几乎处处",
+        "\\(f\\) 可能在一个正测度集上为正",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(f \\geq 0\\) 且 \\(\\int f = 0\\)，则 \\(f = 0\\) a.e.。证明：\\(\\{f > 0\\} = \\bigcup_n \\{f > 1/n\\}\\)，\\(\\mu(\\{f > 1/n\\}) \\leq n \\int f = 0\\)，故 \\(\\mu(\\{f > 0\\}) = 0\\)。但 \\(f\\) 可以在零测集上取正值。选 A 太强（\"处处\"），C 与结论矛盾。"
+      },
+      {
+        "id": "real-analysis-ch03-q5",
+        "question": "以下哪个函数在 \\([0,1]\\) 上 Riemann 可积但不 Lebesgue 可积？",
+        "options": [
+          "\\(f(x) = x^2\\)",
+        "不存在这样的函数",
+        "\\(f(x) = 1/\\sqrt{x}\\)",
+        "Dirichlet 函数"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(f\\) 在 \\([a,b]\\) 上 Riemann 可积，则 \\(f\\) 有界且几乎处处连续，因此 \\(f\\) Lebesgue 可积且两个积分值相等。换言之，Riemann 可积 \\(\\Rightarrow\\) Lebesgue 可积。反之不成立（Dirichlet 函数 Lebesgue 可积但不 Riemann 可积）。"
+      },
+      {
+        "id": "real-analysis-ch03-q6",
+        "question": "\\(\\int_0^1 x^2\\, dx\\) 的 Lebesgue 积分值等于？",
+        "options": [
+          "\\(1/2\\)",
+        "\\(1/3\\)",
+        "\\(1/4\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(x^2\\) 在 \\([0,1]\\) 上连续有界，故 Riemann 可积 = Lebesgue 可积。\\(\\int_0^1 x^2\\, dx = [x^3/3]_0^1 = 1/3\\)。对连续函数，Lebesgue 积分退化为普通的 Riemann 积分，可以使用微积分基本定理。"
+      },
+      {
+        "id": "real-analysis-ch03-q7",
+        "question": "设 \\(f, g\\) 非负可测，\\(f \\leq g\\) a.e.。则以下哪个成立？",
+        "options": [
+          "\\(\\int f \\leq \\int g\\)",
+        "\\(\\int f = \\int g\\)",
+        "\\(\\int f > \\int g\\)",
+        "无法比较"
+        ],
+        "answer": 0,
+        "explanation": "积分的单调性：若 \\(f \\leq g\\) a.e.，则 \\(\\int f \\leq \\int g\\)。证明：\\(h = g - f \\geq 0\\) a.e.，\\(\\int h \\geq 0\\)，\\(\\int g = \\int f + \\int h \\geq \\int f\\)。这对非负函数直接成立，对一般可积函数也成立（取正部和负部）。"
+      },
+      {
+        "id": "real-analysis-ch03-q8",
+        "question": "设 \\(f_n\\) 为简单函数，\\(0 \\leq f_1 \\leq f_2 \\leq \\cdots\\)，\\(f_n \\to f\\) 逐点。则 \\(\\int f\\, d\\mu\\) 等于？",
+        "options": [
+          "\\(\\lim \\int f_n\\, d\\mu\\)",
+        "\\(\\sup \\int f_n\\, d\\mu\\)",
+        "A 和 B 相同",
+        "可能不存在"
+        ],
+        "answer": 2,
+        "explanation": "由 Lebesgue 积分对非负函数的定义：\\(\\int f = \\sup\\{\\int \\varphi : 0 \\leq \\varphi \\leq f, \\varphi \\text{ 简单}\\}\\)。当 \\(f_n \\uparrow f\\) 时，\\(\\lim \\int f_n\\) 恰好等于这个上确界。这也是单调收敛定理 (MCT) 的内容。对递增非负序列，\\(\\lim = \\sup\\)，因此 A 和 B 等价。"
+      },
+      {
+        "id": "real-analysis-ch03-q9",
+        "question": "设 \\(f(x) = 1/x\\) 在 \\((0, 1]\\) 上。\\(f\\) 是否 Lebesgue 可积？",
+        "options": [
+          "可积，\\(\\int = 1\\)",
+        "可积，\\(\\int = \\ln 2\\)",
+        "不可积，\\(\\int = +\\infty\\)",
+        "不可测"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\int_0^1 1/x\\, dx = \\lim_{\\varepsilon \\to 0^+} \\int_\\varepsilon^1 1/x\\, dx = \\lim [-\\ln \\varepsilon] = +\\infty\\)。Lebesgue 积分要求 \\(\\int |f| < \\infty\\)，这里 \\(f > 0\\) 且积分发散，故 \\(f \\notin L^1(0,1)\\)。注意：\\(1/x\\) 可测但不可积。可积性比可测性更强。"
+      },
+      {
+        "id": "real-analysis-ch03-q10",
+        "question": "\\(f(x) = \\sin(x)/x\\) 在 \\([1, \\infty)\\) 上是否 Lebesgue 可积？",
+        "options": [
+          "是",
+        "否，\\(\\int |\\sin x/x| = +\\infty\\)",
+        "条件收敛但 Lebesgue 不可积",
+        "B 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\int_1^\\infty |\\sin x/x|\\, dx \\geq \\sum_{n=1}^\\infty \\int_{n\\pi}^{(n+1)\\pi} |\\sin x|/((n+1)\\pi)\\, dx = \\sum 2/((n+1)\\pi) = +\\infty\\)。Riemann 反常积分 \\(\\int_1^\\infty \\sin x/x\\, dx\\) 条件收敛（Dirichlet 判别法），但 Lebesgue 积分要求绝对可积。这是 Lebesgue 理论的\"代价\"：条件收敛的反常积分不在 \\(L^1\\) 中。"
+      },
+      {
+        "id": "real-analysis-ch03-q11",
+        "question": "设 \\(f\\) 在 \\([a,b]\\) 上有界可测。以下哪个是 Lebesgue 可积的充分条件？",
+        "options": [
+          "\\(f\\) 连续",
+        "\\(f\\) 有界",
+        "\\(f\\) 几乎处处连续",
+        "以上都是"
+        ],
+        "answer": 3,
+        "explanation": "在有限测度空间 \\([a,b]\\) 上，有界可测函数一定可积：\\(\\int |f| \\leq \\|f\\|_\\infty \\cdot m([a,b]) < \\infty\\)。连续 \\(\\Rightarrow\\) 可测且有界（在紧集上），几乎处处连续 \\(\\Rightarrow\\) 可测且有界（Riemann 可积的充要条件）。三者都是充分条件。"
+      },
+      {
+        "id": "real-analysis-ch03-q12",
+        "question": "设 \\(f \\in L^1(\\mathbb{R})\\)，\\(F(x) = \\int_{-\\infty}^x f(t)\\, dt\\)。则 \\(F\\) 是？",
+        "options": [
+          "连续的",
+        "绝对连续的",
+        "几乎处处可微的，且 \\(F' = f\\) a.e.",
+        "以上都对"
+        ],
+        "answer": 3,
+        "explanation": "这是 Lebesgue 微积分基本定理的内容。\\(F\\) 绝对连续（给定 \\(\\varepsilon > 0\\)，存在 \\(\\delta > 0\\)，对互不重叠区间 \\((a_k, b_k)\\) 且 \\(\\sum(b_k - a_k) < \\delta\\) 时 \\(\\sum|F(b_k) - F(a_k)| < \\varepsilon\\)），绝对连续 \\(\\Rightarrow\\) 连续且几乎处处可微，\\(F' = f\\) a.e.。"
+      },
+      {
+        "id": "real-analysis-ch03-q13",
+        "question": "设 \\(f: [0,1] \\to \\mathbb{R}\\) Lipschitz 连续。则 \\(f\\) 是否绝对连续？",
+        "options": [
+          "是",
+        "否",
+        "仅当 Lipschitz 常数 \\(\\leq 1\\) 时",
+        "取决于 \\(f\\) 是否可微"
+        ],
+        "answer": 0,
+        "explanation": "Lipschitz \\(\\Rightarrow\\) 绝对连续。取 \\(\\delta = \\varepsilon/L\\)（\\(L\\) 为 Lipschitz 常数），对任意有限互不重叠区间族 \\(\\{(a_k, b_k)\\}\\)，\\(\\sum(b_k - a_k) < \\delta\\) 时 \\(\\sum|f(b_k) - f(a_k)| \\leq L\\sum(b_k - a_k) < L\\delta = \\varepsilon\\)。反之不成立：\\(\\sqrt{x}\\) 绝对连续但不 Lipschitz。"
+      },
+      {
+        "id": "real-analysis-ch03-q14",
+        "question": "设 \\(f = \\sum_{k=1}^n a_k \\mathbf{1}_{A_k}\\) 且 \\(g = \\sum_{j=1}^m b_j \\mathbf{1}_{B_j}\\) 为简单函数。\\(\\int (f + g)\\, d\\mu\\) 等于？",
+        "options": [
+          "\\(\\int f + \\int g\\)",
+        "\\(\\int f \\cdot \\int g\\)",
+        "\\(\\max(\\int f, \\int g)\\)",
+        "无法简化"
+        ],
+        "answer": 0,
+        "explanation": "积分的线性性：\\(\\int(f + g) = \\int f + \\int g\\)。对简单函数可直接展开验证：将 \\(f + g\\) 写成公共细分上的简单函数，各项系数相加，积分相应分配。线性性对所有 \\(L^1\\) 函数成立，是 Lebesgue 积分的核心性质。"
+      },
+      {
+        "id": "real-analysis-ch03-q15",
+        "question": "设 \\(f\\) 可测，\\(\\int_{[0,1]} f^+\\, dm = 3\\)，\\(\\int_{[0,1]} f^-\\, dm = 1\\)。则 \\(\\int_{[0,1]} f\\, dm\\) 和 \\(\\int_{[0,1]} |f|\\, dm\\) 分别为？",
+        "options": [
+          "\\(2\\) 和 \\(4\\)",
+        "\\(4\\) 和 \\(2\\)",
+        "\\(2\\) 和 \\(2\\)",
+        "\\(3\\) 和 \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f = f^+ - f^-\\)，\\(|f| = f^+ + f^-\\)。故 \\(\\int f = \\int f^+ - \\int f^- = 3 - 1 = 2\\)，\\(\\int |f| = \\int f^+ + \\int f^- = 3 + 1 = 4\\)。\\(f\\) 可积要求 \\(\\int f^+\\) 和 \\(\\int f^-\\) 中至少一个有限（若都有限则 \\(f \\in L^1\\)）。"
+      },
+      {
+        "id": "real-analysis-ch03-q16",
+        "question": "设 \\(f\\) 在 \\([0,1]\\) 上 Riemann 可积。定义 Riemann 积分 \\(R = \\int_0^1 f(x)\\, dx\\) 和 Lebesgue 积分 \\(L = \\int_{[0,1]} f\\, dm\\)。则？",
+        "options": [
+          "\\(R = L\\)",
+        "\\(R < L\\)",
+        "\\(R > L\\)",
+        "不可比较"
+        ],
+        "answer": 0,
+        "explanation": "有界函数在 \\([a,b]\\) 上 Riemann 可积 \\(\\Leftrightarrow\\) 不连续点集为零测集。此时 Riemann 积分 = Lebesgue 积分。证明思路：Riemann 和的上下逼近构成简单函数序列，其 Lebesgue 积分趋近于 Riemann 积分。这保证了两个积分理论的一致性。"
+      },
+      {
+        "id": "real-analysis-ch03-q17",
+        "question": "设 \\(F(x) = |x|\\) 在 \\([-1, 1]\\) 上。\\(F\\) 是否绝对连续？\\(F'\\) 在哪里存在？",
+        "options": [
+          "绝对连续，\\(F' = \\text{sgn}(x)\\) a.e.",
+        "不绝对连续（在 \\(x=0\\) 不可微）",
+        "绝对连续，\\(F'\\) 处处存在",
+        "\\(F\\) 不可积"
+        ],
+        "answer": 0,
+        "explanation": "\\(|x|\\) 是 Lipschitz 函数（\\(L = 1\\)），故绝对连续。\\(F'(x) = 1\\)（\\(x > 0\\)），\\(F'(x) = -1\\)（\\(x < 0\\)），\\(F'(0)\\) 不存在。但在 a.e. 意义下 \\(F' = \\text{sgn}(x)\\)（\\(\\{0\\}\\) 零测）。绝对连续函数几乎处处可微，\\(F = \\int_{-1}^x F'(t)\\, dt + F(-1)\\)。"
+      },
+      {
+        "id": "real-analysis-ch03-q18",
+        "question": "设 \\(f_n = n \\cdot \\mathbf{1}_{[0, 1/n]}\\)。\\(\\int f_n = 1\\) 对所有 \\(n\\)。但 \\(f_n \\to 0\\) 逐点（\\(n \\to \\infty\\)，\\(x > 0\\)）。这说明什么？",
+        "options": [
+          "积分和极限可以交换",
+        "积分和极限不能无条件交换",
+        "Lebesgue 积分有缺陷",
+        "\\(f_n\\) 不可测"
+        ],
+        "answer": 1,
+        "explanation": "\\(f_n \\to 0\\) 逐点但 \\(\\int f_n = 1 \\neq 0 = \\int 0\\)。极限和积分不可交换！这不违反 MCT（\\(f_n\\) 不单调递增）也不违反 DCT（\\(f_n\\) 无一致可积控制函数）。这是\"质量逃逸到集中在越来越小的区域\"的现象。收敛定理的条件（单调性或控制函数）不可缺省。"
+      },
+      {
+        "id": "real-analysis-ch03-q19",
+        "question": "设 \\(f \\in L^1(\\mathbb{R})\\)，\\(\\|f\\|_1 = 1\\)。定义 \\(g_n(x) = nf(nx)\\)。则 \\(\\|g_n\\|_1\\) 为多少？",
+        "options": [
+          "\\(n\\)",
+        "\\(1\\)",
+        "\\(1/n\\)",
+        "\\(n^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "换元 \\(u = nx\\)，\\(du = n\\, dx\\)：\\(\\int |g_n| = \\int |nf(nx)|\\, dx = n \\int |f(nx)|\\, dx = n \\cdot (1/n) \\int |f(u)|\\, du = \\|f\\|_1 = 1\\)。变量替换公式保证了 \\(\\|g_n\\|_1 = \\|f\\|_1\\)。这类\"逼近恒等元\"的构造在分布理论和逼近论中极为重要。"
+      },
+      {
+        "id": "real-analysis-ch03-q20",
+        "question": "设 \\(f\\) 有界可测，\\(g \\in L^1\\)。则 \\(fg\\) 是否可积？",
+        "options": [
+          "不一定",
+        "是，\\(\\int |fg| \\leq \\|f\\|_\\infty \\int |g|\\)",
+        "仅当 \\(f\\) 也属于 \\(L^1\\) 时",
+        "仅当 \\(f\\) 连续时"
+        ],
+        "answer": 1,
+        "explanation": "\\(|fg| \\leq \\|f\\|_\\infty |g|\\)，故 \\(\\int |fg| \\leq \\|f\\|_\\infty \\int |g| < \\infty\\)。有界可测 × 可积 = 可积。这是 Hölder 不等式 \\(p = \\infty, q = 1\\) 的特例。不需要 \\(f \\in L^1\\)（有界性即可，无需有限测度支撑）。"
+      },
+      {
+        "id": "real-analysis-ch03-q21",
+        "question": "Cantor 函数（\"魔鬼阶梯\"）\\(F: [0,1] \\to [0,1]\\) 连续、单调递增、\\(F' = 0\\) a.e.，\\(F(0) = 0\\)，\\(F(1) = 1\\)。\\(F\\) 是否绝对连续？",
+        "options": [
+          "是",
+        "否",
+        "是，因为连续单调",
+        "取决于 Cantor 集的测度"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(F\\) 绝对连续，由 Lebesgue 微积分基本定理 \\(F(1) - F(0) = \\int_0^1 F'\\, dm = \\int_0^1 0\\, dm = 0\\)。但 \\(F(1) - F(0) = 1 \\neq 0\\)，矛盾。故 \\(F\\) 不绝对连续。这是经典反例：连续单调 + a.e. 可微不蕴含绝对连续。\\(F\\) 的\"增长\"集中在零测的 Cantor 集上。"
+      },
+      {
+        "id": "real-analysis-ch03-q22",
+        "question": "设 \\(f \\in L^1(\\mathbb{R})\\)。\\(\\lim_{|a| \\to \\infty} \\int |f(x + a) - f(x)|\\, dx = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\|f\\|_1\\)",
+        "\\(\\|f\\|_1\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "当 \\(|a| \\to \\infty\\)，\\(f(x+a)\\) 和 \\(f(x)\\) 的\"支撑\"越来越不重叠。精确地：\\(\\int |f(x+a) - f(x)| \\leq \\int |f(x+a)| + \\int |f(x)| = 2\\|f\\|_1\\)。反向，对紧支撑的 \\(f\\)，当 \\(|a|\\) 足够大时 \\(f(x+a)\\) 和 \\(f(x)\\) 支撑不相交，\\(\\int |f(x+a) - f(x)| = \\|f(\\cdot+a)\\|_1 + \\|f\\|_1 = 2\\|f\\|_1\\)。由 \\(L^1\\) 逼近，一般 \\(f\\) 也成立。"
+      },
+      {
+        "id": "real-analysis-ch03-q23",
+        "question": "设 \\(f: [0,1] \\to [0, \\infty)\\) 可测。若 \\(\\int_A f\\, dm = 0\\) 对所有可测集 \\(A \\subseteq [0,1]\\)，则？",
+        "options": [
+          "\\(f = 0\\) 处处",
+        "\\(f = 0\\) 几乎处处",
+        "\\(f\\) 可以在零测集上取正值",
+        "B 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "取 \\(A_n = \\{f > 1/n\\}\\)，则 \\(0 = \\int_{A_n} f \\geq (1/n) m(A_n)\\)，故 \\(m(A_n) = 0\\)。\\(\\{f > 0\\} = \\bigcup A_n\\) 零测。但 \\(f\\) 在零测集上可取任意值（不影响积分和\"a.e.\"结论）。严格说只能断言 B，但 C 也兼容（零测集上的值无所谓），故 D 最完整。"
+      },
+      {
+        "id": "real-analysis-ch03-q24",
+        "question": "以下哪个不是 Lebesgue 积分优于 Riemann 积分的特性？",
+        "options": [
+          "更多函数可积",
+        "积分与极限交换有更好的定理",
+        "可处理无界区域",
+        "积分值总是不同的"
+        ],
+        "answer": 3,
+        "explanation": "Lebesgue 积分和 Riemann 积分在两者都定义时给出相同的值。Lebesgue 积分的优势在于：(A) 可对更广的函数类定义积分，(B) 有 MCT、DCT 等强大的极限交换定理，(C) 自然处理无界函数和无界区域。但\"值不同\"是错误的——兼容性是 Lebesgue 理论设计的基本要求。"
+      },
+      {
+        "id": "real-analysis-ch03-q25",
+        "question": "设 \\(f \\in L^1[0,1]\\)，\\(\\int_0^x f(t)\\, dt = 0\\) 对所有 \\(x \\in [0,1]\\)。则？",
+        "options": [
+          "\\(f = 0\\) 处处",
+        "\\(f = 0\\) 几乎处处",
+        "\\(f\\) 可以不为零",
+        "取决于 \\(f\\) 的可微性"
+        ],
+        "answer": 1,
+        "explanation": "\\(F(x) = \\int_0^x f(t)\\, dt = 0\\) 对所有 \\(x\\)。\\(F\\) 绝对连续且 \\(F(x) \\equiv 0\\)，由 Lebesgue 微分定理 \\(F'(x) = f(x)\\) a.e.，故 \\(f = 0\\) a.e.。另一种证法：\\(\\int_a^b f = F(b) - F(a) = 0\\) 对所有 \\([a,b] \\subseteq [0,1]\\)，由测度论唯一性 \\(f = 0\\) a.e.。"
+      },
+      {
+        "id": "real-analysis-ch03-q26",
+        "question": "在概率论中，随机变量 \\(X\\) 的期望定义为 \\(E[X] = \\int_\\Omega X\\, dP\\)（Lebesgue 积分）。若 \\(X\\) 的密度函数为 \\(f(x) = 2x\\)（\\(0 \\leq x \\leq 1\\)），求 \\(E[X]\\)。",
+        "options": [
+          "\\(1/2\\)",
+        "\\(2/3\\)",
+        "\\(1\\)",
+        "\\(1/3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(E[X] = \\int_0^1 x \\cdot f(x)\\, dx = \\int_0^1 x \\cdot 2x\\, dx = 2\\int_0^1 x^2\\, dx = 2 \\cdot [x^3/3]_0^1 = 2/3\\)。期望是 Lebesgue 积分的核心应用：\\(E[X] = \\int x\\, dF(x)\\)。先验证 \\(f\\) 是密度：\\(\\int_0^1 2x\\, dx = 1\\) ✓。"
+      },
+      {
+        "id": "real-analysis-ch03-q27",
+        "question": "在物理学中，一个质量分布 \\(\\rho(x)\\) 在区域 \\(\\Omega\\) 上的总质量为 \\(M = \\int_\\Omega \\rho\\, dm\\)。若 \\(\\rho\\) 在 \\(\\Omega = [0, 2]\\) 上取值为 \\(\\rho(x) = 3x^2\\)，求总质量。",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(12\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(M = \\int_0^2 3x^2\\, dx = 3[x^3/3]_0^2 = [x^3]_0^2 = 8\\)。Lebesgue 积分在物理中计算质量、电荷等\"非负量\"的总和。当密度函数非负时，积分等价于\"把密度乘以微元体积再求和\"的直觉。"
+      },
+      {
+        "id": "real-analysis-ch03-q28",
+        "question": "在金融工程中，Black-Scholes 模型下期权的定价公式涉及对风险中性测度 \\(\\mathbb{Q}\\) 下的条件期望：\\(V_0 = e^{-rT} E_\\mathbb{Q}[h(S_T)]\\)。这里\"期望\"的严格数学含义是？",
+        "options": [
+          "算术平均值",
+        "关于概率测度 \\(\\mathbb{Q}\\) 的 Lebesgue 积分",
+        "Riemann 积分",
+        "求和"
+        ],
+        "answer": 1,
+        "explanation": "\\(E_\\mathbb{Q}[h(S_T)] = \\int_\\Omega h(S_T(\\omega))\\, d\\mathbb{Q}(\\omega)\\) 是关于测度 \\(\\mathbb{Q}\\) 的 Lebesgue 积分。在连续概率模型中，期望无法用有限求和定义，必须用积分。Lebesgue 积分统一了离散（求和）和连续（积分）情形，是现代概率论和金融数学的数学基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="real-analysis"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/real-analysis.html" class="module-name">实分析/测度论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 简单函数积分与非负函数积分</a></li>
+      <li><a href="#kp2">02 · 积分的基本性质</a></li>
+      <li><a href="#kp3">03 · Riemann 与 Lebesgue 积分的比较</a></li>
+      <li><a href="#kp4">04 · 反常积分与 Lebesgue 积分</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>Lebesgue 积分</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>简单函数积分与非负函数积分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了测度和可测函数之后，下一步是定义积分。Lebesgue 的革命性思想 是：不像 Riemann 那样沿定义域划分，而是沿值域划分——先处理 最简单的阶梯函数（简单函数），再通过单调极限扩展到所有非负可测 函数。这种"自底向上"的构造保证了积分与极限运算的良好相容性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lebesgue 积分的核心思想是"按值域分层"：\(\int f\, d\mu\) 不是 将定义域切成小块，而是问"\(f\) 取值在 \([a, a+da)\) 的那些 \(x\) 构成多大的集合"。这一思路将"求面积"从几何操作升级为测度运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>简单函数积分</strong>：对 \(\varphi = \sum_{i=1}^n a_i \mathbf{1}_{A_i}\) （标准表示，\(A_i\) 两两不交），定义 \[\int \varphi\, d\mu = \sum_{i=1}^n a_i \, \mu(A_i)\] <strong>非负可测函数积分</strong>：对 \(f \geq 0\) 可测，定义 \[\int f\, d\mu = \sup\left\{\int \varphi\, d\mu : 0 \leq \varphi \leq f,\; \varphi \text{ 简单}\right\}\] <strong>一般可积函数</strong>：\(f = f^+ - f^-\)，其中 \(f^+ = \max(f, 0)\)， \(f^- = \max(-f, 0)\)。当 \(\int f^+\, d\mu\) 和 \(\int f^-\, d\mu\) 至少一个有限时，定义 \(\int f\, d\mu = \int f^+ d\mu - \int f^- d\mu\)。 \(f\) 可积（\(f \in L^1\)）\(\Leftrightarrow \int |f|\, d\mu < \infty\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 Dirichlet 函数 \(f = \mathbf{1}_{\mathbb{Q} \cap [0,1]}\) 关于 Lebesgue 测度的积分。 解答：\(f\) 是简单函数，\(\int f\, d\lambda = 1 \cdot \lambda(\mathbb{Q} \cap [0,1]) = 1 \cdot 0 = 0\)。 注意：此函数不 Riemann 可积（上下 Darboux 和分别为 1 和 0）， 但 Lebesgue 可积且积分为 0。 易错点：忘记 Lebesgue 积分定义中取的是 \(\sup\) 而非 \(\lim\)。 积分等于所有小于 \(f\) 的简单函数积分的上确界。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Lebesgue 积分与 Riemann 积分的关系是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。有界函数 Riemann 可积当且仅当不连续点集为零测集，')">A. Lebesgue 可积蕴含 Riemann 可积</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！有界函数 Riemann 可积当且仅当不连续点集为零测集，')">B. Riemann 可积蕴含 Lebesgue 可积，且积分值相等</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。有界函数 Riemann 可积当且仅当不连续点集为零测集，')">C. 两者完全独立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。有界函数 Riemann 可积当且仅当不连续点集为零测集，')">D. 它们在连续函数上不同</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>积分的基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>积分作为分析学的核心运算，需要满足一系列代数和序结构性质。 线性性和单调性是最基本的——它们保证积分是"合理的"度量函数 "总量"的方式。Chebyshev 不等式则将积分与函数水平集的测度 联系起来，是概率论中不可或缺的工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>线性性</strong>：对可积函数 \(f, g\) 和常数 \(\alpha, \beta\)， \[\int (\alpha f + \beta g)\, d\mu = \alpha \int f\, d\mu + \beta \int g\, d\mu\] 先对简单函数验证（直接由定义），再由逼近传递到一般情形。 <strong>单调性</strong>：\(f \leq g\) a.e. \(\Rightarrow \int f\, d\mu \leq \int g\, d\mu\)。 <strong>三角不等式</strong>：\(\left|\int f\, d\mu\right| \leq \int |f|\, d\mu\)。 <strong>Chebyshev(Markov) 不等式</strong>：对 \(f \geq 0\), \(\alpha > 0\)， \[\mu(\{x : f(x) \geq \alpha\}) \leq \frac{1}{\alpha} \int f\, d\mu\] 证明：\(\alpha \cdot \mathbf{1}_{\{f \geq \alpha\}} \leq f\)， 积分两边即得。 <strong>a.e. 相等 ⇒ 积分相等</strong>：若 \(f = g\) a.e.，则 \(\int f\, d\mu = \int g\, d\mu\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Chebyshev 不等式在概率论中化为 \(P(|X| \geq \alpha) \leq E[|X|]/\alpha\)，广泛用于估计随机变量的尾概率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(f \in L^1([0,1])\) 且 \(\int_0^1 f\, d\lambda = 3\)。 证明 \(\lambda(\{x : f(x) \geq 1\}) > 0\)。 解答：\(f = f \cdot \mathbf{1}_{\{f \geq 1\}} + f \cdot \mathbf{1}_{\{f < 1\}}\)。 \(\int f \cdot \mathbf{1}_{\{f < 1\}} d\lambda < 1 \cdot \lambda([0,1]) = 1\)。 故 \(\int f \cdot \mathbf{1}_{\{f \geq 1\}} d\lambda > 2 > 0\)， 因此 \(\lambda(\{f \geq 1\}) > 0\)。 易错点：试图用 Chebyshev 不等式时方向搞反。 \(\mu(\{f \geq \alpha\}) \leq \int f / \alpha\) 给出的是上界， 不能直接用来得到下界。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(f \geq 0\) 且 \(\int f\, d\mu = 0\)，则？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。由 Chebyshev 不等式，对任意 \\(n\\)，')">A. \(f = 0\) 处处</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！由 Chebyshev 不等式，对任意 \\(n\\)，')">B. \(f = 0\) 几乎处处</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。由 Chebyshev 不等式，对任意 \\(n\\)，')">C. \(f\) 几乎处处有界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。由 Chebyshev 不等式，对任意 \\(n\\)，')">D. 无法确定 \(f\) 的性质</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Riemann 与 Lebesgue 积分的比较</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>学生自然会问：既然已经有了 Riemann 积分，为什么还要引入更复杂的 Lebesgue 积分？关键在于 Riemann 积分对极限运算不够稳定： 逐点收敛的 Riemann 可积函数序列的极限可能不 Riemann 可积。 Lebesgue 积分的优势恰恰在于它与极限运算的完美相容性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Riemann 积分"沿定义域切分"，Lebesgue 积分"沿值域切分"。 后者的抽象层次更高，代价是需要测度论基础，但收获是 强大的收敛定理（MCT, DCT）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Lebesgue 判别法</strong>：有界函数 \(f: [a,b] \to \mathbb{R}\) Riemann 可积 \(\Leftrightarrow\) \(f\) 的不连续点集 \(D_f\) 满足 \(\lambda(D_f) = 0\)。 证明思路（充分性）：设 \(\lambda(D_f) = 0\)。对划分 \(P\) 的 上下 Darboux 和 \(U(P, f) - L(P, f) = \sum (M_i - m_i) \Delta x_i\)。 在连续点附近 \(M_i - m_i\) 可任意小；不连续点集零测， 其对总振荡的贡献可以通过精细划分控制。 <strong>关系定理</strong>：\(f\) 在 \([a,b]\) 上 Riemann 可积 \(\Rightarrow\) \(f\) Lebesgue 可积，且 \[\int_a^b f(x)\, dx = \int_{[a,b]} f\, d\lambda\] <strong>反例</strong>：\(f = \mathbf{1}_{\mathbb{Q}}\)，\(D_f = \mathbb{R}\)， \(\lambda(D_f) > 0\)（实际上 \(= \infty\)），所以不 Riemann 可积。 但 \(f\) Lebesgue 可积。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f_n(x) = n \cdot \mathbf{1}_{(0, 1/n)}(x)\) 在 \([0,1]\) 上。 每个 \(f_n\) 都 Riemann 可积，且 \(\int_0^1 f_n = 1\)。但 \(f_n(x) \to 0\) 对所有 \(x > 0\)（即 a.e.）。所以 \(\lim \int f_n = 1 \neq 0 = \int \lim f_n\)。 为什么极限和积分不能交换？ 解答：因为没有可积控制函数 \(g\) 使 \(|f_n| \leq g\)（DCT 的条件 不满足）。这恰好说明收敛定理的条件是必要的。 易错点：认为"逐点收敛就能交换极限和积分"。 必须有控制条件（如 DCT 的控制函数）才行。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">函数 \(f(x) = \begin{cases} 1 & x \in \mathbb{Q} \cap [0,1] \\ 0 & x \notin \mathbb{Q} \end{cases}\) 是否 Riemann 可积？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f\\) 在 \\([0,1]\\) 的每一点都不连续，\\(D_f = [0,1]\\)，')">A. 是，积分为 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f\\) 在 \\([0,1]\\) 的每一点都不连续，\\(D_f = [0,1]\\)，')">B. 是，积分为 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(f\\) 在 \\([0,1]\\) 的每一点都不连续，\\(D_f = [0,1]\\)，')">C. 否，因为不连续点集的测度不为零</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f\\) 在 \\([0,1]\\) 的每一点都不连续，\\(D_f = [0,1]\\)，')">D. 否，因为 \(f\) 无界</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>反常积分与 Lebesgue 积分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在微积分中我们学过反常积分 \(\int_0^{\infty} f(x)\, dx\)，它通过 截断后取极限定义。Lebesgue 积分处理无穷区间上的积分有不同的方式： 它直接对整个定义域定义积分，无需截断。两种积分在什么条件下一致？ 何时反常 Riemann 积分存在但 Lebesgue 积分不存在？</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>反常 Riemann 积分</strong>：\(\int_0^{\infty} f = \lim_{R \to \infty} \int_0^R f(x)\, dx\)。 <strong>Lebesgue 积分</strong>：\(\int_{[0,\infty)} f\, d\lambda\)，要求 \(\int |f|\, d\lambda < \infty\)。 <strong>关系</strong>：若 \(f \geq 0\) 且反常 Riemann 积分收敛，则 Lebesgue 积分存在且两者相等。 但对变号函数，可能反常 Riemann 积分存在（条件收敛）而 Lebesgue 积分不存在。经典例子： \[\int_0^{\infty} \frac{\sin x}{x}\, dx = \frac{\pi}{2}\] 此反常 Riemann 积分存在，但 \(\int_0^{\infty} |\sin x / x|\, dx = +\infty\)， 故 \(\sin(x)/x \notin L^1([0,\infty))\)。 Lebesgue 积分要求绝对可积（\(L^1\)），不承认条件收敛， 这保证了积分运算更强的稳定性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：判断 \(\int_1^{\infty} \frac{\cos x}{x^2}\, dx\) 是否 Lebesgue 可积。 解答：\(|\cos x / x^2| \leq 1/x^2\)，而 \(\int_1^{\infty} 1/x^2\, dx = 1 < \infty\)，由比较判别法，\(\cos x / x^2 \in L^1([1,\infty))\)。 易错点：混淆"反常 Riemann 积分收敛"与"Lebesgue 可积"。 \(\sin(x)/x\) 的反常积分收敛但不 Lebesgue 可积。 Lebesgue 可积 = 绝对可积。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\int_0^{\infty} \frac{\sin x}{x} dx\) 作为反常 Riemann 积分</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\int_0^{\\infty} |\\sin x/x|\\, dx = +\\infty\\)，因此')">A. Lebesgue 可积，积分也是 \(\pi/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\int_0^{\\infty} |\\sin x/x|\\, dx = +\\infty\\)，因此')">B. 不 Lebesgue 可积，因为 \(\int |\sin x / x| = \infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\int_0^{\\infty} |\\sin x/x|\\, dx = +\\infty\\)，因此')">C. Lebesgue 可积，但积分与 \(\pi/2\) 不同</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\int_0^{\\infty} |\\sin x/x|\\, dx = +\\infty\\)，因此')">D. 取决于 σ-代数的选择</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/analysis/real-analysis.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

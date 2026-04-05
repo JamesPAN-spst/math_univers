@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 上同调与 Poincaré 对偶 — 代数拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "alg-topo-ch05-q1",
+        "question": "上同调群 \\(H^n(X; G)\\) 是如何从链复形定义的？",
+        "options": [
+          "对偶化链复形：\\(C^n = \\text{Hom}(C_n, G)\\)，上边界 \\(\\delta: C^n \\to C^{n+1}\\)",
+        "与同调群相同",
+        "是同调群的对偶空间",
+        "A（\\(H^n = \\ker \\delta^n / \\text{im} \\delta^{n-1}\\) = 上闭链/上边界链）"
+        ],
+        "answer": 3,
+        "explanation": "\\(C^n(X; G) = \\text{Hom}(C_n(X), G)\\)。\\(\\delta^n: C^n \\to C^{n+1}\\), \\((\\delta f)(\\sigma) = f(\\partial \\sigma)\\)。\\(\\delta^2 = 0\\)（因为 \\(\\partial^2 = 0\\)）。\\(H^n = \\ker\\delta^n / \\text{im}\\delta^{n-1}\\)。\\(G = \\mathbb{Z}\\) 时重要性质：上同调有环结构（上积 cup product），同调群没有自然的乘法。"
+      },
+      {
+        "id": "alg-topo-ch05-q2",
+        "question": "\\(H^n(S^k; \\mathbb{Z}) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}\\)（\\(n = 0\\) 或 \\(n = k\\)），\\(0\\) 其他",
+        "与 \\(H_n(S^k)\\) 相同",
+        "\\(\\mathbb{Z}/2\\)",
+        "A 和 B 都对（\\(S^k\\) 同调无挠）"
+        ],
+        "answer": 3,
+        "explanation": "万有系数定理（上同调版）：\\(0 \\to \\text{Ext}^1(H_{n-1}, \\mathbb{Z}) \\to H^n \\to \\text{Hom}(H_n, \\mathbb{Z}) \\to 0\\)。\\(S^k\\) 同调群全是 \\(\\mathbb{Z}\\) 或 \\(0\\)（无挠），\\(\\text{Ext} = 0\\)，\\(H^n \\cong \\text{Hom}(H_n, \\mathbb{Z})\\)。\\(H^n(S^k) = H_n(S^k) = \\) A。无挠空间的上同调 = 同调。"
+      },
+      {
+        "id": "alg-topo-ch05-q3",
+        "question": "上积 (cup product) \\(\\smile: H^p(X) \\times H^q(X) \\to H^{p+q}(X)\\) 的作用是什么？",
+        "options": [
+          "让 \\(H^*(X) = \\bigoplus_n H^n(X)\\) 成为分级环（上同调环）",
+        "同调群的乘法",
+        "与环结构无关",
+        "A（上同调环是比 Betti 数更精细的不变量）"
+        ],
+        "answer": 3,
+        "explanation": "\\((\\alpha \\smile \\beta)(\\sigma) = \\alpha(\\sigma|_{[v_0,\\ldots,v_p]}) \\cdot \\beta(\\sigma|_{[v_p,\\ldots,v_{p+q}]})\\)（奇异上链的 front-back 分裂）。\\(H^*(X)\\) 成为分级交换环（\\(\\alpha \\smile \\beta = (-1)^{pq} \\beta \\smile \\alpha\\)）。\\(T^2\\)：\\(H^*(T^2) = \\mathbb{Z}[\\alpha, \\beta]/(\\alpha^2, \\beta^2)\\)（\\(\\alpha, \\beta \\in H^1\\), \\(\\alpha\\beta = -\\beta\\alpha\\)）。"
+      },
+      {
+        "id": "alg-topo-ch05-q4",
+        "question": "\\(H^*(\\mathbb{CP}^n; \\mathbb{Z})\\) 的环结构是什么？",
+        "options": [
+          "\\(\\mathbb{Z}[x]/(x^{n+1})\\)（\\(x \\in H^2\\)）",
+        "\\(\\mathbb{Z}^{n+1}\\)",
+        "外代数",
+        "多项式环"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^{2k}(\\mathbb{CP}^n) = \\mathbb{Z}\\), 生成元 \\(x^k\\)（\\(x \\in H^2\\) 的 \\(k\\) 次上积幂）。\\(x^{n+1} = 0\\)（维度超过 \\(2n\\) 为零）。\\(H^*(\\mathbb{CP}^n) = \\mathbb{Z}[x]/(x^{n+1})\\)。这比 Betti 数（都是 1）更精细——\\(\\mathbb{CP}^2\\) 和 \\(S^2 \\vee S^4\\) 有相同 Betti 数但不同环结构。"
+      },
+      {
+        "id": "alg-topo-ch05-q5",
+        "question": "Poincaré 对偶定理的陈述（闭有向流形）？",
+        "options": [
+          "\\(H^k(M; \\mathbb{Z}) \\cong H_{n-k}(M; \\mathbb{Z})\\)（\\(M\\) 紧致有向连通 \\(n\\)-流形）",
+        "\\(H^k = H_k\\)",
+        "只对 \\(S^n\\) 成立",
+        "A（上积与基本类的 cap product 给出同构）"
+        ],
+        "answer": 3,
+        "explanation": "Poincaré 对偶：\\(D: H^k(M) \\xrightarrow{\\cong} H_{n-k}(M)\\), \\(D(\\alpha) = \\alpha \\frown [M]\\)（cap product with 基本类 \\([M] \\in H_n(M)\\)）。\\(S^2\\)：\\(H^0 \\cong H_2 = \\mathbb{Z}\\), \\(H^1 \\cong H_1 = 0\\), \\(H^2 \\cong H_0 = \\mathbb{Z}\\)。推论：奇维闭有向流形 \\(\\chi = 0\\)（Betti 数成对）。"
+      },
+      {
+        "id": "alg-topo-ch05-q6",
+        "question": "de Rham 定理联系什么？",
+        "options": [
+          "\\(H^n_{\\text{dR}}(M) \\cong H^n(M; \\mathbb{R})\\)（de Rham 上同调 \\(\\cong\\) 奇异上同调实系数）",
+        "同调与同伦",
+        "上同调与微分方程",
+        "A（同构由积分配对 \\(\\int_\\sigma \\omega\\) 给出）"
+        ],
+        "answer": 3,
+        "explanation": "de Rham：微分形式的上同调（\\(H^n_{\\text{dR}} = \\) 闭形式/恰当形式）\\(\\cong\\) 奇异上同调（\\(\\mathbb{R}\\) 系数）。配对 \\(\\langle [\\omega], [\\sigma]\\rangle = \\int_\\sigma \\omega\\)（Stokes 定理保证良定）。连接了微分几何（光滑结构）和代数拓扑（组合/代数结构）。"
+      },
+      {
+        "id": "alg-topo-ch05-q7",
+        "question": "\\(\\mathbb{RP}^2\\) 的上同调群（整系数）？",
+        "options": [
+          "\\(H^0 = \\mathbb{Z}, H^1 = 0, H^2 = \\mathbb{Z}/2\\)",
+        "\\(H^0 = \\mathbb{Z}, H^1 = \\mathbb{Z}/2, H^2 = 0\\)",
+        "与同调相同",
+        "A（万有系数定理：\\(\\text{Ext}^1(\\mathbb{Z}/2, \\mathbb{Z}) = \\mathbb{Z}/2\\) 出现在 \\(H^2\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(H_0 = \\mathbb{Z}, H_1 = \\mathbb{Z}/2, H_2 = 0\\)。万有系数（上同调）：\\(H^n \\cong \\text{Hom}(H_n, \\mathbb{Z}) \\oplus \\text{Ext}^1(H_{n-1}, \\mathbb{Z})\\)。\\(H^0 = \\text{Hom}(\\mathbb{Z}, \\mathbb{Z}) = \\mathbb{Z}\\)。\\(H^1 = \\text{Hom}(\\mathbb{Z}/2, \\mathbb{Z}) \\oplus \\text{Ext}(\\mathbb{Z}, \\mathbb{Z}) = 0\\)。\\(H^2 = \\text{Hom}(0, \\mathbb{Z}) \\oplus \\text{Ext}(\\mathbb{Z}/2, \\mathbb{Z}) = \\mathbb{Z}/2\\)。"
+      },
+      {
+        "id": "alg-topo-ch05-q8",
+        "question": "万有系数定理（上同调版）中 \\(\\text{Ext}^1(\\mathbb{Z}/n, \\mathbb{Z}) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/n\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Ext}^1(\\mathbb{Z}/n, \\mathbb{Z})\\)：将 \\(\\mathbb{Z}/n\\) 的自由解析 \\(0 \\to \\mathbb{Z} \\xrightarrow{\\times n} \\mathbb{Z} \\to \\mathbb{Z}/n \\to 0\\) 对偶。\\(\\text{Hom}(\\mathbb{Z}, \\mathbb{Z}) \\xrightarrow{\\times n} \\text{Hom}(\\mathbb{Z}, \\mathbb{Z})\\) 即 \\(\\mathbb{Z} \\xrightarrow{\\times n} \\mathbb{Z}\\)。\\(\\text{Ext}^1 = \\text{coker} = \\mathbb{Z}/n\\)。所以同调中的 \\(\\mathbb{Z}/n\\) 挠在上同调中\"上移一维\"出现。"
+      },
+      {
+        "id": "alg-topo-ch05-q9",
+        "question": "\\(H^*(T^2; \\mathbb{Z})\\) 的环结构？",
+        "options": [
+          "\\(\\Lambda_\\mathbb{Z}[\\alpha, \\beta]\\)（\\(\\alpha, \\beta \\in H^1\\), \\(\\alpha^2 = \\beta^2 = 0\\), \\(\\alpha\\beta = -\\beta\\alpha\\)）",
+        "\\(\\mathbb{Z}[\\alpha, \\beta]\\)",
+        "\\(\\mathbb{Z}^4\\)",
+        "A（外代数 \\(\\Lambda[\\alpha,\\beta] = \\mathbb{Z} \\oplus \\mathbb{Z}\\alpha \\oplus \\mathbb{Z}\\beta \\oplus \\mathbb{Z}(\\alpha\\beta)\\))"
+        ],
+        "answer": 3,
+        "explanation": "\\(H^0 = \\mathbb{Z}(1)\\), \\(H^1 = \\mathbb{Z}\\alpha \\oplus \\mathbb{Z}\\beta\\), \\(H^2 = \\mathbb{Z}(\\alpha\\beta)\\)。\\(\\alpha^2 = 0, \\beta^2 = 0\\)（\\(H^2\\) 一维, 所以 \\(\\alpha^2 = 0\\) 由 \\(\\alpha \\smile \\alpha = (-1)^{1 \\cdot 1}\\alpha \\smile \\alpha = -\\alpha^2 \\Rightarrow 2\\alpha^2 = 0\\), 无挠 \\(\\Rightarrow \\alpha^2 = 0\\)）。\\(\\alpha\\beta\\) 是 \\(H^2\\) 的生成元（Poincaré 对偶保证非零）。"
+      },
+      {
+        "id": "alg-topo-ch05-q10",
+        "question": "Poincaré 对偶的推论：奇维闭有向流形 \\(\\chi(M^{2k+1}) = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "取决于 \\(M\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\beta_i = \\beta_{2k+1-i}\\)（Poincaré 对偶）。\\(\\chi = \\sum_{i=0}^{2k+1} (-1)^i \\beta_i = \\sum_{i=0}^k ((-1)^i + (-1)^{2k+1-i})\\beta_i = \\sum ((-1)^i - (-1)^i)\\beta_i = 0\\)（因为 \\((-1)^{2k+1-i} = -(-1)^i \\cdot (-1)^{2k} = -(-1)^i\\)）。所有奇维闭有向流形 Euler 数为零。\\(S^{2k+1}\\)：\\(\\chi = 0\\) ✓。"
+      },
+      {
+        "id": "alg-topo-ch05-q11",
+        "question": "de Rham 上同调 \\(H^1_{\\text{dR}}(S^1) = ?\\)",
+        "options": [
+          "\\(\\mathbb{R}\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{R}^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S^1\\) 上的 1-形式 \\(\\omega = f(\\theta)d\\theta\\)。闭：\\(d\\omega = 0\\) 自动（\\(S^1\\) 一维，无 2-形式）。恰当：\\(\\omega = dg \\iff \\int_0^{2\\pi} f(\\theta)d\\theta = 0\\)。\\(H^1_{\\text{dR}} = \\{\\)闭\\(\\}/\\{\\)恰当\\(\\} = \\mathbb{R}\\)（由 \\(\\int_{S^1} \\omega\\) 参数化）。\\(\\cong H^1(S^1; \\mathbb{R}) = \\mathbb{R}\\)。"
+      },
+      {
+        "id": "alg-topo-ch05-q12",
+        "question": "\\(H^*(\\mathbb{CP}^2; \\mathbb{Z})\\) 和 \\(H^*(S^2 \\vee S^4; \\mathbb{Z})\\) 作为群相同吗？作为环呢？",
+        "options": [
+          "群同构（\\(\\mathbb{Z}\\) 在维度 0,2,4），环不同构",
+        "完全相同",
+        "群不同",
+        "A（\\(\\mathbb{CP}^2\\)：\\(x^2 \\neq 0\\), \\(S^2 \\vee S^4\\)：\\(\\alpha^2 = 0\\)）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathbb{CP}^2\\)：\\(H^* = \\mathbb{Z}[x]/(x^3)\\), \\(x \\in H^2\\), \\(x^2 \\in H^4\\) 生成元。\\(S^2 \\vee S^4\\)：\\(H^2 = \\mathbb{Z}\\alpha, H^4 = \\mathbb{Z}\\beta\\), 但 \\(\\alpha^2 = 0\\)（\\(\\alpha\\) 的支撑在 \\(S^2\\) 上不能产生 \\(S^4\\) 上的类）。环不同构。Betti 数无法区分，但上积可以。上同调环比同调群更精细。"
+      },
+      {
+        "id": "alg-topo-ch05-q13",
+        "question": "\\(\\text{Hom}(\\mathbb{Z}/n, \\mathbb{Z}) = ?\\)",
+        "options": [
+          "\\(\\mathbb{Z}/n\\)",
+        "\\(0\\)",
+        "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}^n\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f: \\mathbb{Z}/n \\to \\mathbb{Z}\\) 同态。\\(f(1)\\) 满足 \\(nf(1) = f(n \\cdot 1) = f(0) = 0\\)。\\(\\mathbb{Z}\\) 无挠 \\(\\Rightarrow f(1) = 0 \\Rightarrow f = 0\\)。\\(\\text{Hom}(\\mathbb{Z}/n, \\mathbb{Z}) = 0\\)。这就是为什么挠在上同调中\"移位\"——\\(\\text{Ext}^1(\\mathbb{Z}/n, \\mathbb{Z}) = \\mathbb{Z}/n\\) 补偿了 \\(\\text{Hom} = 0\\)。"
+      },
+      {
+        "id": "alg-topo-ch05-q14",
+        "question": "Poincaré 对偶对不可定向流形成立吗？",
+        "options": [
+          "\\(\\mathbb{Z}\\) 系数不成立，但 \\(\\mathbb{Z}/2\\) 系数成立",
+        "总成立",
+        "完全不成立",
+        "A（\\(\\mathbb{Z}/2\\) 系数下：\\(H^k(M; \\mathbb{Z}/2) \\cong H_{n-k}(M; \\mathbb{Z}/2)\\)）"
+        ],
+        "answer": 3,
+        "explanation": "整系数 Poincaré 对偶需要定向类 \\([M] \\in H_n(M; \\mathbb{Z})\\)。不可定向流形没有整数基本类（\\(H_n = 0\\)），但有 \\(\\mathbb{Z}/2\\) 基本类（\\(H_n(M; \\mathbb{Z}/2) = \\mathbb{Z}/2\\)）。\\(\\mathbb{Z}/2\\) 系数下所有闭流形满足 Poincaré 对偶。也可以用\"扭曲系数\"（定向丛）恢复整数对偶。"
+      },
+      {
+        "id": "alg-topo-ch05-q15",
+        "question": "\\(\\Sigma_g\\)（亏格 \\(g\\) 闭有向曲面）的上同调环 \\(H^*(\\Sigma_g; \\mathbb{Z})\\)？",
+        "options": [
+          "\\(H^0 = \\mathbb{Z}, H^1 = \\mathbb{Z}^{2g}, H^2 = \\mathbb{Z}\\)，环结构由交叉形式（intersection form）决定",
+        "外代数",
+        "多项式环",
+        "A（\\(\\alpha_i \\smile \\beta_j = \\delta_{ij} \\mu\\), \\(\\alpha_i \\smile \\alpha_j = \\beta_i \\smile \\beta_j = 0\\)，\\(\\mu \\in H^2\\) 生成元）"
+        ],
+        "answer": 3,
+        "explanation": "\\(H^1\\) 有 \\(2g\\) 个生成元 \\(\\alpha_1, \\beta_1, \\ldots, \\alpha_g, \\beta_g\\)（对偶于同调中的经纬向环）。上积：\\(\\alpha_i \\smile \\beta_j = \\delta_{ij} \\mu\\)（Poincaré 对偶/交叉数决定），\\(\\alpha_i \\smile \\alpha_j = 0\\), \\(\\beta_i \\smile \\beta_j = 0\\)。交叉形式矩阵 = 辛阵 \\(\\begin{pmatrix}0 & I_g \\\\ -I_g & 0\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "alg-topo-ch05-q16",
+        "question": "域系数 \\(H^n(X; \\mathbb{F})\\) 与同调的关系？",
+        "options": [
+          "\\(H^n(X; \\mathbb{F}) \\cong \\text{Hom}_\\mathbb{F}(H_n(X; \\mathbb{F}), \\mathbb{F})\\)（对偶空间）",
+        "\\(H^n = H_n\\)",
+        "无简单关系",
+        "A（域上 Ext = 0，万有系数退化为对偶）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\mathbb{F}\\) 是域（\\(\\mathbb{Q}, \\mathbb{R}, \\mathbb{C}, \\mathbb{F}_p\\)），所有 \\(\\mathbb{F}[x]\\)-模是自由的，\\(\\text{Ext} = 0\\)。\\(H^n(X; \\mathbb{F}) = \\text{Hom}(H_n(X; \\mathbb{F}), \\mathbb{F}) = H_n(X; \\mathbb{F})^*\\)（对偶向量空间）。维数相同：\\(\\dim H^n = \\dim H_n = \\beta_n\\)（\\(\\mathbb{F}\\) 上的 Betti 数）。"
+      },
+      {
+        "id": "alg-topo-ch05-q17",
+        "question": "Cap product \\(\\frown: H^k(X) \\times H_n(X) \\to H_{n-k}(X)\\) 的几何含义？",
+        "options": [
+          "上同调类 \\(\\alpha \\in H^k\\) \"切割\" 同调类 \\(\\sigma \\in H_n\\)，得到 \\(n-k\\) 维子流形的同调类",
+        "与 cup product 相同",
+        "零映射",
+        "A（Poincaré 对偶 \\(D(\\alpha) = \\alpha \\frown [M]\\) 就是用 \\(\\alpha\\) 切割基本类）"
+        ],
+        "answer": 3,
+        "explanation": "Cap product 是 cup product 的对偶操作。在流形 \\(M^n\\) 上：\\(\\alpha \\in H^k\\) 的 Poincaré 对偶 \\(D(\\alpha) = \\alpha \\frown [M] \\in H_{n-k}\\)。几何上 \\(D(\\alpha)\\) 是 \\(\\alpha\\) 的零集（横截相交时）。例如 \\(\\mathbb{CP}^n\\) 中 \\(x \\in H^2\\) 的对偶是 \\(\\mathbb{CP}^{n-1} \\subseteq \\mathbb{CP}^n\\)（超平面截面）。"
+      },
+      {
+        "id": "alg-topo-ch05-q18",
+        "question": "上积的反交换性 \\(\\alpha \\smile \\beta = (-1)^{pq} \\beta \\smile \\alpha\\) 的意义？",
+        "options": [
+          "\\(H^*(X)\\) 是分级交换（graded-commutative）环",
+        "交换环",
+        "反交换环",
+        "A（偶数维类交换，奇数维类反交换）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\alpha \\in H^p, \\beta \\in H^q\\)：\\(\\alpha \\smile \\beta = (-1)^{pq} \\beta \\smile \\alpha\\)。\\(p, q\\) 都偶：\\(\\alpha\\beta = \\beta\\alpha\\)（交换）。\\(p\\) 奇 \\(q\\) 奇：\\(\\alpha\\beta = -\\beta\\alpha\\)（反交换）。\\(\\alpha^2 = -\\alpha^2\\)（\\(p\\) 奇）\\(\\Rightarrow 2\\alpha^2 = 0\\)。这给出外代数结构（奇维类）。上同调环是分级交换代数。"
+      },
+      {
+        "id": "alg-topo-ch05-q19",
+        "question": "交叉形式 (intersection form)：4 维闭有向流形 \\(M^4\\) 的 \\(Q: H^2(M; \\mathbb{Z}) \\times H^2(M; \\mathbb{Z}) \\to \\mathbb{Z}\\)。这是什么？",
+        "options": [
+          "\\(Q(\\alpha, \\beta) = \\langle \\alpha \\smile \\beta, [M]\\rangle\\)（上积再与基本类配对）",
+        "度量",
+        "拓扑不变量",
+        "A 和 C（\\(Q\\) 是对称双线性形式，是 \\(M\\) 的同胚不变量——Donaldson/Freedman 理论的核心）"
+        ],
+        "answer": 3,
+        "explanation": "\\(Q(\\alpha, \\beta) = (\\alpha \\smile \\beta)[M] \\in \\mathbb{Z}\\)。\\(Q\\) 对称（\\(\\alpha \\smile \\beta = \\beta \\smile \\alpha\\), 因 \\(p = q = 2\\), \\((-1)^4 = 1\\)）。\\(Q\\) 非退化（Poincaré 对偶）。\\(Q\\) 的符号 = 流形的 signature。Freedman 分类：单连通闭 4-流形由 \\(Q\\) 决定（Top 范畴）。Donaldson：光滑结构更受限。"
+      },
+      {
+        "id": "alg-topo-ch05-q20",
+        "question": "Poincaré 对偶的证明核心思路？",
+        "options": [
+          "用 Mayer-Vietoris 归纳：先证对 \\(\\mathbb{R}^n\\)，再粘合",
+        "直接定义 cap product",
+        "A 和 B 结合——cap product 给出映射，MV 归纳证明是同构",
+        "用微分形式"
+        ],
+        "answer": 2,
+        "explanation": "Step 1: 定义 \\(D_M: H^k(M) \\to H_{n-k}(M)\\), \\(D_M(\\alpha) = \\alpha \\frown [M]\\)。Step 2: 对 \\(M = \\mathbb{R}^n\\)（\\(H^k_c\\) 紧支撑上同调）证明 \\(D\\) 是同构。Step 3: Mayer-Vietoris 归纳：\\(M = U \\cup V\\)，\\(D_U, D_V, D_{U \\cap V}\\) 都是同构 \\(\\Rightarrow D_M\\) 是同构（五引理）。微分形式版（D）也可以——Hodge 理论。"
+      },
+      {
+        "id": "alg-topo-ch05-q21",
+        "question": "Alexander 对偶定理：紧子集 \\(K \\subseteq S^n\\) 的约化同调与 \\(S^n \\setminus K\\) 的什么相关？",
+        "options": [
+          "\\(\\tilde{H}^q(K) \\cong \\tilde{H}_{n-q-1}(S^n \\setminus K)\\)",
+        "\\(H^q(K) = H^q(S^n \\setminus K)\\)",
+        "无关系",
+        "A（推论：\\(K = S^k \\subseteq S^n\\), \\(\\tilde{H}_i(S^n \\setminus S^k) \\cong \\tilde{H}^{n-i-1}(S^k)\\)）"
+        ],
+        "answer": 3,
+        "explanation": "Alexander 对偶是 Poincaré 对偶的推广到嵌入子空间。\\(K = S^1 \\subseteq S^3\\)（结）：\\(\\tilde{H}_1(S^3 \\setminus K) \\cong \\tilde{H}^1(S^1) = \\mathbb{Z}\\)。推论：\\(S^3\\) 中任何结的补空间 \\(H_1 = \\mathbb{Z}\\)（但 \\(\\pi_1\\) 可以很复杂——结群）。\\(K = S^0 \\subseteq S^n\\)：\\(S^n \\setminus S^0 \\simeq S^{n-1}\\)。"
+      },
+      {
+        "id": "alg-topo-ch05-q22",
+        "question": "Čech 上同调和奇异上同调的区别？",
+        "options": [
+          "对好的空间（paracompact Hausdorff）同构",
+        "Čech 用开覆盖定义，奇异用链复形",
+        "A 和 B",
+        "Čech 适用于更广的空间（如层上同调）"
+        ],
+        "answer": 2,
+        "explanation": "Čech 上同调：取开覆盖 \\(\\mathcal{U} = \\{U_\\alpha\\}\\)，nerve \\(N(\\mathcal{U})\\) 的上同调，取直极限。对 CW 复形/流形与奇异上同调同构。Čech 上同调在代数几何中推广为层上同调。奇异上同调更适合计算，Čech 更适合抽象理论和层论。"
+      },
+      {
+        "id": "alg-topo-ch05-q23",
+        "question": "Künneth 公式：\\(H^n(X \\times Y; \\mathbb{F}) \\cong ?\\)（\\(\\mathbb{F}\\) = 域）",
+        "options": [
+          "\\(\\bigoplus_{i+j=n} H^i(X; \\mathbb{F}) \\otimes_\\mathbb{F} H^j(Y; \\mathbb{F})\\)",
+        "\\(H^n(X) \\oplus H^n(Y)\\)",
+        "\\(H^n(X) \\otimes H^n(Y)\\)",
+        "A（域系数下无 Tor 修正项）"
+        ],
+        "answer": 3,
+        "explanation": "域系数 Künneth：\\(H^*(X \\times Y; \\mathbb{F}) \\cong H^*(X; \\mathbb{F}) \\otimes_\\mathbb{F} H^*(Y; \\mathbb{F})\\)（作为分级环）。\\(T^2 = S^1 \\times S^1\\)：\\(H^*(T^2; \\mathbb{Q}) = H^*(S^1) \\otimes H^*(S^1) = \\Lambda[\\alpha] \\otimes \\Lambda[\\beta] = \\Lambda[\\alpha, \\beta]\\)。整系数需加 Tor 项。"
+      },
+      {
+        "id": "alg-topo-ch05-q24",
+        "question": "Hodge 分解定理（紧致 Riemann 流形）的含义？",
+        "options": [
+          "\\(H^k_{\\text{dR}}(M) \\cong \\mathcal{H}^k(M)\\)（调和 \\(k\\)-形式空间）",
+        "每个 de Rham 上同调类有唯一调和代表元",
+        "A 和 B",
+        "\\(\\Omega^k = d\\Omega^{k-1} \\oplus \\delta\\Omega^{k+1} \\oplus \\mathcal{H}^k\\)（正交分解）"
+        ],
+        "answer": 2,
+        "explanation": "Hodge 定理：紧致 Riemann 流形上，\\(\\Omega^k = \\text{im}(d) \\oplus \\text{im}(\\delta) \\oplus \\mathcal{H}^k\\)（\\(\\delta = d^*\\) 余微分，\\(\\mathcal{H}^k = \\ker \\Delta\\) 调和形式）。\\(H^k_{\\text{dR}} \\cong \\mathcal{H}^k\\)（每个上同调类有唯一调和代表）。\\(\\dim \\mathcal{H}^k = \\beta_k\\)。调和形式给出上同调的解析实现。"
+      },
+      {
+        "id": "alg-topo-ch05-q25",
+        "question": "\\(H^*(\\mathbb{RP}^n; \\mathbb{Z}/2)\\) 的环结构？",
+        "options": [
+          "\\(\\mathbb{Z}/2[x]/(x^{n+1})\\)（\\(x \\in H^1\\)）",
+        "外代数",
+        "\\((\\mathbb{Z}/2)^{n+1}\\)",
+        "A（\\(\\mathbb{Z}/2\\) 系数下所有维度有生成元，上积给多项式环截断）"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^k(\\mathbb{RP}^n; \\mathbb{Z}/2) = \\mathbb{Z}/2\\)（\\(0 \\leq k \\leq n\\)）。\\(x \\in H^1\\) 的 \\(k\\) 次幂 \\(x^k\\) 生成 \\(H^k\\)。\\(x^{n+1} = 0\\)。这是 Stiefel-Whitney 类理论的基础：\\(w_1(\\gamma) = x \\in H^1(\\mathbb{RP}^n; \\mathbb{Z}/2)\\)（\\(\\gamma\\) = 典范线丛）。"
+      },
+      {
+        "id": "alg-topo-ch05-q26",
+        "question": "在弦理论中，Calabi-Yau 流形 \\(M^3\\)（复 3 维）的 Hodge 数 \\(h^{p,q}\\) 有什么物理意义？",
+        "options": [
+          "决定紧化后低能粒子的代数",
+        "决定流形体积",
+        "\\(h^{1,1}\\) = Kähler 模参数数（标量场），\\(h^{2,1}\\) = 复结构模参数数",
+        "A 和 C"
+        ],
+        "answer": 3,
+        "explanation": "Calabi-Yau 三折 \\(M\\)：Hodge 菱形由 \\(h^{1,1}, h^{2,1}\\) 决定。\\(h^{1,1}\\) = \\(H^{1,1}\\) 维数 = Kähler 模空间维度（紧化体积和形状参数）。\\(h^{2,1}\\) = 复结构形变数。物理中这些对应低能有效理论中的标量场数目。\\(\\chi = 2(h^{1,1} - h^{2,1})\\)。镜对称交换 \\(h^{1,1} \\leftrightarrow h^{2,1}\\)。"
+      },
+      {
+        "id": "alg-topo-ch05-q27",
+        "question": "特征类（Chern 类、Stiefel-Whitney 类）是什么？",
+        "options": [
+          "向量丛 \\(E \\to M\\) 的上同调类 \\(c_k(E) \\in H^{2k}(M; \\mathbb{Z})\\)（Chern），\\(w_k(E) \\in H^k(M; \\mathbb{Z}/2)\\)（SW）",
+        "函数",
+        "度量",
+        "A（衡量向量丛的\"扭曲程度\"，是拓扑不变量）"
+        ],
+        "answer": 3,
+        "explanation": "Chern 类 \\(c_k(E)\\)：复向量丛的不变量。\\(c_1\\) = 行列式丛的度。\\(\\int_M c_n(TM) = \\chi(M)\\)（Gauss-Bonnet 推广）。Stiefel-Whitney 类 \\(w_k\\)：实向量丛。\\(w_1(TM) = 0 \\iff M\\) 可定向。\\(w_2(TM) = 0 \\iff M\\) 有 spin 结构。上同调环是定义和计算特征类的自然框架。"
+      },
+      {
+        "id": "alg-topo-ch05-q28",
+        "question": "在电磁学中，Maxwell 方程的上同调解释是什么？",
+        "options": [
+          "\\(F = dA\\)（\\(F\\) = 电磁场 2-形式，\\(A\\) = 势 1-形式），\\(dF = 0\\), \\(d*F = J\\)",
+        "\\(F\\) 是 de Rham 上同调类（磁荷不为零时 \\([F] \\neq 0 \\in H^2\\)）",
+        "A 和 B",
+        "与上同调无关"
+        ],
+        "answer": 2,
+        "explanation": "无源 Maxwell：\\(dF = 0\\)（\\(F\\) 闭），\\(F = dA\\) 局部（\\(F\\) 恰当）。全局：\\(F\\) 的 de Rham 类 \\([F] \\in H^2(M)\\) 可以非零（如磁单极子——\\(H^2(S^2) = \\mathbb{Z}\\)）。Dirac 量子化条件：\\(\\frac{1}{2\\pi}\\int_{S^2} F \\in \\mathbb{Z}\\)。上同调提供了规范场（联络）的整体分类框架——主丛的分类由特征类给出。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="alg-topo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/alg-topo.html" class="module-name">代数拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 上同调群的定义与环结构</a></li>
+      <li><a href="#kp2">02 · 万有系数定理</a></li>
+      <li><a href="#kp3">03 · Poincaré 对偶</a></li>
+      <li><a href="#kp4">04 · Künneth 公式与交叉积</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>上同调与 Poincaré 对偶</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>上同调群的定义与环结构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同调将空间分解为"洞"的信息，但上同调更进一步——它自带乘法 结构（杯积）！同调群只是交换群的序列，而上同调群在杯积下构成 一个分次交换环。这个额外的代数结构能区分同调群相同但上同调环 不同的空间（经典例子：\(\mathbb{C}P^2\) 和 \(S^2 \vee S^4\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>上同调 = 链复形的对偶（\(\mathrm{Hom}\) 函子）。杯积来自链的 对角逼近（Alexander-Whitney 映射），给上同调以环结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>余链群</strong>：\(C^n(X; R) = \mathrm{Hom}(C_n(X), R)\)（\(R\) 为系数环）。 <strong>余边缘</strong>：\(\delta^n: C^n \to C^{n+1}\)，\((\delta \varphi)(\sigma) = \varphi(\partial \sigma)\)。 \(\delta^2 = 0\)（因为 \(\partial^2 = 0\)）。 <strong>上同调群</strong>：\(H^n(X; R) = \ker \delta^n / \mathrm{im}\,\delta^{n-1}\)。 <strong>杯积</strong>：\(\smile: H^p(X) \times H^q(X) \to H^{p+q}(X)\)。 定义在余链层面：\((\varphi \smile \psi)(\sigma) = \varphi(\sigma|_{[v_0,\ldots,v_p]}) \cdot \psi(\sigma|_{[v_p,\ldots,v_{p+q}]})\)。 \[\alpha \smile \beta = (-1)^{pq} \beta \smile \alpha\] （分次交换）。 <strong>上同调环</strong>：\(H^*(X; R) = \bigoplus_n H^n(X; R)\) 配合 \(\smile\) 构成分次交换环。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 杯积区分 \(\mathbb{C}P^2\) 和 \(S^2 \vee S^4\)（同调同构但杯积不同）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(H^*(\mathbb{C}P^2; \mathbb{Z})\) 的环结构。 解答：\(H^0 = \mathbb{Z}\), \(H^2 = \mathbb{Z}\), \(H^4 = \mathbb{Z}\)。 设 \(\alpha\) 生成 \(H^2\)。\(\alpha \smile \alpha\) 生成 \(H^4\)： \(H^*(\mathbb{C}P^2) \cong \mathbb{Z}[\alpha] / (\alpha^3)\)，\(\deg \alpha = 2\)。 比较 \(S^2 \vee S^4\)：\(H^2 = \mathbb{Z}\langle a \rangle\)，\(H^4 = \mathbb{Z}\langle b \rangle\)， \(a \smile a = 0 \neq b\)。 杯积区分了两个空间。 易错点：\(H_n\) 相同不等于空间同伦等价——上同调环是更精细的不变量。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">杯积满足什么交换律？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。分次交换，\\(p = \\deg \\alpha\\)，\\(q = \\deg \\beta\\)。偶数阶生成元交换，')">A. \(\alpha \smile \beta = \beta \smile \alpha\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！分次交换，\\(p = \\deg \\alpha\\)，\\(q = \\deg \\beta\\)。偶数阶生成元交换，')">B. \(\alpha \smile \beta = (-1)^{pq}\beta \smile \alpha\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。分次交换，\\(p = \\deg \\alpha\\)，\\(q = \\deg \\beta\\)。偶数阶生成元交换，')">C. \(\alpha \smile \beta = -\beta \smile \alpha\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。分次交换，\\(p = \\deg \\alpha\\)，\\(q = \\deg \\beta\\)。偶数阶生成元交换，')">D. 杯积没有交换律</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>万有系数定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>用不同系数（\(\mathbb{Z}, \mathbb{Z}/2, \mathbb{Q}, \mathbb{R}\)）计算上同调 时结果不同——万有系数定理精确地描述了它们之间的关系。实际计算 中，\(\mathbb{Z}/2\) 系数消除了方向问题，\(\mathbb{Q}\) 系数消除了挠， \(\mathbb{R}\) 系数连接到 de Rham 上同调。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>万有系数定理说 \(H^n(X; G) \cong \mathrm{Hom}(H_n, G) \oplus \mathrm{Ext}^1(H_{n-1}, G)\) ——上同调由同调和 Ext 函子决定（自然但非典范分裂）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>万有系数定理（上同调版）</strong>： \[0 \to \mathrm{Ext}^1_\mathbb{Z}(H_{n-1}(X), G) \to H^n(X; G) \to \mathrm{Hom}(H_n(X), G) \to 0\] 此序列分裂（但非自然）。 <strong>关键情况</strong>： - \(G = \mathbb{Q}\) 或 \(\mathbb{R}\)：\(\mathrm{Ext}\) 项消失（可除群）， \(H^n(X; \mathbb{R}) \cong \mathrm{Hom}(H_n(X), \mathbb{R})\)。 - \(G = \mathbb{Z}\)：\(\mathrm{Ext}^1(\mathbb{Z}/m, \mathbb{Z}) = \mathbb{Z}/m\)。 \(\mathrm{Ext}\) 项"提升"了挠信息。 <strong>万有系数定理（同调版）</strong>： \[0 \to H_n(X;\mathbb{Z}) \otimes G \to H_n(X; G) \to \mathrm{Tor}_1(H_{n-1}(X), G) \to 0\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- de Rham 定理：\(H^n_{dR}(M) \cong H^n(M; \mathbb{R})\)，将分析与拓扑连接</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(H_1(\mathbb{R}P^2) = \mathbb{Z}/2\)，\(H_0 = \mathbb{Z}\)。 求 \(H^2(\mathbb{R}P^2; \mathbb{Z})\)。 解答：万有系数定理：\(H^2 \cong \mathrm{Hom}(H_2, \mathbb{Z}) \oplus \mathrm{Ext}^1(H_1, \mathbb{Z})\)。 \(H_2(\mathbb{R}P^2) = 0\)，\(\mathrm{Hom}(0, \mathbb{Z}) = 0\)。 \(\mathrm{Ext}^1(\mathbb{Z}/2, \mathbb{Z}) = \mathbb{Z}/2\)。 \(H^2(\mathbb{R}P^2; \mathbb{Z}) = \mathbb{Z}/2\)。 易错点：\(H^n \neq H_n\) 一般不成立！上同调可能有挠而同调没有（反之亦然）， 通过 \(\mathrm{Ext}\) 项联系。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(H_n(X)\) 无挠（自由交换群），则 \(H^n(X;\mathbb{Z}) \cong ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(H_{n-1}\\) 自由 \\(\\Rightarrow\\) \\(\\mathrm{Ext}^1 = 0\\)，')">A. \(H_n(X)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(H_{n-1}\\) 自由 \\(\\Rightarrow\\) \\(\\mathrm{Ext}^1 = 0\\)，')">B. \(\mathrm{Hom}(H_n(X), \mathbb{Z})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(H_{n-1}\\) 自由 \\(\\Rightarrow\\) \\(\\mathrm{Ext}^1 = 0\\)，')">C. \(\mathrm{Ext}^1(H_n, \mathbb{Z})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(H_{n-1}\\) 自由 \\(\\Rightarrow\\) \\(\\mathrm{Ext}^1 = 0\\)，')">D. \(H_{n+1}(X)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Poincaré 对偶</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>闭定向 \(n\) 维流形有一个惊人的对称性：\(k\) 维的上同调与 \((n-k)\) 维 的同调同构！这就是 Poincaré 对偶——几何上对应于"\(k\) 维子流形 与 \((n-k)\) 维子流形横截相交"。对偶让高维上同调的计算可以 转化为低维同调的计算（或反之）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Poincaré 对偶 = 与基本类的杯积给出同构。 \([M] \in H_n(M)\) 是"整个流形"的同调类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Poincaré 对偶定理</strong>：\(M\) 是闭定向 \(n\) 维流形，\(R\) 为系数。 \[D: H^k(M; R) \xrightarrow{\cong} H_{n-k}(M; R)\] \(D(\alpha) = \alpha \frown [M]\)（帽积 with 基本类）。 等价表述：杯积配对 \[H^k(M; R) \otimes H^{n-k}(M; R) \xrightarrow{\smile} H^n(M; R) \cong R\] 是非退化的（当 \(R\) 是域时）。 <strong>推论</strong>： - Betti 数对称：\(\beta_k = \beta_{n-k}\) - \(\chi(M) = 0\) 若 \(n\) 为奇数 - 中间维上同调 \(H^{n/2}\) 上有非退化配对（交叉形式）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 4 维流形分类中，\(H^2\) 上的交叉形式是核心不变量（Donaldson 和 Freedman 的工作）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(M = S^2\)（\(n = 2\)）。验证 Poincaré 对偶。 解答：\(H^0 = \mathbb{Z}\)，\(H^1 = 0\)，\(H^2 = \mathbb{Z}\)。 \(H_0 = \mathbb{Z}\)，\(H_1 = 0\)，\(H_2 = \mathbb{Z}\)。 对偶：\(H^0 \cong H_2\)（\(\mathbb{Z} \cong \mathbb{Z}\)）， \(H^1 \cong H_1\)（\(0 \cong 0\)），\(H^2 \cong H_0\)（\(\mathbb{Z} \cong \mathbb{Z}\)）。✓ 易错点：Poincaré 对偶要求闭（无边界）+ 定向。莫比乌斯带（有边界且不可定向） 和 \(\mathbb{R}P^2\)（不可定向）不满足\(\mathbb{Z}\) 系数的 Poincaré 对偶。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">闭定向 5 维流形 \(M\) 的 \(\beta_2\) 和 \(\beta_3\) 满足什么关系？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Poincaré 对偶：\\(\\beta_k = \\beta_{n-k}\\)。')">A. \(\beta_2 = \beta_3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Poincaré 对偶：\\(\\beta_k = \\beta_{n-k}\\)。')">B. \(\beta_2 = \beta_3 + 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Poincaré 对偶：\\(\\beta_k = \\beta_{n-k}\\)。')">C. \(\beta_2 + \beta_3 = 5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Poincaré 对偶：\\(\\beta_k = \\beta_{n-k}\\)。')">D. 没有固定关系</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Künneth 公式与交叉积</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>积空间 \(X \times Y\) 的同调/上同调如何从因子的同调/上同调计算？ Künneth 公式给出答案：在系数为域时， \(H_n(X \times Y) \cong \bigoplus_{p+q=n} H_p(X) \otimes H_q(Y)\)。 交叉积 (cross product) 是实现这一同构的自然映射。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Künneth 公式将同调理论中的"积"与代数中的"张量积"联系起来。 系数不是域时有修正项（Tor 项）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Künneth 公式</strong>（域系数 \(k\)）： \[H_n(X \times Y; k) \cong \bigoplus_{p+q=n} H_p(X; k) \otimes_k H_q(Y; k)\] <strong>整系数 Künneth</strong>： \[0 \to \bigoplus_{p+q=n} H_p(X) \otimes H_q(Y) \to H_n(X \times Y) \to \bigoplus_{p+q=n-1} \mathrm{Tor}_1(H_p(X), H_q(Y)) \to 0\] <strong>上同调中的交叉积</strong>： \(\times: H^p(X; R) \otimes H^q(Y; R) \to H^{p+q}(X \times Y; R)\)， \(\alpha \times \beta = \pi_X^* \alpha \smile \pi_Y^* \beta\)。 \[H^*(X \times Y; k) \cong H^*(X; k) \otimes_k H^*(Y; k) \quad (\text{分次环同构})\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- \(H^*(T^n; \mathbb{Z}) = \Lambda^*[\alpha_1, \ldots, \alpha_n]\)（\(\deg \alpha_i = 1\)， 外代数），因为 \(T^n = (S^1)^n\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：计算 \(H_*(T^2; \mathbb{Z})\)。 解答：\(T^2 = S^1 \times S^1\)。\(H_0(S^1) = \mathbb{Z}\)，\(H_1(S^1) = \mathbb{Z}\)。 \(H_0(T^2) = \mathbb{Z} \otimes \mathbb{Z} = \mathbb{Z}\) \(H_1(T^2) = (H_0 \otimes H_1) \oplus (H_1 \otimes H_0) = \mathbb{Z}^2\) \(H_2(T^2) = H_1 \otimes H_1 = \mathbb{Z}\) 无 Tor 项（\(H_*(S^1)\) 自由）。 易错点：若因子有挠同调，Tor 项非零。例如 \(H_*(RP^2 \times RP^2)\) 需要 Tor 修正。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(H_2(S^2 \times S^2; \mathbb{Z}) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(H_2 = H_0 \\otimes H_2 \\oplus H_2 \\otimes H_0 = \\mathbb{Z} \\oplus \\mathbb{Z} = \\mathbb{Z}^2\\)。')">A. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(H_2 = H_0 \\otimes H_2 \\oplus H_2 \\otimes H_0 = \\mathbb{Z} \\oplus \\mathbb{Z} = \\mathbb{Z}^2\\)。')">B. \(\mathbb{Z}^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(H_2 = H_0 \\otimes H_2 \\oplus H_2 \\otimes H_0 = \\mathbb{Z} \\oplus \\mathbb{Z} = \\mathbb{Z}^2\\)。')">C. \(\mathbb{Z}^3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(H_2 = H_0 \\otimes H_2 \\oplus H_2 \\otimes H_0 = \\mathbb{Z} \\oplus \\mathbb{Z} = \\mathbb{Z}^2\\)。')">D. \(0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/geometry/alg-topo.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

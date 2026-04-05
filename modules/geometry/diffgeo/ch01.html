@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 光滑流形 — 微分几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "diffgeo-ch01-q1",
+        "question": "\\(n\\) 维拓扑流形的定义要求什么？",
+        "options": [
+          "嵌入 \\(\\mathbb{R}^n\\) 的光滑曲面",
+        "Hausdorff、第二可数的局部欧氏空间（每点有邻域同胚于 \\(\\mathbb{R}^n\\)）",
+        "度量空间",
+        "紧致连通空间"
+        ],
+        "answer": 1,
+        "explanation": "拓扑流形 = Hausdorff + 第二可数 + 局部欧氏。Hausdorff 保证极限唯一，第二可数保证可度量化和仿紧。局部欧氏：每点 \\(p\\) 有邻域 \\(U\\) 和同胚 \\(\\varphi: U \\to \\hat{U} \\subseteq \\mathbb{R}^n\\)（坐标卡 \\((U, \\varphi)\\)）。不要求嵌入 \\(\\mathbb{R}^n\\)（A 错——Whitney 嵌入定理另说）。度量和紧致不是定义的一部分。"
+      },
+      {
+        "id": "diffgeo-ch01-q2",
+        "question": "\\(S^2\\)（单位球面）是几维流形？坐标卡至少需要几个？",
+        "options": [
+          "1 维，1 个",
+        "2 维，1 个",
+        "2 维，至少 2 个",
+        "3 维，1 个"
+        ],
+        "answer": 2,
+        "explanation": "\\(S^2 \\subseteq \\mathbb{R}^3\\) 局部同胚于 \\(\\mathbb{R}^2\\)，是 2 维流形。\\(S^2\\) 紧致，\\(\\mathbb{R}^2\\) 不紧致，所以不可能用一个坐标卡覆盖。至少需要 2 个（如球极投影：北极和南极各去一个点）。实际上 \\(S^n\\) 至少需要 2 个坐标卡。"
+      },
+      {
+        "id": "diffgeo-ch01-q3",
+        "question": "两个坐标卡 \\((U, \\varphi)\\) 和 \\((V, \\psi)\\) 光滑相容的条件是什么？",
+        "options": [
+          "\\(U \\cap V = \\emptyset\\)",
+        "转移函数 \\(\\psi \\circ \\varphi^{-1}: \\varphi(U \\cap V) \\to \\psi(U \\cap V)\\) 是光滑映射",
+        "\\(\\varphi = \\psi\\)",
+        "\\(U = V\\)"
+        ],
+        "answer": 1,
+        "explanation": "转移函数（坐标变换）\\(\\psi \\circ \\varphi^{-1}\\) 是 \\(\\mathbb{R}^n\\) 开子集之间的映射。若它是 \\(C^\\infty\\) 的（光滑的），则两个卡光滑相容。光滑结构 = 极大光滑图册（任意两卡光滑相容的坐标卡收集）。若 \\(U \\cap V = \\emptyset\\)，自动相容（空集上条件平凡满足）。"
+      },
+      {
+        "id": "diffgeo-ch01-q4",
+        "question": "\\(p \\in M\\) 处切空间 \\(T_pM\\) 的维数是什么？",
+        "options": [
+          "\\(\\dim M + 1\\)",
+        "\\(\\dim M\\)",
+        "\\(2 \\dim M\\)",
+        "\\(\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(T_pM \\cong \\mathbb{R}^n\\)（\\(n = \\dim M\\)）。坐标卡 \\((U, \\varphi = (x^1, \\ldots, x^n))\\) 给出基 \\(\\{\\partial/\\partial x^i|_p\\}_{i=1}^n\\)。\\(T_pM\\) 是 \\(n\\) 维实向量空间。切向量可以作为\"方向导数算子\"：\\(v(f) = \\sum v^i \\frac{\\partial(f \\circ \\varphi^{-1})}{\\partial x^i}\\)。"
+      },
+      {
+        "id": "diffgeo-ch01-q5",
+        "question": "\\(\\mathbb{R}^3\\) 中 \\(S^2\\) 在北极 \\(N = (0,0,1)\\) 处的切空间 \\(T_NS^2\\) 是什么？",
+        "options": [
+          "\\(\\{(x,y,z) : z = 1\\}\\)",
+        "\\(\\{(x,y,0) : x,y \\in \\mathbb{R}\\}\\)",
+        "\\(\\mathbb{R}^3\\)",
+        "\\(\\{(0,0,z) : z \\in \\mathbb{R}\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(S^2 = \\{(x,y,z) : x^2+y^2+z^2 = 1\\}\\)。在 \\(N = (0,0,1)\\)，法向量 \\(\\nabla(x^2+y^2+z^2) = (0,0,2)\\)。切平面 = 法向量的正交补 = \\(\\{(x,y,z) : z = 0\\}\\)（过原点的 \\(xy\\) 平面）。作为 \\(\\mathbb{R}^3\\) 中的仿射切平面是 \\(z = 1\\)（A），但作为向量空间是 \\(z = 0\\)（B）。在抽象微分几何中，切空间是过该点的向量空间。"
+      },
+      {
+        "id": "diffgeo-ch01-q6",
+        "question": "光滑映射 \\(F: M \\to N\\) 在 \\(p\\) 处的微分 \\(dF_p: T_pM \\to T_{F(p)}N\\) 的定义是什么？",
+        "options": [
+          "\\(dF_p(v)(g) = v(g \\circ F)\\)，对 \\(g \\in C^\\infty(N)\\)",
+        "\\(dF_p = F'(p)\\)（普通导数）",
+        "\\(dF_p\\) 是 Jacobian 矩阵",
+        "A 和 C 在坐标下等价"
+        ],
+        "answer": 3,
+        "explanation": "抽象定义：\\(dF_p(v)(g) = v(g \\circ F)\\)（A），将 \\(v \\in T_pM\\)（作为导数算子）\"推前\"。在坐标下：选 \\(M\\) 的坐标 \\((x^i)\\) 和 \\(N\\) 的坐标 \\((y^j)\\)，\\(dF_p(\\partial/\\partial x^i) = \\sum_j \\frac{\\partial F^j}{\\partial x^i} \\partial/\\partial y^j\\)，矩阵就是 Jacobian \\((\\partial F^j/\\partial x^i)\\)。所以 A 和 C 在坐标下等价。"
+      },
+      {
+        "id": "diffgeo-ch01-q7",
+        "question": "\\(\\mathbb{RP}^n\\) 可以赋予光滑结构吗？",
+        "options": [
+          "不可以",
+        "可以，由 \\(S^n \\to \\mathbb{RP}^n\\) 的二重覆叠继承",
+        "只在偶数维时",
+        "只在 \\(n \\leq 3\\) 时"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{RP}^n = S^n/\\{x \\sim -x\\}\\)。\\(S^n\\) 是光滑流形，对径映射 \\(x \\mapsto -x\\) 是光滑自同构。商流形定理：自由、真（properly discontinuous）的光滑群作用的商有自然光滑结构。对径映射群 \\(\\mathbb{Z}/2\\) 自由作用 \\(\\Rightarrow \\mathbb{RP}^n\\) 是 \\(n\\) 维光滑流形。"
+      },
+      {
+        "id": "diffgeo-ch01-q8",
+        "question": "\\(GL(n, \\mathbb{R}) = \\{A \\in M_{n \\times n} : \\det A \\neq 0\\}\\) 是几维流形？",
+        "options": [
+          "\\(n\\)",
+        "\\(n^2\\)",
+        "\\(n^2 - 1\\)",
+        "\\(2n^2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(GL(n, \\mathbb{R})\\) 是 \\(M_{n \\times n} \\cong \\mathbb{R}^{n^2}\\) 的开子集（\\(\\det\\) 连续, \\(\\det \\neq 0\\) 是开条件）。\\(\\mathbb{R}^{n^2}\\) 的开子集自身是 \\(n^2\\) 维流形（一个坐标卡 = 包含映射）。\\(SL(n) = \\{\\det = 1\\}\\) 是 \\(n^2 - 1\\) 维（C）。"
+      },
+      {
+        "id": "diffgeo-ch01-q9",
+        "question": "\\(S^7\\) 上存在几种不同的光滑结构？",
+        "options": [
+          "1 种",
+        "15 种",
+        "28 种",
+        "无穷多种"
+        ],
+        "answer": 2,
+        "explanation": "Milnor 1956 年发现\"奇异球面\"（exotic spheres）：\\(S^7\\) 上有 28 种不微分同胚的光滑结构（但彼此同胚作为拓扑空间）。这 28 种形成群 \\(\\Theta_7 \\cong \\mathbb{Z}/28\\mathbb{Z}\\)。\\(S^1, S^2, S^3, S^5, S^6\\) 光滑结构唯一。\\(S^4\\) 的光滑结构数未知（广义 Poincaré 猜想相关）。"
+      },
+      {
+        "id": "diffgeo-ch01-q10",
+        "question": "曲线 \\(\\gamma(t) = (\\cos t, \\sin t)\\) 在 \\(t = 0\\)（即 \\((1,0) \\in S^1\\)）处的切向量是？",
+        "options": [
+          "\\((0, 1)\\)",
+        "\\((-\\sin 0, \\cos 0) = (0, 1)\\)",
+        "\\((1, 0)\\)",
+        "A 和 B 相同"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\gamma'(0) = (-\\sin 0, \\cos 0) = (0, 1)\\)。在 \\(\\mathbb{R}^2\\) 嵌入的意义下，切向量指向 \\((0,1)\\) 方向（竖直向上）。在抽象定义中，\\(\\gamma'(0)\\) 作为 \\(T_{(1,0)}S^1\\) 的元素，作用于函数 \\(f\\) 给出 \\((f \\circ \\gamma)'(0) = \\nabla f \\cdot (0,1)\\)。"
+      },
+      {
+        "id": "diffgeo-ch01-q11",
+        "question": "设 \\(F: \\mathbb{R}^2 \\to \\mathbb{R}^3\\)，\\(F(u,v) = (u^2, uv, v^2)\\)。\\(dF_{(1,1)}\\) 的矩阵是？",
+        "options": [
+          "\\(\\begin{pmatrix} 2 & 0 \\\\ 1 & 1 \\\\ 0 & 2 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 2u & 0 \\\\ v & u \\\\ 0 & 2v \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 1 & 0 \\\\ 1 & 1 \\\\ 0 & 1 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 2 & 0 & 0 \\\\ 0 & 1 & 1 \\\\ 0 & 0 & 2 \\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(F = (u^2, uv, v^2)\\)。Jacobian \\(= \\begin{pmatrix} 2u & 0 \\\\ v & u \\\\ 0 & 2v \\end{pmatrix}\\)。在 \\((u,v) = (1,1)\\)：\\(\\begin{pmatrix} 2 & 0 \\\\ 1 & 1 \\\\ 0 & 2 \\end{pmatrix}\\)。秩 = 2（\\(2 \\times 2\\) 子矩阵 \\(\\begin{pmatrix} 2 & 0 \\\\ 1 & 1 \\end{pmatrix}\\) 行列式 = 2 \\(\\neq 0\\)），所以 \\(dF_{(1,1)}\\) 是单射。D 是 \\(3 \\times 3\\) 矩阵（维度错误）。"
+      },
+      {
+        "id": "diffgeo-ch01-q12",
+        "question": "带边流形 \\(M\\) 的边界 \\(\\partial M\\) 是什么？",
+        "options": [
+          "\\(M\\) 的拓扑边界（在某个环境空间中）",
+        "由坐标映到 \\(\\mathbb{R}^n_+ = \\{x^n \\geq 0\\}\\) 边界 \\(\\{x^n = 0\\}\\) 的点构成的子流形",
+        "\\(M\\) 的闭包减去内部",
+        "A 和 B 相同"
+        ],
+        "answer": 1,
+        "explanation": "带边 \\(n\\)-流形：局部同胚于 \\(\\mathbb{R}^n\\) 或 \\(\\mathbb{R}^n_+ = \\{x \\in \\mathbb{R}^n : x^n \\geq 0\\}\\)。\\(\\partial M\\) 是映到 \\(\\{x^n = 0\\}\\) 的点，组成 \\((n-1)\\)-维无边流形。例如 \\([0,1]\\) 的边界 \\(\\partial[0,1] = \\{0, 1\\}\\)。拓扑边界（A/C）是环境空间的概念，与流形边界不同。"
+      },
+      {
+        "id": "diffgeo-ch01-q13",
+        "question": "切向量的等价定义中，\\(v \\in T_pM\\) 可以视为什么？",
+        "options": [
+          "通过 \\(p\\) 的曲线的等价类",
+        "\\(p\\) 处 \\(C^\\infty\\) 函数芽上的导子",
+        "坐标变换下的\"变换规则\" \\(v'^i = \\sum_j \\frac{\\partial x'^i}{\\partial x^j} v^j\\)",
+        "以上全部等价"
+        ],
+        "answer": 3,
+        "explanation": "切向量有三种等价定义：(A) 曲线等价类：\\(\\gamma_1 \\sim \\gamma_2 \\iff (\\varphi \\circ \\gamma_1)'(0) = (\\varphi \\circ \\gamma_2)'(0)\\)；(B) 导子：\\(v: C^\\infty_p \\to \\mathbb{R}\\) 线性且满足 Leibniz 律 \\(v(fg) = f(p)v(g) + g(p)v(f)\\)；(C) 坐标分量按 Jacobian 变换。三者在光滑流形上等价。"
+      },
+      {
+        "id": "diffgeo-ch01-q14",
+        "question": "浸入 (immersion) 和嵌入 (embedding) 的区别是什么？",
+        "options": [
+          "浸入要求 \\(dF_p\\) 单射；嵌入额外要求 \\(F\\) 是到像的同胚",
+        "浸入 = 嵌入",
+        "浸入要求 \\(dF_p\\) 满射",
+        "嵌入不要求 \\(dF_p\\) 单射"
+        ],
+        "answer": 0,
+        "explanation": "浸入：\\(dF_p\\) 处处单射（\\(\\dim M \\leq \\dim N\\)）。嵌入：浸入 + \\(F: M \\to F(M)\\) 是拓扑嵌入（同胚到像）。8 字形曲线 \\(\\gamma: \\mathbb{R} \\to \\mathbb{R}^2\\) 是浸入但不是嵌入（自相交，或像的拓扑不同于 \\(\\mathbb{R}\\)）。Whitney 嵌入定理：\\(n\\)-流形嵌入 \\(\\mathbb{R}^{2n}\\)。"
+      },
+      {
+        "id": "diffgeo-ch01-q15",
+        "question": "\\(T^2 = S^1 \\times S^1\\) 的光滑结构由什么决定？",
+        "options": [
+          "由 \\(S^1\\) 的光滑结构的积给出",
+        "需要独立定义",
+        "不存在光滑结构",
+        "与 \\(\\mathbb{R}^2\\) 微分同胚"
+        ],
+        "answer": 0,
+        "explanation": "光滑流形的乘积是光滑流形：若 \\((U_\\alpha, \\varphi_\\alpha)\\) 和 \\((V_\\beta, \\psi_\\beta)\\) 分别是 \\(M, N\\) 的坐标卡，\\((U_\\alpha \\times V_\\beta, \\varphi_\\alpha \\times \\psi_\\beta)\\) 是 \\(M \\times N\\) 的坐标卡。\\(T^2 = S^1 \\times S^1\\) 是 2 维紧致光滑流形。不同胚于 \\(\\mathbb{R}^2\\)（\\(T^2\\) 紧致，\\(\\mathbb{R}^2\\) 不紧致）。"
+      },
+      {
+        "id": "diffgeo-ch01-q16",
+        "question": "以下何者不是流形？",
+        "options": [
+          "两条相交直线 \\(\\{(x,y) : xy = 0\\} \\subseteq \\mathbb{R}^2\\)",
+        "\\(\\mathbb{R}P^2\\)",
+        "\\(GL(n, \\mathbb{R})\\)",
+        "\\(S^n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{xy = 0\\}\\) 在原点 \\((0,0)\\) 不是局部欧氏的——原点的邻域看起来像\"十字\"而非直线段，不同胚于 \\(\\mathbb{R}^1\\)。这不满足流形定义。\\(\\mathbb{RP}^2\\), \\(GL(n)\\), \\(S^n\\) 都是流形。交叉点/奇点破坏局部欧氏性。"
+      },
+      {
+        "id": "diffgeo-ch01-q17",
+        "question": "\\(F: S^1 \\to S^1\\), \\(F(z) = z^2\\)（复数乘法）。\\(dF_1: T_1S^1 \\to T_1S^1\\) 是什么？",
+        "options": [
+          "恒等映射",
+        "乘以 \\(2\\)",
+        "零映射",
+        "乘以 \\(-1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(T_1S^1 \\cong \\mathbb{R}\\)。\\(\\gamma(t) = e^{it}\\)，\\(\\gamma(0) = 1\\)，\\(\\gamma'(0) = i\\)（基向量）。\\(F \\circ \\gamma(t) = e^{2it}\\)，\\((F \\circ \\gamma)'(0) = 2i\\)。所以 \\(dF_1(\\gamma'(0)) = 2 \\gamma'(0)\\)，即 \\(dF_1\\) 是乘以 \\(2\\) 的线性映射。一般地 \\(z \\mapsto z^n\\) 的微分在每点乘以 \\(n\\)。"
+      },
+      {
+        "id": "diffgeo-ch01-q18",
+        "question": "Whitney 嵌入定理的陈述是什么？",
+        "options": [
+          "每个 \\(n\\)-流形嵌入 \\(\\mathbb{R}^n\\)",
+        "每个 \\(n\\)-流形嵌入 \\(\\mathbb{R}^{2n+1}\\)（弱形式）",
+        "每个 \\(n\\)-流形嵌入 \\(\\mathbb{R}^{2n}\\)（强形式）",
+        "B 和 C 都正确"
+        ],
+        "answer": 3,
+        "explanation": "Whitney 弱嵌入定理：紧（或第二可数）\\(n\\)-流形嵌入 \\(\\mathbb{R}^{2n+1}\\)。强形式：嵌入 \\(\\mathbb{R}^{2n}\\)（\\(n > 0\\)）。证据：\\(S^1\\) 嵌入 \\(\\mathbb{R}^2\\)（\\(2n = 2\\)），\\(S^2\\) 嵌入 \\(\\mathbb{R}^4\\) 但也嵌入 \\(\\mathbb{R}^3\\)。\\(2n\\) 是最佳上界（Klein 瓶不嵌入 \\(\\mathbb{R}^3\\)，但浸入 \\(\\mathbb{R}^3\\)，嵌入 \\(\\mathbb{R}^4 = \\mathbb{R}^{2 \\cdot 2}\\)）。"
+      },
+      {
+        "id": "diffgeo-ch01-q19",
+        "question": "\\(\\mathbb{R}^4\\) 有多少种光滑结构？",
+        "options": [
+          "1 种",
+        "有限多种",
+        "不可数多种",
+        "与 \\(\\mathbb{R}^n\\) (\\(n \\neq 4\\)) 相同"
+        ],
+        "answer": 2,
+        "explanation": "惊人结果：\\(\\mathbb{R}^4\\) 有不可数多种光滑结构（exotic \\(\\mathbb{R}^4\\), Donaldson-Freedman）！\\(n \\neq 4\\) 时 \\(\\mathbb{R}^n\\) 光滑结构唯一（D 错，\\(n = 4\\) 是唯一例外）。这是 4 维拓扑的特殊性——与规范场论（Donaldson 理论、Seiberg-Witten 理论）深刻相关。"
+      },
+      {
+        "id": "diffgeo-ch01-q20",
+        "question": "逆函数定理（流形版本）：若 \\(dF_p: T_pM \\to T_{F(p)}N\\) 是同构，则？",
+        "options": [
+          "\\(F\\) 是全局微分同胚",
+        "\\(F\\) 在 \\(p\\) 附近是局部微分同胚",
+        "\\(F\\) 是单射",
+        "\\(\\dim M > \\dim N\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(dF_p\\) 可逆 \\(\\Rightarrow \\dim M = \\dim N\\)（D 错），存在 \\(p\\) 的邻域 \\(U\\) 使 \\(F|_U: U \\to F(U)\\) 是微分同胚。不保证全局（A 错，如 \\(\\exp: \\mathbb{R} \\to S^1\\)，\\(d\\exp_0\\) 可逆但不是全局双射）。在坐标中就是经典逆函数定理 \\(\\det(J_F) \\neq 0\\)。"
+      },
+      {
+        "id": "diffgeo-ch01-q21",
+        "question": "\\(f: M \\to N\\) 光滑，\\(c \\in N\\) 是正则值（\\(df_p\\) 对所有 \\(p \\in f^{-1}(c)\\) 满射）。\\(f^{-1}(c)\\) 是什么？",
+        "options": [
+          "离散点集",
+        "\\((\\dim M - \\dim N)\\)-维子流形",
+        "\\(\\dim N\\)-维子流形",
+        "不一定是流形"
+        ],
+        "answer": 1,
+        "explanation": "正则值定理（隐函数定理推论）：\\(f^{-1}(c)\\) 是 \\((\\dim M - \\dim N)\\)-维光滑子流形。例如 \\(f: \\mathbb{R}^3 \\to \\mathbb{R}\\)，\\(f(x,y,z) = x^2+y^2+z^2\\)，\\(c = 1\\)（正则值因为 \\(\\nabla f \\neq 0\\) 在 \\(S^2\\) 上）。\\(f^{-1}(1) = S^2\\)，\\(3 - 1 = 2\\) 维。"
+      },
+      {
+        "id": "diffgeo-ch01-q22",
+        "question": "余切空间 \\(T_p^*M\\) 与切空间 \\(T_pM\\) 是什么关系？",
+        "options": [
+          "相等",
+        "\\(T_p^*M = (T_pM)^*\\)（对偶空间）",
+        "\\(T_p^*M = T_pM \\times T_pM\\)",
+        "维数不同"
+        ],
+        "answer": 1,
+        "explanation": "\\(T_p^*M = \\text{Hom}(T_pM, \\mathbb{R})\\)，即 \\(T_pM\\) 的对偶空间。\\(\\dim T_p^*M = \\dim T_pM = n\\)。基：\\(\\{dx^i|_p\\}\\) 是 \\(\\{\\partial/\\partial x^i|_p\\}\\) 的对偶基，\\(dx^i(\\partial/\\partial x^j) = \\delta^i_j\\)。余切向量也叫\"1-形式在一点的值\"。"
+      },
+      {
+        "id": "diffgeo-ch01-q23",
+        "question": "Grassmann 流形 \\(Gr(k, n)\\)（\\(\\mathbb{R}^n\\) 中 \\(k\\)-维子空间全体）的维数是什么？",
+        "options": [
+          "\\(k\\)",
+        "\\(n\\)",
+        "\\(k(n-k)\\)",
+        "\\(kn\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(Gr(k,n)\\) 是 \\(k(n-k)\\) 维紧致流形。直觉：\\(k\\)-维子空间由 \\(k \\times n\\) 矩阵的行空间表示，模 \\(GL(k)\\) 作用，自由度 \\(kn - k^2 = k(n-k)\\)。特例：\\(Gr(1, n) = \\mathbb{RP}^{n-1}\\)，\\(\\dim = 1 \\cdot (n-1) = n-1\\)。\\(Gr(k,n)\\) 在代数几何和物理（弦论模空间）中重要。"
+      },
+      {
+        "id": "diffgeo-ch01-q24",
+        "question": "微分同胚 \\(F: M \\to N\\) 的逆 \\(F^{-1}\\) 一定光滑吗？",
+        "options": [
+          "是（定义要求双向光滑）",
+        "不一定",
+        "只在紧致流形时",
+        "只在 \\(\\dim M = 1\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "微分同胚定义：\\(F\\) 光滑双射且 \\(F^{-1}\\) 也光滑。逆的光滑性是定义的一部分，不是自动推出的。仅\"光滑双射\"不保证逆光滑：\\(f: \\mathbb{R} \\to \\mathbb{R}\\), \\(f(x) = x^3\\)，双射光滑，但 \\(f^{-1}(y) = y^{1/3}\\) 在 \\(y = 0\\) 不可微。"
+      },
+      {
+        "id": "diffgeo-ch01-q25",
+        "question": "\\(f: M \\to N\\) 光滑，\\(p\\) 是临界点 (\\(df_p\\) 非满射)。Sard 定理说什么？",
+        "options": [
+          "临界点集是有限集",
+        "临界值集（\\(f\\) 在临界点上的像）在 \\(N\\) 中零测",
+        "临界点集是空集",
+        "每个值都是正则值"
+        ],
+        "answer": 1,
+        "explanation": "Sard 定理：光滑映射的临界值集在 \\(N\\) 中 Lebesgue 测度为零。等价地，正则值集是稠密的（在 \\(N\\) 中）。不是说临界点少（A 错——如常值映射每个点都是临界点），而是说临界值少。推论：几乎每个 \\(c \\in N\\) 的原像 \\(f^{-1}(c)\\) 是光滑子流形。"
+      },
+      {
+        "id": "diffgeo-ch01-q26",
+        "question": "在机器人学中，机器人的配置空间（所有关节角度的集合）自然构成什么？",
+        "options": [
+          "向量空间",
+        "光滑流形",
+        "离散集",
+        "拓扑空间但不是流形"
+        ],
+        "answer": 1,
+        "explanation": "\\(n\\) 个旋转关节的机器人配置空间是 \\(T^n = (S^1)^n\\)（\\(n\\)-环面），是光滑流形。一般地，刚体运动由 \\(SE(3)\\)（特殊欧氏群）参数化，是 6 维 Lie 群（光滑流形）。配置空间的流形结构决定了运动规划的拓扑约束，如不可能存在全局连续的逆运动学解（因为流形拓扑非平凡）。"
+      },
+      {
+        "id": "diffgeo-ch01-q27",
+        "question": "在计算机视觉中，相机的内参/外参空间自然构成什么流形？",
+        "options": [
+          "\\(SE(3)\\)（位姿）和 \\(\\mathbb{R}^k\\)（内参）",
+        "\\(\\mathbb{R}^{12}\\)",
+        "\\(S^2\\)",
+        "纯粹的向量空间"
+        ],
+        "answer": 0,
+        "explanation": "相机外参（位置+朝向）\\(\\in SE(3) = SO(3) \\ltimes \\mathbb{R}^3\\)（6 维流形）。内参（焦距、主点等）\\(\\in \\mathbb{R}^k\\)。整体参数空间是流形 \\(SE(3) \\times \\mathbb{R}^k\\)。\\(SO(3)\\) 不是 \\(\\mathbb{R}^3\\)（欧拉角有万向锁问题），必须用流形理论正确处理旋转参数化（四元数 \\(\\in S^3\\), 旋转矩阵 \\(\\in SO(3)\\)）。"
+      },
+      {
+        "id": "diffgeo-ch01-q28",
+        "question": "GPS 卫星定位需要从多个距离方程 \\(d_i = \\|x - s_i\\|\\) 中解出位置 \\(x\\)。这在数学上对应什么？",
+        "options": [
+          "线性方程组",
+        "多个函数的正则值原像（隐函数定理）",
+        "特征值问题",
+        "优化问题"
+        ],
+        "answer": 1,
+        "explanation": "\\(f_i(x) = \\|x - s_i\\|^2 - d_i^2 = 0\\) 定义了以 \\(s_i\\) 为心的球面。\\(f = (f_1, \\ldots, f_k): \\mathbb{R}^3 \\to \\mathbb{R}^k\\)。当 \\(k \\geq 3\\) 且卫星位置\"一般\"时，\\(0\\) 是正则值，\\(f^{-1}(0)\\) 是 \\(3-k\\) 维子流形（\\(k = 3\\) 时离散点集）。正则性保证了局部唯一性——4 颗卫星可以唯一确定 3D 位置（+时钟偏差）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="diffgeo"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/diffgeo.html" class="module-name">微分几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 拓扑流形与坐标卡</a></li>
+      <li><a href="#kp2">02 · 光滑流形与光滑映射</a></li>
+      <li><a href="#kp3">03 · 切空间与切映射</a></li>
+      <li><a href="#kp4">04 · 浸入、淹没与正则值定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>光滑流形</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>拓扑流形与坐标卡</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>球面、环面等几何对象局部看起来像欧几里得空间，但整体结构完全 不同。流形概念正是将"局部像 \(\mathbb{R}^n\)"的直觉严格化：通过 坐标卡将弯曲空间的局部贴成平面，再通过转移函数保证不同坐标系 的兼容性。这是微分几何、广义相对论和现代物理的语言基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象："内在几何"。流形不需要嵌入到环境空间中定义—— 坐标卡提供了局部的欧式坐标，转移函数编码了坐标系之间的关系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>拓扑流形</strong>：\(M\) 是 \(n\) 维拓扑流形 \(\iff\) (1) \(M\) 是 Hausdorff 的； (2) \(M\) 是第二可数的； (3) \(M\) 局部欧几里得：\(\forall p \in M\)，\(\exists\) 开邻域 \(U\) 同胚于 \(\mathbb{R}^n\) 的开集。 <strong>坐标卡 (Chart)</strong>：\((U, \varphi)\)，\(U \subseteq M\) 开， \(\varphi: U \to \varphi(U) \subseteq \mathbb{R}^n\) 同胚。 <strong>图册 (Atlas)</strong>：\(\mathcal{A} = \{(U_\alpha, \varphi_\alpha)\}\) 使 \(\bigcup U_\alpha = M\)。 <strong>转移函数</strong>：对重叠区域 \(U_\alpha \cap U_\beta \neq \emptyset\)， \[\varphi_\beta \circ \varphi_\alpha^{-1}: \varphi_\alpha(U_\alpha \cap U_\beta) \to \varphi_\beta(U_\alpha \cap U_\beta)\] 是 \(\mathbb{R}^n\) 开集之间的同胚。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 广义相对论中的时空是 4 维流形 - 机器人学中的构型空间（如旋转群 \(SO(3)\)）是流形</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2\) 是 2 维拓扑流形。给出一个图册。 解答：球极投影：\(U_N = S^2 \setminus \{N\}\)（\(N\) = 北极）， \(\varphi_N(x,y,z) = (x/(1-z), y/(1-z))\)。 \(U_S = S^2 \setminus \{S\}\)（\(S\) = 南极）， \(\varphi_S(x,y,z) = (x/(1+z), y/(1+z))\)。 \(\{(U_N, \varphi_N), (U_S, \varphi_S)\}\) 覆盖 \(S^2\)。 转移函数 \(\varphi_S \circ \varphi_N^{-1}(u,v) = (u,v)/(u^2+v^2)\) （反演映射），在 \(\mathbb{R}^2 \setminus \{0\}\) 上光滑。 易错点：\(S^2\) 不能用单个坐标卡覆盖（紧且非 \(\mathbb{R}^2\)）， 至少需要两个。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个不是 1 维流形？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。"8"在交叉点没有与 \\(\\mathbb{R}\\) 同胚的邻域')">A. \(S^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。"8"在交叉点没有与 \\(\\mathbb{R}\\) 同胚的邻域')">B. \(\mathbb{R}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！"8"在交叉点没有与 \\(\\mathbb{R}\\) 同胚的邻域')">C. 字母 "8"</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。"8"在交叉点没有与 \\(\\mathbb{R}\\) 同胚的邻域')">D. \((0,1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>光滑流形与光滑映射</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>拓扑流形只能讨论连续性，不能做微积分。要在流形上定义导数，需要 转移函数足够"光滑"。光滑流形要求所有转移函数是 \(C^\infty\) 的， 由此可以定义流形之间的光滑映射——这是微分几何的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>光滑结构 = 极大光滑图册。通过要求转移函数光滑，将微积分从 \(\mathbb{R}^n\) "传送"到流形上。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>光滑兼容</strong>：两个坐标卡 \((U, \varphi), (V, \psi)\) 光滑兼容 \(\iff\) \(\psi \circ \varphi^{-1}\) 和 \(\varphi \circ \psi^{-1}\) 都是 \(C^\infty\) 映射。 <strong>光滑图册</strong>：图册中任意两个坐标卡光滑兼容。 <strong>光滑流形</strong>：\((M, \mathcal{A})\)，\(\mathcal{A}\) 是极大光滑图册。 <strong>光滑映射</strong>：\(f: M \to N\) 光滑 \(\iff\) 对所有坐标卡 \((U, \varphi)\) on \(M\)、\((V, \psi)\) on \(N\)，复合 \[\psi \circ f \circ \varphi^{-1}: \varphi(U \cap f^{-1}(V)) \to \mathbb{R}^n\] 是 \(C^\infty\) 映射。 <strong>微分同胚 (Diffeomorphism)</strong>：\(f: M \to N\)，\(f\) 光滑双射且 \(f^{-1}\) 也光滑。是光滑流形范畴的同构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 物理中的规范变换是流形上的光滑映射 - 计算机图形学中曲面建模使用光滑流形参数化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x^3\)。 \(f\) 是光滑双射，\(f\) 是微分同胚吗？ 解答：\(f\) 是 \(C^\infty\) 双射。但 \(f^{-1}(y) = y^{1/3}\)， 在 \(y = 0\) 处 \((f^{-1})'(0)\) 不存在。 故 \(f^{-1}\) 不光滑，\(f\) 不是微分同胚。 易错点：光滑双射 ≠ 微分同胚。必须验证逆映射也光滑。 根本原因：\(f'(0) = 0\)，\(f\) 在 \(0\) 处不是局部微分同胚。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: M \to N\) 是微分同胚的必要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。微分同胚 \\(\\Rightarrow\\) 光滑 \\(\\Rightarrow\\) 连续，加上双射和')">A. \(f\) 是连续的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。微分同胚 \\(\\Rightarrow\\) 光滑 \\(\\Rightarrow\\) 连续，加上双射和')">B. \(f\) 是光滑双射且 \(f^{-1}\) 光滑</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。微分同胚 \\(\\Rightarrow\\) 光滑 \\(\\Rightarrow\\) 连续，加上双射和')">C. \(f\) 是同胚</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！微分同胚 \\(\\Rightarrow\\) 光滑 \\(\\Rightarrow\\) 连续，加上双射和')">D. 以上都是</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>切空间与切映射</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>流形上一点处的"方向"是什么？在 \(\mathbb{R}^n\) 中方向就是向量， 但弯曲流形上没有全局的向量加法。切空间 \(T_pM\) 将"经过 \(p\) 的 曲线的速度向量"抽象为一个向量空间，为流形上的微积分提供了 基础。切映射则是光滑映射在切空间层面的"线性化"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>切空间 = 方向导数的空间。两种等价定义（曲线定义和推导定义） 分别强调几何直觉和代数操作。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>曲线定义</strong>：\(T_pM = \{\text{过 } p \text{ 的光滑曲线}\} / {\sim}\)， \(\gamma_1 \sim \gamma_2 \iff (\varphi \circ \gamma_1)'(0) = (\varphi \circ \gamma_2)'(0)\) （在某坐标卡下速度相同）。 <strong>推导定义</strong>：\(v \in T_pM\) 是 \(C_p^\infty(M) \to \mathbb{R}\) 上的线性映射， 满足 Leibniz 法则 \(v(fg) = f(p)v(g) + g(p)v(f)\)。 坐标基：\((U, x^1, \ldots, x^n)\) 下， \(\left.\frac{\partial}{\partial x^i}\right|_p\) 构成 \(T_pM\) 的基。 \(\dim T_pM = \dim M = n\)。 <strong>切映射 (Differential)</strong>：\(f: M \to N\) 光滑。 \[df_p: T_pM \to T_{f(p)}N, \quad df_p(v)(g) = v(g \circ f)\] 坐标中 \(df_p\) 的矩阵就是 Jacobian 矩阵 \(J_f\)。 <strong>链式法则</strong>：\(d(g \circ f)_p = dg_{f(p)} \circ df_p\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 机器学习中流形假设：高维数据位于低维流形上，切空间用于局部线性化 - 物理中粒子的速度是时空流形上世界线的切向量</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: \mathbb{R}^2 \to \mathbb{R}^2\)，\(f(x,y) = (x^2-y^2, 2xy)\)。 求 \(df_{(1,1)}\)。 解答：Jacobian 矩阵 \(J_f = \begin{pmatrix} 2x & -2y \\ 2y & 2x \end{pmatrix}\)。 在 \((1,1)\)：\(df_{(1,1)} = \begin{pmatrix} 2 & -2 \\ 2 & 2 \end{pmatrix}\)。 \(df_{(1,1)}(\partial/\partial x) = 2 \partial/\partial u + 2 \partial/\partial v\)。 易错点：切映射是线性映射（在切空间之间），不是流形之间的映射。 不要混淆 \(df_p\) 和 \(f\) 本身。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim T_p S^2 = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2\\) 是 2 维流形，每点的切空间都是 2 维的。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(S^2\\) 是 2 维流形，每点的切空间都是 2 维的。')">B. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2\\) 是 2 维流形，每点的切空间都是 2 维的。')">C. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(S^2\\) 是 2 维流形，每点的切空间都是 2 维的。')">D. 取决于点 \(p\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>浸入、淹没与正则值定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>光滑映射的切映射 \(df_p\) 可能是单射（浸入）、满射（淹没）或两者 都不是。浸入和淹没是微分几何中构造子流形的基本工具。正则值定理 （原像定理）说：如果 \(c\) 是 \(f\) 的正则值（\(df_p\) 在原像上处处满射）， 那么 \(f^{-1}(c)\) 自动获得光滑流形结构。这是隐函数定理的流形版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>浸入 = 切映射处处单射（"无折叠"的映射），淹没 = 切映射处处满射 （"无褶皱"的映射）。正则值定理是隐函数定理的坐标无关表述。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>浸入 (Immersion)</strong>：\(f: M \to N\) 在 \(p\) 处浸入 \(\iff df_p\) 单射。 \(f\) 是浸入 \(\iff\) 处处浸入。必要条件：\(\dim M \leq \dim N\)。 <strong>淹没 (Submersion)</strong>：\(f: M \to N\) 在 \(p\) 处淹没 \(\iff df_p\) 满射。 必要条件：\(\dim M \geq \dim N\)。 <strong>嵌入 (Embedding)</strong>：浸入 + 拓扑嵌入（到像的同胚）。 <strong>正则值定理</strong>：设 \(f: M^m \to N^n\) 光滑（\(m \geq n\)）， \(c \in N\) 是正则值（\(\forall p \in f^{-1}(c)\)，\(df_p\) 满射）。 则 \(f^{-1}(c)\) 是 \(M\) 的 \((m-n)\) 维光滑子流形。 <strong>证明思路</strong>：隐函数定理保证在每个 \(p \in f^{-1}(c)\) 附近， \(f^{-1}(c)\) 可局部参数化为 \(n\) 个方程在 \(m\) 维空间中的解集。 \[\dim f^{-1}(c) = m - n = \dim M - \dim N\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- \(S^n = f^{-1}(1)\)，\(f(x) = \|x\|^2\)，\(df_x = 2x \neq 0\) 对 \(x \in S^n\)， 故 \(1\) 是正则值，\(S^n\) 是 \(n\) 维光滑流形 - 约束优化中，约束面 \(g(x) = c\) 在正则值处是流形</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f: \mathbb{R}^3 \to \mathbb{R}\)，\(f(x,y,z) = x^2 + y^2 - z^2\)。 \(f^{-1}(1)\) 是几维流形？ 解答：\(\nabla f = (2x, 2y, -2z)\)。在 \(f^{-1}(1)\) 上， \(\nabla f = 0 \Rightarrow x = y = z = 0\)，但 \(f(0,0,0) = 0 \neq 1\)。 故 \(1\) 是正则值，\(f^{-1}(1)\) 是 \(3-1 = 2\) 维光滑子流形（单叶双曲面）。 易错点：\(f^{-1}(0)\) 不一定是流形！\(\nabla f(0,0,0) = 0\) 且 \(f(0,0,0) = 0\)，所以 \(0\) 不是正则值。 \(f^{-1}(0)\) 在原点有奇点（锥点）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: \mathbb{R}^2 \to \mathbb{R}\)，\(f(x,y) = x^2 + y^2\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\nabla f(0,0) = (0,0) = 0\\)，且 \\(f(0,0) = 0\\)，')">A. 是，\(0\) 维流形</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\nabla f(0,0) = (0,0) = 0\\)，且 \\(f(0,0) = 0\\)，')">B. 否，\(0\) 不是正则值</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\nabla f(0,0) = (0,0) = 0\\)，且 \\(f(0,0) = 0\\)，')">C. 是，\(1\) 维流形</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\nabla f(0,0) = (0,0) = 0\\)，且 \\(f(0,0) = 0\\)，')">D. 否，因为 \(f^{-1}(0)\) 是空集</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/geometry/diffgeo.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

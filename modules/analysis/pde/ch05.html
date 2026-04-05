@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Fourier 方法 — 偏微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "pde-ch05-q1",
+        "question": "分离变量法求解 PDE 的核心思想是？",
+        "options": [
+          "假设 \\(u(x,t)=X(x)T(t)\\)，将 PDE 化为两个 ODE",
+        "直接积分",
+        "变换为代数方程",
+        "迭代逼近"
+        ],
+        "answer": 0,
+        "explanation": "代入 PDE 后两边分别依赖不同变量 → 必须等于同一常数（分离常数）→ 两个独立 ODE。边界条件给特征值问题 \\(X''+\\lambda X=0\\)，初始条件用 Fourier 级数确定系数。"
+      },
+      {
+        "id": "pde-ch05-q2",
+        "question": "Sturm-Liouville 问题 \\(-(p\\phi')'+q\\phi=\\lambda w\\phi\\) 的特征值有什么性质？",
+        "options": [
+          "实数、可数、无穷多且趋于 \\(+\\infty\\)；特征函数关于权 \\(w\\) 正交",
+        "复数",
+        "有限个",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "自伴算子 → 特征值实数。关于 \\(w\\) 的加权内积：\\(\\int\\phi_m\\phi_n w\\,dx=0\\)（\\(m\\neq n\\)）。特征函数系完备 → 任意函数可展开为广义 Fourier 级数 \\(f=\\sum c_n\\phi_n\\)，\\(c_n=\\frac{\\langle f,\\phi_n\\rangle}{\\|\\phi_n\\|^2}\\)。"
+      },
+      {
+        "id": "pde-ch05-q3",
+        "question": "热方程 \\(u_t=u_{xx}\\)（\\(0<x<L\\)），\\(u(0,t)=u(L,t)=0\\)。分离变量后 \\(X(x)\\) 满足？",
+        "options": [
+          "\\(X''+\\lambda X=0\\)，\\(X(0)=X(L)=0\\) → \\(\\lambda_n=(n\\pi/L)^2\\)，\\(X_n=\\sin(n\\pi x/L)\\)",
+        "\\(X''=0\\)",
+        "\\(X'+\\lambda X=0\\)",
+        "\\(X''+X=0\\) 无边界条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(u=XT\\)：\\(XT'=X''T\\) → \\(T'/T=X''/X=-\\lambda\\)。\\(X''+\\lambda X=0\\)，\\(X(0)=X(L)=0\\) 是标准 Dirichlet 特征值问题。\\(T'+\\lambda T=0\\) → \\(T_n=e^{-\\lambda_n t}\\)。解：\\(u=\\sum B_n\\sin(n\\pi x/L)e^{-(n\\pi/L)^2 t}\\)。"
+      },
+      {
+        "id": "pde-ch05-q4",
+        "question": "Fourier 变换将热方程 \\(u_t=u_{xx}\\)（\\(x\\in\\mathbb{R}\\)）变为？",
+        "options": [
+          "\\(\\hat u_t=-\\xi^2\\hat u\\)（频域中的 ODE）",
+        "\\(\\hat u_{tt}=\\hat u\\)",
+        "\\(\\hat u=0\\)",
+        "\\(\\hat u_t=i\\xi\\hat u\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{F}[u_{xx}]=-\\xi^2\\hat u\\)（对 \\(x\\) 做 Fourier 变换）。\\(\\hat u_t=-\\xi^2\\hat u\\) → \\(\\hat u(\\xi,t)=\\hat u_0(\\xi)e^{-\\xi^2 t}\\)。逆变换：\\(u=u_0*\\frac{1}{\\sqrt{4\\pi t}}e^{-x^2/(4t)}\\)（高斯核卷积）。"
+      },
+      {
+        "id": "pde-ch05-q5",
+        "question": "Duhamel 原理处理的是什么类型的 PDE？",
+        "options": [
+          "含非齐次源项的演化方程（\\(u_t-\\Delta u=f\\)）",
+        "仅椭圆方程",
+        "仅齐次方程",
+        "仅一维问题"
+        ],
+        "answer": 0,
+        "explanation": "齐次问题的解 \\(S(t)u_0\\) 定义propagator。非齐次解 \\(u(t)=S(t)u_0+\\int_0^t S(t-s)f(s)\\,ds\\)——将源项视为连续叠加的脉冲。类比 ODE 的常数变易法 / Variation of Constants。"
+      },
+      {
+        "id": "pde-ch05-q6",
+        "question": "\\(-y''=\\lambda y\\)（\\(0<x<\\pi\\)），\\(y(0)=y(\\pi)=0\\)。特征值和特征函数？",
+        "options": [
+          "\\(\\lambda_n=n^2\\)，\\(y_n=\\sin(nx)\\)（\\(n=1,2,\\ldots\\)）",
+        "\\(\\lambda_n=n\\pi\\)",
+        "\\(y_n=\\cos(nx)\\)",
+        "\\(\\lambda_n=n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(y''+\\lambda y=0\\)。\\(\\lambda=k^2>0\\)：\\(y=A\\sin kx+B\\cos kx\\)。\\(y(0)=0\\) → \\(B=0\\)。\\(y(\\pi)=0\\) → \\(\\sin k\\pi=0\\) → \\(k=n\\)。\\(\\lambda_n=n^2\\)，\\(y_n=\\sin nx\\)。这是最基本的 S-L 特征值问题。"
+      },
+      {
+        "id": "pde-ch05-q7",
+        "question": "Fourier 变换的卷积定理：\\(\\mathcal{F}[f*g]=\\)？",
+        "options": [
+          "\\(\\hat f\\cdot\\hat g\\)",
+        "\\(\\hat f*\\hat g\\)",
+        "\\(\\hat f+\\hat g\\)",
+        "\\(\\hat f/\\hat g\\)"
+        ],
+        "answer": 0,
+        "explanation": "卷积变乘积，乘积变卷积（Parseval / Plancherel）。这就是为什么 PDE 的 Green 函数解（卷积形式）在频域中仅仅是相乘。FFT 利用此性质将 \\(O(N^2)\\) 卷积降为 \\(O(N\\log N)\\)。"
+      },
+      {
+        "id": "pde-ch05-q8",
+        "question": "波方程 \\(u_{tt}=c^2 u_{xx}\\)（\\(0<x<L\\)），\\(u(0,t)=u(L,t)=0\\)，初始条件 \\(u(x,0)=f(x)\\)，\\(u_t(x,0)=0\\)。解？",
+        "options": [
+          "\\(u=\\sum_{n=1}^\\infty B_n\\cos\\frac{n\\pi ct}{L}\\sin\\frac{n\\pi x}{L}\\)，\\(B_n=\\frac{2}{L}\\int_0^L f(x)\\sin\\frac{n\\pi x}{L}\\,dx\\)",
+        "\\(u=f(x-ct)\\)",
+        "\\(u=e^{-t}f(x)\\)",
+        "\\(u=\\sum B_n e^{-n^2t}\\sin(nx)\\)"
+        ],
+        "answer": 0,
+        "explanation": "分离变量 \\(u=X(x)T(t)\\)：\\(X''+\\lambda X=0\\)，\\(T''+c^2\\lambda T=0\\)。\\(X_n=\\sin(n\\pi x/L)\\)，\\(T_n=A_n\\cos(\\omega_n t)+B_n\\sin(\\omega_n t)\\)，\\(\\omega_n=cn\\pi/L\\)。\\(u_t(x,0)=0\\) → \\(B_n=0\\)（无 \\(\\sin\\)项）。每个模式是驻波。"
+      },
+      {
+        "id": "pde-ch05-q9",
+        "question": "S-L 问题 \\(-(py')'+qy=\\lambda wy\\) 中，不同特征值的特征函数 \\(\\phi_m,\\phi_n\\) 满足？",
+        "options": [
+          "\\(\\int_a^b\\phi_m\\phi_n w\\,dx=0\\)（加权正交）",
+        "\\(\\int\\phi_m\\phi_n=1\\)",
+        "\\(\\phi_m=\\phi_n\\)",
+        "\\(\\int\\phi_m'\\phi_n'=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\lambda_m\\int\\phi_m\\phi_n w=\\int[-(p\\phi_m')'+q\\phi_m]\\phi_n=\\int[-(p\\phi_n')'+q\\phi_n]\\phi_m=\\lambda_n\\int\\phi_m\\phi_n w\\)。\\((\\lambda_m-\\lambda_n)\\int\\phi_m\\phi_n w=0\\)。\\(\\lambda_m\\neq\\lambda_n\\) → \\(\\int\\phi_m\\phi_n w=0\\)。"
+      },
+      {
+        "id": "pde-ch05-q10",
+        "question": "用 Fourier 变换解波方程 \\(u_{tt}=c^2 u_{xx}\\)（\\(x\\in\\mathbb{R}\\)），\\(u(x,0)=f(x)\\)，\\(u_t(x,0)=0\\)。频域方程？",
+        "options": [
+          "\\(\\hat u_{tt}=-c^2\\xi^2\\hat u\\) → \\(\\hat u=\\hat f(\\xi)\\cos(c\\xi t)\\)",
+        "\\(\\hat u=e^{-c\\xi t}\\hat f\\)",
+        "\\(\\hat u=\\hat f/(1+\\xi^2)\\)",
+        "\\(\\hat u=\\hat f e^{i\\xi t}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat u_{tt}+c^2\\xi^2\\hat u=0\\)，初始 \\(\\hat u(0)=\\hat f\\)，\\(\\hat u_t(0)=0\\) → \\(\\hat u=\\hat f\\cos(c\\xi t)\\)。逆变换：\\(u=\\frac{1}{2}[f(x+ct)+f(x-ct)]\\)（d'Alembert 公式）。每个频率分量以速度 \\(c\\) 传播。"
+      },
+      {
+        "id": "pde-ch05-q11",
+        "question": "Duhamel 原理：热方程 \\(u_t-u_{xx}=f(x,t)\\)（\\(u(x,0)=0\\)）的解可写为？",
+        "options": [
+          "\\(u(x,t)=\\int_0^t v(x,t;s)\\,ds\\)，其中 \\(v(\\cdot,\\cdot;s)\\) 是以 \\(f(\\cdot,s)\\) 为初值的齐次问题解",
+        "\\(u=tf\\)",
+        "\\(u=\\int f\\,dx\\)",
+        "\\(u=e^{t\\Delta}f\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(v(x,t;s)\\) 解 \\(v_t-v_{xx}=0\\)（\\(t>s\\)），\\(v(x,s;s)=f(x,s)\\)。整体解 \\(u(t)=\\int_0^t e^{(t-s)\\Delta}f(s)\\,ds\\)。这是 ODE 常数变易法 \\(y=\\int_0^t e^{A(t-s)}b(s)\\,ds\\) 的推广。"
+      },
+      {
+        "id": "pde-ch05-q12",
+        "question": "分离变量解圆盘 Laplace 方程 \\(\\Delta u=0\\)（\\(r<R\\)），\\(u(R,\\theta)=\\cos(3\\theta)\\)。解？",
+        "options": [
+          "\\(u=(r/R)^3\\cos(3\\theta)\\)",
+        "\\(u=R^3\\cos(3\\theta)/r^3\\)",
+        "\\(u=r^3\\cos\\theta\\)",
+        "\\(u=e^{-3r}\\cos(3\\theta)\\)"
+        ],
+        "answer": 0,
+        "explanation": "极坐标 Laplace：分离后 \\(u=\\sum(A_n r^n+B_n r^{-n})(C_n\\cos n\\theta+D_n\\sin n\\theta)\\)。内部有界 → \\(B_n=0\\)。边界 \\(u(R,\\theta)=\\cos 3\\theta\\)：只有 \\(n=3\\) 项非零。\\(A_3 R^3=1\\) → \\(u=(r/R)^3\\cos 3\\theta\\)。"
+      },
+      {
+        "id": "pde-ch05-q13",
+        "question": "Bessel 函数 \\(J_n(x)\\) 出现在什么类型的分离变量问题中？",
+        "options": [
+          "圆柱坐标中的 Laplace/Helmholtz 方程",
+        "仅直角坐标",
+        "仅球坐标",
+        "仅一维问题"
+        ],
+        "answer": 0,
+        "explanation": "分离变量后径向方程 \\(r^2 R''+rR'+(k^2 r^2-n^2)R=0\\)（Bessel 方程）。解为 \\(J_n(kr)\\), \\(Y_n(kr)\\)。零点 \\(j_{n,\\ell}\\)（\\(J_n(j_{n,\\ell})=0\\)）给出特征值 \\(k_\\ell=j_{n,\\ell}/a\\)。"
+      },
+      {
+        "id": "pde-ch05-q14",
+        "question": "用 Duhamel 原理解 \\(u_t-u_{xx}=e^{-t}\\sin(\\pi x)\\)（\\(0<x<1\\)），\\(u(0,t)=u(1,t)=0\\)，\\(u(x,0)=0\\)。",
+        "options": [
+          "\\(u(x,t)=\\frac{e^{-t}-e^{-\\pi^2 t}}{\\pi^2-1}\\sin(\\pi x)\\)",
+        "\\(u=te^{-t}\\sin\\pi x\\)",
+        "\\(u=e^{-\\pi^2 t}\\sin\\pi x\\)",
+        "\\(u=\\frac{\\sin\\pi x}{\\pi^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f=e^{-t}\\sin\\pi x\\)。齐次问题以 \\(\\sin\\pi x\\) 为初值的解：\\(e^{-\\pi^2(t-s)}\\sin\\pi x\\)。\\(u=\\int_0^t e^{-s}e^{-\\pi^2(t-s)}\\sin\\pi x\\,ds=\\sin\\pi x\\cdot e^{-\\pi^2 t}\\int_0^t e^{(\\pi^2-1)s}\\,ds=\\frac{e^{-t}-e^{-\\pi^2 t}}{\\pi^2-1}\\sin\\pi x\\)。"
+      },
+      {
+        "id": "pde-ch05-q15",
+        "question": "Fourier 变换 \\(\\mathcal{F}[e^{-a|x|}]\\)（\\(a>0\\)）等于？",
+        "options": [
+          "\\(\\frac{2a}{a^2+\\xi^2}\\)（Lorentzian / Cauchy 分布）",
+        "\\(e^{-a\\xi^2}\\)",
+        "\\(\\delta(\\xi-a)\\)",
+        "\\(1/(i\\xi+a)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int e^{-a|x|}e^{-i\\xi x}\\,dx=\\int_0^\\infty e^{-(a+i\\xi)x}\\,dx+\\int_0^\\infty e^{-(a-i\\xi)x}\\,dx=\\frac{1}{a+i\\xi}+\\frac{1}{a-i\\xi}=\\frac{2a}{a^2+\\xi^2}\\)。指数衰减 ↔ 有理（代数衰减）频谱。"
+      },
+      {
+        "id": "pde-ch05-q16",
+        "question": "Legendre 多项式 \\(P_n(\\cos\\theta)\\) 出现在什么情境？",
+        "options": [
+          "球坐标中具有轴对称性的 Laplace 方程分离变量",
+        "仅圆柱坐标",
+        "仅直角坐标热方程",
+        "仅一维 S-L 问题"
+        ],
+        "answer": 0,
+        "explanation": "\\(u(r,\\theta)=\\sum A_n r^n P_n(\\cos\\theta)\\)（内部），\\(\\sum B_n r^{-(n+1)}P_n(\\cos\\theta)\\)（外部）。S-L 问题 \\([(1-x^2)y']'+n(n+1)y=0\\)（\\(x=\\cos\\theta\\)）的解。\\(P_n\\) 关于 \\(w\\equiv 1\\) 在 \\([-1,1]\\) 上正交。"
+      },
+      {
+        "id": "pde-ch05-q17",
+        "question": "证明 S-L 问题的特征值为实数。（核心步骤？）",
+        "options": [
+          "假设 \\(\\lambda\\) 复数，取共轭方程并做内积 → \\((\\lambda-\\bar\\lambda)\\int|\\phi|^2 w=0\\) → \\(\\lambda=\\bar\\lambda\\)",
+        "直接计算",
+        "用 Fourier 展开",
+        "无法证明"
+        ],
+        "answer": 0,
+        "explanation": "\\(-(p\\phi')'+q\\phi=\\lambda w\\phi\\)。共轭 \\(-(p\\bar\\phi')'+q\\bar\\phi=\\bar\\lambda w\\bar\\phi\\)。乘 \\(\\bar\\phi\\) 和 \\(\\phi\\) 后相减并积分：\\((\\lambda-\\bar\\lambda)\\int|\\phi|^2 w\\,dx=0\\)。\\(\\phi\\neq 0\\), \\(w>0\\) → \\(\\int|\\phi|^2 w>0\\) → \\(\\lambda=\\bar\\lambda\\)。"
+      },
+      {
+        "id": "pde-ch05-q18",
+        "question": "多维热方程 \\(u_t=\\Delta u\\) 在矩形 \\([0,a]\\times[0,b]\\) 上所有边为零。分离变量后特征值？",
+        "options": [
+          "\\(\\lambda_{mn}=(m\\pi/a)^2+(n\\pi/b)^2\\)，特征函数 \\(\\sin(m\\pi x/a)\\sin(n\\pi y/b)\\)",
+        "\\(\\lambda_{mn}=mn\\pi^2\\)",
+        "\\(\\lambda_{mn}=m+n\\)",
+        "只依赖 \\(m\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u=X(x)Y(y)T(t)\\)：\\(X''/X+Y''/Y=T'/T=-\\lambda\\)。\\(X''+\\mu X=0\\), \\(Y''+\\nu Y=0\\), \\(\\mu+\\nu=\\lambda\\)。Dirichlet B.C. → \\(\\mu_m=(m\\pi/a)^2\\), \\(\\nu_n=(n\\pi/b)^2\\)。多维问题的特征值是各维度之和。"
+      },
+      {
+        "id": "pde-ch05-q19",
+        "question": "Fourier 变换解三维波方程：\\(\\hat u_{tt}+c^2|\\boldsymbol\\xi|^2\\hat u=0\\)。解回空间域得到什么形式的解？",
+        "options": [
+          "Kirchhoff 球面平均公式：\\(u\\) 由初始数据在球面 \\(|x-y|=ct\\) 上的平均决定",
+        "d'Alembert 公式",
+        "Poisson-like 公式",
+        "柱面平均"
+        ],
+        "answer": 0,
+        "explanation": "频域 \\(\\hat u=\\hat f\\cos(c|\\xi|t)+\\hat g\\sin(c|\\xi|t)/(c|\\xi|)\\)。逆变换需要 \\(\\mathcal{F}^{-1}[\\cos(c|\\xi|t)]\\)，这涉及 \\(\\delta(|x|-ct)\\)（球面 delta）。三维 Huygens 原理：信号严格在球面 \\(|x|=ct\\) 上传播（前沿清晰），二维则有\"余波\"。"
+      },
+      {
+        "id": "pde-ch05-q20",
+        "question": "用 Duhamel 原理 + Fourier 变换解 \\(u_t-u_{xx}=f(x,t)\\)（\\(x\\in\\mathbb{R}\\)，\\(u(x,0)=0\\)）。结果？",
+        "options": [
+          "\\(u(x,t)=\\int_0^t\\int_{-\\infty}^\\infty\\frac{1}{\\sqrt{4\\pi(t-s)}}e^{-\\frac{(x-y)^2}{4(t-s)}}f(y,s)\\,dy\\,ds\\)",
+        "\\(u=\\int f\\,dy\\)",
+        "\\(u=tf\\)",
+        "\\(u=e^{-t}*f\\)"
+        ],
+        "answer": 0,
+        "explanation": "齐次解的 propagator 是高斯核 \\(G(x,t)=\\frac{1}{\\sqrt{4\\pi t}}e^{-x^2/(4t)}\\)。Duhamel：\\(u(t)=\\int_0^t G(\\cdot,t-s)*f(\\cdot,s)\\,ds\\)。展开卷积得双重积分。物理：每个时空点 \\((y,s)\\) 的源贡献经扩散核传播到 \\((x,t)\\)。"
+      },
+      {
+        "id": "pde-ch05-q21",
+        "question": "S-L 问题的 Rayleigh 商 \\(R[\\phi]=\\frac{[p\\phi\\phi']_a^b+\\int(p|\\phi'|^2+q|\\phi|^2)}{\\int w|\\phi|^2}\\)。最小值等于？",
+        "options": [
+          "最小特征值 \\(\\lambda_1\\)，由第一特征函数 \\(\\phi_1\\) 实现",
+        "0",
+        "\\(\\infty\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "变分原理 \\(\\lambda_1=\\min_{\\phi\\neq 0}R[\\phi]\\)。类比：矩阵 \\(A\\) 的最小特征值 \\(=\\min\\frac{x^TAx}{x^Tx}\\)。高阶：\\(\\lambda_n=\\min_{\\phi\\perp\\phi_1,...,\\phi_{n-1}}R[\\phi]\\)（极大极小原理）。这是谱理论的核心工具，也是有限元收敛分析的基础。"
+      },
+      {
+        "id": "pde-ch05-q22",
+        "question": "Gibbs 现象：Fourier 级数在间断点附近的截断级数会超调约？",
+        "options": [
+          "约 \\(9\\%\\)（不随项数 \\(N\\) 增加而消失）",
+        "约 \\(50\\%\\)",
+        "趋于零",
+        "约 \\(1\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "在跳跃间断处，\\(S_N f\\) 的极大值趋于 \\(\\frac{1}{\\pi}\\int_0^\\pi\\frac{\\sin t}{t}\\,dt\\approx 1.0895...\\)（超调 \\(\\approx 8.95\\%\\) 的跳跃幅度）。这是 Fourier 逼近的内在限制——不是误差，而是振荡不会消失。"
+      },
+      {
+        "id": "pde-ch05-q23",
+        "question": "Parseval（Plancherel）等式 \\(\\int|f(x)|^2\\,dx=\\int|\\hat f(\\xi)|^2\\,d\\xi\\) 的物理意义？",
+        "options": [
+          "时域（空域）总能量 = 频域总能量",
+        "\\(f\\) 和 \\(\\hat f\\) 相等",
+        "仅对实函数成立",
+        "频域能量更大"
+        ],
+        "answer": 0,
+        "explanation": "Fourier 变换是 \\(L^2(\\mathbb{R})\\) 上的等距同构（保范映射）。物理：\\(|f|^2\\) 是信号功率密度，\\(|\\hat f|^2\\) 是功率谱密度。总能量守恒。推论：\\(\\langle f,g\\rangle=\\langle\\hat f,\\hat g\\rangle\\)（内积保持）。"
+      },
+      {
+        "id": "pde-ch05-q24",
+        "question": "阻尼波 \\(u_{tt}+2\\gamma u_t=c^2 u_{xx}\\) 中 Duhamel 原理如何修改？",
+        "options": [
+          "用阻尼齐次方程的 propagator（含 \\(e^{-\\gamma t}\\) 衰减因子）做积分",
+        "直接忽略阻尼",
+        "用热方程 propagator",
+        "不适用"
+        ],
+        "answer": 0,
+        "explanation": "齐次方程 \\(u_{tt}+2\\gamma u_t-c^2 u_{xx}=0\\) 的解算子 \\(S(t)\\) 含衰减模式 \\(e^{-\\gamma t}\\cos(\\omega t)\\)。Duhamel：\\(u(t)=S(t)u_0+\\int_0^t S(t-s)f(s)\\,ds\\)。结构不变，只是 propagator 含阻尼。"
+      },
+      {
+        "id": "pde-ch05-q25",
+        "question": "周期 S-L 问题（如 \\(y''+\\lambda y=0\\)，\\(y(0)=y(2\\pi)\\)，\\(y'(0)=y'(2\\pi)\\)）的特征值结构？",
+        "options": [
+          "\\(\\lambda_n=n^2\\)（\\(n=0,1,2,...\\)），除 \\(\\lambda_0\\) 外每个特征值有二重特征空间 \\(\\{\\cos nx,\\sin nx\\}\\)",
+        "非退化",
+        "无特征值",
+        "仅奇数 \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\lambda_0=0\\) → \\(y=\\text{const}\\)（一维）。\\(\\lambda_n=n^2\\)（\\(n\\geq 1\\)） → \\(y=A\\cos nx+B\\sin nx\\)（二维）。周期条件下特征值可重复——与 Dirichlet/Neumann 情况（简单特征值）不同。"
+      },
+      {
+        "id": "pde-ch05-q26",
+        "question": "音乐中的泛音：弦振动 \\(u_{tt}=c^2 u_{xx}\\) 的 Fourier 级解中，\\(n=1,2,3,...\\) 各模式对应？",
+        "options": [
+          "基频和各次泛音（频率 \\(f_n=nc/(2L)\\)）",
+        "仅基频",
+        "随机频率",
+        "频率不是 \\(n\\) 的整数倍"
+        ],
+        "answer": 0,
+        "explanation": "\\(u=\\sum B_n\\sin(n\\pi x/L)\\cos(n\\pi ct/L)\\)。\\(f_n=n\\cdot f_1\\)（整数谐波序列）。\\(n=1\\)：基频（或基音），\\(n=2\\)：八度，\\(n=3\\)：纯五度 + 八度。弦长 \\(L\\) 和张力（通过 \\(c\\)）决定音高。"
+      },
+      {
+        "id": "pde-ch05-q27",
+        "question": "信号处理中的低通滤波器：在频域中将 \\(|\\xi|>B\\) 的分量置零，等价于空域中？",
+        "options": [
+          "与 \\(\\text{sinc}\\) 函数做卷积",
+        "截断信号",
+        "乘以常数",
+        "求导"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat h(\\xi)=\\Pi(\\xi/(2B))\\)（矩形窗）→ \\(h(x)=2B\\text{sinc}(2Bx)\\)。\\(u_\\text{filtered}=u*h\\)。卷积 = 平滑 → 高频去除。Shannon 采样定理：带宽 \\(B\\) 的信号可用间隔 \\(1/(2B)\\) 的样点完全重建。"
+      },
+      {
+        "id": "pde-ch05-q28",
+        "question": "量子力学：含时 Schrödinger 方程 \\(i\\hbar\\psi_t=-\\frac{\\hbar^2}{2m}\\psi_{xx}+V\\psi\\) 的 Duhamel 形式？",
+        "options": [
+          "\\(\\psi(t)=e^{-iHt/\\hbar}\\psi_0-\\frac{i}{\\hbar}\\int_0^t e^{-iH(t-s)/\\hbar}V_\\text{pert}(s)\\psi(s)\\,ds\\)",
+        "\\(\\psi=e^{-t}\\psi_0\\)",
+        "\\(\\psi=\\int V\\,dx\\)",
+        "不适用"
+        ],
+        "answer": 0,
+        "explanation": "\\(H=-\\frac{\\hbar^2}{2m}\\partial_{xx}+V_0\\)（无微扰 Hamiltonian）。微扰 \\(V_\\text{pert}\\) 的效应用 Duhamel/Dyson 级数叠加。第一项 = 自由演化，积分项 = 微扰修正。这也是散射理论（Lippmann-Schwinger 方程）的出发点。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="pde"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/pde.html" class="module-name">偏微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Fourier 级数在 PDE 中的应用框架</a></li>
+      <li><a href="#kp2">02 · Sturm-Liouville 理论</a></li>
+      <li><a href="#kp3">03 · Fourier 变换方法</a></li>
+      <li><a href="#kp4">04 · 非齐次问题与 Duhamel 原理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Fourier 方法</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Fourier 级数在 PDE 中的应用框架</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 方法是求解线性 PDE（热方程、波方程、Laplace 方程） 最系统的工具。核心思想是将解展开为正交函数系（三角函数、 Bessel 函数等）的级数，使 PDE 解耦为独立的 ODE。Fourier 在 1807 年提出用三角级数表示任意函数的大胆猜想，开启了整个 现代分析的新纪元。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fourier 方法的本质是在 Hilbert 空间 \(L^2\) 中将函数投影到 算子（如 \(-d^2/dx^2\)）的特征函数基上。PDE 在特征基下对角化， 每个分量独立演化。这是「谱方法」思想的原型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一般框架</strong>（以热方程为例）： 1. 分离变量得到 Sturm-Liouville 问题 \(X'' + \lambda X = 0\)，边界条件 → 特征值 \(\lambda_n\)，特征函数 \(X_n\) 2. 特征函数的正交性：\(\int_0^L X_m X_n\,dx = 0\)（\(m \neq n\)） 3. 初值展开：\(\phi(x) = \sum b_n X_n(x)\)， \(b_n = \frac{\langle\phi, X_n\rangle}{\|X_n\|^2}\) 4. 时间部分独立求解得 \(T_n(t)\) 5. 叠加：\(u(x,t) = \sum b_n T_n(t) X_n(x)\) <strong>Dirichlet 条件</strong>：\(X_n = \sin(n\pi x/L)\) <strong>Neumann 条件</strong>：\(X_n = \cos(n\pi x/L)\)（含 \(n=0\) 常数项） <strong>周期条件</strong>：\(X_n = e^{in\pi x/L}\)（或 \(\cos, \sin\) 组合） <strong>Fourier 系数的计算</strong>：利用正交性提取系数 \[b_n = \frac{2}{L}\int_0^L \phi(x)\sin\frac{n\pi x}{L}\,dx\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 谱方法是现代科学计算的基础（天气预报中球谐函数展开） - 量子力学中的定态 Schrödinger 方程本质上是 Fourier 方法</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求阶梯函数 \(\phi(x) = \begin{cases}1,&0<x<L/2\\0,&L/2<x<L\end{cases}\) 的 Fourier 正弦系数。 解答：\(b_n = \frac{2}{L}\int_0^{L/2}\sin\frac{n\pi x}{L}\,dx = \frac{2}{n\pi}\left[-\cos\frac{n\pi x}{L}\right]_0^{L/2}\) \(= \frac{2}{n\pi}(1-\cos\frac{n\pi}{2})\)。 \(b_1 = 2/\pi\)，\(b_2 = 2/\pi\)，\(b_3 = 2/(3\pi)\)，\(b_4 = 0\)，... 易错点：使用 Fourier 正弦级数（Dirichlet）vs 余弦级数（Neumann） 取决于边界条件，不可混用。错误的边界条件导致错误的展开基。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Neumann 边值问题 \(u_x(0,t) = u_x(L,t) = 0\) 对应哪种 Fourier 展开？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Neumann 条件 \\(X\\'(0) = X\\'(L) = 0\\) 的特征函数是 \\(\\cos(n\\pi x/L)\\)。')">A. 正弦级数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Neumann 条件 \\(X\\'(0) = X\\'(L) = 0\\) 的特征函数是 \\(\\cos(n\\pi x/L)\\)。')">B. 余弦级数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Neumann 条件 \\(X\\'(0) = X\\'(L) = 0\\) 的特征函数是 \\(\\cos(n\\pi x/L)\\)。')">C. 复指数级数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Neumann 条件 \\(X\\'(0) = X\\'(L) = 0\\) 的特征函数是 \\(\\cos(n\\pi x/L)\\)。')">D. Bessel 函数展开</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Sturm-Liouville 理论</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 方法中反复出现的特征值问题 \(X'' + \lambda X = 0\) 是 一般 Sturm-Liouville 问题的特例。Sturm-Liouville 理论保证 特征值实数、特征函数正交、形成完备基——这为 Fourier 方法 提供了严格的数学基础，也推广到圆柱坐标(Bessel)和球坐标(Legendre)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sturm-Liouville 问题是无穷维的「特征值问题」：自伴算子在 \(L^2\) 上的谱分解。特征函数基的完备性类比于有限维的特征向量分解， Parseval 等式类比于 \(\|x\|^2 = \sum|x_i|^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一般 Sturm-Liouville 问题</strong>： \[-(p(x)y')' + q(x)y = \lambda w(x)y, \quad x \in [a,b]\] 配以边界条件（Dirichlet/Neumann/Robin/周期）。 <strong>定理</strong>（正则 SL 问题）： 1. 特征值实数且可列 \(\lambda_1 < \lambda_2 < \cdots \to \infty\) 2. 对应不同特征值的特征函数正交：\(\int_a^b w(x)y_m y_n\,dx = 0\)（\(m \neq n\)） 3. 特征函数 \(\{y_n\}\) 在 \(L^2_w([a,b])\) 中构成完备正交基 4. 第 \(n\) 个特征函数在 \((a,b)\) 内恰有 \(n-1\) 个零点 <strong>证明要点</strong>（实特征值）：Sturm-Liouville 算子 \(L[y] = -(py')'+qy\) 关于权函数 \(w\) 的内积是自伴的 \(\langle Ly, z\rangle_w = \langle y, Lz\rangle_w\) （通过分部积分验证），自伴算子的特征值必为实数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 量子力学中 \(-\hbar^2/(2m)\psi'' + V\psi = E\psi\) 就是 Sturm-Liouville 问题 - Bessel 方程、Legendre 方程是特殊的 SL 问题</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(y'' + \lambda y = 0\)，\(y(0)=y(\pi)=0\) 的特征值和零点规律。 解答：\(\lambda_n = n^2\)，\(y_n = \sin nx\)（\(n=1,2,\ldots\)）。 \(y_1 = \sin x\) 在 \((0,\pi)\) 内 0 个零点。 \(y_2 = \sin 2x\) 在 \((0,\pi)\) 内 1 个零点（\(x=\pi/2\)）。 \(y_n\) 在 \((0,\pi)\) 内 \(n-1\) 个零点。✓ 符合 Sturm-Liouville 理论预测。 易错点：完备性（\(y_n\) 构成基）不等于逐点收敛。Fourier 级数在 不连续点处收敛到左右极限的平均值，不是函数值本身。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Sturm-Liouville 问题的特征值有什么性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正则 SL 问题的特征值全部实数，可列为 \\(\\lambda_1 < \\lambda_2 < \\cdots\\)，')">A. 可以是复数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！正则 SL 问题的特征值全部实数，可列为 \\(\\lambda_1 < \\lambda_2 < \\cdots\\)，')">B. 都是实数且可列到正无穷</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正则 SL 问题的特征值全部实数，可列为 \\(\\lambda_1 < \\lambda_2 < \\cdots\\)，')">C. 有有限个</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。正则 SL 问题的特征值全部实数，可列为 \\(\\lambda_1 < \\lambda_2 < \\cdots\\)，')">D. 可以是负数但有有限个</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Fourier 变换方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当域是全空间 \(\mathbb{R}^n\) 时，分离变量不产生离散特征值， 取而代之的是连续谱——这正是 Fourier 变换发挥作用的场景。 Fourier 变换将微分算子 \(\partial/\partial x\) 变为乘以 \(i\xi\)， 将 PDE 变为关于频率变量的代数方程（或 ODE），极大简化了求解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Fourier 变换是 \(L^2(\mathbb{R}^n)\) 上的酉变换（Plancherel 定理）， 将空间域问题转化为频率域问题。微分 \(\leftrightarrow\) 乘法、 卷积 \(\leftrightarrow\) 乘积的对偶关系是 PDE 求解的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Fourier 变换求解热方程</strong>（全空间）：\(u_t = \kappa u_{xx}\)。 \(\hat{u}_t = -4\pi^2\kappa\xi^2 \hat{u}\)（\(\partial_x^2 \to -4\pi^2\xi^2\)）。 这是关于 \(t\) 的 ODE：\(\hat{u}(\xi,t) = \hat{\phi}(\xi)e^{-4\pi^2\kappa\xi^2 t}\)。 反变换 \(u = \mathcal{F}^{-1}[\hat{\phi} \cdot \hat{\Phi}] = \phi * \Phi\)，得到卷积公式。 <strong>Fourier 变换求解波方程</strong>：\(u_{tt} = c^2 u_{xx}\)。 \(\hat{u}_{tt} = -4\pi^2 c^2\xi^2 \hat{u}\)，即 \(\hat{u}_{tt} + \omega^2(\xi)\hat{u} = 0\)，\(\omega = 2\pi c|\xi|\)。 每个频率分量是简谐振动！ \[\hat{u}(\xi,t) = \hat{\phi}(\xi)\cos(2\pi c|\xi|t) + \frac{\hat{\psi}(\xi)}{2\pi c|\xi|}\sin(2\pi c|\xi|t)\] <strong>Fourier 变换求解 Poisson 方程</strong>：\(\Delta u = f\)。 \(-4\pi^2|\xi|^2\hat{u} = \hat{f}\)，\(\hat{u} = -\hat{f}/(4\pi^2|\xi|^2)\)。 反变换得 \(u = \Phi * f\)（\(\Phi\) 是基本解）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 信号处理中的频域滤波直接对应 PDE 的 Fourier 方法 - 光学中 Fraunhofer 衍射是波方程 Fourier 变换解的远场近似</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 Fourier 变换求解 \(u_t + au_x = 0\)（\(\mathbb{R}\) 上）。 解答：\(\hat{u}_t + 2\pi ia\xi\hat{u} = 0\)（ODE）， \(\hat{u}(\xi,t) = \hat{\phi}(\xi)e^{-2\pi ia\xi t}\)。 反变换利用时移性：\(u(x,t) = \phi(x-at)\)（右行波）。与特征线法一致。 易错点：Fourier 变换的不同约定（\(2\pi\) 放在指数还是系数中） 会导致公式差异。需始终使用同一约定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fourier 变换将偏导数 \(\partial u/\partial x\) 变为什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathcal{F}[\\partial u/\\partial x] = 2\\pi i\\xi\\hat{u}(\\xi)\\)')">A. \(\hat{u}/\xi\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\mathcal{F}[\\partial u/\\partial x] = 2\\pi i\\xi\\hat{u}(\\xi)\\)')">B. \(2\pi i\xi\hat{u}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathcal{F}[\\partial u/\\partial x] = 2\\pi i\\xi\\hat{u}(\\xi)\\)')">C. \(-\xi^2\hat{u}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathcal{F}[\\partial u/\\partial x] = 2\\pi i\\xi\\hat{u}(\\xi)\\)')">D. \(\partial\hat{u}/\partial\xi\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>非齐次问题与 Duhamel 原理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>真实世界的热源、外力驱动导致非齐次 PDE \(u_t - \kappa\Delta u = f(x,t)\)。 Duhamel 原理将非齐次问题分解为一族齐次初值问题的「叠加」， 类比于 ODE 中的常数变易法。这是将齐次解理论推广到非齐次情况 的系统方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Duhamel 原理的核心是线性叠加 + 时间延迟：将源项 \(f(x,s)\) 在每个 时间片 \(ds\) 上看作一个瞬时脉冲，每个脉冲从 \(t = s\) 开始演化 \(t - s\) 秒后叠加。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Duhamel 原理</strong>（热方程版）： 问题：\(u_t - \kappa\Delta u = f(x,t)\)，\(u(x,0) = 0\)。 设 \(w(x,t;s)\) 是齐次问题 \(w_t - \kappa\Delta w = 0\)（\(t > s\)）， \(w(x,s;s) = f(x,s)\) 的解。则 \[u(x,t) = \int_0^t w(x,t;s)\,ds\] <strong>证明</strong>：\(u_t = w(x,t;t) + \int_0^t w_t(x,t;s)\,ds = f(x,t) + \int_0^t \kappa\Delta w\,ds\) \(= f(x,t) + \kappa\Delta u\)。✓ <strong>全空间具体公式</strong>： \[u(x,t) = \int_0^t \int_{\mathbb{R}^n} \Phi(x-y, t-s) f(y,s)\,dy\,ds\] 其中 \(\Phi\) 是热核。这是「Green 函数法」的时空版本。 <strong>波方程的类似形式</strong>：\(u_{tt} = c^2\Delta u + f\)， \(u(x,t) = \int_0^t w(x,t;s)\,ds\)，\(w\) 满足齐次波方程且 \(w(x,s;s)=0\)，\(w_t(x,s;s)=f(x,s)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 加热棒问题：外部热源 \(f(x,t)\) 下的温度场 - 受迫振动：外力驱动下的弦/膜振动</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：口述 Duhamel 原理如何将 \(u_t - u_{xx} = e^{-t}\sin x\)（\(u(x,0)=0\)，\(x \in \mathbb{R}\)） 化归为齐次问题。 解答：对每个 \(s \in [0,t]\)，求解 \(w_t = w_{xx}\)（\(t > s\)），\(w(x,s) = e^{-s}\sin x\)。 解：\(w(x,t;s) = e^{-s}\sin x \cdot e^{-(t-s)}\)（因 \(\sin x\) 是 \(-\partial_{xx}\) 的特征函数）。 \(u = \int_0^t e^{-s}\sin x \cdot e^{-(t-s)}\,ds = \sin x \cdot e^{-t}\int_0^t 1\,ds = t e^{-t}\sin x\)。 验证：\(u_t = (1-t)e^{-t}\sin x\)，\(u_{xx} = -te^{-t}\sin x\)， \(u_t - u_{xx} = (1-t+t)e^{-t}\sin x = e^{-t}\sin x\)。✓ 易错点：Duhamel 积分的上限是 \(t\)（不是 \(\infty\)）， 且被积函数中 \(w\) 的时间参数是 \(t-s\)（不是 \(t\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Duhamel 原理类比于 ODE 理论中的哪个方法？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Duhamel 原理通过叠加齐次解来构造非齐次解，')">A. 分离变量法</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Duhamel 原理通过叠加齐次解来构造非齐次解，')">B. 常数变易法</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Duhamel 原理通过叠加齐次解来构造非齐次解，')">C. 特征方程法</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Duhamel 原理通过叠加齐次解来构造非齐次解，')">D. 幂级数法</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/analysis/pde.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

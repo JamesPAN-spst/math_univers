@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 奇异积分 — 调和分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "harmonic-ch05-q1",
+        "question": "Hilbert 变换 \\(Hf(x) = \\text{p.v.}\\frac{1}{\\pi}\\int\\frac{f(t)}{x-t}\\, dt\\) 的 Fourier 乘子？",
+        "options": [
+          "\\(\\widehat{Hf}(\\xi) = -i\\,\\text{sgn}(\\xi)\\hat f(\\xi)\\)（相移 \\(\\pm\\pi/2\\)）",
+        "\\(\\hat f(\\xi)\\)",
+        "\\(|\\xi|\\hat f(\\xi)\\)",
+        "\\(\\xi\\hat f(\\xi)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H\\) 的核 \\(1/(\\pi x)\\) 的 Fourier 变换 \\(= -i\\,\\text{sgn}(\\xi)\\)（p.v. 意义）。\\(|{-}i\\,\\text{sgn}(\\xi)| = 1\\)（\\(\\xi \\neq 0\\)）\\(\\Rightarrow\\) \\(\\|Hf\\|_2 = \\|f\\|_2\\)（\\(L^2\\) 等距）。\\(H^2 = -I\\)（\\(\\text{sgn}^2 = 1\\)，乘以 \\((-i)^2 = -1\\)）。\\(H\\) 将 \\(\\cos\\) 变成 \\(\\sin\\)，反之亦然——\"90° 相移\"。"
+      },
+      {
+        "id": "harmonic-ch05-q2",
+        "question": "\\(H\\) 在 \\(L^2\\) 上有界：\\(\\|Hf\\|_2 = \\|f\\|_2\\)。\\(H\\) 在 \\(L^1\\) 上？",
+        "options": [
+          "\\(H\\) 不是 \\(L^1 \\to L^1\\) 有界的——而是弱型 \\((1,1)\\)：\\(|\\{|Hf| > \\lambda\\}| \\leq C\\|f\\|_1/\\lambda\\)",
+        "\\(\\|Hf\\|_1 \\leq C\\|f\\|_1\\)",
+        "\\(H: L^1 \\to L^\\infty\\)",
+        "\\(H\\) 在 \\(L^1\\) 上无界且无弱估计"
+        ],
+        "answer": 0,
+        "explanation": "\\(f = \\chi_{[0,1]}\\)：\\(Hf(x) \\sim \\frac{1}{\\pi}\\log|x/(x-1)|\\)（\\(|x| \\to \\infty\\) 时 \\(\\sim 1/(\\pi x)\\)）。\\(Hf \\notin L^1\\)——\\(L^1\\) 有界性失败。弱型 \\((1,1)\\)：Calderón-Zygmund 分解的核心应用。\\(L^p\\)（\\(1 < p < \\infty\\)）：\\(\\|Hf\\|_p \\leq C_p\\|f\\|_p\\)（M. Riesz 定理）。"
+      },
+      {
+        "id": "harmonic-ch05-q3",
+        "question": "Calderón-Zygmund 算子 \\(T\\) 的定义（简化版）：\\(Tf(x) = \\text{p.v.}\\int K(x-y) f(y)\\, dy\\)，核 \\(K\\) 满足？",
+        "options": [
+          "\\(|K(x)| \\leq C/|x|^n\\)（大小条件），\\(|K(x)-K(x-y)| \\leq C|y|^\\delta/|x|^{n+\\delta}\\)（\\(|x| > 2|y|\\)，正则性条件），\\(T: L^2 \\to L^2\\) 有界",
+        "\\(K \\in L^1\\)",
+        "\\(K\\) 连续",
+        "\\(K\\) 可积且有界"
+        ],
+        "answer": 0,
+        "explanation": "CZ 核的三个条件：(1) 大小 \\(O(|x|^{-n})\\)——恰好不可积（奇异！）。(2) Hörmander 正则性——远离奇点时 \\(K\\) 变化平缓。(3) \\(L^2\\) 有界（通常由 Fourier 乘子判定）。这些条件保证 \\(T: L^p \\to L^p\\)（\\(1 < p < \\infty\\)）和弱 \\((1,1)\\)。"
+      },
+      {
+        "id": "harmonic-ch05-q4",
+        "question": "Calderón-Zygmund 分解：\\(f \\in L^1\\)，高度 \\(\\lambda > 0\\)。\\(f = g + b\\)（好部分 + 坏部分）。\\(g\\) 和 \\(b\\) 的性质？",
+        "options": [
+          "\\(|g| \\leq C\\lambda\\)（a.e.），\\(b = \\sum b_j\\)（\\(b_j\\) 支撑在不相交的立方体 \\(Q_j\\) 上，\\(\\int b_j = 0\\)，\\(\\sum|Q_j| \\leq C\\|f\\|_1/\\lambda\\)）",
+        "\\(g = f\\)，\\(b = 0\\)",
+        "\\(g\\) 连续，\\(b\\) 间断",
+        "\\(g \\in L^2\\)，\\(b \\in L^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "对 \\(\\mathbb{R}^n\\) 二进格点进行 Calderón-Zygmund 分解：\\(Q_j\\) = \\(f\\) 的平均值 \\(> \\lambda\\) 的极大二进立方体。\\(g = f\\)（在 \\(\\bigcup Q_j^c\\)），\\(g|_{Q_j}\\) = \\(f\\) 在 \\(Q_j\\) 的平均。\\(b_j = (f - \\text{avg}_j)\\chi_{Q_j}\\)。关键：\\(b_j\\) 有零均值——使奇异积分核的正则性起作用。"
+      },
+      {
+        "id": "harmonic-ch05-q5",
+        "question": "BMO 空间（有界平均振荡）\\(f \\in \\text{BMO}\\) 当且仅当？",
+        "options": [
+          "\\(\\|f\\|_{\\text{BMO}} = \\sup_Q \\frac{1}{|Q|}\\int_Q |f - f_Q|\\, dx < \\infty\\)（\\(f_Q\\) = \\(f\\) 在 \\(Q\\) 上的平均值）",
+        "\\(f \\in L^\\infty\\)",
+        "\\(f \\in L^1\\)",
+        "\\(\\sup|f| < \\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "BMO：每个立方体上 \\(f\\) 与其均值的平均偏差有界。\\(L^\\infty \\subsetneq \\text{BMO}\\)：\\(\\log|x| \\in \\text{BMO} \\setminus L^\\infty\\)。BMO 是 \\(H^1\\) 的对偶空间（Fefferman）。CZ 算子：\\(L^\\infty \\to \\text{BMO}\\)（而非 \\(L^\\infty \\to L^\\infty\\)）。BMO 是\"几乎有界\"的自然空间。"
+      },
+      {
+        "id": "harmonic-ch05-q6",
+        "question": "Marcinkiewicz 插值定理（简化版）：\\(T\\) 线性，弱 \\((p_0, p_0)\\) 且弱 \\((p_1, p_1)\\)（\\(p_0 < p_1\\)）\\(\\Rightarrow\\) \\(T\\) 强 \\((p, p)\\)（\\(p_0 < p < p_1\\)）。\"弱型 \\((p,p)\\)\"指？",
+        "options": [
+          "\\(|\\{|Tf| > \\lambda\\}| \\leq (C\\|f\\|_p/\\lambda)^p\\)",
+        "\\(\\|Tf\\|_p \\leq C\\|f\\|_p\\)",
+        "\\(Tf \\in L^p\\)",
+        "\\(\\|Tf\\|_\\infty \\leq C\\|f\\|_p\\)"
+        ],
+        "answer": 0,
+        "explanation": "弱型：分布函数估计（比强型弱）。Chebyshev 不等式：强 \\(\\Rightarrow\\) 弱。反之不成立。Marcinkiewicz 定理：两端弱 \\(\\Rightarrow\\) 中间强——调和分析的\"魔法\"插值。应用：\\(H\\) 弱 \\((1,1)\\) + 强 \\((2,2)\\) \\(\\Rightarrow\\) 强 \\((p,p)\\)（\\(1 < p \\leq 2\\)）。"
+      },
+      {
+        "id": "harmonic-ch05-q7",
+        "question": "Riesz 变换 \\(R_j f = \\text{p.v.}\\int \\frac{x_j - y_j}{|x-y|^{n+1}} f(y)\\, dy\\)（\\(1 \\leq j \\leq n\\)）在 \\(\\mathbb{R}^n\\) 的角色？",
+        "options": [
+          "\\(-\\Delta\\) 的因子分解：\\(\\partial_j = R_j(-\\Delta)^{1/2}\\)——Riesz 变换是 Hilbert 变换的高维推广",
+        "积分算子",
+        "微分算子",
+        "与 \\(\\Delta\\) 无关"
+        ],
+        "answer": 0,
+        "explanation": "Fourier 乘子：\\(\\widehat{R_jf}(\\xi) = -i\\frac{\\xi_j}{|\\xi|}\\hat f(\\xi)\\)。\\((-\\Delta)^{1/2}\\)：乘子 \\(2\\pi|\\xi|\\)。\\(\\partial_j = R_j \\cdot (-\\Delta)^{1/2}\\)（乘子 \\(-i\\xi_j/(|\\xi|) \\cdot 2\\pi|\\xi| = 2\\pi i\\xi_j\\)）。\\(n = 1\\)：\\(R_1 = H\\)。\\(R_j: L^p \\to L^p\\)（\\(1 < p < \\infty\\)）——CZ 算子。"
+      },
+      {
+        "id": "harmonic-ch05-q8",
+        "question": "CZ 定理核心结论：\\(T\\) 是 CZ 算子 \\(\\Rightarrow\\) \\(T: L^p(\\mathbb{R}^n) \\to L^p(\\mathbb{R}^n)\\) 有界（\\(1 < p < \\infty\\)），\\(T: L^1 \\to L^{1,\\infty}\\)（弱型）。证明框架？",
+        "options": [
+          "\\(L^2\\) 有界（假设）+ CZ 分解得弱 \\((1,1)\\) + Marcinkiewicz 插值得 \\(L^p\\)（\\(1 < p \\leq 2\\)）+ 对偶得 \\(p > 2\\)",
+        "直接 Fourier 分析",
+        "用 Schur 检验",
+        "用 Young 卷积不等式"
+        ],
+        "answer": 0,
+        "explanation": "Step 1：\\(L^2\\) 有界（核的 Fourier 变换有界）。Step 2：\\(f = g + b\\)（CZ 分解，高度 \\(\\lambda\\)）。\\(|Tf > \\lambda|\\)：\\(g\\) 部分用 \\(L^2\\) + Chebyshev，\\(b\\) 部分用核正则性 + \\(\\int b_j = 0\\)。Step 3：\\(T\\) 弱 \\((1,1)\\) + 强 \\((2,2)\\) →（Marcinkiewicz）强 \\((p,p)\\)（\\(1 < p \\leq 2\\)）。Step 4：\\(T^*\\) 同样 CZ \\(\\Rightarrow\\) \\(p > 2\\) 由对偶。"
+      },
+      {
+        "id": "harmonic-ch05-q9",
+        "question": "\\(H(\\chi_{[0,1]})(x) = ?\\)（Hilbert 变换作用在特征函数上）",
+        "options": [
+          "\\(\\frac{1}{\\pi}\\log\\left|\\frac{x}{x-1}\\right|\\)",
+        "\\(\\chi_{[0,1]}(x)\\)",
+        "\\(\\delta(x) - \\delta(x-1)\\)",
+        "\\(1/(\\pi x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H\\chi_{[0,1]}(x) = \\frac{1}{\\pi}\\text{p.v.}\\int_0^1 \\frac{dt}{x-t} = \\frac{1}{\\pi}\\log\\left|\\frac{x}{x-1}\\right|\\)。\\(x \\to 0^+\\)：\\(\\to -\\infty\\)。\\(x \\to 1^-\\)：\\(\\to +\\infty\\)。\\(x \\to \\infty\\)：\\(\\sim 1/(\\pi x)\\)。不在 \\(L^1\\)——验证 \\(H\\) 不是 \\(L^1 \\to L^1\\) 有界。"
+      },
+      {
+        "id": "harmonic-ch05-q10",
+        "question": "\\(\\log|x| \\in \\text{BMO}(\\mathbb{R})\\)。验证：\\(Q = [a, 2a]\\)（\\(a > 0\\)）时 \\(\\frac{1}{|Q|}\\int_Q |\\log|x| - (\\log|x|)_Q|\\, dx \\leq ?\\)",
+        "options": [
+          "\\(C\\)（常数，不依赖 \\(a\\)）——对数增长被 BMO 的均值振荡消除",
+        "\\(\\log a\\)",
+        "\\(\\infty\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Q = [a, 2a]\\)：\\((\\log|x|)_Q = \\frac{1}{a}\\int_a^{2a}\\log x\\, dx = \\log a + (\\text{const})\\)。\\(|\\log x - (\\log x)_Q| \\leq |\\log(x/a)| + C' \\leq \\log 2 + C'\\)（\\(x \\in [a, 2a]\\)）。均值振荡 \\(\\leq C\\)。对任何区间类似——\\(\\log|x|\\) 增长被局部平均抵消。\\(\\|\\log|x|\\|_{\\text{BMO}} < \\infty\\) 但 \\(\\log|x| \\notin L^\\infty\\)。"
+      },
+      {
+        "id": "harmonic-ch05-q11",
+        "question": "Marcinkiewicz 插值中 \\(T\\) 需要是次线性算子即可（\\(|T(f+g)| \\leq |Tf| + |Tg|\\)）。极大函数 \\(Mf\\) 满足次线性吗？",
+        "options": [
+          "是——\\(M(f+g)(x) \\leq Mf(x) + Mg(x)\\)（三角不等式在平均值中传递）",
+        "不是",
+        "仅线性",
+        "超线性"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{1}{|Q|}\\int_Q |f+g| \\leq \\frac{1}{|Q|}\\int_Q |f| + \\frac{1}{|Q|}\\int_Q |g| \\leq Mf(x) + Mg(x)\\)（\\(x \\in Q\\)）。取 \\(\\sup\\) 得 \\(M(f+g) \\leq Mf + Mg\\)。\\(M\\) 弱 \\((1,1)\\)（Hardy-Littlewood）+ 强 \\((\\infty, \\infty)\\)（显然）\\(\\Rightarrow\\) Marcinkiewicz 给出 \\(M: L^p \\to L^p\\)（\\(1 < p \\leq \\infty\\)）。"
+      },
+      {
+        "id": "harmonic-ch05-q12",
+        "question": "Hörmander 条件：\\(\\int_{|x| > 2|y|} |K(x-y) - K(x)|\\, dx \\leq C\\)（\\(\\forall y\\)）。这保证什么？",
+        "options": [
+          "CZ 核的\"远场正则性\"——保证 \\(b_j\\) 部分（坏部分）的贡献可控（证明弱型 \\((1,1)\\) 的关键）",
+        "\\(K \\in L^1\\)",
+        "\\(K\\) 连续",
+        "\\(T: L^\\infty \\to L^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(b_j\\) 支撑在 \\(Q_j\\)，\\(\\int b_j = 0\\)。\\(Tb_j(x) = \\int [K(x-y) - K(x-c_j)] b_j(y)\\, dy\\)（\\(c_j\\) = \\(Q_j\\) 中心，利用零均值）。\\(|x - c_j| > 2\\text{diam}(Q_j)\\)：Hörmander 条件保证 \\(\\int|Tb_j| \\leq C\\|b_j\\|_1\\)。这是 CZ 理论的核心技术引理。"
+      },
+      {
+        "id": "harmonic-ch05-q13",
+        "question": "John-Nirenberg 不等式：\\(f \\in \\text{BMO}\\) \\(\\Rightarrow\\) \\(f\\) 在每个立方体上\"指数可积\"。更精确？",
+        "options": [
+          "\\(|\\{x \\in Q: |f(x) - f_Q| > \\lambda\\}| \\leq C|Q| e^{-c\\lambda/\\|f\\|_{\\text{BMO}}}\\)（指数衰减分布函数）",
+        "\\(f \\in L^\\infty\\)",
+        "\\(f \\in L^p\\)（\\(\\forall p\\)）",
+        "\\(|f - f_Q| \\leq C\\|f\\|_{\\text{BMO}}\\)"
+        ],
+        "answer": 0,
+        "explanation": "John-Nirenberg（1961）：BMO 函数超过均值量的集合按指数衰减——比 \\(L^p\\) 估计强得多。推论：\\(f \\in \\text{BMO} \\Rightarrow f \\in L^p_{\\text{loc}}\\)（\\(\\forall p < \\infty\\)）。\\(e^{c|f|/\\|f\\|_{\\text{BMO}}} \\in L^1_{\\text{loc}}\\)——局部指数可积。BMO 是\"差一步到 \\(L^\\infty\\)\"的空间。"
+      },
+      {
+        "id": "harmonic-ch05-q14",
+        "question": "截断 Hilbert 变换 \\(H_\\epsilon f(x) = \\frac{1}{\\pi}\\int_{|t|>\\epsilon}\\frac{f(x-t)}{t}\\, dt\\)。\\(H_\\epsilon f \\to Hf\\) 在什么意义？",
+        "options": [
+          "\\(L^p\\)（\\(1 < p < \\infty\\)）和 a.e.（几乎处处）（用极大函数控制）",
+        "仅 \\(L^2\\)",
+        "逐点一致",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^*f(x) = \\sup_{\\epsilon > 0}|H_\\epsilon f(x)|\\)（极大 Hilbert 变换）。\\(H^*: L^p \\to L^p\\)（\\(1 < p < \\infty\\)）有界（由 CZ 理论）。\\(\\Rightarrow H_\\epsilon f \\to Hf\\) a.e.（控制收敛/极大函数论证）。\\(L^p\\) 收敛：\\(\\|H_\\epsilon f - Hf\\|_p \\to 0\\)。"
+      },
+      {
+        "id": "harmonic-ch05-q15",
+        "question": "Riesz-Thorin 插值定理 vs Marcinkiewicz 插值定理：主要区别？",
+        "options": [
+          "Riesz-Thorin 需要强型端点但给出精确常数（复方法）。Marcinkiewicz 只需弱型端点但常数不精确（实方法）",
+        "完全相同",
+        "Riesz-Thorin 更弱",
+        "Marcinkiewicz 需要强型"
+        ],
+        "answer": 0,
+        "explanation": "RT：\\(T\\) 强 \\((p_0,q_0)\\) & 强 \\((p_1,q_1)\\) \\(\\Rightarrow\\) 强 \\((p_\\theta,q_\\theta)\\)（\\(\\theta\\)-线性插值），最佳常数 \\(\\leq M_0^{1-\\theta}M_1^\\theta\\)。Marc：仅需弱端点——更普适（如极大函数弱 \\((1,1)\\)）。但代价：常数可能爆炸。CZ 理论同时利用两者。"
+      },
+      {
+        "id": "harmonic-ch05-q16",
+        "question": "核 \\(K(x) = \\Omega(x')/|x|^n\\)（\\(x' = x/|x|\\)，\\(\\Omega\\) 定义在 \\(S^{n-1}\\)，均值为零）。这类核是 CZ 核吗？",
+        "options": [
+          "若 \\(\\Omega \\in \\text{Lip}(S^{n-1})\\)（或 \\(C^1\\)）且 \\(\\int_{S^{n-1}}\\Omega = 0\\)，则满足 CZ 条件（齐次核——Calderón-Zygmund 旋转方法处理）",
+        "总是 CZ 核",
+        "永远不是",
+        "需 \\(\\Omega \\in C^\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|K(x)| = |\\Omega(x')|/|x|^n \\leq C/|x|^n\\)（大小条件✓）。正则性：\\(|\\nabla K(x)| \\leq C/|x|^{n+1}\\)（\\(\\Omega\\) Lipschitz）\\(\\Rightarrow\\) Hörmander 条件✓。\\(\\int_{S^{n-1}}\\Omega = 0\\)：消除理由（保证 p.v. 存在）。\\(L^2\\) 有界：\\(\\hat K(\\xi) = c_n \\Omega(\\xi')\\)——Fourier 乘子有界。"
+      },
+      {
+        "id": "harmonic-ch05-q17",
+        "question": "\\(H^1(\\mathbb{R}^n)\\)（Hardy 空间）vs \\(L^1\\)：关系？",
+        "options": [
+          "\\(H^1 \\subsetneq L^1\\)，\\(H^1 = \\{f \\in L^1: Rf_j \\in L^1,\\, j = 1,...,n\\}\\)（Riesz 变换也在 \\(L^1\\) 中）。\\((H^1)' = \\text{BMO}\\)",
+        "\\(H^1 = L^1\\)",
+        "\\(L^1 \\subsetneq H^1\\)",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^1\\)：CZ 算子弱 \\((1,1)\\) 但非强 \\((1,1)\\)。\\(H^1\\)：\"CZ 算子友好\"的 \\(L^1\\) 子空间。等价刻画：\\(f \\in H^1 \\Leftrightarrow f \\in L^1\\) 且 \\(Mf \\in L^1\\)（极大函数刻画等）。Fefferman-Stein 对偶：\\((H^1)' = \\text{BMO}\\)——调和分析的里程碑定理。CZ 算子：\\(H^1 \\to L^1\\)（强型）。"
+      },
+      {
+        "id": "harmonic-ch05-q18",
+        "question": "Cotlar-Stein 引理：\\(\\{T_j\\}\\) 是 Hilbert 空间上的算子，\\(\\|T_i^* T_j\\| \\leq a(i-j)\\)，\\(\\|T_i T_j^*\\| \\leq a(i-j)\\)，\\(\\sum \\sqrt{a(k)} = A\\)。则 \\(\\|\\sum T_j\\| \\leq ?\\)",
+        "options": [
+          "\\(A\\)（\"几乎正交\"的算子之和有界——远距离算子的交叉项衰减）",
+        "\\(\\sum \\|T_j\\|\\)",
+        "\\(\\|T_j\\|_\\infty\\)",
+        "\\(A^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "经典 Cotlar 引理假设 \\(\\|T_i^*T_j\\|^{1/2} + \\|T_iT_j^*\\|^{1/2} \\leq a(i-j)\\)（快速衰减）。\\(\\|\\sum T_j\\| \\leq \\sum \\sqrt{a(k)}\\)。应用：CZ 算子的 \\(L^2\\) 有界性——将核截断为 \\(T_j\\)（尺度 \\(2^j\\)），验证几乎正交性。David-Journé \\(T(1)\\) 定理的关键工具。"
+      },
+      {
+        "id": "harmonic-ch05-q19",
+        "question": "\\(T(1)\\) 定理（David-Journé）：CZ 型算子 \\(T: L^2 \\to L^2\\) 有界 \\(\\Leftrightarrow\\) \\(T(1)\\) 和 \\(T^*(1)\\) 在 \\(\\text{BMO}\\) 中，且 \\(T\\) 满足弱有界性。\\(T(1) \\in \\text{BMO}\\) 的含义？",
+        "options": [
+          "\\(T\\) 作用于常函数 \\(1\\) 的结果（分布意义）是 BMO 函数——不要求 \\(T(1) = 0\\)",
+        "\\(T\\) 在 \\(L^\\infty\\) 有界",
+        "\\(T1 = 0\\)",
+        "\\(T\\) 自伴"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(1)\\)（分布意义）：\\(\\langle T(1), \\varphi\\rangle = \\langle 1, T^*\\varphi\\rangle\\)。\\(T(1) = 0\\) 是最简单情况（如 Hilbert 变换：反对称核 \\(\\Rightarrow T1 = 0\\)）。\\(T(1) \\neq 0\\)：可以通过 para-product 修正。\\(T(1)\\) 定理将 CZ 算子的 \\(L^2\\) 有界性归结为可验证条件。"
+      },
+      {
+        "id": "harmonic-ch05-q20",
+        "question": "Fefferman 定理：\\((H^1)' = \\text{BMO}\\)。对偶如何理解？",
+        "options": [
+          "每个 BMO 函数 \\(b\\) 定义 \\(H^1\\) 上的有界线性泛函 \\(\\ell(f) = \\int fb\\)，且所有 \\(H^1\\) 上的有界泛函都如此",
+        "\\(H^1 = \\text{BMO}'\\)",
+        "\\(H^1 \\subset \\text{BMO}\\)",
+        "无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\int fb| \\leq C\\|f\\|_{H^1}\\|b\\|_{\\text{BMO}}\\)（Fefferman 不等式——关键技术）。反向：\\((H^1)' \\ni \\ell \\Rightarrow \\exists b \\in \\text{BMO}\\)：\\(\\ell(f) = \\int fb\\)。\\(H^1-\\text{BMO}\\) 对偶替代了 \\(L^1-L^\\infty\\) 对偶——后者不好用（\\(L^1\\) 不自反，\\((L^1)' = L^\\infty\\) 但 \\(L^\\infty\\) 太大）。"
+      },
+      {
+        "id": "harmonic-ch05-q21",
+        "question": "Stein 插值定理 vs Riesz-Thorin：Stein 允许算子族 \\(T_z\\)（\\(z\\) 在带状区域 \\(0 \\leq \\text{Re}\\, z \\leq 1\\)）全纯变化。这比 RT 更强在？",
+        "options": [
+          "\\(T_z\\) 在两条边有界（\\(\\text{Re}\\, z = 0\\)：\\((p_0,q_0)\\)，\\(\\text{Re}\\, z = 1\\)：\\((p_1,q_1)\\)）\\(\\Rightarrow\\) \\(T_\\theta\\) 有界（\\(0 < \\theta < 1\\)）——算子可随参数解析变化",
+        "相同",
+        "Stein 更弱",
+        "仅对内积空间"
+        ],
+        "answer": 0,
+        "explanation": "RT 要求单个算子 \\(T\\) 同时满足两端。Stein：\\(T_z\\) 的 \\(z\\) 解析——可以在端点用不同算子。应用：\\(\\mathcal{F}: L^{p_z} \\to L^{p_z'}\\)（\\(z\\) 参数化）给出 Hausdorff-Young 最佳常数。复方法：三线引理（带状区域最大模原理）。"
+      },
+      {
+        "id": "harmonic-ch05-q22",
+        "question": "Hilbert 变换与边界值：\\(F(z) = \\frac{1}{\\pi i}\\int\\frac{f(t)}{t-z}\\, dt\\)（\\(\\text{Im}\\, z > 0\\)，Cauchy 积分）。\\(z \\to x + i0^+\\) 时 \\(\\text{Re}\\, F(x) = ?\\)",
+        "options": [
+          "\\(f(x)/2 + Hf(x)/2\\)... 更准确：\\(F(x+i0) = \\frac{1}{2}f(x) + \\frac{i}{2}Hf(x)\\)——Hilbert 变换连接实部和虚部",
+        "\\(f(x)\\)",
+        "\\(Hf(x)\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cauchy 积分边界值：\\(F(x+i0) = \\frac{1}{2}f(x) + \\frac{1}{2\\pi i}\\text{p.v.}\\int\\frac{f(t)}{t-x}\\, dt = \\frac{1}{2}[f(x) + iHf(x)]\\)。（Plemelj-Sokhotski 公式）。\\(\\text{Re}[F] = f/2\\)，\\(\\text{Im}[F] = Hf/2\\)。Hilbert 变换：实部↔虚部（解析信号的虚部）。"
+      },
+      {
+        "id": "harmonic-ch05-q23",
+        "question": "奇异积分的截断算子极大函数 \\(T^*f(x) = \\sup_{\\epsilon>0}|T_\\epsilon f(x)|\\)。\\(T^*\\) 有什么有界性？",
+        "options": [
+          "\\(T: L^p \\to L^p\\)（\\(1 < p < \\infty\\)）有界 \\(\\Rightarrow T^*: L^p \\to L^p\\) 有界（Cotlar 不等式：\\(T^*f \\leq C(Mf + M(Tf))\\)）",
+        "\\(T^*\\) 无界",
+        "仅 \\(L^2\\)",
+        "\\(T^* = T\\)"
+        ],
+        "answer": 0,
+        "explanation": "Cotlar 不等式：\\(T^* f(x) \\leq C[M(Tf)(x) + Mf(x)]\\)（\\(M\\) = Hardy-Littlewood 极大函数）。\\(M: L^p \\to L^p\\) 有界，\\(T: L^p \\to L^p\\) 有界 \\(\\Rightarrow M(Tf) \\in L^p\\) \\(\\Rightarrow T^* \\in L^p\\)。推论：\\(T_\\epsilon f \\to Tf\\) a.e.——主值极限存在。"
+      },
+      {
+        "id": "harmonic-ch05-q24",
+        "question": "BMO 函数的 Sharp 极大函数 \\(f^\\sharp(x) = \\sup_{Q \\ni x}\\frac{1}{|Q|}\\int_Q|f-f_Q|\\)。Fefferman-Stein 不等式：\\(\\|f\\|_{L^p} \\leq C_p \\|f^\\sharp\\|_{L^p}\\)（\\(1 < p < \\infty\\)）。意义？",
+        "options": [
+          "\\(L^p\\) 范数由局部振荡控制——比极大函数更精细的工具",
+        "\\(f^\\sharp = Mf\\)",
+        "无意义",
+        "仅对 BMO 函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(f^\\sharp \\leq 2Mf\\)（显然）。反向：\\(\\|f\\|_p \\leq C\\|f^\\sharp\\|_p\\)——\\(L^p\\) 范数完全由\"局部均值振荡\"控制。应用：CZ 算子 \\(T\\) 的 \\(L^p\\) 有界性——证 \\((Tf)^\\sharp \\leq CMf\\)，再用 \\(M\\) 有界得 \\(Tf \\in L^p\\)。比直接 CZ 分解更灵活。"
+      },
+      {
+        "id": "harmonic-ch05-q25",
+        "question": "\\(A_p\\) 权条件（Muckenhoupt）：\\(w\\) 是 \\(A_p\\) 权（\\(1 < p < \\infty\\)）当且仅当？",
+        "options": [
+          "\\(\\sup_Q \\left(\\frac{1}{|Q|}\\int_Q w\\right)\\left(\\frac{1}{|Q|}\\int_Q w^{-1/(p-1)}\\right)^{p-1} \\leq [w]_{A_p} < \\infty\\)",
+        "\\(w \\in L^1\\)",
+        "\\(w = 1\\)",
+        "\\(w\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "\\(A_p\\) 条件：权 \\(w\\) 和 \\(w^{-1/(p-1)}\\) 的平均值乘积有界。\\(M: L^p(w) \\to L^p(w)\\) 有界 \\(\\Leftrightarrow w \\in A_p\\)（Muckenhoupt 定理）。CZ 算子也满足加权有界。\\(A_1 \\subset A_p\\)（\\(p > 1\\)）。\\(\\bigcup A_p = A_\\infty\\)。加权不等式是现代调和分析的核心方向。"
+      },
+      {
+        "id": "harmonic-ch05-q26",
+        "question": "语音信号处理中 Hilbert 变换用于构造解析信号 \\(f_a(t) = f(t) + iHf(t)\\)。解析信号的物理意义？",
+        "options": [
+          "\\(|f_a(t)|\\) 给出瞬时振幅（包络），\\(\\arg f_a(t)\\) 给出瞬时相位——从而定义瞬时频率",
+        "去噪",
+        "频谱分析",
+        "时间反转"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_a = f + iHf\\)：仅含正频率（\\(\\hat f_a(\\xi) = 0\\) 当 \\(\\xi < 0\\)）。包络 \\(A(t) = |f_a(t)| = \\sqrt{f^2 + (Hf)^2}\\)。瞬时频率 \\(\\omega(t) = \\frac{d}{dt}\\arg f_a(t)\\)。应用：AM 解调、语音 pitch 提取、振动分析。Hilbert 变换是信号处理的基础工具。"
+      },
+      {
+        "id": "harmonic-ch05-q27",
+        "question": "图像处理中 Riesz 变换用于？",
+        "options": [
+          "方向边缘检测——\\(R_1\\), \\(R_2\\)（\\(\\mathbb{R}^2\\)）分别检测水平和垂直方向特征（类似 Hilbert 变换在各方向的推广）",
+        "颜色变换",
+        "压缩",
+        "旋转"
+        ],
+        "answer": 0,
+        "explanation": "\\(R_j\\) 乘子 \\(-i\\xi_j/|\\xi|\\)：方向性。\\((R_1 f, R_2 f)\\) 给出\"Riesz 向量\"——图像的方向局部特征。模 \\(\\sqrt{R_1^2+R_2^2}\\)：方向无关的边缘度量。推广：monogenic signal（3D Hilbert变换/Riesz变换）用于纹理分析。"
+      },
+      {
+        "id": "harmonic-ch05-q28",
+        "question": "概率论中 BMO 与鞅（martingale）的关系？",
+        "options": [
+          "BMO 鞅：\\(\\sup_n \\|E[|M_\\infty - M_n|^2 | \\mathcal{F}_n]\\|_\\infty^{1/2} < \\infty\\)——鞅的 BMO 空间与调和分析 BMO 通过 Brownian motion 联系",
+        "无关",
+        "BMO = \\(L^\\infty\\)",
+        "仅对离散鞅"
+        ],
+        "answer": 0,
+        "explanation": "\\(f \\in \\text{BMO}(\\mathbb{R}^n) \\Leftrightarrow\\) 调和延拓 \\(u\\) 在上半空间的面积函数有界——Brownian 运动到达边界时的鞅。鞅 BMO：最终值与当前值的条件方差有界。Fefferman-Stein、Davis 不等式（\\(H^1\\)-BMO 对偶）都有概率对应物。调和分析与概率论深层统一。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="harmonic"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/harmonic.html" class="module-name">调和分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Hilbert 变换与共轭函数</a></li>
+      <li><a href="#kp2">02 · Calderón-Zygmund 奇异积分</a></li>
+      <li><a href="#kp3">03 · 极大函数与 Calderón-Zygmund 分解</a></li>
+      <li><a href="#kp4">04 · Littlewood-Paley 理论</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>奇异积分</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Hilbert 变换与共轭函数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 级数的部分和算子在 \(L^p\)（\(1 < p < \infty\)）上有界吗？ 这个问题归结为 Hilbert 变换 \(Hf(x) = \text{p.v.}\frac{1}{\pi}\int \frac{f(t)}{x-t} dt\) 的 \(L^p\) 有界性。Hilbert 变换是原型的"奇异积分算子"， 它连接了调和分析与复分析（对应于全纯函数的实部和虚部）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Hilbert 变换是 Fourier 乘子 \(-i\text{sgn}(\xi)\)——在频域上 它只改变相位（正频率乘 \(-i\)，负频率乘 \(+i\)），不改变模。 这使 \(H\) 成为 \(L^2\) 上的酉算子。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(Hf(x) = \text{p.v.}\frac{1}{\pi}\int_{-\infty}^{\infty} \frac{f(t)}{x-t}\, dt = \lim_{\varepsilon \to 0} \frac{1}{\pi}\int_{|x-t|>\varepsilon} \frac{f(t)}{x-t}\, dt\) <strong>Fourier 乘子</strong>：\(\widehat{Hf}(\xi) = -i\,\text{sgn}(\xi)\,\hat{f}(\xi)\)。 故 \(\|Hf\|_2 = \|f\|_2\)（\(L^2\) 等距）。 <strong>M. Riesz 定理</strong>：\(H: L^p \to L^p\) 有界（\(1 < p < \infty\)）： \[\|Hf\|_p \leq C_p \|f\|_p\] 但 \(H\) 在 \(L^1\) 和 \(L^\infty\) 上不有界（弱 \((1,1)\) 型）。 <strong>与复分析的关系</strong>：\(f + iHf\) 是上半平面的全纯函数的边界值。 \(u + iv\) 全纯，\(u\) 调和 ⇒ \(v = Hu\)（调和共轭）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>信号处理中的"解析信号"：\(z(t) = f(t) + iHf(t)\)， 瞬时频率 \(= \frac{d}{dt}\arg z(t)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(H(\chi_{[-1,1]})(x) = ?\) 解答：\(Hf(x) = \frac{1}{\pi}\text{p.v.}\int_{-1}^1 \frac{dt}{x-t} = \frac{1}{\pi}\ln\left|\frac{x+1}{x-1}\right|\)（\(x \notin \{-1,1\}\)）。 易错点：\(Hf\) 对 \(f \in L^1\) 可能不在 \(L^1\) 中（只是弱 \(L^1\)）。 需要 \(1 < p < \infty\) 才有 \(L^p\) 有界性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hilbert 变换在 \(L^2\) 上是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H\\) 的 Fourier 乘子模为 1，故 \\(H\\) 等距。')">A. 自伴算子</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(H\\) 的 Fourier 乘子模为 1，故 \\(H\\) 等距。')">B. 等距算子（\(\|Hf\|_2 = \|f\|_2\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H\\) 的 Fourier 乘子模为 1，故 \\(H\\) 等距。')">C. 紧算子</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(H\\) 的 Fourier 乘子模为 1，故 \\(H\\) 等距。')">D. 投影算子</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Calderón-Zygmund 奇异积分</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hilbert 变换是一维的。多维 PDE 需要多维奇异积分——如 Riesz 变换 \(R_j f = c_n \text{p.v.}\int \frac{x_j - y_j}{|x-y|^{n+1}} f(y) dy\)。 Calderón-Zygmund 理论建立了奇异积分算子 \(L^p\) 有界性的 一般框架，是现代调和分析的核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>CZ 理论的精神：奇异积分的核 \(K(x)\) 在原点有不可积奇异性 （\(|K(x)| \sim |x|^{-n}\)），但通过取主值和光滑性条件 （Hörmander 条件），奇异性被"抵消"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Calderón-Zygmund 核</strong>：\(K: \mathbb{R}^n \setminus \{0\} \to \mathbb{C}\) 满足： (1) \(|K(x)| \leq C|x|^{-n}\)（尺寸条件） (2) \(|K(x-y) - K(x)| \leq C|y|/|x|^{n+1}\)（\(|x| > 2|y|\)）（光滑性/Hörmander） <strong>CZ 定理</strong>：设 \(T: L^2 \to L^2\) 有界，且 \(Tf(x) = \int K(x-y)f(y)dy\) （\(x \notin \text{supp}\, f\)），\(K\) 为 CZ 核。则： - \(T: L^p \to L^p\) 有界（\(1 < p < \infty\)） - \(T: L^1 \to L^{1,\infty}\) 弱 \((1,1)\) 有界 <strong>Riesz 变换</strong>：\(R_j = \partial_j(-\Delta)^{-1/2}\)， \(\widehat{R_j f}(\xi) = -i\xi_j/|\xi| \hat{f}(\xi)\)。 \(R_j\) 是 CZ 算子。 <strong>应用</strong>：\(\|\partial_i\partial_j u\|_p \leq C\|\Delta u\|_p\) （二阶导数被 Laplacian 控制——Calderón-Zygmund 不等式）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>椭圆 PDE 正则性：\(-\Delta u = f \in L^p \Rightarrow D^2 u \in L^p\) （Calderón-Zygmund 估计），是 Schauder 理论的 \(L^p\) 版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^2\) 中 Riesz 变换 \(R_1 f = \text{p.v.}\frac{1}{2\pi}\int \frac{x_1-y_1}{|x-y|^3} f(y) dy\)。 验证核满足 \(|K(x)| \leq C|x|^{-2}\)。 解答：\(|K(x)| = \frac{|x_1|}{2\pi|x|^3} \leq \frac{1}{2\pi|x|^2}\)。✓（\(n = 2\)） 易错点：CZ 核在原点不可积（\(|x|^{-n}\) 在 \(\mathbb{R}^n\) 中 不局部可积），必须用主值定义积分。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CZ 算子在 \(L^1\) 上？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。CZ 算子在 \\(L^1\\) 上不是强有界的，但是弱 \\((1,1)\\)')">A. 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！CZ 算子在 \\(L^1\\) 上不是强有界的，但是弱 \\((1,1)\\)')">B. 弱 (1,1) 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。CZ 算子在 \\(L^1\\) 上不是强有界的，但是弱 \\((1,1)\\)')">C. 不有界也不弱有界</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。CZ 算子在 \\(L^1\\) 上不是强有界的，但是弱 \\((1,1)\\)')">D. 紧</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>极大函数与 Calderón-Zygmund 分解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hardy-Littlewood 极大函数 \(Mf(x) = \sup_r \frac{1}{|B_r|}\int_{B_r(x)} |f|\) 是调和分析最基本的工具——它控制了 Fourier 级数、奇异积分和 微分算子的"最坏情形"行为。Calderón-Zygmund 分解将函数 分解为"好部分"（小且有界）和"坏部分"（大但稀疏）， 是证明弱 \((1,1)\) 估计的核心手法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>极大函数体现了"平均值控制逐点值"的思想。 CZ 分解体现了"大处稀疏、小处有界"的二分原则。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Hardy-Littlewood 极大函数</strong>： \[Mf(x) = \sup_{r > 0} \frac{1}{|B(x,r)|}\int_{B(x,r)} |f(y)|\, dy\] <strong>弱 \((1,1)\) 估计</strong>：\(|\{Mf > \lambda\}| \leq \frac{C_n}{\lambda}\|f\|_1\)。 证明用 Vitali 覆盖引理。 <strong>\(L^p\) 有界性</strong>（\(1 < p \leq \infty\)）： \(\|Mf\|_p \leq C_p \|f\|_p\)（插值 + Marcinkiewicz）。 <strong>Calderón-Zygmund 分解</strong>：给定 \(f \in L^1\), \(\lambda > 0\)， 分解 \(f = g + b\)（\(g\) = "好", \(b\) = "坏"）： - \(|g| \leq C\lambda\) a.e. - \(b = \sum b_k\), \(b_k\) 支在互不相交的方体 \(Q_k\) 上 - \(\int b_k = 0\), \(\sum |Q_k| \leq C\|f\|_1/\lambda\) <strong>Lebesgue 微分定理</strong>（极大函数的推论）： a.e. \(x\): \(\lim_{r \to 0} \frac{1}{|B_r|}\int_{B_r(x)} f = f(x)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f = \chi_{[0,1]}\) 在 \(\mathbb{R}\) 上。\(Mf(x)\) 在 \(x > 1\) 的行为？ 解答：\(x > 1\)：\(Mf(x) = \sup_r \frac{1}{2r}\int_{x-r}^{x+r} \chi_{[0,1]}\)。 最优 \(r\)：取 \(r = x\)，\(Mf(x) \geq \frac{1}{2x}\int_0^1 1\, dt = \frac{1}{2x}\)。 实际 \(Mf(x) = \frac{1}{2x}\)（\(x > 1\)）。衰减如 \(1/x\)，不在 \(L^1\) 中。 易错点：\(f \in L^1\) 不意味 \(Mf \in L^1\)（\(Mf\) 只在弱 \(L^1\) 中）。 对 \(1 < p \leq \infty\)，\(Mf \in L^p\) 当 \(f \in L^p\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hardy-Littlewood 极大算子 \(M\) 在 \(L^1\) 上？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(M\\) 在 \\(L^1\\) 上不是强有界（\\(Mf\\) 可以不在 \\(L^1\\)），')">A. 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(M\\) 在 \\(L^1\\) 上不是强有界（\\(Mf\\) 可以不在 \\(L^1\\)），')">B. 弱 (1,1) 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(M\\) 在 \\(L^1\\) 上不是强有界（\\(Mf\\) 可以不在 \\(L^1\\)），')">C. 不有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(M\\) 在 \\(L^1\\) 上不是强有界（\\(Mf\\) 可以不在 \\(L^1\\)），')">D. B 和 C 都对</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Littlewood-Paley 理论</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>分析函数的频率结构不仅要知道总频谱，还要知道不同频率段 的贡献。Littlewood-Paley 理论将函数按频率"分层" （\(f = \sum_j \Delta_j f\)），每层只包含频率约 \(2^j\) 的部分。 关键定理是平方函数估计：\(\|f\|_p \sim \|(\sum |\Delta_j f|^2)^{1/2}\|_p\)， 它将 \(L^p\) 范数的估计分解为逐层估计。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>LP 分解是"多尺度分析"的原型——函数在不同频率尺度上的 行为近似独立。这一思想贯穿小波分析和偏微分方程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>频率分解</strong>：选择光滑函数 \(\psi\) 使 \(\sum_{j \in \mathbb{Z}} |\hat{\psi}(2^{-j}\xi)|^2 = 1\)（\(\xi \neq 0\)）。 定义 \(\Delta_j f = (\hat{\psi}(2^{-j}\cdot)\hat{f})^\vee\)。 \(f = \sum_j \Delta_j f\)（频率分解）。 <strong>Littlewood-Paley 定理</strong>：对 \(1 < p < \infty\)， \[\|f\|_p \sim \left\|\left(\sum_{j} |\Delta_j f|^2\right)^{1/2}\right\|_p\] 即 \(L^p\) 范数等价于平方函数的 \(L^p\) 范数。 <strong>应用</strong>：证明 Fourier 乘子定理（Mihlin 定理）， 估计伪微分算子的 \(L^p\) 有界性。 <strong>Bernstein 不等式</strong>：\(\text{supp}\,\hat{f} \subseteq \{|\xi| \sim 2^j\}\) ⇒ \(\|D^\alpha f\|_p \lesssim 2^{j|\alpha|} \|f\|_p\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>非线性 PDE 中，Littlewood-Paley 分解用于估计非线性项 的频率交互（paradifferential calculus）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f \in L^2(\mathbb{R})\)。验证 \(\|f\|_2^2 = \sum_j \|\Delta_j f\|_2^2\)。 解答：Plancherel + \(\sum |\hat{\psi}(2^{-j}\xi)|^2 = 1\)： \(\sum \|\Delta_j f\|_2^2 = \sum \int |\hat{\psi}(2^{-j}\xi)|^2 |\hat{f}|^2 d\xi = \int |\hat{f}|^2 = \|f\|_2^2\)。✓ （\(p = 2\) 时 LP 定理是 Parseval 的推论。） 易错点：LP 定理 \(p \neq 2\) 时不是直接推论——需要 向量值 CZ 理论或 Stein 的插值论证。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Littlewood-Paley 平方函数的意义在于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！LP 将 \\(L^p\\) 范数等价于平方函数，每一层 \\(\\Delta_j f\\)')">A. 将 \(L^p\) 问题归约为逐频率段的 \(L^2\) 问题</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。LP 将 \\(L^p\\) 范数等价于平方函数，每一层 \\(\\Delta_j f\\)')">B. 替代 Fourier 变换</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。LP 将 \\(L^p\\) 范数等价于平方函数，每一层 \\(\\Delta_j f\\)')">C. 仅在 \(L^2\) 有效</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。LP 将 \\(L^p\\) 范数等价于平方函数，每一层 \\(\\Delta_j f\\)')">D. 给出精确的 \(\|f\|_p\) 值</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/analysis/harmonic.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

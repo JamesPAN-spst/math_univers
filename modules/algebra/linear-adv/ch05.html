@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 张量积 — 线代进阶 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-adv-ch05-q1",
+        "question": "\\(\\dim V=2\\)，\\(\\dim W=3\\)。\\(\\dim(V\\otimes W)=?\\)",
+        "options": [
+          "\\(6\\)",
+        "\\(5\\)",
+        "\\(8\\)",
+        "\\(23\\)"
+        ],
+        "answer": 0,
+        "explanation": "张量积维数公式: \\(\\dim(V\\otimes W)=\\dim V\\cdot\\dim W=2\\times3=6\\)。注意是**乘积**，不是和（直和 \\(V\\oplus W\\) 的维数才是 \\(2+3=5\\)）。基: \\(\\{e_i\\otimes f_j\\}_{i=1,2;\\;j=1,2,3}\\) 共 6 个元素。"
+      },
+      {
+        "id": "linear-adv-ch05-q2",
+        "question": "\\(\\mathbb{R}^2\\otimes\\mathbb{R}^2\\) 的标准基有多少个元素？同构于？",
+        "options": [
+          "\\(4\\) 个，同构于 \\(M_{2\\times2}(\\mathbb{R})\\)",
+        "\\(2\\) 个，同构于 \\(\\mathbb{R}^2\\)",
+        "\\(8\\) 个",
+        "\\(4\\) 个，同构于 \\(\\mathbb{R}^2\\oplus\\mathbb{R}^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "基: \\(e_1\\otimes e_1,e_1\\otimes e_2,e_2\\otimes e_1,e_2\\otimes e_2\\)（4个）。映射 \\(v\\otimes w\\mapsto vw^T\\) 建立 \\(\\mathbb{R}^2\\otimes\\mathbb{R}^2\\cong M_{2\\times2}\\)——纯张量对应秩-1 矩阵。"
+      },
+      {
+        "id": "linear-adv-ch05-q3",
+        "question": "张量积的泛性质将什么类型的映射转化为什么类型？",
+        "options": [
+          "双线性映射 \\(\\to\\) 线性映射",
+        "线性映射 \\(\\to\\) 双线性映射",
+        "线性映射 \\(\\to\\) 线性映射",
+        "双线性映射 \\(\\to\\) 双线性映射"
+        ],
+        "answer": 0,
+        "explanation": "泛性质: 对任何双线性 \\(B:V\\times W\\to U\\)，存在唯一线性 \\(\\tilde{B}:V\\otimes W\\to U\\) 使 \\(B(v,w)=\\tilde{B}(v\\otimes w)\\)。核心价值: 将双线性问题「线性化」，使线性代数的全部工具（核、像、秩等）可用。"
+      },
+      {
+        "id": "linear-adv-ch05-q4",
+        "question": "外代数中 \\(v\\wedge v=?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(v^2\\)",
+        "\\(2v\\)",
+        "\\(\\|v\\|^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "外积（楔积）的基本性质: \\(v\\wedge v=0\\) 对所有 \\(v\\in V\\)。这来自反对称性: \\(v\\wedge v=-(v\\wedge v)\\Rightarrow2(v\\wedge v)=0\\Rightarrow v\\wedge v=0\\)（\\(\\mathrm{char}\\neq2\\)）。推论: \\(v\\wedge w=-w\\wedge v\\)。"
+      },
+      {
+        "id": "linear-adv-ch05-q5",
+        "question": "\\(V=\\mathbb{R}^4\\)。\\(\\dim\\Lambda^2(V)=?\\)",
+        "options": [
+          "\\(6\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dim\\Lambda^k(V)=\\binom{n}{k}\\)。\\(\\binom{4}{2}=6\\)。基: \\(e_1\\wedge e_2,e_1\\wedge e_3,e_1\\wedge e_4,e_2\\wedge e_3,e_2\\wedge e_4,e_3\\wedge e_4\\)。每个基元素对应一个有序对 \\(i<j\\)，共 \\(\\binom{4}{2}=6\\) 个。"
+      },
+      {
+        "id": "linear-adv-ch05-q6",
+        "question": "纯张量 \\(v\\otimes w\\)（\\(v\\neq0,w\\neq0\\)）的张量秩为？",
+        "options": [
+          "\\(1\\)",
+        "\\(0\\)",
+        "\\(\\dim V\\)",
+        "\\(\\dim W\\)"
+        ],
+        "answer": 0,
+        "explanation": "张量秩 \\(=\\min\\{r:T=\\sum_{i=1}^r v_i\\otimes w_i\\}\\)。\\(v\\otimes w\\) 本身就是一个纯张量项→秩≤1。\\((v\\neq0,w\\neq0)\\)→\\(v\\otimes w\\neq0\\)→秩≥1。故秩=1。纯张量对应秩-1 矩阵: \\(v\\otimes w\\leftrightarrow vw^T\\)。"
+      },
+      {
+        "id": "linear-adv-ch05-q7",
+        "question": "\\(\\mathbb{R}^m\\otimes\\mathbb{R}^n\\) 同构于什么空间？",
+        "options": [
+          "\\(M_{m\\times n}(\\mathbb{R})\\)（\\(m\\times n\\) 矩阵空间）",
+        "\\(\\mathbb{R}^{m+n}\\)",
+        "\\(M_{n\\times m}(\\mathbb{R})\\)",
+        "\\(\\mathbb{R}^{mn^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "同构 \\(v\\otimes w\\mapsto vw^T\\)。\\(vw^T\\) 是 \\(m\\times n\\) 秩-1 矩阵。线性扩展后覆盖所有 \\(M_{m\\times n}\\)。\\(\\dim=mn\\) ✓。这个同构使得张量的抽象概念在矩阵层面变得直观: 张量秩=矩阵秩（对2阶张量）。"
+      },
+      {
+        "id": "linear-adv-ch05-q8",
+        "question": "\\(\\mathbb{R}^2\\otimes\\mathbb{R}^2\\) 中，\\(T=e_1\\otimes f_1+e_2\\otimes f_2\\) 是纯张量吗？",
+        "options": [
+          "不是（\\(T\\) 对应 \\(I_2\\)，秩=2）",
+        "是（因为有两项相加）",
+        "是（因为 \\(T=?(v\\otimes w)\\)）",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\leftrightarrow\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}=I_2\\)，矩阵秩=2。纯张量 \\(v\\otimes w\\leftrightarrow vw^T\\) 的矩阵秩=1。秩>1→不可分解→T不是纯张量。易错: 以为 \\(V\\otimes W\\) 的每个元素都是 \\(v\\otimes w\\) 的形式。一般元素是纯张量的线性组合。"
+      },
+      {
+        "id": "linear-adv-ch05-q9",
+        "question": "\\(\\dim V=3\\)，\\(\\dim W=4\\)。\\(\\dim(V\\oplus W)\\) 和 \\(\\dim(V\\otimes W)\\) 分别为？",
+        "options": [
+          "\\(7\\) 和 \\(12\\)",
+        "\\(12\\) 和 \\(7\\)",
+        "\\(12\\) 和 \\(12\\)",
+        "\\(7\\) 和 \\(7\\)"
+        ],
+        "answer": 0,
+        "explanation": "直和: \\(\\dim(V\\oplus W)=\\dim V+\\dim W=3+4=7\\)。张量积: \\(\\dim(V\\otimes W)=\\dim V\\cdot\\dim W=3\\times4=12\\)。易错: 混淆 \\(\\oplus\\)（加法）和 \\(\\otimes\\)（乘法）。物理类比: 直和≈独立并列，张量积≈所有组合。"
+      },
+      {
+        "id": "linear-adv-ch05-q10",
+        "question": "\\(\\Lambda^2(\\mathbb{R}^4)\\) 中，\\(\\omega=e_1\\wedge e_2+e_3\\wedge e_4\\) 是否可分解（即能否写成 \\(v\\wedge w\\)）？",
+        "options": [
+          "不可分解（\\(\\omega\\wedge\\omega\\neq0\\)）",
+        "可分解",
+        "不确定",
+        "\\(\\Lambda^2\\) 中的元素都可分解"
+        ],
+        "answer": 0,
+        "explanation": "判据: \\(\\omega\\in\\Lambda^2(V)\\) 可分解 \\(\\Leftrightarrow\\) \\(\\omega\\wedge\\omega=0\\)。\\((e_1\\wedge e_2+e_3\\wedge e_4)\\wedge(e_1\\wedge e_2+e_3\\wedge e_4)=2e_1\\wedge e_2\\wedge e_3\\wedge e_4\\neq0\\)。故不可分解。这在辛几何中对应非退化辛形式。"
+      },
+      {
+        "id": "linear-adv-ch05-q11",
+        "question": "\\(\\dim\\Lambda^3(\\mathbb{R}^5)=?\\)",
+        "options": [
+          "\\(10\\)",
+        "\\(5\\)",
+        "\\(15\\)",
+        "\\(60\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\binom{5}{3}=10\\)。基: \\(\\{e_i\\wedge e_j\\wedge e_k:1\\leq i<j<k\\leq5\\}\\)。共 \\(10\\) 个。\\(\\Lambda^3(\\mathbb{R}^5)\\cong\\Lambda^2(\\mathbb{R}^5)\\)（Hodge 对偶: \\(\\binom{5}{3}=\\binom{5}{2}\\)）。"
+      },
+      {
+        "id": "linear-adv-ch05-q12",
+        "question": "泛性质: 双线性 \\(B:\\mathbb{R}^2\\times\\mathbb{R}^2\\to\\mathbb{R}\\) 定义为 \\(B(u,v)=u_1 v_2+u_2 v_1\\)。通过张量积 \\(\\tilde{B}:\\mathbb{R}^2\\otimes\\mathbb{R}^2\\to\\mathbb{R}\\)。\\(\\tilde{B}(e_1\\otimes e_2+e_2\\otimes e_1)=?\\)",
+        "options": [
+          "\\(2\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tilde{B}(e_1\\otimes e_2)=B(e_1,e_2)=0\\cdot1+1\\cdot0=... \\) 等等，\\(B(e_1,e_2)=e_{1,1}\\cdot e_{2,2}+e_{1,2}\\cdot e_{2,1}=1\\cdot0+0\\cdot1=0\\)... 不对，让我仔细想。\\(e_1=(1,0)\\), \\(e_2=(0,1)\\). \\(B(e_1,e_2)=(1)(1)+(0)(0)=1\\). \\(B(e_2,e_1)=(0)(0)+(1)(1)=1\\). 所以 \\(\\tilde{B}(e_1\\otimes e_2+e_2\\otimes e_1)=1+1=2\\). ✓"
+      },
+      {
+        "id": "linear-adv-ch05-q13",
+        "question": "单位矩阵 \\(I_2\\in M_{2\\times2}\\cong\\mathbb{R}^2\\otimes\\mathbb{R}^2\\) 的张量秩为？",
+        "options": [
+          "\\(2\\)",
+        "\\(1\\)",
+        "\\(4\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(I_2=e_1\\otimes e_1+e_2\\otimes e_2\\)（2 个纯张量项）。秩≤2。若 \\(I_2=v\\otimes w\\)，则 \\(\\mathrm{rank}(vw^T)=1\\neq\\mathrm{rank}(I_2)=2\\)。故秩≥2。\\(\\mathrm{rank}(I_2)=2\\)。张量秩=矩阵秩（对2-阶张量成立）。"
+      },
+      {
+        "id": "linear-adv-ch05-q14",
+        "question": "\\(V=\\mathbb{R}^3\\)。\\(\\dim\\Lambda^4(V)=?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(81\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(k>\\dim V\\) 时 \\(\\Lambda^k(V)=0\\)。\\(\\binom{3}{4}=0\\)→\\(\\Lambda^4(\\mathbb{R}^3)=\\{0\\}\\)。直觉: 反对称性要求 \\(k\\) 个\"不同方向\"，但 \\(V\\) 只有 3 个独立方向。\\(k=4>3\\)→不可能→空间为零。易错: 以为 \\(\\Lambda^k(V)\\) 对所有 \\(k\\) 非零。"
+      },
+      {
+        "id": "linear-adv-ch05-q15",
+        "question": "张量积的双线性性: \\((v_1+v_2)\\otimes w=?\\)",
+        "options": [
+          "\\(v_1\\otimes w+v_2\\otimes w\\)",
+        "\\((v_1+v_2)\\cdot w\\)",
+        "\\(v_1\\otimes w\\otimes v_2\\otimes w\\)",
+        "\\((v_1\\otimes v_2)\\otimes w\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\otimes:V\\times W\\to V\\otimes W\\) 是双线性映射→第一变量线性: \\((v_1+v_2)\\otimes w=v_1\\otimes w+v_2\\otimes w\\)。同样 \\(v\\otimes(w_1+w_2)=v\\otimes w_1+v\\otimes w_2\\) 且 \\((\\alpha v)\\otimes w=\\alpha(v\\otimes w)\\)。这些关系是张量积构造的定义约束。"
+      },
+      {
+        "id": "linear-adv-ch05-q16",
+        "question": "对 2 阶张量（矩阵）\\(T\\in V\\otimes W\\)，张量秩等于？",
+        "options": [
+          "矩阵秩（\\(T\\) 视为 \\(M_{m\\times n}\\) 的元素时）",
+        "矩阵的迹",
+        "矩阵的行列式",
+        "矩阵的 Frobenius 范数"
+        ],
+        "answer": 0,
+        "explanation": "\\(T=\\sum_{i=1}^r v_i\\otimes w_i\\leftrightarrow\\sum v_i w_i^T\\)，最少这样的项数 \\(r\\) =矩阵秩。但注意: 这只对2阶张量成立！3阶及以上张量秩与矩阵化后的秩不同——高阶张量秩的计算是 NP-hard 问题。"
+      },
+      {
+        "id": "linear-adv-ch05-q17",
+        "question": "\\(\\dim\\mathrm{Sym}^2(\\mathbb{R}^3)=?\\)（对称 2 阶张量空间）",
+        "options": [
+          "\\(6\\)",
+        "\\(9\\)",
+        "\\(3\\)",
+        "\\(12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dim\\mathrm{Sym}^k(V)=\\binom{n+k-1}{k}\\)。\\(n=3,k=2\\): \\(\\binom{4}{2}=6\\)。基: \\(e_1^2,e_2^2,e_3^2,e_1 e_2,e_1 e_3,e_2 e_3\\)（6个）。对比: \\(\\dim(V\\otimes V)=9\\)，\\(\\dim\\Lambda^2(V)=3\\)。\\(9=6+3=\\dim\\mathrm{Sym}^2+\\dim\\Lambda^2\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch05-q18",
+        "question": "线性映射 \\(f:V\\to V'\\) 和 \\(g:W\\to W'\\) 诱导张量积映射 \\((f\\otimes g):V\\otimes W\\to V'\\otimes W'\\)。\\((f\\otimes g)(v\\otimes w)=?\\)",
+        "options": [
+          "\\(f(v)\\otimes g(w)\\)",
+        "\\(f(v)\\cdot g(w)\\)",
+        "\\(f\\circ g(v\\otimes w)\\)",
+        "\\(f(v)+g(w)\\)"
+        ],
+        "answer": 0,
+        "explanation": "由泛性质: \\((v,w)\\mapsto f(v)\\otimes g(w)\\) 是双线性→唯一提升为线性 \\(f\\otimes g\\)，满足 \\((f\\otimes g)(v\\otimes w)=f(v)\\otimes g(w)\\)。矩阵语言: 若 \\(f\\leftrightarrow A\\)，\\(g\\leftrightarrow B\\)，则 \\(f\\otimes g\\leftrightarrow A\\otimes_{\\text{Kron}}B\\)（Kronecker 积）。"
+      },
+      {
+        "id": "linear-adv-ch05-q19",
+        "question": "迹映射 \\(\\mathrm{tr}:M_n\\to\\mathbb{R}\\)。在 \\(V\\otimes V^*\\cong\\mathrm{End}(V)\\) 的语言中，迹对应？",
+        "options": [
+          "缩并映射 \\(V\\otimes V^*\\to K\\)，\\(v\\otimes f\\mapsto f(v)\\)",
+        "行列式映射",
+        "转置映射",
+        "对角元素之和"
+        ],
+        "answer": 0,
+        "explanation": "\\(v\\otimes f\\) 对应秩-1线性映射 \\(w\\mapsto f(w)\\cdot v\\)。其迹 \\(=f(v)\\)（因为 \\(\\mathrm{tr}(vf^T)=f^T v=f(v)\\)）。缩并(contraction)是张量分析的核心运算: 将配对维度\"收缩\"掉。选项D正确描述了迹的计算，但不是张量语言。"
+      },
+      {
+        "id": "linear-adv-ch05-q20",
+        "question": "\\(\\mathbb{R}^3\\) 中，\\((e_1\\wedge e_2)\\wedge e_3=?\\) 和 \\(e_2\\wedge e_1\\wedge e_3=?\\)",
+        "options": [
+          "\\(e_1\\wedge e_2\\wedge e_3\\) 和 \\(-e_1\\wedge e_2\\wedge e_3\\)",
+        "都等于 \\(e_1\\wedge e_2\\wedge e_3\\)",
+        "都等于 \\(0\\)",
+        "\\(e_3\\wedge e_2\\wedge e_1\\) 和 \\(e_2\\wedge e_1\\wedge e_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((e_1\\wedge e_2)\\wedge e_3=e_1\\wedge e_2\\wedge e_3\\)（结合律）。\\(e_2\\wedge e_1=-e_1\\wedge e_2\\)→\\(e_2\\wedge e_1\\wedge e_3=-(e_1\\wedge e_2\\wedge e_3)\\)。每次交换相邻元素改变符号。置换 \\((2,1,3)\\) 是一次对换→符号为 \\(-1\\)。"
+      },
+      {
+        "id": "linear-adv-ch05-q21",
+        "question": "\\(\\dim\\Lambda^4(\\mathbb{R}^4)=?\\) 这个空间有何特殊意义？",
+        "options": [
+          "\\(1\\)；\\(\\Lambda^4(\\mathbb{R}^4)\\) 是行列式所在的一维空间",
+        "\\(4\\)",
+        "\\(0\\)",
+        "\\(24\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\binom{4}{4}=1\\)。唯一基元素: \\(e_1\\wedge e_2\\wedge e_3\\wedge e_4\\)。\\(\\Lambda^n(V)\\) 是一维空间，行列式 \\(\\det:V^n\\to K\\) 本质上是 \\(\\Lambda^n(V)\\) 中的元素。线性映射 \\(f:V\\to V\\) 在 \\(\\Lambda^n(V)\\) 上的作用恰好是乘以 \\(\\det(f)\\)。"
+      },
+      {
+        "id": "linear-adv-ch05-q22",
+        "question": "\\(2\\times2\\) 矩阵乘法张量 \\(\\langle2,2,2\\rangle\\) 的张量秩（Strassen）为？",
+        "options": [
+          "\\(7\\)（非朴素的 \\(8\\)）",
+        "\\(8\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "朴素矩阵乘法用 8 次乘法（\\(2^3\\)）。Strassen(1969) 证明可用 7 次——对应张量秩=7。这意味着 \\(2\\times2\\) 矩阵乘法分解为 7 个秩-1 张量项, 少于朴素的 8 项。递归应用: 从 \\(O(n^3)\\) 降到 \\(O(n^{\\log_2 7})\\approx O(n^{2.807})\\)。易错: 以为矩阵乘法是不可优化的 \\(O(n^3)\\)。"
+      },
+      {
+        "id": "linear-adv-ch05-q23",
+        "question": "3 阶及以上张量秩的精确计算复杂度是？",
+        "options": [
+          "NP-hard",
+        "\\(O(n^3)\\) 多项式",
+        "等价于矩阵特征值问题",
+        "\\(O(n\\log n)\\)"
+        ],
+        "answer": 0,
+        "explanation": "2 阶张量秩 \\(=\\) 矩阵秩→\\(O(n^3)\\)（高斯消元）。但 3 阶及以上张量秩是 NP-hard（Håstad 1990 证明）。这是张量理论与矩阵理论的根本区别——高阶张量远比矩阵复杂。实际中用近似算法（ALS、非负张量分解等）。"
+      },
+      {
+        "id": "linear-adv-ch05-q24",
+        "question": "张量积对直和的分配律: \\(V\\otimes(W_1\\oplus W_2)\\cong?\\)",
+        "options": [
+          "\\((V\\otimes W_1)\\oplus(V\\otimes W_2)\\)",
+        "\\((V\\otimes W_1)\\otimes(V\\otimes W_2)\\)",
+        "\\(V\\otimes W_1\\otimes W_2\\)",
+        "\\((V\\oplus W_1)\\otimes(V\\oplus W_2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(v\\otimes(w_1,w_2)\\mapsto(v\\otimes w_1,v\\otimes w_2)\\) 定义自然同构。维数验证: \\(\\dim V\\cdot(\\dim W_1+\\dim W_2)=\\dim V\\cdot\\dim W_1+\\dim V\\cdot\\dim W_2\\) ✓。张量积对直和的分配律类比整数乘法对加法的分配律 \\(a(b+c)=ab+ac\\)。"
+      },
+      {
+        "id": "linear-adv-ch05-q25",
+        "question": "Kronecker 积: \\(A=\\begin{pmatrix}1&2\\end{pmatrix}\\)（\\(1\\times2\\)），\\(B=\\begin{pmatrix}3\\\\4\\end{pmatrix}\\)（\\(2\\times1\\)）。\\(A\\otimes B=?\\) 是什么大小的矩阵？",
+        "options": [
+          "\\(2\\times2\\) 矩阵 \\(\\begin{pmatrix}3&6\\\\4&8\\end{pmatrix}\\)",
+        "\\(1\\times1\\) 矩阵",
+        "\\(3\\times3\\) 矩阵",
+        "\\(2\\times4\\) 矩阵"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\otimes B\\): 大小 \\((1\\cdot2)\\times(2\\cdot1)=2\\times2\\)。元素: \\(a_{ij} B\\) 拼成分块矩阵→\\(\\begin{pmatrix}1\\cdot B&2\\cdot B\\end{pmatrix}=\\begin{pmatrix}3&6\\\\4&8\\end{pmatrix}\\)。Kronecker 积是张量积在选定基下的矩阵表示，广泛用于信号处理和量子计算中。"
+      },
+      {
+        "id": "linear-adv-ch05-q26",
+        "question": "量子力学: 两个 qubit 系统的态空间是 \\(\\mathbb{C}^2\\otimes\\mathbb{C}^2\\)（\\(\\dim=4\\)）。Bell 态 \\(|\\Phi^+\\rangle=\\frac{1}{\\sqrt{2}}(|00\\rangle+|11\\rangle)\\) 是纠缠态（不可分解张量），这意味着？",
+        "options": [
+          "\\(|\\Phi^+\\rangle\\neq|\\psi\\rangle\\otimes|\\phi\\rangle\\) 对任何单 qubit 态 \\(|\\psi\\rangle,|\\phi\\rangle\\)",
+        "\\(|\\Phi^+\\rangle=|0\\rangle\\otimes|0\\rangle\\)",
+        "两个 qubit 是独立的",
+        "\\(\\dim=2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|00\\rangle+|11\\rangle\\) 对应矩阵 \\(I_2\\)（秩 2），不是秩-1→不可分解→纠缠。量子纠缠 \\(=\\) 不可分解张量，这是张量积理论在物理中最深刻的体现。纠缠态的两个 qubit 之间有非经典关联。"
+      },
+      {
+        "id": "linear-adv-ch05-q27",
+        "question": "微分形式: \\(\\mathbb{R}^3\\) 上 \\(\\omega=dx\\wedge dy+dz\\wedge dx\\)。这是 \\(\\Lambda^2(\\mathbb{R}^3)\\) 中的元素。\\(\\omega\\wedge\\omega=?\\)",
+        "options": [
+          "\\(0\\)（因为 \\(\\Lambda^4(\\mathbb{R}^3)=0\\)）",
+        "\\(2\\,dx\\wedge dy\\wedge dz\\wedge dx\\)",
+        "\\((dx\\wedge dy)^2\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\omega\\wedge\\omega\\in\\Lambda^4(\\mathbb{R}^3)\\)，而 \\(4>3=\\dim\\mathbb{R}^3\\)→\\(\\Lambda^4(\\mathbb{R}^3)=0\\)→\\(\\omega\\wedge\\omega=0\\)。2-形式的自楔积在 3 维空间中自动为零。这在 4 维（如辛几何）中不一定成立: \\(\\omega\\wedge\\omega\\) 可非零。"
+      },
+      {
+        "id": "linear-adv-ch05-q28",
+        "question": "信号处理: 混合信号 \\(X=\\sum_{i=1}^r a_i\\otimes b_i\\otimes c_i\\)（3 阶张量 CP 分解）。这里 \\(r\\) 代表？",
+        "options": [
+          "独立信号源的个数",
+        "采样点数",
+        "频率分量数",
+        "噪声等级"
+        ],
+        "answer": 0,
+        "explanation": "CP (Canonical Polyadic) 分解将 3 阶张量分解为 \\(r\\) 个秩-1 项的和。\\(r\\) 是独立源（成分）的个数。在盲源分离 (BSS) 中，\\(a_i,b_i,c_i\\) 分别表示时间、频率、空间维度的特征。张量分解（不同于矩阵分解）具有本质唯一性，使得盲源分离成为可能。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="linear-adv"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/linear-adv.html" class="module-name">线代进阶</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 双线性映射与张量积的泛性质</a></li>
+      <li><a href="#kp2">02 · 张量积的构造与维数</a></li>
+      <li><a href="#kp3">03 · 对称代数与外代数</a></li>
+      <li><a href="#kp4">04 · 张量秩与应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>张量积</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>双线性映射与张量积的泛性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>两个向量空间 \(V, W\) 之间的双线性映射有很多。张量积 \(V \otimes W\) 是一种 「万能翻译器」——它将所有双线性映射统一为线性映射。 这种泛性质的思想贯穿现代代数的各个分支。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>张量积的泛性质: \(V \times W \xrightarrow{\otimes} V \otimes W\) 使得任何双线性映射 \(B: V \times W \to U\) 唯一因子化为 \(V \otimes W \xrightarrow{\tilde{B}} U\)。这是范畴论中「自由对象」的实例。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>张量积 \(V \otimes W\)</strong> 的泛性质: 存在双线性 \(\otimes: V \times W \to V \otimes W\)， 使得对任何双线性 \(B: V \times W \to U\)， 存在唯一线性 \(\tilde{B}: V \otimes W \to U\) 满足 \(B = \tilde{B} \circ \otimes\)。即: \[B(v, w) = \tilde{B}(v \otimes w)\] \(v \otimes w\) 称为纯张量（可分解张量）。 一般元素是纯张量的线性组合: \(\sum_i v_i \otimes w_i\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(V = \mathbb{R}^2\)，\(W = \mathbb{R}^2\)。 \(e_1 \otimes f_1 + e_2 \otimes f_2\) 是纯张量吗？ 解答: 不一定。纯张量 \(v \otimes w\) 对应秩-1 矩阵， 而 \(e_1 \otimes f_1 + e_2 \otimes f_2\) 对应 \(I_2\)（秩 2）， 所以<strong>不是</strong>纯张量。 易错点: 以为 \(V \otimes W\) 中的每个元素都是 \(v \otimes w\) 的形式。 一般元素是纯张量的线性组合。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">张量积的泛性质把双线性映射变为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。泛性质的核心: 双线性 \\(\\to\\) 线性。')">A. 双线性映射</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！泛性质的核心: 双线性 \\(\\to\\) 线性。')">B. 线性映射</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。泛性质的核心: 双线性 \\(\\to\\) 线性。')">C. 多线性映射</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。泛性质的核心: 双线性 \\(\\to\\) 线性。')">D. 同构</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>张量积的构造与维数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>泛性质告诉我们张量积「应该做什么」，但怎么构造它？ 具体构造为自由向量空间模掉双线性关系，基的张量积给出了 \(V \otimes W\) 的基，从而 \(\dim(V \otimes W) = \dim V \cdot \dim W\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>构造</strong>: \(V \otimes W = F(V \times W) / R\)， 其中 \(F(V \times W)\) 是以 \((v,w)\) 为基的自由向量空间， \(R\) 是由双线性关系生成的子空间: \((v_1+v_2, w) - (v_1, w) - (v_2, w)\), \((\alpha v, w) - \alpha(v, w)\) 等。 <strong>基</strong>: 若 \(\{e_i\}\) 是 \(V\) 的基，\(\{f_j\}\) 是 \(W\) 的基， 则 \(\{e_i \otimes f_j\}\) 是 \(V \otimes W\) 的基。 \[\dim(V \otimes W) = \dim V \cdot \dim W\] <strong>与矩阵的关系</strong>: \(\mathbb{R}^m \otimes \mathbb{R}^n \cong M_{m \times n}(\mathbb{R})\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学: 两个量子系统的复合态空间是张量积 \(\mathcal{H}_1 \otimes \mathcal{H}_2\)（纠缠态 = 不可分解张量）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\dim V = 3\)，\(\dim W = 4\)。\(\dim(V \otimes W) = ?\) 解答: \(\dim(V \otimes W) = 3 \times 4 = 12\)。 易错点: 以为 \(\dim(V \otimes W) = \dim V + \dim W\)。 张量积的维数是<strong>乘积</strong>，不是和。直和才是和。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}^2 \otimes \mathbb{R}^3\) 同构于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim = 2 \\times 3 = 6\\)，\\(\\mathbb{R}^2 \\otimes \\mathbb{R}^3 \\cong \\mathbb{R}^6 \\cong M_{2 \\times 3}\\)。')">A. \(\mathbb{R}^5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\dim = 2 \\times 3 = 6\\)，\\(\\mathbb{R}^2 \\otimes \\mathbb{R}^3 \\cong \\mathbb{R}^6 \\cong M_{2 \\times 3}\\)。')">B. \(\mathbb{R}^6\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim = 2 \\times 3 = 6\\)，\\(\\mathbb{R}^2 \\otimes \\mathbb{R}^3 \\cong \\mathbb{R}^6 \\cong M_{2 \\times 3}\\)。')">C. \(\mathbb{R}^8\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\dim = 2 \\times 3 = 6\\)，\\(\\mathbb{R}^2 \\otimes \\mathbb{R}^3 \\cong \\mathbb{R}^6 \\cong M_{2 \\times 3}\\)。')">D. \(\mathbb{R}^{23}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>对称代数与外代数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>张量积不区分顺序——但对称张量和反对称张量在物理（玻色子/费米子） 和几何（微分形式）中分别起核心作用。对称代数 \(\mathrm{Sym}(V)\) 和 外代数 \(\Lambda(V)\) 正是这两种特殊张量的系统框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>对称代数取张量积模掉「交换关系」(\(v \otimes w - w \otimes v\))， 外代数取模掉「反交换关系」(\(v \otimes v\))。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>外代数</strong>: \(\Lambda^k(V)\) 是反对称 \(k\)-张量空间。 楔积 \(v \wedge w = -w \wedge v\)，\(v \wedge v = 0\)。 若 \(\dim V = n\)，则 \[\dim \Lambda^k(V) = \binom{n}{k}\] 基: \(\{e_{i_1} \wedge \cdots \wedge e_{i_k} : i_1 < \cdots < i_k\}\)。 特别地 \(\dim \Lambda^n(V) = 1\)（行列式空间）。 <strong>对称代数</strong>: \(\mathrm{Sym}^k(V)\) 是对称 \(k\)-张量空间。 \[\dim \mathrm{Sym}^k(V) = \binom{n+k-1}{k}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>微分形式 \(\omega = \sum f_{ij} dx^i \wedge dx^j\) 是外代数的元素。 行列式 \(\det: V^n \to K\) 是 \(\Lambda^n(V)\) 中的唯一（up to scalar）元素。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(V = \mathbb{R}^4\)。\(\dim \Lambda^2(V) = ?\) 解答: \(\binom{4}{2} = 6\)。 基: \(e_1 \wedge e_2, e_1 \wedge e_3, e_1 \wedge e_4, e_2 \wedge e_3, e_2 \wedge e_4, e_3 \wedge e_4\)。 易错点: 以为 \(\Lambda^k(V)\) 在 \(k > n\) 时有非零元素。 \(k > n\) 时 \(\Lambda^k(V) = 0\)（反对称性迫使一切为零）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(v \wedge v = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。外积的基本性质: \\(v \\wedge v = 0\\)。')">A. \(v^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。外积的基本性质: \\(v \\wedge v = 0\\)。')">B. \(2v\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！外积的基本性质: \\(v \\wedge v = 0\\)。')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。外积的基本性质: \\(v \\wedge v = 0\\)。')">D. \(|v|^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>张量秩与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>不是每个张量都是纯张量 \(v \otimes w\)。表示一个张量所需的最少纯张量项数 称为张量秩。它在信号处理、量子信息和代数复杂度理论中有深刻应用， 如矩阵乘法的最优算法与张量秩直接相关。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>张量秩推广了矩阵秩（矩阵秩 = 二阶张量秩）。但高阶张量秩的计算 是 NP-hard 问题——这是一种根本性的复杂度障碍。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>张量秩</strong>: \(T \in V \otimes W\) 的秩 \(= \min\{r : T = \sum_{i=1}^r v_i \otimes w_i\}\)。 对 \(V \otimes W \cong M_{m \times n}\)，这就是矩阵秩。 <strong>高阶张量</strong>: \(T \in V_1 \otimes V_2 \otimes V_3\) 的秩: \[\mathrm{rank}(T) = \min\{r : T = \sum_{i=1}^r v_i^{(1)} \otimes v_i^{(2)} \otimes v_i^{(3)}\}\] 这称为 CP（Canonical Polyadic）分解。 <strong>Strassen</strong>: 矩阵乘法 \(\langle 2,2,2 \rangle\) 张量的秩为 7（非朴素的 8）， 这是 Strassen 算法的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>信号处理中的盲源分离（BSS）: 将混合信号分解为独立源， 数学上等价于张量分解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(T = e_1 \otimes e_1 \otimes e_1 + e_2 \otimes e_2 \otimes e_2 \in (\mathbb{R}^2)^{\otimes 3}\)。张量秩是多少？ 解答: 两个纯张量的和，\(\mathrm{rank}(T) \leq 2\)。 若 \(T = v \otimes v' \otimes v''\)（秩 1），则各分量矩阵秩为 1， 但 \(T\) 在 \(e_1, e_2\) 两个方向上贡献，矛盾。故 \(\mathrm{rank}(T) = 2\)。 易错点: 以为张量秩 = 矩阵化后的矩阵秩。 矩阵化（展平）给出秩的下界，但不是张量秩本身。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">三阶张量秩的计算是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。三阶及以上张量秩的精确计算是 NP-hard 问题。')">A. \(O(n^3)\) 多项式算法</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！三阶及以上张量秩的精确计算是 NP-hard 问题。')">B. NP-hard</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。三阶及以上张量秩的精确计算是 NP-hard 问题。')">C. 等价于矩阵秩</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。三阶及以上张量秩的精确计算是 NP-hard 问题。')">D. 总是等于维数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/algebra/linear-adv.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

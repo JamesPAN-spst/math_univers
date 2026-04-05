@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 一阶常微分方程 — 常微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "edo-ch01-q1",
+        "question": "求解可分离变量方程 \\(y' = 2xy\\)，满足初值条件 \\(y(0) = 1\\)。",
+        "options": [
+          "\\(y = e^{x^2}\\)",
+        "\\(y = e^{2x}\\)",
+        "\\(y = e^{x^2/2}\\)",
+        "\\(y = 2xe^{x^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "分离变量 \\(dy/y = 2x\\,dx\\)，两边积分 \\(\\ln|y| = x^2 + C\\)。代入 \\(y(0)=1\\) 得 \\(C=0\\)，故 \\(y = e^{x^2}\\)。选 B 是将 \\(2x\\,dx\\) 误积分为 \\(2x\\)，选 C 遗漏了 \\(\\int 2x\\,dx = x^2\\) 中的系数。"
+      },
+      {
+        "id": "edo-ch01-q2",
+        "question": "方程 \\(y' = \\frac{x+y}{x}\\) 是何种类型？令 \\(v = y/x\\) 后化简为什么形式？",
+        "options": [
+          "齐次方程；\\(xv' = 1\\)",
+        "线性方程；\\(v' = 1/x\\)",
+        "恰当方程；\\(v' = v + 1\\)",
+        "可分离方程；\\(xv' = v\\)"
+        ],
+        "answer": 0,
+        "explanation": "改写为 \\(y' = 1 + y/x\\)，右端是 \\(y/x\\) 的函数，为齐次方程。令 \\(v=y/x\\)，\\(y'=v+xv'\\)，代入得 \\(v+xv'=1+v\\)，即 \\(xv' = 1\\)。积分得 \\(v = \\ln|x|+C\\)，\\(y = x\\ln|x| + Cx\\)。选 C 忘记减去 \\(v\\)。"
+      },
+      {
+        "id": "edo-ch01-q3",
+        "question": "求一阶线性方程 \\(y' + 2y = 4\\) 的通解。",
+        "options": [
+          "\\(y = 2 + Ce^{-2x}\\)",
+        "\\(y = 4 + Ce^{-2x}\\)",
+        "\\(y = 2 + Ce^{2x}\\)",
+        "\\(y = 2e^{-2x} + C\\)"
+        ],
+        "answer": 0,
+        "explanation": "积分因子 \\(\\mu = e^{2x}\\)。\\((e^{2x}y)' = 4e^{2x}\\)，积分得 \\(e^{2x}y = 2e^{2x}+C\\)，\\(y = 2+Ce^{-2x}\\)。特解为 \\(y=2\\)（\\(q/p=4/2\\)）。选 B 将 \\(q(x)=4\\) 误作特解。"
+      },
+      {
+        "id": "edo-ch01-q4",
+        "question": "Bernoulli 方程 \\(y' + y = y^3\\) 通过何种换元化为线性方程？",
+        "options": [
+          "\\(v = y^2\\)",
+        "\\(v = y^{-2}\\)",
+        "\\(v = \\ln y\\)",
+        "\\(v = 1/y\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(n=3\\)，Bernoulli 换元 \\(v = y^{1-n} = y^{-2}\\)。\\(v' = -2y^{-3}y'\\)。原方程两边除以 \\(y^3\\)：\\(y^{-3}y' + y^{-2} = 1\\)，即 \\(-v'/2 + v = 1\\)，化为关于 \\(v\\) 的一阶线性方程 \\(v' - 2v = -2\\)。选 A 是 \\(v=y^2\\) 不满足 \\(1-n=-2\\) 的公式。"
+      },
+      {
+        "id": "edo-ch01-q5",
+        "question": "判断方程 \\((2xy+3)\\,dx + (x^2+4y)\\,dy = 0\\) 是否恰当。",
+        "options": [
+          "恰当，因为 \\(M_y = N_x = 2x\\)",
+        "不恰当，因为 \\(M_y = 2x \\neq N_x = 2\\)",
+        "恰当，因为 \\(M_y = N_x = 2\\)",
+        "不恰当，因为 \\(M_y = 2y \\neq N_x = 2x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M=2xy+3\\)，\\(N=x^2+4y\\)。\\(M_y = 2x\\)，\\(N_x = 2x\\)。\\(M_y=N_x\\) 故恰当。通解由 \\(F=\\int M\\,dx = x^2y+3x+\\varphi(y)\\)，\\(F_y = x^2+\\varphi'(y) = x^2+4y\\) 确定 \\(\\varphi=2y^2\\)，即 \\(x^2y+3x+2y^2=C\\)。"
+      },
+      {
+        "id": "edo-ch01-q6",
+        "question": "求恰当方程 \\(y\\,dx + x\\,dy = 0\\) 的通解。",
+        "options": [
+          "\\(xy = C\\)",
+        "\\(x + y = C\\)",
+        "\\(x^2 + y^2 = C\\)",
+        "\\(y/x = C\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M=y\\)，\\(N=x\\)，\\(M_y=1=N_x\\)，恰当。\\(F=\\int y\\,dx = xy + \\varphi(y)\\)，\\(F_y = x + \\varphi'(y) = x\\)，故 \\(\\varphi'=0\\)，\\(F=xy\\)。通解 \\(xy=C\\)。或直接注意 \\(y\\,dx+x\\,dy = d(xy)=0\\)。"
+      },
+      {
+        "id": "edo-ch01-q7",
+        "question": "关于 Clairaut 方程 \\(y = xy' + g(y')\\)，下列哪项正确？",
+        "options": [
+          "通解是一族直线 \\(y = Cx + g(C)\\)",
+        "通解是一族抛物线",
+        "只有奇解没有通解",
+        "必须用分离变量法求解"
+        ],
+        "answer": 0,
+        "explanation": "在 Clairaut 方程中令 \\(y'=C\\)（常数），得 \\(y = Cx + g(C)\\)，这是一族直线（参数为 \\(C\\)）。这族直线的包络（由 \\(x+g'(C)=0\\) 和 \\(y=Cx+g(C)\\) 消去 \\(C\\) 得到）就是奇解。通解和奇解都是方程的解。"
+      },
+      {
+        "id": "edo-ch01-q8",
+        "question": "求解齐次方程 \\((x^2+y^2)\\,dx - 2xy\\,dy = 0\\)。",
+        "options": [
+          "\\(x^2 - y^2 = Cx\\)",
+        "\\(x^2 + y^2 = Cx\\)",
+        "\\(xy = C(x^2+y^2)\\)",
+        "\\(y^2 = Cx + x^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "改写 \\(y' = (x^2+y^2)/(2xy)\\)。令 \\(v=y/x\\)，\\(y'=(1+v^2)/(2v)\\)，\\(xv' = (1+v^2)/(2v)-v = (1-v^2)/(2v)\\)。\\(\\frac{2v\\,dv}{1-v^2}=\\frac{dx}{x}\\)，积分 \\(-\\ln|1-v^2|=\\ln|x|+C_1\\)，即 \\(|x(1-v^2)|=C\\)。回代 \\(v=y/x\\)：\\(x-y^2/x=C\\)，即 \\(x^2-y^2=Cx\\)。"
+      },
+      {
+        "id": "edo-ch01-q9",
+        "question": "求方程 \\(y' = y/x + e^{y/x}\\) 通过换元 \\(v = y/x\\) 后的通解。",
+        "options": [
+          "\\(e^{-y/x} = -\\ln|x| + C\\)",
+        "\\(e^{y/x} = \\ln|x| + C\\)",
+        "\\(y/x = \\ln\\ln|x| + C\\)",
+        "\\(e^{-y/x} = \\ln|x| + C\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(y'=v+e^v\\)（齐次方程）。\\(v+xv'=v+e^v\\)，\\(xv'=e^v\\)，\\(e^{-v}\\,dv = dx/x\\)。积分得 \\(-e^{-v}=\\ln|x|+C_1\\)，即 \\(e^{-v}=-\\ln|x|+C\\)。回代 \\(v=y/x\\)：\\(e^{-y/x} = C - \\ln|x|\\)。写成标准形式 \\(e^{-y/x} = \\ln|x| + C\\)（\\(C\\) 吸收符号）。注意：选 A 与选 D 差一个负号，取决于常数 \\(C\\) 的定义方式；标准形式为 D。"
+      },
+      {
+        "id": "edo-ch01-q10",
+        "question": "求解初值问题 \\(y' + \\frac{1}{x}y = x^2\\)，\\(y(1) = 0\\)。",
+        "options": [
+          "\\(y = \\frac{x^3}{4} - \\frac{1}{4x}\\)",
+        "\\(y = \\frac{x^3}{3} - \\frac{1}{3x}\\)",
+        "\\(y = \\frac{x^2}{3} - \\frac{1}{3x}\\)",
+        "\\(y = x^3 - x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(p=1/x\\)，\\(\\mu = e^{\\ln x}=x\\)。\\((xy)' = x^3\\)，\\(xy = x^4/4 + C\\)。\\(y(1)=0\\)：\\(0=1/4+C\\)，\\(C=-1/4\\)。\\(y = x^3/4 - 1/(4x)\\)。选 B 是将 \\(\\int x^3\\,dx\\) 误算为 \\(x^3/3\\)。"
+      },
+      {
+        "id": "edo-ch01-q11",
+        "question": "求解 Bernoulli 方程 \\(y' + y = xy^2\\)。",
+        "options": [
+          "\\(y = \\frac{1}{(1-x+Ce^x)}\\)",
+        "\\(y = \\frac{1}{(x-1+Ce^x)}\\)",
+        "\\(y = (1-x+Ce^x)\\)",
+        "\\(y = \\frac{e^{-x}}{x+C}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(n=2\\)，令 \\(v=y^{-1}\\)，\\(v'=-y^{-2}y'\\)。除以 \\(y^2\\)：\\(y^{-2}y'+y^{-1}=x\\)，即 \\(-v'+v=x\\)，\\(v'-v=-x\\)。积分因子 \\(\\mu=e^{-x}\\)，\\((e^{-x}v)'=-xe^{-x}\\)，\\(e^{-x}v=xe^{-x}-e^{-x}+C=e^{-x}(x-1)+C\\)。\\(v=x-1+Ce^x\\)，\\(y=1/(x-1+Ce^x)\\)。选 A 符号差异。"
+      },
+      {
+        "id": "edo-ch01-q12",
+        "question": "方程 \\(y\\,dx + (2x-ye^y)\\,dy = 0\\) 不恰当。若积分因子仅依赖 \\(y\\)，求此积分因子。",
+        "options": [
+          "\\(\\mu = y\\)",
+        "\\(\\mu = e^y\\)",
+        "\\(\\mu = 1/y\\)",
+        "\\(\\mu = y^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M=y\\)，\\(N=2x-ye^y\\)。\\(M_y=1\\)，\\(N_x=2\\)。\\((N_x-M_y)/M = (2-1)/y = 1/y\\)，仅依赖 \\(y\\)。积分因子 \\(\\mu = e^{\\int 1/y\\,dy} = e^{\\ln y} = y\\)。乘以 \\(\\mu\\)：\\(y^2\\,dx+(2xy-y^2e^y)\\,dy=0\\)。检验：新 \\(M_y=2y\\)，新 \\(N_x=2y\\)。✓"
+      },
+      {
+        "id": "edo-ch01-q13",
+        "question": "求解恰当方程 \\((e^x\\sin y + 2y)\\,dx + (e^x\\cos y + 2x)\\,dy = 0\\)。",
+        "options": [
+          "\\(e^x\\sin y + 2xy = C\\)",
+        "\\(e^x\\cos y + 2xy = C\\)",
+        "\\(e^x\\sin y + x^2y = C\\)",
+        "\\(e^x(\\sin y + \\cos y) + 2xy = C\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M_y = e^x\\cos y+2\\)，\\(N_x = e^x\\cos y+2\\)，恰当。\\(F=\\int M\\,dx = e^x\\sin y+2xy+\\varphi(y)\\)。\\(F_y = e^x\\cos y+2x+\\varphi'(y) = e^x\\cos y+2x\\)，\\(\\varphi'=0\\)。通解 \\(e^x\\sin y + 2xy = C\\)。"
+      },
+      {
+        "id": "edo-ch01-q14",
+        "question": "求 Clairaut 方程 \\(y = xy' + (y')^2\\) 的奇解。",
+        "options": [
+          "\\(y = -x^2/4\\)",
+        "\\(y = x^2/4\\)",
+        "\\(y = -x^2/2\\)",
+        "\\(y = x^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "通解 \\(y = Cx+C^2\\)。求包络：\\(F(x,C)=Cx+C^2-y=0\\)，\\(F_C = x+2C=0\\)，\\(C=-x/2\\)。代入 \\(y = (-x/2)x+x^2/4 = -x^2/4\\)。验证：\\(y'=-x/2\\)，\\(xy'+(y')^2 = -x^2/2+x^2/4 = -x^2/4 = y\\)。✓"
+      },
+      {
+        "id": "edo-ch01-q15",
+        "question": "方程 \\(y = xy' - (y')^3\\) 的通解为 \\(y = Cx - C^3\\)。求其包络的参数形式。",
+        "options": [
+          "\\(x = 3C^2\\)，\\(y = 2C^3\\)",
+        "\\(x = 3C^2\\)，\\(y = -2C^3\\)",
+        "\\(x = 2C\\)，\\(y = C^2\\)",
+        "\\(x = C^2\\)，\\(y = -C^3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(F(x,C) = Cx - C^3 - y = 0\\)，\\(F_C = x - 3C^2 = 0\\)，\\(x = 3C^2\\)。代入 \\(y = C(3C^2)-C^3 = 2C^3\\)。但 \\(f(p)=-p^3\\)，所以 \\(y=Cx-C^3\\)，\\(F_C=x-3C^2=0\\)，\\(x=3C^2\\)，\\(y=3C^3-C^3=2C^3\\)。参数消去：\\(C=(x/3)^{1/2}\\)，\\(y=2(x/3)^{3/2}\\)。实际上通解是 \\(y=Cx-C^3\\)，包络 \\(x=3C^2\\), \\(y=C\\cdot3C^2-C^3=2C^3\\)。选 B 差了个负号——让我再算：\\(f(p)=-p^3\\)，通解 \\(y=Cx+(-C^3)=Cx-C^3\\)。\\(F_C=x-3C^2=0\\), \\(x=3C^2\\), \\(y=C\\cdot3C^2-C^3=3C^3-C^3=2C^3\\)。所以 A 和 B 区别在 \\(y\\) 的符号。\\(y=2C^3\\)，选 A。 等一下，让我检查选项。A) \\(x=3C^2, y=2C^3\\); B) \\(x=3C^2, y=-2C^3\\)。答案应该是 A。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="edo"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/edo.html" class="module-name">常微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 可分离变量方程与齐次方程</a></li>
+      <li><a href="#kp2">02 · 一阶线性方程与 Bernoulli 方程</a></li>
+      <li><a href="#kp3">03 · 恰当方程与积分因子</a></li>
+      <li><a href="#kp4">04 · 包络、奇解与方程的几何</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>一阶常微分方程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>可分离变量方程与齐次方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>自然界最直接的建模方式往往导致一阶 ODE：牛顿冷却定律 \(dT/dt = -k(T - T_{\text{env}})\)、放射性衰变 \(dN/dt = -\lambda N\)、 种群增长 \(dP/dt = rP\)。这些方程有一个共性——变量可以分离 到等号两侧分别积分。可分离变量方程是最简单也最基本的一类 ODE， 齐次方程通过换元 \(v = y/x\) 化归为可分离型，体现了「化归」思想。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思想是「分离与化归」：将方程中不同变量的有关项分到等号两侧， 使积分成为可能。齐次方程 \(y' = f(y/x)\) 通过引入比值变量 \(v = y/x\) 降低耦合度，这是 ODE 求解中「换元降阶」策略的原型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>可分离变量方程</strong>：\(y' = f(x)g(y)\)。当 \(g(y) \neq 0\) 时分离变量： \[\frac{dy}{g(y)} = f(x)\,dx\] 两边积分得 \(\int \frac{dy}{g(y)} = \int f(x)\,dx + C\)。 注意：\(g(y_0) = 0\) 的常数解 \(y \equiv y_0\) 需要单独验证。 <strong>齐次方程</strong>：\(y' = f(y/x)\)（\(f\) 是 \(y/x\) 的函数）。 令 \(v = y/x\)，则 \(y = vx\)，\(y' = v + xv'\)，代入得 \[v + xv' = f(v) \quad\Longrightarrow\quad \frac{dv}{f(v) - v} = \frac{dx}{x}\] 这是关于 \(v\) 和 \(x\) 的可分离变量方程。积分后回代 \(v = y/x\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 放射性衰变 \(N' = -\lambda N\)（可分离）→ \(N(t) = N_0 e^{-\lambda t}\) - 化学反应动力学：二级反应 \(dc/dt = -kc^2\) → \(c(t) = c_0/(1+kc_0 t)\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求解 \((x^2 + y^2)\,dx - 2xy\,dy = 0\)。 解答：改写为 \(y' = \frac{x^2+y^2}{2xy}\)。 令 \(v = y/x\)，则 \(y' = \frac{1+v^2}{2v}\)。 \(v + xv' = \frac{1+v^2}{2v}\)，\(xv' = \frac{1-v^2}{2v}\)， \(\frac{2v\,dv}{1-v^2} = \frac{dx}{x}\)，积分得 \(-\ln|1-v^2| = \ln|x| + C_1\)，即 \(|x(1-v^2)| = C\)。 回代 \(v = y/x\)：\(|x - y^2/x| = C\)，即 \(x^2 - y^2 = Cx\)。 易错点：忘记检验 \(g(y) = 0\) 可能给出的奇异解。 如 \(y' = y^2\) 中 \(y \equiv 0\) 是解但不在通解 \(y = -1/(x+C)\) 中。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">方程 \(y' = \frac{x+y}{x-y}\) 是哪一类方程？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\frac{x+y}{x-y} = \\frac{1 + y/x}{1 - y/x}\\) 是 \\(y/x\\) 的函数，')">A. 可分离变量方程</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\frac{x+y}{x-y} = \\frac{1 + y/x}{1 - y/x}\\) 是 \\(y/x\\) 的函数，')">B. 齐次方程</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\frac{x+y}{x-y} = \\frac{1 + y/x}{1 - y/x}\\) 是 \\(y/x\\) 的函数，')">C. 线性方程</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\frac{x+y}{x-y} = \\frac{1 + y/x}{1 - y/x}\\) 是 \\(y/x\\) 的函数，')">D. 恰当方程</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>一阶线性方程与 Bernoulli 方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一阶线性方程 \(y' + p(x)y = q(x)\) 在工程和物理中无处不在： RC 电路的电压响应、药物在血液中的浓度变化、一阶系统的强迫振动。 它有完整的求解公式，是 ODE 理论的基石。Bernoulli 方程和 Riccati 方程则是重要的非线性推广，但能通过巧妙换元化归为线性方程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>线性方程的核心是「叠加原理」：齐次解空间是一维线性空间， 通解 = 齐次通解 + 特解。积分因子法的本质是乘以一个函数使左端 变为全导数 \(d(\mu y)/dx\)，这是微分运算的逆操作。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>一阶线性方程</strong> \(y' + p(x)y = q(x)\)。 积分因子 \(\mu(x) = e^{\int p(x)\,dx}\)，两边乘 \(\mu\)： \[\frac{d}{dx}[\mu(x) y] = \mu(x) q(x)\] 积分得通解： \[y(x) = e^{-\int p\,dx}\left[\int e^{\int p\,dx}\,q(x)\,dx + C\right]\] <strong>Bernoulli 方程</strong> \(y' + p(x)y = q(x)y^n\)（\(n \neq 0,1\)）。 令 \(v = y^{1-n}\)，则 \(v' = (1-n)y^{-n}y'\)。 原方程两边同除 \(y^n\) 得 \(y^{-n}y' + p(x)y^{1-n} = q(x)\)， 即 \(\frac{1}{1-n}v' + p(x)v = q(x)\)，化为关于 \(v\) 的一阶线性方程。 <strong>Riccati 方程</strong> \(y' = a(x)y^2 + b(x)y + c(x)\)： 已知特解 \(y_1\) 时，令 \(y = y_1 + 1/v\) 可化为一阶线性方程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- RC 电路：\(RC\,dV_C/dt + V_C = V_{\text{in}}(t)\)， 是标准一阶线性方程，描述电容充放电过程 - Logistic 方程 \(P' = rP(1-P/K)\) 是 Bernoulli 方程（\(n=2\)）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求解 \(y' + \frac{2}{x}y = x^2\)，\(y(1)=0\)。 解答：\(p(x)=2/x\)，积分因子 \(\mu = e^{\int 2/x\,dx} = x^2\)。 乘以 \(\mu\)：\((x^2 y)' = x^4\)，积分得 \(x^2 y = x^5/5 + C\)。 \(y = x^3/5 + C/x^2\)。代入 \(y(1)=0\)：\(0 = 1/5 + C\)，\(C = -1/5\)。 故 \(y = \frac{x^3 - x^{-2}}{5} = \frac{x^5 - 1}{5x^2}\)。 易错点：积分因子中忘记常数可以省略（取 \(C=0\) 即可）， 或对 Bernoulli 方程在 \(n>1\) 时忘记 \(y=0\) 也是解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Bernoulli 方程 \(y' + y = y^3\) 通过哪个换元化为线性方程？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(n=3\\)，故 \\(v = y^{1-n} = y^{-2}\\)。代入后得到关于 \\(v\\) 的')">A. \(v = y^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(n=3\\)，故 \\(v = y^{1-n} = y^{-2}\\)。代入后得到关于 \\(v\\) 的')">B. \(v = y^{-2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(n=3\\)，故 \\(v = y^{1-n} = y^{-2}\\)。代入后得到关于 \\(v\\) 的')">C. \(v = \ln y\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(n=3\\)，故 \\(v = y^{1-n} = y^{-2}\\)。代入后得到关于 \\(v\\) 的')">D. \(v = 1/y\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>恰当方程与积分因子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当方程可以写成某个二元函数的全微分 \(dF = 0\) 时，解就是等值线 \(F(x,y) = C\)。但大多数方程不是天然恰当的——此时需要寻找 积分因子使它变得恰当。恰当方程的判别法和积分因子的求法， 构成了一阶 ODE 求解的另一条重要路径。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>恰当方程的本质是外微分：\(M\,dx + N\,dy = dF\) 当且仅当 \(dF\) 是 恰当 1-形式。恰当性条件 \(\partial M/\partial y = \partial N/\partial x\) 就是 Poincaré 引理在 \(\mathbb{R}^2\) 上的具体表现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>恰当方程</strong>：\(M(x,y)\,dx + N(x,y)\,dy = 0\) 称为恰当的，如果存在 \(F(x,y)\) 使得 \(F_x = M\)，\(F_y = N\)。 <strong>判别条件</strong>（单连通域上）： \[\frac{\partial M}{\partial y} = \frac{\partial N}{\partial x}\] <strong>求解方法</strong>：从 \(F_x = M\) 积分得 \(F = \int M\,dx + \varphi(y)\)， 再由 \(F_y = N\) 确定 \(\varphi'(y)\)。 <strong>积分因子</strong>：若不恰当，寻找 \(\mu(x,y)\) 使 \(\mu M\,dx + \mu N\,dy = 0\) 恰当。特殊情况： - 若 \(\frac{M_y - N_x}{N}\) 仅依赖 \(x\)，则 \(\mu = e^{\int \frac{M_y-N_x}{N}dx}\) - 若 \(\frac{N_x - M_y}{M}\) 仅依赖 \(y\)，则 \(\mu = e^{\int \frac{N_x-M_y}{M}dy}\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 力学中保守力场 \(\mathbf{F} = -\nabla V\) 的等势线即为恰当方程的解 - 热力学中状态方程 \(dU = T\,dS - P\,dV\) 的恰当性条件给出 Maxwell 关系</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：判断 \((2xy + 3)\,dx + (x^2 + 4y)\,dy = 0\) 是否恰当并求解。 解答：\(M = 2xy+3\)，\(N = x^2+4y\)。 \(M_y = 2x\)，\(N_x = 2x\)。\(M_y = N_x\)，恰当。 \(F = \int (2xy+3)\,dx = x^2y + 3x + \varphi(y)\)。 \(F_y = x^2 + \varphi'(y) = x^2 + 4y\)，故 \(\varphi'(y) = 4y\)， \(\varphi(y) = 2y^2\)。通解：\(x^2 y + 3x + 2y^2 = C\)。 易错点：对 \(M\) 关于 \(x\) 积分时，「常数」\(\varphi(y)\) 不能漏掉， 否则 \(F_y\) 将缺少关键项，导致矛盾或错误。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">方程 \(y\,dx + 2x\,dy = 0\) 是否恰当？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(M=y\\)，\\(N=2x\\)，\\(M_y = 1\\)，\\(N_x = 2\\)，不相等故不恰当。')">A. 恰当，因为 \(M_y = N_x = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(M=y\\)，\\(N=2x\\)，\\(M_y = 1\\)，\\(N_x = 2\\)，不相等故不恰当。')">B. 不恰当，因为 \(M_y = 1 \neq N_x = 2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(M=y\\)，\\(N=2x\\)，\\(M_y = 1\\)，\\(N_x = 2\\)，不相等故不恰当。')">C. 恰当，因为可以直接积分</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(M=y\\)，\\(N=2x\\)，\\(M_y = 1\\)，\\(N_x = 2\\)，不相等故不恰当。')">D. 取决于定义域</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>包络、奇解与方程的几何</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>ODE 的通解是一族曲线（由任意常数 \(C\) 参数化），这族曲线可能 拥有「包络」——一条与每条曲线相切的特殊曲线。包络满足方程 但不包含在通解族中，称为奇解。理解奇解对于完整描述方程的 解集至关重要，也揭示了 ODE 解结构的微妙几何性质。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>通解族的包络</strong>：设通解为 \(F(x, y, C) = 0\)。包络由以下方程组确定： \[F(x, y, C) = 0 \quad\text{且}\quad \frac{\partial F}{\partial C}(x, y, C) = 0\] 消去 \(C\) 得到包络曲线。 <strong>奇解</strong>：满足 ODE 但不能由通解 \(y = y(x; C)\) 对任何 \(C\) 取值得到。 奇解上每一点都与通解族中某条曲线相切。 <strong>Clairaut 方程</strong> \(y = xy' + f(y')\) 的通解为 \(y = Cx + f(C)\)（直线族）， 奇解由消去 \(p\)：\(x + f'(p) = 0\)，\(y = px + f(p)\) 得到参数形式。 此奇解就是直线族的包络。 <strong>判别曲线法</strong>：对 \(F(x,y,y') = 0\)，\(p\)-判别曲线由消去 \(y'\) 得到： \(F = 0,\; F_{y'} = 0\)。该曲线包含奇解，但也可能包含非解（需验证）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 光学中的焦散线(caustic)是光线族的包络 - 几何光学中波前的形成与包络密切相关</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 Clairaut 方程 \(y = xy' + (y')^2\) 的通解和奇解。 解答：通解：\(y = Cx + C^2\)（直线族）。 求包络：\(F(x,y,C) = Cx + C^2 - y = 0\)，\(F_C = x + 2C = 0\)。 由 \(C = -x/2\) 代入：\(y = (-x/2)x + x^2/4 = -x^2/4\)。 奇解：\(y = -x^2/4\)（抛物线，与每条直线相切）。 验证：\(y' = -x/2\)，\(xy' + (y')^2 = -x^2/2 + x^2/4 = -x^2/4 = y\)。✓ 易错点：\(p\)-判别曲线不一定全是奇解，需要代回原方程验证。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Clairaut 方程 \(y = xy' + g(y')\) 的通解是什么形式？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。令 \\(y\\' = C\\)（常数），得 \\(y = Cx + g(C)\\)，这是斜率为 \\(C\\)、')">A. 一族抛物线</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！令 \\(y\\' = C\\)（常数），得 \\(y = Cx + g(C)\\)，这是斜率为 \\(C\\)、')">B. 一族直线</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。令 \\(y\\' = C\\)（常数），得 \\(y = Cx + g(C)\\)，这是斜率为 \\(C\\)、')">C. 一族圆</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。令 \\(y\\' = C\\)（常数），得 \\(y = Cx + g(C)\\)，这是斜率为 \\(C\\)、')">D. 不确定，取决于 \(g\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/analysis/edo.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

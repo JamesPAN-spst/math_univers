@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Poisson 过程 — 随机过程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-ch05-q1",
+        "question": "齐次 Poisson 过程 \\(N_t\\)（速率 \\(\\lambda\\)）的三个等价定义中，增量分布条件？",
+        "options": [
+          "\\(N_t-N_s \\sim \\text{Poisson}(\\lambda(t-s))\\)，独立增量，\\(N_0=0\\)",
+        "\\(N_t \\sim N(\\lambda t, \\lambda t)\\)",
+        "\\(N_t\\) 是 Brown 运动",
+        "\\(N_t-N_s \\sim \\text{Exp}(\\lambda)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Poisson 过程三条公理：(i) \\(N_0=0\\)；(ii) 独立增量；(iii) Poisson 增量。D 混淆了计数分布和到达间隔（到达间隔 \\(\\sim \\text{Exp}(\\lambda)\\)）。B 是正态分布（不是 Poisson）。"
+      },
+      {
+        "id": "stochastic-ch05-q2",
+        "question": "\\(N_t \\sim \\text{Poisson}(\\lambda t)\\)。\\(P(N_t=k)=\\)？",
+        "options": [
+          "\\(e^{-\\lambda t}(\\lambda t)^k/k!\\)",
+        "\\(\\binom{n}{k}p^k(1-p)^{n-k}\\)",
+        "\\(\\lambda^k e^{-\\lambda}/k!\\)",
+        "\\((1-p)^{k-1}p\\)"
+        ],
+        "answer": 0,
+        "explanation": "Poisson 分布的 PMF。\\(E[N_t]=\\lambda t\\)，\\(\\text{Var}(N_t)=\\lambda t\\)（均值=方差是 Poisson 的特征）。\\(k=0\\): \\(P(N_t=0)=e^{-\\lambda t}\\)。C 缺少 \\(t\\) 因子。"
+      },
+      {
+        "id": "stochastic-ch05-q3",
+        "question": "到达间隔 \\(T_k=S_k-S_{k-1}\\)（\\(S_k\\) 第 \\(k\\) 次到达时间）的分布？",
+        "options": [
+          "\\(T_k \\sim \\text{Exp}(\\lambda)\\)，且 \\(T_1, T_2, ...\\) iid",
+        "\\(T_k \\sim \\text{Poisson}(\\lambda)\\)",
+        "\\(T_k \\sim U(0,1/\\lambda)\\)",
+        "\\(T_k\\) 不独立"
+        ],
+        "answer": 0,
+        "explanation": "Poisson 过程的无记忆性 ⟹ 到达间隔 iid \\(\\text{Exp}(\\lambda)\\)。反之：iid Exp 到达间隔 ⟹ 计数过程是 Poisson。\\(S_k=\\sum_{i=1}^k T_i \\sim \\text{Gamma}(k,\\lambda)\\)。"
+      },
+      {
+        "id": "stochastic-ch05-q4",
+        "question": "两个独立 Poisson 过程 \\(N_t^{(1)}\\)（率 \\(\\lambda_1\\)）和 \\(N_t^{(2)}\\)（率 \\(\\lambda_2\\)）的叠加 \\(N_t=N_t^{(1)}+N_t^{(2)}\\)？",
+        "options": [
+          "Poisson 过程，速率 \\(\\lambda_1+\\lambda_2\\)",
+        "不是 Poisson 过程",
+        "速率 \\(\\lambda_1 \\lambda_2\\)",
+        "速率 \\(\\max(\\lambda_1,\\lambda_2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "独立 Poisson 的叠加仍 Poisson：\\(N_t^{(1)}+N_t^{(2)} \\sim \\text{Poi}((\\lambda_1+\\lambda_2)t)\\)。推广到 \\(n\\) 个：\\(\\sum N_t^{(k)} \\sim \\text{Poi}((\\sum\\lambda_k)t)\\)。这是 Poisson 过程的封闭性。"
+      },
+      {
+        "id": "stochastic-ch05-q5",
+        "question": "Poisson 过程分解 (thinning)：每次到达以概率 \\(p\\) 保留。保留的过程是？",
+        "options": [
+          "Poisson 过程，速率 \\(\\lambda p\\)",
+        "二项过程",
+        "速率 \\(\\lambda(1-p)\\)",
+        "不是 Poisson"
+        ],
+        "answer": 0,
+        "explanation": "独立标记：\\(N_t^{(1)} \\sim \\text{Poi}(\\lambda p t)\\)（保留），\\(N_t^{(2)} \\sim \\text{Poi}(\\lambda(1-p)t)\\)（丢弃），且 \\(N^{(1)} \\perp N^{(2)}\\)。应用：网络流量中按类型分解。"
+      },
+      {
+        "id": "stochastic-ch05-q6",
+        "question": "复合 Poisson 过程 \\(Y_t=\\sum_{k=1}^{N_t}X_k\\) 中 \\(X_k\\) 的角色？",
+        "options": [
+          "iid 跳跃大小（与 \\(N_t\\) 独立）",
+        "到达时间",
+        "速率参数",
+        "\\(N_t\\) 的条件分布"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y_t\\)：\\(N_t\\) 次跳跃，每次跳 \\(X_k\\)（iid）。\\(E[Y_t]=\\lambda t E[X]\\), \\(\\text{Var}(Y_t)=\\lambda t E[X^2]\\)。用于保险索赔（\\(X_k\\) 为索赔额）、金融跳跃模型（Merton 模型）。"
+      },
+      {
+        "id": "stochastic-ch05-q7",
+        "question": "Cramér-Lundberg 模型中盈余过程 \\(U_t=\\)？",
+        "options": [
+          "\\(u+ct-\\sum_{k=1}^{N_t}X_k\\)（初始资本+保费收入-索赔）",
+        "\\(u+\\sum X_k\\)",
+        "\\(ct-N_t\\)",
+        "\\(u \\cdot e^{ct}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(u\\) 初始资本，\\(c\\) 保费率（连续收入），\\(\\sum X_k\\) 复合 Poisson 索赔。\\(U_t<0\\) 即破产。净利润条件 \\(c>\\lambda E[X]\\)（保费 > 期望索赔）。破产概率 \\(\\psi(u)=P(\\inf_t U_t<0)\\)。"
+      },
+      {
+        "id": "stochastic-ch05-q8",
+        "question": "给定 \\(N_T=n\\)，\\(n\\) 次到达时间的条件联合分布？",
+        "options": [
+          "\\((S_1,...,S_n)|N_T=n\\) 与 \\(U_{(1)},...,U_{(n)}\\)（\\(n\\) 个 \\(U[0,T]\\) 的顺序统计量）同分布",
+        "均匀分布在 \\([0,T]^n\\) 上",
+        "独立指数分布",
+        "正态分布"
+        ],
+        "answer": 0,
+        "explanation": "经典结果：条件于 \\(N_T=n\\)，到达时间如同 \\(n\\) 个 iid \\(U(0,T)\\) 的排序。证明：\\(f(s_1,...,s_n|N_T=n)=n!/T^n\\)（\\(0<s_1<...<s_n<T\\)）。应用：Poisson 过程的模拟算法。"
+      },
+      {
+        "id": "stochastic-ch05-q9",
+        "question": "\\(E[S_1|N_T=1]=\\)？（\\(S_1\\) 第一次到达时间）",
+        "options": [
+          "\\(T/2\\)",
+        "\\(1/\\lambda\\)",
+        "\\(T\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "条件于 \\(N_T=1\\)，\\(S_1 \\sim U(0,T)\\)（由顺序统计量性质）。\\(E[S_1|N_T=1]=T/2\\)。无条件时 \\(E[S_1]=1/\\lambda\\)。这两个不矛盾：条件改变了分布。"
+      },
+      {
+        "id": "stochastic-ch05-q10",
+        "question": "非齐次 Poisson 过程（速率函数 \\(\\lambda(t)\\)）。\\(N_t-N_s \\sim\\)？",
+        "options": [
+          "\\(\\text{Poisson}\\left(\\int_s^t \\lambda(u)du\\right)\\)",
+        "\\(\\text{Poisson}(\\lambda(t)(t-s))\\)",
+        "\\(\\text{Poisson}(\\lambda(s)(t-s))\\)",
+        "不是 Poisson 分布"
+        ],
+        "answer": 0,
+        "explanation": "积分强度 \\(\\Lambda(s,t)=\\int_s^t \\lambda(u)du\\)。仍有独立增量，但非平稳。\\(\\lambda(t)\\) 变化 ⟹ 到达密度随时间变化。应用：高峰/低谷交通流、地震模型。"
+      },
+      {
+        "id": "stochastic-ch05-q11",
+        "question": "非齐次 Poisson → 齐次 Poisson 的时间变换？",
+        "options": [
+          "\\(\\tilde{N}_s=N_{\\Lambda^{-1}(s)}\\) 是速率 \\(1\\) 的齐次 Poisson（\\(\\Lambda(t)=\\int_0^t \\lambda(u)du\\)）",
+        "不可能变换",
+        "乘以 \\(\\lambda(t)\\)",
+        "对数变换"
+        ],
+        "answer": 0,
+        "explanation": "时间换元 \\(s=\\Lambda(t)\\)：把\"不均匀钟\"变成\"均匀钟\"。\\(\\tilde{N}_s\\) 的增量 \\(\\tilde{N}_{s_2}-\\tilde{N}_{s_1} \\sim \\text{Poi}(s_2-s_1)\\)（率 \\(1\\)）。模拟技巧：先模拟齐次再反变换。"
+      },
+      {
+        "id": "stochastic-ch05-q12",
+        "question": "复合 Poisson 过程 \\(Y_t=\\sum_{k=1}^{N_t}X_k\\)。\\(E[Y_t]\\) 和 \\(\\text{Var}(Y_t)\\)？",
+        "options": [
+          "\\(E=\\lambda t \\mu_X\\), \\(\\text{Var}=\\lambda t E[X^2]\\)",
+        "\\(E=\\lambda t\\), \\(\\text{Var}=\\lambda t\\)",
+        "\\(E=N_t \\mu_X\\), \\(\\text{Var}=N_t \\sigma_X^2\\)",
+        "\\(E=\\lambda t \\mu_X\\), \\(\\text{Var}=\\lambda t \\sigma_X^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[Y_t]=E[N_t]E[X]=\\lambda t \\mu_X\\)。\\(\\text{Var}(Y_t)=\\lambda t E[X^2]=\\lambda t(\\sigma_X^2+\\mu_X^2)\\)（全方差公式）。D 遗漏了均值项——常见错误。C 中 \\(N_t\\) 随机不是参数。"
+      },
+      {
+        "id": "stochastic-ch05-q13",
+        "question": "复合 Poisson 过程的矩母函数 \\(M_{Y_t}(\\theta)=\\)？",
+        "options": [
+          "\\(\\exp(\\lambda t(M_X(\\theta)-1))\\)",
+        "\\(e^{\\lambda t \\theta}\\)",
+        "\\((M_X(\\theta))^{\\lambda t}\\)",
+        "\\(e^{-\\lambda t}M_X(\\theta)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(M_{Y_t}(\\theta)=E[e^{\\theta Y_t}]=\\sum_{n=0}^\\infty P(N_t=n)(M_X(\\theta))^n=e^{-\\lambda t}\\sum \\frac{(\\lambda t M_X(\\theta))^n}{n!}=e^{\\lambda t(M_X-1)}\\)。Lévy-Khintchine 公式的特例。"
+      },
+      {
+        "id": "stochastic-ch05-q14",
+        "question": "Cramér-Lundberg 模型中安全负荷系数 \\(\\theta\\)？",
+        "options": [
+          "\\(\\theta=(c-\\lambda\\mu_X)/(\\lambda\\mu_X)\\)（\\(c\\) 保费率，\\(\\lambda\\mu_X\\) 期望索赔率）",
+        "\\(\\theta=c/\\lambda\\)",
+        "\\(\\theta=\\lambda/c\\)",
+        "\\(\\theta=c\\mu_X\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c=(1+\\theta)\\lambda\\mu_X\\)。\\(\\theta>0\\) 保证正净利润（保费 > 索赔）。\\(\\theta\\) 越大越安全。\\(\\theta=0\\)：保费恰等于期望索赔——长期必破产。精算定价中 \\(\\theta\\) 典型值 \\(10\\%-30\\%\\)。"
+      },
+      {
+        "id": "stochastic-ch05-q15",
+        "question": "Lundberg 不等式 \\(\\psi(u) \\leq e^{-Ru}\\)（\\(R\\) 为调整系数）。\\(R\\) 满足？",
+        "options": [
+          "\\(\\lambda(M_X(R)-1)=cR\\)（Lundberg 方程）",
+        "\\(R=c/\\lambda\\)",
+        "\\(R=1/\\mu_X\\)",
+        "\\(R=\\lambda/c\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(R>0\\) 是 \\(\\lambda(M_X(r)-1)-cr=0\\) 的正根。存在性要求 \\(c>\\lambda\\mu_X\\)（安全负荷 \\(>0\\)）。指数索赔时 \\(R=(1/\\mu_X)-\\lambda/c\\)。\\(R\\) 大 ⟹ 破产概率衰减快（更安全）。"
+      },
+      {
+        "id": "stochastic-ch05-q16",
+        "question": "\\(M_t=N_t-\\lambda t\\) 是？",
+        "options": [
+          "鞅（补偿 Poisson 过程）",
+        "下鞅",
+        "上鞅",
+        "非鞅"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[N_t-N_s|\\mathcal{F}_s]=\\lambda(t-s)\\)。\\(E[M_t|\\mathcal{F}_s]=M_s+\\lambda(t-s)-\\lambda(t-s)=M_s\\)。\\(M_t\\) 是纯跳鞅，二次变差 \\([M]_t=N_t\\)。补偿是使过程中心化的标准操作。"
+      },
+      {
+        "id": "stochastic-ch05-q17",
+        "question": "两个客户类型到达：\\(\\lambda_1=3\\), \\(\\lambda_2=5\\) (每小时)。某到达是类型 1 的概率？",
+        "options": [
+          "\\(3/8\\)",
+        "\\(5/8\\)",
+        "\\(1/2\\)",
+        "\\(3/5\\)"
+        ],
+        "answer": 0,
+        "explanation": "叠加后速率 \\(=8\\)。由分解性质：每次到达是类型 1 的概率 \\(=\\lambda_1/(\\lambda_1+\\lambda_2)=3/8\\)。独立于到达时间。这是 Poisson 分解的逆操作。"
+      },
+      {
+        "id": "stochastic-ch05-q18",
+        "question": "\\(P(N_1=2, N_3=5)\\)（\\(\\lambda=2\\)）？",
+        "options": [
+          "\\(P(N_1=2)P(N_3-N_1=3)=\\frac{e^{-2}2^2}{2!}\\cdot\\frac{e^{-4}4^3}{3!}\\)",
+        "\\(P(N_3=5)\\)",
+        "\\(P(N_1=2) \\cdot P(N_3=5)\\)",
+        "\\(\\frac{e^{-6}6^5}{5!}\\)"
+        ],
+        "answer": 0,
+        "explanation": "独立增量：\\(P(N_1=2, N_3=5)=P(N_1=2)P(N_3-N_1=3)\\)。\\(N_1 \\sim \\text{Poi}(2)\\), \\(N_3-N_1 \\sim \\text{Poi}(4)\\)。\\(=e^{-2}\\cdot 2 \\cdot e^{-4}\\cdot 32/6=e^{-6}\\cdot 32/3\\)。C 错误：\\(N_1\\) 和 \\(N_3\\) 不独立。"
+      },
+      {
+        "id": "stochastic-ch05-q19",
+        "question": "Poisson 过程是 Lévy 过程的特例。Lévy 过程的定义特征？",
+        "options": [
+          "平稳独立增量 + 右连左极路径 + \\(X_0=0\\)",
+        "连续路径",
+        "Gaussian 增量",
+        "有限跳跃总数"
+        ],
+        "answer": 0,
+        "explanation": "Lévy 三元组 \\((\\gamma, \\sigma^2, \\nu)\\)：漂移+高斯+跳跃测度。Poisson: \\(\\gamma=0, \\sigma=0, \\nu=\\lambda\\delta_1\\)。Brown: \\(\\gamma=0, \\sigma^2>0, \\nu=0\\)。一般 Lévy 过程可含无穷多小跳（\\(\\alpha\\)-稳定过程等）。"
+      },
+      {
+        "id": "stochastic-ch05-q20",
+        "question": "非齐次 Poisson：\\(\\lambda(t)=3t\\)（\\(0 \\leq t \\leq 2\\)）。\\(E[N_2]=\\)？",
+        "options": [
+          "\\(6\\)",
+        "\\(3\\)",
+        "\\(12\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[N_2]=\\Lambda(0,2)=\\int_0^2 3t \\, dt=3t^2/2\\big|_0^2=6\\)。\\(N_2 \\sim \\text{Poi}(6)\\)。\\(\\text{Var}(N_2)=6\\)。第一段 \\([0,1]\\) 贡献 \\(3/2\\)，第二段 \\([1,2]\\) 贡献 \\(9/2\\)（后期更密集）。"
+      },
+      {
+        "id": "stochastic-ch05-q21",
+        "question": "复合 Poisson 过程 \\(Y_t\\) 何时趋于正态？",
+        "options": [
+          "\\(t \\to \\infty\\) 时（CLT：\\(\\frac{Y_t-\\lambda t \\mu_X}{\\sqrt{\\lambda t E[X^2]}} \\Rightarrow N(0,1)\\)）",
+        "永远不趋于正态",
+        "仅当 \\(X_k\\) 正态时",
+        "\\(\\lambda \\to 0\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "\\(Y_t=\\sum_{k=1}^{N_t}X_k\\)。\\(N_t \\to \\infty\\) a.s.（\\(t \\to \\infty\\)），CLT 适用。更精确：\\(Y_t\\) 可分解为 \\(N_t\\) 个 iid 项的和，\"随机指标 CLT\"。保险中用正态近似估计年度总索赔。"
+      },
+      {
+        "id": "stochastic-ch05-q22",
+        "question": "指数索赔 \\(X \\sim \\text{Exp}(1/\\mu)\\)。Cramér-Lundberg 精确破产概率 \\(\\psi(u)=\\)？",
+        "options": [
+          "\\(\\frac{\\rho}{1+\\theta}e^{-\\theta u/((1+\\theta)\\mu)}\\)（\\(\\rho=\\lambda\\mu/c\\)）",
+        "\\(e^{-u}\\)",
+        "\\(\\lambda/c\\)",
+        "\\(1-e^{-u/\\mu}\\)"
+        ],
+        "answer": 0,
+        "explanation": "指数索赔时 Lundberg 方程有解析解。\\(\\psi(u)=\\frac{1}{1+\\theta}\\exp\\left(-\\frac{\\theta}{(1+\\theta)\\mu}u\\right)\\)（\\(\\rho=\\lambda\\mu/c=1/(1+\\theta)\\)）。\\(\\psi(0)=1/(1+\\theta)\\), \\(\\psi(\\infty)=0\\)。\\(\\theta \\to 0\\): \\(\\psi \\to 1\\)。"
+      },
+      {
+        "id": "stochastic-ch05-q23",
+        "question": "Poisson 过程的 Campbell 定理：\\(E[\\sum_{k:S_k \\leq t}f(S_k)]=\\)？",
+        "options": [
+          "\\(\\lambda \\int_0^t f(s)ds\\)",
+        "\\(\\sum f(k/\\lambda)\\)",
+        "\\(f(\\lambda t)\\)",
+        "\\(N_t \\cdot E[f]\\)"
+        ],
+        "answer": 0,
+        "explanation": "每个到达点 \\(S_k\\) 贡献 \\(f(S_k)\\)。求和的期望 \\(=\\lambda\\int_0^t f(s)ds\\)（强度测度下的积分）。推广到一般点过程：\\(E[\\sum f(x_i)]=\\int f(x)\\Lambda(dx)\\)。空间 Poisson 过程类似。"
+      },
+      {
+        "id": "stochastic-ch05-q24",
+        "question": "\\(N_t^{(1)} \\sim \\text{Poi}(\\lambda_1 t)\\), \\(N_t^{(2)} \\sim \\text{Poi}(\\lambda_2 t)\\) 独立。\\(P(N_t^{(1)}\\text{先到达第一个事件})=\\)？",
+        "options": [
+          "\\(\\lambda_1/(\\lambda_1+\\lambda_2)\\)",
+        "\\(1/2\\)",
+        "\\(\\lambda_1 \\lambda_2\\)",
+        "\\(\\lambda_1/(1+\\lambda_2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T_1^{(1)} \\sim \\text{Exp}(\\lambda_1)\\), \\(T_1^{(2)} \\sim \\text{Exp}(\\lambda_2)\\)。\\(P(T_1^{(1)}<T_1^{(2)})=\\lambda_1/(\\lambda_1+\\lambda_2)\\)（指数分布的竞争）。这是最小值性质 \\(\\min(T^{(1)},T^{(2)}) \\sim \\text{Exp}(\\lambda_1+\\lambda_2)\\)。"
+      },
+      {
+        "id": "stochastic-ch05-q25",
+        "question": "再保险中超额损失再保险 (excess-of-loss)：保留 \\(\\min(X_k,d)\\)，转移 \\(\\max(X_k-d,0)\\)。原保险人的索赔过程仍是？",
+        "options": [
+          "复合 Poisson（跳跃 \\(\\min(X_k,d)\\)，同一到达率 \\(\\lambda\\)）",
+        "普通 Poisson",
+        "不再是复合 Poisson",
+        "速率变为 \\(\\lambda/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\min(X_k,d)\\) 仍 iid（\\(X_k\\) iid 的函数仍 iid），到达过程不变。但跳跃分布改变：\\(P(\\min(X,d) \\leq x)=P(X \\leq x)\\)（\\(x<d\\)），\\(P(\\min(X,d)=d)=P(X \\geq d)\\)。方差降低（风险转移）。"
+      },
+      {
+        "id": "stochastic-ch05-q26",
+        "question": "某商店平均每小时来 \\(10\\) 位顾客。\\(2\\) 小时内恰来 \\(15\\) 位的概率？",
+        "options": [
+          "\\(e^{-20} \\cdot 20^{15}/15!\\)",
+        "\\(e^{-10} \\cdot 10^{15}/15!\\)",
+        "\\(\\binom{20}{15}(0.5)^{20}\\)",
+        "\\(15/20\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N_2 \\sim \\text{Poi}(20)\\)。\\(P(N_2=15)=e^{-20}20^{15}/15! \\approx 0.0516\\)。B 用了 \\(\\lambda=10\\) 而非 \\(\\lambda t=20\\)——常见错误。均值 \\(20\\)，\\(15\\) 低于均值，概率较小。"
+      },
+      {
+        "id": "stochastic-ch05-q27",
+        "question": "保险公司初始资本 \\(u=100\\)，保费率 \\(c=12\\)/年，索赔 Poisson（\\(\\lambda=10\\)/年），每次索赔 \\(X \\sim \\text{Exp}(1)\\)（均值 \\(1\\)）。安全负荷 \\(\\theta=\\)？",
+        "options": [
+          "\\(0.2\\)（即 \\(20\\%\\)）",
+        "\\(1.2\\)",
+        "\\(2\\)",
+        "\\(0.12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\lambda \\mu_X=10 \\cdot 1=10\\)。\\(c=12=(1+\\theta)\\cdot 10\\)。\\(\\theta=0.2\\)。保费比期望索赔多 \\(20\\%\\)。Lundberg 调整系数和破产概率可据此计算。"
+      },
+      {
+        "id": "stochastic-ch05-q28",
+        "question": "网络攻击事件建模：正常期 \\(\\lambda_1=2\\)/天，异常期 \\(\\lambda_2=20\\)/天。用什么过程？",
+        "options": [
+          "非齐次 Poisson（速率 \\(\\lambda(t)\\) 随状态切换）或 Markov 调制 Poisson",
+        "齐次 Poisson",
+        "Brown 运动",
+        "确定性模型"
+        ],
+        "answer": 0,
+        "explanation": "Markov 调制 Poisson (MMPP)：背景状态（正常/异常）按 CTMC 切换，每个状态下 Poisson 速率不同。比静态 Poisson 更能捕捉突发性。网络安全、电信流量分析中常用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic.html" class="module-name">随机过程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Poisson 过程的定义与等价表述</a></li>
+      <li><a href="#kp2">02 · 叠加、分解与非齐次 Poisson 过程</a></li>
+      <li><a href="#kp3">03 · 复合 Poisson 过程</a></li>
+      <li><a href="#kp4">04 · Poisson 过程的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Poisson 过程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Poisson 过程的定义与等价表述</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如果 Brown 运动描述的是「连续波动」，Poisson 过程描述的就是 「随机事件的计数」：电话来电数、放射性衰变、网站访问量。 Poisson 过程是仅次于 Brown 运动的第二重要随机过程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Poisson 过程 = 「连续时间上的随机计数」，与 Brown 运动互补： 一个是连续路径+连续状态，另一个是跳跃路径+离散状态。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>三种等价定义： (1) 计数定义：\(\{N(t)\}\) 为 Poisson(\(\lambda\)) 过程 iff \(N(0)=0\)，独立增量，\(N(t)-N(s) \sim \text{Poisson}(\lambda(t-s))\)。 (2) 微分定义：\(P(N(t+h)-N(t)=1) = \lambda h + o(h)\)， \(P(N(t+h)-N(t) \geq 2) = o(h)\)。 (3) 构造定义：间隔时间 \(T_i \overset{iid}{\sim} \text{Exp}(\lambda)\)， 到达时间 \(S_n = \sum_{i=1}^{n} T_i\)，\(N(t) = \max\{n: S_n \leq t\}\)。 等价性的关键：\(S_n \sim \text{Gamma}(n, \lambda)\)， \[P(N(t) \geq n) = P(S_n \leq t)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>电信流量建模、保险理赔计数、放射性衰变。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：某网站平均每分钟 2 次访问。求 3 分钟内恰好 5 次访问的概率。 解答：\(N(3) \sim \text{Poisson}(6)\)。 \(P(N(3) = 5) = e^{-6} \cdot 6^5 / 5! = 7776 e^{-6}/120 \approx 0.1606\)。 易错点：混淆参数 \(\lambda\) (速率) 和 \(\lambda t\) (期间期望值)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Poisson 过程中，第 \(n\) 个事件的到达时间 \(S_n\) 服从</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(S_n = \\sum_{i=1}^n T_i\\)，\\(T_i \\sim \\text{Exp}(\\lambda)\\) i.i.d.，')">A. \(\text{Exp}(n\lambda)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(S_n = \\sum_{i=1}^n T_i\\)，\\(T_i \\sim \\text{Exp}(\\lambda)\\) i.i.d.，')">B. \(\text{Poisson}(n\lambda)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(S_n = \\sum_{i=1}^n T_i\\)，\\(T_i \\sim \\text{Exp}(\\lambda)\\) i.i.d.，')">C. \(\text{Gamma}(n, \lambda)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(S_n = \\sum_{i=1}^n T_i\\)，\\(T_i \\sim \\text{Exp}(\\lambda)\\) i.i.d.，')">D. \(\text{Gamma}(\lambda, n)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>叠加、分解与非齐次 Poisson 过程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当多个独立 Poisson 源合并时，结果仍是 Poisson。当事件被 随机分类时，各类独立。这两个简洁的性质极大简化了 复杂系统的建模。非齐次版本则允许事件速率随时间变化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>叠加：若 \(N_1 \sim \text{PP}(\lambda_1)\)，\(N_2 \sim \text{PP}(\lambda_2)\) 独立， 则 \(N_1 + N_2 \sim \text{PP}(\lambda_1 + \lambda_2)\)。 分解：\(N \sim \text{PP}(\lambda)\)，每个事件独立地以概率 \(p\) 归为 I 类， \(1-p\) 归为 II 类。则 \(N_I \sim \text{PP}(\lambda p)\)， \(N_{II} \sim \text{PP}(\lambda(1-p))\)，且 \(N_I \perp\!\!\!\perp N_{II}\)。 非齐次 Poisson 过程：强度函数 \(\lambda(t)\) 随时间变化。 \(N(t) - N(s) \sim \text{Poisson}\!\left(\int_s^t \lambda(u)\,du\right)\)， 仍保持独立增量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>电话流量：不同时段来电率不同用非齐次建模； 保险：不同类型理赔对应叠加随机点过程的分解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：某路口左转 (\(\lambda_1=2\)/min) 和直行 (\(\lambda_2=3\)/min) 的车辆 分别为 Poisson。求 1 分钟内总车流超过 7 辆的概率。 解答：总车流 \(\sim \text{Poisson}(5)\)。 \(P(N > 7) = 1 - \sum_{k=0}^{7} e^{-5} 5^k/k! \approx 0.1334\)。 易错点：叠加时参数相加（不相乘）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(N \sim \text{PP}(10)\) 的事件以 \(p=0.3\) 分为 A 类。\(N_A\) 服从</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(N_A \\sim \\text{PP}(\\lambda p) = \\text{PP}(3)\\)。C 描述的是给定 \\(N\\) 时的')">A. \(\text{PP}(3)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(N_A \\sim \\text{PP}(\\lambda p) = \\text{PP}(3)\\)。C 描述的是给定 \\(N\\) 时的')">B. \(\text{PP}(7)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(N_A \\sim \\text{PP}(\\lambda p) = \\text{PP}(3)\\)。C 描述的是给定 \\(N\\) 时的')">C. \(\text{Binomial}(N, 0.3)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>复合 Poisson 过程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当每次事件不仅被计数，还带有随机大小（如保险理赔额、地震震级）时， 复合 Poisson 过程将计数和随机大小结合起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：\(S(t) = \sum_{i=1}^{N(t)} Y_i\)，其中 \(N \sim \text{PP}(\lambda)\)， \(Y_i\) i.i.d.（与 \(N\) 独立）。 矩计算：\(E[S(t)] = \lambda t \cdot E[Y]\)， \[\text{Var}(S(t)) = \lambda t \cdot E[Y^2]\] （不是 \(\lambda t \cdot \text{Var}(Y)\)！） 证明：用条件方差公式： \(\text{Var}(S) = E[\text{Var}(S|N)] + \text{Var}(E[S|N]) = E[N \cdot \text{Var}(Y)] + \text{Var}(N \cdot E[Y]) = \lambda t \text{Var}(Y) + (E[Y])^2 \lambda t = \lambda t E[Y^2]\)。 \(S(t)\) 的 MGF：\(M_{S(t)}(\theta) = \exp(\lambda t (M_Y(\theta) - 1))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>保险中的集体风险模型：\(S(t)\) = 时间 \(t\) 内的累计理赔总额。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：保险公司理赔到达率 \(\lambda = 5\)/天，每次理赔额 \(Y \sim \text{Exp}(1/1000)\) （均值 1000 元）。求一天累计理赔额的均值和方差。 解答：\(E[S(1)] = 5 \times 1000 = 5000\) 元。 \(E[Y^2] = \text{Var}(Y) + (E[Y])^2 = 10^6 + 10^6 = 2 \times 10^6\)。 \(\text{Var}(S(1)) = 5 \times 2 \times 10^6 = 10^7\)。 易错点：误用 \(\text{Var}(S) = \lambda t \cdot \text{Var}(Y)\)。正确是 \(\lambda t \cdot E[Y^2]\)（包含了均值平方项）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">复合 Poisson \(S(t) = \sum_{i=1}^{N(t)} Y_i\) 的方差包含</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\text{Var}(S) = \\lambda t E[Y^2] = \\lambda t(\\text{Var}(Y) + E[Y]^2)\\)。')">A. 仅 \(\text{Var}(Y)\) 的贡献</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\text{Var}(S) = \\lambda t E[Y^2] = \\lambda t(\\text{Var}(Y) + E[Y]^2)\\)。')">B. 仅 \(E[Y]^2\) 的贡献</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\text{Var}(S) = \\lambda t E[Y^2] = \\lambda t(\\text{Var}(Y) + E[Y]^2)\\)。')">C. \(\text{Var}(Y)\) 和 \(E[Y]^2\) 的共同贡献</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Poisson 过程的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Poisson 过程在保险精算中有典型应用：Cramér-Lundberg 模型描述 保险公司的盈余过程，“破产概率”是精算学的核心问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Cramér-Lundberg 模型：盈余过程 \[R(t) = u + ct - S(t)\] \(u\) = 初始资本，\(c\) = 保费率，\(S(t) = \sum_{i=1}^{N(t)} Y_i\)。 破产概率：\(\psi(u) = P(\exists t > 0: R(t) < 0)\)。 安全负荷条件：\(c > \lambda E[Y]\)（保费超过期望理赔）。 指数理赔下：若 \(Y \sim \text{Exp}(\alpha)\)，则 \[\psi(u) = \frac{\lambda}{\alpha c} e^{-(\alpha - \lambda/c) u}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>再保险定价、网络流量建模、地震风险评估。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(u = 10\)，\(c = 3\)，\(\lambda = 2\)，\(Y \sim \text{Exp}(1)\)。求破产概率。 解答：检查 \(c = 3 > \lambda E[Y] = 2\) ✓。 \(\alpha = 1\)，\(\psi(10) = (2/3) e^{-(1-2/3) \cdot 10} = (2/3) e^{-10/3} \approx 0.024\)。 易错点：忘记检查安全负荷条件。若 \(c \leq \lambda E[Y]\)， 破产概率 = 1（必然破产）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Cramér-Lundberg 模型中，增加初始资本 \(u\) 对破产概率的影响</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。在安全负荷条件下，\\(\\psi(u)\\) 随 \\(u\\) 指数衰减。')">A. \(\psi(u)\) 增加</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！在安全负荷条件下，\\(\\psi(u)\\) 随 \\(u\\) 指数衰减。')">B. \(\psi(u)\) 指数衰减</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。在安全负荷条件下，\\(\\psi(u)\\) 随 \\(u\\) 指数衰减。')">C. \(\psi(u)\) 不变</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/probability/stochastic.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

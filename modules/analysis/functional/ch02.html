@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 Banach 空间 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch02-q1",
+        "question": "Banach 空间是什么？",
+        "options": [
+          "完备的赋范空间",
+        "有限维赋范空间",
+        "有内积的赋范空间",
+        "可分的赋范空间"
+        ],
+        "answer": 0,
+        "explanation": "Banach 空间 = 赋范空间 + 完备性（Cauchy 序列收敛）。完备性是分析的基石：保证极限过程可在空间内完成。所有有限维赋范空间都完备，但无限维空间未必。Hilbert 空间 \\(\\subset\\) Banach 空间（Hilbert 有内积）。"
+      },
+      {
+        "id": "functional-ch02-q2",
+        "question": "\\((C[0,1], \\|\\cdot\\|_\\infty)\\) 是 Banach 空间。\\((C[0,1], \\|\\cdot\\|_1)\\) 是否完备？",
+        "options": [
+          "是",
+        "否（\\(\\|\\cdot\\|_1\\) 下不完备）",
+        "取决于函数空间的定义",
+        "两者都不完备"
+        ],
+        "answer": 1,
+        "explanation": "在 \\(\\|\\cdot\\|_1 = \\int |f|\\) 下，\\(C[0,1]\\) 不完备。反例：\\(f_n(x) = x^n\\) 在 \\(\\|\\cdot\\|_1\\) 下 Cauchy（\\(\\|f_n - f_m\\|_1 \\to 0\\)），但 \\(\\|\\cdot\\|_1\\)-极限不是连续函数（极限在 \\(L^1\\) 中是 \\(\\mathbf{1}_{\\{1\\}}\\)）。完备化得到 \\(L^1[0,1]\\)。范数的选择影响完备性。"
+      },
+      {
+        "id": "functional-ch02-q3",
+        "question": "以下哪个不是 Banach 空间？",
+        "options": [
+          "\\(\\ell^p\\)（\\(1 \\leq p \\leq \\infty\\)）",
+        "\\(L^p[0,1]\\)（\\(1 \\leq p \\leq \\infty\\)）",
+        "\\(c_{00}\\)（仅有限个非零坐标的序列，\\(\\|\\cdot\\|_\\infty\\)）",
+        "\\(C[0,1]\\)（\\(\\|\\cdot\\|_\\infty\\)）"
+        ],
+        "answer": 2,
+        "explanation": "\\(c_{00}\\) 在 \\(\\|\\cdot\\|_\\infty\\) 下不完备：\\(x_n = (1, 1/2, 1/3, ..., 1/n, 0, 0, ...)\\) 是 Cauchy 序列，极限 \\((1, 1/2, 1/3, ...) \\in c_0 \\setminus c_{00}\\)。\\(c_{00}\\) 的完备化是 \\(c_0\\)（趋零序列空间）。\\(\\ell^p\\)、\\(L^p\\)、\\(C[0,1]\\) 都是经典 Banach 空间。"
+      },
+      {
+        "id": "functional-ch02-q4",
+        "question": "Baire 范畴定理的核心结论：完备度量空间不是可数个无处稠密集的并。等价地？",
+        "options": [
+          "可数个开稠密集的交是稠密的",
+        "开集都不可数",
+        "闭集不可数",
+        "有可数基"
+        ],
+        "answer": 0,
+        "explanation": "Baire：\\(\\{G_n\\}\\) 开稠密 \\(\\Rightarrow\\) \\(\\bigcap G_n\\) 稠密（\\(G_\\delta\\) 稠密集）。等价：\\(X \\neq \\bigcup_{n=1}^\\infty F_n\\)（\\(F_n\\) 无处稠密，即 \\(\\overline{F_n}\\) 内部空）。直觉：完备空间\"太大\"了，不能被可数个\"薄\"集覆盖。这是泛函分析三大定理的共同基础。"
+      },
+      {
+        "id": "functional-ch02-q5",
+        "question": "一致有界原理（Banach-Steinhaus）：\\(X\\) Banach，\\(Y\\) 赋范，\\(\\{T_\\alpha\\} \\subseteq B(X,Y)\\)。若 \\(\\sup_\\alpha \\|T_\\alpha x\\| < \\infty\\) 对每个 \\(x\\)（逐点有界），则？",
+        "options": [
+          "\\(\\sup_\\alpha \\|T_\\alpha\\| < \\infty\\)（一致有界）",
+        "\\(T_\\alpha\\) 有收敛子列",
+        "\\(T_\\alpha \\to 0\\)",
+        "仅当 \\(Y\\) 也完备"
+        ],
+        "answer": 0,
+        "explanation": "一致有界原理：逐点有界 \\(\\Rightarrow\\) 一致有界。\\(\\sup_\\alpha \\|T_\\alpha\\| < \\infty\\)。证明用 Baire 范畴：\\(X = \\bigcup_n \\{x: \\sup_\\alpha \\|T_\\alpha x\\| \\leq n\\}\\)，\\(X\\) Banach（第二范畴），某 \\(X_n\\) 包含球，推出算子范数有界。\\(X\\) 完备是关键！"
+      },
+      {
+        "id": "functional-ch02-q6",
+        "question": "一致有界原理的反例：\\(X\\) 不完备时逐点有界不保证一致有界。考虑 \\(X = c_{00}\\)，\\(T_n(x) = n x_n\\)。\\(T_n\\) 逐点有界吗？一致有界吗？",
+        "options": [
+          "逐点有界且一致有界",
+        "逐点有界但不一致有界",
+        "不逐点有界",
+        "一致有界但不逐点有界"
+        ],
+        "answer": 1,
+        "explanation": "对固定 \\(x \\in c_{00}\\)，\\(x\\) 只有有限个非零分量，\\(T_n(x) = nx_n = 0\\)（\\(n\\) 足够大），故 \\(\\sup_n |T_n(x)| < \\infty\\)。但 \\(\\|T_n\\| = n\\)（\\(T_n(e_n) = n\\)），\\(\\sup_n \\|T_n\\| = \\infty\\)。\\(c_{00}\\) 不完备，一致有界原理不适用！"
+      },
+      {
+        "id": "functional-ch02-q7",
+        "question": "\\(L^\\infty[0,1]\\) 是 Banach 空间。它可分吗？",
+        "options": [
+          "是（有可数稠密子集）",
+        "否",
+        "取决于测度",
+        "仅当使用本质上确界范数"
+        ],
+        "answer": 1,
+        "explanation": "\\(L^\\infty\\) 不可分。\\(\\{\\mathbf{1}_{[0,a]} : 0 < a < 1\\}\\) 是不可数集且 \\(\\|\\mathbf{1}_{[0,a]} - \\mathbf{1}_{[0,b]}\\|_\\infty = 1\\)（\\(a \\neq b\\)）。可数稠密集在每个球中，但这些球两两分离的不可数族不能被可数集分开。\\(L^p\\)（\\(1 \\leq p < \\infty\\)）和 \\(\\ell^p\\)（\\(1 \\leq p < \\infty\\)）可分。"
+      },
+      {
+        "id": "functional-ch02-q8",
+        "question": "判断级数 \\(\\sum x_n\\) 在 Banach 空间中绝对收敛则收敛。这等价于空间的什么性质？",
+        "options": [
+          "完备性",
+        "可分性",
+        "自反性",
+        "可数维"
+        ],
+        "answer": 0,
+        "explanation": "定理：赋范空间完备 \\(\\Leftrightarrow\\) 绝对收敛级数(\\(\\sum \\|x_n\\| < \\infty\\))收敛(\\(\\sum x_n\\) 在 \\(X\\) 中收敛)。\\(\\Rightarrow\\)：部分和 Cauchy。\\(\\Leftarrow\\)：对 Cauchy 列 \\(\\{y_n\\}\\)取子列 \\(\\|y_{n_{k+1}} - y_{n_k}\\| < 2^{-k}\\)，级数绝对收敛故收敛，子列收敛推全列收敛。"
+      },
+      {
+        "id": "functional-ch02-q9",
+        "question": "\\(C^k[0,1]\\)（\\(k\\) 次连续可微函数）在范数 \\(\\|f\\| = \\sum_{j=0}^k \\|f^{(j)}\\|_\\infty\\) 下是 Banach 空间吗？",
+        "options": [
+          "是",
+        "否",
+        "仅当 \\(k = 0\\) 时",
+        "仅当 \\(k = \\infty\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(f_n\\) Cauchy：\\(f_n^{(j)}\\) 对每个 \\(j\\) 在 \\(\\|\\cdot\\|_\\infty\\) 下 Cauchy，收敛到 \\(g_j\\)。\\(g_0 = \\lim f_n\\) 连续。\\(f_n' \\to g_1\\) 一致 + \\(f_n \\to g_0\\) 逐点 \\(\\Rightarrow\\) \\(g_0' = g_1\\)（一致极限与导数可交换的经典定理）。递归得 \\(g_0 \\in C^k\\)。"
+      },
+      {
+        "id": "functional-ch02-q10",
+        "question": "Baire 范畴定理推论：连续函数的逐点极限 \\(f = \\lim f_n\\)（\\(f_n \\in C[0,1]\\)）的连续点集？",
+        "options": [
+          "可以是空集",
+        "一定是 \\(G_\\delta\\) 稠密集",
+        "一定是全空间",
+        "可以是可数集"
+        ],
+        "answer": 1,
+        "explanation": "Baire 一类函数（连续函数的逐点极限）的连续点集 \\(C(f) = \\bigcap_n \\bigcup_m \\{x : \\text{osc}_{B(x,1/m)} f < 1/n\\}\\) 是 \\(G_\\delta\\) 集。Baire 范畴：\\(C(f)\\) 在每个区间中稠密（稠密 \\(G_\\delta\\)），故不可能是空集或可数集。Dirichlet 函数不是 Baire 一类的。"
+      },
+      {
+        "id": "functional-ch02-q11",
+        "question": "设 \\(T_n: X \\to Y\\)（\\(X\\) Banach，\\(Y\\) 赋范），\\(T_n x \\to Tx\\)（逐点）。则 \\(T\\) 满足？",
+        "options": [
+          "\\(T\\) 有界且 \\(\\|T\\| \\leq \\liminf \\|T_n\\|\\)",
+        "\\(T\\) 有界且 \\(\\|T\\| = \\lim \\|T_n\\|\\)",
+        "\\(T\\) 不一定有界",
+        "\\(T\\) 有界且 \\(\\|T\\| \\leq \\sup \\|T_n\\|\\)"
+        ],
+        "answer": 0,
+        "explanation": "一致有界原理：逐点有界 \\(\\Rightarrow\\) \\(M = \\sup_n \\|T_n\\| < \\infty\\)。\\(\\|Tx\\| = \\lim \\|T_n x\\| \\leq \\liminf \\|T_n\\| \\cdot \\|x\\| \\leq M\\|x\\|\\)。\\(T\\) 有界且 \\(\\|T\\| \\leq M = \\sup_n \\|T_n\\|\\)。更精确地 \\(\\|T\\| \\leq \\liminf_n \\|T_n\\|\\)。等号不一定成立。"
+      },
+      {
+        "id": "functional-ch02-q12",
+        "question": "\\(\\ell^1\\) 和 \\(c_0\\) 作为 Banach 空间，它们同构吗？",
+        "options": [
+          "是（都可分且无限维）",
+        "否（\\(\\ell^1\\) 有 Schur 性质，\\(c_0\\) 没有）",
+        "否（\\(\\ell^1\\) 不可分）",
+        "是（通过坐标映射）"
+        ],
+        "answer": 1,
+        "explanation": "Schur 性质：\\(\\ell^1\\) 中弱收敛蕴含强收敛（极罕见性质）。\\(c_0\\) 中 \\(e_n \\rightharpoonup 0\\)（弱）但 \\(\\|e_n\\| = 1 \\not\\to 0\\)（强）。若 \\(\\ell^1 \\cong c_0\\)，同构保持弱收敛，矛盾。同构不变量（如 Schur 性质）区分 Banach 空间。"
+      },
+      {
+        "id": "functional-ch02-q13",
+        "question": "用 Baire 范畴证明：存在处处连续但处处不可微的函数。关键构造？",
+        "options": [
+          "\\(F_n = \\{f \\in C[0,1] : \\exists x, |f(x+h)-f(x)|/|h| \\leq n, \\forall 0<|h|<1/n\\}\\) 是闭的无处稠密集",
+        "直接构造 Weierstrass 函数",
+        "用概率方法",
+        "用 Fourier 级数"
+        ],
+        "answer": 0,
+        "explanation": "\\(F_n\\) = \"在某点导数不超过 \\(n\\)\"的连续函数集合。\\(F_n\\) 闭且无处稠密（\\(\\|\\cdot\\|_\\infty\\) 拓扑下）。\\(\\bigcup F_n\\) = 至少在一点可微的函数。Baire：\\(C[0,1] \\neq \\bigcup F_n\\)（\\(C[0,1]\\) 完备）。所以\"generic\"连续函数处处不可微——大多数连续函数不可微！"
+      },
+      {
+        "id": "functional-ch02-q14",
+        "question": "\\(X\\) 赋范空间的完备化 \\(\\hat{X}\\) 存在且唯一（等距同构意义下）。\\(\\hat{X}\\) 的构造方法？",
+        "options": [
+          "\\(X\\) 中 Cauchy 列的等价类",
+        "\\(X\\) 的闭凸包",
+        "\\(X\\) 的对偶的对偶",
+        "\\(X\\) 中所有有界子集"
+        ],
+        "answer": 0,
+        "explanation": "如同 \\(\\mathbb{Q}\\) 完备化得 \\(\\mathbb{R}\\)（Cauchy 列等价类），\\(X\\) 完备化：取所有 Cauchy 列 \\(\\{x_n\\}\\)，\\(\\{x_n\\} \\sim \\{y_n\\}\\) 当 \\(\\|x_n - y_n\\| \\to 0\\)，\\(\\|[\\{x_n\\}]\\| = \\lim \\|x_n\\|\\)。\\(X\\) 等距嵌入 \\(\\hat{X}\\)（常值列），且 \\(X\\) 在 \\(\\hat{X}\\) 中稠密。"
+      },
+      {
+        "id": "functional-ch02-q15",
+        "question": "共鸣定理（resonance theorem）：\\(\\{T_\\alpha\\}\\) 逐点有界 \\(\\Leftrightarrow\\) 一致有界。\"共鸣\"的含义？",
+        "options": [
+          "若不一致有界，存在某个 \\(x\\) 使 \\(\\sup_\\alpha \\|T_\\alpha x\\| = \\infty\\)（\"共鸣点\"）",
+        "算子之间有频率共鸣",
+        "与物理中的共振类似",
+        "A 的对偶说法：逐点无界 \\(\\Rightarrow\\) 存在\"共鸣\"的稠密集"
+        ],
+        "answer": 0,
+        "explanation": "对偶版本：\\(\\sup_\\alpha \\|T_\\alpha\\| = \\infty\\) \\(\\Rightarrow\\) \\(\\{x : \\sup_\\alpha \\|T_\\alpha x\\| = \\infty\\}\\) 是 \\(G_\\delta\\) 稠密集（不仅非空），称为\"共鸣集\"。像物理共振一样，算子范数的\"无界性\"集中在稠密集上同时爆发。Baire 范畴定理保证此稠密集的存在。"
+      },
+      {
+        "id": "functional-ch02-q16",
+        "question": "Sobolev 空间 \\(W^{1,p}(0,1)\\)（范数 \\(\\|f\\|_{W^{1,p}} = \\|f\\|_p + \\|f'\\|_p\\)）是 Banach 空间吗？",
+        "options": [
+          "是（\\(L^p\\) 完备性 + 弱导数闭性）",
+        "否",
+        "仅当 \\(p = 2\\)",
+        "仅当 \\(p = \\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(f_n\\) Cauchy：\\(f_n \\to f\\) 在 \\(L^p\\)，\\(f_n' \\to g\\) 在 \\(L^p\\)。弱导数定义：\\(\\int f \\varphi' = -\\int g\\varphi\\)（取极限 \\(\\int f_n \\varphi' = -\\int f_n' \\varphi\\)），故 \\(f' = g\\)（弱意义），\\(f \\in W^{1,p}\\)。Sobolev 空间是 PDE 理论的基本 Banach 空间。"
+      },
+      {
+        "id": "functional-ch02-q17",
+        "question": "Baire 范畴定理推论：\\(\\mathbb{R}\\) 不是可数集。证明？",
+        "options": [
+          "\\(\\mathbb{R} = \\bigcup \\{r_n\\}\\) 矛盾：单点集无处稠密，\\(\\mathbb{R}\\) 完备",
+        "Cantor 对角线",
+        "势的比较",
+        "A 和 B 都行，但 A 利用 Baire"
+        ],
+        "answer": 3,
+        "explanation": "Baire 证法：\\(\\mathbb{R}\\) 完备。若 \\(\\mathbb{R} = \\{r_1, r_2, ...\\}\\) 可数，则 \\(\\mathbb{R} = \\bigcup_n \\{r_n\\}\\)。\\(\\{r_n\\}\\) 闭且 \\(\\overline{\\{r_n\\}}^\\circ = \\emptyset\\)（无处稠密）。矛盾 Baire 范畴定理。当然 Cantor 对角线也可证，但 Baire 方法更\"泛函分析\"。"
+      },
+      {
+        "id": "functional-ch02-q18",
+        "question": "\\(\\ell^p\\)（\\(1 \\leq p < \\infty\\)）的 Schauder 基是 \\(\\{e_n\\}\\)（标准基）。\\(\\ell^\\infty\\) 有 Schauder 基吗？",
+        "options": [
+          "有（\\(\\{e_n\\}\\) 仍是基）",
+        "没有（\\(\\ell^\\infty\\) 不可分）",
+        "仅有有限基",
+        "取决于选择公理"
+        ],
+        "answer": 1,
+        "explanation": "Schauder 基 \\(\\Rightarrow\\) 可分（\\(\\text{span}_\\mathbb{Q}\\{e_n\\}\\) 可数稠密）。\\(\\ell^\\infty\\) 不可分（\\(\\{\\mathbf{1}_S : S \\subseteq \\mathbb{N}\\}\\) 不可数且两两距离 \\(= 1\\)）。因此 \\(\\ell^\\infty\\) 无 Schauder 基。\\(\\{e_n\\}\\) 不是基因为 \\(\\overline{\\text{span}\\{e_n\\}} = c_0 \\neq \\ell^\\infty\\)。"
+      },
+      {
+        "id": "functional-ch02-q19",
+        "question": "一致有界原理应用：设 \\(\\{a_{nk}\\}\\) 是矩阵，\\(\\sum_k a_{nk} x_k\\) 对所有 \\(x \\in \\ell^1\\) 收敛（\\(n \\to \\infty\\)）。则 \\(\\sup_n \\sup_k |a_{nk}| < \\infty\\)？",
+        "options": [
+          "是（一致有界原理）",
+        "不一定",
+        "需要额外条件",
+        "仅当 \\(a_{nk} \\geq 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "定义 \\(T_n: \\ell^1 \\to \\mathbb{R}\\)，\\(T_n(x) = \\sum_k a_{nk} x_k\\)。\\(\\|T_n\\| = \\sup_k |a_{nk}|\\)（\\(\\ell^1\\) 上线性泛函的范数 = 系数的 \\(\\ell^\\infty\\) 范数）。收敛 \\(\\Rightarrow\\) 逐点有界。一致有界原理：\\(\\sup_n \\|T_n\\| = \\sup_n \\sup_k |a_{nk}| < \\infty\\)。"
+      },
+      {
+        "id": "functional-ch02-q20",
+        "question": "James 空间 \\(J\\) 具有什么独特性质？",
+        "options": [
+          "同构于其二次对偶 \\(J^{**}\\) 但不自反",
+        "可分但不可计量",
+        "完备但不可数维",
+        "有 Schauder 基但不可分"
+        ],
+        "answer": 0,
+        "explanation": "James 空间 \\(J\\)：\\(\\text{codim}(J, J^{**}) = 1\\)，所以 \\(J \\cong J^{**}\\)（维度匹配），但 \\(J\\) 不自反（\\(J\\) 到 \\(J^{**}\\) 的 canonical embedding 不是满射）。自反性不仅要求 \\(X \\cong X^{**}\\)，还要求由 canonical embedding 给出。"
+      },
+      {
+        "id": "functional-ch02-q21",
+        "question": "稠密 \\(G_\\delta\\) 集在完备度量空间中有什么性质？（Baire）",
+        "options": [
+          "可数个稠密 \\(G_\\delta\\) 集的交仍是稠密 \\(G_\\delta\\)",
+        "可数个稠密 \\(G_\\delta\\) 集的交可能为空",
+        "\\(G_\\delta\\) 集一定闭",
+        "\\(G_\\delta\\) 集一定开"
+        ],
+        "answer": 0,
+        "explanation": "\\(G_\\delta\\) 稠密 = 可数个开稠密集的交。可数个 \\(G_\\delta\\) 稠密集的交 = 可数个开稠密集的可数族的交 = 仍是可数个开稠密集的交 = 仍是 \\(G_\\delta\\) 稠密（Baire）。这给出\"generic\"性质的稳定性：可数个 generic 性质的交仍是 generic。"
+      },
+      {
+        "id": "functional-ch02-q22",
+        "question": "Fourier 级数发散：存在 \\(f \\in C(\\mathbb{T})\\) 使 Fourier 部分和 \\(S_n f(0) \\to \\infty\\)。证明用？",
+        "options": [
+          "一致有界原理 + \\(\\|S_n\\|_{C \\to \\mathbb{R}}\\) 无界",
+        "具体构造",
+        "Parseval 等式",
+        "Riemann-Lebesgue 引理"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_n f(0) = \\int_{-\\pi}^\\pi f(t) D_n(t)\\, dt/(2\\pi)\\)（\\(D_n\\) = Dirichlet 核）。\\(\\|S_n\\| = \\frac{1}{2\\pi}\\int |D_n| \\sim \\frac{4}{\\pi^2}\\ln n \\to \\infty\\)。若所有 \\(f\\) 的 \\(S_n f(0)\\) 有界，则一致有界原理给出 \\(\\sup_n \\|S_n\\| < \\infty\\)，矛盾。故存在\"共鸣\" \\(f\\)。"
+      },
+      {
+        "id": "functional-ch02-q23",
+        "question": "\\(X\\) Banach，\\(Y \\leq X\\) 闭子空间。\\(X/Y\\) 是否完备？",
+        "options": [
+          "是（\\(X\\) 完备 + \\(Y\\) 闭 \\(\\Rightarrow\\) \\(X/Y\\) Banach）",
+        "不一定",
+        "仅当 \\(Y\\) 有限余维",
+        "仅当 \\(Y\\) 互补"
+        ],
+        "answer": 0,
+        "explanation": "设 \\([x_n]\\) 在 \\(X/Y\\) 中 Cauchy。选代表元 \\(\\tilde{x}_n\\) 使 \\(\\|[x_n] - [x_{n+1}]\\| \\geq \\|\\tilde{x}_n - \\tilde{x}_{n+1}\\| - 2^{-n}\\)。\\(\\tilde{x}_n\\) 可选为 \\(X\\) 中 Cauchy 列，\\(\\tilde{x}_n \\to x \\in X\\)，\\([x_n] \\to [x]\\)。Banach 空间关于闭子空间的商仍 Banach。"
+      },
+      {
+        "id": "functional-ch02-q24",
+        "question": "\\(L^p \\cap L^q\\)（\\(1 \\leq p < q \\leq \\infty\\)）在范数 \\(\\|f\\| = \\|f\\|_p + \\|f\\|_q\\) 下是 Banach 空间吗？",
+        "options": [
+          "是",
+        "否",
+        "仅当 \\(p = 1, q = \\infty\\)",
+        "仅当底空间有限测度"
+        ],
+        "answer": 0,
+        "explanation": "\\(f_n\\) Cauchy in \\(L^p \\cap L^q\\)：\\(f_n\\) 在 \\(L^p\\) 和 \\(L^q\\) 中都 Cauchy。\\(f_n \\to f\\) in \\(L^p\\)，\\(f_n \\to g\\) in \\(L^q\\)。取子列 \\(f_{n_k} \\to h\\) a.e.，\\(f = g = h\\) a.e.。\\(f \\in L^p \\cap L^q\\) 且 \\(\\|f_n - f\\| \\to 0\\)。（关键：两个完备范数的和仍完备。）"
+      },
+      {
+        "id": "functional-ch02-q25",
+        "question": "开映射定理的证明用到 Baire 范畴。第一步：\\(T: X \\to Y\\) 满射，\\(X, Y\\) Banach，则 \\(T(B_X(0,1))\\) 包含 \\(Y\\) 中某个球。这步用了？",
+        "options": [
+          "\\(Y = \\bigcup_n T(B_X(0,n))\\)，Baire 范畴 \\(\\Rightarrow\\) 某 \\(T(\\overline{B_X(0,n)})\\) 有内点",
+        "紧性",
+        "Hahn-Banach",
+        "Zorn 引理"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 满射：\\(Y = \\bigcup_n n \\cdot T(B_X)\\)。\\(Y\\) 完备（第二范畴），Baire：某 \\(\\overline{n \\cdot T(B_X)}\\) 有内点。对称性和凸性推出 \\(\\overline{T(B_X))} \\supseteq B_Y(0, \\delta)\\)。第二步用 Cauchy 序列技巧去掉闭包：\\(T(B_X) \\supseteq B_Y(0, \\delta/2)\\)。"
+      },
+      {
+        "id": "functional-ch02-q26",
+        "question": "在数值分析中，Lax 等价定理：对良定PDE，差分格式收敛 \\(\\Leftrightarrow\\) 稳定。证明用到哪个泛函分析工具？",
+        "options": [
+          "一致有界原理",
+        "开映射定理",
+        "Hahn-Banach 定理",
+        "谱定理"
+        ],
+        "answer": 0,
+        "explanation": "稳定性：\\(\\sup_n \\|T^n\\| < \\infty\\)（\\(T\\) 为差分算子）。一致性 + 稳定性 \\(\\Rightarrow\\) 收敛。关键：\\(T^n f \\to u\\)（逐点），一致有界原理保证 \\(\\|T^n\\| \\leq M\\)，从而 \\(\\|u - T^n f\\| \\leq M\\|u - f\\| + \\|T^n u - u\\| \\to 0\\)。Lax-Richtmyer 定理是一致有界原理在数值PDE中的直接应用。"
+      },
+      {
+        "id": "functional-ch02-q27",
+        "question": "在随机分析中，Itô积分 \\(\\int_0^T H_t\\, dW_t\\) 定义在 Banach 空间 \\(L^2(\\Omega)\\) 中。首先对简单过程定义，然后用什么延拓到一般过程？",
+        "options": [
+          "\\(L^2\\) 的完备性（简单过程稠密 + Cauchy 列收敛）",
+        "Hahn-Banach 延拓",
+        "测度论",
+        "逐点定义"
+        ],
+        "answer": 0,
+        "explanation": "Itô 等距：\\(E[(\\int H\\, dW)^2] = E[\\int H^2\\, dt]\\)。简单过程 \\(H_n \\to H\\) 在 \\(L^2([0,T] \\times \\Omega)\\) 中，\\(\\int H_n\\, dW\\) 在 \\(L^2(\\Omega)\\) 中 Cauchy（等距），由 \\(L^2\\) 完备性收敛。定义 \\(\\int H\\, dW = \\lim \\int H_n\\, dW\\)。Banach 空间的完备性是推广定义的标准工具。"
+      },
+      {
+        "id": "functional-ch02-q28",
+        "question": "在经济学中，Debreu 定理证明\"generic\"经济体有有限个均衡。\"generic\"的精确含义（用 Baire 范畴）是？",
+        "options": [
+          "稠密 \\(G_\\delta\\) 集（含\"大多数\"经济体的残余集）",
+        "开稠密集",
+        "全测集",
+        "可数集的补"
+        ],
+        "answer": 0,
+        "explanation": "参数空间（禀赋空间等）是 Banach 空间（或 Banach 流形），Baire 范畴意义下\"generic\" = 残余集（countable intersection of open dense sets）。Sard 定理 + Baire：\\(G_\\delta\\) 稠密集的参数值使均衡是有限且正则的。这是一般均衡理论的拓扑方法。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 完备性与 Banach 空间的定义</a></li>
+      <li><a href="#kp2">02 · 典型 Banach 空间</a></li>
+      <li><a href="#kp3">03 · 闭子空间与商空间</a></li>
+      <li><a href="#kp4">04 · 级数收敛与完备性的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>Banach 空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>完备性与 Banach 空间的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>赋范空间不一定完备——Cauchy 列可能"逃逸"到空间之外。但分析学 的许多定理（如不动点定理、三大定理）需要完备性。完备的赋范空间 称为 Banach 空间，它们是泛函分析的核心对象。理解"完备"的多种 等价刻画对证明完备性至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>完备性的核心意义：逼近过程具有极限。在 Banach 空间中， "绝对收敛 ⇒ 收敛" 等价于完备性——这是将有限维的经验 推广到无穷维的关键桥梁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：Banach 空间 = 完备的赋范空间。 <strong>等价刻画</strong>：\(X\) 是 Banach 空间 \(\Leftrightarrow\) 每个绝对收敛的级数 \(\sum x_n\)（即 \(\sum \|x_n\| < \infty\)） 在 \(X\) 中收敛。 证明 (\(\Rightarrow\))：部分和 \(S_N = \sum_1^N x_n\) 是 Cauchy 列： \(\|S_M - S_N\| \leq \sum_{n=N+1}^M \|x_n\| \to 0\)。 (\(\Leftarrow\))：设 \(\{y_n\}\) 是 Cauchy 列，取子列使 \(\|y_{n_{k+1}} - y_{n_k}\| < 2^{-k}\)，令 \(x_k = y_{n_{k+1}} - y_{n_k}\)， 则 \(\sum \|x_k\| < \infty\)，级数收敛，故子列收敛， Cauchy 列收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \((C([0,1]), \|\cdot\|_\infty)\) 是 Banach 空间。 解答：设 \(\{f_n\}\) 是 Cauchy 列。对每个 \(x\)，\(\{f_n(x)\}\) 是 \(\mathbb{R}\) 中 Cauchy 列，收敛到 \(f(x)\)。一致 Cauchy 保证 \(f_n \to f\) 一致收敛，\(f\) 连续，\(\|f_n - f\|_\infty \to 0\)。 易错点：\((C([0,1]), \|\cdot\|_1)\) 不完备！ \(f_n(x) = \max(0, \min(1, n(x - 1/2) + 1/2))\) 在 \(\|\cdot\|_1\) 下是 Cauchy 列但极限不连续。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个不是 Banach 空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。多项式空间是无穷维但没有自然的完备范数')">A. \((C([0,1]), \|\cdot\|_\infty)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。多项式空间是无穷维但没有自然的完备范数')">B. \((L^2([0,1]), \|\cdot\|_2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！多项式空间是无穷维但没有自然的完备范数')">C. 多项式空间 \(\mathbb{R}[x]\) 配任意范数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。多项式空间是无穷维但没有自然的完备范数')">D. \(l^\infty\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>典型 Banach 空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>掌握泛函分析不能只知道抽象定义——必须了解最重要的具体 Banach 空间。\(C([a,b])\), \(l^p\), \(L^p\) 是三大类基本例子，各有不同的性质。 这些空间在 PDE、概率论、数值分析和信号处理中反复出现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(C([a,b])\)</strong>（\(\|\cdot\|_\infty\)）：连续函数空间。 可分（Weierstrass 逼近定理：多项式稠密）。不是 Hilbert 空间。 <strong>\(l^p\)</strong>（\(1 \leq p \leq \infty\)）：序列空间。 \(l^p = \{(x_n) : \sum |x_n|^p < \infty\}\)。 Banach 空间。\(l^2\) 是 Hilbert 空间。 \(l^p\)（\(1 \leq p < \infty\)）可分；\(l^\infty\) 不可分。 包含关系：\(l^p \subsetneq l^q\)（\(p < q\)）。 <strong>\(L^p(\mu)\)</strong>（\(1 \leq p \leq \infty\)）：Lebesgue 空间。 Banach（Riesz-Fischer）。\(L^2\) 是 Hilbert。 <strong>关键区别</strong>：\(L^p\) 中的"元素"是等价类（a.e. 相等的函数视为相同）。 <strong>\(B(X, Y)\)</strong>（有界线性算子空间）：若 \(Y\) 完备则 \(B(X, Y)\) 完备。 特别地 \(X^* = B(X, \mathbb{K})\) 总是 Banach 空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(C([a,b])\) 是数值逼近理论的框架；\(L^2\) 是信号处理和量子力学 的状态空间；\(l^1\) 在绝对收敛级数理论和 Fourier 分析中出现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(c_0 = \{(x_n) \in l^\infty : x_n \to 0\}\) 是 \(l^\infty\) 的闭子空间，因此是 Banach 空间。 解答：设 \(x^{(k)} \in c_0\)，\(x^{(k)} \to x\) 在 \(l^\infty\) 中。 对任意 \(\varepsilon > 0\)，取 \(K\) 使 \(\|x^{(K)} - x\|_\infty < \varepsilon/2\)。 \(x^{(K)} \in c_0\) 故存在 \(N\) 使 \(|x^{(K)}_n| < \varepsilon/2\)（\(n > N\)）。 则 \(|x_n| \leq |x_n - x^{(K)}_n| + |x^{(K)}_n| < \varepsilon\)。 故 \(x \in c_0\)，\(c_0\) 闭。闭子空间继承完备性。✓ 易错点：混淆 \(l^p\) 的包含关系方向。 \(l^p \subsetneq l^q\)（\(p < q\)），例如 \((1/n) \in l^2\) 但 \(\notin l^1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">对偶空间 \(X^*\) 是否总是 Banach 空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(X^* = B(X, \\mathbb{K})\\)，\\(\\mathbb{K}\\)（\\(\\mathbb{R}\\) 或 \\(\\mathbb{C}\\)）')">A. 是，无需 \(X\) 完备</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(X^* = B(X, \\mathbb{K})\\)，\\(\\mathbb{K}\\)（\\(\\mathbb{R}\\) 或 \\(\\mathbb{C}\\)）')">B. 仅当 \(X\) 是 Banach 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(X^* = B(X, \\mathbb{K})\\)，\\(\\mathbb{K}\\)（\\(\\mathbb{R}\\) 或 \\(\\mathbb{C}\\)）')">C. 仅当 \(X\) 是 Hilbert 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(X^* = B(X, \\mathbb{K})\\)，\\(\\mathbb{K}\\)（\\(\\mathbb{R}\\) 或 \\(\\mathbb{C}\\)）')">D. 否</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>闭子空间与商空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>子空间和商空间是线性代数中的基本构造。在 Banach 空间中， 子空间必须是闭的才能继承完备性。商空间 \(X/M\) 上可以自然 定义商范数，当 \(M\) 闭时商空间也是 Banach 空间。这些构造 在同调代数和 PDE 的商空间方法中不可或缺。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>闭子空间</strong>：Banach 空间 \(X\) 的子空间 \(Y\) 是 Banach 空间 \(\Leftrightarrow\) \(Y\) 在 \(X\) 中闭。（完备子集 ⇔ 闭子集， 在完备空间中。） <strong>商空间</strong>：\(M \subseteq X\) 为闭子空间。 \(X/M = \{x + M : x \in X\}\)。 <strong>商范数</strong>：\(\|x + M\| = \inf_{m \in M} \|x + m\| = d(x, M)\)。 验证范数公理：正定性需要 \(M\) 闭（\(d(x, M) = 0 \Leftrightarrow x \in \overline{M} = M\)）。 <strong>定理</strong>：若 \(X\) 是 Banach 空间且 \(M\) 闭，则 \(X/M\) 是 Banach 空间。 证明：设 \(\sum \|x_n + M\| < \infty\)，取 \(m_n\) 使 \(\|x_n + m_n\| < \|x_n + M\| + 2^{-n}\)，则 \(\sum \|x_n + m_n\| < \infty\)， 由 \(X\) 的完备性 \(\sum (x_n + m_n)\) 收敛，故 \(\sum (x_n + M)\) 在 \(X/M\) 收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(c_0\) 是 \(l^\infty\) 的闭子空间。描述 \(l^\infty / c_0\) 的含义。 解答：\(x \sim y\) 在 \(l^\infty / c_0\) 中当且仅当 \(x - y \in c_0\)， 即 \(x_n - y_n \to 0\)。商范数 \(\|x + c_0\| = \limsup |x_n|\)。 \(l^\infty / c_0\) 是一个不可分的 Banach 空间。 易错点：忘记 \(M\) 必须是闭子空间。若 \(M\) 不闭， \(\|x + M\| = 0\) 不意味着 \(x \in M\)，商范数不满足正定性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Banach 空间中，子空间何时自动完备？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。完备度量空间中，子空间完备当且仅当闭。')">A. 总是完备的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！完备度量空间中，子空间完备当且仅当闭。')">B. 当且仅当是闭子空间</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。完备度量空间中，子空间完备当且仅当闭。')">C. 当且仅当是有限维的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。完备度量空间中，子空间完备当且仅当闭。')">D. 当且仅当是稠密的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>级数收敛与完备性的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Banach 空间的完备性在实际分析中如何发挥作用？最典型的应用是 不动点定理和级数方法。Banach 不动点定理通过 Cauchy 列的收敛性 保证迭代法收敛；Neumann 级数将矩阵逆的公式推广到算子。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Banach 不动点定理</strong>：设 \(X\) 为 Banach 空间（或完备度量空间）， \(T: X \to X\) 满足 \(\|Tx - Ty\| \leq q\|x - y\|\)（\(0 < q < 1\)）。 则 \(T\) 有唯一不动点 \(x^* = \lim T^n(x_0)\)。 <strong>Neumann 级数</strong>：若 \(\|T\| < 1\)（\(T \in B(X)\), \(X\) Banach），则 \(I - T\) 可逆且 \[(I - T)^{-1} = \sum_{n=0}^{\infty} T^n\] 收敛于 \(B(X)\) 中（因为 \(\sum \|T^n\| \leq \sum \|T\|^n < \infty\)， 绝对收敛 ⇒ 收敛于 Banach 空间 \(B(X)\)）。 <strong>推论</strong>：\(\|(I-T)^{-1}\| \leq 1/(1 - \|T\|)\)。 可逆算子集 \(GL(X)\) 是 \(B(X)\) 中的开集 （\(A\) 可逆，\(\|B - A\| < 1/\|A^{-1}\|\) ⇒ \(B\) 可逆）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Neumann 级数在数值分析中用于迭代求解线性方程组 \(Ax = b\)： 将 \(A = I - T\) 后迭代 \(x_{n+1} = Tx_n + b\)； Banach 不动点用于证明 ODE 的 Picard-Lindelöf 存在唯一性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(T \in B(l^2)\)，\(\|T\| = 0.5\)。证明 \(I - T\) 可逆 并估计 \(\|(I-T)^{-1}\|\)。 解答：\(\|T\| = 0.5 < 1\)，由 Neumann 级数 \((I-T)^{-1} = \sum T^n\)， \(\|(I-T)^{-1}\| \leq 1/(1 - 0.5) = 2\)。 易错点：对不完备空间使用 Neumann 级数。 绝对收敛 ⇒ 收敛需要空间完备。在不完备空间中级数可能发散。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Neumann 级数 \(\sum T^n\) 收敛的条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\sum \\|T^n\\| \\leq \\sum \\|T\\|^n\\)，当 \\(\\|T\\| < 1\\) 时')">A. \(T\) 是紧算子</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\sum \\|T^n\\| \\leq \\sum \\|T\\|^n\\)，当 \\(\\|T\\| < 1\\) 时')">B. \(\|T\| < 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\sum \\|T^n\\| \\leq \\sum \\|T\\|^n\\)，当 \\(\\|T\\| < 1\\) 时')">C. \(T\) 自伴</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\sum \\|T^n\\| \\leq \\sum \\|T\\|^n\\)，当 \\(\\|T\\| < 1\\) 时')">D. \(\|T\| \leq 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

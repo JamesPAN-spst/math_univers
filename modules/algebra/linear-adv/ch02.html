@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 最小多项式与 Cayley-Hamilton — 线代进阶 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-adv-ch02-q1",
+        "question": "\\(A = I_3\\)（\\(3\\times3\\) 单位矩阵）。\\(m_A(x) = ?\\)",
+        "options": [
+          "\\(x - 1\\)",
+        "\\((x-1)^3\\)",
+        "\\(x^3 - 1\\)",
+        "\\(x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A - I = 0\\)，故 \\(m_A(x)=x-1\\)（最低次零化多项式）。\\(\\chi_A(x)=(x-1)^3\\)。注意 \\(m_A\\neq\\chi_A\\): 最小多项式的次数可以远小于特征多项式。\\(m_A\\mid\\chi_A\\): \\((x-1)\\mid(x-1)^3\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch02-q2",
+        "question": "\\(A = \\begin{pmatrix}2&0\\\\0&2\\end{pmatrix}\\)。\\(m_A(x)\\) 和 \\(\\chi_A(x)\\) 分别是？",
+        "options": [
+          "\\(m_A = x-2\\)，\\(\\chi_A = (x-2)^2\\)",
+        "\\(m_A = (x-2)^2\\)，\\(\\chi_A = (x-2)^2\\)",
+        "\\(m_A = x-2\\)，\\(\\chi_A = x-2\\)",
+        "\\(m_A = (x-2)^2\\)，\\(\\chi_A = x-2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A-2I=0\\)，所以 \\(m_A(x)=x-2\\)（一次即可零化）。\\(\\chi_A(x)=\\det(xI-A)=(x-2)^2\\)（二次）。易错: 以为最小多项式总等于特征多项式。只有当每个特征值的几何重数为 1（不可对角化情形）时 \\(m_A=\\chi_A\\)。这里 \\(\\lambda=2\\) 的几何重数=2=代数重数。"
+      },
+      {
+        "id": "linear-adv-ch02-q3",
+        "question": "\\(A = \\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}\\)，\\(\\chi_A(x)=x^2-5x-2\\)。验证 \\(\\chi_A(A)=0\\)。\\(A^2-5A-2I\\) 的 \\((1,1)\\) 元素为？",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\)",
+        "\\(-2\\)",
+        "\\(7\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=\\begin{pmatrix}7&10\\\\15&22\\end{pmatrix}\\)。\\(A^2-5A-2I=\\begin{pmatrix}7-5-2&10-10\\\\15-15&22-20-2\\end{pmatrix}=\\begin{pmatrix}0&0\\\\0&0\\end{pmatrix}\\)。\\((1,1)\\) 元素 \\(=7-5\\times1-2=0\\)。这就是 Cayley-Hamilton 定理: 每个矩阵满足自己的特征方程。"
+      },
+      {
+        "id": "linear-adv-ch02-q4",
+        "question": "\\(n\\times n\\) 矩阵 \\(A\\) 的特征多项式 \\(\\chi_A(x)=\\det(xI-A)\\) 的次数为？",
+        "options": [
+          "\\(n\\)",
+        "\\(n^2\\)",
+        "\\(2n\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\det(xI-A)\\) 是 \\(n\\times n\\) 行列式，展开后最高次项为 \\(x^n\\)（来自对角线乘积 \\((x-a_{11})\\cdots(x-a_{nn})\\)），所以 \\(\\deg\\chi_A=n\\)。CH定理因此保证: \\(A\\) 的 \\(n\\) 次多项式零化它——矩阵的\"代数复杂度\"至多为 \\(n\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q5",
+        "question": "Smith 标准形中不变因子 \\(d_1\\mid d_2\\mid\\cdots\\mid d_n\\)。最后一个 \\(d_n\\) 等于？",
+        "options": [
+          "最小多项式 \\(m_A\\)",
+        "特征多项式 \\(\\chi_A\\)",
+        "行列式 \\(\\det A\\)",
+        "迹 \\(\\mathrm{tr}(A)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Smith 标准形将 \\(xI-A\\) 化为对角形 \\(\\mathrm{diag}(d_1,\\ldots,d_n)\\)，\\(d_i\\mid d_{i+1}\\)。\\(d_n=m_A\\)（最大的不变因子=最小多项式），\\(\\prod d_i=\\chi_A\\)（乘积=特征多项式）。这两个多项式的关系完全由不变因子链编码。"
+      },
+      {
+        "id": "linear-adv-ch02-q6",
+        "question": "\\(m_A(x)=(x-1)(x-3)\\)（两个不同根）。\\(A\\) 可以对角化吗？",
+        "options": [
+          "可以",
+        "不可以",
+        "取决于矩阵大小",
+        "取决于基域"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\) 可对角化 \\(\\Leftrightarrow\\) \\(m_A\\) 分解为不同一次因子之积。\\((x-1)(x-3)\\) 无重根 ✓。由中国剩余定理: \\(V=\\ker(A-I)\\oplus\\ker(A-3I)\\)，即特征空间之和=全空间。"
+      },
+      {
+        "id": "linear-adv-ch02-q7",
+        "question": "\\(m_A(x)=(x-2)^2\\)。\\(A\\) 可以对角化吗？",
+        "options": [
+          "不可以，因为 \\(m_A\\) 有重根",
+        "可以，因为只有一个特征值",
+        "可以，只要维数合适",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_A=(x-2)^2\\) 有重根 \\(\\lambda=2\\)。对角化要求 \\(m_A\\) 无重根——即 \\(m_A=(x-2)\\) 而非 \\((x-2)^2\\)。有 \\((x-2)^2\\) 说明 \\(A-2I\\neq0\\) 但 \\((A-2I)^2=0\\)，存在非零的广义特征向量，不可完全对角化。"
+      },
+      {
+        "id": "linear-adv-ch02-q8",
+        "question": "\\(A = \\begin{pmatrix}2&1\\\\0&2\\end{pmatrix}\\)。\\(m_A(x) = ?\\)",
+        "options": [
+          "\\((x-2)^2\\)",
+        "\\(x-2\\)",
+        "\\(x^2-4\\)",
+        "\\(x^2-4x+4\\)（与A相同但写法不同）"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_A=(x-2)^2\\)。\\(A-2I=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\neq0\\)，所以 \\(m_A\\neq x-2\\)。\\((A-2I)^2=\\begin{pmatrix}0&0\\\\0&0\\end{pmatrix}=0\\) ✓。故 \\(m_A=(x-2)^2=\\chi_A\\)。注意: 选项A和D数学上相同（\\((x-2)^2=x^2-4x+4\\)），但约定最小多项式写成因式分解形式。"
+      },
+      {
+        "id": "linear-adv-ch02-q9",
+        "question": "\\(A = \\mathrm{diag}(1,2,1)\\)。\\(m_A(x) = ?\\)",
+        "options": [
+          "\\((x-1)(x-2)\\)",
+        "\\((x-1)^2(x-2)\\)",
+        "\\((x-1)^2\\)",
+        "\\((x-2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_A=(x-1)^2(x-2)\\)。检测: \\((A-I)(A-2I)=\\mathrm{diag}(0,1,0)\\cdot\\mathrm{diag}(-1,0,-1)=\\mathrm{diag}(0,0,0)=0\\) ✓。而 \\(A-I\\neq0\\)，\\(A-2I\\neq0\\)，所以 \\(m_A=(x-1)(x-2)\\)。易错: 看到 \\(\\chi_A\\) 中 \\((x-1)^2\\) 就以为 \\(m_A\\) 也有 \\((x-1)^2\\)。\\(\\lambda=1\\) 的几何重数=2=代数重数，所以 \\((x-1)\\) 的一次幂就够了。"
+      },
+      {
+        "id": "linear-adv-ch02-q10",
+        "question": "\\(A = \\begin{pmatrix}3&1\\\\2&4\\end{pmatrix}\\)，\\(\\mathrm{tr}(A)=7\\)，\\(\\det(A)=10\\)。利用 CH 定理求 \\(A^{-1}\\)。",
+        "options": [
+          "\\(A^{-1}=\\frac{1}{10}\\begin{pmatrix}4&-1\\\\-2&3\\end{pmatrix}\\)",
+        "\\(A^{-1}=\\frac{1}{7}\\begin{pmatrix}4&-1\\\\-2&3\\end{pmatrix}\\)",
+        "\\(A^{-1}=\\begin{pmatrix}4&-1\\\\-2&3\\end{pmatrix}\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "CH: \\(A^2-7A+10I=0\\Rightarrow A(7I-A)=10I\\Rightarrow A^{-1}=\\frac{1}{10}(7I-A)=\\frac{1}{10}\\begin{pmatrix}4&-1\\\\-2&3\\end{pmatrix}\\)。验证: \\(A\\cdot A^{-1}=\\frac{1}{10}\\begin{pmatrix}3&1\\\\2&4\\end{pmatrix}\\begin{pmatrix}4&-1\\\\-2&3\\end{pmatrix}=\\frac{1}{10}\\begin{pmatrix}10&0\\\\0&10\\end{pmatrix}=I\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch02-q11",
+        "question": "\\(A=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}\\)，\\(\\chi_A=x^2-1\\)。由 CH 得 \\(A^2=I\\)。\\(A^5=?\\)",
+        "options": [
+          "\\(A\\)",
+        "\\(I\\)",
+        "\\(-A\\)",
+        "\\(-I\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=I\\Rightarrow A^4=(A^2)^2=I\\Rightarrow A^5=A^4\\cdot A=A\\)。利用CH将高次幂降阶: \\(A\\) 的任意幂可化为 \\(I\\) 和 \\(A\\) 的线性组合。\\(A^{2k}=I\\)，\\(A^{2k+1}=A\\)。\\(5=2\\times2+1\\)，故 \\(A^5=A\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q12",
+        "question": "\\(3\\times3\\) 矩阵 \\(A\\) 的 \\(\\chi_A=(x-1)(x-2)^2\\)。可能的不变因子列表有几种？",
+        "options": [
+          "2 种: \\(\\{1,1,(x\\!-\\!1)(x\\!-\\!2)^2\\}\\) 或 \\(\\{1,(x\\!-\\!2),(x\\!-\\!1)(x\\!-\\!2)\\}\\)",
+        "1 种",
+        "3 种",
+        "4 种"
+        ],
+        "answer": 0,
+        "explanation": "需满足: ①\\(d_1\\mid d_2\\mid d_3\\)；②\\(d_1 d_2 d_3=\\chi_A\\)；③\\(d_3=m_A\\)。方案一: \\(d_3=(x-1)(x-2)^2\\)→\\(m_A\\) 有重根，不可对角化。方案二: \\(d_2=(x-2)\\)，\\(d_3=(x-1)(x-2)\\)→\\(m_A\\) 无重根，可对角化。\\((x-2)\\mid(x-1)(x-2)\\) ✓。乘积: \\(1\\cdot(x-2)\\cdot(x-1)(x-2)=(x-1)(x-2)^2\\) ✓。其他组合如 \\(d_2=(x-1)\\)，\\(d_3=(x-2)^2\\)→\\((x-1)\\nmid(x-2)^2\\)，不合法。"
+      },
+      {
+        "id": "linear-adv-ch02-q13",
+        "question": "多项式 \\(p(x)=x^2-5x-2\\) 的友矩阵 (companion matrix) 为？",
+        "options": [
+          "\\(\\begin{pmatrix}0&2\\\\1&5\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}5&2\\\\1&0\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}0&-2\\\\1&5\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}0&2\\\\1&-5\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "对首一多项式 \\(p(x)=x^2+c_1 x+c_0\\)（这里 \\(c_1=-5\\)，\\(c_0=-2\\)），友矩阵: \\(C=\\begin{pmatrix}0&-c_0\\\\1&-c_1\\end{pmatrix}=\\begin{pmatrix}0&2\\\\1&5\\end{pmatrix}\\)。验证: \\(\\chi_C=\\det\\begin{pmatrix}x&-2\\\\-1&x-5\\end{pmatrix}=x(x-5)-2=x^2-5x-2=p(x)\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch02-q14",
+        "question": "\\(A=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}\\)，\\(\\chi_A=(x-1)^2\\)。\\(A\\) 可以对角化吗？",
+        "options": [
+          "可以（\\(m_A=x-1\\) 无重根，\\(A\\) 本身就是对角阵）",
+        "不可以（\\(\\chi_A\\) 有重根）",
+        "可以，但需换基",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=I\\)，\\(A-I=0\\)→\\(m_A=x-1\\) 无重根→可对角化（且已经是对角形）。易错: 看到 \\(\\chi_A=(x-1)^2\\) 有重根就判定不可对角化。判据是 \\(m_A\\) 无重根，不是 \\(\\chi_A\\) 无重根！\\(\\chi_A\\) 有重根只是\"可能\"不可对角化，需看 \\(m_A\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q15",
+        "question": "\\(A = \\begin{pmatrix}2&1\\\\0&2\\end{pmatrix}\\)，\\(m_A=(x-2)^2\\)。最大的 Jordan 块大小为？",
+        "options": [
+          "\\(2\\times2\\)",
+        "\\(1\\times1\\)",
+        "\\(3\\times3\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_A=(x-2)^2\\) 意味着特征值 \\(\\lambda=2\\) 的最大 Jordan 块大小=2。\\(A\\) 本身就是 \\(J_2(2)\\)。一般地: \\(m_A\\) 中 \\((x-\\lambda)\\) 的幂次 = \\(\\lambda\\) 对应最大 Jordan 块的大小。\\((x-2)^2\\) → 最大块 \\(2\\times2\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q16",
+        "question": "\\(A = \\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\)（旋转 \\(90°\\)）。求 \\(m_A\\)。",
+        "options": [
+          "\\(x^2+1\\)",
+        "\\(x^2-1\\)",
+        "\\(x+1\\)",
+        "\\(x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=\\begin{pmatrix}-1&0\\\\0&-1\\end{pmatrix}=-I\\)，故 \\(A^2+I=0\\)，\\(m_A\\mid(x^2+1)\\)。\\(x^2+1\\) 在 \\(\\mathbb{R}\\) 上不可约（无实根），所以 \\(m_A=x^2+1=\\chi_A\\)。特征值 \\(\\lambda=\\pm i\\) 为复数，反映了旋转矩阵在实数域上不可对角化的事实。"
+      },
+      {
+        "id": "linear-adv-ch02-q17",
+        "question": "\\(A=\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}\\)，由 CH 得 \\(A^2=5A+2I\\)。\\(A^3=?\\)",
+        "options": [
+          "\\(27A+10I\\)",
+        "\\(25A+10I\\)",
+        "\\(5A^2+2A\\)",
+        "\\(125A+8I\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^3=A\\cdot A^2=A(5A+2I)=5A^2+2A=5(5A+2I)+2A=27A+10I\\)。求值: \\(27\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}+10I=\\begin{pmatrix}37&54\\\\81&118\\end{pmatrix}\\)。易错: 直接写 \\(A^3=5A^2+2A\\)（选项C）没有继续用 CH 替换 \\(A^2\\)。正确做法是反复用 \\(A^2=5A+2I\\) 消除高次幂。"
+      },
+      {
+        "id": "linear-adv-ch02-q18",
+        "question": "\\(A = J_3(2) = \\begin{pmatrix}2&1&0\\\\0&2&1\\\\0&0&2\\end{pmatrix}\\)。\\(m_A(x) = ?\\)",
+        "options": [
+          "\\((x-2)^3\\)",
+        "\\((x-2)^2\\)",
+        "\\(x-2\\)",
+        "\\((x-2)^3\\) 与 \\(\\chi_A\\) 不同"
+        ],
+        "answer": 0,
+        "explanation": "\\(A-2I=\\begin{pmatrix}0&1&0\\\\0&0&1\\\\0&0&0\\end{pmatrix}\\)，\\((A-2I)^2=\\begin{pmatrix}0&0&1\\\\0&0&0\\\\0&0&0\\end{pmatrix}\\neq0\\)，\\((A-2I)^3=0\\)。故 \\(m_A=(x-2)^3=\\chi_A\\)。\\(k\\times k\\) Jordan 块 \\(J_k(\\lambda)\\) 的最小多项式总是 \\((x-\\lambda)^k\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q19",
+        "question": "已知 \\(m_A(x)\\mid(x^2-1)\\)。\\(A\\) 的特征值只能在哪个集合中？",
+        "options": [
+          "\\(\\{1,-1\\}\\)",
+        "\\(\\{0,1\\}\\)",
+        "\\(\\{-1,0,1\\}\\)",
+        "任意实数"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_A\\) 的根 = \\(\\chi_A\\) 的根 = \\(A\\) 的特征值。\\(m_A\\mid(x^2-1)=(x-1)(x+1)\\)，故 \\(m_A\\) 的根 \\(\\subseteq\\{1,-1\\}\\)。特征值只能是 \\(1\\) 和/或 \\(-1\\)。此外 \\(m_A\\mid(x-1)(x+1)\\) 无重根→\\(A\\) 可对角化，\\(A^2=I\\)（对合矩阵）。"
+      },
+      {
+        "id": "linear-adv-ch02-q20",
+        "question": "\\(A=\\begin{pmatrix}1&1\\\\0&1\\end{pmatrix}\\)。利用 CH（\\(A^2=2A-I\\)）求 \\(A^{100}\\)。",
+        "options": [
+          "\\(\\begin{pmatrix}1&100\\\\0&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}100&100\\\\0&100\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&99\\\\0&1\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(N=A-I=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)，\\(N^2=0\\)。\\(A^n=(I+N)^n=\\sum_{k=0}^{n}\\binom{n}{k}N^k=I+nN\\)（\\(k\\geq2\\) 项全为 \\(0\\)）。\\(A^{100}=I+100N=\\begin{pmatrix}1&100\\\\0&1\\end{pmatrix}\\)。这是 Jordan 块幂次公式的最简情形: \\(J_2(1)^n=\\begin{pmatrix}1&n\\\\0&1\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q21",
+        "question": "用 CH 证明: \\(2\\times2\\) 可逆矩阵 \\(A\\) 满足 \\(A^{-1}=\\frac{1}{\\det A}(\\mathrm{tr}(A)\\cdot I-A)\\)。对 \\(A=\\begin{pmatrix}2&3\\\\1&5\\end{pmatrix}\\) 验证。",
+        "options": [
+          "\\(A^{-1}=\\frac{1}{7}\\begin{pmatrix}5&-3\\\\-1&2\\end{pmatrix}\\)",
+        "\\(A^{-1}=\\frac{1}{7}\\begin{pmatrix}2&3\\\\1&5\\end{pmatrix}\\)",
+        "\\(A^{-1}=\\frac{1}{7}\\begin{pmatrix}5&3\\\\1&2\\end{pmatrix}\\)",
+        "不可用 CH 求逆"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{tr}=7\\)，\\(\\det=7\\)。CH: \\(A^2-7A+7I=0\\Rightarrow A(7I-A)=7I\\Rightarrow A^{-1}=\\frac{1}{7}(7I-A)=\\frac{1}{7}\\begin{pmatrix}5&-3\\\\-1&2\\end{pmatrix}\\)。验证: \\(\\begin{pmatrix}2&3\\\\1&5\\end{pmatrix}\\cdot\\frac{1}{7}\\begin{pmatrix}5&-3\\\\-1&2\\end{pmatrix}=\\frac{1}{7}\\begin{pmatrix}7&0\\\\0&7\\end{pmatrix}=I\\) ✓。"
+      },
+      {
+        "id": "linear-adv-ch02-q22",
+        "question": "\\(A=\\mathrm{diag}(1,1,2)\\)（\\(3\\times3\\)）。不变因子列表为？",
+        "options": [
+          "\\(\\{1,\\;(x-1),\\;(x-1)(x-2)\\}\\)",
+        "\\(\\{1,\\;1,\\;(x-1)^2(x-2)\\}\\)",
+        "\\(\\{(x-1),\\;(x-1),\\;(x-2)\\}\\)",
+        "\\(\\{1,\\;(x-2),\\;(x-1)(x-2)\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi_A=(x-1)^2(x-2)\\)。\\(m_A=(x-1)(x-2)\\)（已知 \\((A-I)(A-2I)=0\\)）。\\(d_3=m_A=(x-1)(x-2)\\)。\\(d_1 d_2=\\chi_A/d_3=(x-1)\\)。需 \\(d_1\\mid d_2\\mid d_3\\)→\\(d_1=1\\)，\\(d_2=(x-1)\\)。验证: \\(1\\mid(x-1)\\mid(x-1)(x-2)\\) ✓。选项B: 相当于 \\(m_A=\\chi_A\\)，但实际 \\(m_A\\) 没有重根。选项C: \\((x-1)\\nmid(x-2)\\)，不合法。"
+      },
+      {
+        "id": "linear-adv-ch02-q23",
+        "question": "友矩阵 \\(C(p)\\)（\\(p\\) 为首一多项式）总满足 \\(m_{C(p)}=\\chi_{C(p)}=p\\)。若 \\(p(x)=x^3-x\\)，\\(C(p)\\) 可对角化吗？",
+        "options": [
+          "可以（\\(m_{C(p)}=x^3-x=x(x-1)(x+1)\\) 无重根）",
+        "不可以（三次多项式有太多根）",
+        "不可以（友矩阵不可对角化）",
+        "取决于基域"
+        ],
+        "answer": 0,
+        "explanation": "友矩阵的关键性质: \\(m_{C(p)}=p=\\chi_{C(p)}\\)。\\(p(x)=x(x-1)(x+1)\\) 分解为3个不同一次因子→\\(m_{C(p)}\\) 无重根→\\(C(p)\\) 可对角化。易错: 以为友矩阵总是不可对角化。实际上友矩阵可对角化当且仅当其特征多项式无重根。"
+      },
+      {
+        "id": "linear-adv-ch02-q24",
+        "question": "\\(3\\times3\\) 矩阵 \\(A\\) 有 \\(\\chi_A=(x-1)^3\\) 和 \\(m_A=(x-1)^2\\)。Jordan 标准形为？",
+        "options": [
+          "\\(J_2(1)\\oplus J_1(1)=\\begin{pmatrix}1&1&0\\\\0&1&0\\\\0&0&1\\end{pmatrix}\\)",
+        "\\(J_3(1)=\\begin{pmatrix}1&1&0\\\\0&1&1\\\\0&0&1\\end{pmatrix}\\)",
+        "\\(\\mathrm{diag}(1,1,1)\\)",
+        "\\(J_1(1)\\oplus J_1(1)\\oplus J_1(1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_A=(x-1)^2\\)→最大 Jordan 块大小=2。总大小=3→分配: \\(2+1\\)（唯一选择满足最大块=2且总和=3）。故 \\(A\\sim J_2(1)\\oplus J_1(1)\\)。选项B: \\(J_3(1)\\) 的 \\(m_A=(x-1)^3\\)。选项C,D: \\(m_A=x-1\\)，不匹配。"
+      },
+      {
+        "id": "linear-adv-ch02-q25",
+        "question": "\\(3\\times3\\) 幂零矩阵 \\(A\\)（\\(A^2=0\\) 但 \\(A\\neq0\\)）。\\(A\\) 有几个 Jordan 块？",
+        "options": [
+          "2 个（\\(J_2(0)\\oplus J_1(0)\\)）",
+        "1 个（\\(J_3(0)\\)）",
+        "3 个",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=0\\Rightarrow m_A\\mid x^2\\)，\\(A\\neq0\\Rightarrow m_A\\neq x\\)，故 \\(m_A=x^2\\)。最大 Jordan 块=2。大小分配: \\(3=2+1\\)→2个块。\\(J_3(0)\\) 需要 \\(m_A=x^3\\)（矛盾）。3个 \\(J_1(0)\\) 需要 \\(A=0\\)（矛盾）。唯一选择: \\(J_2(0)\\oplus J_1(0)\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q26",
+        "question": "Fibonacci 矩阵 \\(A=\\begin{pmatrix}1&1\\\\1&0\\end{pmatrix}\\)，\\(\\chi_A=x^2-x-1\\)，由 CH 得 \\(A^2=A+I\\)。求 \\(A^5\\)。",
+        "options": [
+          "\\(5A+3I=\\begin{pmatrix}8&5\\\\5&3\\end{pmatrix}\\)",
+        "\\(A^5=A\\)",
+        "\\(25A+I\\)",
+        "\\(A^5=5A\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=A+I\\)→\\(A^3=A^2+A=2A+I\\)→\\(A^4=2A^2+A=2(A+I)+A=3A+2I\\)→\\(A^5=3A^2+2A=3(A+I)+2A=5A+3I=\\begin{pmatrix}5+3&5\\\\5&3\\end{pmatrix}=\\begin{pmatrix}8&5\\\\5&3\\end{pmatrix}\\)。\\((1,1)\\) 元素 \\(=F_6=8\\)，\\((1,2)\\) 元素 \\(=F_5=5\\)。CH将矩阵幂次压缩为线性组合——这在计算 Fibonacci 数中极为高效。"
+      },
+      {
+        "id": "linear-adv-ch02-q27",
+        "question": "微分方程组 \\(\\dot{\\mathbf{x}}=A\\mathbf{x}\\)。若 \\(A\\) 可对角化且所有特征值为负实数，系统是？",
+        "options": [
+          "渐近稳定: 所有解趋于零（\\(e^{At}\\to0\\)）",
+        "不稳定",
+        "周期振荡",
+        "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\) 可对角化→\\(A=PDP^{-1}\\)→\\(e^{At}=Pe^{Dt}P^{-1}\\)。\\(D=\\mathrm{diag}(\\lambda_i)\\) 所有 \\(\\lambda_i<0\\)→\\(e^{Dt}=\\mathrm{diag}(e^{\\lambda_i t})\\to0\\)→\\(e^{At}\\to0\\)→渐近稳定。对角化条件（\\(m_A\\) 无重根）保证没有多项式增长因子 \\(t^k e^{\\lambda t}\\)。"
+      },
+      {
+        "id": "linear-adv-ch02-q28",
+        "question": "控制论中可控性矩阵 \\(\\mathcal{C}=[B,AB,\\ldots,A^{n-1}B]\\)。为什么不需要 \\(A^n B\\) 及更高次幂？",
+        "options": [
+          "因为 CH 保证 \\(A^n\\in\\mathrm{span}\\{I,A,\\ldots,A^{n-1}\\}\\)，高次幂冗余",
+        "因为 \\(A^n=0\\)",
+        "因为 \\(n\\) 列已经够多",
+        "因为 \\(A\\) 可对角化"
+        ],
+        "answer": 0,
+        "explanation": "CH定理: \\(A^n+c_{n-1}A^{n-1}+\\cdots+c_0I=0\\)→\\(A^n=-\\sum c_k A^k\\)→\\(A^n B\\in\\mathrm{span}\\{B,AB,\\ldots,A^{n-1}B\\}\\)。更高次幂同理。因此 \\(\\mathrm{Im}(\\mathcal{C})\\) 已包含所有 \\(A^k B\\) 的信息。这是 CH 定理在工程中最重要的应用之一。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="linear-adv"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/linear-adv.html" class="module-name">线代进阶</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 最小多项式的定义与性质</a></li>
+      <li><a href="#kp2">02 · Cayley-Hamilton 定理</a></li>
+      <li><a href="#kp3">03 · 不变因子与有理标准形</a></li>
+      <li><a href="#kp4">04 · 最小多项式与对角化判定</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>最小多项式与 Cayley-Hamilton</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>最小多项式的定义与性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>矩阵 \(A\) 满足哪些多项式方程？最小多项式 \(m_A(x)\) 是零化 \(A\) 的 最低次多项式，它完全确定了 \(A\) 的「代数复杂度」。理解它与特征 多项式的关系是深入研究线性算子的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>最小多项式是理想 \(\{p(x) : p(A) = 0\}\) 的生成元——反映了 \(K[x] \to \mathrm{End}(V)\) 这个环同态的核结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(m_A(x)\) = 零化 \(A\) 的最低次首一多项式。 即 \(m_A(A) = 0\) 且 \(\deg m_A\) 最小。 <strong>性质</strong>: 1) \(p(A) = 0 \Rightarrow m_A \mid p\) 2) \(m_A \mid \chi_A\)（\(m_A\) 整除特征多项式） 3) \(m_A\) 与 \(\chi_A\) 有相同的不可约因子（即相同的根） \[m_A(A) = 0, \quad m_A \mid \chi_A\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}2&0\\0&2\end{pmatrix}\)。 求 \(m_A\) 和 \(\chi_A\)。 解答: \(\chi_A(x) = (x-2)^2\)。 \(A - 2I = 0 \Rightarrow m_A(x) = x - 2\)。 验证: \(m_A \mid \chi_A\): \((x-2) \mid (x-2)^2\)。✓ 易错点: 以为 \(m_A = \chi_A\)。只有当每个特征值的几何重数 = 1 时才有 \(m_A = \chi_A\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(A = I_n\)，则 \(m_A(x) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A - I = 0\\)，故 \\(m_A(x) = x - 1\\)，与 \\(n\\) 无关。')">A. \(x^n - 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A - I = 0\\)，故 \\(m_A(x) = x - 1\\)，与 \\(n\\) 无关。')">B. \((x-1)^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(A - I = 0\\)，故 \\(m_A(x) = x - 1\\)，与 \\(n\\) 无关。')">C. \(x - 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A - I = 0\\)，故 \\(m_A(x) = x - 1\\)，与 \\(n\\) 无关。')">D. \(x^n\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Cayley-Hamilton 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Cayley-Hamilton 定理说每个矩阵满足它自己的特征方程: \(\chi_A(A) = 0\)。 这是线性代数中最深刻的定理之一，将特征值的性质强制加到矩阵本身。 它提供了计算 \(A^{-1}\)、\(A^n\) 的强大工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>矩阵被它的特征多项式「零化」——这是线性算子的一种内在约束。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cayley-Hamilton</strong>: 设 \(A \in M_n(K)\)，\(\chi_A(x) = \det(xI - A)\)，则 \[\chi_A(A) = 0\] 证明策略（伴随矩阵法）: 设 \(B(x) = \mathrm{adj}(xI - A)\)（伴随矩阵）。 由 \((xI - A)B(x) = \chi_A(x) I\)。 \(B(x)\) 是 \(x\) 的多项式矩阵: \(B(x) = B_{n-1}x^{n-1} + \cdots + B_0\)。 展开并比较系数，将 \(x\) 替换为 \(A\)，级联求和得 \(\chi_A(A) = 0\)。 <strong>推论</strong>: \(m_A \mid \chi_A\)，\(\deg m_A \leq n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>计算 \(A^{-1}\): 若 \(\chi_A(x) = x^n + c_{n-1}x^{n-1} + \cdots + c_0\)， 则 \(A^{-1} = -c_0^{-1}(A^{n-1} + c_{n-1}A^{n-2} + \cdots + c_1 I)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}1&2\\3&4\end{pmatrix}\)，验证 \(\chi_A(A) = 0\)。 解答: \(\chi_A(x) = x^2 - 5x - 2\)。 \(A^2 = \begin{pmatrix}7&10\\15&22\end{pmatrix}\)。 \(A^2 - 5A - 2I = \begin{pmatrix}7-5-2&10-10-0\\15-15-0&22-20-2\end{pmatrix} = \begin{pmatrix}0&0\\0&0\end{pmatrix}\)。✓ 易错点: 将 \(\chi_A(A) = \det(A \cdot I - A) = \det(0) = 0\) 作为“证明”。 这是错误的——\(\chi_A(A)\) 是矩阵不是数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(3 \times 3\) 矩阵 \(A\) 的特征多项式次数为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\chi_A(x) = \\det(xI - A)\\) 是 \\(n\\) 次多项式，\\(n=3\\)。')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\chi_A(x) = \\det(xI - A)\\) 是 \\(n\\) 次多项式，\\(n=3\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\chi_A(x) = \\det(xI - A)\\) 是 \\(n\\) 次多项式，\\(n=3\\)。')">C. 9</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\chi_A(x) = \\det(xI - A)\\) 是 \\(n\\) 次多项式，\\(n=3\\)。')">D. 不确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>不变因子与有理标准形</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>最小多项式和特征多项式还不能完全描述矩阵的结构。不变因子（Smith 标准形）提供了更细致的信息，将多项式矩阵的等价类完全分类。 有理标准形是不需要扩展基域的标准形，在任意域上都可用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Smith 标准形是多项式环上的「对角化」——将 \(xI - A\) 的信息 编码为对角元列。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Smith 标准形</strong>: 多项式矩阵 \(xI - A\) 可通过初等行列变换 化为对角形 \(\mathrm{diag}(d_1(x), \ldots, d_n(x))\)， 其中 \(d_i \mid d_{i+1}\)。\(d_i\) 称为不变因子。 \(\chi_A = \prod d_i\)，\(m_A = d_n\)（最后一个）。 <strong>有理标准形</strong>: 每个不变因子 \(d_i\) 对应一个尺同矩阵： \[C(d_i) = \begin{pmatrix} 0 & & -c_0 \\ 1 & \ddots & \vdots \\ & 1 & -c_{k-1} \end{pmatrix}\] \(A\) 相似于这些尺同矩阵的直和。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\chi_A = (x-1)(x-2)^2\)，可能的不变因子列表是什么？ 解答: 两种可能: (1) \(d_1 = 1, d_2 = 1, d_3 = (x-1)(x-2)^2\)（\(m_A = \chi_A\)） (2) \(d_1 = 1, d_2 = (x-2), d_3 = (x-1)(x-2)\)（\(m_A = (x-1)(x-2)\)） 第二种对应 \(A\) 可对角化或 \(m_A\) 无重根。 易错点: 忘记 \(d_i \mid d_{i+1}\) 的整除条件。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Smith 标准形中最后一个不变因子 \(d_n\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(d_n = m_A\\)（最小多项式），\\(\\prod d_i = \\chi_A\\)（特征多项式）。')">A. 特征多项式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(d_n = m_A\\)（最小多项式），\\(\\prod d_i = \\chi_A\\)（特征多项式）。')">B. 最小多项式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(d_n = m_A\\)（最小多项式），\\(\\prod d_i = \\chi_A\\)（特征多项式）。')">C. 行列式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(d_n = m_A\\)（最小多项式），\\(\\prod d_i = \\chi_A\\)（特征多项式）。')">D. 迹</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>最小多项式与对角化判定</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>什么时候矩阵可以对角化？特征值重数的分析是基本方法，而最小多项式 提供了简洁的等价条件: \(A\) 可对角化 \(\Leftrightarrow\) \(m_A\) 无重根。 这比逐个检查特征空间维数更高效。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(m_A\) 无重根 \(\Leftrightarrow\) 广义特征空间 = 普通特征空间， 这是 Jordan 标准形退化为对角形的条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>对角化充要条件</strong>: \(A\) 可对角化 \(\Leftrightarrow\) \(m_A(x)\) 在 \(K\) 上分解为不同一次因子之积: \[m_A(x) = (x - \lambda_1)(x - \lambda_2) \cdots (x - \lambda_r), \quad \lambda_i \text{ 两两不同}\] 证: \(m_A\) 无重根 \(\Rightarrow\) \(V = \bigoplus \ker(A - \lambda_i I)\) （中国剩余定理于多项式），即 \(V\) 是特征空间的直和。 <strong>计算方法</strong>: 用 \(\chi_A\) 的因子逐个检测: \((A - \lambda I) = 0\)？若否，\((A-\lambda I)^2 = 0\)？确定重数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>对角化在计算 \(A^n\)、\(e^A\)、解微分方程等场景中至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\)，判断可否对角化。 解答: \(\chi_A = (x-2)^2\)。 \(A - 2I = \begin{pmatrix}0&1\\0&0\end{pmatrix} \neq 0\)。 故 \(m_A = (x-2)^2\)，有重根，不可对角化。 易错点: 只用特征值不同来判断。即使特征值有重复， 只要 \(m_A\) 无重根就可对角化（如 \(A = \mathrm{diag}(2,2)\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(m_A(x) = (x-1)^2(x-3)\)，\(A\) 能对角化吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(m_A\\) 含 \\((x-1)^2\\) 因子（重根），故 \\(A\\) 不可对角化。')">A. 能</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(m_A\\) 含 \\((x-1)^2\\) 因子（重根），故 \\(A\\) 不可对角化。')">B. 不能，因为 \((x-1)^2\) 有重根</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(m_A\\) 含 \\((x-1)^2\\) 因子（重根），故 \\(A\\) 不可对角化。')">C. 不确定</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(m_A\\) 含 \\((x-1)^2\\) 因子（重根），故 \\(A\\) 不可对角化。')">D. 能，因为有两个不同特征值</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/algebra/linear-adv.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

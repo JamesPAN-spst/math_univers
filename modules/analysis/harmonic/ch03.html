@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 分布理论 — 调和分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "harmonic-ch03-q1",
+        "question": "测试函数空间 \\(\\mathcal{D}(\\mathbb{R}^n) = C_c^\\infty(\\mathbb{R}^n)\\) 的定义？",
+        "options": [
+          "所有紧支撑的 \\(C^\\infty\\) 函数，配以适当拓扑（\\(\\varphi_j \\to 0\\)：\\(\\text{supp}\\, \\varphi_j \\subset K\\) 且 \\(D^\\alpha \\varphi_j \\rightrightarrows 0\\)）",
+        "所有 \\(L^2\\) 函数",
+        "所有多项式",
+        "Schwartz 空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_c^\\infty\\)：每个函数在某紧集外为零，且无穷次可微。拓扑（非度量化的归纳极限拓扑）：\\(\\varphi_j \\to 0\\) 要求支撑统一包含在某紧集 \\(K\\) 中，且每阶导数一致收敛于零。\\(\\mathcal{D} \\subset \\mathcal{S} \\subset L^p\\)。\\(\\mathcal{D}\\) 在 \\(L^p\\) 中稠密。"
+      },
+      {
+        "id": "harmonic-ch03-q2",
+        "question": "分布 \\(T \\in \\mathcal{D}'(\\mathbb{R}^n)\\) 的定义？",
+        "options": [
+          "\\(\\mathcal{D}\\) 上的连续线性泛函：\\(T: \\mathcal{D} \\to \\mathbb{C}\\)，线性，且 \\(\\varphi_j \\to 0 \\Rightarrow T(\\varphi_j) \\to 0\\)",
+        "\\(L^2\\) 函数",
+        "测度",
+        "连续函数"
+        ],
+        "answer": 0,
+        "explanation": "分布推广了函数概念：\\(f \\in L^1_{\\text{loc}}\\) 对应分布 \\(T_f(\\varphi) = \\int f\\varphi\\)。\\(\\delta\\) 分布：\\(\\delta(\\varphi) = \\varphi(0)\\)——不对应任何函数。分布 = \"广义函数\"。\\(\\mathcal{D}'\\) 是 \\(\\mathcal{D}\\) 的连续对偶空间。"
+      },
+      {
+        "id": "harmonic-ch03-q3",
+        "question": "分布的导数：\\(T' \\in \\mathcal{D}'\\) 定义为 \\(\\langle T', \\varphi\\rangle = ?\\)",
+        "options": [
+          "\\(-\\langle T, \\varphi'\\rangle\\)（将导数\"转嫁\"给测试函数，添负号）",
+        "\\(\\langle T, \\varphi'\\rangle\\)",
+        "\\(\\langle T, \\varphi\\rangle'\\)",
+        "\\(T(x) \\varphi'(x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "动机：若 \\(T = T_f\\)（\\(f\\) 可微），分部积分 \\(\\int f'\\varphi = -\\int f\\varphi'\\)（边界项=0因紧支撑）。推广到任意 \\(T\\)：\\(\\langle T', \\varphi\\rangle := -\\langle T, \\varphi'\\rangle\\)。\\(n\\) 阶：\\(\\langle T^{(n)}, \\varphi\\rangle = (-1)^n \\langle T, \\varphi^{(n)}\\rangle\\)。每个分布都无穷次可微！"
+      },
+      {
+        "id": "harmonic-ch03-q4",
+        "question": "Heaviside 阶跃函数 \\(H(x) = 1\\)（\\(x > 0\\)），\\(= 0\\)（\\(x < 0\\)）。\\(H' = ?\\)（分布意义）",
+        "options": [
+          "\\(\\delta\\)（Dirac delta）",
+        "\\(0\\)",
+        "\\(1\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle H', \\varphi\\rangle = -\\langle H, \\varphi'\\rangle = -\\int_0^\\infty \\varphi'(x)\\, dx = -[\\varphi(\\infty) - \\varphi(0)] = \\varphi(0) = \\langle\\delta, \\varphi\\rangle\\)。\\(H' = \\delta\\)——间断函数的导数是集中在间断点上的 \\(\\delta\\) 分布。分布导数解释了\"不可微函数\"的导数。"
+      },
+      {
+        "id": "harmonic-ch03-q5",
+        "question": "\\(\\delta\\) 分布的支撑（support）是？",
+        "options": [
+          "\\(\\{0\\}\\)（\\(\\delta\\) 只在 \\(x = 0\\) 处\"非零\"）",
+        "\\(\\mathbb{R}\\)",
+        "\\(\\emptyset\\)",
+        "\\((-\\epsilon, \\epsilon)\\)"
+        ],
+        "answer": 0,
+        "explanation": "分布 \\(T\\) 的支撑 = \\(\\mathbb{R}^n \\setminus\\) 最大开集 \\(\\Omega\\)（\\(T|_\\Omega = 0\\)）。\\(\\delta(\\varphi) = \\varphi(0)\\)：若 \\(\\text{supp}(\\varphi) \\subset \\mathbb{R}\\setminus\\{0\\}\\)（\\(\\varphi(0) = 0\\)），则 \\(\\delta(\\varphi) = 0\\)。因此 \\(\\text{supp}(\\delta) = \\{0\\}\\)。支撑在 \\(\\{0\\}\\) 的分布都是 \\(\\delta\\) 和其导数的有限线性组合。"
+      },
+      {
+        "id": "harmonic-ch03-q6",
+        "question": "缓增分布 \\(\\mathcal{S}'(\\mathbb{R}^n)\\) 是？",
+        "options": [
+          "Schwartz 空间 \\(\\mathcal{S}\\) 上的连续线性泛函（比 \\(\\mathcal{D}'\\) 小：增长不超过多项式）",
+        "所有分布",
+        "\\(L^2\\) 函数",
+        "测度"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{S} \\supset \\mathcal{D}\\)（Schwartz 函数含更多\"测试能力\"）\\(\\Rightarrow\\) \\(\\mathcal{S}' \\subset \\mathcal{D}'\\)（对偶反转）。\\(T \\in \\mathcal{S}'\\)：多项式增长的分布。\\(L^p \\subset \\mathcal{S}'\\)（\\(\\forall p\\)）。\\(e^{x^2} \\in \\mathcal{D}'\\) 但 \\(\\notin \\mathcal{S}'\\)（增长太快）。\\(\\mathcal{S}'\\) 是 Fourier 变换的自然领域。"
+      },
+      {
+        "id": "harmonic-ch03-q7",
+        "question": "基本解（fundamental solution）\\(E\\) 满足 \\(LE = ?\\)（\\(L\\) 是线性偏微分算子）",
+        "options": [
+          "\\(\\delta\\)（\\(E\\) 是 \\(L\\) 关于 \\(\\delta\\) 源的响应）",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(f\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Lu = f\\) 的解：\\(u = E * f\\)（若卷积有意义）。\\(L(E*f) = (LE)*f = \\delta * f = f\\)。例：\\(-\\Delta E = \\delta\\)（\\(\\mathbb{R}^3\\)）：\\(E = 1/(4\\pi|x|)\\)（Newton 位势）。\\((\\partial_t - \\Delta)E = \\delta\\)：\\(E\\) = 热核。基本解将 PDE 转化为卷积积分方程。"
+      },
+      {
+        "id": "harmonic-ch03-q8",
+        "question": "\\(x \\cdot \\delta(x) = ?\\)（乘以坐标函数）",
+        "options": [
+          "\\(0\\)（因为 \\(\\langle x\\delta, \\varphi\\rangle = \\langle\\delta, x\\varphi\\rangle = 0 \\cdot \\varphi(0) = 0\\)）",
+        "\\(\\delta(x)\\)",
+        "\\(x\\)",
+        "未定义"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle x\\delta, \\varphi\\rangle = \\langle\\delta, x\\varphi\\rangle = (x\\varphi)(0) = 0\\)。\\(x\\delta = 0\\)（零分布）。注意：\\(x\\delta' \\neq 0\\)！\\(\\langle x\\delta', \\varphi\\rangle = -\\langle\\delta, (x\\varphi)'\\rangle = -\\langle\\delta, \\varphi + x\\varphi'\\rangle = -\\varphi(0)\\)。\\(x\\delta' = -\\delta\\)。"
+      },
+      {
+        "id": "harmonic-ch03-q9",
+        "question": "\\(\\delta\\) 的 Fourier 变换：\\(\\hat\\delta(\\xi) = ?\\)（缓增分布意义）",
+        "options": [
+          "\\(1\\)（常数函数）",
+        "\\(\\delta(\\xi)\\)",
+        "\\(0\\)",
+        "\\(e^{-\\xi^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\hat\\delta, \\varphi\\rangle = \\langle\\delta, \\hat\\varphi\\rangle = \\hat\\varphi(0) = \\int\\varphi(x)\\, dx = \\langle 1, \\varphi\\rangle\\)。\\(\\hat\\delta = 1\\)。对偶：\\(\\hat 1 = \\delta\\)（常数的 Fourier 变换是 \\(\\delta\\)）。\"点源的频谱是白噪声（所有频率等权重）\"。"
+      },
+      {
+        "id": "harmonic-ch03-q10",
+        "question": "\\(\\delta^{(n)}(\\varphi) = ?\\)",
+        "options": [
+          "\\((-1)^n \\varphi^{(n)}(0)\\)",
+        "\\(\\varphi^{(n)}(0)\\)",
+        "\\(n! \\delta(\\varphi)\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\delta^{(n)}, \\varphi\\rangle = (-1)^n \\langle\\delta, \\varphi^{(n)}\\rangle = (-1)^n \\varphi^{(n)}(0)\\)。\\(\\delta^{(n)}\\) 测量测试函数的第 \\(n\\) 阶导数在原点的值。支撑 \\(= \\{0\\}\\)。Fourier：\\(\\widehat{\\delta^{(n)}}(\\xi) = (2\\pi i\\xi)^n\\)（多项式——多项式增长的缓增分布）。"
+      },
+      {
+        "id": "harmonic-ch03-q11",
+        "question": "\\(-u'' = \\delta\\)（\\(\\mathbb{R}\\)）的基本解 \\(E(x) = ?\\)",
+        "options": [
+          "\\(-|x|/2\\)（up to constant；\\(E'' = -\\delta\\)，即 \\(E(x) = -|x|/2 + C\\)）",
+        "\\(e^{-|x|}\\)",
+        "\\(\\log|x|\\)",
+        "\\(1/x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E(x) = -|x|/2\\)：\\(E'(x) = -\\text{sgn}(x)/2 = -H(x) + 1/2\\)。\\(E''(x) = -H'(x) = -\\delta\\)。或：\\(E'' = -\\delta\\)，\\(\\widehat{E''} = -(2\\pi i\\xi)^2 \\hat E = 4\\pi^2\\xi^2 \\hat E = 1\\)。\\(\\hat E = 1/(4\\pi^2\\xi^2)\\)（需正则化/PV 意义）。反变换得 \\(-|x|/2\\)。"
+      },
+      {
+        "id": "harmonic-ch03-q12",
+        "question": "\\(\\text{p.v.}(1/x)\\) 是什么分布？",
+        "options": [
+          "\\(\\langle\\text{p.v.}(1/x), \\varphi\\rangle = \\lim_{\\epsilon\\to0^+}\\int_{|x|>\\epsilon}\\frac{\\varphi(x)}{x}\\, dx\\)（Cauchy 主值）",
+        "\\(\\int \\varphi/x\\, dx\\)（直接积分——发散）",
+        "\\(\\delta(x)\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(1/x\\) 在 \\(x = 0\\) 不可积。主值移除奇点的对称邻域：\\(\\int_{|x|>\\epsilon} = \\int_{-\\infty}^{-\\epsilon} + \\int_\\epsilon^\\infty\\)。对称性使奇点两侧的贡献部分抵消。\\(\\text{p.v.}(1/x) \\in \\mathcal{S}'\\)。Hilbert 变换的核。\\(\\widehat{\\text{p.v.}(1/x)} = -i\\pi\\, \\text{sgn}(\\xi)\\)。"
+      },
+      {
+        "id": "harmonic-ch03-q13",
+        "question": "\\(e^{2\\pi iax}\\) 的 Fourier 变换（分布意义）？",
+        "options": [
+          "\\(\\delta(\\xi - a)\\)（频率单一分量 \\(\\to\\) 频域中的点）",
+        "\\(e^{2\\pi ia\\xi}\\)",
+        "\\(\\delta(\\xi)\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\widehat{e^{2\\pi iax}}, \\varphi\\rangle = \\langle e^{2\\pi iax}, \\hat\\varphi\\rangle = \\int e^{2\\pi iax}\\hat\\varphi(\\xi)\\, d\\xi\\)...用反转：\\(= \\hat\\varphi\\) 在 \\(x = a\\)... 实际：\\(\\widehat{e^{2\\pi iax}}(\\xi) = \\delta(\\xi-a)\\)（平移调制对偶）。\\(\\cos(2\\pi ax) \\to [\\delta(\\xi-a)+\\delta(\\xi+a)]/2\\)（两个频率分量）。"
+      },
+      {
+        "id": "harmonic-ch03-q14",
+        "question": "Green 函数 \\(G(x;y)\\) 满足 \\(L_x G(x;y) = \\delta(x-y)\\)。\\(Lu = f\\) 的解 \\(u(x) = ?\\)",
+        "options": [
+          "\\(\\int G(x;y) f(y)\\, dy\\)（叠加原理：连续多个 \\(\\delta\\) 源的响应累加）",
+        "\\(G(x;0) f(x)\\)",
+        "\\(G * G\\)",
+        "\\(f/L\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_x[\\int G(x;y) f(y)\\, dy] = \\int L_x G(x;y) f(y)\\, dy = \\int \\delta(x-y) f(y)\\, dy = f(x)\\)。Green 函数是\"点源响应\"；\\(f\\) 视为连续分布的点源——叠加得完整响应。边界条件体现在 \\(G\\) 的选择中。"
+      },
+      {
+        "id": "harmonic-ch03-q15",
+        "question": "\\(\\delta(ax) = ?\\)（\\(a \\neq 0\\)）",
+        "options": [
+          "\\(\\frac{1}{|a|}\\delta(x)\\)（尺度变换性质）",
+        "\\(a\\delta(x)\\)",
+        "\\(\\delta(x)\\)",
+        "\\(\\delta(x)/a^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle\\delta(ax), \\varphi\\rangle = \\frac{1}{|a|}\\varphi(0) = \\frac{1}{|a|}\\langle\\delta, \\varphi\\rangle\\)（变量替换 \\(u = ax\\)，\\(du = |a|dx\\)）。推广：\\(\\delta(g(x)) = \\sum_i \\frac{\\delta(x-x_i)}{|g'(x_i)|}\\)（\\(g(x_i) = 0\\)，\\(g'(x_i) \\neq 0\\)）。"
+      },
+      {
+        "id": "harmonic-ch03-q16",
+        "question": "每个分布 \\(T\\) 局部是有限阶导数的连续函数。即存在连续 \\(F\\) 和 \\(k\\) 使 \\(T = F^{(k)}\\)（局部）。这称为？",
+        "options": [
+          "分布的结构定理",
+        "Riesz 表示定理",
+        "Hahn-Banach",
+        "闭图定理"
+        ],
+        "answer": 0,
+        "explanation": "任何分布都能写成连续函数的有限阶导数。\\(\\delta = H'\\)（\\(H\\) 连续但不光滑），也 \\(= (|x|/2)''\\)（\\(|x|/2\\) 连续）。阶 \\(k\\) 取决于分布的奇异程度。\\(\\delta^{(n)}\\) 需要 \\(k \\geq n+1\\)。结构定理给出分布的\"具象化\"：分布并不比函数复杂太多。"
+      },
+      {
+        "id": "harmonic-ch03-q17",
+        "question": "\\(\\widehat{\\text{sgn}(x)}(\\xi) = ?\\)（\\(\\text{sgn}(x) = H(x) - H(-x)\\)，分布 Fourier 变换）",
+        "options": [
+          "\\(\\frac{1}{\\pi i\\xi}\\)（主值意义：\\(= -i\\, \\text{p.v.}(1/(\\pi\\xi))\\)）",
+        "\\(\\delta(\\xi)\\)",
+        "\\(1\\)",
+        "\\(i\\xi\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{sgn}(x) = 2H(x) - 1\\)。\\(\\hat H = \\frac{1}{2}\\delta + \\frac{1}{2\\pi i\\xi}\\)（p.v.意义）。\\(\\widehat{\\text{sgn}} = 2\\hat H - \\hat 1 = \\delta + \\frac{1}{\\pi i\\xi} - \\delta = \\frac{1}{\\pi i\\xi}\\)。Hilbert 变换核：\\(Hf = f * \\frac{1}{\\pi x}\\)（p.v.），\\(\\widehat{Hf} = -i\\,\\text{sgn}(\\xi)\\hat f\\)。"
+      },
+      {
+        "id": "harmonic-ch03-q18",
+        "question": "分布不能随意相乘。\\(\\delta(x) \\cdot \\delta(x)\\) 有定义吗？",
+        "options": [
+          "没有良好定义（分布乘法在一般理论中不封闭——Schwartz 不可能性定理）",
+        "\\(\\delta^2(x)\\)",
+        "\\(\\delta(x)\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "Schwartz 不可能性定理：不存在包含 \\(\\mathcal{D}'\\) 的结合代数同时保持 Leibniz 法则和嵌入 \\(C^\\infty\\) 的乘法。\\(\\delta \\cdot \\delta\\)：wave front set 分析表明乘积的奇异性太强。解决方案：Colombeau 代数（放弃部分性质）、重整化（物理中处理）。"
+      },
+      {
+        "id": "harmonic-ch03-q19",
+        "question": "卷积方程 \\(T * S = \\delta\\)（\\(T, S \\in \\mathcal{D}'\\)，\\(T\\) 有紧支撑）。若存在 \\(S\\)，称 \\(S\\) 是 \\(T\\) 的？",
+        "options": [
+          "卷积逆（convolution inverse）——等价于 \\(T\\) 对应的算子可逆",
+        "Fourier 变换",
+        "导数",
+        "伴随"
+        ],
+        "answer": 0,
+        "explanation": "\\(T * u = f \\Rightarrow u = S * f\\)（\\(S\\) = 基本解/卷积逆）。\\(\\hat T \\cdot \\hat S = 1\\)（频域：逐点乘法逆）。存在性：\\(\\hat T(\\xi) \\neq 0\\)（\\(\\forall \\xi\\)，或增长条件下可行）。紧支撑 \\(T\\) 的 \\(\\hat T\\) 是整函数——零点的分布决定可逆性。"
+      },
+      {
+        "id": "harmonic-ch03-q20",
+        "question": "缓增分布的 Fourier 变换满足 \\(\\mathcal{F}: \\mathcal{S}' \\to \\mathcal{S}'\\) 是连续双射。定义：\\(\\langle\\hat T, \\varphi\\rangle = \\langle T, \\hat\\varphi\\rangle\\)。为什么这个定义合理？",
+        "options": [
+          "\\(\\mathcal{F}: \\mathcal{S} \\to \\mathcal{S}\\) 是自同构——\\(\\hat\\varphi \\in \\mathcal{S}\\) 对 \\(\\varphi \\in \\mathcal{S}\\)，所以 \\(T(\\hat\\varphi)\\) 有意义",
+        "因为 \\(T \\in L^2\\)",
+        "因为 \\(\\hat\\varphi\\) 可积",
+        "直接积分"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi \\in \\mathcal{S} \\Rightarrow \\hat\\varphi \\in \\mathcal{S}\\)（Schwartz 空间的自同构性质）。\\(T \\in \\mathcal{S}'\\)：对 \\(\\mathcal{S}\\) 中任何函数作用都有定义。因此 \\(T(\\hat\\varphi)\\) 有意义。Parseval 一致性：\\(T = T_f\\)（\\(f \\in L^2\\)）时还原为通常定义。"
+      },
+      {
+        "id": "harmonic-ch03-q21",
+        "question": "Laplace 方程 \\(\\Delta u = 0\\)（\\(\\mathbb{R}^3\\)）的基本解？",
+        "options": [
+          "\\(E(x) = -\\frac{1}{4\\pi|x|}\\)（\\(\\Delta E = \\delta\\)）",
+        "\\(E = \\log|x|\\)",
+        "\\(E = |x|\\)",
+        "\\(E = e^{-|x|}\\)"
+        ],
+        "answer": 0,
+        "explanation": "球对称性：\\(E = E(r)\\)。\\(\\Delta E = \\frac{1}{r^2}\\frac{d}{dr}(r^2 \\frac{dE}{dr}) = 0\\)（\\(r > 0\\)）\\(\\Rightarrow E = C/r\\)。\\(\\int_{B_\\epsilon} \\Delta E = \\int_{\\partial B_\\epsilon} \\nabla E \\cdot n = -C \\cdot 4\\pi\\)。\\(\\Delta E = -4\\pi C\\delta\\)。\\(C = 1/(4\\pi)\\)：\\(\\Delta(-1/(4\\pi r)) = \\delta\\)。\\(\\mathbb{R}^2\\)：\\(E = \\frac{1}{2\\pi}\\log|x|\\)。"
+      },
+      {
+        "id": "harmonic-ch03-q22",
+        "question": "分布的支撑定理：\\(T \\in \\mathcal{E}'(\\mathbb{R}^n)\\)（紧支撑分布）\\(\\Rightarrow\\) \\(\\hat T\\) 是？",
+        "options": [
+          "整函数（\\(\\mathbb{C}^n\\) 上的全纯函数），满足 \\(|\\hat T(\\zeta)| \\leq C(1+|\\zeta|)^N e^{a|\\text{Im}\\,\\zeta|}\\)（Paley-Wiener-Schwartz）",
+        "\\(L^2\\) 函数",
+        "紧支撑",
+        "多项式"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat T(\\zeta) = \\langle T, e^{-2\\pi i\\langle \\cdot, \\zeta\\rangle}\\rangle\\)：\\(\\zeta \\in \\mathbb{C}^n\\) 时 \\(e^{-2\\pi ix\\cdot\\zeta}\\) 仍是 \\(C^\\infty\\)（\\(T\\) 紧支撑，作用有意义）。解析性来自被积函数的全纯性。指数型 \\(\\leq 2\\pi a\\)（\\(a\\) = 支撑半径）。Paley-Wiener-Schwartz 定理精确刻画紧支撑分布的 Fourier 变换。"
+      },
+      {
+        "id": "harmonic-ch03-q23",
+        "question": "\\(\\sum_{n \\in \\mathbb{Z}} \\delta(x - n)\\)（Dirac 梳）的 Fourier 变换？",
+        "options": [
+          "\\(\\sum_{k \\in \\mathbb{Z}} \\delta(\\xi - k)\\)（Dirac 梳的 Fourier 变换还是 Dirac 梳——离散↔离散）",
+        "\\(1\\)",
+        "\\(\\delta(\\xi)\\)",
+        "\\(\\sum e^{2\\pi in\\xi}\\)（条件收敛级数）"
+        ],
+        "answer": 0,
+        "explanation": "Poisson 求和公式：\\(\\sum f(n) = \\sum \\hat f(k)\\)。视 \\(\\text{III}(x) = \\sum \\delta(x-n)\\) 为分布：\\(\\langle \\widehat{\\text{III}}, \\varphi\\rangle = \\langle\\text{III}, \\hat\\varphi\\rangle = \\sum \\hat\\varphi(n) = \\sum \\varphi(k) = \\langle\\text{III}, \\varphi\\rangle\\)（Poisson）。\\(\\widehat{\\text{III}} = \\text{III}\\)。Dirac 梳是自对偶的——采样↔周期化对偶。"
+      },
+      {
+        "id": "harmonic-ch03-q24",
+        "question": "热方程 \\(u_t - u_{xx} = 0\\)（\\(\\mathbb{R}\\)，\\(t > 0\\)），\\(u(x,0) = \\delta(x)\\)。\\(u(x,t) = ?\\)",
+        "options": [
+          "\\(\\frac{1}{\\sqrt{4\\pi t}} e^{-x^2/(4t)}\\)（热核/Gauss 核）",
+        "\\(\\delta(x-t)\\)",
+        "\\(e^{-|x|}\\)",
+        "\\(1/t\\)"
+        ],
+        "answer": 0,
+        "explanation": "Fourier（\\(x \\to \\xi\\)）：\\(\\hat u_t + 4\\pi^2\\xi^2 \\hat u = 0\\)，\\(\\hat u(\\xi, 0) = 1\\)。\\(\\hat u = e^{-4\\pi^2\\xi^2 t}\\)。反变换：Gauss 积分 \\(\\to u = \\frac{1}{\\sqrt{4\\pi t}}e^{-x^2/(4t)}\\)。\\(t \\to 0^+\\)：\\(u \\to \\delta\\)（好核性质）。基本解 = Green 函数 = 点源热扩散。"
+      },
+      {
+        "id": "harmonic-ch03-q25",
+        "question": "分布的阶：\\(T \\in \\mathcal{D}'\\) 的阶 \\(k\\) 定义为满足 \\(|\\langle T, \\varphi\\rangle| \\leq C \\sum_{|\\alpha|\\leq k}\\sup|D^\\alpha\\varphi|\\)（\\(\\text{supp}\\,\\varphi \\subset K\\)）的最小 \\(k\\)。\\(\\delta^{(n)}\\) 的阶？",
+        "options": [
+          "\\(n\\)（\\(\\delta^{(n)}(\\varphi) = (-1)^n\\varphi^{(n)}(0)\\)——需要第 \\(n\\) 阶导数信息）",
+        "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\delta^{(n)}(\\varphi)| = |\\varphi^{(n)}(0)| \\leq \\sup|D^n\\varphi|\\)（\\(k = n\\) 够）。\\(k < n\\) 不够：取 \\(\\varphi_j\\) 使 \\(\\sup|D^\\alpha\\varphi_j| \\leq 1\\)（\\(|\\alpha| < n\\)）但 \\(\\varphi_j^{(n)}(0) \\to \\infty\\)。\\(\\delta\\) 的阶 = 0（只需 \\(\\sup|\\varphi|\\)）。\\(\\text{p.v.}(1/x)\\) 的阶 = 1。"
+      },
+      {
+        "id": "harmonic-ch03-q26",
+        "question": "电磁学中点电荷 \\(q\\) 在原点的电荷密度用分布表示？",
+        "options": [
+          "\\(\\rho(x) = q\\,\\delta^3(x)\\)（三维 Dirac delta）",
+        "\\(\\rho = q/|x|^2\\)",
+        "\\(\\rho = q\\)",
+        "\\(\\rho = q\\, H(x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int \\rho\\, dV = q\\)（总电荷）。\\(\\delta^3(x) = \\delta(x_1)\\delta(x_2)\\delta(x_3)\\)。Poisson 方程：\\(\\Delta\\phi = -\\rho/\\epsilon_0 = -q\\delta^3/\\epsilon_0\\)。\\(\\phi = q/(4\\pi\\epsilon_0|x|)\\)（Coulomb 位势 = 基本解 \\(\\times q/\\epsilon_0\\)）。\\(\\delta\\) 分布是点源的自然数学语言。"
+      },
+      {
+        "id": "harmonic-ch03-q27",
+        "question": "信号处理中\"冲激响应\" \\(h(t)\\) 满足 \\(Lh = \\delta\\)。系统对任意输入 \\(f(t)\\) 的输出？",
+        "options": [
+          "\\(y(t) = (h * f)(t) = \\int h(t-\\tau) f(\\tau)\\, d\\tau\\)（卷积——叠加原理）",
+        "\\(y = hf\\)",
+        "\\(y = h + f\\)",
+        "\\(y = Lf\\)"
+        ],
+        "answer": 0,
+        "explanation": "线性时不变（LTI）系统：\\(L[h*f] = (Lh)*f = \\delta*f = f\\)。输出 = 冲激响应与输入的卷积。频域：\\(\\hat y = \\hat h \\cdot \\hat f\\)——\\(\\hat h\\) 就是传递函数/频率响应。这是线性系统理论的基本定理。"
+      },
+      {
+        "id": "harmonic-ch03-q28",
+        "question": "在量子场论中，Feynman 传播子 \\(G_F\\) 满足 \\((\\Box + m^2)G_F = -\\delta^4(x)\\)（Klein-Gordon 方程的 Green 函数）。\\(G_F\\) 在动量空间（Fourier 变换后）的形式？",
+        "options": [
+          "\\(\\hat G_F(p) = \\frac{1}{p^2 - m^2 + i\\epsilon}\\)（\\(i\\epsilon\\) 处方确定因果性）",
+        "\\(\\delta(p)\\)",
+        "\\(1/m^2\\)",
+        "\\(e^{-m|p|}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Fourier 变换 \\((\\Box + m^2)G_F = -\\delta^4\\)：\\((-p^2 + m^2)\\hat G_F = -1\\)（\\(p^2 = p_0^2 - |\\mathbf{p}|^2\\)，闵可夫斯基度量）。\\(\\hat G_F = 1/(p^2 - m^2)\\)——但分母有零点（质壳）。\\(i\\epsilon\\) 位移选择因果推迟边界条件。\\(G_F\\) 是 Feynman 图计算的核心对象。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="harmonic"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/harmonic.html" class="module-name">调和分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 分布的定义与基本运算</a></li>
+      <li><a href="#kp2">02 · 分布的微分与基本解</a></li>
+      <li><a href="#kp3">03 · 缓增分布的 Fourier 变换</a></li>
+      <li><a href="#kp4">04 · Sobolev 嵌入定理初步</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>分布理论</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>分布的定义与基本运算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>经典函数不够用——\(\delta\) "函数"、Heaviside 阶跃函数的导数、 PDE 的基本解都不是传统意义下的函数。Schwartz 的分布理论 将"函数"推广为"作用在测试函数上的连续线性泛函"，使得 每个分布都可以求导、做 Fourier 变换——这为 PDE 理论奠定了 严格的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>分布将"函数"从"取值规则"转变为"对测试函数的作用"。 这种对偶视角允许用积分和极限统一处理所有广义函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>测试函数空间</strong>：\(\mathcal{D}(\mathbb{R}^n) = C_c^\infty(\mathbb{R}^n)\) （光滑紧支集函数），配适当拓扑。 <strong>分布</strong>：\(T \in \mathcal{D}'\)，即 \(T: \mathcal{D} \to \mathbb{R}\) 线性且连续（\(\varphi_n \to 0\) in \(\mathcal{D} \Rightarrow T(\varphi_n) \to 0\)）。 <strong>正则分布</strong>：\(f \in L^1_{\text{loc}} \mapsto T_f\)， \(\langle T_f, \varphi \rangle = \int f\varphi\, dx\)。 <strong>\(\delta\) 分布</strong>：\(\langle \delta, \varphi \rangle = \varphi(0)\)。 不是正则分布（没有 \(L^1_{\text{loc}}\) 函数 \(f\) 使 \(\int f\varphi = \varphi(0)\)）。 <strong>运算</strong>： - 加法、标量乘法（线性空间） - 与光滑函数相乘：\(\langle aT, \varphi \rangle = \langle T, a\varphi \rangle\) - 求导：\(\langle T', \varphi \rangle = -\langle T, \varphi' \rangle\) - 卷积（与紧支集分布或测试函数）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>电磁学中 \(\nabla \cdot \mathbf{E} = \rho/\varepsilon_0\)， 点电荷 \(\rho = q\delta(\mathbf{r})\) 只在分布意义下有意义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(H(x) = \begin{cases} 1 & x > 0 \\ 0 & x < 0 \end{cases}\)（Heaviside）的分布导数。 解答：\(\langle H', \varphi \rangle = -\langle H, \varphi' \rangle = -\int_0^\infty \varphi'(x) dx = \varphi(0) = \langle \delta, \varphi \rangle\)。 故 \(H' = \delta\)。✓ 易错点：分布的乘积一般无法定义（\(\delta \cdot \delta\) 无意义）。 只有分布与光滑函数的乘积有定义。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\langle x\delta, \varphi \rangle = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。$\\langle x\\delta, \\varphi \\rangle = \\langle \\delta, x\\varphi \\rangle')">A. \(\varphi(0)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！$\\langle x\\delta, \\varphi \\rangle = \\langle \\delta, x\\varphi \\rangle')">B. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。$\\langle x\\delta, \\varphi \\rangle = \\langle \\delta, x\\varphi \\rangle')">C. \(\varphi'(0)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。$\\langle x\\delta, \\varphi \\rangle = \\langle \\delta, x\\varphi \\rangle')">D. 无定义</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>分布的微分与基本解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>分布理论最强大的特点是：每个分布都可以任意次求导。不再需要 函数可微！这彻底解决了 PDE 中"解不够光滑"的困境。基本解 （Green 函数）是 \(LG = \delta\) 的解，它通过卷积给出非齐次 方程 \(Lu = f\) 的解 \(u = G * f\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>分布求导使得"导数"成为纯代数运算——不再需要极限过程。 基本解将 PDE 的求解归结为卷积运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分布导数</strong>：\(\langle D^\alpha T, \varphi \rangle = (-1)^{|\alpha|} \langle T, D^\alpha \varphi \rangle\)。 每个分布都有各阶分布导数。 <strong>基本解</strong>：若线性微分算子 \(L\) 满足 \(LG = \delta\)， 则 \(G\) 是 \(L\) 的基本解。\(Lu = f\) 的解为 \(u = G * f\) （\(L(G*f) = (LG)*f = \delta * f = f\)）。 <strong>例</strong>： - Laplacian \(\Delta\)：\(G(x) = \frac{1}{2\pi}\log|x|\)（\(n = 2\)）， \(G(x) = \frac{-1}{4\pi|x|}\)（\(n = 3\)）。 - 热方程 \(\partial_t - \Delta\)：\(G(x,t) = \frac{1}{(4\pi t)^{n/2}} e^{-|x|^2/(4t)}\)。 <strong>Malgrange-Ehrenpreis 定理</strong>（陈述）：每个常系数线性偏微分 算子都有基本解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>位势论：电荷分布 \(\rho\) 产生的电位 \(\phi = G * \rho\) （\(G\) 是 Laplacian 的基本解）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(-u'' = f\) 在 \(\mathbb{R}\) 上。基本解是什么？ 解答：\(-G'' = \delta\)。\(G(x) = -|x|/2\)。 验证：\(G'(x) = -\text{sgn}(x)/2\)，\(G'' = -\delta\)。✓ 解：\(u = G * f = -\frac{1}{2}\int |x - y| f(y) dy\)。 易错点：基本解不唯一（差一个齐次方程的解）。 物理中通常取衰减的基本解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}^3\) 中 Laplacian 的基本解是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\Delta(-1/(4\\pi|x|)) = \\delta\\) 在 \\(\\mathbb{R}^3\\) 中。')">A. \(\log|x|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\Delta(-1/(4\\pi|x|)) = \\delta\\) 在 \\(\\mathbb{R}^3\\) 中。')">B. \(-1/(4\pi|x|)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\Delta(-1/(4\\pi|x|)) = \\delta\\) 在 \\(\\mathbb{R}^3\\) 中。')">C. \(e^{-|x|}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\Delta(-1/(4\\pi|x|)) = \\delta\\) 在 \\(\\mathbb{R}^3\\) 中。')">D. \(|x|^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>缓增分布的 Fourier 变换</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>普通 Fourier 变换要求函数可积或平方可积，但分布不一定满足 这些条件。缓增分布 \(\mathcal{S}'\) 上的 Fourier 变换通过 与 Schwartz 空间的对偶定义，使得 \(\delta\)、多项式、 \(e^{ix}\) 等"函数"都有 Fourier 变换。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\mathcal{F}: \mathcal{S}' \to \mathcal{S}'\) 是同构， 推广了 \(L^2\) 上的 Plancherel 定理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：对 \(T \in \mathcal{S}'\)， \[\langle \hat{T}, \varphi \rangle = \langle T, \hat{\varphi} \rangle, \quad \forall \varphi \in \mathcal{S}\] <strong>性质</strong>： - \(\hat{T}\) 仍为缓增分布 - 与 \(L^1, L^2\) 上的定义相容 - \(\widehat{D^\alpha T} = (2\pi i\xi)^\alpha \hat{T}\) - \(\widehat{x^\alpha T} = (-1)^{|\alpha|}(2\pi i)^{-|\alpha|} D^\alpha \hat{T}\) <strong>经典公式</strong>： - \(\hat{\delta} = 1\)，\(\hat{1} = \delta\) - \(\widehat{e^{2\pi iax}} = \delta(\xi - a)\) - \(\widehat{|x|^{-\alpha}}\)：\(= C_\alpha |\xi|^{\alpha - n}\)（适当正则化后） - Poisson 求和公式：\(\sum_{n \in \mathbb{Z}} f(n) = \sum_{n \in \mathbb{Z}} \hat{f}(n)\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>X 射线衍射中，晶体的周期结构 \(\sum \delta(x - na)\) 的 Fourier 变换 \(= (1/a)\sum \delta(\xi - n/a)\)（倒格子），这解释了衍射斑点的分布。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\widehat{\text{sgn}}(\xi) = ?\)（\(\text{sgn}(x) = \pm 1\)）。 解答：\(\text{sgn}'(x) = 2\delta(x)\)。 \(2\pi i\xi \cdot \widehat{\text{sgn}} = 2\)，故 \(\widehat{\text{sgn}} = \frac{1}{\pi i\xi}\) （主值意义下）\(= \text{p.v.}\frac{1}{\pi i\xi}\)。 易错点：\(\hat{1} = \delta\) 不能从积分 \(\int e^{-2\pi ix\xi} dx\) 直接得到 （积分不收敛）。必须用分布意义定义。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Poisson 求和公式 \(\sum f(n) = \sum \hat{f}(n)\) 等价于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Dirac 梳 \\(\\text{III}(x) = \\sum \\delta(x-n)\\) 满足')">A. Parseval 恒等式</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Dirac 梳 \\(\\text{III}(x) = \\sum \\delta(x-n)\\) 满足')">B. \(\widehat{\sum \delta_n} = \sum \delta_n\)（Dirac 梳的自对偶性）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Dirac 梳 \\(\\text{III}(x) = \\sum \\delta(x-n)\\) 满足')">C. 卷积定理</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Dirac 梳 \\(\\text{III}(x) = \\sum \\delta(x-n)\\) 满足')">D. Plancherel 定理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Sobolev 嵌入定理初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>分布导数允许定义"弱导数"，从而定义 Sobolev 空间 \(W^{k,p} = \{f \in L^p : D^\alpha f \in L^p, |\alpha| \leq k\}\)。 Sobolev 嵌入定理建立了"弱可微性"与"经典正则性"的桥梁： 足够多的弱导数在 \(L^p\) 中 ⇒ 函数实际上连续。这是 PDE 正则性理论的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sobolev 空间用 Fourier 变换刻画：\(f \in H^s \Leftrightarrow (1 + |\xi|^2)^{s/2}\hat{f} \in L^2\)。更高的 Sobolev 正则性 = Fourier 变换衰减更快。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Sobolev 空间</strong>：\(W^{k,p}(\mathbb{R}^n) = \{f \in L^p : D^\alpha f \in L^p, |\alpha| \leq k\}\)， 范数 \(\|f\|_{W^{k,p}} = \sum_{|\alpha| \leq k} \|D^\alpha f\|_p\)。 <strong>\(H^s\) 空间</strong>：\(H^s(\mathbb{R}^n) = W^{s,2}\)（\(s\) 可以是分数）， \(\|f\|_{H^s}^2 = \int (1 + |\xi|^2)^s |\hat{f}(\xi)|^2 d\xi\)。 <strong>Sobolev 嵌入定理（陈述）</strong>： - \(kp > n\)（\(k = \) 导数阶, \(p = \) 可积指标, \(n = \) 维数）： \(W^{k,p}(\mathbb{R}^n) \hookrightarrow C(\mathbb{R}^n)\) （甚至 Hölder 连续）。 - \(kp = n\)：临界情形（Trudinger 不等式）。 - \(kp < n\)：\(W^{k,p} \hookrightarrow L^q\)（\(q = np/(n-kp)\)）。 一维特例：\(W^{1,1}(\mathbb{R}) \hookrightarrow C_0(\mathbb{R})\) （\(n = 1, k = 1, p = 1, kp = 1 = n\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>椭圆 PDE 正则性：弱解 \(\in H^1\) ⇒ 如果方程系数足够光滑， 则 \(u \in H^{k+2}\) ⇒ \(u \in C^k\)（Sobolev 嵌入）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(n = 2\), \(f \in W^{1,3}(\mathbb{R}^2)\)。\(f\) 连续吗？ 解答：\(kp = 1 \times 3 = 3 > 2 = n\)。由嵌入定理 \(f\) 连续。✓ 例题：\(n = 3\), \(g \in H^1(\mathbb{R}^3)\)。\(g\) 连续吗？ 解答：\(kp = 1 \times 2 = 2 < 3 = n\)。不保证连续。 但 \(g \in L^6\)（\(q = 3 \times 2/(3 - 2) = 6\)）。 易错点：Sobolev 嵌入不给出 \(W^{k,p} \subseteq L^\infty\) （当 \(kp < n\) 时），只给出 \(L^q\) 嵌入。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(W^{2,2}(\mathbb{R}^3)\) 嵌入 \(C(\mathbb{R}^3)\) 吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(k = 2, p = 2, n = 3\\)。\\(kp = 4 > 3 = n\\)。')">A. 是（\(kp = 4 > 3\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(k = 2, p = 2, n = 3\\)。\\(kp = 4 > 3 = n\\)。')">B. 否（\(kp = 4\) 但需 \(kp > n + 1\)）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(k = 2, p = 2, n = 3\\)。\\(kp = 4 > 3 = n\\)。')">C. 仅在有界区域上</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(k = 2, p = 2, n = 3\\)。\\(kp = 4 > 3 = n\\)。')">D. 取决于函数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/analysis/harmonic.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 曲率 — 黎曼几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "riemannian-ch03-q1",
+        "question": "黎曼曲率张量 \\(R(X,Y)Z\\) 的定义？",
+        "options": [
+          "\\(R(X,Y)Z = \\nabla_X\\nabla_Y Z - \\nabla_Y\\nabla_X Z - \\nabla_{[X,Y]}Z\\)",
+        "\\(R = \\nabla^2\\)",
+        "A（衡量协变导数的\"不可交换性\"——平坦 \\(\\iff R = 0\\)）",
+        "Gauss 曲率"
+        ],
+        "answer": 2,
+        "explanation": "\\(R(X,Y)Z = \\nabla_X\\nabla_Y Z - \\nabla_Y\\nabla_X Z - \\nabla_{[X,Y]}Z\\)。\\(R\\) 是 \\((1,3)\\)-张量。\\(R = 0 \\iff\\) 局部等距 \\(\\mathbb{R}^n\\)（平坦）。坐标中 \\(R^l_{ijk} = \\partial_i\\Gamma^l_{jk} - \\partial_j\\Gamma^l_{ik} + \\Gamma^l_{im}\\Gamma^m_{jk} - \\Gamma^l_{jm}\\Gamma^m_{ik}\\)。对称性：\\(R_{ijkl} = -R_{jikl} = -R_{ijlk} = R_{klij}\\), Bianchi 恒等式。"
+      },
+      {
+        "id": "riemannian-ch03-q2",
+        "question": "截面曲率 \\(K(\\sigma)\\)（\\(\\sigma = \\text{span}(X,Y) \\subseteq T_pM\\)）的定义？",
+        "options": [
+          "\\(K(\\sigma) = \\frac{g(R(X,Y)Y, X)}{g(X,X)g(Y,Y) - g(X,Y)^2}\\)",
+        "\\(K = \\text{tr}(R)\\)",
+        "A（\\(n=2\\) 时 \\(K =\\) Gauss 曲率）",
+        "标量曲率"
+        ],
+        "answer": 2,
+        "explanation": "\\(K(\\sigma)\\) = 沿 2-平面 \\(\\sigma\\) 的\"高斯曲率\"。\\(K(\\sigma) = \\frac{R_{1221}}{g_{11}g_{22} - g_{12}^2}\\)。曲面上 \\(K\\) = 通常的高斯曲率。\\(S^n(r)\\)：\\(K = 1/r^2\\) 常数。\\(\\mathbb{H}^n\\)：\\(K = -1\\) 常数。\\(\\mathbb{R}^n\\)：\\(K = 0\\)。截面曲率唯一确定 \\(R\\)（知道所有 2-平面的 \\(K \\Rightarrow\\) 知道 \\(R_{ijkl}\\)）。"
+      },
+      {
+        "id": "riemannian-ch03-q3",
+        "question": "Ricci 曲率 \\(\\text{Ric}(X,X)\\) 和标量曲率 \\(S\\) 是 \\(R\\) 的什么缩并？",
+        "options": [
+          "\\(\\text{Ric}_{ij} = R^k_{ikj}\\)（缩并一个指标），\\(S = g^{ij}\\text{Ric}_{ij}\\)（全缩并）",
+        "\\(\\text{Ric} = R\\)",
+        "\\(S = \\det(R)\\)",
+        "A（\\(K \\to \\text{Ric} \\to S\\) 逐步平均）"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{Ric}(X,X) = \\sum_{i=1}^{n-1} K(\\text{span}(X, e_i))\\)（在 \\(X\\) 方向取 \\(n-1\\) 个截面曲率之和）。\\(\\text{Ric}\\) 是 \\((0,2)\\)-张量。\\(S = \\text{tr}_g(\\text{Ric}) = \\sum_{i<j} K_{ij}\\) 的倍数。Einstein 方程用 Ricci 张量：\\(\\text{Ric} - \\frac{S}{2}g = 8\\pi T\\)。标量曲率 \\(S\\) = 一个数。"
+      },
+      {
+        "id": "riemannian-ch03-q4",
+        "question": "\\(S^2(r)\\) 的曲率张量分量 \\(R_{1212}\\)（\\(\\theta, \\phi\\) 坐标）？",
+        "options": [
+          "\\(R_{1212} = r^2\\sin^2\\theta\\)",
+        "\\(R_{1212} = 1\\)",
+        "A（\\(K = R_{1212}/(g_{11}g_{22}-g_{12}^2) = r^2\\sin^2\\theta/(r^2 \\cdot r^2\\sin^2\\theta) = 1/r^2\\)）",
+        "\\(R_{1212} = 0\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(g_{11} = r^2, g_{22} = r^2\\sin^2\\theta, g_{12} = 0\\)。\\(K = 1/r^2\\)。\\(R_{1212} = K \\cdot (g_{11}g_{22} - g_{12}^2) = \\frac{1}{r^2} \\cdot r^4\\sin^2\\theta = r^2\\sin^2\\theta\\)。或直接从 Christoffel 符号计算。\\(\\text{Ric}_{11} = K \\cdot g_{11} = r^2/r^2 = 1\\)... 实际 \\(\\text{Ric} = (n-1)Kg = g/r^2\\)（\\(n=2\\)）。\\(S = n(n-1)K = 2/r^2\\)。"
+      },
+      {
+        "id": "riemannian-ch03-q5",
+        "question": "曲率张量的几何意义：平行移动沿无穷小平行四边形一圈后向量的旋转由什么决定？",
+        "options": [
+          "\\(R(X,Y)Z\\)（\\(X, Y\\) = 平行四边形边，\\(Z\\) = 被移动向量）",
+        "Christoffel 符号",
+        "A（\"和乐角\" = 曲率 × 面积，有限版本）",
+        "度量"
+        ],
+        "answer": 2,
+        "explanation": "沿由 \\(\\epsilon X, \\epsilon Y\\) 张成的无穷小平行四边形移动 \\(Z\\)，返回后变化 \\(\\delta Z \\approx \\epsilon^2 R(X,Y)Z\\)。\\(R = 0 \\iff\\) 平行移动与路径无关 \\(\\iff\\) 平坦。这是曲率的几何本质：空间\"弯曲\"导致平行概念依赖路径。和乐群 \\(\\text{Hol}(M,g) \\subseteq O(n)\\)（或 \\(SO(n), U(n), \\ldots\\)）由曲率生成。"
+      },
+      {
+        "id": "riemannian-ch03-q6",
+        "question": "常曲率空间（space form）有哪些？",
+        "options": [
+          "\\(K > 0\\)：\\(S^n\\)，\\(K = 0\\)：\\(\\mathbb{R}^n\\)，\\(K < 0\\)：\\(\\mathbb{H}^n\\)",
+        "只有球面",
+        "A（连通完备单连通——三种模型空间）",
+        "所有流形"
+        ],
+        "answer": 2,
+        "explanation": "常截面曲率 \\(K\\) 的完备单连通黎曼流形：\\(M^n_K \\cong \\begin{cases}S^n(1/\\sqrt{K}) & K > 0 \\\\ \\mathbb{R}^n & K = 0 \\\\ \\mathbb{H}^n(1/\\sqrt{-K}) & K < 0\\end{cases}\\)（等距意义下唯一）。非单连通：商空间（\\(\\mathbb{RP}^n = S^n/\\mathbb{Z}_2\\), 平坦环面 \\(T^n = \\mathbb{R}^n/\\mathbb{Z}^n\\), 双曲面 \\(\\mathbb{H}^2/\\Gamma\\)）。"
+      },
+      {
+        "id": "riemannian-ch03-q7",
+        "question": "Einstein 流形满足什么？",
+        "options": [
+          "\\(\\text{Ric} = \\lambda g\\)（Ricci 曲率 = 度量的常数倍）",
+        "\\(R = 0\\)",
+        "A（\\(S = n\\lambda\\) 常数, 常曲率空间是 Einstein 流形的特例）",
+        "只有 \\(S^n\\)"
+        ],
+        "answer": 2,
+        "explanation": "Einstein 条件 \\(\\text{Ric}_{ij} = \\lambda g_{ij}\\)。取迹：\\(S = n\\lambda\\) 常数（\\(n \\geq 3\\), Schur 引理）。常截面曲率 \\(K \\Rightarrow\\) Einstein（\\(\\lambda = (n-1)K\\)）, 但反之不然。\\(n = 4\\)：Einstein 不蕴含常曲率。Einstein 流形在几何和物理（真空 Einstein 方程 \\(\\text{Ric} = 0\\), \\(\\lambda = 0\\)）中核心。"
+      },
+      {
+        "id": "riemannian-ch03-q8",
+        "question": "曲率张量的 Bianchi 恒等式有几种？",
+        "options": [
+          "第一 Bianchi：\\(R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0\\)（代数恒等式）",
+        "第二 Bianchi：\\((\\nabla_X R)(Y,Z) + (\\nabla_Y R)(Z,X) + (\\nabla_Z R)(X,Y) = 0\\)（微分恒等式）",
+        "A 和 B",
+        "只有一种"
+        ],
+        "answer": 2,
+        "explanation": "第一 Bianchi 是代数对称性（减少独立分量）。第二 Bianchi 是微分恒等式，缩并后给出 \\(\\text{div}(\\text{Ric} - \\frac{S}{2}g) = 0\\)——即 Einstein 张量 \\(G = \\text{Ric} - \\frac{S}{2}g\\) 无散。物理意义：\\(\\nabla \\cdot G = 0 \\Rightarrow \\nabla \\cdot T = 0\\)（能量动量守恒）。\\(R_{ijkl}\\) 独立分量数：\\(\\frac{n^2(n^2-1)}{12}\\)（\\(n=4\\): 20 个）。"
+      },
+      {
+        "id": "riemannian-ch03-q9",
+        "question": "\\(n\\)-维常曲率 \\(K\\) 空间的曲率张量 \\(R_{ijkl} = ?\\)",
+        "options": [
+          "\\(R_{ijkl} = K(g_{ik}g_{jl} - g_{il}g_{jk})\\)",
+        "\\(R_{ijkl} = Kg_{ij}\\)",
+        "A（所有截面曲率 \\(= K \\Rightarrow\\) 曲率张量完全由 \\(K\\) 和 \\(g\\) 确定）",
+        "\\(R = 0\\)"
+        ],
+        "answer": 2,
+        "explanation": "常截面曲率 \\(K\\)：\\(R_{ijkl} = K(g_{ik}g_{jl} - g_{il}g_{jk})\\)。验证 \\(K(\\sigma) = \\frac{R_{ijkl}X^iY^jY^kX^l}{(g_{ij}X^iX^j)(g_{kl}Y^kY^l) - (g_{ij}X^iY^j)^2} = K\\)。\\(\\text{Ric}_{ij} = (n-1)Kg_{ij}\\), \\(S = n(n-1)K\\)。\\(S^n(r)\\)：\\(K = 1/r^2\\), \\(R_{ijkl} = \\frac{1}{r^2}(g_{ik}g_{jl} - g_{il}g_{jk})\\)。"
+      },
+      {
+        "id": "riemannian-ch03-q10",
+        "question": "在材料科学中，晶体缺陷（位错）的几何描述用什么曲率概念？",
+        "options": [
+          "挠率 \\(T\\)（Burgers 向量 = 挠率积分）和曲率 \\(R\\)（旋错 = 曲率积分）",
+        "只用高斯曲率",
+        "A（含挠率的联络——Cartan 几何/广义 Weitzenböck 联络）",
+        "Ricci 曲率"
+        ],
+        "answer": 2,
+        "explanation": "晶体位错 = 平移缺陷 \\(\\leftrightarrow\\) 挠率 \\(T^k_{ij} = \\Gamma^k_{ij} - \\Gamma^k_{ji}\\)（联络不对称部分）。旋错 = 旋转缺陷 \\(\\leftrightarrow\\) 曲率 \\(R\\)。Burgers 向量 \\(b = \\oint T\\), Frank 向量 \\(\\Omega = \\oint R\\)。Cartan 几何（含挠率的黎曼几何推广）是连续介质缺陷理论的数学框架。Einstein-Cartan 理论也引入挠率。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="riemannian"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/riemannian.html" class="module-name">黎曼几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Riemann 曲率张量</a></li>
+      <li><a href="#kp2">02 · 截面曲率与 Ricci 曲率</a></li>
+      <li><a href="#kp3">03 · Gauss 曲率与 Gauss-Bonnet 定理</a></li>
+      <li><a href="#kp4">04 · 常曲率空间与空间形式</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>曲率</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Riemann 曲率张量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>曲率是黎曼几何的核心概念——它量化空间的"弯曲程度"。Riemann 曲率张量 \(R\) 是一个 \((1,3)\) 类型张量，完全编码了空间的内在曲率信息。 它衡量的是平行移动的路径依赖性：沿一个封闭小回路平行移动向量， 回来后向量旋转了——旋转量正比于曲率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(R(X,Y)Z\) 测量 \(\nabla_X\) 和 \(\nabla_Y\) 的"不可交换程度"—— 是联络的"二阶障碍"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>： \[R(X,Y)Z = \nabla_X\nabla_Y Z - \nabla_Y\nabla_X Z - \nabla_{[X,Y]}Z\] 坐标中：\(R^l{}_{kij} = \partial_i\Gamma^l_{jk} - \partial_j\Gamma^l_{ik} + \Gamma^l_{im}\Gamma^m_{jk} - \Gamma^l_{jm}\Gamma^m_{ik}\)。 <strong>对称性</strong>（Levi-Civita 联络）： (1) \(R_{ijkl} = -R_{jikl} = -R_{ijlk}\) (2) \(R_{ijkl} = R_{klij}\)（对称对） (3) 第一 Bianchi：\(R_{ijkl} + R_{iklj} + R_{iljk} = 0\) (4) 第二 Bianchi：\(\nabla_m R_{ijkl} + \nabla_i R_{jmkl} + \nabla_j R_{mikl} = 0\) 独立分量数：\(n^2(n^2-1)/12\)（\(n=2\) 时 \(1\) 个，\(n=3\) 时 \(6\) 个，\(n=4\) 时 \(20\) 个）。 \[n = 2: \quad R_{1212} \text{ 完全确定 } R\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Einstein 场方程中曲率张量描述引力场</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(R)\)（半径 \(R\)）的曲率张量。 解答：常曲率空间 \(K = 1/R^2\)。 \(R_{ijkl} = K(g_{ik}g_{jl} - g_{il}g_{jk})\)。 \(R_{\theta\varphi\theta\varphi} = K \cdot (g_{\theta\theta}g_{\varphi\varphi} - g_{\theta\varphi}^2) = \frac{1}{R^2} \cdot R^4\sin^2\theta = R^2\sin^2\theta\)。 易错点：指标升降很重要。\(R^\theta{}_{\varphi\theta\varphi} = g^{\theta\theta}R_{\theta\varphi\theta\varphi} = \frac{1}{R^2} \cdot R^2\sin^2\theta = \sin^2\theta\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(n\) 维黎曼流形的 Riemann 张量有多少个独立分量？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对称性将 \\(n^4\\) 个分量减少到 \\(n^2(n^2-1)/12\\) 个。')">A. \(n^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对称性将 \\(n^4\\) 个分量减少到 \\(n^2(n^2-1)/12\\) 个。')">B. \(n^4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！对称性将 \\(n^4\\) 个分量减少到 \\(n^2(n^2-1)/12\\) 个。')">C. \(n^2(n^2-1)/12\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对称性将 \\(n^4\\) 个分量减少到 \\(n^2(n^2-1)/12\\) 个。')">D. \(n(n-1)/2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>截面曲率与 Ricci 曲率</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Riemann 曲率张量有很多分量，不易直观理解。截面曲率 \(K(\Pi)\) 取一个 2 维平面 \(\Pi \subseteq T_pM\) 测量"该方向的弯曲"——它 推广了 Gauss 曲率。Ricci 曲率是截面曲率的迹（平均），标量曲率 再取迹。Einstein 方程直接涉及 Ricci 曲率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Riemann \(\to\) 截面曲率（2 维信息）\(\to\) Ricci（迹）\(\to\) 标量曲率（双迹）。 信息逐步减少，但在低维中截面曲率完全决定 Riemann。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>截面曲率</strong>：\(\Pi = \mathrm{span}(u,v) \subseteq T_pM\)（2 维平面）， \[K(\Pi) = \frac{R(u,v,v,u)}{g(u,u)g(v,v) - g(u,v)^2}\] \(K\) 与 \(u,v\) 的选取无关（只依赖平面 \(\Pi\)）。 \(n = 2\) 时 \(K = \) Gauss 曲率。 常截面曲率 \(K\) 的空间：\(S^n(1/\sqrt{K})\), \(\mathbb{R}^n\), \(\mathbb{H}^n\) （\(K > 0, = 0, < 0\)）。 <strong>Ricci 曲率</strong>：\(\mathrm{Ric}(u,v) = \sum_{i=1}^n R(e_i, u, v, e_i)\)（\(\{e_i\}\) 正交基）。 即 \(\mathrm{Ric}_{ij} = R^k{}_{ikj}\)（\(R\) 的迹）。 \(\mathrm{Ric}(v,v)/|v|^2\) = 经过 \(v\) 方向的截面曲率的平均。 <strong>标量曲率</strong>：\(S = g^{ij}\mathrm{Ric}_{ij} = \sum_i \mathrm{Ric}(e_i, e_i)\)。 \[S = \sum_{i \neq j} K(\Pi_{ij})\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Ricci 曲率 \(\geq (n-1)K > 0\) \(\Rightarrow\) 流形直径有上界（Bonnet-Myers） - Ricci 流 \(\partial_t g = -2\mathrm{Ric}\) 是 Perelman 证明几何化猜想的工具</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^n(R)\) 的 Ricci 曲率和标量曲率。 解答：截面曲率 \(K = 1/R^2\)（常数，所有平面）。 \(\mathrm{Ric}(v,v) = (n-1)K|v|^2 = (n-1)/R^2 \cdot |v|^2\)。 \(\mathrm{Ric}_{ij} = (n-1)/R^2 \cdot g_{ij}\)（Einstein 流形）。 \(S = n(n-1)/R^2\)。 易错点：\(\mathrm{Ric}\) 是 \((n-1)\) 个截面曲率之和（不是平均值）， 标量曲率是 \(\binom{n}{2}\) 个截面曲率之和乘以 2（或其他约定——注意系数约定）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}^n\) 的 Ricci 曲率是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{R}^n\\) 平坦，\\(R = 0\\)，所以 \\(\\mathrm{Ric} = 0\\)，\\(S = 0\\)。')">A. 正的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{R}^n\\) 平坦，\\(R = 0\\)，所以 \\(\\mathrm{Ric} = 0\\)，\\(S = 0\\)。')">B. 负的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\mathbb{R}^n\\) 平坦，\\(R = 0\\)，所以 \\(\\mathrm{Ric} = 0\\)，\\(S = 0\\)。')">C. 零</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{R}^n\\) 平坦，\\(R = 0\\)，所以 \\(\\mathrm{Ric} = 0\\)，\\(S = 0\\)。')">D. 取决于 \(n\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Gauss 曲率与 Gauss-Bonnet 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Gauss-Bonnet 定理是微分几何中最深刻的定理之一：它将曲面的 Gauss 曲率（局部几何/分析量）积分后等于 Euler 特征（全局拓扑 不变量）。"几何完全决定拓扑"——这是局部-整体原理的巅峰体现。 高维推广是 Chern-Gauss-Bonnet 定理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Gauss-Bonnet = 曲率（分析/几何）与 Euler 特征（拓扑）的桥梁。 这是指标定理的原型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Gauss 曲率</strong>：2 维黎曼曲面 \((M^2, g)\)，\(K = R_{1212} / \det(g_{ij})\)。 \(K\) 是 2 维 Riemann 张量的唯一独立分量。 <strong>Gauss-Bonnet 定理（闭曲面）</strong>：\(M\) 闭定向 2 维黎曼流形， \[\int_M K\, dA = 2\pi \chi(M)\] <strong>带边界版本</strong>：\(M\) 紧致带边界，\(\partial M\) 分段光滑， \[\int_M K\, dA + \int_{\partial M} \kappa_g\, ds + \sum_i \alpha_i = 2\pi \chi(M)\] \(\kappa_g\) = 边界测地曲率，\(\alpha_i\) = 角点的外角。 <strong>推论</strong>： - \(\chi(S^2) = 2\)：\(\int K\, dA = 4\pi\)（\(K = 1/R^2\) 对球面） - \(\chi(T^2) = 0\)：\(\int K\, dA = 0\)（环面的总曲率为零）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 大地测量学：三角形内角和偏差 \(= \int_\Delta K\, dA\) - Chern-Gauss-Bonnet 在高维推广为指标定理（Atiyah-Singer）的特例</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(R)\) 的 Gauss-Bonnet 验证。 解答：\(K = 1/R^2\)（常数），\(\mathrm{Area}(S^2(R)) = 4\pi R^2\)。 \(\int K\, dA = (1/R^2)(4\pi R^2) = 4\pi\)。 \(2\pi\chi(S^2) = 2\pi \cdot 2 = 4\pi\)。✓ 易错点：\(\chi(T^2) = 0\)，所以环面上正曲率和负曲率区域的贡献完全抵消。 环面不可能有处处正的 Gauss 曲率（否则 \(\int K > 0 \neq 0\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">亏格 \(g\) 的闭定向曲面 \(\Sigma_g\) 的 Euler 特征是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\chi(\\Sigma_g) = 2-2g\\)。\\(g=0\\)（球面）\\(\\chi=2\\)；')">A. \(2g\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\chi(\\Sigma_g) = 2-2g\\)。\\(g=0\\)（球面）\\(\\chi=2\\)；')">B. \(2-2g\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\chi(\\Sigma_g) = 2-2g\\)。\\(g=0\\)（球面）\\(\\chi=2\\)；')">C. \(g\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\chi(\\Sigma_g) = 2-2g\\)。\\(g=0\\)（球面）\\(\\chi=2\\)；')">D. \(2+2g\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>常曲率空间与空间形式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>截面曲率恒为常数 \(K\) 的黎曼流形——空间形式——是几何中最对称 的空间。\(K > 0\) 是球面，\(K = 0\) 是欧氏空间，\(K < 0\) 是双曲空间。 它们的分类是一个经典问题：完备单连通的常曲率空间只有这三种 （唯一性定理），一般常曲率空间是它们被离散群作用的商。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>常曲率 = 最大对称。Schur 定理：如果截面曲率在每点各方向相同 且 \(\dim \geq 3\)，则 \(K\) 全局为常数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>模型空间</strong>： - \(K > 0\)：\(S^n(1/\sqrt{K})\)（半径 \(1/\sqrt{K}\) 的球面） - \(K = 0\)：\(\mathbb{R}^n\) - \(K < 0\)：\(\mathbb{H}^n\)（双曲空间） <strong>唯一性定理</strong>：完备单连通 \(n\) 维常曲率 \(K\) 黎曼流形与模型空间等距（\(n \geq 2\)）。 <strong>空间形式</strong>：\(M = \tilde{M} / \Gamma\)，\(\tilde{M}\) 为模型空间， \(\Gamma\) 是 \(\mathrm{Isom}(\tilde{M})\) 的离散自由作用子群。 - \(K > 0\)：球面空间形式（如 \(\mathbb{R}P^n = S^n / \mathbb{Z}_2\)，透镜空间） - \(K = 0\)：Bieberbach 群的商（如 \(T^n = \mathbb{R}^n / \mathbb{Z}^n\)） - \(K < 0\)：双曲流形 <strong>Schur 定理</strong>：\(\dim M \geq 3\)，如果截面曲率在每点 \(K_p(\Pi)\) 对所有 \(\Pi\) 相同（\(= K(p)\)），则 \(K(p) = \) 常数。 （证明用第二 Bianchi 恒等式。）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 宇宙学中三种标准空间模型（正曲率/平坦/双曲）对应宇宙的三种几何</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(M = \mathbb{R}^2 / \mathbb{Z}^2\)（平坦环面），截面曲率 \(K = ?\) 解答：\(\tilde{M} = \mathbb{R}^2\) 是 \(K = 0\) 的模型空间。 \(\Gamma = \mathbb{Z}^2\) 通过平移作用，等距变换不改变曲率。 \(K = 0\)（平坦环面）。 易错点：环面可以嵌入 \(\mathbb{R}^3\)（显式参数化），但嵌入度量 的 Gauss 曲率有正有负区域——那不是内在的平坦度量。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">完备单连通常曲率 \(K < 0\) 的 \(n\) 维空间是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(K < 0\\) 对应双曲空间。\\(S^n\\) 是 \\(K > 0\\)，\\(\\mathbb{R}^n\\) 是 \\(K = 0\\)，')">A. \(S^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(K < 0\\) 对应双曲空间。\\(S^n\\) 是 \\(K > 0\\)，\\(\\mathbb{R}^n\\) 是 \\(K = 0\\)，')">B. \(\mathbb{R}^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(K < 0\\) 对应双曲空间。\\(S^n\\) 是 \\(K > 0\\)，\\(\\mathbb{R}^n\\) 是 \\(K = 0\\)，')">C. \(\mathbb{H}^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(K < 0\\) 对应双曲空间。\\(S^n\\) 是 \\(K > 0\\)，\\(\\mathbb{R}^n\\) 是 \\(K = 0\\)，')">D. \(T^n\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/geometry/riemannian.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

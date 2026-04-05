@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 存在唯一性定理 — 常微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "edo-ch02-q1",
+        "question": "初值问题（IVP）\\(y' = f(t,y)\\)，\\(y(t_0) = y_0\\) 的等价积分形式是什么？",
+        "options": [
+          "\\(y(t) = y_0 + \\int_{t_0}^{t} f(s, y_0)\\,ds\\)",
+        "\\(y(t) = y_0 + \\int_{t_0}^{t} f(s, y(s))\\,ds\\)",
+        "\\(y(t) = \\int_{t_0}^{t} f(s, y(s))\\,ds\\)",
+        "\\(y(t) = y_0 \\cdot \\exp\\!\\left(\\int_{t_0}^{t} f(s)\\,ds\\right)\\)"
+        ],
+        "answer": 1,
+        "explanation": "对 \\(y' = f(t,y)\\) 两边从 \\(t_0\\) 到 \\(t\\) 积分得 \\(y(t) - y(t_0) = \\int_{t_0}^t f(s,y(s))\\,ds\\)，再利用 \\(y(t_0)=y_0\\) 即得 Volterra 积分方程 \\(y(t)=y_0+\\int_{t_0}^t f(s,y(s))\\,ds\\)。A 错在用 \\(y_0\\) 代替 \\(y(s)\\)。"
+      },
+      {
+        "id": "edo-ch02-q2",
+        "question": "函数 \\(f(t,y) = t^2 + y^2\\) 在矩形区域 \\(|t| \\leq 1,\\;|y| \\leq 2\\) 上关于 \\(y\\) 的 Lipschitz 常数 \\(L\\) 的最小值是？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|f(t,y_1)-f(t,y_2)| = |y_1^2 - y_2^2| = |y_1+y_2||y_1-y_2| \\leq (|y_1|+|y_2|)|y_1-y_2| \\leq 4|y_1-y_2|\\)，其中 \\(|y_i| \\leq 2\\)。因此 \\(L=4\\)。也可由 \\(\\partial f/\\partial y = 2y\\)，\\(\\max|2y|=4\\) 得到。"
+      },
+      {
+        "id": "edo-ch02-q3",
+        "question": "验证 \\(f(t,y) = e^y\\) 在区域 \\(|y| \\leq M\\) 上关于 \\(y\\) 满足 Lipschitz 条件，其 Lipschitz 常数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(e^M\\)",
+        "\\(Me^M\\)",
+        "\\(2e^M\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|e^{y_1}-e^{y_2}| = e^\\xi |y_1-y_2|\\)（均值定理，\\(\\xi\\) 介于 \\(y_1,y_2\\) 之间）。在 \\(|y|\\leq M\\) 上 \\(e^\\xi \\leq e^M\\)，故 \\(L=e^M\\)。注意 \\(e^y\\) 不是全局 Lipschitz（\\(y\\to\\infty\\) 时导数无界），仅是局部 Lipschitz。"
+      },
+      {
+        "id": "edo-ch02-q4",
+        "question": "对 \\(y' = 2t\\)，\\(y(0) = 0\\) 做 Picard 迭代，\\(y_2(t)\\) 等于？",
+        "options": [
+          "\\(0\\)",
+        "\\(t^2\\)",
+        "\\(2t\\)",
+        "\\(t^2 + t^4/2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f(t,y)=2t\\) 不依赖 \\(y\\)。\\(y_0(t)=0\\)，\\(y_1(t)=0+\\int_0^t 2s\\,ds=t^2\\)，\\(y_2(t)=0+\\int_0^t 2s\\,ds=t^2\\)。迭代一次后即稳定（\\(y_n=t^2\\) 对所有 \\(n\\geq 1\\)），因为 \\(f\\) 不含 \\(y\\)。精确解即为 \\(y=t^2\\)。"
+      },
+      {
+        "id": "edo-ch02-q5",
+        "question": "对 \\(y' = y\\)，\\(y(0) = 1\\) 做 Picard 迭代 3 步，\\(y_3(t)\\) 等于？",
+        "options": [
+          "\\(1+t+t^2/2\\)",
+        "\\(1+t+t^2/2+t^3/6\\)",
+        "\\(e^t\\)",
+        "\\(1+t+t^2+t^3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(y_0=1\\)，\\(y_1=1+\\int_0^t 1\\,ds=1+t\\)，\\(y_2=1+\\int_0^t(1+s)ds=1+t+t^2/2\\)，\\(y_3=1+\\int_0^t(1+s+s^2/2)ds=1+t+t^2/2+t^3/6\\)。这恰好是 \\(e^t\\) 的前 4 项 Taylor 展开。"
+      },
+      {
+        "id": "edo-ch02-q6",
+        "question": "Peano 存在定理的条件是什么？",
+        "options": [
+          "\\(f\\) 连续且 Lipschitz",
+        "\\(f\\) 仅需连续",
+        "\\(f\\) 连续可微",
+        "\\(f\\) 有界"
+        ],
+        "answer": 1,
+        "explanation": "Peano 定理仅要求 \\(f(t,y)\\) 在区域上连续即可保证 IVP 至少有一个局部解。不需要 Lipschitz 条件。但连续性只保证存在性不保证唯一性（如 \\(y'=y^{2/3}\\)，\\(y(0)=0\\) 有多个解）。"
+      },
+      {
+        "id": "edo-ch02-q7",
+        "question": "若 \\(u(t) \\geq 0\\) 且 \\(u(t) \\leq 5 + 3\\int_0^t u(s)\\,ds\\)，由 Grönwall 不等式，\\(u(2)\\) 的上界是？",
+        "options": [
+          "\\(5e^6\\)",
+        "\\(5e^3\\)",
+        "\\(15\\)",
+        "\\(5+6\\)"
+        ],
+        "answer": 0,
+        "explanation": "Grönwall 不等式：\\(u(t)\\leq a+b\\int_0^t u(s)\\,ds\\) 蕴含 \\(u(t)\\leq ae^{bt}\\)。这里 \\(a=5\\)，\\(b=3\\)，故 \\(u(2)\\leq 5e^{3\\times 2}=5e^6\\approx 2017\\)。"
+      },
+      {
+        "id": "edo-ch02-q8",
+        "question": "函数 \\(f(t,y)=\\sqrt{|y|}\\) 在 \\(y=0\\) 附近是否满足 Lipschitz 条件？",
+        "options": [
+          "是，\\(L=1\\)",
+        "否，比值 \\(|\\sqrt{|y_1|}-\\sqrt{|y_2|}|/|y_1-y_2| \\to \\infty\\)",
+        "是，\\(L=1/2\\)",
+        "仅在 \\(y>1\\) 时满足"
+        ],
+        "answer": 1,
+        "explanation": "取 \\(y_1=\\epsilon>0\\)，\\(y_2=0\\)：\\(\\sqrt{\\epsilon}/\\epsilon=1/\\sqrt{\\epsilon}\\to\\infty\\)（\\(\\epsilon\\to 0\\)）。因此 \\(f\\) 在 \\(y=0\\) 附近不 Lipschitz。这直接导致 \\(y'=\\sqrt{|y|}\\)，\\(y(0)=0\\) 的解不唯一（\\(y\\equiv 0\\) 和 \\(y=(t/2)^2\\) 都是解）。"
+      },
+      {
+        "id": "edo-ch02-q9",
+        "question": "\\(f(t,y) = |y|\\) 在全 \\(\\mathbb{R}\\) 上关于 \\(y\\) 是否 Lipschitz？Lipschitz 常数是？",
+        "options": [
+          "不是，\\(|y|\\) 在 \\(y=0\\) 不可微",
+        "是，\\(L=1\\)",
+        "是，\\(L=2\\)",
+        "仅在 \\(y \\neq 0\\) 时"
+        ],
+        "answer": 1,
+        "explanation": "\\(||y_1|-|y_2||\\leq |y_1-y_2|\\)（三角不等式的推论），故 \\(L=1\\)。Lipschitz 条件不要求可微！\\(|y|\\) 在 \\(y=0\\) 不可微但仍全局 Lipschitz。易错点：不要将\"可微\"等同于\"Lipschitz\"，Lipschitz 是更弱的正则性条件。"
+      },
+      {
+        "id": "edo-ch02-q10",
+        "question": "Cauchy-Lipschitz 定理中，若 \\(\\max_R|f| = M\\)，\\(R = \\{|t-t_0|\\leq a,\\;|y-y_0|\\leq b\\}\\)，解的存在区间 \\([t_0-\\alpha, t_0+\\alpha]\\) 中 \\(\\alpha\\) 如何确定？",
+        "options": [
+          "\\(\\alpha = a\\)",
+        "\\(\\alpha = b/M\\)",
+        "\\(\\alpha = \\min(a, b/M)\\)",
+        "\\(\\alpha = \\min(a, b/L)\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\alpha = \\min(a, b/M)\\) 保证 Picard 迭代的所有近似解不离开矩形区域 \\(R\\)。\\(b/M\\) 是沿切线走不超出 \\(|y-y_0|\\leq b\\) 的时间限制；\\(a\\) 是 \\(t\\) 方向的限制。取两者之小保证 \\((t,y(t))\\) 始终在 \\(R\\) 内。"
+      },
+      {
+        "id": "edo-ch02-q11",
+        "question": "Picard 迭代收敛速度的关键因素是什么？",
+        "options": [
+          "初始猜测 \\(y_0\\) 的精度",
+        "\\(f\\) 的连续性模",
+        "Lipschitz 常数 \\(L\\) 和存在区间长度 \\(\\alpha\\)",
+        "\\(f\\) 的有界性 \\(M\\)"
+        ],
+        "answer": 2,
+        "explanation": "Picard 迭代的误差界为 \\(|y_{n+1}-y_n|\\leq ML^n\\alpha^{n+1}/(n+1)!\\)，收敛速度由 \\(L\\alpha\\) 控制。当 \\(L\\alpha<1\\) 时收敛极快（级数由 \\(e^{L\\alpha}\\) 的 Taylor 展开控制）。Lipschitz 常数 \\(L\\) 越大，收敛越慢。"
+      },
+      {
+        "id": "edo-ch02-q12",
+        "question": "\\(y' = y^2\\)，\\(y(0) = 2\\) 的解在何时爆破？",
+        "options": [
+          "\\(t = 1\\)",
+        "\\(t = 1/2\\)",
+        "\\(t = 2\\)",
+        "不爆破"
+        ],
+        "answer": 1,
+        "explanation": "分离变量 \\(dy/y^2 = dt\\)，\\(-1/y = t + C\\)。\\(y(0)=2\\)：\\(C=-1/2\\)。\\(y=2/(1-2t)\\)。分母为零时爆破：\\(t=1/2\\)。\\(y\\to+\\infty\\) 当 \\(t\\to 1/2^-\\)。这说明非线性 ODE 的解可在有限时间内趋于无穷。"
+      },
+      {
+        "id": "edo-ch02-q13",
+        "question": "\\(y' = y^{2/3}\\)，\\(y(0) = 0\\) 有几个解？",
+        "options": [
+          "恰好 1 个",
+        "恰好 2 个",
+        "无穷多个",
+        "0 个"
+        ],
+        "answer": 2,
+        "explanation": "\\(y\\equiv 0\\) 是一个解。\\(y=(t/3)^3\\)（\\(t\\geq 0\\)）也是解。更一般地，对任意 \\(c\\geq 0\\)，\\(y(t)=\\begin{cases}0,&t\\leq c\\\\((t-c)/3)^3,&t>c\\end{cases}\\) 也是解。因此有无穷多个解。根源在于 \\(f(y)=y^{2/3}\\) 在 \\(y=0\\) 不 Lipschitz。"
+      },
+      {
+        "id": "edo-ch02-q14",
+        "question": "\\(y' = 1 + y^2\\)，\\(y(0) = 1\\) 的爆破时间是？",
+        "options": [
+          "\\(\\pi/2\\)",
+        "\\(\\pi/4\\)",
+        "\\(\\pi/2 - \\pi/4 = \\pi/4\\)",
+        "\\(\\pi - \\arctan 1 = 3\\pi/4\\)"
+        ],
+        "answer": 2,
+        "explanation": "分离变量 \\(dy/(1+y^2)=dt\\)，\\(\\arctan y = t + C\\)。\\(y(0)=1\\)：\\(C=\\arctan 1 = \\pi/4\\)。\\(y=\\tan(t+\\pi/4)\\)。在 \\(t+\\pi/4=\\pi/2\\) 即 \\(t=\\pi/4\\) 处爆破。注意初值 \\(y_0=1\\neq 0\\) 使得爆破时间从 \\(\\pi/2\\) 缩短到 \\(\\pi/4\\)。"
+      },
+      {
+        "id": "edo-ch02-q15",
+        "question": "设 \\(y_1\\)，\\(y_2\\) 分别是 \\(y'=f(t,y)\\) 在初值 \\(y_{0,1}=1\\)，\\(y_{0,2}=1.01\\) 下的解，\\(f\\) 关于 \\(y\\) 的 Lipschitz 常数 \\(L=10\\)。则 \\(|y_1(1)-y_2(1)|\\) 的上界是？",
+        "options": [
+          "\\(0.01\\)",
+        "\\(0.01 \\times e^{10}\\)",
+        "\\(0.01 \\times 10\\)",
+        "\\(0.01 \\times e\\)"
+        ],
+        "answer": 1,
+        "explanation": "由 Grönwall 不等式推出的连续依赖性：\\(|y_1(t)-y_2(t)|\\leq|y_{0,1}-y_{0,2}|e^{L|t-t_0|}\\)。代入 \\(|y_{0,1}-y_{0,2}|=0.01\\)，\\(L=10\\)，\\(t=1\\)：上界为 \\(0.01\\times e^{10}\\approx 220.3\\)。这说明初值差 0.01 可以在 \\(t=1\\) 时放大到 220 倍。"
+      },
+      {
+        "id": "edo-ch02-q16",
+        "question": "Grönwall 不等式中 \\(u(t) \\leq a(t) + \\int_0^t b(s)u(s)\\,ds\\)，若 \\(a(t)=2\\)，\\(b(s)=1\\)，则 \\(u(t)\\) 的上界是？",
+        "options": [
+          "\\(2e^t\\)",
+        "\\(2+t\\)",
+        "\\(2(1+t)\\)",
+        "\\(e^{2t}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Grönwall 不等式（常数版）：\\(u(t)\\leq ae^{\\int_0^t b\\,ds}=2e^t\\)。这是最紧的指数上界。B 和 C 是线性增长，不是 Grönwall 的结论；D 中指数底错误。"
+      },
+      {
+        "id": "edo-ch02-q17",
+        "question": "Picard 迭代本质上依赖于哪个不动点定理？",
+        "options": [
+          "Brouwer 不动点定理",
+        "Banach 压缩映射原理",
+        "Schauder 不动点定理",
+        "Kakutani 不动点定理"
+        ],
+        "answer": 1,
+        "explanation": "积分算子 \\(T[y](t)=y_0+\\int_{t_0}^t f(s,y(s))\\,ds\\) 在适当的度量空间（如加权 \\(\\sup\\) 范数）上是压缩映射（利用 Lipschitz 条件）。Banach 压缩映射原理保证唯一不动点即唯一解。Schauder 不动点定理用于 Peano 的存在定理（无 Lipschitz 条件时）。"
+      },
+      {
+        "id": "edo-ch02-q18",
+        "question": "函数 \\(f(t,y) = y\\sin(1/y)\\)（\\(y\\neq 0\\)），\\(f(t,0)=0\\) 在 \\(y=0\\) 附近是否 Lipschitz？",
+        "options": [
+          "是，\\(L=2\\)",
+        "否，\\(\\sin(1/y)\\) 振荡太快",
+        "是，\\(L=1\\)",
+        "否，\\(f\\) 在 \\(y=0\\) 不连续"
+        ],
+        "answer": 0,
+        "explanation": "\\(|f(t,y)| = |y\\sin(1/y)| \\leq |y|\\)（因 \\(|\\sin|\\leq 1\\)）。\\(|f(t,y_1)-f(t,y_2)| \\leq |y_1\\sin(1/y_1)-y_2\\sin(1/y_2)|\\)。利用 \\(|y\\sin(1/y)|\\) 可微且导数有界的事实，可以验证 \\(f\\) 整体 Lipschitz 常数 \\(L\\leq 2\\)。关键：\\(f\\) 连续、振荡但有界增长率。"
+      },
+      {
+        "id": "edo-ch02-q19",
+        "question": "对系统 \\(\\mathbf{Y}' = A\\mathbf{Y}\\)（\\(A\\) 为常矩阵），Picard 迭代 \\(\\mathbf{Y}_{n+1}(t)=\\mathbf{Y}_0+\\int_0^t A\\mathbf{Y}_n(s)\\,ds\\) 从 \\(\\mathbf{Y}_0=\\mathbf{I}\\) 出发，\\(\\mathbf{Y}_n(t)\\) 等于什么？",
+        "options": [
+          "\\((tA)^n/n!\\)",
+        "\\(\\sum_{k=0}^n (tA)^k/k!\\)",
+        "\\(e^{tA}\\)",
+        "\\(I + ntA\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbf{Y}_0=I\\)，\\(\\mathbf{Y}_1=I+tA\\)，\\(\\mathbf{Y}_2=I+\\int_0^t A(I+sA)ds=I+tA+t^2A^2/2\\)。归纳法易证 \\(\\mathbf{Y}_n=\\sum_{k=0}^n (tA)^k/k!\\)，这是 \\(e^{tA}\\) 的 \\(n\\) 次 Taylor 部分和。\\(n\\to\\infty\\) 时收敛到 \\(e^{tA}\\)。"
+      },
+      {
+        "id": "edo-ch02-q20",
+        "question": "方程 \\(y' = y^p\\)，\\(y(0)=y_0>0\\) 在 \\(p>1\\) 时的爆破时间 \\(T^*\\) 为？",
+        "options": [
+          "\\(\\frac{1}{(p-1)y_0^{p-1}}\\)",
+        "\\(\\frac{y_0}{p-1}\\)",
+        "\\(\\frac{1}{py_0^p}\\)",
+        "\\(\\infty\\)（不爆破）"
+        ],
+        "answer": 0,
+        "explanation": "分离变量 \\(\\int y^{-p}dy = t+C\\)，\\(\\frac{y^{1-p}}{1-p}=t+C\\)。\\(y(0)=y_0\\)：\\(C=\\frac{y_0^{1-p}}{1-p}\\)。当 \\(y\\to\\infty\\) 时 \\(y^{1-p}\\to 0\\)（因 \\(p>1\\)），故 \\(T^*=-C=\\frac{y_0^{1-p}}{p-1}=\\frac{1}{(p-1)y_0^{p-1}}\\)。\\(p=2\\)，\\(y_0=1\\) 时 \\(T^*=1\\)。"
+      },
+      {
+        "id": "edo-ch02-q21",
+        "question": "Peano 存在定理的证明使用以下哪个紧性工具？",
+        "options": [
+          "Bolzano-Weierstrass 定理",
+        "Arzelà-Ascoli 定理",
+        "Heine-Borel 定理",
+        "Banach-Alaoglu 定理"
+        ],
+        "answer": 1,
+        "explanation": "Peano 定理的证明构造 Euler 折线逼近序列 \\(\\{y_h\\}\\)。\\(|f|\\leq M\\) 保证等度连续、一致有界。Arzelà-Ascoli 定理从中提取一致收敛的子列，极限即为 IVP 的解。Banach 压缩映射用于 Cauchy-Lipschitz 而不是 Peano。"
+      },
+      {
+        "id": "edo-ch02-q22",
+        "question": "设 \\(y_1(t)\\) 和 \\(y_2(t)\\) 满足同一方程 \\(y'=f(t,y)\\)（\\(L\\)-Lipschitz），初值分别为 \\(y_0\\) 和 \\(y_0+\\delta\\)。则在区间 \\([0,T]\\) 上任意 \\(\\epsilon>0\\) 可以保证 \\(|y_1-y_2|<\\epsilon\\) 只需 \\(\\delta\\) 满足？",
+        "options": [
+          "\\(\\delta < \\epsilon\\)",
+        "\\(\\delta < \\epsilon e^{-LT}\\)",
+        "\\(\\delta < \\epsilon/T\\)",
+        "\\(\\delta < \\epsilon/(1+LT)\\)"
+        ],
+        "answer": 1,
+        "explanation": "由连续依赖性 \\(|y_1(t)-y_2(t)|\\leq\\delta e^{Lt}\\)，要求 \\(\\delta e^{LT}<\\epsilon\\)，即 \\(\\delta<\\epsilon e^{-LT}\\)。当 \\(LT\\) 大时，所需 \\(\\delta\\) 指数小——这定量描述了初值敏感性（混沌系统中 \\(LT\\gg 1\\)）。"
+      },
+      {
+        "id": "edo-ch02-q23",
+        "question": "设 \\(u'(t) \\leq 3u(t) + 2\\)，\\(u(0)=1\\)，\\(u(t)\\geq 0\\)。利用 Grönwall 不等式（微分形式），\\(u(1)\\) 的上界是？",
+        "options": [
+          "\\(e^3 + 2(e^3-1)/3\\)",
+        "\\(3e^3\\)",
+        "\\(5e^3\\)",
+        "\\((1+2/3)e^3 - 2/3\\)"
+        ],
+        "answer": 3,
+        "explanation": "微分 Grönwall：\\(u'(t)\\leq\\beta u+\\alpha\\)，\\(\\beta=3\\)，\\(\\alpha=2\\)，\\(u_0=1\\)。\\(u(t)\\leq u_0 e^{\\beta t}+\\frac{\\alpha}{\\beta}(e^{\\beta t}-1)=e^{3t}+\\frac{2}{3}(e^{3t}-1)=(1+2/3)e^{3t}-2/3=\\frac{5}{3}e^{3t}-\\frac{2}{3}\\)。\\(u(1)\\leq\\frac{5}{3}e^3-\\frac{2}{3}\\approx 33.2\\)。"
+      },
+      {
+        "id": "edo-ch02-q24",
+        "question": "若 \\(f(t,y)\\) 关于 \\(y\\) 可微且 \\(|\\partial f/\\partial y|\\leq L\\)，为什么 \\(f\\) 关于 \\(y\\) Lipschitz？",
+        "options": [
+          "因为连续函数有界",
+        "因为均值定理给出 \\(|f(t,y_1)-f(t,y_2)|\\leq L|y_1-y_2|\\)",
+        "因为可微蕴含连续",
+        "因为 \\(\\partial f/\\partial y\\) 存在蕴含 \\(f\\) 单调"
+        ],
+        "answer": 1,
+        "explanation": "均值定理：\\(f(t,y_1)-f(t,y_2) = f_y(t,\\xi)(y_1-y_2)\\)，\\(\\xi\\) 介于 \\(y_1,y_2\\) 之间。取绝对值 \\(|f(t,y_1)-f(t,y_2)| = |f_y(t,\\xi)||y_1-y_2|\\leq L|y_1-y_2|\\)。这证明了\"偏导数有界 ⇒ Lipschitz\"，但反之不然（\\(|y|\\) Lipschitz 但 \\(y=0\\) 不可微）。"
+      },
+      {
+        "id": "edo-ch02-q25",
+        "question": "\\(y' = -y^3\\)，\\(y(0)=1\\) 的解的最大存在区间是？",
+        "options": [
+          "\\([0,1)\\)",
+        "\\([0,+\\infty)\\)",
+        "\\((-\\infty,+\\infty)\\)",
+        "\\([0,\\pi/2)\\)"
+        ],
+        "answer": 2,
+        "explanation": "分离变量 \\(-dy/y^3=dt\\)，\\(1/(2y^2)=t+C\\)，\\(y(0)=1\\)：\\(C=1/2\\)。\\(y=1/\\sqrt{1+2t}\\)（\\(t>-1/2\\)）。\\(t\\to+\\infty\\) 时 \\(y\\to 0\\)（不爆破），\\(t\\to -1/2^+\\) 时 \\(y\\to+\\infty\\)。最大存在区间 \\((-1/2,+\\infty)\\)；但由于方程 \\(y'=-y^3\\) 对负方向也可分析，实际上全局存在。"
+      },
+      {
+        "id": "edo-ch02-q26",
+        "question": "某药物在血液中的浓度 \\(c(t)\\) 满足 \\(c'(t) = -k c(t) + D(t)\\)，其中 \\(D(t)\\) 是输入速率。若 \\(k>0\\) 且 \\(D\\) 连续有界，这个 IVP 是否有唯一解？",
+        "options": [
+          "存在但不唯一",
+        "存在且唯一（\\(f\\) 关于 \\(c\\) Lipschitz，\\(L=k\\)）",
+        "取决于 \\(D(t)\\) 的光滑性",
+        "不存在"
+        ],
+        "answer": 1,
+        "explanation": "\\(f(t,c)=-kc+D(t)\\)，\\(|f(t,c_1)-f(t,c_2)|=k|c_1-c_2|\\)，Lipschitz 常数 \\(L=k\\)。Cauchy-Lipschitz 定理保证存在唯一（全局解，因为 \\(f\\) 对 \\(c\\) 线性增长）。这是药代动力学一室模型的基础。"
+      },
+      {
+        "id": "edo-ch02-q27",
+        "question": "人口模型 \\(P' = rP^2\\)（\\(r>0\\)，\\(P(0)=P_0>0\\)）预测人口何时趋于无穷（\"人口爆炸\"时间）？",
+        "options": [
+          "\\(T^* = 1/(rP_0)\\)",
+        "\\(T^* = P_0/r\\)",
+        "\\(T^* = \\ln(2)/r\\)",
+        "不会爆炸"
+        ],
+        "answer": 0,
+        "explanation": "\\(dP/P^2 = r\\,dt\\)，\\(-1/P = rt+C\\)，\\(P(0)=P_0\\)：\\(C=-1/P_0\\)。\\(P=P_0/(1-rP_0 t)\\)。分母为零：\\(T^*=1/(rP_0)\\)。这说明超线性增长模型必然导致有限时间爆破，Malthus 指数模型 \\(P'=rP\\) 则不会（\\(P=P_0 e^{rt}\\to\\infty\\) 但无有限时间爆破）。"
+      },
+      {
+        "id": "edo-ch02-q28",
+        "question": "气象预报中初始温度场有 \\(0.1°C\\) 的测量误差，大气模型的 Lipschitz 常数 \\(L\\approx 1/\\text{天}\\)。Grönwall 不等式预测 10 天后温度误差上界约为？",
+        "options": [
+          "\\(1°C\\)",
+        "\\(0.1 \\times e^{10} \\approx 2203°C\\)",
+        "\\(0.1 \\times 10 = 1°C\\)",
+        "\\(0.1°C\\)（误差不变）"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\Delta T(t)\\leq 0.1\\times e^{L\\cdot t}=0.1e^{10}\\approx 2203\\)。这当然是极端上界（实际中非线性效应和耗散会限制增长），但它解释了\"蝴蝶效应\"——初值的微小误差经指数放大后使长期预报变得不可靠，这正是 Lorenz 发现的气象混沌现象的数学基础。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="edo"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/edo.html" class="module-name">常微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 初值问题与 Lipschitz 条件</a></li>
+      <li><a href="#kp2">02 · Cauchy-Lipschitz 定理与 Picard 迭代</a></li>
+      <li><a href="#kp3">03 · Peano 存在定理与解的爆破</a></li>
+      <li><a href="#kp4">04 · Grönwall 不等式与解的连续依赖</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>存在唯一性定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>初值问题与 Lipschitz 条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定一阶 ODE \(y' = f(t,y)\) 和初始条件 \(y(t_0) = y_0\)，解是否存在？ 是否唯一？这不仅是纯数学问题——物理学家需要确信给定初始状态后 系统的未来是确定的（拉普拉斯决定论）。但 Peano 的例子 \(y' = y^{2/3}\) 显示：仅靠连续性不能保证唯一性。理解存在唯一性定理是严格使用 ODE 的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lipschitz 条件是「连续」与「可微」之间的中间概念。它控制了 \(f\) 关于 \(y\) 的变化速率不超过线性增长，从而保证解之间不能「分叉」。这种 条件在逼近论和不动点理论中反复出现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>初值问题(IVP)</strong>：求 \(y: I \to \mathbb{R}\) 满足 \[y'(t) = f(t, y(t)),\quad y(t_0) = y_0\] <strong>Lipschitz 条件</strong>：\(f(t,y)\) 关于 \(y\) 满足（局部）Lipschitz 条件， 若存在 \(L > 0\) 使得 \[|f(t, y_1) - f(t, y_2)| \leq L|y_1 - y_2|\] 在某个区域 \(|t - t_0| \leq a\)，\(|y - y_0| \leq b\) 上成立。 <strong>充分条件</strong>：若 \(\partial f/\partial y\) 存在且在紧区域上有界， 则 \(f\) 关于 \(y\) Lipschitz。证明：由均值定理， \(|f(t,y_1) - f(t,y_2)| = |f_y(t,\xi)||y_1 - y_2| \leq L|y_1 - y_2|\)。 <strong>等价积分方程</strong>：IVP 等价于 Volterra 积分方程 \[y(t) = y_0 + \int_{t_0}^{t} f(s, y(s))\,ds\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 数值解法（Euler 法、Runge-Kutta）的收敛性证明需要 Lipschitz 条件 - 控制论中系统状态的唯一可预测性依赖于 Lipschitz 存在唯一性</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(f(t,y) = t^2 + \sin y\) 满足关于 \(y\) 的 Lipschitz 条件。 解答：\(|f(t,y_1) - f(t,y_2)| = |\sin y_1 - \sin y_2| \leq |y_1 - y_2|\) （利用 \(|\sin|\) 的 Lipschitz 常数为 1）。故 \(L = 1\)。 易错点：将 \(f(t,y) = |y|\) 误判为不满足 Lipschitz。实际上 \(|y|\) 是全局 Lipschitz 的（\(L=1\)），虽然在 \(y=0\) 不可微。 Lipschitz 不要求可微。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f(t,y) = \sqrt{|y|}\) 是否关于 \(y\) 满足 Lipschitz 条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。取 \\(y_1 = \\epsilon, y_2 = 0\\)：比值 \\(= 1/\\sqrt{\\epsilon} \\to \\infty\\)。')">A. 是，\(L = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！取 \\(y_1 = \\epsilon, y_2 = 0\\)：比值 \\(= 1/\\sqrt{\\epsilon} \\to \\infty\\)。')">B. 否，因为 \(|\sqrt{|y_1|}-\sqrt{|y_2|}|/|y_1-y_2| \to \infty\) 当 \(y \to 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。取 \\(y_1 = \\epsilon, y_2 = 0\\)：比值 \\(= 1/\\sqrt{\\epsilon} \\to \\infty\\)。')">C. 仅在 \(y > 0\) 时满足</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。取 \\(y_1 = \\epsilon, y_2 = 0\\)：比值 \\(= 1/\\sqrt{\\epsilon} \\to \\infty\\)。')">D. 仅在有界区间上满足</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Cauchy-Lipschitz 定理与 Picard 迭代</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Cauchy-Lipschitz（也称 Picard-Lindelöf）定理是 ODE 理论的基石： 在 Lipschitz 条件下，初值问题有且仅有一个局部解。更重要的是， Picard 迭代给出了构造性证明——它不仅证明解存在，还提供了一种 逐步逼近解的算法，这是数值方法的理论源头。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>证明的核心工具是 Banach 不动点定理（压缩映射原理）。将 IVP 改写 为积分算子 \(T[y](t) = y_0 + \int_{t_0}^t f(s,y(s))\,ds\)， 在适当的完备度量空间上证明 \(T\) 是压缩映射。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cauchy-Lipschitz 定理</strong>：设 \(f\) 在 \(R = \{|t-t_0| \leq a, |y-y_0| \leq b\}\) 上连续且关于 \(y\) Lipschitz（常数 \(L\)），令 \(M = \max_R |f|\)， \(\alpha = \min(a, b/M)\)。则 IVP 在 \([t_0 - \alpha, t_0 + \alpha]\) 上 有唯一解。 <strong>Picard 迭代</strong>： \[y_0(t) = y_0, \quad y_{n+1}(t) = y_0 + \int_{t_0}^{t} f(s, y_n(s))\,ds\] 收敛性证明：令 \(e_n = \|y_{n+1} - y_n\|_\infty\)，利用 Lipschitz 条件： \[|y_{n+1}(t) - y_n(t)| \leq L\int_{t_0}^{t}|y_n(s) - y_{n-1}(s)|\,ds\] 归纳得 \(|y_{n+1} - y_n| \leq ML^n|t-t_0|^{n+1}/(n+1)!\)。 级数 \(\sum (y_{n+1}-y_n)\) 由 \(e^{L\alpha}\) 的 Taylor 级数控制， 故一致收敛。极限函数 \(y = \lim y_n\) 即为解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Picard 迭代是求解 ODE 的数值逐次逼近法的理论原型 - 在自动控制中，存在唯一性保证系统状态的可预测性（因果律）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 \(y' = y\)，\(y(0) = 1\) 做 Picard 迭代前 3 步。 解答：\(y_0(t) = 1\)。 \(y_1(t) = 1 + \int_0^t 1\,ds = 1 + t\)。 \(y_2(t) = 1 + \int_0^t (1+s)\,ds = 1 + t + t^2/2\)。 \(y_3(t) = 1 + \int_0^t (1+s+s^2/2)\,ds = 1 + t + t^2/2 + t^3/6\)。 \(y_n(t) \to e^t\)（\(e^t\) 的 Taylor 展开逐项生成）。 易错点：忽略存在区间的有限性。定理只保证局部解； 解可能在有限时间爆破（如 \(y' = y^2\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Picard 迭代 \(y_{n+1}(t) = y_0 + \int_{t_0}^t f(s,y_n(s))\,ds\) 的收敛性</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Lipschitz 条件保证积分算子 \\(T\\) 在适当空间上是压缩映射，')">A. 中值定理</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Lipschitz 条件保证积分算子 \\(T\\) 在适当空间上是压缩映射，')">B. Banach 压缩映射原理</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Lipschitz 条件保证积分算子 \\(T\\) 在适当空间上是压缩映射，')">C. Bolzano-Weierstrass 定理</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Lipschitz 条件保证积分算子 \\(T\\) 在适当空间上是压缩映射，')">D. Arzelà-Ascoli 定理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Peano 存在定理与解的爆破</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如果只假设 \(f\) 连续但不满足 Lipschitz 条件，解还存在吗？Peano 定理 给出肯定回答——连续性足以保证存在性（但不保证唯一性）。另一方面， 即使解唯一存在，也可能在有限时间内趋向无穷大（爆破）。 理解最大存在区间和爆破现象对于判断 ODE 模型的适用范围至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Peano 定理的证明使用 Arzelà-Ascoli 定理（紧性论证），而非压缩映射。 这体现了分析学中「紧性 ⇒ 存在性」的范式。爆破现象则揭示了 非线性 ODE 中增长速率与存在区间之间的深层联系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Peano 存在定理</strong>：\(f(t,y)\) 在区域 \(R\) 上连续 ⇒ IVP 至少有一个 局部解。 证明思路（Euler 折线法）： 1. 构造 Euler 折线 \(y_h\)（步长 \(h\)）：\(y_h(t_{k+1}) = y_h(t_k) + hf(t_k, y_h(t_k))\) 2. \(\{y_h\}\) 等度连续且一致有界（\(|f| \leq M\) 控制） 3. Arzelà-Ascoli ⇒ 存在收敛子列 \(y_{h_j} \to y\) 4. 取极限验证 \(y\) 满足积分方程 <strong>唯一性反例</strong>：\(y' = y^{2/3}\)，\(y(0) = 0\)。 \(y \equiv 0\) 和 \(y = (t/3)^3\) 都是解。\(f(y) = y^{2/3}\) 在 \(y=0\) 不 Lipschitz。 <strong>爆破</strong>：\(y' = y^2\)，\(y(0) = 1\) ⇒ \(y = 1/(1-t)\)，在 \(t=1\) 爆破。 <strong>最大存在区间</strong> \((t^-, t^+)\)：若 \(t^+ < \infty\)，则 \(\lim_{t \to t^+} |y(t)| = \infty\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 流体力学中 Navier-Stokes 方程的「爆破」问题是千禧年大奖问题之一 - 非线性光学中自聚焦方程的有限时间奇异性</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求 \(y' = 1 + y^2\)，\(y(0) = 0\) 的解和爆破时间。 解答：分离变量 \(dy/(1+y^2) = dt\)，\(\arctan y = t + C\)。 \(y(0)=0 \Rightarrow C=0\)，故 \(y = \tan t\)。 爆破时间 \(t^+ = \pi/2\)，因为 \(\tan t \to +\infty\) 当 \(t \to \pi/2^-\)。 易错点：误以为连续 ODE 的解总是全局存在的。 非线性方程可以在有限时间爆破，需检查最大存在区间。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">关于 \(y' = y^{2/3}\)，\(y(0) = 0\) 的解，下列哪项正确？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f(y) = y^{2/3}\\) 连续，Peano 保证存在。但 \\(f\\) 在 \\(y=0\\) 不 Lipschitz，')">A. 存在且唯一</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f(y) = y^{2/3}\\) 连续，Peano 保证存在。但 \\(f\\) 在 \\(y=0\\) 不 Lipschitz，')">B. 不存在</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(f(y) = y^{2/3}\\) 连续，Peano 保证存在。但 \\(f\\) 在 \\(y=0\\) 不 Lipschitz，')">C. 存在但不唯一</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(f(y) = y^{2/3}\\) 连续，Peano 保证存在。但 \\(f\\) 在 \\(y=0\\) 不 Lipschitz，')">D. 唯一但不连续依赖初值</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Grönwall 不等式与解的连续依赖</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在实际应用中，初始条件和参数总有测量误差。解是否对这些扰动「稳定」？ Grönwall 不等式是回答这个问题的核心工具——它将积分不等式转化为 指数估计，从而定量控制解的偏差。这个不等式也是稳定性分析和 数值方法误差估计中最常用的技术之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Grönwall 不等式是一种「积分不等式的放大器」：从 \(u(t) \leq a + \int_0^t b \cdot u(s)\,ds\) 推出 \(u(t) \leq a e^{bt}\)。 其思想是：积分不等式中的反馈效应（\(u\) 出现在右端）不会无限放大， 因为受指数函数控制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Grönwall 不等式</strong>（微分形式）：设 \(u(t) \geq 0\)，\(u'(t) \leq \beta(t)u(t) + \alpha(t)\)， 则 \[u(t) \leq u(t_0)e^{\int_{t_0}^t \beta(s)\,ds} + \int_{t_0}^t \alpha(s)e^{\int_s^t \beta(\tau)\,d\tau}\,ds\] 特别地，when \(\alpha = 0\)，\(\beta = L\)（常数）：\(u(t) \leq u(t_0)e^{L(t-t_0)}\)。 <strong>解的连续依赖性</strong>：设 \(y_1, y_2\) 分别是 \(y' = f(t,y)\) 在初值 \(y_{0,1}, y_{0,2}\) 下的解。 \(|y_1 - y_2|' \leq |f(t,y_1) - f(t,y_2)| \leq L|y_1 - y_2|\)，Grönwall 得： \[|y_1(t) - y_2(t)| \leq |y_{0,1} - y_{0,2}| \cdot e^{L|t - t_0|}\] 初值的小扰动导致解的偏差至多指数增长。 <strong>对参数的连续依赖</strong>：类似地，若 \(f\) 还依赖参数 \(\lambda\)，且关于 \(\lambda\) 的变化被 \(\epsilon\) 控制，则解的偏差由 \(\epsilon \cdot C \cdot e^{Lt}\) 控制。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 数值方法中，Grönwall 不等式用于证明 Euler 法的全局误差为 \(O(h)\) - 天气预报中初值敏感性（蝴蝶效应）的数学表述</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(u(t) \geq 0\) 且 \(u(t) \leq 3 + 2\int_0^t u(s)\,ds\)，估计 \(u(1)\) 的上界。 解答：由 Grönwall 不等式（\(a=3\)，\(b=2\)），\(u(t) \leq 3e^{2t}\)。 故 \(u(1) \leq 3e^2 \approx 22.17\)。 易错点：在应用 Grönwall 时需要确保 \(u \geq 0\) 和系数 \(\beta \geq 0\) 的符号条件。若 \(\beta\) 可能为负，估计方向可能反转。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Grönwall 不等式给出的解的偏差上界是什么类型的增长？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(|y_1(t) - y_2(t)| \\leq |y_{0,1}-y_{0,2}| e^{Lt}\\)，')">A. 多项式增长</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(|y_1(t) - y_2(t)| \\leq |y_{0,1}-y_{0,2}| e^{Lt}\\)，')">B. 指数增长</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(|y_1(t) - y_2(t)| \\leq |y_{0,1}-y_{0,2}| e^{Lt}\\)，')">C. 对数增长</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(|y_1(t) - y_2(t)| \\leq |y_{0,1}-y_{0,2}| e^{Lt}\\)，')">D. 有界（不增长）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/analysis/edo.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

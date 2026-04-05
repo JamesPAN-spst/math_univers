@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 量子错误纠正 — 量子计算 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "quantum-ch05-q1",
+        "question": "量子错误纠正(QEC)与经典纠错的根本区别？为什么不能简单\"复制\"量子态来纠错？",
+        "options": [
+          "不可克隆定理禁止复制; 量子错误是连续的(任意 \\(SU(2)\\) 旋转); QEC 的关键洞察: 将连续错误\"离散化\"为 Pauli 错误 \\(\\{I,X,Y,Z\\}\\)",
+        "可以复制量子态",
+        "量子错误都是离散的",
+        "经典纠错方法直接适用"
+        ],
+        "answer": 0,
+        "explanation": "经典: 重复码 \\(0\\to 000, 1\\to 111\\) 靠冗余。量子: (1) 不可克隆: \\(|\\psi\\rangle\\not\\to|\\psi\\rangle|\\psi\\rangle|\\psi\\rangle\\); (2) 测量破坏态——不能直接检查 qubit 值; (3) 错误连续: \\(|\\psi\\rangle\\to e^{-i\\epsilon X}|\\psi\\rangle\\approx(1-i\\epsilon X)|\\psi\\rangle\\)。但: 错误综合征(syndrome)测量将连续错误投影到离散 Pauli 错误→只需纠正 \\(X\\)(位翻转)和 \\(Z\\)(相位翻转)。3-qubit 位翻转码: \\(|0\\rangle_L=|000\\rangle,|1\\rangle_L=|111\\rangle\\)——能纠正单个 \\(X\\) 错误。"
+      },
+      {
+        "id": "quantum-ch05-q2",
+        "question": "Shor 码 \\([[9,1,3]]\\) 编码 1 个逻辑 qubit 到 9 个物理 qubit。它如何同时纠正位翻转和相位翻转？",
+        "options": [
+          "三重嵌套: 先用 3-qubit 相位翻转码保护 \\(Z\\) 错误, 再用 3-qubit 位翻转码保护 \\(X\\) 错误——\\(|0\\rangle_L=(|000\\rangle+|111\\rangle)^{\\otimes 3}/2\\sqrt{2}\\)",
+        "只纠正一种错误",
+        "用 3 个 qubit 就够",
+        "Shor 码不用纠缠"
+        ],
+        "answer": 0,
+        "explanation": "位翻转码: \\(|0\\rangle\\to|000\\rangle\\), \\(|1\\rangle\\to|111\\rangle\\)——纠正 \\(X\\) 错误。相位翻转码: \\(|0\\rangle\\to|{+}{+}{+}\\rangle\\), \\(|1\\rangle\\to|{-}{-}{-}\\rangle\\)——纠正 \\(Z\\) 错误(Hadamard 变换下\\(Z\\to X\\))。Shor: 串联! \\(|0\\rangle_L=\\frac{(|000\\rangle+|111\\rangle)^3}{2\\sqrt{2}}\\), \\(|1\\rangle_L=\\frac{(|000\\rangle-|111\\rangle)^3}{2\\sqrt{2}}\\)。综合征测量: 比较相邻 qubit 对 (\\(Z_iZ_j\\) 检测 \\(X\\) 错误; \\(X_iX_jX_kX_lX_mX_n\\) 检测 \\(Z\\) 错误)——不泄露逻辑信息。\\([[9,1,3]]\\): 纠正任意单 qubit 错误。"
+      },
+      {
+        "id": "quantum-ch05-q3",
+        "question": "量子纠错码的参数 \\([[n,k,d]]\\) 含义？量子 Singleton 界？",
+        "options": [
+          "\\(n\\)=物理 qubit, \\(k\\)=逻辑 qubit, \\(d\\)=码距(最小错误权重); Singleton 界: \\(k\\leq n-2(d-1)\\)——比经典多因子 2(量子需同时纠 \\(X\\) 和 \\(Z\\))",
+        "\\(d\\) 是 qubit 数",
+        "\\(k>n\\) 可能",
+        "经典和量子 Singleton 界相同"
+        ],
+        "answer": 0,
+        "explanation": "\\(d\\)=最小使得逻辑态可区分的 Pauli 算子权重。纠正 \\(t\\) 个错误: \\(d\\geq 2t+1\\)。Knill-Laflamme 条件: \\(\\langle i_L|E_a^\\dagger E_b|j_L\\rangle=C_{ab}\\delta_{ij}\\)——错误不区分逻辑态。经典 Singleton: \\(k\\leq n-d+1\\)。量子: \\(k\\leq n-2d+2\\)——需要同时\"防护\"\\(X\\) 和 \\(Z\\)。例: \\([[5,1,3]]\\)(完美码, 最小纠正单错误), \\([[7,1,3]]\\)(Steane码), \\([[9,1,3]]\\)(Shor码)。"
+      },
+      {
+        "id": "quantum-ch05-q4",
+        "question": "稳定子码(Stabilizer Code)的核心思想？为什么稳定子形式能高效描述量子纠错？",
+        "options": [
+          "码空间是一组对易 Pauli 算子(稳定子群 \\(\\mathcal{S}\\))的公共 \\(+1\\) 特征空间——综合征测量 = 测量稳定子生成元, Clifford 群操作可高效模拟",
+        "稳定子码只纠正经典错误",
+        "需要指数多稳定子",
+        "不能描述所有 QEC 码"
+        ],
+        "answer": 0,
+        "explanation": "稳定子群 \\(\\mathcal{S}\\subset\\mathcal{P}_n\\)(Pauli 群), \\(|\\mathcal{S}|=2^{n-k}\\), \\(n-k\\) 个独立生成元 \\(g_i\\)。码空间: \\(\\mathcal{C}=\\{|\\psi\\rangle:g_i|\\psi\\rangle=|\\psi\\rangle\\,\\forall i\\}\\), 维度 \\(2^k\\)。错误 \\(E\\): 测量所有 \\(g_i\\) 得综合征 \\(s_i=\\pm 1\\)。\\(s_i=-1\\) iff \\(Eg_i=-g_iE\\)(\\(E\\) 与 \\(g_i\\) 反对易)。综合征定位错误→施加修正。Steane \\([[7,1,3]]\\): \\(\\mathcal{S}\\) 有 6 个生成元。高效: 综合征是 \\(O(n)\\) 个比特, Clifford 操作在稳定子表示下多项式追踪(Gottesman-Knill)。"
+      },
+      {
+        "id": "quantum-ch05-q5",
+        "question": "容错量子计算的阈值定理: 只要物理错误率 \\(p\\) 低于阈值 \\(p_{th}\\), 就能实现任意精度的量子计算。阈值大约是多少？",
+        "options": [
+          "表面码阈值 \\(p_{th}\\approx 1\\%\\); 一般拼接码 \\(p_{th}\\sim 10^{-4}\\); 逻辑错误率 \\(p_L\\sim(p/p_{th})^{d/2}\\) 指数衰减",
+        "\\(p_{th}=50\\%\\)",
+        "不存在阈值",
+        "\\(p_{th}=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "阈值定理(Aharonov-Ben-Or, Knill-Laflamme-Zurek): 若 \\(p<p_{th}\\), 拼接纠错可将 \\(p_L\\) 压到任意小, 代价 \\(\\text{poly}(\\log(1/p_L))\\) overhead。拼接: \\(L\\) 层 \\(→p_L\\sim p_{th}(p/p_{th})^{2^L}\\) (双指数衰减)。表面码: 更实际, \\(p_{th}\\approx 0.6\\%-1.1\\%\\)(取决于噪声模型)。当前超导: \\(p_{CX}\\sim 10^{-3}-10^{-2}\\)——接近但尚未稳定低于阈值。Google 2023: 从 \\(d=3\\) 到 \\(d=5\\) 表面码看到逻辑错误率下降——量子纠错\"开始工作\"的里程碑。"
+      },
+      {
+        "id": "quantum-ch05-q6",
+        "question": "表面码(Surface Code)为什么是目前最有前途的量子纠错方案？",
+        "options": [
+          "只需最近邻连接(适合 2D 芯片)、高阈值 \\(\\sim 1\\%\\)、综合征提取电路简单; 缺点: 编码率低(\\(k/n\\sim 1/n\\))和 \\(T\\) 门需要昂贵的 magic state distillation",
+        "编码率高",
+        "不需要物理连接",
+        "T 门免费"
+        ],
+        "answer": 0,
+        "explanation": "表面码: 在 2D 正方格点上, data qubit 在边, \\(X\\)-稳定子在格点, \\(Z\\)-稳定子在面。距离 \\(d\\) 的表面码: \\((2d-1)^2\\) 物理 qubit → 1 逻辑 qubit, \\([[d^2+(d-1)^2,1,d]]\\)。阈值高(~1%), 只需 weight-4 稳定子测量, 最近邻。Clifford 门: 格子手术(Lattice Surgery)——合并/分裂表面码 patches。\\(T\\) 门: 需要 magic state \\(|T\\rangle\\) 蒸馏, \\(\\sim 100-1000\\) 个表面码操作→主要开销。\\(d=27\\) 表面码 \\(\\to p_L\\sim 10^{-12}\\), 约 1500 物理 qubit/逻辑 qubit。"
+      },
+      {
+        "id": "quantum-ch05-q7",
+        "question": "量子错误缓解(Error Mitigation)与纠错(Error Correction)的区别？NISQ 时代为什么需要缓解？",
+        "options": [
+          "纠错: 物理实时纠正(需额外 qubit); 缓解: 后处理统计推断估计无噪声结果——不需额外 qubit 但采样开销增加; NISQ 资源不足以做完整纠错",
+        "两者相同",
+        "缓解比纠错更强",
+        "NISQ 不需要任何纠错"
+        ],
+        "answer": 0,
+        "explanation": "Error Mitigation 技术: (1) Zero-Noise Extrapolation (ZNE): 放大噪声 → 外推到零噪声; (2) Probabilistic Error Cancellation (PEC): 用理想门的准概率分解→无偏估计, 方差 \\(\\sim e^{O(\\epsilon n)}\\); (3) Clifford Data Regression(CDR); (4) Symmetry Verification。代价: 采样开销指数增长——只适合 \\(\\sim 100\\) qubit \\(\\times\\) \\(\\sim 100\\) 深度。Google 量子优越性实验: ZNE 是关键技术之一。长期: 纠错取代缓解。"
+      },
+      {
+        "id": "quantum-ch05-q8",
+        "question": "CSS 码(Calderbank-Shor-Steane)是什么？为什么经典线性码可以构造量子码？",
+        "options": [
+          "CSS 码由两个经典码 \\(C_1\\supset C_2\\) 构造: \\(X\\)-稳定子来自 \\(C_2^\\perp\\), \\(Z\\)-稳定子来自 \\(C_1\\); 条件 \\(C_2\\subset C_1\\) 保证 \\(X,Z\\) 稳定子对易",
+        "经典码不能用于量子",
+        "CSS 码不稳定子",
+        "只需要一个经典码"
+        ],
+        "answer": 0,
+        "explanation": "经典 \\([n,k_1,d_1]\\) 码 \\(C_1\\) 和 \\([n,k_2,d_2]\\) 码 \\(C_2\\subset C_1\\) → 量子 \\([[n,k_1-k_2,d]]\\) CSS 码, \\(d=\\min(d_1,d_2^\\perp)\\)。逻辑基: \\(|x+C_2\\rangle_L=\\frac{1}{\\sqrt{|C_2|}}\\sum_{y\\in C_2}|x+y\\rangle\\), \\(x\\in C_1/C_2\\)。Steane 码: \\(C_1=[7,4,3]\\) Hamming, \\(C_2=[7,3,4]\\) 对偶→\\([[7,1,3]]\\)。对易条件: \\(X\\)-type 稳定子对应 \\(C_2^\\perp\\) 的行, \\(Z\\)-type 对应 \\(C_1\\) 的行; \\(C_2\\subset C_1\\) → \\(H_1H_2^T=0\\) → 对易。表面码也是 CSS 码。"
+      },
+      {
+        "id": "quantum-ch05-q9",
+        "question": "拓扑量子计算(如 Kitaev 的 Toric Code)如何用拓扑保护量子信息？",
+        "options": [
+          "逻辑信息编码在环面 (torus) 的非平凡拓扑循环中——局部扰动无法改变全局拓扑→天然抗局部噪声; 逻辑操作是非阿贝尔任意子(anyons)的编织",
+        "拓扑码不需要冗余",
+        "局部操作能改变逻辑态",
+        "只存在于理论中"
+        ],
+        "answer": 0,
+        "explanation": "Toric 码: 环面上的表面码, \\([[2n,2,\\sqrt{n}]]\\)(2个逻辑qubit)。逻辑 \\(X\\)/\\(Z\\): 沿环面不可收缩回路的 Pauli 链——必须跨越整个系统(\\(d=\\sqrt{n}\\))→局域错误不影响。任意子激发: 4-body 稳定子违反 = 准粒子, 来阿贝尔任意子编织可实现拓扑量子门。Majorana 零模: 凝聚态实现(Microsoft 方向)。\\(e-m\\) 任意子只给 Clifford→仍需 magic state。Fibonacci anyons: 通用但更难实现。拓扑保护+主动纠错(\"错误综合征 = anyons 对的产生\")。"
+      },
+      {
+        "id": "quantum-ch05-q10",
+        "question": "量子 LDPC 码(Low-Density Parity-Check)相比表面码的潜在优势？",
+        "options": [
+          "表面码编码率 \\(k/n\\to 0\\); 量子 LDPC 可实现常数编码率 \\(k/n=\\Theta(1)\\) 且距离 \\(d=\\Theta(n^\\alpha)\\) (good qLDPC)——指数减少物理 qubit -> 逻辑 qubit 的比例",
+        "LDPC 码总是更差",
+        "表面码已经最优",
+        "LDPC 码不存在"
+        ],
+        "answer": 0,
+        "explanation": "表面码: \\([[O(d^2),1,d]]\\)→\\(n/k=O(d^2)\\), 对 \\(d=27\\) 需 ~1400 qubit/逻辑 qubit。qLDPC: 目标 \\([[n,\\Theta(n),\\Theta(n^\\alpha)]]\\)。Panteleev-Kalachev (2022): \\([[n,\\Theta(n),\\Theta(n)]]\\)——\"asymptotically good\" qLDPC 码! 理论上: \\(\\sim 10-100\\) 物理/逻辑 qubit。挑战: 稳定子权重 > 4, 非平面连接→需要长程连接(超导困难, 离子阱/中性原子更合适)。综合征解码: 也需要更复杂的译码器。这是 QEC 最活跃的研究方向之一。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="quantum"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/quantum.html" class="module-name">量子计算</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 量子噪声与错误模型</a></li>
+      <li><a href="#kp2">02 · 经典纠错到量子：Shor 码与 Steane 码</a></li>
+      <li><a href="#kp3">03 · 稳定子码与容错阈值</a></li>
+      <li><a href="#kp4">04 · 表面码与拓扑量子计算</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>量子错误纠正</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>量子噪声与错误模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>真实量子硬件充满噪声——退相干、门误差、测量错误。如果不能纠错， 量子计算将无法扩展。与经典比特只有翻转(bit-flip)不同，量子比特 还有相位翻转(phase-flip)和两者的组合。量子纠错必须在不直接测量 （破坏）量子态的前提下诊断和修复错误。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>量子信道(Quantum Channel) \(=\) 完全正的保迹(CPTP)映射。 Kraus 表示：\(\mathcal{E}(\rho) = \sum_k E_k \rho E_k^\dagger\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>主要噪声模型： 1) 比特翻转信道：\(\mathcal{E}(\rho) = (1-p)\rho + pX\rho X\) 2) 相位翻转信道：\(\mathcal{E}(\rho) = (1-p)\rho + pZ\rho Z\) 3) 去极化信道：\(\mathcal{E}(\rho) = (1-p)\rho + \frac{p}{3}(X\rho X + Y\rho Y + Z\rho Z)\) 关键观察：任何单量子比特错误可分解为 Pauli 基 \(\{I, X, Y, Z\}\)： \[E = c_0 I + c_1 X + c_2 Y + c_3 Z\] 因此纠正 Pauli 错误即可纠正一般连续错误——数字化噪声！ 保真度(Fidelity)：\(F(\rho, \sigma) = \left(\mathrm{tr}\sqrt{\sqrt{\rho}\sigma\sqrt{\rho}}\right)^2\)， 衡量量子态经历噪声后的质量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>IBM/Google 的量子处理器每个门错误率约 \(10^{-3}\)，需要纠错才能执行深线路。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：去极化信道 \(p=0.1\) 作用于 \(|0\rangle\)。输出密度矩阵？ 解答：\(\rho = |0\rangle\langle 0|\)。 \(X\rho X = |1\rangle\langle 1|\), \(Y\rho Y = |1\rangle\langle 1|\), \(Z\rho Z = |0\rangle\langle 0|\)。 \(\mathcal{E}(\rho) = 0.9|0\rangle\langle 0| + \frac{0.1}{3}(|1\rangle\langle 1|+|1\rangle\langle 1|+|0\rangle\langle 0|)\) \(= (0.9 + 0.1/3)|0\rangle\langle 0| + 2(0.1/3)|1\rangle\langle 1| \approx 0.933|0\rangle\langle 0| + 0.067|1\rangle\langle 1|\)。 易错点：\(Y\rho Y\) 中 \(Y = iXZ\)，计算时注意相位：\(Y|0\rangle = i|1\rangle\)，\(Y|0\rangle\langle 0|Y^\dagger = |1\rangle\langle 1|\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">为什么量子纠错可以只纠正离散 Pauli 错误而覆盖连续错误？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。综合征测量本身就是投影——数字化噪声是量子纠错的核心洞察。')">A. 因为噪声总是离散的</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！综合征测量本身就是投影——数字化噪声是量子纠错的核心洞察。')">B. 因为综合征测量将连续错误投影到离散 Pauli 子空间</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。综合征测量本身就是投影——数字化噪声是量子纠错的核心洞察。')">C. 因为我们忽略了连续错误</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。综合征测量本身就是投影——数字化噪声是量子纠错的核心洞察。')">D. 因为 Pauli 算子构成完备基</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>经典纠错到量子：Shor 码与 Steane 码</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Shor 在 1995 年提出第一个量子纠错码——9-qubit 码，用 9 个物理量 子比特保护 1 个逻辑量子比特。Steane 的 7-qubit 码基于经典 Hamming 码构造，是 CSS 码(Calderbank-Shor-Steane)的原型。这些 开创性工作证明了量子纠错的可行性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>CSS 码 \(=\) 从两个嵌套经典码 \(C_2 \subset C_1\) 构建量子码。 \(X\)-错误用 \(C_1\) 纠正，\(Z\)-错误用 \(C_2^\perp\) 纠正——解耦处理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Shor 码 \([[9,1,3]]\)：编码 1 逻辑量子比特到 9 物理量子比特。 \(|0_L\rangle = \frac{1}{2\sqrt{2}}(|000\rangle+|111\rangle)^{\otimes 3}\) \(|1_L\rangle = \frac{1}{2\sqrt{2}}(|000\rangle-|111\rangle)^{\otimes 3}\) 结构：先用相位翻转码（3 个 block 保护 \(Z\) 错误）， 每个 block 内用比特翻转码（3 qubit 保护 \(X\) 错误）。 Steane 码 \([[7,1,3]]\)：基于经典 \([7,4,3]\) Hamming 码。 稳定子群由 6 个生成元构成（3 个 \(X\)-type + 3 个 \(Z\)-type）。 \[S_1 = IIIXXXX, \quad S_4 = IIIZZZZ\] \[S_2 = IXXIIXX, \quad S_5 = IZZIIZZ\] \[S_3 = XIXIXIX, \quad S_6 = ZIZIZIZ\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Steane 码支持横向(transversal) CNOT 门——这对容错逻辑门实现至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Shor 码中第 2 个 qubit 发生 \(X\) 错误。如何检测和纠正？ 解答：第 1 个 block = \(|000\rangle+|111\rangle\) 变为 \(|010\rangle+|101\rangle\)。 测量稳定子 \(Z_1 Z_2\)（结果 \(-1\)）和 \(Z_2 Z_3\)（结果 \(-1\)），定位 qubit 2。 施加 \(X_2\) 纠正。其他 block 不受影响。 易错点：必须用稳定子测量而非直接测量量子比特——直接测量会破坏叠加！</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\([[n,k,d]]\) 码中 \(d\) 的含义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。码距 \\(d\\) 意味着最小权 Pauli 算子在码字之间的距离是 \\(d\\)，可纠正 \\(\\lfloor(d-1)/2\\rfloor\\) 个错误。')">A. 编码距离 = 逻辑量子比特数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。码距 \\(d\\) 意味着最小权 Pauli 算子在码字之间的距离是 \\(d\\)，可纠正 \\(\\lfloor(d-1)/2\\rfloor\\) 个错误。')">B. 可检测的错误数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！码距 \\(d\\) 意味着最小权 Pauli 算子在码字之间的距离是 \\(d\\)，可纠正 \\(\\lfloor(d-1)/2\\rfloor\\) 个错误。')">C. 可纠正 \(\lfloor(d-1)/2\rfloor\) 个错误</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。码距 \\(d\\) 意味着最小权 Pauli 算子在码字之间的距离是 \\(d\\)，可纠正 \\(\\lfloor(d-1)/2\\rfloor\\) 个错误。')">D. 物理量子比特数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>稳定子码与容错阈值</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>稳定子形式(Stabilizer Formalism)是描述量子纠错码的统一框架——用 Pauli 群的子群定义码空间。容错阈值定理(Threshold Theorem)则保证： 只要物理错误率低于某个阈值，逻辑错误率可以任意压低。这是大规模 量子计算可行性的理论基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>稳定子群 \(\mathcal{S} \subset \mathcal{P}_n\)（\(n\)-qubit Pauli 群）。 码空间 = \(\mathcal{S}\) 所有元素的 \(+1\) 特征空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>稳定子码：\(\mathcal{S} = \langle g_1, \ldots, g_{n-k}\rangle\) 是 Abel 群， \(-I \notin \mathcal{S}\)，编码 \(k\) 逻辑量子比特到 \(n\) 物理量子比特。 综合征(Syndrome)：错误 \(E\) 的综合征 = 向量 \((s_1, \ldots, s_{n-k})\)， \(s_i = 0\) 若 \([E, g_i] = 0\)，\(s_i = 1\) 若 \(\{E, g_i\} = 0\)。 不同错误对应不同综合征 \(\Rightarrow\) 可识别并纠正。 容错阈值定理：存在阈值 \(p_{\text{th}} > 0\)，若每个物理门/测量的错误率 \(p < p_{\text{th}}\)，则通过码级联(concatenation)或增大码距，逻辑错误率 \[p_L \sim \left(\frac{p}{p_{\text{th}}}\right)^{d/2}\] 可任意降低。表面码(Surface Code)的阈值 \(p_{\text{th}} \approx 1\%\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Google 2023 年实验首次展示了增大表面码距可降低逻辑错误率——验证了阈值行为。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：3-qubit 比特翻转码的稳定子生成元和综合征表。 解答：\(g_1 = Z_1 Z_2, g_2 = Z_2 Z_3\)。 \(E = I\): syndrome \((0,0)\); \(E = X_1\): \((1,0)\); \(E = X_2\): \((1,1)\); \(E = X_3\): \((0,1)\)。 4 个不同综合征 \(\Rightarrow\) 可唯一定位并纠正单 qubit \(X\) 错误。 易错点：稳定子测量不破坏码空间内的信息——只提取错误信息。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">表面码的容错阈值大约是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\sim 1\\%\\) 阈值是表面码的主要优势，也是当前硬件可以够到的目标。')">A. \(10^{-6}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\sim 1\\%\\) 阈值是表面码的主要优势，也是当前硬件可以够到的目标。')">B. \(10^{-2}\)（约 1%）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\sim 1\\%\\) 阈值是表面码的主要优势，也是当前硬件可以够到的目标。')">C. \(10^{-1}\)（约 10%）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\sim 1\\%\\) 阈值是表面码的主要优势，也是当前硬件可以够到的目标。')">D. \(0.5\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>表面码与拓扑量子计算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>表面码(Surface Code / Toric Code)是目前最有前景的量子纠错码—— 它只需最近邻耦合（适合平面芯片布局），阈值高（~1%），且码距可 通过增大阵列尺寸提升。拓扑量子计算则用拓扑保护替代主动纠错， 是长远的"终极"方案（如 Microsoft 的 Majorana 路线）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>表面码的错误 \(\leftrightarrow\) 环面上的同调类。逻辑算子 \(=\) 不可缩回路径——拓扑保护！</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>表面码定义：\(L \times L\) 方格上的量子比特（在边上）， 稳定子：面(plaquette)算子 \(B_p = \prod_{e \in \partial p} Z_e\)， 星(star)算子 \(A_s = \prod_{e \ni s} X_e\)。 码参数：\([[2L^2, 2, L]]\)（环面）或 \([[L^2 + (L-1)^2, 1, L]]\)（平面边界）。 错误 = 激发的准粒子对（face 激发 = \(e\) 粒子，vertex 激发 = \(m\) 粒子）。 纠错 = 将准粒子配对消除。最小权匹配(MWPM)解码： \[\text{找权最小的路径连接同类型准粒子对}\] 复杂度 \(O(n^3)\)，实际中 Union-Find 解码器接近线性。 逻辑门：横向 Hadamard 和 CNOT 可自然实现；\(T\) 门需魔术态蒸馏(Magic State Distillation)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Google Sycamore / IBM Eagle 的中期纠错路线图均以表面码为核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(L=3\) 的平面表面码能纠正多少个错误？ 解答：码距 \(d = L = 3\)，可纠正 \(\lfloor(3-1)/2\rfloor = 1\) 个错误。 物理量子比特数 \(= 3^2 + 2^2 = 13\)，编码 1 个逻辑量子比特。 开销比 \(13:1\)。增大 \(L\) 可改善但开销也增大。 易错点：表面码纠正 1 个错误不意味只有 1 个量子比特出错——而是错误的"path"不横穿整个格子。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">表面码的主要优点是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。最近邻结构适合超导/离子芯片的物理布局。但 \\(T\\) 门需要额外资源（魔术态蒸馏）。')">A. 纠错能力最强</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！最近邻结构适合超导/离子芯片的物理布局。但 \\(T\\) 门需要额外资源（魔术态蒸馏）。')">B. 只需最近邻交互且阈值高</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。最近邻结构适合超导/离子芯片的物理布局。但 \\(T\\) 门需要额外资源（魔术态蒸馏）。')">C. 不需要经典辅助计算</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。最近邻结构适合超导/离子芯片的物理布局。但 \\(T\\) 门需要额外资源（魔术态蒸馏）。')">D. 可以直接实现所有逻辑门</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/applied/quantum.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

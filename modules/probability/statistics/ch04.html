@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 区间估计 — 统计推断 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "statistics-ch04-q1",
+        "question": "\\(95\\%\\) 置信区间 \\([L(X), U(X)]\\) 的频率学解释？",
+        "options": [
+          "重复抽样中约 \\(95\\%\\) 的区间包含真值 \\(\\theta\\)",
+        "\\(\\theta\\) 落在区间内的概率是 \\(95\\%\\)",
+        "区间包含 \\(95\\%\\) 的数据",
+        "\\(P(\\theta=\\hat\\theta)=0.95\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P_\\theta(\\theta \\in [L,U])=0.95\\)（\\(\\forall \\theta\\)）。\\(\\theta\\) 是固定常数（频率学），区间是随机的。B 是贝叶斯可信区间的解释——与频率学 CI 概念不同。"
+      },
+      {
+        "id": "statistics-ch04-q2",
+        "question": "\\(X_1,...,X_n \\sim N(\\mu,\\sigma^2)\\)（\\(\\sigma\\) 已知）。\\(\\mu\\) 的 \\(95\\%\\) CI？",
+        "options": [
+          "\\(\\bar{X} \\pm 1.96\\sigma/\\sqrt{n}\\)",
+        "\\(\\bar{X} \\pm 1.96\\sigma\\)",
+        "\\(\\bar{X} \\pm 1.645\\sigma/\\sqrt{n}\\)",
+        "\\(\\bar{X} \\pm \\sigma/n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(Z=\\sqrt{n}(\\bar{X}-\\mu)/\\sigma \\sim N(0,1)\\)。\\(P(-1.96<Z<1.96)=0.95\\)。\\(|Z|<1.96 \\Leftrightarrow \\mu \\in \\bar{X} \\pm 1.96\\sigma/\\sqrt{n}\\)。B 遗漏 \\(\\sqrt{n}\\)（常见错误）。C 是 \\(90\\%\\) CI。"
+      },
+      {
+        "id": "statistics-ch04-q3",
+        "question": "\\(\\sigma\\) 未知时 \\(\\mu\\) 的 \\(95\\%\\) CI？",
+        "options": [
+          "\\(\\bar{X} \\pm t_{n-1,0.025} \\cdot S/\\sqrt{n}\\)",
+        "\\(\\bar{X} \\pm 1.96 S/\\sqrt{n}\\)",
+        "\\(\\bar{X} \\pm S/n\\)",
+        "\\(\\bar{X} \\pm t_{n,0.025} \\cdot S/\\sqrt{n}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T=\\sqrt{n}(\\bar{X}-\\mu)/S \\sim t_{n-1}\\)。\\(t_{n-1,0.025}\\)（双侧 \\(5\\%\\)）。\\(n\\) 大时 \\(t \\approx 1.96\\)（趋于正态）。\\(n\\) 小时 \\(t_{n-1}\\) 尾更厚（区间更宽）。D 自由度错误（\\(n-1\\) 不是 \\(n\\)）。"
+      },
+      {
+        "id": "statistics-ch04-q4",
+        "question": "枢轴量 (pivot) 的定义？",
+        "options": [
+          "\\(Q(X,\\theta)\\) 的分布不依赖任何未知参数",
+        "\\(Q=\\hat\\theta\\)",
+        "\\(Q=\\theta\\)",
+        "\\(Q\\) 的分布已知但依赖 \\(\\theta\\)"
+        ],
+        "answer": 0,
+        "explanation": "枢轴量的分布完全已知。例：\\(Z=\\sqrt{n}(\\bar{X}-\\mu)/\\sigma \\sim N(0,1)\\)（\\(\\sigma\\) 已知时是枢轴量）。\\(T=\\sqrt{n}(\\bar{X}-\\mu)/S \\sim t_{n-1}\\)。反转枢轴量的不等式得置信区间。"
+      },
+      {
+        "id": "statistics-ch04-q5",
+        "question": "正态总体中 \\(\\sigma^2\\) 的 \\(95\\%\\) CI 基于什么枢轴量？",
+        "options": [
+          "\\((n-1)S^2/\\sigma^2 \\sim \\chi^2_{n-1}\\)",
+        "\\(S^2/\\sigma^2 \\sim N(0,1)\\)",
+        "\\(S/\\sigma \\sim t_{n-1}\\)",
+        "\\(nS^2/\\sigma^2 \\sim F\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\chi^2_{n-1}\\) 的 \\(\\alpha/2\\) 和 \\(1-\\alpha/2\\) 分位数 \\(\\chi^2_L, \\chi^2_U\\)。CI: \\(\\left[\\frac{(n-1)S^2}{\\chi^2_U}, \\frac{(n-1)S^2}{\\chi^2_L}\\right]\\)。不对称区间（\\(\\chi^2\\) 偏斜）。"
+      },
+      {
+        "id": "statistics-ch04-q6",
+        "question": "置信区间与假设检验的对偶关系？",
+        "options": [
+          "\\(\\theta_0 \\in\\) CI \\(\\Leftrightarrow\\) 不拒绝 \\(H_0:\\theta=\\theta_0\\)（同一 \\(\\alpha\\)）",
+        "两者无关",
+        "CI 总是比检验更保守",
+        "检验不需要 CI"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\theta_0 \\notin [\\bar{X}-z_{\\alpha/2}\\sigma/\\sqrt{n}, \\bar{X}+z_{\\alpha/2}\\sigma/\\sqrt{n}] \\Leftrightarrow |Z|>z_{\\alpha/2} \\Leftrightarrow\\) 拒绝 \\(H_0\\)。置信集 \\(=\\) 不被拒绝的 \\(\\theta_0\\) 集合（检验的反转）。"
+      },
+      {
+        "id": "statistics-ch04-q7",
+        "question": "大样本近似 CI（CLT）：\\(\\hat\\theta \\pm z_{\\alpha/2}\\sqrt{\\hat{\\text{Var}}(\\hat\\theta)}\\)。Wald CI 适用条件？",
+        "options": [
+          "\\(n\\) 足够大使 \\(\\hat\\theta\\) 近似正态",
+        "精确正态",
+        "\\(n=1\\) 就行",
+        "仅离散数据"
+        ],
+        "answer": 0,
+        "explanation": "MLE 渐近正态 ⟹ Wald CI。\\(\\hat{\\text{Var}}=1/(nI(\\hat\\theta))\\) 或 \\(1/J(\\hat\\theta)\\)。\\(n\\) 小时覆盖率可能偏离名义值。二项比例的 Wald CI \\(\\hat{p} \\pm z\\sqrt{\\hat{p}(1-\\hat{p})/n}\\) 在 \\(p\\) 极端时表现差。"
+      },
+      {
+        "id": "statistics-ch04-q8",
+        "question": "CI 宽度 \\(=2z_{\\alpha/2}\\sigma/\\sqrt{n}\\)。宽度减半需要？",
+        "options": [
+          "\\(n\\) 增大到 \\(4\\) 倍",
+        "\\(n\\) 增大到 \\(2\\) 倍",
+        "\\(\\sigma\\) 减半",
+        "A 或 C"
+        ],
+        "answer": 3,
+        "explanation": "宽度 \\(\\propto \\sigma/\\sqrt{n}\\)。\\(\\sigma/\\sqrt{4n}=\\sigma/(2\\sqrt{n})\\)：宽度减半。\\((\\sigma/2)/\\sqrt{n}\\): 也减半。实际中减小 \\(\\sigma\\)（更精确测量）或增大 \\(n\\)。A 和 C 都可以。"
+      },
+      {
+        "id": "statistics-ch04-q9",
+        "question": "二项比例 \\(p\\) 的 Wilson 区间优于 Wald 区间的原因？",
+        "options": [
+          "Wilson 基于 Score 检验反转，覆盖率更接近名义值（特别是 \\(p\\) 极端或 \\(n\\) 小时）",
+        "Wilson 更窄",
+        "Wilson 不需要数据",
+        "Wilson 基于贝叶斯方法"
+        ],
+        "answer": 0,
+        "explanation": "Wald: \\(\\hat{p} \\pm z\\sqrt{\\hat{p}(1-\\hat{p})/n}\\)（\\(\\hat{p}=0\\) 时退化为点 \\(\\{0\\}\\)）。Wilson: 解 \\((p-\\hat{p})^2 \\leq z^2 p(1-p)/n\\)（二次方程）。Agresti-Coull 是 Wilson 的简化版。推荐 Wilson 或 exact Clopper-Pearson。"
+      },
+      {
+        "id": "statistics-ch04-q10",
+        "question": "似然比置信区间：\\(\\{\\theta: -2[\\ell(\\theta)-\\ell(\\hat\\theta)] \\leq \\chi^2_{1,\\alpha}\\}\\) 的含义？",
+        "options": [
+          "似然曲面足够平坦的区域（不被 LRT 拒绝的 \\(\\theta\\) 值）",
+        "\\(\\theta\\) 的 MLE 的邻域",
+        "恰好等于 Wald CI",
+        "仅适用于正态"
+        ],
+        "answer": 0,
+        "explanation": "基于 Wilks 定理。不对称 CI（似然非对称时）。通常比 Wald CI 更准确（尤其小样本或非线性参数化）。profile likelihood CI 扩展到多参数。"
+      },
+      {
+        "id": "statistics-ch04-q11",
+        "question": "预测区间 vs 置信区间的区别？",
+        "options": [
+          "预测区间包含未来观测值 \\(X_{n+1}\\)；置信区间包含参数 \\(\\theta\\)",
+        "两者相同",
+        "预测区间更窄",
+        "置信区间包含数据"
+        ],
+        "answer": 0,
+        "explanation": "预测区间 \\(=\\bar{X} \\pm t_{n-1}\\cdot S\\sqrt{1+1/n}\\)（额外的 \\(1\\) 来自新观测的方差）。总是比 CI 宽（多了随机波动）。\\(n \\to \\infty\\): PI \\(\\to \\bar{X} \\pm z_\\alpha \\sigma\\)（不收缩到零）。"
+      },
+      {
+        "id": "statistics-ch04-q12",
+        "question": "Bootstrap 置信区间的基本步骤？",
+        "options": [
+          "重复从样本中有放回抽样，计算 \\(\\hat\\theta^*\\) 的分布，取分位数",
+        "从总体抽样",
+        "用正态近似",
+        "增大样本量"
+        ],
+        "answer": 0,
+        "explanation": "非参数 Bootstrap: (1) 从 \\(X_1,...,X_n\\) 有放回抽 \\(n\\) 个得 \\(X^*\\); (2) 计算 \\(\\hat\\theta^*=T(X^*)\\); (3) 重复 \\(B\\) 次; (4) CI: \\([\\hat\\theta^*_{\\alpha/2}, \\hat\\theta^*_{1-\\alpha/2}]\\)（百分位法）。不需要分布假设。"
+      },
+      {
+        "id": "statistics-ch04-q13",
+        "question": "两独立样本均值差 \\(\\mu_1-\\mu_2\\) 的 CI（等方差假设）？",
+        "options": [
+          "\\((\\bar{X}_1-\\bar{X}_2) \\pm t_{n_1+n_2-2} \\cdot S_p\\sqrt{1/n_1+1/n_2}\\)",
+        "\\((\\bar{X}_1-\\bar{X}_2) \\pm z \\cdot S_p\\)",
+        "\\(\\bar{X}_1 \\pm t \\cdot S_p\\)",
+        "\\((\\bar{X}_1-\\bar{X}_2)/S_p\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_p^2=[(n_1-1)S_1^2+(n_2-1)S_2^2]/(n_1+n_2-2)\\)（pooled variance）。\\(T=(\\bar{X}_1-\\bar{X}_2-\\Delta_0)/(S_p\\sqrt{1/n_1+1/n_2}) \\sim t_{n_1+n_2-2}\\)。不等方差用 Welch。"
+      },
+      {
+        "id": "statistics-ch04-q14",
+        "question": "Clopper-Pearson 区间（exact CI for \\(p\\)）的特点？",
+        "options": [
+          "保守（实际覆盖率 \\(\\geq 1-\\alpha\\)），基于二项分布精确概率",
+        "反保守",
+        "基于正态近似",
+        "仅适用于大样本"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_L=\\text{Beta}(\\alpha/2; x, n-x+1)\\) 的分位数，\\(C_U=\\text{Beta}(1-\\alpha/2; x+1, n-x)\\)。精确：覆盖率 \\(\\geq 1-\\alpha\\)（离散性导致保守）。\\(n\\) 大时与 Wilson 接近。FDA 偏好精确 CI。"
+      },
+      {
+        "id": "statistics-ch04-q15",
+        "question": "Bootstrap 百分位法 CI 和 BCa (bias-corrected accelerated) CI 的关系？",
+        "options": [
+          "BCa 修正了偏差和偏斜（二阶准确），百分位法是一阶的",
+        "两者相同",
+        "百分位法更准确",
+        "BCa 不使用 Bootstrap"
+        ],
+        "answer": 0,
+        "explanation": "百分位法在偏斜分布中覆盖率偏离。BCa: \\(z_0\\)（偏差校正）、\\(a\\)（加速因子 — 方差与 \\(\\theta\\) 的关系）。BCa CI 的覆盖率在变换下不变（transformation-respecting）。Efron (1987)。"
+      },
+      {
+        "id": "statistics-ch04-q16",
+        "question": "Profile likelihood CI 在多元参数 \\((\\psi,\\lambda)\\) 中对 \\(\\psi\\) 构造 CI 时？",
+        "options": [
+          "固定 \\(\\psi\\)，最大化 \\(\\lambda\\) 得 \\(\\ell_P(\\psi)=\\max_\\lambda \\ell(\\psi,\\lambda)\\)，再用 \\(-2[\\ell_P(\\psi)-\\ell_P(\\hat\\psi)] \\leq \\chi^2_1\\)",
+        "直接用联合 CI",
+        "忽略 \\(\\lambda\\)",
+        "固定 \\(\\lambda\\) 在 MLE"
+        ],
+        "answer": 0,
+        "explanation": "Profile likelihood 消除干扰参数 \\(\\lambda\\)。\\(\\ell_P(\\psi)\\) 的最大值在 \\(\\hat\\psi\\) 处。区间 = \\(\\{\\psi: \\ell_P \\geq \\ell_P(\\hat\\psi)-\\chi^2_{1,\\alpha}/2\\}\\)。比 Wald CI 更稳健（非对称、参数化不变）。"
+      },
+      {
+        "id": "statistics-ch04-q17",
+        "question": "置信水平 \\(1-\\alpha\\) 增加（如从 \\(95\\%\\) 到 \\(99\\%\\)）时 CI 宽度？",
+        "options": [
+          "变宽（更高置信需更宽区间）",
+        "变窄",
+        "不变",
+        "取决于数据"
+        ],
+        "answer": 0,
+        "explanation": "\\(z_{0.025}=1.96\\) vs \\(z_{0.005}=2.576\\)。\\(99\\%\\) CI 约宽 \\(31\\%\\)。信心-精度权衡：\\(100\\%\\) 置信 ⟹ 整个参数空间（无信息）。实际中 \\(95\\%\\) 是惯例，特殊场景用 \\(99\\%\\) 或 \\(90\\%\\)。"
+      },
+      {
+        "id": "statistics-ch04-q18",
+        "question": "配对 \\(t\\) 区间：\\(D_i=X_i-Y_i\\)，\\(\\mu_D\\) 的 CI？",
+        "options": [
+          "\\(\\bar{D} \\pm t_{n-1,\\alpha/2} \\cdot S_D/\\sqrt{n}\\)",
+        "\\((\\bar{X}-\\bar{Y}) \\pm t \\cdot S_p\\sqrt{2/n}\\)",
+        "\\(\\bar{D} \\pm z \\cdot \\sigma_D/\\sqrt{n}\\)",
+        "\\(\\bar{D}\\)"
+        ],
+        "answer": 0,
+        "explanation": "配对设计：差值 \\(D_i\\) 是 iid。一样本 \\(t\\) 作用于 \\(D_i\\)。比两独立样本更有效（消除受试者间变异）。\\(S_D=\\sqrt{\\sum(D_i-\\bar{D})^2/(n-1)}\\)。"
+      },
+      {
+        "id": "statistics-ch04-q19",
+        "question": "最短 CI（给定覆盖率）不一定等分尾概率的例子？",
+        "options": [
+          "\\(\\chi^2\\) 分布：偏斜分布的最短 CI 需要不等尾",
+        "正态分布",
+        "最短 CI 总是等尾",
+        "不存在最短 CI"
+        ],
+        "answer": 0,
+        "explanation": "正态：对称 ⟹ 等尾 \\(=\\) 最短。\\(\\chi^2\\)：右偏 ⟹ 最短 CI 的左端比等尾更靠右（多分配右尾概率）。求解：\\(\\min(U-L)\\) s.t. \\(F(U)-F(L)=1-\\alpha\\)（Lagrange 条件：\\(f(L)=f(U)\\)）。"
+      },
+      {
+        "id": "statistics-ch04-q20",
+        "question": "似然比 CI 的二阶准确性（Bartlett 校正）的含义？",
+        "options": [
+          "\\(-2\\ln\\Lambda\\) 乘以校正因子使其更接近 \\(\\chi^2\\)，覆盖误差从 \\(O(n^{-1})\\) 降为 \\(O(n^{-2})\\)",
+        "修改自由度",
+        "用 \\(t\\) 分布替代",
+        "增加样本量"
+        ],
+        "answer": 0,
+        "explanation": "Bartlett: \\(\\Lambda^*=-2\\ln\\Lambda/(1+a/n)\\)（\\(a\\) 由模型计算）。校正后 \\(\\Lambda^* \\sim \\chi^2_r\\) 近似更精确。这是 LRT 比 Wald 更稳健的理论基础。Bartlett 校正对指数族有封闭表达式。"
+      },
+      {
+        "id": "statistics-ch04-q21",
+        "question": "参数 Bootstrap vs 非参数 Bootstrap 的区别？",
+        "options": [
+          "参数 Bootstrap 从 \\(\\hat{F}_\\theta\\) 模拟（假设模型正确）；非参数从经验分布 \\(\\hat{F}_n\\) 模拟",
+        "两者相同",
+        "参数 Bootstrap 不用模拟",
+        "非参数需要更多样本"
+        ],
+        "answer": 0,
+        "explanation": "参数：\\(X^* \\sim F_{\\hat\\theta}\\)（如 \\(N(\\bar{x},s^2)\\)）。非参数：从 \\(\\{x_1,...,x_n\\}\\) 有放回抽样。模型正确时参数 Bootstrap 更有效；模型错误时非参数更稳健。混合策略：残差 Bootstrap（回归中）。"
+      },
+      {
+        "id": "statistics-ch04-q22",
+        "question": "Fieller 定理：两个正态均值之比 \\(\\mu_1/\\mu_2\\) 的 CI 可能是？",
+        "options": [
+          "有限区间、半无穷区间或全实数（取决于分母的显著性）",
+        "总是有限区间",
+        "不存在",
+        "总是 \\([0,1]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu_2\\) 可能包含 \\(0\\)（不显著 ⟹ 比率无穷大区间或全实数）。当 \\(\\hat\\mu_2\\) 远离零时得有限 CI。Fieller CI 比 Delta 方法更精确（不假设 \\(\\mu_2 \\neq 0\\)）。药效比较中的 EC50 比值分析。"
+      },
+      {
+        "id": "statistics-ch04-q23",
+        "question": "Delta 方法 CI: \\(g(\\hat\\theta) \\pm z_{\\alpha/2}|g'(\\hat\\theta)|\\sqrt{\\hat{\\text{Var}}(\\hat\\theta)}\\)。推导基于什么？",
+        "options": [
+          "\\(g(\\hat\\theta) \\approx g(\\theta)+g'(\\theta)(\\hat\\theta-\\theta)\\)（一阶 Taylor 展开）+ \\(\\hat\\theta\\) 的渐近正态性",
+        "精确分布",
+        "Bootstrap",
+        "Bayes 定理"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sqrt{n}(g(\\hat\\theta)-g(\\theta)) \\xrightarrow{d} N(0, [g'(\\theta)]^2/I(\\theta))\\)。\\(\\text{Var}(g(\\hat\\theta)) \\approx [g'(\\theta)]^2 \\text{Var}(\\hat\\theta)\\)。适用于光滑 \\(g\\), \\(g'(\\theta) \\neq 0\\)。\\(g'(\\theta)=0\\) 时需二阶展开。"
+      },
+      {
+        "id": "statistics-ch04-q24",
+        "question": "Bootstrap-\\(t\\) 区间（studentized Bootstrap）比百分位法更准确的原因？",
+        "options": [
+          "以 \\(t^*=(\\hat\\theta^*-\\hat\\theta)/\\hat{se}^*\\) 为枢轴量，二阶准确",
+        "计算更快",
+        "不需要标准误",
+        "总是对称"
+        ],
+        "answer": 0,
+        "explanation": "studentized: 模拟 \\(t^*\\) 分布得 \\(c_L, c_U\\)。CI: \\([\\hat\\theta-c_U\\hat{se}, \\hat\\theta-c_L\\hat{se}]\\)。覆盖误差 \\(O(n^{-1})\\) vs 百分位法 \\(O(n^{-1/2})\\)。代价：每个 Bootstrap 样本需内层 Bootstrap 估计 \\(\\hat{se}^*\\)。"
+      },
+      {
+        "id": "statistics-ch04-q25",
+        "question": "贝叶斯可信区间 (credible interval) vs 频率学 CI？",
+        "options": [
+          "可信区间：后验分布的分位数，\\(P(\\theta \\in [L,U]|X)=0.95\\)；CI 是关于 \\(X\\) 的概率",
+        "两者相同",
+        "CI 是关于 \\(\\theta\\) 的概率",
+        "可信区间更宽"
+        ],
+        "answer": 0,
+        "explanation": "贝叶斯可信区间直接给 \\(\\theta\\) 的概率（更直观）。频率 CI：长程覆盖率保证。两者在扁平先验下可近似一致。HPD (highest posterior density) 区间是最短可信区间。"
+      },
+      {
+        "id": "statistics-ch04-q26",
+        "question": "民调中 \\(\\hat{p}=0.52\\), \\(n=1000\\)。\\(p\\) 的 \\(95\\%\\) CI 宽度约？",
+        "options": [
+          "\\(\\pm 3.1\\%\\)（\\(\\approx 1.96\\sqrt{0.52 \\times 0.48/1000}\\)）",
+        "\\(\\pm 1\\%\\)",
+        "\\(\\pm 5\\%\\)",
+        "\\(\\pm 10\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat{se}=\\sqrt{0.52 \\times 0.48/1000}=\\sqrt{0.000250}=0.0158\\)。\\(1.96 \\times 0.0158=0.031\\)。CI: \\([0.489, 0.551]\\)。\\(\\pm 3\\%\\) 报道为\"误差范围\"。\\(n=2500\\): \\(\\pm 2\\%\\)。"
+      },
+      {
+        "id": "statistics-ch04-q27",
+        "question": "回归系数 \\(\\beta\\) 的 \\(95\\%\\) CI 不包含 \\(0\\) 等价于？",
+        "options": [
+          "该系数在 \\(5\\%\\) 水平下显著（拒绝 \\(H_0:\\beta=0\\)）",
+        "\\(R^2>0.95\\)",
+        "模型拟合好",
+        "\\(\\beta\\) 很大"
+        ],
+        "answer": 0,
+        "explanation": "CI \\(=\\hat\\beta \\pm t_{\\alpha/2}\\hat{se}(\\hat\\beta)\\)。\\(0 \\notin\\) CI ⟺ \\(|t|=|\\hat\\beta/\\hat{se}|>t_{\\alpha/2}\\) ⟺ 拒绝 \\(H_0\\)。统计显著不一定实际显著（效应可能很小但样本量大）。报告 CI 比仅报告 p 值更信息丰富。"
+      },
+      {
+        "id": "statistics-ch04-q28",
+        "question": "制造业中产品寿命的 CI 常用 Bootstrap 的原因？",
+        "options": [
+          "寿命分布通常偏斜（Weibull、对数正态），正态近似不佳",
+        "不需要数据",
+        "计算最快",
+        "Bootstrap 总是精确的"
+        ],
+        "answer": 0,
+        "explanation": "可靠性数据：右偏 + 截尾（censored）。参数 Bootstrap 从 \\(\\hat{F}_{\\text{Weibull}}\\) 模拟。非参数 Bootstrap 处理截尾需特殊方法（Efron 1981）。百分位数（如中位寿命）的 CI：Bootstrap 是标准方法。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="statistics"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/statistics.html" class="module-name">统计推断</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 置信区间的基本概念</a></li>
+      <li><a href="#kp2">02 · 枢轴量方法</a></li>
+      <li><a href="#kp3">03 · Bootstrap 置信区间</a></li>
+      <li><a href="#kp4">04 · 贝叶斯可信区间</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>区间估计</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>置信区间的基本概念</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>点估计给出一个值，但不告诉我们不确定性有多大。置信区间 \([L, U]\) 同时提供了估计值和不确定度量：「We are 95% confident that \(\theta\) lies in \([L, U]\)」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(1-\alpha\) 置信区间：随机区间 \([L(X), U(X)]\) 满足 \[P_\theta(L(X) \leq \theta \leq U(X)) \geq 1-\alpha, \quad \forall \theta\] 重要区分：\(\theta\) 是固定的，\([L, U]\) 是随机的。 不是「\(\theta\) 以 95% 的概率落在区间中」， 而是「此构造方法在重复抽样中有 95% 的时间能覆盖真值」。 不同 \(\alpha\) 分配： 等尾 \(\alpha/2 + \alpha/2\) 或单侧 \(\alpha + 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>民调报告中“误差范围 \(\pm 3\%\)”就是置信区间半宽。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_i \sim N(\mu, 4)\) i.i.d.，\(n = 25\)，\(\bar{x} = 12.3\)。 求 95% 置信区间。 解答：\(\sigma\) 已知 = 2。\(\bar{X} \pm z_{0.025} \cdot \sigma/\sqrt{n} = 12.3 \pm 1.96 \times 2/5 = 12.3 \pm 0.784\)。 CI: \([11.516, 13.084]\)。 易错点：“\(\mu\) 以 95% 的概率在此区间中”是错误的频率解释。 数据收集后，\([11.516, 13.084]\) 是确定的，\(\mu\) 要么在内要么不在。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">95% 置信区间 \([2.1, 3.9]\) 的正确解释是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。置信区间是“过程”的性质，不是某个具体区间的性质。')">A. \(\theta\) 有 95% 的概率落在 \([2.1, 3.9]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！置信区间是“过程”的性质，不是某个具体区间的性质。')">B. 重复抽样时，95% 的区间会包含 \(\theta\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。置信区间是“过程”的性质，不是某个具体区间的性质。')">C. \(\theta\) 必在 \([2.1, 3.9]\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>枢轴量方法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>枢轴量是构造置信区间的系统方法：找一个包含 \(\theta\) 和 \(X\) 但 分布不依赖 \(\theta\) 的量 \(Q(X, \theta)\)，然后反解得到区间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>枢轴量 = “数据与参数的已知函数关系”，类似于英语中的 “pivot”（支点）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>枢轴量 \(Q(X, \theta)\) 满足：\(Q\) 的分布不依赖于任何未知参数。 步骤： 1. 找枢轴量 \(Q(X, \theta)\) 2. 找 \(a, b\) 使 \(P(a \leq Q \leq b) = 1-\alpha\) 3. 反解 \(a \leq Q(X,\theta) \leq b\) 得 \(L \leq \theta \leq U\) 典型例子：\(\sigma\) 已知时， \[Q = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}} \sim N(0,1)\] \(\sigma\) 未知时， \[Q = \frac{\bar{X} - \mu}{S/\sqrt{n}} \sim t_{n-1}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(t\)-置信区间是最常用的小样本区间估计方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_i \sim N(\mu, \sigma^2)\) i.i.d.，\(\sigma\) 未知，\(n = 16\)， \(\bar{x} = 5.2\)，\(s = 1.5\)。求均值的 95% CI。 解答：枢轴量 \(T = (\bar{X}-\mu)/(S/\sqrt{n}) \sim t_{15}\)。 \(t_{0.025,15} = 2.131\)。CI: \(5.2 \pm 2.131 \times 1.5/4 = 5.2 \pm 0.799\)。 即 \([4.401, 5.999]\)。 易错点：当 \(\sigma\) 未知时必须用 \(t\) 分布而不是 \(Z\) 分布。 \(n\) 很大时两者近似，但小样本时差异显著。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">枢轴量的关键性质是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。枢轴量含有 \\(\\theta\\)（它不是统计量），但其分布与 \\(\\theta\\) 无关。')">A. 它是 \(\theta\) 的无偏估计</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！枢轴量含有 \\(\\theta\\)（它不是统计量），但其分布与 \\(\\theta\\) 无关。')">B. 它的分布不依赖于 \(\theta\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。枢轴量含有 \\(\\theta\\)（它不是统计量），但其分布与 \\(\\theta\\) 无关。')">C. 它是充分统计量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Bootstrap 置信区间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当没有解析的枢轴量时怎么办？Bootstrap 用重抽样模拟估计量的 抽样分布，从而构造置信区间。它对分布的假设最少，是「计算机 时代」的产物。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思想：用经验分布 \(\hat{F}_n\) 代替真实分布 \(F\)，通过重抽样 估计统计量的波动性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>算法步骤： 1. 从数据 \((x_1,\ldots,x_n)\) 有放回抽取 \(n\) 个得 \(x^*\) 2. 计算 \(\hat{\theta}^* = T(x^*)\) 3. 重复 \(B\) 次，得 \(\hat{\theta}^*_1, \ldots, \hat{\theta}^*_B\) 百分位数法： \[CI = [\hat{\theta}^*_{(\alpha/2)}, \hat{\theta}^*_{(1-\alpha/2)}]\] 即取 Bootstrap 分布的 \(\alpha/2\) 和 \(1-\alpha/2\) 分位数。 BCa 方法（偏差校正加速）更精确， 考虑了偏差和偏斜。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在没有解析公式的复杂统计量（如中位数、相关系数、 机器学习模型精度）的不确定性量化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：数据 \((1.2, 3.5, 2.1, 4.7, 3.3)\)。用 Bootstrap 估计中位数的 CI。 解答：重抽样 \(B=1000\) 次，每次有放回抽 5 个，计算中位数。 得 1000 个 Bootstrap 中位数，取 2.5% 和 97.5% 分位数作为 CI。 例如得到 CI = \([2.1, 4.7]\)。 易错点：Bootstrap 要求原始样本能合理代表总体。若原始 样本太小或有强偏，Bootstrap 也会失效。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Bootstrap 的核心思想是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。非参数 Bootstrap 直接从数据的经验分布有放回抽样。')">A. 从先验分布重抽样</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！非参数 Bootstrap 直接从数据的经验分布有放回抽样。')">B. 从经验分布 \(\hat{F}_n\) 重抽样模拟抽样分布</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。非参数 Bootstrap 直接从数据的经验分布有放回抽样。')">C. 从参数模型重抽样</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>贝叶斯可信区间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>频率派置信区间的解释“绕口”。贝叶斯可信区间直接回答 “给定数据后，\(\theta\) 以 95% 的概率在哪个范围”——这是大多数 人直觉想要的答案。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>贝叶斯可信区间是后验分布 \(\pi(\theta|x)\) 的分位数（或 HPD 区域）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>后验分布：\(\pi(\theta|x) \propto L(\theta|x)\pi(\theta)\)。 等尾可信区间：\([\theta_{\alpha/2}, \theta_{1-\alpha/2}]\)， 其中 \(\theta_q\) 是 \(\pi(\theta|x)\) 的 \(q\) 分位数。 HPD (Highest Posterior Density) 区间： \[C = \{\theta: \pi(\theta|x) \geq c\}\] 其中 \(c\) 使 \(P(\theta \in C|x) = 1-\alpha\)。 HPD 是包含后验概率 \(1-\alpha\) 的最短区间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>贝叶斯 A/B 测试中把“方案 B 优于方案 A 的概率”直接给出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X|p \sim \text{Bin}(10, p)\)，先验 \(p \sim \text{Beta}(1,1)\)。 观察 \(x=7\)。求 95% 可信区间。 解答：后验 \(p|x \sim \text{Beta}(8, 4)\)。 Beta(8,4) 的 2.5% 分位数 ≈ 0.395，97.5% 分位数 ≈ 0.894。 95% 可信区间：\([0.395, 0.894]\)。 易错点：可信区间和置信区间概念不同。可信区间是贝叶斯概念， 依赖先验选择；置信区间是频率派概念。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">HPD 区间与等尾可信区间的主要区别是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！HPD 是最短的可信区间。当后验分布对称时 HPD = 等尾，')">A. HPD 总是更短</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。HPD 是最短的可信区间。当后验分布对称时 HPD = 等尾，')">B. 等尾总是更短</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。HPD 是最短的可信区间。当后验分布对称时 HPD = 等尾，')">C. 两者总相同</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/probability/statistics.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

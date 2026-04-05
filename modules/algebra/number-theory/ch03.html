@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 费马、欧拉与威尔逊 — 数论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "number-theory-ch03-q1",
+        "question": "\\(2^{10} \\bmod 11 = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(10\\)"
+        ],
+        "answer": 1,
+        "explanation": "费马小定理：\\(p = 11\\) 素数，\\(\\gcd(2, 11) = 1\\)，\\(2^{10} \\equiv 1 \\pmod{11}\\)。直接验证：\\(2^{10} = 1024 = 93 \\times 11 + 1\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q2",
+        "question": "\\(\\varphi(20) = ?\\)",
+        "options": [
+          "\\(6\\)",
+        "\\(8\\)",
+        "\\(10\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(20 = 2^2 \\times 5\\)。\\(\\varphi(20) = 20(1-1/2)(1-1/5) = 20 \\times 1/2 \\times 4/5 = 8\\)。与 \\(20\\) 互素的数：\\(\\{1, 3, 7, 9, 11, 13, 17, 19\\}\\)，共 \\(8\\) 个。"
+      },
+      {
+        "id": "number-theory-ch03-q3",
+        "question": "\\(6! \\bmod 7 = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(6\\)",
+        "\\(3\\)"
+        ],
+        "answer": 2,
+        "explanation": "威尔逊定理：\\(p = 7\\) 时 \\((p-1)! = 6! \\equiv -1 \\equiv 6 \\pmod{7}\\)。\\(6! = 720 = 102 \\times 7 + 6\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch03-q4",
+        "question": "快速幂计算 \\(3^{13} \\bmod 7\\)。\\(13\\) 的二进制为 \\(1101_2\\)。第一步 \\(3^1 \\equiv 3\\)，则 \\(3^{13} \\equiv ?\\)",
+        "options": [
+          "\\(3\\)",
+        "\\(5\\)",
+        "\\(6\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(3^1 \\equiv 3\\)，\\(3^2 \\equiv 2\\)，\\(3^4 \\equiv 4\\)，\\(3^8 \\equiv 16 \\equiv 2\\)。\\(13 = 8+4+1\\)：\\(3^{13} = 3^8 \\cdot 3^4 \\cdot 3^1 \\equiv 2 \\times 4 \\times 3 = 24 \\equiv 3 \\pmod{7}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q5",
+        "question": "费马小定理要求 \\(\\gcd(a, p) = 1\\)。\\(0^{p-1} \\bmod p\\) 等于？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(p-1\\)",
+        "未定义"
+        ],
+        "answer": 0,
+        "explanation": "\\(0^{p-1} = 0\\)（\\(p \\geq 3\\) 时）。费马小定理不适用于 \\(a \\equiv 0 \\pmod{p}\\)。\\(a^p \\equiv a \\pmod{p}\\) 这个等价形式倒是对所有 \\(a\\) 成立（包括 \\(a = 0\\)：\\(0^p = 0 \\equiv 0\\)）。"
+      },
+      {
+        "id": "number-theory-ch03-q6",
+        "question": "\\(\\varphi(p) = ?\\)（\\(p\\) 素数）",
+        "options": [
+          "\\(p\\)",
+        "\\(p-1\\)",
+        "\\(p+1\\)",
+        "\\(1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(p\\) 素数时 \\(\\{1, 2, \\ldots, p-1\\}\\) 均与 \\(p\\) 互素，\\(\\varphi(p) = p-1\\)。这也说明费马小定理 \\(a^{p-1} \\equiv 1\\) 是欧拉定理 \\(a^{\\varphi(n)} \\equiv 1\\) 在 \\(n = p\\) 时的特例。"
+      },
+      {
+        "id": "number-theory-ch03-q7",
+        "question": "威尔逊定理 \\((p-1)! \\equiv -1 \\pmod{p}\\) 对以下哪个 \\(p\\) 不成立？",
+        "options": [
+          "\\(p = 5\\)",
+        "\\(p = 7\\)",
+        "\\(p = 4\\)",
+        "\\(p = 11\\)"
+        ],
+        "answer": 2,
+        "explanation": "威尔逊定理只对素数 \\(p\\) 成立。\\(p = 4\\) 不是素数。验证：\\(3! = 6 \\equiv 2 \\pmod{4} \\neq -1 \\equiv 3\\)。\\(n \\geq 4\\) 的合数 \\(n\\)，\\((n-1)! \\equiv 0 \\pmod{n}\\)（因为 \\(n\\) 的因子会出现在 \\((n-1)!\\) 中）。"
+      },
+      {
+        "id": "number-theory-ch03-q8",
+        "question": "\\(3^{100} \\bmod 7 = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(3^6 \\equiv 1 \\pmod{7}\\)（费马）。\\(100 = 6 \\times 16 + 4\\)。\\(3^{100} \\equiv 3^4 = 81 = 11 \\times 7 + 4 \\equiv 4 \\pmod{7}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q9",
+        "question": "\\(7^{222} \\bmod 15 = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(4\\)",
+        "\\(7\\)",
+        "\\(13\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(15) = 8\\)，\\(7^8 \\equiv 1 \\pmod{15}\\)。\\(222 = 8 \\times 27 + 6\\)。\\(7^{222} \\equiv 7^6\\)。\\(7^2 = 49 \\equiv 4\\)，\\(7^4 \\equiv 16 \\equiv 1\\)，\\(7^6 = 7^4 \\cdot 7^2 \\equiv 1 \\times 4 = 4 \\pmod{15}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q10",
+        "question": "\\(12! \\bmod 13 = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(12\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "威尔逊定理：\\(12! \\equiv -1 \\equiv 12 \\pmod{13}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q11",
+        "question": "\\(\\varphi\\) 函数的乘法性质：若 \\(\\gcd(m, n) = 1\\)，则 \\(\\varphi(mn) = ?\\)",
+        "options": [
+          "\\(\\varphi(m) + \\varphi(n)\\)",
+        "\\(\\varphi(m) \\times \\varphi(n)\\)",
+        "\\(\\varphi(m + n)\\)",
+        "\\(mn - 1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi\\) 是积性函数：\\(\\gcd(m,n) = 1 \\Rightarrow \\varphi(mn) = \\varphi(m)\\varphi(n)\\)。这是 CRT 环同构 \\((\\mathbb{Z}/mn\\mathbb{Z})^* \\cong (\\mathbb{Z}/m\\mathbb{Z})^* \\times (\\mathbb{Z}/n\\mathbb{Z})^*\\) 的直接推论。"
+      },
+      {
+        "id": "number-theory-ch03-q12",
+        "question": "RSA 参数 \\(p = 5, q = 11, e = 3\\)。加密消息 \\(m = 9\\)，密文 \\(c = ?\\)",
+        "options": [
+          "\\(14\\)",
+        "\\(9\\)",
+        "\\(27\\)",
+        "\\(4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N = 55\\)。\\(c = m^e \\bmod N = 9^3 \\bmod 55 = 729 \\bmod 55\\)。\\(729 = 13 \\times 55 + 14\\)。\\(c = 14\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q13",
+        "question": "\\(a^{n-1} \\equiv 1 \\pmod{n}\\) 对某些合数 \\(n\\) 也成立（\\(\\gcd(a, n) = 1\\)）。这类合数称为？",
+        "options": [
+          "Mersenne 数",
+        "Carmichael 数（对所有 \\(\\gcd(a,n)=1\\) 成立时）",
+        "完美数",
+        "Smith 数"
+        ],
+        "answer": 1,
+        "explanation": "Carmichael 数满足 \\(\\forall a, \\gcd(a,n) = 1 \\Rightarrow a^{n-1} \\equiv 1 \\pmod{n}\\)，是费马素性测试的漏洞。最小 Carmichael 数是 \\(561 = 3 \\times 11 \\times 17\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q14",
+        "question": "利用威尔逊定理求 \\(10! \\bmod 11\\) 后，\\(9! \\bmod 11 = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(10\\)",
+        "\\(-1\\)",
+        "\\(5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(10! \\equiv -1 \\pmod{11}\\)（威尔逊）。\\(10! = 10 \\times 9!\\)。\\(10 \\equiv -1 \\pmod{11}\\)。\\((-1) \\times 9! \\equiv -1 \\pmod{11}\\)。\\(9! \\equiv 1 \\pmod{11}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q15",
+        "question": "\\(5^{21} \\bmod 23 = ?\\)（\\(23\\) 为素数）",
+        "options": [
+          "\\(5\\)",
+        "\\(10\\)",
+        "\\(14\\)",
+        "\\(22\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(5^{22} \\equiv 1 \\pmod{23}\\)（费马）。\\(5^{21} \\equiv 5^{-1}\\)。\\(5 \\times 14 = 70 = 3 \\times 23 + 1\\)，故 \\(5^{-1} \\equiv 14 \\pmod{23}\\)。或直接算：\\((5^3)^7 \\equiv 10^7\\)，\\(10^2 \\equiv 8\\)，\\(10^4 \\equiv 18\\)，\\(10^7 = 10^4 \\cdot 10^2 \\cdot 10 \\equiv 18 \\times 8 \\times 10 = 1440 \\equiv 14 \\pmod{23}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q16",
+        "question": "快速幂算法计算 \\(a^n \\bmod m\\) 的时间复杂度为？",
+        "options": [
+          "\\(O(n)\\)",
+        "\\(O(\\log n)\\) 次模乘",
+        "\\(O(\\sqrt{n})\\)",
+        "\\(O(n^2)\\)"
+        ],
+        "answer": 1,
+        "explanation": "将 \\(n\\) 写成二进制 \\(n = \\sum 2^{b_i}\\)，每步平方并取模，共 \\(\\lfloor \\log_2 n \\rfloor\\) 次平方和至多 \\(\\lfloor \\log_2 n \\rfloor\\) 次乘法。总共 \\(O(\\log n)\\) 次模乘运算。"
+      },
+      {
+        "id": "number-theory-ch03-q17",
+        "question": "\\(\\varphi(p^2) = ?\\)（\\(p\\) 素数）",
+        "options": [
+          "\\(p^2 - 1\\)",
+        "\\(p^2 - p\\)",
+        "\\((p-1)^2\\)",
+        "\\(p(p+1)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(p^k) = p^k - p^{k-1} = p^{k-1}(p-1)\\)。\\(k = 2\\)：\\(\\varphi(p^2) = p^2 - p = p(p-1)\\)。\\(1\\) 到 \\(p^2\\) 中不与 \\(p^2\\) 互素的恰好是 \\(p\\) 的倍数：\\(p, 2p, \\ldots, p \\cdot p\\)，共 \\(p\\) 个。"
+      },
+      {
+        "id": "number-theory-ch03-q18",
+        "question": "\\(\\mathrm{ord}_7(3)\\)（\\(3\\) 模 \\(7\\) 的阶）为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(7\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(3^1 \\equiv 3, 3^2 \\equiv 2, 3^3 \\equiv 6, 3^4 \\equiv 4, 3^5 \\equiv 5, 3^6 \\equiv 1 \\pmod{7}\\)。\\(\\mathrm{ord}_7(3) = 6 = p-1\\)，说明 \\(3\\) 是模 \\(7\\) 的原根。阶必须整除 \\(\\varphi(7) = 6\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q19",
+        "question": "\\(\\sum_{d \\mid 12} \\varphi(d) = ?\\)",
+        "options": [
+          "\\(6\\)",
+        "\\(12\\)",
+        "\\(24\\)",
+        "\\(8\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(12\\) 的因子：\\(1, 2, 3, 4, 6, 12\\)。\\(\\varphi(1) + \\varphi(2) + \\varphi(3) + \\varphi(4) + \\varphi(6) + \\varphi(12) = 1 + 1 + 2 + 2 + 2 + 4 = 12\\)。恒等式 \\(\\sum_{d \\mid n} \\varphi(d) = n\\) 的验证。"
+      },
+      {
+        "id": "number-theory-ch03-q20",
+        "question": "RSA 中 \\(N = pq = 55\\)，\\(e = 3\\)，\\(d = 27\\)。解密 \\(c = 14\\)：\\(m = 14^{27} \\bmod 55\\)。用 CRT 加速：\\(14^{27} \\bmod 5\\) 和 \\(14^{27} \\bmod 11\\) 分别为？",
+        "options": [
+          "\\(4\\) 和 \\(9\\)",
+        "\\(4\\) 和 \\(3\\)",
+        "\\(1\\) 和 \\(9\\)",
+        "\\(3\\) 和 \\(9\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(14 \\equiv 4 \\pmod{5}\\)。\\(4^4 \\equiv 1 \\pmod{5}\\)（费马，\\(\\varphi(5)=4\\)）。\\(27 = 4 \\times 6 + 3\\)，\\(4^{27} \\equiv 4^3 = 64 \\equiv 4 \\pmod{5}\\)。\\(14 \\equiv 3 \\pmod{11}\\)。\\(3^{10} \\equiv 1 \\pmod{11}\\)（费马）。\\(27 = 10 \\times 2 + 7\\)，\\(3^{27} \\equiv 3^7\\)。\\(3^3 = 27 \\equiv 5, 3^6 \\equiv 25 \\equiv 3, 3^7 \\equiv 9 \\pmod{11}\\)。CRT 合并：\\(x \\equiv 4 \\pmod{5}, x \\equiv 9 \\pmod{11}\\)，\\(x = 9 \\pmod{55}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q21",
+        "question": "\\(-1\\) 是模 \\(p\\) 的二次剩余当且仅当？",
+        "options": [
+          "\\(p \\equiv 1 \\pmod{4}\\)",
+        "\\(p \\equiv 3 \\pmod{4}\\)",
+        "\\(p = 2\\)",
+        "A 或 C"
+        ],
+        "answer": 3,
+        "explanation": "\\((-1)^{(p-1)/2} \\equiv 1 \\pmod{p} \\Leftrightarrow (p-1)/2\\) 为偶数 \\(\\Leftrightarrow p \\equiv 1 \\pmod{4}\\)。\\(p = 2\\) 时 \\((-1) \\equiv 1 = 1^2\\)，也是二次剩余。证明用威尔逊定理：\\((p-1)! \\equiv -1\\)，将 \\(\\{1, \\ldots, p-1\\}\\) 分为前后两半配对。"
+      },
+      {
+        "id": "number-theory-ch03-q22",
+        "question": "\\(n = 561 = 3 \\times 11 \\times 17\\) 是 Carmichael 数。验证：\\(2^{560} \\bmod 561\\)。先算 \\(2^{560} \\bmod 3 = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\gcd(2, 3) = 1\\)，\\(2^2 \\equiv 1 \\pmod{3}\\)（费马，\\(\\varphi(3) = 2\\)）。\\(560 = 2 \\times 280\\)。\\(2^{560} \\equiv 1 \\pmod{3}\\)。类似地 \\(2^{560} \\equiv 1 \\pmod{11}\\)（\\(10 \\mid 560\\)）和 \\(\\pmod{17}\\)（\\(16 \\mid 560\\)）。CRT：\\(2^{560} \\equiv 1 \\pmod{561}\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q23",
+        "question": "利用威尔逊定理证明：对素数 \\(p\\)，\\(((p-1)/2)!^2 \\equiv (-1)^{(p+1)/2} \\pmod{p}\\)（\\(p\\) 奇素数）。当 \\(p = 5\\) 时，\\(2!^2 \\bmod 5 = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(4\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(2!^2 = 4 \\equiv 4 \\pmod{5}\\)。\\((-1)^{(5+1)/2} = (-1)^3 = -1 \\equiv 4 \\pmod{5}\\) ✓。此公式来自将 \\((p-1)!\\) 拆为 \\(1 \\cdot 2 \\cdots \\frac{p-1}{2}\\) 和 \\(\\frac{p+1}{2} \\cdots (p-1)\\)，后半部分等于 \\((-1)^{(p-1)/2} \\cdot ((p-1)/2)!\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q24",
+        "question": "\\(\\varphi(360) = ?\\)（\\(360 = 2^3 \\times 3^2 \\times 5\\)）",
+        "options": [
+          "\\(72\\)",
+        "\\(96\\)",
+        "\\(120\\)",
+        "\\(144\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(360) = 360(1 - 1/2)(1 - 1/3)(1 - 1/5) = 360 \\times 1/2 \\times 2/3 \\times 4/5 = 96\\)。或用 \\(\\varphi(2^3)\\varphi(3^2)\\varphi(5) = 4 \\times 6 \\times 4 = 96\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q25",
+        "question": "\\(2^{1000000} \\bmod 47\\) 的最快计算方式是？",
+        "options": [
+          "直接计算 \\(2^{1000000}\\) 后取模",
+        "先用费马定理缩减指数：\\(1000000 \\bmod 46\\)，再快速幂",
+        "试除法",
+        "逐次乘 \\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(47) = 46\\)，\\(2^{46} \\equiv 1 \\pmod{47}\\)。\\(1000000 = 46 \\times 21739 + 6\\)。\\(2^{1000000} \\equiv 2^6 = 64 \\equiv 64 - 47 = 17 \\pmod{47}\\)。先缩减指数再快速幂，\\(O(\\log 6)\\) 步完成。"
+      },
+      {
+        "id": "number-theory-ch03-q26",
+        "question": "某银行系统用 RSA 加密客户数据。\\(p = 61, q = 53\\)，\\(N = 3233\\)，\\(e = 17\\)。\\(\\varphi(N) = ?\\)",
+        "options": [
+          "\\(3120\\)",
+        "\\(3216\\)",
+        "\\(3232\\)",
+        "\\(3060\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(N) = (p-1)(q-1) = 60 \\times 52 = 3120\\)。RSA 安全性依赖于不知 \\(p, q\\) 时无法计算 \\(\\varphi(N)\\)（因式分解困难），从而无法求私钥 \\(d = e^{-1} \\bmod \\varphi(N)\\)。"
+      },
+      {
+        "id": "number-theory-ch03-q27",
+        "question": "Diffie-Hellman 密钥交换中，选素数 \\(p = 23\\)，原根 \\(g = 5\\)。Alice 选私钥 \\(a = 6\\)，\\(A = g^a \\bmod p = 5^6 \\bmod 23 = ?\\)",
+        "options": [
+          "\\(8\\)",
+        "\\(2\\)",
+        "\\(15\\)",
+        "\\(19\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(5^2 = 25 \\equiv 2\\)，\\(5^4 \\equiv 4\\)，\\(5^6 = 5^4 \\times 5^2 \\equiv 4 \\times 2 = 8 \\pmod{23}\\)。Alice 发送 \\(A = 8\\) 给 Bob。安全性基于离散对数困难性：从 \\(A = 8\\) 反推 \\(a = 6\\) 在大素数情况下计算不可行。"
+      },
+      {
+        "id": "number-theory-ch03-q28",
+        "question": "密码学中的素性测试使用 Miller-Rabin 算法。该算法基于费马小定理和什么额外条件？",
+        "options": [
+          "威尔逊定理",
+        "二次探测：\\(x^2 \\equiv 1 \\pmod{n} \\Rightarrow x \\equiv \\pm 1\\)（\\(n\\) 素数时）",
+        "欧拉定理",
+        "中国剩余定理"
+        ],
+        "answer": 1,
+        "explanation": "Miller-Rabin 将 \\(n-1 = 2^s d\\) 分解，不仅检查 \\(a^{n-1} \\equiv 1\\)，还检查平方根链 \\(a^d, a^{2d}, \\ldots, a^{2^s d}\\)。素数 \\(p\\) 中 \\(x^2 \\equiv 1 \\pmod{p}\\) 只有 \\(x = \\pm 1\\)，若在链中出现其他解则 \\(n\\) 必为合数。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="number-theory"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/number-theory.html" class="module-name">数论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 费马小定理</a></li>
+      <li><a href="#kp2">02 · Euler \(\varphi\) 函数与欧拉定理</a></li>
+      <li><a href="#kp3">03 · 威尔逊定理</a></li>
+      <li><a href="#kp4">04 · 应用：模幂运算与 RSA</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>费马、欧拉与威尔逊</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>费马小定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何快速计算 \(a^{1000000} \bmod p\)？直接计算无望，但费马小定理 告诉我们 \(a^{p-1} \equiv 1 \pmod{p}\)，将指数大幅缩小。这是模运算中 最重要的定理之一，也是 RSA 加密的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>费马小定理是 Lagrange 定理在 \((\mathbb{Z}/p\mathbb{Z})^*\) 上的特例: \(a^{|G|} = e\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>费马小定理</strong>: 若 \(p\) 素数，\(\gcd(a, p) = 1\)，则 \[a^{p-1} \equiv 1 \pmod{p}\] 等价形式: \(a^p \equiv a \pmod{p}\)（对所有 \(a\)）。 <strong>群论证明</strong>: \((\mathbb{Z}/p\mathbb{Z})^*\) 是 \(p-1\) 阶群。 由 Lagrange 定理，\(\mathrm{ord}(\overline{a}) \mid p-1\)， 故 \(a^{p-1} \equiv 1\)。 <strong>组合证明</strong>: 考虑 \(\{a, 2a, 3a, \ldots, (p-1)a\} \pmod{p}\)。 因 \(\gcd(a,p)=1\)，这 \(p-1\) 个数两两不同余， 故是 \(\{1,2,\ldots,p-1\}\) 的某种排列。 二边乘积: \((a)(2a)\cdots((p-1)a) \equiv 1 \cdot 2 \cdots (p-1) \pmod{p}\)。 \(a^{p-1} (p-1)! \equiv (p-1)! \pmod{p}\)。 消去 \((p-1)!\)（与 \(p\) 互素）得 \(a^{p-1} \equiv 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>费马素性测试: 若 \(a^{n-1} \not\equiv 1 \pmod{n}\)，则 \(n\) 非素。 （反之不一定，Carmichael 数是反例。）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \(3^{100} \bmod 7\)。 解答: \(p = 7\)，\(3^6 \equiv 1 \pmod{7}\)（费马）。 \(100 = 6 \times 16 + 4\)，故 \(3^{100} \equiv 3^4 = 81 \equiv 81 - 11 \times 7 = 81 - 77 = 4 \pmod{7}\)。 易错点: 忘记 \(\gcd(a,p) = 1\) 的前提。 \(0^{p-1} = 0 \neq 1 \pmod{p}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(2^{10} \bmod 11 = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。由费马小定理，\\(2^{10} \\equiv 1 \\pmod{11}\\)。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！由费马小定理，\\(2^{10} \\equiv 1 \\pmod{11}\\)。')">B. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。由费马小定理，\\(2^{10} \\equiv 1 \\pmod{11}\\)。')">C. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。由费马小定理，\\(2^{10} \\equiv 1 \\pmod{11}\\)。')">D. 10</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Euler \(\varphi\) 函数与欧拉定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>费马小定理只适用于素数模。欧拉将其推广到任意模 \(n\): \(a^{\varphi(n)} \equiv 1 \pmod{n}\)（\(\gcd(a,n)=1\)）。为此需要理解 Euler \(\varphi\) 函数——计算与 \(n\) 互素的数的个数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\varphi\) 是算术函数中的核心乘法函数。其乘法性反映了 CRT 的 环同构结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Euler \(\varphi\) 函数</strong>: \(\varphi(n) = |\{1 \leq k \leq n : \gcd(k,n)=1\}|\)。 <strong>乘法公式</strong>: \(\gcd(m,n)=1 \Rightarrow \varphi(mn) = \varphi(m)\varphi(n)\)。 <strong>素数幂</strong>: \(\varphi(p^a) = p^a - p^{a-1} = p^{a-1}(p-1)\)。 <strong>一般公式</strong>: \(\varphi(n) = n \prod_{p \mid n} (1 - 1/p)\)。 <strong>欧拉定理</strong>: 若 \(\gcd(a,n) = 1\)，则 \[a^{\varphi(n)} \equiv 1 \pmod{n}\] 证明: 与费马小定理的群论证明完全类似—— 将 \((\mathbb{Z}/p\mathbb{Z})^*\) 替换为 \((\mathbb{Z}/n\mathbb{Z})^*\) 即可。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RSA 加密: \(m^{ed} \equiv m \pmod{N}\)，其中 \(ed \equiv 1 \pmod{\varphi(N)}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \(7^{222} \bmod 15\)。 解答: \(\varphi(15) = \varphi(3)\varphi(5) = 2 \times 4 = 8\)。 \(7^8 \equiv 1 \pmod{15}\)。\(222 = 8 \times 27 + 6\)。 \(7^{222} \equiv 7^6 \pmod{15}\)。 \(7^2 = 49 \equiv 4\)，\(7^4 \equiv 16 \equiv 1\)，\(7^6 \equiv 7^4 \cdot 7^2 \equiv 4 \pmod{15}\)。 易错点: 将 \(\varphi(n)\) 与 \(n\) 混淆。\(\varphi(15) = 8 \neq 15\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\varphi(20) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(20 = 2^2 \\times 5\\)，\\(\\varphi(20) = 20(1-1/2)(1-1/5) = 8\\)。')">A. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(20 = 2^2 \\times 5\\)，\\(\\varphi(20) = 20(1-1/2)(1-1/5) = 8\\)。')">B. 8</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(20 = 2^2 \\times 5\\)，\\(\\varphi(20) = 20(1-1/2)(1-1/5) = 8\\)。')">C. 10</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(20 = 2^2 \\times 5\\)，\\(\\varphi(20) = 20(1-1/2)(1-1/5) = 8\\)。')">D. 12</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>威尔逊定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>威尔逊定理 \((p-1)! \equiv -1 \pmod{p}\) 是将素数、阶乘和同余联系 起来的优美结果。它提供了一种判定素数的理论方法（虽然计算上不实用）， 也在证明某些数论结果时十分有用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>威尔逊定理是 \((\mathbb{Z}/p\mathbb{Z})^*\) 中元素与其逆元配对的结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>威尔逊定理</strong>: \(p\) 素数 \(\Rightarrow (p-1)! \equiv -1 \pmod{p}\)。 证明: 在 \((\mathbb{Z}/p\mathbb{Z})^*\) 中，每个元素 \(a\) 有唯一逆元 \(a^{-1}\)。 \(a = a^{-1} \Leftrightarrow a^2 \equiv 1 \Leftrightarrow p \mid (a-1)(a+1) \Leftrightarrow a \equiv \pm 1 \pmod{p}\)。 故在 \(\{1, 2, \ldots, p-1\}\) 中，除了 \(1\) 和 \(p-1\)， 其余元素两两配对为互逆对，乘积为 \(1\)。 \[(p-1)! = 1 \cdot \underbrace{(2 \cdot 2^{-1}) \cdots}_{=1} \cdot (p-1) \equiv 1 \cdot (p-1) \equiv -1 \pmod{p}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>威尔逊定理用于证明 \(-1\) 何时是二次剩余: \((-1/p) = (-1)^{(p-1)/2}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 验证 \(6! \equiv -1 \pmod{7}\)。 解答: \(6! = 720\)。\(720 / 7 = 102 \cdots 6\)。 \(720 \equiv 6 \equiv -1 \pmod{7}\)。✓ 易错点: 误以为威尔逊定理对合数也成立。 \(4! = 24 \equiv 0 \pmod{4} \neq -1\)（\(n \geq 4\) 的合数 \(n\)， \((n-1)!\) 中包含 \(n\) 的因子，结果为 0）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\((10)! \bmod 11 = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。由威尔逊定理，\\(10! \\equiv -1 \\equiv 10 \\pmod{11}\\)。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。由威尔逊定理，\\(10! \\equiv -1 \\equiv 10 \\pmod{11}\\)。')">B. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！由威尔逊定理，\\(10! \\equiv -1 \\equiv 10 \\pmod{11}\\)。')">C. 10</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。由威尔逊定理，\\(10! \\equiv -1 \\equiv 10 \\pmod{11}\\)。')">D. 5</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>应用：模幂运算与 RSA</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何高效计算 \(a^n \bmod m\)（\(n\) 可能是十万位的大数）？快速幂算法 利用二进制展开将复杂度降到 \(O(\log n)\) 次乘法。结合欧拉定理的 指数缩减，这构成了 RSA 加密的完整算法基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>快速幂</strong>（平方-乘法）: 将指数写成二进制 \(n = \sum 2^{b_i}\)，然后 \(a^n = \prod a^{2^{b_i}}\)。每步平方并取模，O(\log n) 步。 <strong>RSA 框架</strong>: 1) 选大素数 \(p, q\)，令 \(N = pq\)。 2) 计算 \(\varphi(N) = (p-1)(q-1)\)。 3) 选 \(e\) 与 \(\varphi(N)\) 互素，计算 \(d = e^{-1} \bmod \varphi(N)\)。 4) 加密: \(c = m^e \bmod N\)。解密: \(m = c^d \bmod N\)。 正确性: \(m^{ed} = m^{1 + k\varphi(N)} = m \cdot (m^{\varphi(N)})^k \equiv m \cdot 1^k = m \pmod{N}\)（由欧拉定理）。 \[c = m^e \bmod N, \quad m = c^d \bmod N\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RSA 是互联网安全通信（HTTPS）的基石之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: RSA 参数 \(p=5, q=11, e=3\)。加密 \(m=9\)。 解答: \(N = 55\)，\(\varphi(55) = 40\)。 \(d = 3^{-1} \bmod 40\): \(3 \times 27 = 81 = 2 \times 40 + 1\)， 故 \(d = 27\)。 加密: \(c = 9^3 \bmod 55 = 729 \bmod 55 = 729 - 13 \times 55 = 729 - 715 = 14\)。 解密: \(14^{27} \bmod 55\)（用快速幂计算）\(= 9\)。✓ 易错点: 计算 \(d\) 时将模数写成 \(N\) 而非 \(\varphi(N)\)。 \(d\) 必须满足 \(ed \equiv 1 \pmod{\varphi(N)}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">RSA 中解密指数 \(d\) 满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(ed \\equiv 1 \\pmod{\\varphi(N)}\\) 保证了')">A. \(d = e^{-1} \bmod N\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(ed \\equiv 1 \\pmod{\\varphi(N)}\\) 保证了')">B. \(d = e^{-1} \bmod \varphi(N)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(ed \\equiv 1 \\pmod{\\varphi(N)}\\) 保证了')">C. \(d = e^{-1} \bmod (p+q)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(ed \\equiv 1 \\pmod{\\varphi(N)}\\) 保证了')">D. \(d \equiv e \pmod{N}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/algebra/number-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

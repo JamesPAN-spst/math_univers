@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 Jordan 标准形 — 线代进阶 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-adv-ch03-q1",
+        "question": "\\(A=J_3(2)=\\begin{pmatrix}2&1&0\\\\0&2&1\\\\0&0&2\\end{pmatrix}\\)。普通特征空间 \\(\\ker(A-2I)\\) 的维数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A-2I=\\begin{pmatrix}0&1&0\\\\0&0&1\\\\0&0&0\\end{pmatrix}\\)，\\(\\mathrm{rank}=2\\)，\\(\\dim\\ker=3-2=1\\)。普通特征空间仅 1 维（\\(\\mathrm{span}\\{e_1\\}\\)），远小于代数重数 3。这正是\"不可对角化\"的体现——特征向量不够多。"
+      },
+      {
+        "id": "linear-adv-ch03-q2",
+        "question": "\\(\\lambda\\) 的代数重数为 3，几何重数为 1。广义特征空间 \\(V_\\lambda\\) 的维数是？对应多少个 Jordan 块？",
+        "options": [
+          "\\(\\dim V_\\lambda=3\\)，1 个 Jordan 块",
+        "\\(\\dim V_\\lambda=1\\)，1 个 Jordan 块",
+        "\\(\\dim V_\\lambda=3\\)，3 个 Jordan 块",
+        "\\(\\dim V_\\lambda=1\\)，3 个 Jordan 块"
+        ],
+        "answer": 0,
+        "explanation": "广义特征空间维数 = 代数重数 = 3。Jordan 块个数 = 几何重数 = 1。因此是一个 \\(3\\times3\\) Jordan 块 \\(J_3(\\lambda)\\)。易错: 将几何重数（普通特征空间维数）与广义特征空间维数混淆。"
+      },
+      {
+        "id": "linear-adv-ch03-q3",
+        "question": "Jordan 块 \\(J_2(3)\\) 的矩阵为？",
+        "options": [
+          "\\(\\begin{pmatrix}3&1\\\\0&3\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}3&0\\\\1&3\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}3&0\\\\0&3\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&3\\\\0&1\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(J_k(\\lambda)=\\lambda I_k+N_k\\)，其中 \\(N_k\\) 是超对角线为 1 的幂零矩阵。\\(J_2(3)=\\begin{pmatrix}3&1\\\\0&3\\end{pmatrix}\\)。选项B是下三角形式（不同约定）；选项C是 \\(3I\\)（纯量阵，非 Jordan 块）；选项D的对角元不对。"
+      },
+      {
+        "id": "linear-adv-ch03-q4",
+        "question": "\\(4\\times4\\) 矩阵，\\(\\chi_A=(x-2)^4\\)，\\(m_A=(x-2)^2\\)，\\(\\mathrm{rank}(A-2I)=2\\)。Jordan 形为？",
+        "options": [
+          "\\(J_2(2)\\oplus J_2(2)\\)",
+        "\\(J_4(2)\\)",
+        "\\(J_2(2)\\oplus J_1(2)\\oplus J_1(2)\\)",
+        "\\(J_1(2)^4\\)"
+        ],
+        "answer": 0,
+        "explanation": "最大块大小 \\(=m_A\\) 中 \\((x-2)\\) 的幂次 \\(=2\\)。几何重数 \\(=\\dim\\ker(A-2I)=4-2=2\\)→2 个 Jordan 块。总大小 \\(4=2+2\\)。选项B: 需 \\(m_A=(x-2)^4\\)；选项C: 几何重数=3 但 \\(\\mathrm{rank}(A-2I)=2\\) 给出几何重数=2；选项D: 需 \\(A=2I\\)。"
+      },
+      {
+        "id": "linear-adv-ch03-q5",
+        "question": "\\(A=\\begin{pmatrix}2&1\\\\0&2\\end{pmatrix}\\)。求 Jordan 链的起始向量 \\(v\\)（满足 \\((A-2I)v\\neq0\\)，\\((A-2I)^2 v=0\\)）。",
+        "options": [
+          "\\(v=e_2=(0,1)^T\\)，链: \\((A-2I)e_2=e_1\\)，\\(e_2\\)",
+        "\\(v=e_1=(1,0)^T\\)",
+        "\\(v=(1,1)^T\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\((A-2I)=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)。取 \\(v=e_2\\): \\((A-2I)e_2=(1,0)^T=e_1\\neq0\\)，\\((A-2I)^2 e_2=(A-2I)e_1=0\\) ✓。Jordan 链: \\(\\{e_1, e_2\\}\\)（先 \\((A-2I)v\\)，后 \\(v\\)），在此基下 \\(A\\) 表示为 \\(J_2(2)\\)。选项B: \\((A-2I)e_1=0\\)，\\(e_1\\) 是普通特征向量，不是链起点。"
+      },
+      {
+        "id": "linear-adv-ch03-q6",
+        "question": "\\(e^{tJ_2(0)}=?\\)，其中 \\(J_2(0)=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)。",
+        "options": [
+          "\\(\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^t&0\\\\0&e^t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&0\\\\t&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}t&1\\\\0&t\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(J_2(0)=N\\)（幂零），\\(N^2=0\\)。\\(e^{tN}=I+tN+\\frac{t^2}{2}N^2+\\cdots=I+tN=\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)。\\(\\lambda=0\\) 故无指数增长因子 \\(e^{\\lambda t}\\)。这是最简单的矩阵指数计算。"
+      },
+      {
+        "id": "linear-adv-ch03-q7",
+        "question": "矩阵指数满足 \\(e^{A+B}=e^A e^B\\) 的充要条件是？",
+        "options": [
+          "\\(AB=BA\\)（\\(A,B\\) 可交换）",
+        "总成立",
+        "\\(A,B\\) 对角",
+        "\\(A+B=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "只有当 \\(AB=BA\\) 时 \\(e^{A+B}=e^Ae^B\\)。反例: \\(A=\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\), \\(B=\\begin{pmatrix}0&0\\\\1&0\\end{pmatrix}\\), \\(AB\\neq BA\\), \\(e^{A+B}\\neq e^Ae^B\\)。选项C是充分条件但非必要（任何可交换对都行）。"
+      },
+      {
+        "id": "linear-adv-ch03-q8",
+        "question": "\\(A=\\begin{pmatrix}1&1&0\\\\0&1&0\\\\0&0&2\\end{pmatrix}=J_2(1)\\oplus J_1(2)\\)。\\(\\dim\\ker(A-I)\\) 和 \\(\\dim\\ker(A-2I)\\) 分别为？",
+        "options": [
+          "\\(1\\) 和 \\(1\\)",
+        "\\(2\\) 和 \\(1\\)",
+        "\\(1\\) 和 \\(2\\)",
+        "\\(2\\) 和 \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A-I=\\begin{pmatrix}0&1&0\\\\0&0&0\\\\0&0&1\\end{pmatrix}\\)，\\(\\mathrm{rank}=2\\)，\\(\\dim\\ker=1\\)。\\(A-2I=\\begin{pmatrix}-1&1&0\\\\0&-1&0\\\\0&0&0\\end{pmatrix}\\)，\\(\\mathrm{rank}=2\\)，\\(\\dim\\ker=1\\)。\\(\\lambda=1\\) 的几何重数=1（1 个 Jordan 块），\\(\\lambda=2\\) 的几何重数=1（1 个块）。"
+      },
+      {
+        "id": "linear-adv-ch03-q9",
+        "question": "\\(A=\\begin{pmatrix}3&1&0\\\\0&3&0\\\\0&0&3\\end{pmatrix}\\)。广义特征空间维数链: \\(\\dim\\ker(A-3I)^k\\) 对 \\(k=1,2,3\\) 是？",
+        "options": [
+          "\\(2,3,3\\)",
+        "\\(1,2,3\\)",
+        "\\(1,3,3\\)",
+        "\\(3,3,3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A-3I=\\begin{pmatrix}0&1&0\\\\0&0&0\\\\0&0&0\\end{pmatrix}\\)，\\(\\mathrm{rank}=1\\)，\\(\\dim\\ker=2\\)。\\((A-3I)^2=0\\)，\\(\\dim\\ker=3\\)。链: \\(2,3,3\\)。\\(J\\) 结构: \\(J_2(3)\\oplus J_1(3)\\)（最大块=2，几何重数=2）。易错: 以为 \\(\\dim\\ker(A-\\lambda I)=1\\) 就推出只有 1 个 Jordan 块——这里几何重数=2 意味着有 2 个块。"
+      },
+      {
+        "id": "linear-adv-ch03-q10",
+        "question": "\\(3\\times3\\)，\\(\\chi_A=(x-1)^3\\)，\\(m_A=(x-1)^2\\)。Jordan 标准形为？",
+        "options": [
+          "\\(J_2(1)\\oplus J_1(1)\\)",
+        "\\(J_3(1)\\)",
+        "\\(\\mathrm{diag}(1,1,1)\\)",
+        "\\(J_2(1)\\oplus J_2(1)\\)（大小超出）"
+        ],
+        "answer": 0,
+        "explanation": "最大块=2（\\(m_A\\) 的幂次）。总维=3=2+1→两个块。选项B需 \\(m_A=(x-1)^3\\)。选项C需 \\(m_A=(x-1)\\)。选项D总维=4≠3。"
+      },
+      {
+        "id": "linear-adv-ch03-q11",
+        "question": "\\(3\\times3\\)，\\(\\chi_A=(x-1)^2(x-3)\\)，\\(m_A=(x-1)(x-3)\\)。Jordan 形为？",
+        "options": [
+          "\\(\\mathrm{diag}(1,1,3)\\)（可对角化）",
+        "\\(J_2(1)\\oplus J_1(3)\\)",
+        "\\(J_2(1)\\oplus J_1(1)\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(m_A=(x-1)(x-3)\\) 无重根→可对角化。Jordan 形=对角阵，特征值按代数重数: \\(1,1,3\\)。选项B的 \\(m_A\\) 应为 \\((x-1)^2(x-3)\\)，与题设矛盾。"
+      },
+      {
+        "id": "linear-adv-ch03-q12",
+        "question": "\\(A=\\begin{pmatrix}0&1&0\\\\0&0&0\\\\0&0&0\\end{pmatrix}=J_2(0)\\oplus J_1(0)\\)。对 \\(J_2(0)\\) 部分，Jordan 链起始向量可以取？",
+        "options": [
+          "\\(v=e_2\\)，链: \\(\\{Av=e_1,\\;v=e_2\\}\\)",
+        "\\(v=e_1\\)",
+        "\\(v=e_3\\)",
+        "\\(v=e_1+e_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(J_2(0)\\) 的链: 取 \\(v\\in\\ker A^2\\setminus\\ker A\\)。\\(Ae_2=e_1\\neq0\\)，\\(A^2 e_2=A(e_1)=0\\)→\\(e_2\\) 满足。链: \\(\\{Ae_2=e_1, e_2\\}\\)。\\(e_1\\) 和 \\(e_3\\) 在 \\(\\ker A\\) 中（\\(Ae_1=0,Ae_3=0\\)），是普通特征向量，不能做链的起点。"
+      },
+      {
+        "id": "linear-adv-ch03-q13",
+        "question": "链基法中，\\(k\\) 阶 Jordan 块的起始向量 \\(v\\) 需满足什么条件？",
+        "options": [
+          "\\((A-\\lambda I)^k v=0\\) 且 \\((A-\\lambda I)^{k-1}v\\neq0\\)",
+        "\\((A-\\lambda I)v=0\\)",
+        "\\(Av=\\lambda v\\)",
+        "\\((A-\\lambda I)^k v\\neq0\\)"
+        ],
+        "answer": 0,
+        "explanation": "起始向量必须在 \\(\\ker(A-\\lambda I)^k\\) 中但不在 \\(\\ker(A-\\lambda I)^{k-1}\\) 中。这保证链 \\(\\{(A-\\lambda I)^{k-1}v,\\ldots,(A-\\lambda I)v,v\\}\\) 恰好有 \\(k\\) 个非零向量。选项B和C: 这是普通特征向量的条件，只用于 \\(k=1\\) 的块。"
+      },
+      {
+        "id": "linear-adv-ch03-q14",
+        "question": "\\(A=\\mathrm{diag}(1,2)\\)。\\(e^{tA}=?\\)",
+        "options": [
+          "\\(\\mathrm{diag}(e^t, e^{2t})\\)",
+        "\\(\\mathrm{diag}(t, 2t)\\)",
+        "\\((1+t)I\\)",
+        "\\(e^t\\cdot e^{2t}\\cdot I\\)"
+        ],
+        "answer": 0,
+        "explanation": "对角矩阵的指数按元素取指数: \\(e^{tA}=\\mathrm{diag}(e^{t\\cdot1},e^{t\\cdot2})=\\mathrm{diag}(e^t,e^{2t})\\)。选项D合并了两个特征值，这是不对的（\\(e^{A+B}\\neq e^Ae^B\\) 除非可交换——这里虽然可交换但结果仍是对角非纯量阵）。"
+      },
+      {
+        "id": "linear-adv-ch03-q15",
+        "question": "\\(A\\) 满足 \\(A^2=-I\\)。\\(e^{tA}=?\\)",
+        "options": [
+          "\\(\\cos(t)\\cdot I+\\sin(t)\\cdot A\\)",
+        "\\(e^{-t}\\cdot I\\)",
+        "\\((1-t^2/2)I+tA\\)",
+        "\\(\\cosh(t)\\cdot I+\\sinh(t)\\cdot A\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^{2k}=(-1)^k I\\)，\\(A^{2k+1}=(-1)^k A\\)。\\(e^{tA}=\\sum\\frac{t^k A^k}{k!}=\\bigl(\\sum\\frac{(-1)^k t^{2k}}{(2k)!}\\bigr)I+\\bigl(\\sum\\frac{(-1)^k t^{2k+1}}{(2k+1)!}\\bigr)A=\\cos(t)I+\\sin(t)A\\)。经典例子: \\(A=\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}\\)（旋转矩阵生成元），\\(e^{tA}\\) 是旋转角 \\(t\\) 的旋转矩阵。"
+      },
+      {
+        "id": "linear-adv-ch03-q16",
+        "question": "特征值 \\(\\lambda\\) 对应的 Jordan 块个数等于？",
+        "options": [
+          "\\(\\lambda\\) 的几何重数 \\(\\dim\\ker(A-\\lambda I)\\)",
+        "\\(\\lambda\\) 的代数重数",
+        "\\(m_A\\) 中 \\((x-\\lambda)\\) 的幂次",
+        "\\(\\chi_A\\) 的次数"
+        ],
+        "answer": 0,
+        "explanation": "每个 Jordan 块贡献一个线性无关的特征向量（块的第一列）。因此 Jordan 块个数 = 线性无关特征向量个数 = 几何重数。选项B是所有块大小之和，不是块的个数。选项C是最大块的大小，不是块数。易错: 块数与块大小是两个不同的概念。"
+      },
+      {
+        "id": "linear-adv-ch03-q17",
+        "question": "\\(4\\times4\\) 矩阵，\\(\\lambda=0\\) 唯一特征值。\\(\\dim\\ker A^k\\): \\(k=1\\)→\\(2\\)，\\(k=2\\)→\\(3\\)，\\(k=3\\)→\\(4\\)。Jordan 块结构为？",
+        "options": [
+          "\\(J_3(0)\\oplus J_1(0)\\)",
+        "\\(J_2(0)\\oplus J_2(0)\\)",
+        "\\(J_4(0)\\)",
+        "\\(J_2(0)\\oplus J_1(0)\\oplus J_1(0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "增量 \\(\\Delta_k=\\dim\\ker A^k-\\dim\\ker A^{k-1}\\): \\(\\Delta_1=2,\\Delta_2=1,\\Delta_3=1\\)。大小≥\\(k\\) 的块数=\\(\\Delta_k\\): 大小≥1→2块，≥2→1块，≥3→1块。因此: 恰好 2 块，其中 1 块大小≥3（为3），1 块大小=1。即 \\(J_3(0)\\oplus J_1(0)\\)。总维=3+1=4 ✓。"
+      },
+      {
+        "id": "linear-adv-ch03-q18",
+        "question": "\\(A=\\begin{pmatrix}0&0&1\\\\0&0&0\\\\0&0&0\\end{pmatrix}\\)。\\(\\dim\\ker A^k\\) 链为？Jordan 结构为？",
+        "options": [
+          "\\(k=1\\): \\(2\\)；\\(k=2\\): \\(3\\)。\\(J_2(0)\\oplus J_1(0)\\)",
+        "\\(k=1\\): \\(1\\)；\\(k=2\\): \\(3\\)。\\(J_3(0)\\)",
+        "\\(k=1\\): \\(3\\)。\\(3J_1(0)\\)（零矩阵）",
+        "\\(k=1\\): \\(2\\)；\\(k=2\\): \\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\) 的 \\(\\mathrm{rank}=1\\)，\\(\\dim\\ker A=2\\)。\\(A^2=0\\)→\\(\\dim\\ker A^2=3\\)。增量: \\(\\Delta_1=2,\\Delta_2=1\\)→2 个块，最大块=2。\\(J_2(0)\\oplus J_1(0)\\)。验证: \\((A-0I)^2=0\\) ✓，\\((A-0I)\\neq0\\) ✓→\\(m_A=x^2\\) ✓（最大块=2）。"
+      },
+      {
+        "id": "linear-adv-ch03-q19",
+        "question": "\\(5\\times5\\)，\\(\\chi_A=(x-1)^5\\)，\\(m_A=(x-1)^3\\)。有多少种可能的 Jordan 形？",
+        "options": [
+          "\\(2\\) 种: \\(J_3\\oplus J_2\\) 或 \\(J_3\\oplus J_1\\oplus J_1\\)",
+        "\\(1\\) 种",
+        "\\(3\\) 种",
+        "\\(5\\) 种"
+        ],
+        "answer": 0,
+        "explanation": "最大块=3。\\(5\\) 的分拆中最大部分=3: \\(\\{3,2\\}\\) 和 \\(\\{3,1,1\\}\\)。\\(\\{3,2\\}\\): \\(J_3(1)\\oplus J_2(1)\\)，几何重数=2。\\(\\{3,1,1\\}\\): \\(J_3(1)\\oplus J_1(1)^2\\)，几何重数=3。两种均合法。易错: 以为 \\(\\chi_A\\) 和 \\(m_A\\) 唯一确定 Jordan 形——实际上还需要中间的核链信息或秩信息。"
+      },
+      {
+        "id": "linear-adv-ch03-q20",
+        "question": "\\(A=\\begin{pmatrix}5&1\\\\0&5\\end{pmatrix}=J_2(5)\\)。求 Jordan 基和过渡矩阵 \\(P\\) 使 \\(P^{-1}AP=J_2(5)\\)。",
+        "options": [
+          "基 \\(\\{e_1,e_2\\}\\)，\\(P=I\\)（\\(A\\) 已经是 Jordan 形）",
+        "基 \\(\\{e_2,e_1\\}\\)，\\(P=\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}\\)",
+        "基 \\(\\{e_1+e_2,e_1\\}\\)",
+        "需要复杂计算"
+        ],
+        "answer": 0,
+        "explanation": "\\(A\\) 已经是 Jordan 形 \\(J_2(5)\\)！标准基 \\(\\{e_1,e_2\\}\\) 就是 Jordan 基。链: \\(v=e_2\\)→\\((A-5I)e_2=e_1\\)→链终止。过渡矩阵 \\(P=I\\)，\\(P^{-1}AP=A=J_2(5)\\)。这不是trick——识别出矩阵已经是 Jordan 形很重要。"
+      },
+      {
+        "id": "linear-adv-ch03-q21",
+        "question": "\\(A=\\begin{pmatrix}3&1&0\\\\-1&1&0\\\\0&0&2\\end{pmatrix}\\)，特征值 \\(2\\)（代数重数 \\(2\\)）和 \\(2\\)... 不对，先算 \\(\\chi_A\\)。",
+        "options": [
+          "\\(2\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A-2I=\\begin{pmatrix}1&1&0\\\\-1&-1&0\\\\0&0&0\\end{pmatrix}\\)，\\(\\mathrm{rank}=1\\)→\\(\\dim\\ker=2\\)。几何重数=2→2 个 Jordan 块。\\(\\chi_A=(x-2)^3\\)，总维 3=块大小之和→\\(J_2(2)\\oplus J_1(2)\\)。\\(m_A=(x-2)^2\\)。"
+      },
+      {
+        "id": "linear-adv-ch03-q22",
+        "question": "\\(e^{tJ_3(\\lambda)}\\) 的 \\((1,3)\\) 元素为？",
+        "options": [
+          "\\(e^{\\lambda t}\\cdot\\frac{t^2}{2}\\)",
+        "\\(e^{\\lambda t}\\cdot t\\)",
+        "\\(\\frac{t^2}{2}\\)",
+        "\\(e^{\\lambda t}\\cdot t^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^{tJ_3(\\lambda)}=e^{\\lambda t}\\begin{pmatrix}1&t&t^2/2\\\\0&1&t\\\\0&0&1\\end{pmatrix}\\)。\\((1,3)\\) 元素 \\(=e^{\\lambda t}\\cdot\\frac{t^2}{2!}\\)。一般公式: \\((e^{tJ_k(\\lambda)})_{ij}=e^{\\lambda t}\\cdot\\frac{t^{j-i}}{(j-i)!}\\)（\\(j\\geq i\\)），\\(j<i\\) 时为 0。"
+      },
+      {
+        "id": "linear-adv-ch03-q23",
+        "question": "\\(\\dot{\\mathbf{x}}=A\\mathbf{x}\\)，\\(A=J_2(1)=\\begin{pmatrix}1&1\\\\0&1\\end{pmatrix}\\)，\\(\\mathbf{x}(0)=(0,1)^T\\)。\\(\\mathbf{x}(t)=?\\)",
+        "options": [
+          "\\(\\begin{pmatrix}te^t\\\\e^t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^t\\\\e^t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}0\\\\e^t\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}e^t\\\\te^t\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e^{tA}=e^t\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\)。\\(\\mathbf{x}(t)=e^{tA}\\mathbf{x}(0)=e^t\\begin{pmatrix}1&t\\\\0&1\\end{pmatrix}\\begin{pmatrix}0\\\\1\\end{pmatrix}=e^t\\begin{pmatrix}t\\\\1\\end{pmatrix}=\\begin{pmatrix}te^t\\\\e^t\\end{pmatrix}\\)。\\(te^t\\) 项反映 Jordan 块导致的多项式增长因子——这是不可对角化系统的特征。"
+      },
+      {
+        "id": "linear-adv-ch03-q24",
+        "question": "两个 \\(3\\times3\\) 矩阵 \\(A,B\\) 有 \\(\\chi_A=\\chi_B=(x-2)^3\\)，\\(m_A=m_B=(x-2)^2\\)，\\(\\mathrm{rank}(A-2I)=\\mathrm{rank}(B-2I)=1\\)。\\(A\\) 与 \\(B\\) 相似吗？",
+        "options": [
+          "是：两者 Jordan 形均为 \\(J_2(2)\\oplus J_1(2)\\)，相同 Jordan 形→相似",
+        "不一定",
+        "否",
+        "需要知道具体矩阵"
+        ],
+        "answer": 0,
+        "explanation": "Jordan 形由 \\(\\chi_A\\)、\\(m_A\\)（或等价地，核链维数 \\(\\dim\\ker(A-\\lambda I)^k\\)）唯一确定。两者均有: 最大块=2，几何重数=2→\\(J_2(2)\\oplus J_1(2)\\)。Jordan 形相同→\\(A\\sim B\\)。Jordan 标准形定理的核心价值: 它提供了矩阵相似类的完全不变量。"
+      },
+      {
+        "id": "linear-adv-ch03-q25",
+        "question": "\\(n\\times n\\) 幂零矩阵 \\(A\\)（\\(A^k=0\\) 对某 \\(k\\)）。\\(A\\) 的所有特征值为？",
+        "options": [
+          "全为 \\(0\\)",
+        "可以是任何值",
+        "全为 \\(1\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(\\lambda\\) 是特征值，\\(Av=\\lambda v\\)→\\(A^k v=\\lambda^k v\\)。\\(A^k=0\\)→\\(\\lambda^k=0\\)→\\(\\lambda=0\\)。故幂零矩阵所有特征值为 0，\\(\\chi_A=x^n\\)。Jordan 形由 \\(x^n\\) 的分拆决定: 幂零矩阵的相似分类等价于 \\(n\\) 的整数分拆。"
+      },
+      {
+        "id": "linear-adv-ch03-q26",
+        "question": "弹簧阻尼系统 \\(\\dot{\\mathbf{x}}=A\\mathbf{x}\\)，\\(A=\\begin{pmatrix}0&1\\\\-4&0\\end{pmatrix}\\)。\\(A^2=-4I\\)。\\(e^{tA}=?\\)",
+        "options": [
+          "\\(\\cos(2t)I+\\frac{\\sin(2t)}{2}A=\\begin{pmatrix}\\cos2t&\\frac{1}{2}\\sin2t\\\\-2\\sin2t&\\cos2t\\end{pmatrix}\\)",
+        "\\(e^{-4t}I\\)",
+        "\\(\\cos(4t)I+\\sin(4t)A\\)",
+        "\\(I+tA\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=-4I\\)→\\((A/2)^2=-I\\)→\\(e^{tA}=\\cos(2t)I+\\frac{\\sin(2t)}{2}A\\)（令 \\(B=A/2\\)，\\(e^{2tB}=\\cos(2t)I+\\sin(2t)B\\)...） 实际上: \\(A^{2k}=(-4)^k I\\), \\(A^{2k+1}=(-4)^k A\\)。\\(e^{tA}=\\sum\\frac{(-4)^k t^{2k}}{(2k)!}I+\\sum\\frac{(-4)^k t^{2k+1}}{(2k+1)!}A=\\cos(2t)I+\\frac{\\sin(2t)}{2}A\\)。周期解反映无阻尼振荡。"
+      },
+      {
+        "id": "linear-adv-ch03-q27",
+        "question": "Markov 链转移矩阵 \\(P\\)。若 \\(P\\) 可对角化且特征值为 \\(1, 0.5, -0.3\\)，\\(P^n\\) 当 \\(n\\to\\infty\\) 趋向？",
+        "options": [
+          "投影到 \\(\\lambda=1\\) 特征空间（其他特征值的分量衰减至 \\(0\\)）",
+        "零矩阵",
+        "单位矩阵",
+        "发散"
+        ],
+        "answer": 0,
+        "explanation": "\\(P=S\\mathrm{diag}(1,0.5,-0.3)S^{-1}\\)→\\(P^n=S\\mathrm{diag}(1,0.5^n,(-0.3)^n)S^{-1}\\)。\\(n\\to\\infty\\): \\(0.5^n\\to0\\)，\\((-0.3)^n\\to0\\)。\\(P^\\infty=S\\mathrm{diag}(1,0,0)S^{-1}\\)，即投影到稳态分布。Jordan 形（此处可对角化）确保收敛; 若不可对角化且 \\(|\\lambda|<1\\)，多项式因子 \\(n^k\\) 仍被指数衰减压倒。"
+      },
+      {
+        "id": "linear-adv-ch03-q28",
+        "question": "递推关系 \\(a_{n+2}=5a_{n+1}+2a_n\\)，\\(a_0=1,a_1=1\\)。写成矩阵形式 \\(\\mathbf{x}_{n+1}=A\\mathbf{x}_n\\) 的矩阵 \\(A\\) 是？",
+        "options": [
+          "\\(A=\\begin{pmatrix}5&2\\\\1&0\\end{pmatrix}\\)",
+        "\\(A=\\begin{pmatrix}5&1\\\\2&0\\end{pmatrix}\\)",
+        "\\(A=\\begin{pmatrix}0&2\\\\1&5\\end{pmatrix}\\)",
+        "\\(A=\\begin{pmatrix}1&1\\\\5&2\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(\\mathbf{x}_n=(a_{n+1},a_n)^T\\)。\\(\\mathbf{x}_{n+1}=(a_{n+2},a_{n+1})^T=(5a_{n+1}+2a_n,a_{n+1})^T\\)。\\(A=\\begin{pmatrix}5&2\\\\1&0\\end{pmatrix}\\)。\\(a_n\\) 由 \\(A^n\\) 的结构决定，而 \\(A^n\\) 可通过 Jordan 分解高效计算——这是 Jordan 理论在组合学中的经典应用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="linear-adv"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/linear-adv.html" class="module-name">线代进阶</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 广义特征空间与分解</a></li>
+      <li><a href="#kp2">02 · Jordan 块与 Jordan 标准形</a></li>
+      <li><a href="#kp3">03 · Jordan 基的求法</a></li>
+      <li><a href="#kp4">04 · 矩阵指数与微分方程应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>Jordan 标准形</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>广义特征空间与分解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当矩阵不可对角化时，特征空间不够“大”。广义特征空间 \(\ker(A - \lambda I)^k\) 取代普通特征空间，总能给出完整的直和分解。 这是 Jordan 标准形的出发点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>广义特征空间的思想: 不仅看 \((A-\lambda I)v = 0\) 的解，还看 \((A-\lambda I)^k v = 0\) 的解，捕捉更多结构信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>广义特征空间</strong>: \(V_\lambda^{(k)} = \ker(A - \lambda I)^k\)。 链: \(V_\lambda^{(1)} \subseteq V_\lambda^{(2)} \subseteq \cdots\)。 终止: 存在 \(k\) 使 \(V_\lambda^{(k)} = V_\lambda^{(k+1)} = \cdots\)。 记 \(V_\lambda = V_\lambda^{(\infty)}\)。 <strong>直和分解</strong>（代数闭域上）: \[V = V_{\lambda_1} \oplus V_{\lambda_2} \oplus \cdots \oplus V_{\lambda_r}\] \(\dim V_{\lambda_i}\) = \(\lambda_i\) 的代数重数。 普通特征空间 \(\ker(A-\lambda I) \subseteq V_\lambda\)， \(\dim \ker(A-\lambda I)\) = 几何重数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}2&1&0\\0&2&1\\0&0&2\end{pmatrix}\)。 求广义特征空间链。 解答: \(\lambda = 2\)。 \((A-2I)^1 = \begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix}\)，\(\ker = \mathrm{span}\{e_1\}\)，维数 1。 \((A-2I)^2\): 维数 2。\((A-2I)^3 = 0\): 维数 3。 \(V_2 = \mathbb{R}^3\)（整个空间）。 易错点: 将广义特征空间与普通特征空间混淆。 普通特征空间 \(\ker(A-2I)\) 只有 1 维，但广义特征空间有 3 维。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\lambda\) 的代数重数为 3，几何重数为 1，则？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。广义特征空间维数 = 代数重数 = 3。')">A. \(\dim V_\lambda = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！广义特征空间维数 = 代数重数 = 3。')">B. \(\dim V_\lambda = 3\)，Jordan 块只有 1 个</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。广义特征空间维数 = 代数重数 = 3。')">C. \(A\) 可对角化</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。广义特征空间维数 = 代数重数 = 3。')">D. \(\dim V_\lambda = 3\)，Jordan 块有 3 个</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Jordan 块与 Jordan 标准形</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>当矩阵不可对角化时，Jordan 标准形是最接近对角阵的「次优」形式。 每个矩阵在代数闭域上可以化为若干 Jordan 块的直和，这提供了 矩阵结构的完全分类。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Jordan 形是「对角 + 尺幺扰动」的模型，尾部的 1 描述了 特征空间不完全的程度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Jordan 块</strong>: \(J_k(\lambda) = \lambda I_k + N_k\)，其中 \(N_k\) 是 \(k \times k\) 上三角幂零矩阵（超对角线全 1）。 \[J_k(\lambda) = \begin{pmatrix} \lambda & 1 & & \\ & \lambda & \ddots & \\ & & \ddots & 1 \\ & & & \lambda \end{pmatrix}\] <strong>Jordan 标准形定理</strong>: 设 \(K\) 代数闭，则任意 \(A \in M_n(K)\) 相似于唯一的（不计块顺序）Jordan 算子: \(J = \mathrm{diag}(J_{k_1}(\lambda_1), \ldots, J_{k_s}(\lambda_s))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Jordan 形确定了 \(A^n\) 和 \(e^{tA}\) 的关键结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\chi_A = (x-1)^2(x-3)\)，\(m_A = (x-1)^2(x-3)\)。 求 Jordan 形。 解答: \(\lambda=1\): 代数重 2，\(m_A\) 中 \((x-1)^2\) 说明最大 Jordan 块大小为 2。故 \(J_2(1)\)。\(\lambda=3\): 代数重 1，\(J_1(3)\)。 Jordan 形 \(= \mathrm{diag}(J_2(1), J_1(3)) = \begin{pmatrix}1&1&0\\0&1&0\\0&0&3\end{pmatrix}\)。 易错点: 当 \(\chi_A = (x-1)^3\) 时，Jordan 形可能为 \(J_3(1)\)、\(J_2(1) \oplus J_1(1)\)、或 \(J_1(1)^3\)（对角）。 需要 \(m_A\) 信息来确定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(4 \times 4\) 矩阵 \(A\)，\(\chi_A = (x-2)^4\)，\(m_A = (x-2)^2\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(m_A = (x-2)^2\\) 说明最大块大小 = 2。总维数 4 =')">A. \(J_4(2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(m_A = (x-2)^2\\) 说明最大块大小 = 2。总维数 4 =')">B. \(J_2(2) \oplus J_2(2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(m_A = (x-2)^2\\) 说明最大块大小 = 2。总维数 4 =')">C. \(J_2(2) \oplus J_1(2) \oplus J_1(2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(m_A = (x-2)^2\\) 说明最大块大小 = 2。总维数 4 =')">D. \(J_1(2)^4\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Jordan 基的求法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>知道 Jordan 形后，如何找到使 \(A\) 变为 Jordan 形的<strong>基</strong>？链基法通过 构造 \((A-\lambda I)\) 的核链来系统地找到 Jordan 基。这是将 Jordan 标准形从理论转化为计算的关键步骤。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>链基法本质是构造 \((A-\lambda I)\) 的幂零链: \(v, (A-\lambda I)v, \ldots, (A-\lambda I)^{k-1}v\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>链基法</strong>: 对每个特征值 \(\lambda\): 1) 计算 \(\ker(A-\lambda I)^k\) 的维数链，确定 Jordan 块结构。 2) 对每个 \(k\) 阶 Jordan 块，选 \(v \in \ker(A-\lambda I)^k \setminus \ker(A-\lambda I)^{k-1}\)。 3) Jordan 链: \(\{(A-\lambda I)^{k-1}v, \ldots, (A-\lambda I)v, v\}\)。 验证: \((A-\lambda I)^{k-1}v \neq 0\) 且 \((A-\lambda I)^k v = 0\)。 在这组基下 \(A\) 的矩阵表示恰好是 \(J_k(\lambda)\)。 \[\text{Jordan 链: } (A-\lambda I)^{k-1}v, \ldots, (A-\lambda I)v, v\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\)。求 Jordan 基。 解答: \(\lambda = 2\)，需 \(J_2(2)\)。 选 \(v \in \ker(A-2I)^2 \setminus \ker(A-2I)\)。 \(v = e_2 = (0,1)^T\)。\((A-2I)v = (1,0)^T = e_1\)。 Jordan 基: \(\{e_1, e_2\}\)。 易错点: 链基的顺序。Jordan 块中第一个基向量对应链的末端 （在 \(\ker(A-\lambda I)\) 中），不是起始向量。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">链基法中，\(k\) 阶 Jordan 块的起始向量满足？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。起始向量必须在 \\(\\ker(A-\\lambda I)^k\\) 中但不在')">A. \((A-\lambda I)v = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！起始向量必须在 \\(\\ker(A-\\lambda I)^k\\) 中但不在')">B. \((A-\lambda I)^k v = 0\) 且 \((A-\lambda I)^{k-1}v \neq 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。起始向量必须在 \\(\\ker(A-\\lambda I)^k\\) 中但不在')">C. \(Av = \lambda v\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。起始向量必须在 \\(\\ker(A-\\lambda I)^k\\) 中但不在')">D. \(v \in \ker A\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>矩阵指数与微分方程应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性 ODE 系统 \(X' = AX\) 的解为 \(X(t) = e^{tA}X(0)\)。计算 \(e^{tA}\) 的关键是 Jordan 形: \(e^{tA} = P e^{tJ} P^{-1}\)，而 \(e^{tJ}\) 可以 按块计算。Jordan 标准形因此是解常系数线性 ODE 的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(e^{tJ_k(\lambda)} = e^{\lambda t} e^{tN_k}\)，其中 \(N_k\) 幂零， \(e^{tN_k}\) 是有限多项式——拇指数的多项式系数特征。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>矩阵指数</strong>: \(e^{tA} = \sum_{k=0}^{\infty} \frac{(tA)^k}{k!}\)。 <strong>Jordan 块的指数</strong>: \[e^{tJ_k(\lambda)} = e^{\lambda t} \begin{pmatrix} 1 & t & t^2/2! & \cdots \\ 0 & 1 & t & \cdots \\ \vdots & & \ddots & \\ 0 & \cdots & 0 & 1 \end{pmatrix}\] <strong>应用于 ODE</strong>: \(X' = AX\) 的通解 \(X(t) = e^{tA}X(0)\)。 若 \(A \sim J\)（\(A = PJP^{-1}\)），则 \(e^{tA} = P e^{tJ} P^{-1}\)。 <strong>应用于递推</strong>: \(a_{n+k} = c_1 a_{n+k-1} + \cdots + c_k a_n\)。 写成 \(X_{n+1} = AX_n\)，解 \(X_n = A^n X_0\)。 \(A^n = PJ^nP^{-1}\)，\(J^n\) 按块计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>控制系统的稳定性分析；信号处理中滤波器的脉冲响应。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}\)。计算 \(e^{tA}\)。 解答: \(\chi_A = x^2 + 1\)，特征值 \(\pm i\)。可对角化（复数域）。 也可直接: \(A^2 = -I\)，\(A^3 = -A\)，\(A^4 = I\)。 \(e^{tA} = \cos t \cdot I + \sin t \cdot A = \begin{pmatrix}\cos t & \sin t \\ -\sin t & \cos t\end{pmatrix}\)。 易错点: 以为 \(e^{A+B} = e^A e^B\) 总成立。 只有当 \(AB = BA\) 时才成立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(e^{tJ_2(0)}\) 等于什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(J_2(0) = \\begin{pmatrix}0&1\\\0&0\\end{pmatrix}\\)，')">A. \(\begin{pmatrix}1&t\\0&1\end{pmatrix}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(J_2(0) = \\begin{pmatrix}0&1\\\0&0\\end{pmatrix}\\)，')">B. \(\begin{pmatrix}e^t&0\\0&e^t\end{pmatrix}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(J_2(0) = \\begin{pmatrix}0&1\\\0&0\\end{pmatrix}\\)，')">C. \(\begin{pmatrix}1&0\\t&1\end{pmatrix}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(J_2(0) = \\begin{pmatrix}0&1\\\0&0\\end{pmatrix}\\)，')">D. \(\begin{pmatrix}t&1\\0&t\end{pmatrix}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/algebra/linear-adv.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 对偶空间 — 线代进阶 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-adv-ch01-q1",
+        "question": "\\(V = \\mathbb{R}^2\\)，标准基 \\(\\{e_1, e_2\\}\\)。线性形式 \\(f = 3e_1^* - 2e_2^*\\)，求 \\(f(v)\\)，其中 \\(v=(1,4)\\)。",
+        "options": [
+          "\\(-5\\)",
+        "\\(5\\)",
+        "\\(11\\)",
+        "\\(-11\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(v)=3e_1^*(1,4)+(-2)e_2^*(1,4)=3\\times1+(-2)\\times4=3-8=-5\\)。对偶基元素 \\(e_i^*\\) 是取第 \\(i\\) 个坐标的线性形式: \\(e_i^*(x_1,\\ldots,x_n)=x_i\\)。线性形式本质上是「用 \\((3,-2)\\) 做内积」。"
+      },
+      {
+        "id": "linear-adv-ch01-q2",
+        "question": "设 \\(V\\) 是 5 维向量空间。\\(\\dim V^* = ?\\)",
+        "options": [
+          "5",
+        "10",
+        "25",
+        "不确定，取决于基的选取"
+        ],
+        "answer": 0,
+        "explanation": "有限维情况下 \\(\\dim V^* = \\dim V\\)。若 \\(\\{e_1,\\ldots,e_5\\}\\) 是 \\(V\\) 的基，则对偶基 \\(\\{e_1^*,\\ldots,e_5^*\\}\\) 是 \\(V^*\\) 的基，维数相同为 5。选项C是 \\((\\dim V)^2\\)，那是 \\(\\mathrm{End}(V)\\) 的维数而非 \\(V^*\\) 的。"
+      },
+      {
+        "id": "linear-adv-ch01-q3",
+        "question": "\\(V=\\mathbb{R}^2\\)，\\(v=(2,3)\\)。自然映射 \\(\\iota(v)=\\mathrm{ev}_v \\in V^{**}\\)。计算 \\(\\mathrm{ev}_v(e_1^*)\\) 和 \\(\\mathrm{ev}_v(e_2^*)\\)。",
+        "options": [
+          "\\(\\mathrm{ev}_v(e_1^*)=2,\\;\\mathrm{ev}_v(e_2^*)=3\\)",
+        "\\(\\mathrm{ev}_v(e_1^*)=3,\\;\\mathrm{ev}_v(e_2^*)=2\\)",
+        "\\(\\mathrm{ev}_v(e_1^*)=1,\\;\\mathrm{ev}_v(e_2^*)=1\\)",
+        "\\(\\mathrm{ev}_v(e_1^*)=5,\\;\\mathrm{ev}_v(e_2^*)=5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{ev}_v(f)=f(v)\\)。故 \\(\\mathrm{ev}_v(e_1^*)=e_1^*(2,3)=2\\)，\\(\\mathrm{ev}_v(e_2^*)=e_2^*(2,3)=3\\)。\\(\\mathrm{ev}_v\\) 在双对偶基 \\(\\{e_1^{**},e_2^{**}\\}\\) 下的坐标就是 \\((2,3)\\)——与 \\(v\\) 本身的坐标一致，这正是自然同构的意义。"
+      },
+      {
+        "id": "linear-adv-ch01-q4",
+        "question": "下列关于有限维向量空间的叙述，正确的是？",
+        "options": [
+          "\\(V \\cong V^{**}\\) 是自然同构（不依赖基），而 \\(V \\cong V^*\\) 需要选择基",
+        "\\(V \\cong V^*\\) 和 \\(V \\cong V^{**}\\) 都是自然同构",
+        "\\(V \\cong V^*\\) 是自然同构，而 \\(V \\cong V^{**}\\) 需要选择基",
+        "两者都需要选择基"
+        ],
+        "answer": 0,
+        "explanation": "\\(V \\to V^{**}\\), \\(v\\mapsto\\mathrm{ev}_v\\) 是不依赖基的同构（自然同构）。\\(V \\cong V^*\\) 虽然维数相同因而同构，但构造同构映射必须选择基（或内积），因此不是自然的。易错: 混淆「同维因而同构」与「自然同构」——前者依赖选择，后者不依赖。"
+      },
+      {
+        "id": "linear-adv-ch01-q5",
+        "question": "\\(V=\\mathbb{R}^4\\)，\\(W=\\mathrm{span}\\{e_1,e_2,e_3\\}\\)。\\(\\dim\\mathrm{Ann}(W) = ?\\)",
+        "options": [
+          "1",
+        "3",
+        "4",
+        "0"
+        ],
+        "answer": 0,
+        "explanation": "零化子维数公式: \\(\\dim W+\\dim\\mathrm{Ann}(W)=\\dim V\\)。\\(\\dim\\mathrm{Ann}(W)=4-3=1\\)。直觉: \\(W\\) 是 3 维超平面，其零化子是 1 维的，由 \\(e_4^*\\) 生成。"
+      },
+      {
+        "id": "linear-adv-ch01-q6",
+        "question": "\\(V=\\mathbb{R}^3\\)，\\(W=\\mathrm{span}\\{(1,0,0),(0,1,0)\\}\\)。求 \\(\\mathrm{Ann}(W)\\) 的一组基。",
+        "options": [
+          "\\(\\{e_3^*\\}\\)",
+        "\\(\\{e_1^*,e_2^*\\}\\)",
+        "\\(\\{e_1^*,e_2^*,e_3^*\\}\\)",
+        "\\(\\{e_1^*-e_2^*\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\in\\mathrm{Ann}(W)\\) 要求 \\(f(e_1)=0\\) 且 \\(f(e_2)=0\\)。设 \\(f=ae_1^*+be_2^*+ce_3^*\\)，则 \\(a=0,b=0\\)。故 \\(\\mathrm{Ann}(W)=\\mathrm{span}\\{e_3^*\\}\\)。验证: \\(\\dim W+\\dim\\mathrm{Ann}(W)=2+1=3=\\dim V\\) ✓。选项B是 \\(W\\) 对应的对偶元素，不是零化子。"
+      },
+      {
+        "id": "linear-adv-ch01-q7",
+        "question": "\\(\\mathbb{C}^2\\) 中 \\(|v\\rangle=\\begin{pmatrix}1\\\\i\\end{pmatrix}\\)。求 \\(\\langle v|\\) 和 \\(\\langle v|v\\rangle\\)。",
+        "options": [
+          "\\(\\langle v|=(1,-i)\\)，\\(\\langle v|v\\rangle=2\\)",
+        "\\(\\langle v|=(1,i)\\)，\\(\\langle v|v\\rangle=1+i^2=0\\)",
+        "\\(\\langle v|=(1,-i)\\)，\\(\\langle v|v\\rangle=1-1=0\\)",
+        "\\(\\langle v|=(-1,i)\\)，\\(\\langle v|v\\rangle=2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle v|\\) 是 \\(|v\\rangle\\) 的转置共轭: \\((1,\\overline{i})=(1,-i)\\)。\\(\\langle v|v\\rangle=1\\cdot1+(-i)\\cdot i=1-i^2=1-(-1)=2\\)。选项B忘记取共轭；选项C计算 \\((-i)(i)\\) 时出错（\\((-i)(i)=-i^2=1\\) 而非 \\(-1\\)）。"
+      },
+      {
+        "id": "linear-adv-ch01-q8",
+        "question": "\\(V=\\mathbb{R}^3\\)，\\(f(x,y,z)=2x-3y+z\\)。将 \\(f\\) 用对偶基表示，并计算 \\(f(1,1,1)\\)。",
+        "options": [
+          "\\(f=2e_1^*-3e_2^*+e_3^*\\)，\\(f(1,1,1)=0\\)",
+        "\\(f=2e_1^*+3e_2^*+e_3^*\\)，\\(f(1,1,1)=6\\)",
+        "\\(f=2e_1^*-3e_2^*+e_3^*\\)，\\(f(1,1,1)=2\\)",
+        "\\(f=-2e_1^*+3e_2^*-e_3^*\\)，\\(f(1,1,1)=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 在第 \\(i\\) 个坐标上的系数就是 \\(e_i^*\\) 的系数: \\(f=2e_1^*-3e_2^*+1\\cdot e_3^*\\)。\\(f(1,1,1)=2-3+1=0\\)。线性形式的坐标表示与向量坐标类似，只是「住在对偶空间中」。"
+      },
+      {
+        "id": "linear-adv-ch01-q9",
+        "question": "\\(V=\\mathbb{R}^2\\)，新基 \\(B'=\\{v_1=(1,1),v_2=(1,-1)\\}\\)。设 \\(\\{v_1^*,v_2^*\\}\\) 为对偶基。\\(v_1^*(e_1)=?\\)（其中 \\(e_1=(1,0)\\)）",
+        "options": [
+          "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(e_1=(1,0)\\) 在基 \\(B'\\) 下: \\(e_1=\\tfrac{1}{2}v_1+\\tfrac{1}{2}v_2\\)（解 \\(a(1,1)+b(1,-1)=(1,0)\\)→\\(a+b=1,a-b=0\\)→\\(a=b=1/2\\)）。\\(v_1^*(e_1)=v_1^*(\\tfrac{1}{2}v_1+\\tfrac{1}{2}v_2)=\\tfrac{1}{2}\\cdot1+\\tfrac{1}{2}\\cdot0=\\tfrac{1}{2}\\)。易错: 以为 \\(v_1^*(e_1)=v_1\\cdot e_1=1\\)，混淆对偶基与内积。对偶基取决于 \\(B'\\)，不是简单的点积。"
+      },
+      {
+        "id": "linear-adv-ch01-q10",
+        "question": "\\(V=\\mathbb{R}^3\\)，\\(v=(1,-2,3)\\)，\\(f(x,y,z)=x+y+z\\)。计算 \\(\\iota(v)(f)\\)。",
+        "options": [
+          "\\(2\\)",
+        "\\(6\\)",
+        "\\(-4\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\iota(v)(f)=\\mathrm{ev}_v(f)=f(v)=1+(-2)+3=2\\)。求值映射的定义非常直接: \\(V^{**}\\) 中的元素 \\(\\mathrm{ev}_v\\) 作用于 \\(V^*\\) 中的 \\(f\\)，就是把 \\(v\\) 代入 \\(f\\)。"
+      },
+      {
+        "id": "linear-adv-ch01-q11",
+        "question": "在无穷维向量空间 \\(V\\) 中，自然映射 \\(\\iota:V\\to V^{**}\\) 是否仍为同构？",
+        "options": [
+          "仍为单射，但不一定满射",
+        "仍为同构（双射）",
+        "不再是单射",
+        "不存在这样的映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\iota\\) 始终是单射（\\(\\iota(v)=0\\Rightarrow f(v)=0\\;\\forall f\\in V^*\\Rightarrow v=0\\)）。但无穷维时 \\(\\dim V^{**}\\) 可严格大于 \\(\\dim V\\)（例如 \\(V=\\bigoplus_\\mathbb{N}K\\)，\\(V^*\\cong\\prod_\\mathbb{N}K\\)），\\(\\iota\\) 非满射。易错: 将有限维结论直接搬到无穷维。"
+      },
+      {
+        "id": "linear-adv-ch01-q12",
+        "question": "线性映射 \\(T:\\mathbb{R}^2\\to\\mathbb{R}^2\\) 的矩阵为 \\(A=\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}\\)。转置映射 \\(T^*\\) 在对偶基下的矩阵为？",
+        "options": [
+          "\\(\\begin{pmatrix}1&3\\\\2&4\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}4&-2\\\\-3&1\\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix}-4&2\\\\3&-1\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^*(\\varphi)=\\varphi\\circ T\\)。若 \\(T\\) 在基下表示为 \\(A\\)，则 \\(T^*\\) 在对偶基下表示为 \\(A^T\\)。\\(A^T=\\begin{pmatrix}1&3\\\\2&4\\end{pmatrix}\\)。注意: \\(T^*\\) 的方向是 \\(W^*\\to V^*\\)（反转），但在对偶基下矩阵就是 \\(A^T\\)。选项C是 \\(A\\) 的伴随矩阵（与求逆相关），不是转置映射。"
+      },
+      {
+        "id": "linear-adv-ch01-q13",
+        "question": "\\(V=\\mathbb{R}^5\\)，\\(W\\) 是 3 维子空间。\\(\\dim\\mathrm{Ann}(W)=?\\)",
+        "options": [
+          "2",
+        "3",
+        "5",
+        "8"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\dim\\mathrm{Ann}(W)=\\dim V-\\dim W=5-3=2\\)。零化子 \\(\\mathrm{Ann}(W)\\) 包含所有在 \\(W\\) 上恒为零的线性形式。\\(W\\) 的维数越大（约束越多），零化子越小。这是一个「互补」关系。"
+      },
+      {
+        "id": "linear-adv-ch01-q14",
+        "question": "量子比特 \\(|\\psi\\rangle=\\frac{1}{\\sqrt{2}}|0\\rangle+\\frac{i}{\\sqrt{2}}|1\\rangle\\)。测量得到 \\(|0\\rangle\\) 的概率为？",
+        "options": [
+          "\\(1/2\\)",
+        "\\(1/\\sqrt{2}\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(|0\\rangle)=|\\langle 0|\\psi\\rangle|^2=|1/\\sqrt{2}|^2=1/2\\)。注意 \\(|1\\rangle\\) 前的系数 \\(i/\\sqrt{2}\\) 的模方为 \\(|i/\\sqrt{2}|^2=1/2\\)，所以两个基态的概率均为 \\(1/2\\)，符合归一化: \\(1/2+1/2=1\\)。相位因子 \\(i\\) 影响干涉但不影响单基态的测量概率。"
+      },
+      {
+        "id": "linear-adv-ch01-q15",
+        "question": "\\(\\mathbb{C}^2\\) 中 \\(|w\\rangle=\\begin{pmatrix}2\\\\3i\\end{pmatrix}\\)。\\(\\langle w|w\\rangle=?\\)",
+        "options": [
+          "\\(13\\)",
+        "\\(4-9=-5\\)",
+        "\\(4+9i\\)",
+        "\\(\\sqrt{13}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\langle w|=(2,-3i)\\)（转置共轭）。\\(\\langle w|w\\rangle=2\\times2+(-3i)(3i)=4+(-3i)(3i)=4-9i^2=4+9=13\\)。选项B将 \\((3i)^2=-9\\) 误当成直接加，忘记共轭。易错: 在复数内积中忘记取共轭导致 \\(\\langle w|w\\rangle=4+9i^2=4-9=-5\\)，得到负「范数」。"
+      },
+      {
+        "id": "linear-adv-ch01-q16",
+        "question": "若基变换矩阵为 \\(P\\)（旧基→新基），对偶基的变换矩阵为？",
+        "options": [
+          "\\((P^{-1})^T\\)",
+        "\\(P\\)",
+        "\\(P^T\\)",
+        "\\(P^{-1}\\)"
+        ],
+        "answer": 0,
+        "explanation": "设旧基 \\(\\{e_i\\}\\)，新 \\(\\{u_j\\}\\)，\\(u_j=\\sum_i P_{ij}e_i\\)。对偶条件 \\(u_j^*(u_k)=\\delta_{jk}\\)。设 \\(u_j^*=\\sum_i Q_{ij}e_i^*\\)，则 \\(u_j^*(u_k)=\\sum_i Q_{ij}P_{ik}=(QP^T)_{jk}=\\delta_{jk}\\)，故 \\(Q=(P^T)^{-1}=(P^{-1})^T\\)。对偶基与原基「逆转置」地变化，这是协变 vs 逆变的体现。"
+      },
+      {
+        "id": "linear-adv-ch01-q17",
+        "question": "\\(V=\\mathbb{R}^2\\)，标准基。在自然映射下 \\(\\iota(e_1)\\in V^{**}\\) 作用于 \\(e_2^*\\in V^*\\) 的结果为？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\iota(e_1)(e_2^*)=\\mathrm{ev}_{e_1}(e_2^*)=e_2^*(e_1)=0\\)，因为 \\(e_2^*\\) 取第二个坐标而 \\(e_1=(1,0)\\) 的第二坐标为 0。类似地 \\(\\iota(e_1)(e_1^*)=e_1^*(e_1)=1\\)。这说明 \\(\\iota(e_1)\\) 在双对偶基下坐标为 \\((1,0)\\)，与 \\(e_1\\) 本身的坐标一致。"
+      },
+      {
+        "id": "linear-adv-ch01-q18",
+        "question": "\\(V=\\mathbb{R}^3\\)，基 \\(B=\\{v_1=(1,1,0),\\;v_2=(0,1,1),\\;v_3=(1,0,1)\\}\\)。对偶基元素 \\(v_1^*\\) 作用于标准基向量 \\(e_1=(1,0,0)\\) 的值为？",
+        "options": [
+          "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(-1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "设基矩阵 \\(M\\)（列为 \\(v_1,v_2,v_3\\)）= \\(\\begin{pmatrix}1&0&1\\\\1&1&0\\\\0&1&1\\end{pmatrix}\\)。\\(\\det M=2\\)。\\(v_i^*\\) 对应 \\(M^{-1}\\) 的第 \\(i\\) 行: \\(M^{-1}=\\frac{1}{2}\\begin{pmatrix}1&1&-1\\\\-1&1&1\\\\1&-1&1\\end{pmatrix}\\)。\\(v_1^*(x,y,z)=\\frac{x+y-z}{2}\\)。\\(v_1^*(1,0,0)=\\frac{1}{2}\\)。验证: \\(v_1^*(v_1)=\\frac{1+1-0}{2}=1\\) ✓，\\(v_1^*(v_2)=\\frac{0+1-1}{2}=0\\) ✓。易错: 将 \\(M\\) 的行和列搞混，得到 \\(M^T\\) 的逆。"
+      },
+      {
+        "id": "linear-adv-ch01-q19",
+        "question": "\\(V=\\mathbb{R}^2\\)，标准基对偶元素 \\(e_1^*\\) 用新基 \\(\\{u_1=e_1+e_2,\\;u_2=e_1-e_2\\}\\) 的对偶基表示为？",
+        "options": [
+          "\\(e_1^*=u_1^*+u_2^*\\)",
+        "\\(e_1^*=u_1^*-u_2^*\\)",
+        "\\(e_1^*=\\tfrac{1}{2}u_1^*+\\tfrac{1}{2}u_2^*\\)",
+        "\\(e_1^*=u_1^*\\)"
+        ],
+        "answer": 0,
+        "explanation": "设 \\(e_1^*=\\alpha u_1^*+\\beta u_2^*\\)。则 \\(\\alpha=e_1^*(u_1)=e_1^*(e_1+e_2)=1\\)，\\(\\beta=e_1^*(u_2)=e_1^*(e_1-e_2)=1\\)。故 \\(e_1^*=u_1^*+u_2^*\\)。验证: \\((u_1^*+u_2^*)(e_1)\\)。\\(e_1=\\frac{u_1+u_2}{2}\\)，\\((u_1^*+u_2^*)\\bigl(\\frac{u_1+u_2}{2}\\bigr)=\\frac{1+0}{2}+\\frac{0+1}{2}=1\\) ✓。选项C混淆了坐标变换的方向。"
+      },
+      {
+        "id": "linear-adv-ch01-q20",
+        "question": "\\(V=\\mathbb{R}^2\\)。若 \\(\\iota(v)=0\\)（即 \\(\\mathrm{ev}_v\\) 是零泛函），能推出什么？",
+        "options": [
+          "\\(v=(0,0)\\)：取 \\(f=e_1^*\\) 得 \\(v_1=0\\)，取 \\(f=e_2^*\\) 得 \\(v_2=0\\)",
+        "\\(v\\) 可能非零",
+        "\\(\\iota\\) 的核可能非平凡",
+        "取决于基的选取"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\iota(v)=0\\) 意味着 \\(f(v)=0\\) 对所有 \\(f\\in V^*\\) 成立。特别地取 \\(f=e_i^*\\) 得到 \\(v\\) 的每个坐标为零，故 \\(v=0\\)。这证明了 \\(\\ker\\iota=\\{0\\}\\)，即 \\(\\iota\\) 是单射。有限维时再由 \\(\\dim V=\\dim V^{**}\\) 得出同构。"
+      },
+      {
+        "id": "linear-adv-ch01-q21",
+        "question": "\\(V=\\mathbb{R}^2\\)，\\(f=2e_1^*-3e_2^*\\in V^*\\)。计算 \\(\\iota(e_1)(f)\\in K\\)。",
+        "options": [
+          "\\(2\\)",
+        "\\(-3\\)",
+        "\\(-1\\)",
+        "\\(5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\iota(e_1)(f)=f(e_1)=(2e_1^*-3e_2^*)(e_1)=2\\cdot1+(-3)\\cdot0=2\\)。\\(\\mathrm{ev}_{e_1}\\) 从任何线性形式 \\(f\\) 中「读取」\\(f\\) 在 \\(e_1\\) 处的值。这个计算在双对偶基下等价于 \\(\\iota(e_1)\\) 的第一坐标。"
+      },
+      {
+        "id": "linear-adv-ch01-q22",
+        "question": "\\(V=\\mathbb{R}^4\\)，\\(W=\\mathrm{span}\\{(1,1,0,0),(0,0,1,1)\\}\\)。求 \\(\\mathrm{Ann}(W)\\) 的一组基。",
+        "options": [
+          "\\(\\{e_1^*-e_2^*,\\;e_3^*-e_4^*\\}\\)",
+        "\\(\\{e_1^*+e_2^*,\\;e_3^*+e_4^*\\}\\)",
+        "\\(\\{e_1^*,\\;e_3^*\\}\\)",
+        "\\(\\{e_1^*-e_3^*,\\;e_2^*-e_4^*\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "设 \\(f=ae_1^*+be_2^*+ce_3^*+de_4^*\\)。\\(f(1,1,0,0)=a+b=0\\) 且 \\(f(0,0,1,1)=c+d=0\\)。故 \\(b=-a,d=-c\\)，\\(f=a(e_1^*-e_2^*)+c(e_3^*-e_4^*)\\)。基: \\(\\{e_1^*-e_2^*,e_3^*-e_4^*\\}\\)，\\(\\dim=2\\)。验证: \\(2+2=4=\\dim V\\) ✓。选项B: \\((e_1^*+e_2^*)(1,1,0,0)=2\\neq0\\)。"
+      },
+      {
+        "id": "linear-adv-ch01-q23",
+        "question": "\\(T:\\mathbb{R}^3\\to\\mathbb{R}^2\\)，矩阵 \\(A=\\begin{pmatrix}1&0&1\\\\0&1&1\\end{pmatrix}\\)。\\(\\dim\\ker(T^*)=?\\)",
+        "options": [
+          "\\(0\\)（\\(T^*\\) 单射）",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T^*:(\\mathbb{R}^2)^*\\to(\\mathbb{R}^3)^*\\) 的矩阵为 \\(A^T\\) (\\(3\\times2\\))。\\(\\mathrm{rank}(A^T)=\\mathrm{rank}(A)=2\\)（\\(A\\) 的两行线性无关）。\\(\\dim\\ker(T^*)=\\dim(\\mathbb{R}^2)^*-\\mathrm{rank}(T^*)=2-2=0\\)。等价地: \\(T\\) 满射 \\(\\Leftrightarrow\\) \\(T^*\\) 单射。这里 \\(\\mathrm{rank}(A)=2=\\dim\\mathbb{R}^2\\)，\\(T\\) 满射，故 \\(T^*\\) 单射。"
+      },
+      {
+        "id": "linear-adv-ch01-q24",
+        "question": "量子态 \\(|\\psi\\rangle=\\begin{pmatrix}2/3\\\\\\sqrt{5}/3\\end{pmatrix}\\)。投影算子 \\(P=|\\psi\\rangle\\langle\\psi|\\)。\\(P^2=?\\)",
+        "options": [
+          "\\(P^2 = P\\)（幂等性）",
+        "\\(P^2 = I\\)",
+        "\\(P^2 = 0\\)",
+        "\\(P^2 = 2P\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P^2=|\\psi\\rangle\\langle\\psi|\\psi\\rangle\\langle\\psi|=|\\psi\\rangle\\cdot\\langle\\psi|\\psi\\rangle\\cdot\\langle\\psi|\\)。\\(\\langle\\psi|\\psi\\rangle=4/9+5/9=1\\)。故 \\(P^2=P\\)。投影算子的幂等性 \\(P^2=P\\) 是量子测量理论的基础，它意味着重复测量不改变结果。"
+      },
+      {
+        "id": "linear-adv-ch01-q25",
+        "question": "\\(|v\\rangle=(1,0)^T\\)，\\(|w\\rangle=(0,1)^T\\)。算子 \\(A=|v\\rangle\\langle w|\\) 的矩阵为 \\(\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}\\)。\\(A^2=?\\)",
+        "options": [
+          "\\(A^2=0\\)（幂零）",
+        "\\(A^2=A\\)",
+        "\\(A^2=I\\)",
+        "\\(A^2=|w\\rangle\\langle v|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^2=|v\\rangle\\langle w|v\\rangle\\langle w|\\)。\\(\\langle w|v\\rangle=(0,1)\\begin{pmatrix}1\\\\0\\end{pmatrix}=0\\)。故 \\(A^2=0\\)。矩阵验证: \\(\\begin{pmatrix}0&1\\\\0&0\\end{pmatrix}^2=\\begin{pmatrix}0&0\\\\0&0\\end{pmatrix}\\)。\\(|v\\rangle\\langle w|\\) 是秩 1 幂零算子（当 \\(\\langle w|v\\rangle=0\\) 时）。"
+      },
+      {
+        "id": "linear-adv-ch01-q26",
+        "question": "数据分析中，将向量 \\(w=(3,1)\\) 在基 \\(\\{v_1=(1,1),v_2=(1,-1)\\}\\) 下展开。利用对偶基 \\(v_1^*,v_2^*\\) 计算坐标。",
+        "options": [
+          "坐标 \\((2,1)\\)：\\(v_1^*(3,1)=2\\)，\\(v_2^*(3,1)=1\\)，即 \\(w=2v_1+v_2\\)",
+        "坐标 \\((3,1)\\)",
+        "坐标 \\((4,2)\\)",
+        "坐标 \\((1,2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "对偶基: \\(v_1^*(x,y)=\\frac{x+y}{2}\\)，\\(v_2^*(x,y)=\\frac{x-y}{2}\\)。\\(v_1^*(3,1)=\\frac{4}{2}=2\\)，\\(v_2^*(3,1)=\\frac{2}{2}=1\\)。验证: \\(2(1,1)+1(1,-1)=(3,1)\\) ✓。在数据科学中，基变换（如PCA）的核心计算就是对偶基求坐标。"
+      },
+      {
+        "id": "linear-adv-ch01-q27",
+        "question": "线性规划对偶理论: 若原问题约束定义了 \\(\\mathbb{R}^5\\) 中的 3 维可行域（子空间 \\(W\\)），对偶变量的个数为？",
+        "options": [
+          "2 个（\\(=\\dim\\mathrm{Ann}(W)\\)）",
+        "3 个",
+        "5 个",
+        "8 个"
+        ],
+        "answer": 0,
+        "explanation": "对偶变量对应零化子 \\(\\mathrm{Ann}(W)\\) 的维数: \\(\\dim V-\\dim W=5-3=2\\)。线性规划对偶理论中，对偶问题的变量个数等于原问题的约束条数——恰好对应零化子的维数。这是对偶空间理论在优化中的直接应用。"
+      },
+      {
+        "id": "linear-adv-ch01-q28",
+        "question": "量子计算: qubit \\(|\\psi\\rangle=\\frac{1}{\\sqrt{2}}|0\\rangle+\\frac{i}{\\sqrt{2}}|1\\rangle\\)。测量得到 \\(|1\\rangle\\) 的概率为？",
+        "options": [
+          "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(1/4\\)",
+        "\\(i/\\sqrt{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(|1\\rangle)=|\\langle 1|\\psi\\rangle|^2=|i/\\sqrt{2}|^2=|i|^2/2=1/2\\)。虽然系数 \\(i/\\sqrt{2}\\) 是复数，其模方仍为 \\(1/2\\)。总概率: \\(P(|0\\rangle)+P(|1\\rangle)=1/2+1/2=1\\) ✓。全局相位无物理意义，但相对相位 \\(i\\) 在干涉实验中可观测——这是量子力学与经典概率的关键区别。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="linear-adv"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/linear-adv.html" class="module-name">线代进阶</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 线性形式与对偶空间</a></li>
+      <li><a href="#kp2">02 · 双对偶与自然同构</a></li>
+      <li><a href="#kp3">03 · 转置映射与零化子</a></li>
+      <li><a href="#kp4">04 · 对偶空间在量子力学中的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>对偶空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>线性形式与对偶空间</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>向量可以看作「箭头」，但线性映射 \(f: V \to K\) 可以看作「测量工具」—— 它从向量中提取数值信息。对偶空间 \(V^*\) 是所有这类工具的集合， 它提供了研究向量空间的「镜像视角」，在泄函分析和量子力学中尤为重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>对偶性是一种基本的「对称」: 向量与其上的线性函数是互为对偶的对象。 这种对称性在范畴论中推广为「伴随函子」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>线性形式</strong>: \(f: V \to K\) 满足 \(f(\alpha v + \beta w) = \alpha f(v) + \beta f(w)\)。 <strong>对偶空间</strong>: \(V^* = \mathrm{Hom}(V, K)\)，即所有线性形式的集合。 \(V^*\) 本身是向量空间（按点加法和数乘）。 <strong>维数</strong>: \(\dim V^* = \dim V\)（有限维）。 <strong>对偶基</strong>: 若 \(\{e_1, \ldots, e_n\}\) 是 \(V\) 的基，定义 \(e_i^* \in V^*\) 为 \(e_i^*(e_j) = \delta_{ij}\)。 则 \(\{e_1^*, \ldots, e_n^*\}\) 是 \(V^*\) 的基。 \[\dim V^* = \dim V, \quad e_i^*(e_j) = \delta_{ij}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子力学中的 bra-ket 记号: \(|v\rangle \in V\)（ket）， \(\langle f| \in V^*\)（bra）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 设 \(V = \mathbb{R}^2\)，基 \(\{e_1, e_2\}\)。求 \(f = 3e_1^* - 2e_2^*\) 在 \(v = (1, 4)\) 上的值。 解答: \(f(v) = 3 \cdot 1 + (-2) \cdot 4 = 3 - 8 = -5\)。 易错点: 以为 \(V^*\) 与 \(V\) 「自然同构」。 \(V \cong V^*\)（有限维，维数相同），但没有<strong>自然的</strong>同构—— 依赖基的选取。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(V\) 为 3 维向量空间，\(\dim V^* = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\dim V^* = \\dim V = 3\\)。')">A. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\dim V^* = \\dim V = 3\\)。')">B. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\dim V^* = \\dim V = 3\\)。')">C. 9</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\dim V^* = \\dim V = 3\\)。')">D. 不确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>双对偶与自然同构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(V\) 和 \(V^*\) 同构但不自然。但 \(V\) 与双对偶 \(V^{**}\) 之间存在一个 不依赖基的「自然同构」：\(v \mapsto \mathrm{ev}_v\)。这种「自然性」是 范畴论中自然变换的原型，体现了数学中「不依赖选择」的理想。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>「自然」意味着「与基无关」——即存在一个不依赖任何选择的全局同构。 这是范畴论中「自然变换」的直觉来源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>双对偶</strong>: \(V^{**} = (V^*)^*\)。 <strong>自然映射</strong> \(\iota: V \to V^{**}\)，\(\iota(v)(f) = f(v)\)（求值映射）。 \(\iota\) 是单射: \(\iota(v) = 0 \Rightarrow f(v) = 0,\; \forall f \in V^* \Rightarrow v = 0\)。 \(\dim V = \dim V^{**}\)，单射 + 同维 \(\Rightarrow\) 同构。 \[V \xrightarrow{\sim} V^{**}, \quad v \mapsto \mathrm{ev}_v\] 关键: 这个同构不依赖基的选择。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(V = \mathbb{R}^2\)，\(v = (2, 3)\)。计算 \(\mathrm{ev}_v(e_1^*)\) 和 \(\mathrm{ev}_v(e_2^*)\)。 解答: \(\mathrm{ev}_v(e_1^*) = e_1^*(v) = 2\)， \(\mathrm{ev}_v(e_2^*) = e_2^*(v) = 3\)。 即 \(\mathrm{ev}_v\) 作为 \(V^{**}\) 的元素，在对偶基下的坐标是 \((2,3)\)。 易错点: 误以为无穷维情况下 \(\iota\) 仍然是同构。 无穷维时 \(V \hookrightarrow V^{**}\) 仅为单射，不为满射。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(V\) 与 \(V^{**}\) 的自然同构是什么意思？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。「自然」的关键是不依赖基的选取，而不仅仅是维数相同。')">A. 它们维数相同</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！「自然」的关键是不依赖基的选取，而不仅仅是维数相同。')">B. 存在不依赖基的同构</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。「自然」的关键是不依赖基的选取，而不仅仅是维数相同。')">C. 它们是同一个空间</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。「自然」的关键是不依赖基的选取，而不仅仅是维数相同。')">D. \(V^* = V^{**}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>转置映射与零化子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定线性映射 \(f: V \to W\)，它在对偶空间上诱导了一个「反方向」的 映射 \(f^*: W^* \to V^*\)。零化子 \(\mathrm{Ann}(W)\) 则刻画了子空间 \(W\) 的「不可见部分」。这两个概念在约束优化和线性规划对偶理论中 至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>转置映射是「反变函子」的具体体现——映射的方向反转。 零化子把子空间 \(W\) 映射到对偶空间中的「正交补」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>转置映射</strong>: 若 \(f: V \to W\)，定义 \(f^*: W^* \to V^*\) 为 \(f^*(\varphi) = \varphi \circ f\)。即 \((f^*(\varphi))(v) = \varphi(f(v))\)。 矩阵表示: 若 \(f\) 在基下表示为 \(A\)，则 \(f^*\) 在对偶基下表示为 \(A^T\)。 <strong>零化子</strong>: \(W \subseteq V\) 的零化子为 \(\mathrm{Ann}(W) = \{f \in V^* : f|_W = 0\}\)。 <strong>维数关系</strong>: \[\dim W + \dim \mathrm{Ann}(W) = \dim V\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>线性规划中对偶问题的约束条件恰好是零化子的元素。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(V = \mathbb{R}^3\)，\(W = \mathrm{span}\{(1,0,0), (0,1,0)\}\)。 求 \(\mathrm{Ann}(W)\)。 解答: \(f \in V^*\) 使 \(f(e_1) = f(e_2) = 0\)，故 \(f = c \cdot e_3^*\)。\(\mathrm{Ann}(W) = \mathrm{span}\{e_3^*\}\)。 验证: \(\dim W + \dim \mathrm{Ann}(W) = 2 + 1 = 3 = \dim V\)。✓ 易错点: 将零化子与正交补混淆。\(\mathrm{Ann}(W) \subseteq V^*\)， 而正交补 \(W^\perp \subseteq V\)（需要内积结构）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\dim V = 5\)，\(\dim W = 3\)，\(\dim \mathrm{Ann}(W) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\dim \\mathrm{Ann}(W) = \\dim V - \\dim W = 5 - 3 = 2\\)。')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dim \\mathrm{Ann}(W) = \\dim V - \\dim W = 5 - 3 = 2\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dim \\mathrm{Ann}(W) = \\dim V - \\dim W = 5 - 3 = 2\\)。')">C. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dim \\mathrm{Ann}(W) = \\dim V - \\dim W = 5 - 3 = 2\\)。')">D. 8</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>对偶空间在量子力学中的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Dirac 的 bra-ket 记号是对偶空间在物理中最直接的应用: \(|v\rangle\) 是 Hilbert 空间中的向量（态），\(\langle f|\) 是对偶空间的元素（可观测量）。 内积 \(\langle f | v \rangle\) 给出了转移振幅。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Riesz 表示定理将内积空间与其对偶等同起来， 使得 bra 和 ket 可以自由互换。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>在内积空间 \((V, \langle \cdot, \cdot \rangle)\) 中，每个 \(w \in V\) 定义 \(f_w \in V^*\): \(f_w(v) = \langle v, w \rangle\)。 映射 \(w \mapsto f_w\) 是反线性同构（复数域）或线性同构（实数域）。 这就是「降指标」的数学本质: \[|w\rangle \longleftrightarrow \langle w| \quad \text{via } \langle w|(v) = \langle v, w \rangle\] Dirac 记号: \(\langle f|v\rangle = f(v)\)，\(|v\rangle\langle w|\) 为秩-1 算子。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子计算中 qubit \(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)， 测量概率 \(|\langle 0|\psi\rangle|^2 = |\alpha|^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{C}^2\) 中 \(|v\rangle = \begin{pmatrix}1\\i\end{pmatrix}\)， 求 \(\langle v|\) 和 \(\langle v|v\rangle\)。 解答: \(\langle v| = (1, -i)\)（转置共轭）。 \(\langle v|v\rangle = 1 \cdot 1 + (-i)(i) = 1 + 1 = 2\)。 易错点: 复数情况下忘记取共轭。 \(\langle v|\) 是转置<strong>共轭</strong>，不是简单转置。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">bra-ket 记号中 \(\langle f|v\rangle\) 表示什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\langle f|v\\rangle = f(v)\\)，是对偶配对。')">A. 向量的范数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\langle f|v\\rangle = f(v)\\)，是对偶配对。')">B. 线性形式 \(f\) 作用于 \(v\) 的值</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\langle f|v\\rangle = f(v)\\)，是对偶配对。')">C. \(f\) 和 \(v\) 的外积</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\langle f|v\\rangle = f(v)\\)，是对偶配对。')">D. \(f\) 和 \(v\) 的叉积</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/algebra/linear-adv.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

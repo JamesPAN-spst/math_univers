@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 量子比特与量子态 — 量子计算 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "quantum-ch01-q1",
+        "question": "经典比特只取 0 或 1，量子比特(qubit)的状态 \\(|\\psi\\rangle=\\alpha|0\\rangle+\\beta|1\\rangle\\) 中 \\(\\alpha,\\beta\\) 需满足什么条件？",
+        "options": [
+          "\\(|\\alpha|^2+|\\beta|^2=1\\), \\(\\alpha,\\beta\\in\\mathbb{C}\\)——量子态是二维复 Hilbert 空间 \\(\\mathbb{C}^2\\) 中的单位向量",
+        "\\(\\alpha+\\beta=1\\), 实数",
+        "\\(\\alpha,\\beta\\) 可以是任意复数",
+        "\\(|\\alpha|+|\\beta|=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "量子态在 Bloch 球上表示: \\(|\\psi\\rangle=\\cos(\\theta/2)|0\\rangle+e^{i\\phi}\\sin(\\theta/2)|1\\rangle\\), \\(\\theta\\in[0,\\pi],\\phi\\in[0,2\\pi)\\)。注意全局相位 \\(e^{i\\gamma}|\\psi\\rangle\\) 不可观测——物理态是射影 Hilbert 空间 \\(\\mathbb{CP}^1\\) 中的点。\\(|0\\rangle=(1,0)^T\\)(北极), \\(|1\\rangle=(0,1)^T\\)(南极), \\(|+\\rangle=(|0\\rangle+|1\\rangle)/\\sqrt{2}\\)(赤道)。与概率的区别: \\(\\alpha,\\beta\\) 是复振幅, \\(|\\alpha|^2,|\\beta|^2\\) 才是概率——允许干涉(interference)。"
+      },
+      {
+        "id": "quantum-ch01-q2",
+        "question": "\\(n\\) 个量子比特的状态空间维度是多少？为什么量子计算潜在\"强大\"？",
+        "options": [
+          "\\(2^n\\) 维——状态 \\(|\\psi\\rangle=\\sum_{x\\in\\{0,1\\}^n}c_x|x\\rangle\\) 有 \\(2^n\\) 个复振幅, 可以\"同时编码\"指数多信息",
+        "\\(2n\\) 维",
+        "\\(n^2\\) 维",
+        "\\(n\\) 维"
+        ],
+        "answer": 0,
+        "explanation": "单个 qubit: \\(\\mathbb{C}^2\\)。\\(n\\) 个 qubit: \\((\\mathbb{C}^2)^{\\otimes n}=\\mathbb{C}^{2^n}\\)——张量积空间。\\(n=300\\) 个 qubit: \\(2^{300}>10^{90}\\) 振幅——超过可观测宇宙原子数。但不能直接读出所有振幅——测量坍缩到一个基态。量子算法的艺术: 构造干涉使目标答案概率放大、错误答案概率相消。量子并行性 + 干涉 = 量子加速的来源。"
+      },
+      {
+        "id": "quantum-ch01-q3",
+        "question": "Born 规则: 在计算基 \\(\\{|0\\rangle,|1\\rangle\\}\\) 下测量 \\(|\\psi\\rangle=\\frac{1}{\\sqrt{3}}|0\\rangle+\\sqrt{\\frac{2}{3}}|1\\rangle\\), 得到 \\(|0\\rangle\\) 的概率？",
+        "options": [
+          "\\(1/3\\)",
+        "\\(2/3\\)",
+        "\\(1/\\sqrt{3}\\)",
+        "\\(1/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "Born 规则: \\(P(|k\\rangle)=|\\langle k|\\psi\\rangle|^2\\)。\\(P(|0\\rangle)=|1/\\sqrt{3}|^2=1/3\\), \\(P(|1\\rangle)=|\\sqrt{2/3}|^2=2/3\\)。测量后态坍缩: 若结果为 \\(|0\\rangle\\), 态变为 \\(|0\\rangle\\)（不可逆）。在其他基下测量: \\(|\\pm\\rangle\\) 基下, \\(P(|+\\rangle)=|\\langle+|\\psi\\rangle|^2=|(1/\\sqrt{3}+\\sqrt{2/3})/\\sqrt{2}|^2\\)——基的选择影响结果分布。易错: \\(1/\\sqrt{3}\\) 是振幅不是概率。"
+      },
+      {
+        "id": "quantum-ch01-q4",
+        "question": "密度矩阵 \\(\\rho=|\\psi\\rangle\\langle\\psi|\\) 描述纯态。混合态 \\(\\rho=\\sum_ip_i|\\psi_i\\rangle\\langle\\psi_i|\\) 与纯态叠加的区别？",
+        "options": [
+          "混合态是经典概率混合(无干涉), 判据: 纯态 \\(\\text{tr}(\\rho^2)=1\\), 混合态 \\(\\text{tr}(\\rho^2)<1\\)",
+        "混合态和叠加态相同",
+        "密度矩阵只用于纯态",
+        "\\(\\text{tr}(\\rho^2)>1\\) 表示混合态"
+        ],
+        "answer": 0,
+        "explanation": "纯态 \\(|\\psi\\rangle=\\frac{1}{\\sqrt{2}}(|0\\rangle+|1\\rangle)\\): \\(\\rho=\\frac{1}{2}\\begin{pmatrix}1&1\\\\1&1\\end{pmatrix}\\), \\(\\text{tr}(\\rho^2)=1\\), 有非对角元(相干性)。混合态 \\(\\rho=\\frac{1}{2}|0\\rangle\\langle 0|+\\frac{1}{2}|1\\rangle\\langle 1|=\\frac{1}{2}\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}\\), \\(\\text{tr}(\\rho^2)=1/2<1\\), 无非对角元(无相干)。区别: 叠加有量子干涉; 混合只有经典不确定性。实际量子系统与环境耦合→退相干→纯态变混合态。"
+      },
+      {
+        "id": "quantum-ch01-q5",
+        "question": "量子态层析(Quantum State Tomography): 为什么需要在多个基下测量才能重建 \\(\\rho\\)？",
+        "options": [
+          "\\(\\rho\\) 是 \\(2^n\\times 2^n\\) Hermitian 矩阵有 \\(4^n-1\\) 个实参数, 单个基只能获取 \\(2^n-1\\) 个概率——需要指数多不同基的测量",
+        "一次测量就够",
+        "只需要 \\(n\\) 次测量",
+        "量子态不可重建"
+        ],
+        "answer": 0,
+        "explanation": "单 qubit: \\(\\rho=\\frac{1}{2}(I+r_x\\sigma_x+r_y\\sigma_y+r_z\\sigma_z)\\), 3 个实参数(\\(r_x,r_y,r_z\\))——Bloch 向量。需要在 \\(\\sigma_x,\\sigma_y,\\sigma_z\\) 三个基下测量。\\(n\\) qubit: \\(4^n-1\\) 参数, 需要 \\(O(4^n)\\) 测量设置×每个设置多次重复→指数资源。这是量子技术的根本障碍之一。近似方法: 压缩感知(假设低秩), 随机测量(Shadow Tomography: \\(O(n)\\) 测量即可估计多个可观测量期望)。"
+      },
+      {
+        "id": "quantum-ch01-q6",
+        "question": "量子比特在量子密钥分发(QKD, 如 BB84 协议)中如何保证安全？",
+        "options": [
+          "不可克隆定理: 无法完美复制未知量子态; 窃听必然引入扰动——通过对比测量结果检测窃听者",
+        "经典加密足够安全",
+        "量子态可以完美复制",
+        "QKD 不需要量子比特"
+        ],
+        "answer": 0,
+        "explanation": "BB84: Alice 随机选 \\(\\{|0\\rangle,|1\\rangle\\}\\) 或 \\(\\{|+\\rangle,|-\\rangle\\}\\) 编码比特。Bob 随机选基测量。基一致时结果确定→密钥。Eve(窃听者)不知道基→测量扰动态→在Alice-Bob的校验中暴露(错误率>阈值则终止)。安全性根源: 不可克隆定理(\\(\\nexists\\) 酉 \\(U\\) 使 \\(U|\\psi\\rangle|0\\rangle=|\\psi\\rangle|\\psi\\rangle\\) 对所有 \\(|\\psi\\rangle\\))。信息论安全——即使量子计算机也不能破解(不同于RSA等计算安全)。"
+      },
+      {
+        "id": "quantum-ch01-q7",
+        "question": "Bloch 球上 \\(|0\\rangle\\) 和 \\(|+\\rangle=(|0\\rangle+|1\\rangle)/\\sqrt{2}\\) 之间的距离(Fubini-Study度量)？",
+        "options": [
+          "\\(d_{FS}=\\arccos|\\langle 0|+\\rangle|=\\arccos(1/\\sqrt{2})=\\pi/4\\)",
+        "\\(\\pi/2\\)",
+        "\\(\\pi\\)",
+        "\\(1/\\sqrt{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Fubini-Study 距离: \\(d_{FS}(|\\psi\\rangle,|\\phi\\rangle)=\\arccos|\\langle\\psi|\\phi\\rangle|\\)。\\(|\\langle 0|+\\rangle|=|1/\\sqrt{2}|=1/\\sqrt{2}\\)。\\(d_{FS}=\\arccos(1/\\sqrt{2})=\\pi/4\\)。在 Bloch 球上, \\(|0\\rangle\\) 在北极, \\(|+\\rangle\\) 在赤道——极角差 \\(\\theta=\\pi/2\\), 但 \\(d_{FS}=\\theta/2=\\pi/4\\) (半角关系！Bloch 球的角度是态空间角度的2倍)。\\(d_{FS}\\) 量化了量子态的可区分度: \\(d=0\\) → 相同态, \\(d=\\pi/2\\) → 正交态(完美可区分)。"
+      },
+      {
+        "id": "quantum-ch01-q8",
+        "question": "von Neumann 熵 \\(S(\\rho)=-\\text{tr}(\\rho\\log\\rho)\\) 对纯态和最大混合态分别取什么值？",
+        "options": [
+          "纯态: \\(S=0\\); 最大混合态 \\(\\rho=I/d\\): \\(S=\\log d\\)——量子版本的信息熵, 度量系统的量子不确定性",
+        "纯态: \\(S=1\\), 混合态: \\(S=0\\)",
+        "永远为正",
+        "与经典熵不类比"
+        ],
+        "answer": 0,
+        "explanation": "\\(S(\\rho)=-\\sum_i\\lambda_i\\log\\lambda_i\\) (\\(\\lambda_i\\) 为 \\(\\rho\\) 的特征值)。纯态: 特征值 \\((1,0,...,0)\\), \\(S=0\\)——完全确定。\\(I/d\\): 特征值都是 \\(1/d\\), \\(S=-d\\cdot\\frac{1}{d}\\log\\frac{1}{d}=\\log d\\)——最大不确定。子系统: \\(S(\\rho_A)\\neq 0\\) 即使整体纯态——纠缠！\\(S(\\rho_A)=S(\\rho_B)\\) 对纯态 \\(|\\psi\\rangle_{AB}\\)。这联系了量子信息与黑洞热力学(Bekenstein-Hawking 熵)。"
+      },
+      {
+        "id": "quantum-ch01-q9",
+        "question": "量子态的 Wigner 函数可以取负值。这意味着什么？与量子计算的关系？",
+        "options": [
+          "Wigner 负性标志着\"非经典性\"——可以被经典概率模拟的态(如高斯态)有非负 Wigner 函数; 负 Wigner 区域是量子计算加速的必要资源",
+        "Wigner 负性说明态有误",
+        "所有量子态 Wigner 非负",
+        "Wigner 函数与量子计算无关"
+        ],
+        "answer": 0,
+        "explanation": "Wigner 函数 \\(W(x,p)\\): 相空间准概率分布。高斯态(相干态/压缩态): \\(W\\geq 0\\)→可被经典 hidden variable 模拟(Gottesman-Knill 定理: Clifford 门+计算基测量可经典模拟)。非高斯态(如 Fock 态 \\(|1\\rangle\\)): \\(W\\) 有负区域。Magic state distillation: 通过注入 Wigner 负性资源态(如 \\(T\\) 态)来实现通用量子计算。Wigner 负性 ↔ 上下文性(contextuality) ↔ 量子加速。"
+      },
+      {
+        "id": "quantum-ch01-q10",
+        "question": "量子态在开放系统中的演化由什么描述？Lindblad 方程的物理意义？",
+        "options": [
+          "量子信道(CPTP 映射) \\(\\rho\\to\\mathcal{E}(\\rho)=\\sum_kE_k\\rho E_k^\\dagger\\); Lindblad: \\(\\dot\\rho=-i[H,\\rho]+\\sum_k\\gamma_k(L_k\\rho L_k^\\dagger-\\frac{1}{2}\\{L_k^\\dagger L_k,\\rho\\})\\) 描述退相干和耗散",
+        "开放系统也用 Schrödinger 方程",
+        "不需要特殊形式",
+        "Lindblad 方程不保正性"
+        ],
+        "answer": 0,
+        "explanation": "封闭系统: 酉演化 \\(\\rho\\to U\\rho U^\\dagger\\)。开放系统(与环境耦合): CPTP(完全正、保迹) 映射。Kraus 表示: \\(\\mathcal{E}(\\rho)=\\sum_kE_k\\rho E_k^\\dagger\\), \\(\\sum_kE_k^\\dagger E_k=I\\)。连续时间: Lindblad 方程。\\(H\\) 项: 相干演化。\\(L_k\\) 项(跳跃算子): 退相干/弛豫。例: 振幅阻尼(\\(T_1\\)衰减): \\(L=\\sqrt{\\gamma}|0\\rangle\\langle 1|\\); 相位阻尼(\\(T_2\\)): \\(L=\\sqrt{\\gamma}|1\\rangle\\langle 1|\\)。量子纠错的目标: 对抗这些噪声过程。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="quantum"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/quantum.html" class="module-name">量子计算</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 量子比特与 Dirac 记号</a></li>
+      <li><a href="#kp2">02 · 多量子比特与张量积</a></li>
+      <li><a href="#kp3">03 · 测量公设与 Born 规则</a></li>
+      <li><a href="#kp4">04 · 密度矩阵与混合态</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>量子比特与量子态</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>量子比特与 Dirac 记号</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>经典计算机的 bit 只能是 0 或 1，量子比特(qubit)可以同时处于两 者的叠加态——这是量子计算超越经典计算的根源。Dirac 记号 \(|0\rangle, |1\rangle\) 提供了优雅的数学语言。理解量子态的数学表 示（复 Hilbert 空间中的单位向量）是量子计算的绝对起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象：量子态 \(=\) 复 Hilbert 空间 \(\mathbb{C}^2\) 中的单位向量 （全局相位不影响物理，故实际是射影空间 \(\mathbb{CP}^1\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>量子比特：\(|\psi\rangle = \alpha|0\rangle + \beta|1\rangle\)， \(\alpha, \beta \in \mathbb{C}\), \(|\alpha|^2 + |\beta|^2 = 1\)。 计算基：\(|0\rangle = \begin{pmatrix}1\\0\end{pmatrix}\), \(|1\rangle = \begin{pmatrix}0\\1\end{pmatrix}\)。 Bloch 球表示：\(|\psi\rangle = \cos(\theta/2)|0\rangle + e^{i\phi}\sin(\theta/2)|1\rangle\)， 其中 \(\theta \in [0,\pi]\), \(\phi \in [0,2\pi)\)。纯态 \(\leftrightarrow\) 球面上的点。 测量公设（Born 规则）：测量 \(|\psi\rangle\) 在计算基下， \[\Pr(\text{结果}=0) = |\alpha|^2, \quad \Pr(\text{结果}=1) = |\beta|^2\] 测量后量子态坍缩到对应基态。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子密钥分发(QKD, BB84 协议)利用测量导致坍缩的性质实现窃听检测。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(|\psi\rangle = \frac{1}{\sqrt{3}}|0\rangle + \sqrt{\frac{2}{3}}|1\rangle\)。 测量 \(|0\rangle\) 的概率？ 解答：\(P(0) = |1/\sqrt{3}|^2 = 1/3\)。\(P(1) = 2/3\)。 易错点：概率是振幅的模方 \(|\alpha|^2\)，不是 \(\alpha\) 本身。复数振幅的相位影响干涉但不影响单量子比特测量概率。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">量子比特 \(|\psi\rangle = \frac{1}{\sqrt{2}}(|0\rangle + i|1\rangle)\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(|i/\\sqrt{2}|^2 = 1/2\\)。注意 \\(|i|^2 = 1\\) 而非 \\(-1\\)。')">A. \(1/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|i/\\sqrt{2}|^2 = 1/2\\)。注意 \\(|i|^2 = 1\\) 而非 \\(-1\\)。')">B. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|i/\\sqrt{2}|^2 = 1/2\\)。注意 \\(|i|^2 = 1\\) 而非 \\(-1\\)。')">C. \(1/4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(|i/\\sqrt{2}|^2 = 1/2\\)。注意 \\(|i|^2 = 1\\) 而非 \\(-1\\)。')">D. \(|i|^2 = -1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>多量子比特与张量积</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>单量子比特状态空间为 \(\mathbb{C}^2\)。\(n\) 个量子比特的联合态空 间是张量积 \((\mathbb{C}^2)^{\otimes n} = \mathbb{C}^{2^n}\)——维度指数 增长，这正是量子计算威力的来源。理解张量积结构和纠缠是量子计 算的核心数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>张量积 \(\leftrightarrow\) 复合系统的数学描述。\(|a\rangle \otimes |b\rangle\) 描述两个独立子系统，但并非所有 \(\mathbb{C}^4\) 中的向量都可分解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>2-qubit 系统：\(|\psi\rangle \in \mathbb{C}^{2} \otimes \mathbb{C}^{2} = \mathbb{C}^{4}\)。 计算基：\(|00\rangle, |01\rangle, |10\rangle, |11\rangle\)。 一般态：\(|\psi\rangle = \sum_{i,j \in \{0,1\}} c_{ij}|ij\rangle\)，\(\sum |c_{ij}|^2 = 1\)。 可分态 vs 纠缠态：\(|\psi\rangle = |a\rangle \otimes |b\rangle\) 为可分态。 Bell 态 \(|\Phi^+\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)\) 不可分解 为张量积——这就是纠缠。 \(n\)-qubit：\(2^n\) 维空间，存储一个一般态需要 \(2^n\) 个复数。 经典模拟器无法高效存储/操作——这是量子计算优势的根源。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子随机数生成利用多量子比特测量的随机性，提供真正的随机数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：判断 \(|\psi\rangle = \frac{1}{\sqrt{2}}(|01\rangle + |10\rangle)\) 是否纠缠。 解答：假设 \(|\psi\rangle = (a|0\rangle+b|1\rangle)(c|0\rangle+d|1\rangle)\)。 则 \(ac=0, ad=1/\sqrt{2}, bc=1/\sqrt{2}, bd=0\)。 \(ac=0\) 意味 \(a=0\) 或 \(c=0\)；但 \(ad \neq 0\) 要求 \(a,d \neq 0\)， 故 \(c=0\)，但 \(bc \neq 0\) 矛盾。\(\Rightarrow\) 纠缠态。 易错点：判断纠缠需要尝试所有分解——不存在分解即为纠缠。 对 2-qubit 可用 Schmidt 分解或 concurrence。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(n\) 个量子比特的状态空间维度是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。张量积 \\((\\mathbb{C}^2)^{\\otimes n} = \\mathbb{C}^{2^n}\\)，维度指数增长。')">A. \(2n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。张量积 \\((\\mathbb{C}^2)^{\\otimes n} = \\mathbb{C}^{2^n}\\)，维度指数增长。')">B. \(n^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！张量积 \\((\\mathbb{C}^2)^{\\otimes n} = \\mathbb{C}^{2^n}\\)，维度指数增长。')">C. \(2^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。张量积 \\((\\mathbb{C}^2)^{\\otimes n} = \\mathbb{C}^{2^n}\\)，维度指数增长。')">D. \(n!\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>测量公设与 Born 规则</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>量子测量是量子力学最反直觉的部分：测量不仅获取信息，还不可逆 地改变量子态。Born 规则将量子态的振幅与测量结果的概率联系起来。 理解投影测量和一般 POVM 测量是设计量子算法和分析量子协议的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>测量对应一组投影算子 \(\{P_m\}\)，\(\sum P_m = I\)，概率由 \(\langle\psi|P_m|\psi\rangle\) 给出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>投影测量：正交基 \(\{|m\rangle\}\) 定义测量。对 \(|\psi\rangle = \sum_m c_m |m\rangle\)： \[\Pr(\text{结果}=m) = |c_m|^2 = |\langle m|\psi\rangle|^2\] 测量后态：\(|\psi\rangle \to |m\rangle\)（坍缩）。 非计算基测量：在基 \(\{|+\rangle, |-\rangle\}\) 下测量 （\(|+\rangle = (|0\rangle+|1\rangle)/\sqrt{2}\)），概率 \(= |\langle +|\psi\rangle|^2\)。 期望值：可观测量 \(M\)（厄米算子）的期望 \[\langle M \rangle = \langle\psi|M|\psi\rangle = \sum_m m \cdot \Pr(m)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子态层析(Quantum State Tomography)：通过多种基的测量重建密度矩阵。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(|+\rangle = (|0\rangle+|1\rangle)/\sqrt{2}\) 在计算基下测量。 解答：\(P(0) = |\langle 0|+\rangle|^2 = |1/\sqrt{2}|^2 = 1/2\)。同理 \(P(1)=1/2\)。 但在 \(\{|+\rangle,|-\rangle\}\) 基下测量：\(P(+) = 1, P(-) = 0\)。 易错点：测量基不同结果完全不同。量子态本身不变，是测量方式决定了概率分布。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">测量后量子态怎样？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。投影测量后量子态不可逆地坍缩——这是量子信息不可克隆的根源。')">A. 保持不变</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！投影测量后量子态不可逆地坍缩——这是量子信息不可克隆的根源。')">B. 坍缩到测量结果对应的基态</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。投影测量后量子态不可逆地坍缩——这是量子信息不可克隆的根源。')">C. 变为叠加态</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。投影测量后量子态不可逆地坍缩——这是量子信息不可克隆的根源。')">D. 消失</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>密度矩阵与混合态</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>纯态 \(|\psi\rangle\) 只描述完全已知的量子系统。实际中常面对统计 混合（如部分已知的系统或纠缠系统的子系统），需要密度矩阵 \(\rho\) 来描述。密度矩阵统一了纯态和混合态，是量子信息理论的 基本语言。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>密度矩阵 = 量子态的最一般描述。纯态是特例 \(\rho = |\psi\rangle\langle\psi|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>密度矩阵定义：\(\rho\) 是半正定、迹为 1 的矩阵。 纯态：\(\rho = |\psi\rangle\langle\psi|\)，\(\mathrm{tr}(\rho^2) = 1\)。 混合态：\(\rho = \sum_i p_i |\psi_i\rangle\langle\psi_i|\)，\(\mathrm{tr}(\rho^2) < 1\)。 物理量期望：\(\langle M \rangle = \mathrm{tr}(M\rho)\)。 测量概率：\(\Pr(m) = \mathrm{tr}(P_m \rho)\)。 部分迹（约化密度矩阵）：对复合系统 \(\rho_{AB}\)， \[\rho_A = \mathrm{tr}_B(\rho_{AB}) = \sum_j (I_A \otimes \langle j|_B)\rho_{AB}(I_A \otimes |j\rangle_B)\] 纠缠态的约化密度矩阵是混合态——子系统信息不完全。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>量子通信中的信道容量分析需要密度矩阵语言；量子纠错也基于此。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Bell 态 \(|\Phi^+\rangle = (|00\rangle+|11\rangle)/\sqrt{2}\) 的约化密度矩阵 \(\rho_A\)。 解答：\(\rho_{AB} = |\Phi^+\rangle\langle\Phi^+| = \frac{1}{2}(|00\rangle\langle 00|+|00\rangle\langle 11|+|11\rangle\langle 00|+|11\rangle\langle 11|)\)。 \(\rho_A = \mathrm{tr}_B(\rho_{AB}) = \frac{1}{2}(|0\rangle\langle 0|+|1\rangle\langle 1|) = \frac{I}{2}\)。 这是最大混合态——A 的局部信息完全随机。 易错点：整体纯态（\(\mathrm{tr}(\rho_{AB}^2)=1\)）的子系统可以是混合态。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{tr}(\rho^2) = 1\) 意味着？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。纯态 \\(\\rho = |\\psi\\rangle\\langle\\psi|\\) 满足 \\(\\rho^2 = \\rho\\)，故 \\(\\mathrm{tr}(\\rho^2) = 1\\)。')">A. \(\rho\) 是混合态</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！纯态 \\(\\rho = |\\psi\\rangle\\langle\\psi|\\) 满足 \\(\\rho^2 = \\rho\\)，故 \\(\\mathrm{tr}(\\rho^2) = 1\\)。')">B. \(\rho\) 是纯态</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。纯态 \\(\\rho = |\\psi\\rangle\\langle\\psi|\\) 满足 \\(\\rho^2 = \\rho\\)，故 \\(\\mathrm{tr}(\\rho^2) = 1\\)。')">C. \(\rho\) 是单位矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。纯态 \\(\\rho = |\\psi\\rangle\\langle\\psi|\\) 满足 \\(\\rho^2 = \\rho\\)，故 \\(\\mathrm{tr}(\\rho^2) = 1\\)。')">D. 系统未被测量</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/applied/quantum.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

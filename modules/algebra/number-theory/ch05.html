@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 原根与指标 — 数论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "number-theory-ch05-q1",
+        "question": "求 \\(\\mathrm{ord}_7(2)\\)。",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(7\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(2^1 = 2, 2^2 = 4, 2^3 = 8 \\equiv 1 \\pmod{7}\\)。\\(\\mathrm{ord}_7(2) = 3\\)。阶必须整除 \\(\\varphi(7) = 6\\)，\\(3 \\mid 6\\) ✓。\\(2\\) 不是模 \\(7\\) 的原根（阶不等于 \\(6\\)）。"
+      },
+      {
+        "id": "number-theory-ch05-q2",
+        "question": "模 \\(7\\) 的原根个数为？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "原根个数 \\(= \\varphi(\\varphi(7)) = \\varphi(6) = 2\\)。具体为 \\(3\\) 和 \\(5\\)（阶都等于 \\(6\\)）。"
+      },
+      {
+        "id": "number-theory-ch05-q3",
+        "question": "\\((\\mathbb{Z}/11\\mathbb{Z})^*\\) 中阶为 \\(10\\) 的元素有几个？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(10\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\varphi(10) = 4\\)。\\((\\mathbb{Z}/11\\mathbb{Z})^*\\) 是 \\(10\\) 阶循环群，阶为 \\(10\\)（即原根）的元素恰有 \\(\\varphi(10) = 4\\) 个。"
+      },
+      {
+        "id": "number-theory-ch05-q4",
+        "question": "以 \\(g = 3\\) 为模 \\(7\\) 的原根，\\(\\mathrm{ind}_3(5) = ?\\)",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(6\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(3^1 = 3, 3^2 = 2, 3^3 = 6, 3^4 = 4, 3^5 = 5 \\pmod{7}\\)。\\(\\mathrm{ind}_3(5) = 5\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q5",
+        "question": "若 \\(\\mathrm{ord}_n(a) = 10\\)，则 \\(a^{25} \\equiv ?\\)",
+        "options": [
+          "\\(a^5\\)",
+        "\\(a^{25}\\)",
+        "\\(1\\)",
+        "\\(a^{15}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a^{25} = a^{10 \\times 2 + 5} = (a^{10})^2 \\cdot a^5 \\equiv 1 \\cdot a^5 = a^5 \\pmod{n}\\)。指数对阶取模：\\(25 \\bmod 10 = 5\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q6",
+        "question": "以下哪个模数没有原根？",
+        "options": [
+          "\\(n = 7\\)",
+        "\\(n = 9\\)",
+        "\\(n = 8\\)",
+        "\\(n = 10\\)"
+        ],
+        "answer": 2,
+        "explanation": "原根存在 \\(\\Leftrightarrow n = 1, 2, 4, p^k, 2p^k\\)（\\(p\\) 奇素数）。\\(8 = 2^3\\) 不在此列（\\(2\\) 的幂 \\(\\geq 8\\) 无原根）。\\((\\mathbb{Z}/8\\mathbb{Z})^* \\cong (\\mathbb{Z}/2\\mathbb{Z})^2\\) 不是循环群。"
+      },
+      {
+        "id": "number-theory-ch05-q7",
+        "question": "\\(\\mathrm{ind}_g(ab) \\equiv \\mathrm{ind}_g(a) + \\mathrm{ind}_g(b) \\pmod{\\varphi(n)}\\)。若 \\(\\mathrm{ind}_g(a) = 3, \\mathrm{ind}_g(b) = 5, \\varphi(n) = 10\\)，则 \\(\\mathrm{ind}_g(ab) = ?\\)",
+        "options": [
+          "\\(15\\)",
+        "\\(8\\)",
+        "\\(3\\)",
+        "\\(5\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{ind}_g(ab) = 3 + 5 = 8 \\pmod{10}\\)。指标把乘法变成加法，类似于普通对数的性质 \\(\\log(ab) = \\log a + \\log b\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q8",
+        "question": "\\(\\mathrm{ord}_{13}(2) = ?\\)",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)",
+        "\\(13\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\varphi(13) = 12\\)。检查 \\(12\\) 的因子：\\(2^1=2, 2^2=4, 2^3=8, 2^4=3, 2^6=64 \\equiv 12 \\equiv -1 \\pmod{13}\\)。\\(2^6 \\neq 1\\)，\\(2^{12} = (2^6)^2 \\equiv 1\\)。故 \\(\\mathrm{ord}_{13}(2) = 12\\)，\\(2\\) 是模 \\(13\\) 的原根。"
+      },
+      {
+        "id": "number-theory-ch05-q9",
+        "question": "模 \\(13\\) 的原根个数为？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(\\varphi(13)) = \\varphi(12) = 12(1-1/2)(1-1/3) = 4\\)。模 \\(13\\) 恰有 \\(4\\) 个原根。"
+      },
+      {
+        "id": "number-theory-ch05-q10",
+        "question": "\\((\\mathbb{Z}/p\\mathbb{Z})^*\\) 是循环群的证明关键用了什么性质？",
+        "options": [
+          "\\(\\mathbb{Z}/p\\mathbb{Z}\\) 是域，多项式根数 \\(\\leq\\) 次数",
+        "\\(p\\) 是素数所以 \\(\\varphi(p) = p-1\\)",
+        "费马小定理",
+        "欧几里得算法"
+        ],
+        "answer": 0,
+        "explanation": "证明核心：在域 \\(\\mathbb{F}_p\\) 中，\\(x^d - 1 = 0\\) 至多 \\(d\\) 个根。这给出阶恰为 \\(d\\) 的元素个数 \\(\\psi(d) = \\varphi(d)\\)（结合恒等式 \\(\\sum \\psi(d) = \\sum \\varphi(d) = p-1\\)）。特别 \\(\\psi(p-1) = \\varphi(p-1) > 0\\)，原根存在。"
+      },
+      {
+        "id": "number-theory-ch05-q11",
+        "question": "\\(\\mathrm{ord}_{15}(2) = ?\\)",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(15\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(2^1=2, 2^2=4, 2^3=8, 2^4=16 \\equiv 1 \\pmod{15}\\)。\\(\\mathrm{ord}_{15}(2) = 4\\)。\\(4 \\mid \\varphi(15) = 8\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch05-q12",
+        "question": "以 \\(g = 2\\) 为模 \\(13\\) 的原根，求 \\(\\mathrm{ind}_2(5)\\)。",
+        "options": [
+          "\\(5\\)",
+        "\\(7\\)",
+        "\\(9\\)",
+        "\\(11\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(2^1=2, 2^2=4, 2^3=8, 2^4=3, 2^5=6, 2^6=12, 2^7=11, 2^8=9, 2^9=5 \\pmod{13}\\)。\\(\\mathrm{ind}_2(5) = 9\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q13",
+        "question": "\\(n = 10 = 2 \\times 5\\)。\\(10\\) 是否有原根？",
+        "options": [
+          "否，\\(10\\) 是合数",
+        "是，\\(10 = 2p\\) 形式（\\(p = 5\\) 奇素数）",
+        "否，\\(\\gcd(2, 5) = 1\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(10 = 2 \\times 5\\)，\\(5\\) 是奇素数，符合 \\(2p^k\\) 形式（\\(k = 1\\)）。有原根。\\(\\varphi(10) = 4\\)。\\(3^1=3, 3^2=9, 3^3=7, 3^4=1 \\pmod{10}\\)。\\(\\mathrm{ord}_{10}(3) = 4 = \\varphi(10)\\)，\\(3\\) 是原根。"
+      },
+      {
+        "id": "number-theory-ch05-q14",
+        "question": "\\(\\mathrm{ord}_n(a^k) = ?\\)（用 \\(\\mathrm{ord}_n(a)\\) 表达）",
+        "options": [
+          "\\(k \\cdot \\mathrm{ord}_n(a)\\)",
+        "\\(\\mathrm{ord}_n(a) / k\\)",
+        "\\(\\mathrm{ord}_n(a) / \\gcd(k, \\mathrm{ord}_n(a))\\)",
+        "\\(\\gcd(k, \\mathrm{ord}_n(a))\\)"
+        ],
+        "answer": 2,
+        "explanation": "设 \\(d = \\mathrm{ord}_n(a)\\)。\\((a^k)^m = a^{km} \\equiv 1 \\Leftrightarrow d \\mid km \\Leftrightarrow (d/\\gcd(k,d)) \\mid m\\)。最小正 \\(m = d/\\gcd(k,d)\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q15",
+        "question": "\\((\\mathbb{Z}/7\\mathbb{Z})^*\\) 中阶为 \\(3\\) 的元素有几个？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\psi(3) = \\varphi(3) = 2\\)。具体：\\(2^3 = 8 \\equiv 1 \\pmod{7}\\)，\\(\\mathrm{ord}_7(2) = 3\\)；\\(4^3 = 64 \\equiv 1 \\pmod{7}\\)，\\(\\mathrm{ord}_7(4) = 3\\)。阶为 \\(3\\) 的元素恰有 \\(2\\) 个。"
+      },
+      {
+        "id": "number-theory-ch05-q16",
+        "question": "用指标法求解 \\(3^x \\equiv 5 \\pmod{7}\\)。以 \\(g = 3\\) 为原根。",
+        "options": [
+          "\\(x = 5\\)",
+        "\\(x = 3\\)",
+        "\\(x = 4\\)",
+        "无解"
+        ],
+        "answer": 0,
+        "explanation": "\\(3^x \\equiv 5 \\pmod{7}\\)，即 \\(x = \\mathrm{ind}_3(5) = 5\\)（由 KP4 例题）。验证：\\(3^5 = 243 = 34 \\times 7 + 5\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch05-q17",
+        "question": "\\(n = 15 = 3 \\times 5\\) 是否有原根？",
+        "options": [
+          "是",
+        "否",
+        "取决于选择",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(15 = 3 \\times 5\\) 不是 \\(1, 2, 4, p^k, 2p^k\\) 的形式（它是两个不同奇素数之积）。\\((\\mathbb{Z}/15\\mathbb{Z})^* \\cong (\\mathbb{Z}/3\\mathbb{Z})^* \\times (\\mathbb{Z}/5\\mathbb{Z})^* \\cong \\mathbb{Z}/2 \\times \\mathbb{Z}/4\\)，不是循环群，无原根。"
+      },
+      {
+        "id": "number-theory-ch05-q18",
+        "question": "\\(\\mathrm{ord}_{41}(2) = ?\\)（\\(\\varphi(41) = 40 = 2^3 \\times 5\\)）",
+        "options": [
+          "\\(8\\)",
+        "\\(10\\)",
+        "\\(20\\)",
+        "\\(40\\)"
+        ],
+        "answer": 2,
+        "explanation": "需检查 \\(40\\) 的因子。\\(2^{10} = 1024 \\equiv 1024 - 24 \\times 41 = 1024 - 984 = 40 \\equiv -1 \\pmod{41}\\)。\\(2^{10} \\neq 1\\)，\\(2^{20} = (2^{10})^2 \\equiv 1\\)。检查 \\(2^5 = 32\\)，\\(2^4 = 16\\)，\\(2^8 = 256 \\equiv 256 - 6 \\times 41 = 10\\)。\\(2^{10} \\equiv -1 \\neq 1\\)，故 \\(\\mathrm{ord} \\nmid 10\\)。\\(2^{20} \\equiv 1\\)，\\(\\mathrm{ord} \\mid 20\\)。\\(20\\) 的因子：\\(1,2,4,5,10,20\\)。\\(2^{10} \\equiv -1\\) 排除了 \\(1,2,4,5,10\\)。\\(\\mathrm{ord}_{41}(2) = 20\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q19",
+        "question": "若 \\(p = 7\\)，\\(g = 3\\) 是原根。用指标求解 \\(x^2 \\equiv 2 \\pmod{7}\\)。",
+        "options": [
+          "\\(x \\equiv 3, 4 \\pmod{7}\\)",
+        "\\(x \\equiv 2, 5 \\pmod{7}\\)",
+        "无解",
+        "\\(x \\equiv 1, 6 \\pmod{7}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{ind}_3(2) = 2\\)（\\(3^2 = 9 \\equiv 2\\)）。\\(x^2 \\equiv 2 \\Rightarrow 2\\mathrm{ind}(x) \\equiv 2 \\pmod{6}\\)，\\(\\mathrm{ind}(x) \\equiv 1 \\pmod{3}\\)。\\(\\mathrm{ind}(x) \\in \\{1, 4\\}\\)（模 \\(6\\)）。\\(x = 3^1 = 3, 3^4 = 81 \\equiv 4 \\pmod{7}\\)。验证：\\(3^2 = 9 \\equiv 2\\)，\\(4^2 = 16 \\equiv 2\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch05-q20",
+        "question": "离散对数问题（DLP）的 Baby-step Giant-step 算法的时间复杂度为？",
+        "options": [
+          "\\(O(\\sqrt{p})\\)",
+        "\\(O(p)\\)",
+        "\\(O(\\log p)\\)",
+        "\\(O(p^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "BSGS 写 \\(k = im + j\\)（\\(m = \\lceil\\sqrt{p}\\rceil\\)），预计算 \\(g^j\\) 表（baby steps），然后逐个检查 \\(a \\cdot g^{-im}\\)（giant steps）。时间和空间 \\(O(\\sqrt{p})\\)。这比暴力 \\(O(p)\\) 快，但仍不是多项式时间（相对于 \\(\\log p\\) 位数）。"
+      },
+      {
+        "id": "number-theory-ch05-q21",
+        "question": "模 \\(p = 17\\) 的原根个数为？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\varphi(\\varphi(17)) = \\varphi(16) = 8\\)。\\(16 = 2^4\\)，\\(\\varphi(16) = 16(1-1/2) = 8\\)。模 \\(17\\) 有 \\(8\\) 个原根。"
+      },
+      {
+        "id": "number-theory-ch05-q22",
+        "question": "若 \\(\\mathrm{ord}_n(a) = 12\\)，则 \\(\\mathrm{ord}_n(a^4) = ?\\)",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{ord}_n(a^4) = 12/\\gcd(4, 12) = 12/4 = 3\\)。\\(a^4\\) 的阶比 \\(a\\) 的阶缩小了 \\(\\gcd(4, 12) = 4\\) 倍。"
+      },
+      {
+        "id": "number-theory-ch05-q23",
+        "question": "\\((\\mathbb{Z}/16\\mathbb{Z})^*\\) 是否为循环群？",
+        "options": [
+          "是，原根为 \\(3\\)",
+        "否，\\(\\cong \\mathbb{Z}/2 \\times \\mathbb{Z}/4\\)",
+        "否，\\(\\cong (\\mathbb{Z}/2)^4\\)",
+        "是，原根为 \\(5\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(16 = 2^4\\)，\\(2^k\\) (\\(k \\geq 3\\)) 不在有原根的模数列表中。\\((\\mathbb{Z}/16\\mathbb{Z})^* = \\{1,3,5,7,9,11,13,15\\}\\)（\\(\\varphi(16)=8\\)）。\\(\\mathrm{ord}(3) = 4\\)，\\(\\mathrm{ord}(5) = 4\\)。最大阶为 \\(4 < 8\\)，非循环。结构为 \\(\\mathbb{Z}/2 \\times \\mathbb{Z}/4\\)（由 \\(-1\\) 和 \\(3\\) 生成）。"
+      },
+      {
+        "id": "number-theory-ch05-q24",
+        "question": "以 \\(g = 2\\) 为模 \\(13\\) 的原根。\\(\\mathrm{ind}_2(ab)\\) 对应于 \\(a = 3, b = 5\\) 时，\\(\\mathrm{ind}_2(15) = ?\\)（\\(15 \\equiv 2 \\pmod{13}\\)）",
+        "options": [
+          "\\(1\\)",
+        "\\(4\\)",
+        "\\(9\\)",
+        "\\(13\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(15 \\bmod 13 = 2\\)。\\(\\mathrm{ind}_2(2) = 1\\)。或用加法性质：\\(\\mathrm{ind}_2(3) = 4\\)，\\(\\mathrm{ind}_2(5) = 9\\)。\\(\\mathrm{ind}_2(15) = 4 + 9 = 13 \\equiv 1 \\pmod{12}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch05-q25",
+        "question": "模 \\(25 = 5^2\\) 是否有原根？若有，原根个数为？",
+        "options": [
+          "有，\\(4\\) 个",
+        "有，\\(8\\) 个",
+        "没有",
+        "有，\\(2\\) 个"
+        ],
+        "answer": 1,
+        "explanation": "\\(25 = 5^2\\)，\\(5\\) 是奇素数，\\(p^k\\) 形式。有原根。\\(\\varphi(25) = 20\\)，原根个数 \\(= \\varphi(20) = 8\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q26",
+        "question": "Diffie-Hellman 密钥交换选择素数 \\(p\\) 和原根 \\(g\\)。安全性依赖于什么问题的困难性？",
+        "options": [
+          "大数分解",
+        "离散对数问题（DLP）",
+        "背包问题",
+        "旅行商问题"
+        ],
+        "answer": 1,
+        "explanation": "DH 和 ElGamal 的安全性基于 DLP：给定 \\(g^a \\bmod p\\)，求 \\(a\\) 是计算上困难的（最佳已知算法为次指数时间）。大数分解是 RSA 的基础，DLP 是离散对数类密码的基础。"
+      },
+      {
+        "id": "number-theory-ch05-q27",
+        "question": "ElGamal 加密中，选 \\(p = 23, g = 5\\)（原根），私钥 \\(x = 6\\)，公钥 \\(y = g^x \\bmod p = 5^6 \\bmod 23 = 8\\)。加密随机数 \\(k = 3\\)，密文的第一部分 \\(c_1 = g^k \\bmod p = ?\\)",
+        "options": [
+          "\\(10\\)",
+        "\\(15\\)",
+        "\\(125\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(5^3 = 125 = 5 \\times 23 + 10\\)，\\(c_1 = 10\\)。ElGamal 加密：\\(c_1 = g^k\\)，\\(c_2 = m \\cdot y^k \\bmod p\\)。解密：\\(m = c_2 \\cdot c_1^{-x} \\bmod p\\)。"
+      },
+      {
+        "id": "number-theory-ch05-q28",
+        "question": "在数字签名算法 DSA 中，选择 \\(p, q\\)（\\(q \\mid p-1\\)），原根 \\(g\\) 的 \\(q\\) 次幂子群用于签名。\\(g\\) 的阶（在模 \\(p\\) 下）为 \\(q\\)。选择 \\(q\\) 为素数的原因是？",
+        "options": [
+          "保证 \\(g\\) 的幂生成整个 \\((\\mathbb{Z}/p\\mathbb{Z})^*\\)",
+        "保证阶 \\(q\\) 子群为循环群且无非平凡子群",
+        "加快签名验证速度",
+        "减少密钥长度"
+        ],
+        "answer": 1,
+        "explanation": "\\(q\\) 素数 \\(\\Rightarrow\\) 阶 \\(q\\) 的群（循环）没有非平凡子群。这在安全分析中很重要：攻击者不能利用子群结构降低 DLP 的难度（Pohlig-Hellman 攻击对光滑阶群有效，素数阶就避免了这个风险）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="number-theory"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/number-theory.html" class="module-name">数论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 元素的阶与基本性质</a></li>
+      <li><a href="#kp2">02 · 原根的存在性与分类</a></li>
+      <li><a href="#kp3">03 · \((\mathbb{Z}/p\mathbb{Z})^*\) 的循环性</a></li>
+      <li><a href="#kp4">04 · 指标（离散对数）与运算</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>原根与指标</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>元素的阶与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在模 \(n\) 乘法群中，元素 \(a\) 的阶 \(\mathrm{ord}_n(a)\) 描述它的「周期」。 理解阶的性质是研究乘法群结构的基础，也是定义原根和离散对数的 前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(\mathrm{ord}_n(a)\) = 满足 \(a^k \equiv 1 \pmod{n}\) 的最小正整数 \(k\)。 <strong>性质</strong>: 1) \(a^m \equiv 1 \pmod{n} \Leftrightarrow \mathrm{ord}_n(a) \mid m\) 2) \(\mathrm{ord}_n(a) \mid \varphi(n)\)（由欧拉定理） 3) \(\mathrm{ord}_n(a^k) = \mathrm{ord}_n(a) / \gcd(k, \mathrm{ord}_n(a))\) 4) \(\mathrm{ord}_n(a) = \mathrm{ord}_n(b) \cdot \mathrm{ord}_n(c)\) 当 \(\mathrm{ord}(b), \mathrm{ord}(c)\) 互素且 \(a = bc\) 时 \[\mathrm{ord}_n(a) \mid \varphi(n)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>阶的计算在密码学中用于确定密钥空间大小。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(\mathrm{ord}_{13}(2)\)。 解答: \(\varphi(13) = 12\)。阶必整除 12，候选: \(1,2,3,4,6,12\)。 \(2^1=2, 2^2=4, 2^3=8, 2^4=3, 2^6=64 \equiv 12 \equiv -1\)。 \(2^{12} \equiv 1\)。故 \(\mathrm{ord}_{13}(2) = 12\)。 易错点: 只检查 \(a^{\varphi(n)} \equiv 1\) 就认为阶是 \(\varphi(n)\)。 阶是<strong>最小</strong>的 \(k\)，必须排除所有更小的因子。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\mathrm{ord}_n(a) = 10\)，则 \(a^{25} \equiv ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(a^{25} = a^{10 \\times 2 + 5} = (a^{10})^2 \\cdot a^5 \\equiv a^5\\)。')">A. \(a^5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(a^{25} = a^{10 \\times 2 + 5} = (a^{10})^2 \\cdot a^5 \\equiv a^5\\)。')">B. \(a^{25}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(a^{25} = a^{10 \\times 2 + 5} = (a^{10})^2 \\cdot a^5 \\equiv a^5\\)。')">C. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(a^{25} = a^{10 \\times 2 + 5} = (a^{10})^2 \\cdot a^5 \\equiv a^5\\)。')">D. \(a^{15}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>原根的存在性与分类</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如果存在一个元素 \(g\) 使得 \(\mathrm{ord}_n(g) = \varphi(n)\)，则 \((\mathbb{Z}/n\mathbb{Z})^*\) 是循环群，\(g\) 称为原根。哪些 \(n\) 有原根？ 这个问题的答案是经典而优雅的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>原根的存在性等价于 \((\mathbb{Z}/n\mathbb{Z})^*\) 是循环群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(g\) 是模 \(n\) 的原根，若 \(\mathrm{ord}_n(g) = \varphi(n)\)。 <strong>存在性</strong>: 原根存在当且仅当 \[n = 1, 2, 4, p^k, 2p^k \quad (p \text{ 奇素数}, k \geq 1)\] 特别地，每个素数 \(p\) 模下都存在原根。 <strong>个数</strong>: 若原根存在，其个数为 \(\varphi(\varphi(n))\)。 证明思路: \(g\) 是原根 \(\Leftrightarrow\) \(g^k\) 也是原根 iff \(\gcd(k, \varphi(n)) = 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>密码学中 ElGamal 加密体系选择素数 \(p\) 和原根 \(g\) 作为公开参数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求模 7 的所有原根。 解答: \(\varphi(7) = 6\)。检查 \(3\): \(3^1=3,3^2=2,3^3=6,3^6=1\)。 \(\mathrm{ord}_7(3) = 6\)，故 3 是原根。 原根个数 \(= \varphi(6) = 2\)。\(3^k\) 中 \(\gcd(k,6)=1\) 的 \(k\): \(k=1\): \(3\)，\(k=5\): \(3^5 = 243 \equiv 5\)。原根为 \(\{3, 5\}\)。 易错点: 以为每个模数都有原根。 \(n = 8\): \(\varphi(8) = 4\)，但 \((\mathbb{Z}/8\mathbb{Z})^* \cong V_4\)（Klein 四元群）， 不是循环群，无原根。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">模 10 是否存在原根？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(10 = 2 \\times 5\\)，其中 5 是奇素数，符合 \\(2p^k\\) 形式，有原根。')">A. 是，因为 \(10 = 2 \times 5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(10 = 2 \\times 5\\)，其中 5 是奇素数，符合 \\(2p^k\\) 形式，有原根。')">B. 不是，因为 10 是合数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(10 = 2 \\times 5\\)，其中 5 是奇素数，符合 \\(2p^k\\) 形式，有原根。')">C. 是，因为 \(10 = 2 \times 5\) 符合 \(2p\) 形式</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(10 = 2 \\times 5\\)，其中 5 是奇素数，符合 \\(2p^k\\) 形式，有原根。')">D. 不是，因为 \(\varphi(10) = 4\) 不是素数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>\((\mathbb{Z}/p\mathbb{Z})^*\) 的循环性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\((\mathbb{Z}/p\mathbb{Z})^*\) 是循环群（即存在原根）这一事实是数论的基本定理。 它说明每个素数模下的乘法群结构尽可能简单，为指标（离散对数） 的定义提供了基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思想: 有限域 \(\mathbb{F}_p\) 的乘法群是循环的——这是有限域理论的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理</strong>: \((\mathbb{Z}/p\mathbb{Z})^*\) 是 \(p-1\) 阶循环群。 证明框架: 对每个 \(d \mid p-1\)，\(x^d \equiv 1 \pmod{p}\) 有恰好 \(d\) 个解（因为 \(\mathbb{Z}/p\mathbb{Z}\) 是域，多项式根数 \(\leq\) 次数）。 设 \(\psi(d)\) = 阶为 \(d\) 的元素个数。 若 \(\psi(d) > 0\)，则 \(\psi(d) = \varphi(d)\)。 \(\sum_{d \mid p-1} \psi(d) = p-1 = \sum_{d \mid p-1} \varphi(d)\)。 故对所有 \(d\)，\(\psi(d) = \varphi(d)\)。 特别地 \(\psi(p-1) = \varphi(p-1) > 0\)，即存在原根。 \[|(\mathbb{Z}/p\mathbb{Z})^*| = p-1, \quad (\mathbb{Z}/p\mathbb{Z})^* \cong \mathbb{Z}/(p-1)\mathbb{Z}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>离散对数问题（DLP）的定义依赖于循环群结构，是密码学安全性的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证明 \(\mathbb{Z}/7\mathbb{Z}\) 中阶为 6 的元素存在。 解答: 由上述定理，\(\psi(6) = \varphi(6) = 2 > 0\)。 具体: \(3^1=3, 3^2=2, 3^3=6, 3^6=1\)，\(\mathrm{ord}(3)=6\)。✓ 易错点: 试图将该定理应用于非素数模。 \((\mathbb{Z}/8\mathbb{Z})^* = \{1,3,5,7\}\) 不循环（每个元素阶 \(\leq 2\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\((\mathbb{Z}/11\mathbb{Z})^*\) 中阶为 \(10\) 的元素有几个？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。个数 = \\(\\varphi(10) = 4\\)。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。个数 = \\(\\varphi(10) = 4\\)。')">B. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！个数 = \\(\\varphi(10) = 4\\)。')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。个数 = \\(\\varphi(10) = 4\\)。')">D. 10</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>指标（离散对数）与运算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了原根 \(g\)，每个可逆元素都可以写成 \(g^k\) 的形式。指标 \(\mathrm{ind}_g(a) = k\)（离散对数）将乘法转化为加法，类似于对数。 离散对数的计算困难性是现代密码学的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>指标是群同构 \((\mathbb{Z}/p\mathbb{Z})^* \cong \mathbb{Z}/(p-1)\mathbb{Z}\) 的具体实现， 将乘法同构映射为加法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: 若 \(g\) 是模 \(n\) 的原根，\(\gcd(a,n)=1\)，则 \(\mathrm{ind}_g(a)\) 是满足 \(g^k \equiv a \pmod{n}\) 的最小非负 \(k\)。 <strong>运算法则</strong>（全部模 \(\varphi(n)\)）: \(\mathrm{ind}_g(ab) \equiv \mathrm{ind}_g(a) + \mathrm{ind}_g(b)\) \(\mathrm{ind}_g(a^k) \equiv k \cdot \mathrm{ind}_g(a)\) \[g^{\mathrm{ind}_g(a)} \equiv a \pmod{n}, \quad \mathrm{ind}_g(ab) = \mathrm{ind}_g(a) + \mathrm{ind}_g(b) \pmod{\varphi(n)}\] <strong>离散对数问题（DLP）</strong>: 给定 \(g, a, p\)，求 \(k\) 使 \(g^k \equiv a \pmod{p}\)。 当 \(p\) 很大时，最佳已知算法为次指数时间，计算上困难。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Diffie-Hellman 密钥交换、ElGamal 加密、DSA 签名算法的安全性 基于 DLP 的困难性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 以 \(g=3\) 为模 7 的原根，求 \(\mathrm{ind}_3(5)\)。 解答: \(3^1=3, 3^2=2, 3^3=6, 3^4=4, 3^5=5\)。 故 \(\mathrm{ind}_3(5) = 5\)。 验证: \(3^5 = 243 = 34 \times 7 + 5\)。✓ 易错点: 以为指标与原根选取无关。不同原根给出不同指标值。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\mathrm{ind}_g(a) = 3\)，\(\mathrm{ind}_g(b) = 5\)，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ind}(ab) = 3 + 5 = 8 \\pmod{10}\\)。')">A. 15</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\mathrm{ind}(ab) = 3 + 5 = 8 \\pmod{10}\\)。')">B. 8</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ind}(ab) = 3 + 5 = 8 \\pmod{10}\\)。')">C. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\mathrm{ind}(ab) = 3 + 5 = 8 \\pmod{10}\\)。')">D. 5</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/algebra/number-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

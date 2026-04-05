@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 学习理论 — 机器学习数学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "ml-math-ch06-q1",
+        "question": "PAC 学习(Probably Approximately Correct)的定义是什么？\"大概率近似正确\"中\"大概率\"和\"近似正确\"分别对应哪个参数？",
+        "options": [
+          "\"近似正确\": 泛化误差 \\(\\leq\\epsilon\\); \"大概率\": 概率 \\(\\geq 1-\\delta\\); PAC 可学习需要样本复杂度关于 \\(1/\\epsilon, 1/\\delta\\) 多项式",
+        "\\(\\epsilon\\) 是概率, \\(\\delta\\) 是误差",
+        "PAC 要求零误差",
+        "PAC 不涉及概率"
+        ],
+        "answer": 0,
+        "explanation": "假设类 \\(\\mathcal{H}\\) 是 PAC 可学习的，如果存在算法 \\(A\\)，对任意分布 \\(D\\)、任意 \\(\\epsilon,\\delta>0\\), 当样本量 \\(m\\geq m_0(\\epsilon,\\delta)=\\text{poly}(1/\\epsilon,1/\\delta)\\) 时，\\(\\Pr[L_D(h_S)\\leq\\min_{h\\in\\mathcal{H}}L_D(h)+\\epsilon]\\geq 1-\\delta\\)（不可知PAC）。有限假设类: \\(m\\geq\\frac{\\log|\\mathcal{H}|+\\log(1/\\delta)}{\\epsilon}\\) 就够——union bound 证明。"
+      },
+      {
+        "id": "ml-math-ch06-q2",
+        "question": "VC 维(Vapnik-Chervonenkis dimension)度量什么？为什么它比假设类大小更自然？",
+        "options": [
+          "VC 维 = 假设类能\"打散\"的最大点集大小; 对无限假设类（如线性分类器）仍有限——是泛化界的正确复杂度度量",
+        "VC 维就是参数个数",
+        "VC 维只适用于有限假设类",
+        "VC 维度量训练误差"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{VCdim}(\\mathcal{H})=\\max\\{m:\\exists S\\text{ of size }m, \\Pi_\\mathcal{H}(S)=2^m\\}\\)。\\(\\Pi_\\mathcal{H}(S)\\)=假设类在\\(S\\)上的不同标记方式数。VC 维=能被完美拟合的最大数据集大小。例：\\(\\mathbb{R}^d\\) 中线性分类器 VC维=\\(d+1\\)（可打散\\(d+1\\)个一般位置点）。VC 界: \\(L_D(h)\\leq L_S(h)+O(\\sqrt{\\frac{d\\log(m/d)+\\log(1/\\delta)}{m}})\\)——无限类的泛化保证。"
+      },
+      {
+        "id": "ml-math-ch06-q3",
+        "question": "经验风险最小化(ERM)的泛化界中，训练误差和泛化 gap 如何变化？",
+        "options": [
+          "复杂度 \\(\\uparrow\\): 训练误差 \\(\\downarrow\\), 泛化 gap \\(\\uparrow\\); 最优复杂度在两者平衡处——经典偏差-方差折中",
+        "复杂度越高总是越好",
+        "训练误差和泛化 gap 同向变化",
+        "泛化 gap 与复杂度无关"
+        ],
+        "answer": 0,
+        "explanation": "\\(L_D(h)\\leq \\underbrace{L_S(h)}_{\\text{训练误差}}+\\underbrace{\\text{Complexity}(\\mathcal{H},m)}_{\\text{泛化 gap}}\\)。\\(\\mathcal{H}\\) 简单: 训练误差大(高偏差), gap小。\\(\\mathcal{H}\\) 复杂: 训练误差小(低偏差), gap大(高方差)。VC界: gap\\(\\sim\\sqrt{d_{VC}/m}\\)。但现代深度学习\"打破\"了这个故事——过参数化模型0训练误差却泛化好→双下降(double descent)现象, 经典VC理论无法完全解释。"
+      },
+      {
+        "id": "ml-math-ch06-q4",
+        "question": "Rademacher 复杂度 \\(\\mathcal{R}_m(\\mathcal{H})=\\mathbb{E}_\\sigma[\\sup_{h\\in\\mathcal{H}}\\frac{1}{m}\\sum_i\\sigma_ih(x_i)]\\) 中 \\(\\sigma_i\\) 是什么？它度量什么？",
+        "options": [
+          "\\(\\sigma_i\\) 是均匀随机 \\(\\pm 1\\); \\(\\mathcal{R}_m\\) 度量假设类拟合随机噪声的能力——越强的类越能拟合噪声标签",
+        "\\(\\sigma_i\\) 是数据",
+        "\\(\\mathcal{R}_m\\) 度量训练精度",
+        "\\(\\sigma_i\\) 都是 \\(+1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sigma_i\\) i.i.d. Rademacher (\\(\\pm 1\\)等概率). \\(\\mathcal{R}_m(\\mathcal{H})\\)=假设类与随机标签的最大相关性。泛化界: \\(L_D(h)\\leq L_S(h)+2\\mathcal{R}_m(\\mathcal{H})+\\sqrt{\\log(1/\\delta)/(2m)}\\)。优于VC: 数据依赖(经验Rademacher用实际数据\\(x_i\\)), 更紧。例: 线性类\\(\\{x\\mapsto w^Tx:\\|w\\|\\leq B\\}\\), \\(\\mathcal{R}_m\\leq\\frac{B\\sqrt{\\sum\\|x_i\\|^2}}{m}\\leq\\frac{BR}{\\sqrt{m}}\\)——不依赖维度\\(d\\), 只依赖范数。"
+      },
+      {
+        "id": "ml-math-ch06-q5",
+        "question": "偏差-方差分解: \\(\\mathbb{E}[(y-\\hat{f}(x))^2]=\\text{Bias}^2+\\text{Variance}+\\sigma^2\\)。在 \\(k\\)-NN 中, \\(k\\) 如何影响？",
+        "options": [
+          "\\(k\\) 小: 低偏差高方差(过拟合); \\(k\\) 大: 高偏差低方差(过平滑); \\(k=\\sqrt{n}\\) 常是经验平衡点",
+        "\\(k\\) 不影响偏差方差",
+        "\\(k\\) 大总是更好",
+        "方差不随 \\(k\\) 变化"
+        ],
+        "answer": 0,
+        "explanation": "\\(k\\)-NN: \\(\\hat{f}(x)=\\frac{1}{k}\\sum_{i\\in N_k(x)}y_i\\)。\\(k=1\\): \\(\\hat{f}=y_{nn}\\), 偏差\\(\\to 0\\) (插值), 方差\\(=\\sigma^2\\) (一个样本的噪声)。\\(k=n\\): \\(\\hat{f}=\\bar{y}\\), 偏差大(忽略局部结构), 方差\\(=\\sigma^2/n\\)(小)。最优\\(k\\): 最小化 MSE。Cover-Hart: 1-NN 渐近误差 \\(\\leq 2R^*\\)（\\(R^*\\) 为 Bayes 误差）。维度灾难: 高维下\"近邻\"不再近。"
+      },
+      {
+        "id": "ml-math-ch06-q6",
+        "question": "PAC-Bayes 界: \\(D_{KL}(Q\\|P)\\leq\\frac{m\\epsilon^2}{2}+\\log\\frac{1}{\\delta}\\) 对随机化分类器 \\(Q\\)。它为什么能解释深度学习泛化？",
+        "options": [
+          "PAC-Bayes 界依赖 \\(Q\\) 与先验 \\(P\\) 的 KL 散度而非参数数量——宽网络若权重集中在先验附近(如初始化附近), KL 可以小→紧界",
+        "PAC-Bayes 只适用于线性模型",
+        "PAC-Bayes 界总是松的",
+        "深度学习不需要泛化理论"
+        ],
+        "answer": 0,
+        "explanation": "经典 PAC-Bayes: \\(\\mathbb{E}_{h\\sim Q}[L_D(h)]\\leq\\mathbb{E}_{h\\sim Q}[L_S(h)]+\\sqrt{\\frac{D_{KL}(Q\\|P)+\\log(2\\sqrt{m}/\\delta)}{2m}}\\)。\\(P\\): 先验(如初始化分布), \\(Q\\): 学习后的后验。关键: KL\\((Q\\|P)\\) 可以远小于参数数量！SGD 的隐式正则化使 \\(Q\\) 不远离 \\(P\\)。Dziugaite-Roy (2017): PAC-Bayes 给出非空的深度网络泛化界。这也解释了压缩性↔泛化的联系。"
+      },
+      {
+        "id": "ml-math-ch06-q7",
+        "question": "双下降(Double Descent)现象: 模型复杂度从欠拟合到过拟合再到过参数化时, 测试误差先降后升再降。经典理论能解释吗？",
+        "options": [
+          "不能——经典偏差方差预测 U 形曲线, 无法解释过参数化后误差再降; 需要隐式正则化、最小范数解、或核回归等新理论",
+        "经典理论完美解释",
+        "双下降不存在",
+        "只在小数据集出现"
+        ],
+        "answer": 0,
+        "explanation": "经典 bias-variance: 插值阈值(\\(d\\approx n\\))附近方差爆炸。但 \\(d\\gg n\\) 时，最小范数解 \\(w^*=X^T(XX^T)^{-1}y\\) 方差衰减→测试误差下降。Belkin et al. (2019): \"U+下降\"=双下降。解释框架: (1) 最小范数/隐式正则化(SGD偏好平坦极小); (2) 核回归视角(NTK); (3) Random Feature Model 的精确分析。现代理解: \"过参数化不等于过拟合\"——但需要合适的优化器和架构。"
+      },
+      {
+        "id": "ml-math-ch06-q8",
+        "question": "随机梯度下降(SGD)的隐式正则化效应: SGD 找到的解与梯度下降(GD)的有什么不同？",
+        "options": [
+          "SGD 噪声倾向于逃离 sharp minima, 收敛到 flat minima——flat minima 泛化更好(loss景观平坦→参数扰动不影响性能)",
+        "SGD 和 GD 找到相同的解",
+        "SGD 总是更差",
+        "Sharp minima 泛化更好"
+        ],
+        "answer": 0,
+        "explanation": "GD: \\(\\theta\\leftarrow\\theta-\\eta\\nabla L(\\theta)\\), 收敛到最近极小。SGD: \\(\\theta\\leftarrow\\theta-\\eta\\nabla L_B(\\theta)\\), 噪声 \\(\\sim\\eta\\Sigma/|B|\\) 其中 \\(\\Sigma\\) 是梯度协方差。理论(Li et al., 2021): SGD 等效于最小化 \\(L(\\theta)+\\frac{\\eta}{4|B|}\\text{tr}(\\Sigma\\nabla^2L)\\)——对 sharp 区域(大Hessian)的隐式惩罚。Flat minima假说: \\(L(\\theta+\\epsilon)\\approx L(\\theta)\\) 对 \\(\\|\\epsilon\\|\\leq\\rho\\) → PAC-Bayes 意义下泛化好。SAM (Sharpness-Aware Minimization) 显式最小化 sharpness。"
+      },
+      {
+        "id": "ml-math-ch06-q9",
+        "question": "Neural Tangent Kernel (NTK): 在无限宽极限下, 神经网络训练等价于什么？",
+        "options": [
+          "等价于 NTK \\(K(x,x')=\\nabla_\\theta f(x)^T\\nabla_\\theta f(x')\\) 下的核回归——参数几乎不动(lazy training), 预测是训练数据的线性组合",
+        "等价于线性回归",
+        "NTK 只是理论, 不能近似实际网络",
+        "宽度不影响训练动态"
+        ],
+        "answer": 0,
+        "explanation": "宽度 \\(\\to\\infty\\) 时, 参数 \\(\\theta\\) 只在初始化 \\(\\theta_0\\) 附近微移。\\(f(x;\\theta)\\approx f(x;\\theta_0)+\\nabla_\\theta f(x;\\theta_0)^T(\\theta-\\theta_0)\\)——线性化! 训练动态: \\(\\dot{f}=-K\\cdot(f-y)\\) 其中 \\(K_{ij}=\\nabla f(x_i)^T\\nabla f(x_j)\\)=NTK。\\(K\\) 在训练中近似常数。预测: \\(f^*=K_{*,train}K_{train}^{-1}y\\)——核回归。局限: 实际网络不在 lazy regime, 特征会进化(feature learning); NTK 理论不能解释表示学习的优势。"
+      },
+      {
+        "id": "ml-math-ch06-q10",
+        "question": "因果推断在学习理论中的角色: OOD (Out-of-Distribution) 泛化为什么需要因果视角？",
+        "options": [
+          "因果特征 \\(X_{causal}\\to Y\\) 在分布偏移下稳定, 虚假相关 \\(X_{spurious}\\leftarrow Z\\to Y\\) 在新环境中失效——因果推断帮助识别不变机制(Invariant Risk Minimization)",
+        "因果推断只用于医学",
+        "OOD 泛化不需要因果",
+        "所有特征同样重要"
+        ],
+        "answer": 0,
+        "explanation": "训练: \"草地\"特征与\"牛\"标签相关(虚假关联)。OOD: 牛在室内→\"草地\"特征失效。因果: \\(牛\\to\\)图像 是因果, \\(环境\\to\\)草地且\\(环境\\to\\)构图 是非因果。IRM (Arjovsky 2019): \\(\\min_\\phi\\sum_e R^e(\\Phi)+\\lambda\\|\\nabla_{w|w=1}R^e(w\\cdot\\Phi)\\|^2\\)——所有环境 \\(e\\) 上表示 \\(\\Phi\\) 最优+梯度为零(不变预测器)。DRO: 最坏情况分布鲁棒性。前沿: 因果表示学习、独立机制原则(Schölkopf)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="ml-math"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/ml-math.html" class="module-name">机器学习数学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · PAC 学习与 VC 维</a></li>
+      <li><a href="#kp2">02 · Rademacher 复杂度与泛化界</a></li>
+      <li><a href="#kp3">03 · 偏差-方差分解的理论视角</a></li>
+      <li><a href="#kp4">04 · 因果推断初步</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>学习理论</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>PAC 学习与 VC 维</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>机器学习算法在训练集上表现好就够了吗？学习理论回答一个根本问 题：为什么从有限样本学到的模型能泛化到未见数据？PAC 学习框架 和 VC 维理论给出了第一个严格答案：学习的可能性取决于假设类的 "复杂度"与样本量的关系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从"学习一个概念"到"以高概率近似正确"(PAC)——将学习问题转 化为概率语言下的有限样本统计问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>PAC 学习：假设类 \(\mathcal{H}\) 是 PAC 可学的 iff 存在算法 \(A\)， \(\forall \epsilon, \delta > 0\), \(\forall P\)，当样本量 \[n \geq n_0(\epsilon, \delta, \mathcal{H})\] 时，\(\Pr[\mathrm{err}(A(S)) \leq \min_{h \in \mathcal{H}} \mathrm{err}(h) + \epsilon] \geq 1-\delta\)。 有限假设类：\(|\mathcal{H}| < \infty\) 时，union bound 给出 \(n = O(\frac{1}{\epsilon^2}(\log|\mathcal{H}|+\log(1/\delta)))\)。 VC 维：\(\mathrm{VC}(\mathcal{H})\) = \(\mathcal{H}\) 能打散(shatter)的最大点集大小。 VC 不等式：\(\Pr[\sup_{h}|R(h)-\hat{R}(h)| > \epsilon] \leq 4 \cdot S_{\mathcal{H}}(2n) \cdot e^{-n\epsilon^2/8}\)， 其中增长函数 \(S_{\mathcal{H}}(n) \leq (en/d)^d\)（\(d = \mathrm{VC}(\mathcal{H})\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>VC 维决定了模型需要多少数据才能泛化——SVM 最大间隔原理可以 理解为控制"有效 VC 维"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^2\) 中线性分类器的 VC 维。 解答：3 个不共线点可被所有 \(2^3=8\) 种标签方式打散（用直线分类）。 4 个点中存在 XOR 配置不可打散。故 \(\mathrm{VC} = 3 = d+1\)。 一般 \(\mathbb{R}^d\) 中半空间的 VC 维 \(= d+1\)。 易错点：VC 维是最大可打散集合的大小，存在一个能打散的集合即可 （不要求所有大小为 \(d\) 的集合都可打散）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}^d\) 中线性分类器的 VC 维是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(d\\) 维空间中的半空间可以打散 \\(d+1\\) 个一般位置的点。')">A. \(d\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(d\\) 维空间中的半空间可以打散 \\(d+1\\) 个一般位置的点。')">B. \(d+1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(d\\) 维空间中的半空间可以打散 \\(d+1\\) 个一般位置的点。')">C. \(2d\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(d\\) 维空间中的半空间可以打散 \\(d+1\\) 个一般位置的点。')">D. \(2^d\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Rademacher 复杂度与泛化界</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>VC 维是分布无关的——可能过于悲观。Rademacher 复杂度是数据依赖 的复杂度度量，给出更紧的泛化界。它衡量假设类拟合随机噪声的能 力：能拟合噪声越多则复杂度越高，泛化越差。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Rademacher 复杂度量化了"函数类与随机噪声的相关性"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>经验 Rademacher 复杂度： \[\hat{\mathcal{R}}_n(\mathcal{H}) = \mathbb{E}_\sigma\left[\sup_{h \in \mathcal{H}} \frac{1}{n}\sum_{i=1}^n \sigma_i h(x_i)\right]\] 其中 \(\sigma_i \in \{+1,-1\}\) 均匀随机（Rademacher 变量）。 泛化界（对称化技巧）： \[\mathbb{E}[\sup_h (R(h)-\hat{R}(h))] \leq 2\mathcal{R}_n(\mathcal{H})\] 高概率版本（McDiarmid）： \[\Pr[R(h) \leq \hat{R}(h) + 2\mathcal{R}_n + \sqrt{\frac{\log(1/\delta)}{2n}}] \geq 1-\delta\] 与 VC 维的关系：线性分类器的 \(\mathcal{R}_n = O(\sqrt{d/n})\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Rademacher 复杂度用于分析 RKHS 中核方法的泛化性： \(\mathcal{R}_n \leq \frac{B}{\sqrt{n}}\sqrt{\mathrm{tr}(K)/n}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathcal{H} = \{h(x) = \mathrm{sign}(w^Tx) \mid \|w\| \leq 1\}\)， \(x_i\) 在单位球上。估计 \(\hat{\mathcal{R}}_n\)。 解答：\(\hat{\mathcal{R}}_n = \mathbb{E}_\sigma[\sup_{\|w\|\leq 1} \frac{1}{n}|w^T\sum\sigma_i x_i|] = \frac{1}{n}\mathbb{E}[\|\sum \sigma_i x_i\|] \leq \frac{1}{n}\sqrt{n} = 1/\sqrt{n}\)。 易错点：Rademacher 复杂度是数据依赖的——不同数据集上的值不同。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Rademacher 复杂度越大意味着？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。高 Rademacher 复杂度 = 能拟合更多噪声 = 过拟合风险更大。')">A. 泛化越好</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！高 Rademacher 复杂度 = 能拟合更多噪声 = 过拟合风险更大。')">B. 泛化越差（假设类越复杂）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。高 Rademacher 复杂度 = 能拟合更多噪声 = 过拟合风险更大。')">C. 训练误差越大</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。高 Rademacher 复杂度 = 能拟合更多噪声 = 过拟合风险更大。')">D. 数据噪声越小</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>偏差-方差分解的理论视角</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>偏差-方差分解(Ch.01 引入)在学习理论中有更深层的理论含义：它连 接了模型选择、正则化和泛化界。理解经验过程理论视角下的偏差-方 差权衡，有助于设计更好的学习算法和正则化策略。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>形式化：设最优函数 \(f^*\), 假设类中最佳 \(f_{\mathcal{H}}^* = \arg\min_{f \in \mathcal{H}} R(f)\), 学习算法输出 \(\hat{f}_n\)。 分解： \[R(\hat{f}_n) - R(f^*) = \underbrace{[R(f_\mathcal{H}^*) - R(f^*)]}_{\text{逼近误差(偏差)}} + \underbrace{[R(\hat{f}_n) - R(f_\mathcal{H}^*)]}_{\text{估计误差(方差)}}\] 逼近误差：假设类 \(\mathcal{H}\) 不含 \(f^*\) 时的"结构偏差"， \(\mathcal{H}\) 越大则越小。 估计误差：有限样本带来的随机波动，由 Rademacher 复杂度控制： \[R(\hat{f}_n) - R(f_\mathcal{H}^*) \leq 2 \sup_{f \in \mathcal{H}} |R(f)-\hat{R}(f)| \lesssim \mathcal{R}_n(\mathcal{H})\] 权衡：\(\mathcal{H}\) 越大 \(\Rightarrow\) 逼近误差↓、估计误差↑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>模型选择（如交叉验证）本质上是在平衡逼近误差与估计误差。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：多项式假设类 \(\mathcal{H}_d\)（\(d\) 阶多项式）, 数据由 \(d^*=3\) 阶 多项式生成。分析 \(d=1, 5, 20\) 时的偏差-方差权衡。 解答：\(d=1\): 逼近误差大（不含 3 阶项），估计误差小。 \(d=5\): 逼近误差 \(=0\)（包含 3 阶），估计误差适中。 \(d=20\): 逼近误差 \(=0\)，但估计误差大（参数多、样本不足）。 易错点：逼近误差为零不意味着泛化好——还要看估计误差。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">学习理论中，增大假设类 \(\mathcal{H}\) 的效果是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。更大的 \\(\\mathcal{H}\\) 更好地逼近目标但更难从有限样本中估计。')">A. 逼近误差和估计误差都下降</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！更大的 \\(\\mathcal{H}\\) 更好地逼近目标但更难从有限样本中估计。')">B. 逼近误差下降，估计误差上升</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。更大的 \\(\\mathcal{H}\\) 更好地逼近目标但更难从有限样本中估计。')">C. 逼近误差上升，估计误差下降</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。更大的 \\(\\mathcal{H}\\) 更好地逼近目标但更难从有限样本中估计。')">D. 两者不变</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>因果推断初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>"相关不等于因果"——但 ML 模型只能捕捉相关。因果推断从数学上 区分因果效应与虚假关联，使我们能回答"如果干预 X 会怎样"。 结构因果模型(SCM)和 do-calculus 提供了严格的形式化框架，在 医学、政策评估和公平 ML 中至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象：从观察分布 \(P(Y|X)\) 到干预分布 \(P(Y|do(X))\)。 \(do(X=x)\) 表示强制设定 \(X=x\)（而非观察 \(X=x\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>结构因果模型：每个变量 \(X_i = f_i(\mathrm{Pa}(X_i), U_i)\)， \(U_i\) 是独立噪声。DAG 编码因果结构。 do-calculus：\(P(Y|do(X=x))\) 通过"删除指向 \(X\) 的箭头"后计算： \[P(Y|do(X=x)) = \sum_z P(Y|X=x, Z=z)P(Z=z)\] （后门调整公式，当 \(Z\) 满足后门准则时）。 后门准则：\(Z\) 阻断所有 \(X \to Y\) 的后门路径（通过 \(X\) 的因的路径）， 且 \(Z\) 中无 \(X\) 的后代。 前门准则：当后门不可用时，通过中间变量估计因果效应。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>A/B 测试 \(=\) 随机化干预，直接估计 \(P(Y|do(X))\)。 观察性研究中必须用后门/前门调整。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X\) = 是否吸烟, \(Y\) = 肺癌, \(Z\) = 基因。DAG: \(Z \to X\), \(Z \to Y\), \(X \to Y\)。 \(P(Y|X=1) \neq P(Y|do(X=1))\) 因为 \(Z\) 是混杂因子。 后门调整：\(P(Y|do(X)) = \sum_z P(Y|X,Z=z)P(Z=z)\)。 易错点：\(P(Y|X)\) 混合了因果效应和选择偏差，不能直接用于因果推断。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(P(Y|X=x)\) 和 \(P(Y|do(X=x))\) 的区别是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(P(Y|X)\\) 在有混杂因子时包含虚假关联，\\(P(Y|do(X))\\) 消除了这些。')">A. 没有区别</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(P(Y|X)\\) 在有混杂因子时包含虚假关联，\\(P(Y|do(X))\\) 消除了这些。')">B. 前者可能包含混杂偏差，后者是纯因果效应</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(P(Y|X)\\) 在有混杂因子时包含虚假关联，\\(P(Y|do(X))\\) 消除了这些。')">C. 后者是前者的近似</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(P(Y|X)\\) 在有混杂因子时包含虚假关联，\\(P(Y|do(X))\\) 消除了这些。')">D. 前者总大于后者</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/applied/ml-math.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 独立性与乘积空间 — 概率论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "probability-ch04-q1",
+        "question": "随机变量 \\(X_1,...,X_n\\) 相互独立的严格定义？",
+        "options": [
+          "\\(\\forall\\) Borel 集 \\(B_i\\): \\(P(X_1 \\in B_1,...,X_n \\in B_n)=\\prod P(X_i \\in B_i)\\)",
+        "\\(P(X_i X_j)=P(X_i)P(X_j)\\)（\\(\\forall i \\neq j\\)）",
+        "\\(\\text{Cov}(X_i,X_j)=0\\)（\\(\\forall i \\neq j\\)）",
+        "\\(E[\\prod X_i]=\\prod E[X_i]\\)"
+        ],
+        "answer": 0,
+        "explanation": "相互独立要求对所有 Borel 集的乘积形式成立。B 是两两独立的一个条件但不完整。C 只是不相关（比独立弱得多）。D 是独立的推论（称乘积公式），但非充分条件。"
+      },
+      {
+        "id": "probability-ch04-q2",
+        "question": "两两独立能否推出相互独立？",
+        "options": [
+          "能",
+        "不能，Bernstein 反例",
+        "仅当 \\(n=2\\) 时等价",
+        "仅对正态分布等价"
+        ],
+        "answer": 1,
+        "explanation": "经典反例：\\(\\Omega=\\{1,2,3,4\\}\\)，\\(A=\\{1,2\\},B=\\{1,3\\},C=\\{1,4\\}\\)，两两独立但 \\(P(ABC)=1/4 \\neq 1/8\\)。\\(n=2\\) 时两者确实等价（C 部分正确但题目要一般情形）。"
+      },
+      {
+        "id": "probability-ch04-q3",
+        "question": "\\(X \\sim \\text{Exp}(1)\\)，\\(Y \\sim \\text{Exp}(2)\\) 独立。\\(Z=X+Y\\) 的密度由什么运算给出？",
+        "options": [
+          "卷积 \\(f_Z=f_X * f_Y\\)",
+        "乘积 \\(f_Z=f_X \\cdot f_Y\\)",
+        "和 \\(f_Z=f_X+f_Y\\)",
+        "最大值 \\(f_Z=\\max(f_X,f_Y)\\)"
+        ],
+        "answer": 0,
+        "explanation": "独立随机变量之和的密度为各密度的卷积：\\(f_Z(z)=\\int_0^z f_X(x)f_Y(z-x)dx\\)。\\(=\\int_0^z e^{-x}\\cdot 2e^{-2(z-x)}dx=2e^{-2z}\\int_0^z e^x dx=2e^{-2z}(e^z-1)=2(e^{-z}-e^{-2z})\\)。"
+      },
+      {
+        "id": "probability-ch04-q4",
+        "question": "\\(X_1,X_2\\) iid \\(\\sim N(0,1)\\)，\\(Y=X_1+X_2\\) 的分布？",
+        "options": [
+          "\\(N(0,2)\\)",
+        "\\(N(0,1)\\)",
+        "\\(N(1,1)\\)",
+        "\\(\\chi^2(2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "正态的卷积仍正态：\\(Y \\sim N(0+0,1+1)=N(0,2)\\)。MGF 法：\\(M_Y(t)=[e^{t^2/2}]^2=e^{t^2}\\)，对应 \\(N(0,2)\\)。独立正态之和封闭在正态族内。"
+      },
+      {
+        "id": "probability-ch04-q5",
+        "question": "Borel-Cantelli 第一引理：若 \\(\\sum P(A_n)<\\infty\\)，则 \\(P(\\limsup A_n)=\\)？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\sum P(A_n)\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\limsup A_n=\\bigcap_n \\bigcup_{k \\geq n} A_k\\)。\\(P(\\bigcup_{k \\geq n}A_k) \\leq \\sum_{k \\geq n}P(A_k) \\to 0\\). 故 \\(P(\\limsup A_n)=0\\)。即\"无穷多事件同时发生\" 的概率为零。不需独立性。"
+      },
+      {
+        "id": "probability-ch04-q6",
+        "question": "Borel-Cantelli 第二引理的附加条件是？",
+        "options": [
+          "\\(\\sum P(A_n)=\\infty\\) 且 \\(A_n\\) 相互独立",
+        "\\(\\sum P(A_n)=\\infty\\) 即可",
+        "\\(P(A_n) \\to 0\\)",
+        "\\(A_n\\) 单调递减"
+        ],
+        "answer": 0,
+        "explanation": "BC2: 若 \\(\\sum P(A_n)=\\infty\\) 且 \\(A_n\\) 独立，则 \\(P(\\limsup A_n)=1\\)。仅发散不够（反例：\\(A_n=A\\)，\\(P(A)=1/2\\)，\\(P(\\limsup)=1/2 \\neq 1\\)... 这需要独立）。独立性通过 \\(\\prod P(A_n^c)=0\\) 推导。"
+      },
+      {
+        "id": "probability-ch04-q7",
+        "question": "Kolmogorov 零一律适用于什么？",
+        "options": [
+          "尾事件（由 \\(X_{n+1},X_{n+2},...\\) 共同决定的事件）",
+        "任意事件",
+        "只有独立增量的过程",
+        "只有有限维事件"
+        ],
+        "answer": 0,
+        "explanation": "尾 \\(\\sigma\\)-代数 \\(\\mathcal{T}=\\bigcap_n \\sigma(X_{n+1},X_{n+2},...)\\)。若 \\(X_n\\) 独立，则 \\(\\forall A \\in \\mathcal{T}\\): \\(P(A)=0\\) 或 \\(1\\)。\"\\(\\sum X_n\\) 收敛\" 是尾事件，概率非 \\(0\\) 即 \\(1\\)。"
+      },
+      {
+        "id": "probability-ch04-q8",
+        "question": "\\(X_1 \\sim \\text{Bernoulli}(1/2)\\)，\\(X_2 \\sim \\text{Bernoulli}(1/2)\\)，独立。\\(Y=X_1+X_2\\) 的 PMF？",
+        "options": [
+          "\\(P(Y=k)=\\binom{2}{k}(1/2)^2\\)，\\(k=0,1,2\\)",
+        "\\(P(Y=0)=P(Y=1)=P(Y=2)=1/3\\)",
+        "\\(Y \\sim \\text{Bernoulli}(1/2)\\)",
+        "\\(P(Y=0)=1/4, P(Y=1)=1/2, P(Y=2)=1/4\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\text{Bin}(2,1/2)\\): \\(P(0)=1/4, P(1)=2/4, P(2)=1/4\\)。A 和 D 实际等价。D 更直接。这是 Bernoulli 卷积产生 Binomial 的最简例。"
+      },
+      {
+        "id": "probability-ch04-q9",
+        "question": "乘积空间 \\(\\Omega_1 \\times \\Omega_2\\) 上乘积概率 \\(P_1 \\otimes P_2\\) 的定义核心性质是？",
+        "options": [
+          "\\(P(A_1 \\times A_2)=P_1(A_1) \\cdot P_2(A_2)\\) 对所有可测矩形成立",
+        "\\(P(A_1 \\times A_2)=P_1(A_1)+P_2(A_2)\\)",
+        "\\(P\\) 在所有子集上可加",
+        "只在有限空间存在"
+        ],
+        "answer": 0,
+        "explanation": "乘积测度由可测矩形上的乘积值 \\(P_1(A_1)P_2(A_2)\\) 唯一扩展到 \\(\\sigma(A_1 \\times A_2)\\)。存在性和唯一性包含在 Carathéodory 扩张定理及 Fubini 定理中。"
+      },
+      {
+        "id": "probability-ch04-q10",
+        "question": "\\(X_1,...,X_n\\) iid \\(\\sim U(0,1)\\)，\\(M=\\max X_i\\) 的 CDF？",
+        "options": [
+          "\\(F_M(m)=m^n\\)（\\(0 \\leq m \\leq 1\\)）",
+        "\\(F_M(m)=1-(1-m)^n\\)",
+        "\\(F_M(m)=nm^{n-1}\\)",
+        "\\(F_M(m)=m\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(M \\leq m)=P(\\text{所有}\\ X_i \\leq m)=\\prod P(X_i \\leq m)=m^n\\)（独立性）。密度 \\(f_M=nm^{n-1}\\)（C 是密度非 CDF）。B 是 \\(\\min\\) 的 CDF。这是顺序统计量的基本结果。"
+      },
+      {
+        "id": "probability-ch04-q11",
+        "question": "\\(X \\sim \\text{Gamma}(a,1)\\)，\\(Y \\sim \\text{Gamma}(b,1)\\) 独立。\\(X+Y\\) 服从？",
+        "options": [
+          "\\(\\text{Gamma}(a+b,1)\\)",
+        "\\(\\text{Gamma}(ab,1)\\)",
+        "\\(\\text{Gamma}(a,b)\\)",
+        "\\(\\text{Beta}(a,b)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Gamma 卷积（同尺度）：MGF 相乘 \\((1-t)^{-a}(1-t)^{-b}=(1-t)^{-(a+b)}\\)，即 \\(\\text{Gamma}(a+b,1)\\)。形状参数相加。\\(\\chi^2\\) 自由度可加性是特例。D \\(\\text{Beta}\\) 是比 \\(X/(X+Y)\\) 的分布。"
+      },
+      {
+        "id": "probability-ch04-q12",
+        "question": "\\(P(A_n)=1/n\\)，\\(A_n\\) 独立。\\(P(\\limsup A_n)=\\)？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "\\(1/e\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sum 1/n=\\infty\\)（调和级数），BC2 + 独立 \\(\\Rightarrow P(\\limsup A_n)=1\\)。即以概率 \\(1\\) 无穷多个 \\(A_n\\) 发生。验证：\\(P(\\bigcap_{k=n}^m A_k^c)=\\prod(1-1/k) \\to 0\\)（\\(m \\to \\infty\\)）。"
+      },
+      {
+        "id": "probability-ch04-q13",
+        "question": "\\(P(A_n)=1/n^2\\)，不假设独立。\\(P(\\limsup A_n)=\\)？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "需要独立性才能判断",
+        "\\(\\pi^2/6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum 1/n^2=\\pi^2/6<\\infty\\)，BC1 仅需可加性（不需独立）\\(\\Rightarrow P(\\limsup A_n)=0\\)。无穷多 \\(A_n\\) 同时发生的概率为零。选 C 混淆了 BC1 和 BC2 的条件。"
+      },
+      {
+        "id": "probability-ch04-q14",
+        "question": "\\(\\{X_n\\}\\) 独立，\\(\\sum X_n\\) 收敛属于尾事件吗？",
+        "options": [
+          "是，因为有限项不影响级数收敛",
+        "否，与首项有关",
+        "仅对正级数是",
+        "取决于分布"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{\\sum X_n \\text{收敛}\\}=\\{\\sum_{k=n}^\\infty X_k \\text{收敛},\\forall n\\}\\)，不依赖有限项。故属 \\(\\mathcal{T}\\)。Kolmogorov 零一律：\\(P(\\text{收敛})=0\\) 或 \\(1\\)。确定性的二值结论。"
+      },
+      {
+        "id": "probability-ch04-q15",
+        "question": "\\(X_n\\) iid \\(N(0,1)\\)，\\(\\limsup X_n/\\sqrt{2\\ln n}=\\) 常数。该常数是？",
+        "options": [
+          "\\(1\\)",
+        "\\(0\\)",
+        "\\(\\infty\\)",
+        "\\(1/\\sqrt{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "这是正态序列的极端值行为。由 BC 引理精细估计：\\(\\limsup X_n/\\sqrt{2\\ln n}=1\\) a.s.。\\(P(X_n>\\sqrt{2\\ln n})\\) 的尾估计 \\(\\sim 1/(n\\sqrt{4\\pi\\ln n})\\)，级数收敛；但 \\((1-\\varepsilon)\\sqrt{2\\ln n}\\) 处级数发散。"
+      },
+      {
+        "id": "probability-ch04-q16",
+        "question": "Kolmogorov 三级数定理说：\\(\\{X_n\\}\\) 独立，\\(\\sum X_n\\) a.s. 收敛当且仅当三个级数同时收敛。三级数是？",
+        "options": [
+          "\\(\\sum P(|X_n|>c)\\)，\\(\\sum E[X_n^c]\\)，\\(\\sum \\text{Var}(X_n^c)\\)（\\(X_n^c\\) 截断）",
+        "\\(\\sum E[X_n]\\)，\\(\\sum \\text{Var}(X_n)\\)，\\(\\sum E[|X_n|^3]\\)",
+        "\\(\\sum P(X_n>0)\\)，\\(\\sum P(X_n<0)\\)，\\(\\sum P(X_n=0)\\)",
+        "\\(\\sum \\mu_n\\)，\\(\\sum \\sigma_n\\)，\\(\\sum \\sigma_n^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "截断 \\(X_n^c=X_n \\mathbf{1}_{|X_n| \\leq c}\\)。三条件：①\\(\\sum P(|X_n|>c)<\\infty\\)（尾可控）②\\(\\sum E[X_n^c]\\) 收敛 ③\\(\\sum \\text{Var}(X_n^c)<\\infty\\)。BC 引理保证 ① 下截断不改变求和行为。"
+      },
+      {
+        "id": "probability-ch04-q17",
+        "question": "\\(X_1,...,X_n\\) iid \\(\\sim \\text{Exp}(\\lambda)\\) 独立。\\(\\sum X_i \\sim\\)？",
+        "options": [
+          "\\(\\text{Gamma}(n,1/\\lambda)\\)",
+        "\\(\\text{Exp}(n\\lambda)\\)",
+        "\\(\\text{Gamma}(n,\\lambda)\\)",
+        "\\(n\\text{Exp}(\\lambda)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Exp}(\\lambda)=\\text{Gamma}(1,1/\\lambda)\\)。独立 Gamma 同尺度可加：\\(\\sum X_i \\sim \\text{Gamma}(n,1/\\lambda)\\)。MGF: \\((\\lambda/(\\lambda-t))^n\\)。选 B 对应 \\(\\min\\)，选 C 尺度参数搞反。"
+      },
+      {
+        "id": "probability-ch04-q18",
+        "question": "\\(X \\perp Y\\) 且 \\(f(X,Y)=g(X)h(Y)\\)，是否 \\(g(X) \\perp h(Y)\\)（\\(g,h\\) Borel 可测）？",
+        "options": [
+          "是，可测函数保持独立性",
+        "否，一般不成立",
+        "仅当 \\(g,h\\) 线性时",
+        "仅当 \\(g,h\\) 单调时"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{g(X) \\in B\\}=\\{X \\in g^{-1}(B)\\} \\in \\sigma(X)\\)，\\(\\{h(Y) \\in C\\} \\in \\sigma(Y)\\)。\\(\\sigma(X) \\perp \\sigma(Y)\\) 意味着两者的任何可测子集独立。可测函数对独立性封闭，不要求单调或线性。"
+      },
+      {
+        "id": "probability-ch04-q19",
+        "question": "Fubini 定理的可积条件是？",
+        "options": [
+          "\\(\\int |f| d(\\mu \\otimes \\nu)<\\infty\\)",
+        "\\(f \\geq 0\\)",
+        "\\(f\\) 连续",
+        "\\(f\\) 有界"
+        ],
+        "answer": 0,
+        "explanation": "Fubini: 若 \\(f\\) 对乘积测度可积（\\(\\int|f|<\\infty\\)），则迭代积分顺序可交换且等于二重积分。Tonelli 定理则对 \\(f \\geq 0\\)（不要求可积）成立。B 是 Tonelli 条件。"
+      },
+      {
+        "id": "probability-ch04-q20",
+        "question": "\\(X \\sim N(0,1)\\)，\\(Y \\sim N(0,1)\\) 独立。\\(R=\\sqrt{X^2+Y^2}\\) 服从？",
+        "options": [
+          "Rayleigh 分布",
+        "\\(\\chi^2(2)\\)",
+        "\\(\\text{Exp}(1)\\)",
+        "\\(N(0,2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "极坐标变换 \\((X,Y) \\to (R,\\Theta)\\)：\\(f_{R,\\Theta}=re^{-r^2/2}/(2\\pi)\\)。\\(f_R(r)=re^{-r^2/2}\\)（\\(r>0\\)），即 Rayleigh(\\(\\sigma=1\\))。\\(R^2 \\sim \\chi^2(2)=\\text{Exp}(1/2)\\)（B 是 \\(R^2\\) 的分布，非 \\(R\\)）。"
+      },
+      {
+        "id": "probability-ch04-q21",
+        "question": "\\(n\\) 个独立 \\(\\text{Poisson}(\\lambda_i)\\) 的和 \\(\\sim\\)？",
+        "options": [
+          "\\(\\text{Poisson}(\\sum \\lambda_i)\\)",
+        "\\(\\text{Poisson}(\\prod \\lambda_i)\\)",
+        "\\(\\text{Bin}(n,\\bar{\\lambda})\\)",
+        "\\(\\text{NegBin}\\)"
+        ],
+        "answer": 0,
+        "explanation": "MGF 乘积 \\(\\prod e^{\\lambda_i(e^t-1)}=e^{(\\sum\\lambda_i)(e^t-1)}\\)，即 \\(\\text{Poisson}(\\sum\\lambda_i)\\)。Poisson 族对独立求和封闭（可加性）。这是 Poisson 过程叠加定理的离散版本。"
+      },
+      {
+        "id": "probability-ch04-q22",
+        "question": "BC2 证明中关键步骤：\\(P(\\bigcap_{k=n}^m A_k^c)=\\prod_{k=n}^m(1-P(A_k))\\) 需要什么条件？",
+        "options": [
+          "\\(A_k\\) 独立",
+        "\\(A_k\\) 不相交",
+        "\\(P(A_k) \\to 0\\)",
+        "\\(\\sum P(A_k)<\\infty\\)"
+        ],
+        "answer": 0,
+        "explanation": "独立性使 \\(P(\\bigcap A_k^c)=\\prod P(A_k^c)=\\prod(1-p_k)\\)。然后用 \\(1-x \\leq e^{-x}\\): \\(\\prod(1-p_k) \\leq e^{-\\sum p_k} \\to 0\\)（\\(\\sum p_k=\\infty\\) 时）。故 \\(P(\\forall k \\geq n: A_k^c \\text{发生})=0\\)。"
+      },
+      {
+        "id": "probability-ch04-q23",
+        "question": "掷公平硬币 \\(\\{X_n\\}\\) iid Bernoulli(\\(1/2\\))。\\(P(\\text{连续出现 10 个正面，无穷多次})=\\)？",
+        "options": [
+          "\\(1\\)",
+        "\\(0\\)",
+        "\\((1/2)^{10}\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(A_k=\\)\"第 \\(10k+1\\) 到 \\(10(k+1)\\) 次全正面\"。\\(P(A_k)=2^{-10}\\)，\\(A_k\\) 独立（不重叠），\\(\\sum 2^{-10}=\\infty\\)。BC2: \\(P(\\limsup A_k)=1\\)。猴子打字机定理的简化版。"
+      },
+      {
+        "id": "probability-ch04-q24",
+        "question": "\\(X_n\\) iid Bernoulli(\\(1/2\\))，\\(S=\\sum X_n 2^{-n}\\)。\\(P(S \\leq 1/2)=\\)？使用零一律。",
+        "options": [
+          "\\(1/2\\)",
+        "\\(0\\) 或 \\(1\\)",
+        "\\(1\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(S \\sim U(0,1)\\)（二进制展开），故 \\(P(S \\leq 1/2)=1/2\\)。这不是尾事件（依赖 \\(X_1\\)），零一律不适用。选 B 错误——零一律仅对尾 \\(\\sigma\\)-代数中的事件给出 \\(0/1\\)，而 \\(\\{S \\leq 1/2\\}=\\{X_1=0\\} \\notin \\mathcal{T}\\)。"
+      },
+      {
+        "id": "probability-ch04-q25",
+        "question": "证明尾事件与有限子集独立的步骤要用到什么？",
+        "options": [
+          "Dynkin \\(\\pi\\)-\\(\\lambda\\) 定理",
+        "单调类定理",
+        "Carathéodory 扩展",
+        "A 和 B 等价且都可用"
+        ],
+        "answer": 3,
+        "explanation": "尾事件 \\(A \\in \\mathcal{T}\\) 与 \\(\\sigma(X_1,...,X_n)\\) 独立（\\(\\forall n\\)）。证明需从乘积集类（\\(\\pi\\)-系统）出发用 \\(\\pi\\)-\\(\\lambda\\) 扩展。Kolmogorov 零一律即推论：\\(A\\) 与自身独立 \\(\\Rightarrow P(A)=P(A)^2 \\Rightarrow P(A) \\in \\{0,1\\}\\)。"
+      },
+      {
+        "id": "probability-ch04-q26",
+        "question": "芯片制造 \\(n=1000\\) 独立器件，各缺陷概率 \\(p=0.001\\)。总缺陷数 \\(X\\) 近似分布和 \\(P(X=0)\\)？",
+        "options": [
+          "\\(X \\approx \\text{Poisson}(1)\\)，\\(P(X=0) \\approx e^{-1}\\)",
+        "\\(X \\sim \\text{Bin}(1000,0.001)\\)，\\(P=0.999^{1000}\\)",
+        "A 和 B 均正确且近似相等",
+        "\\(X \\sim N(1,1)\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(X \\sim \\text{Bin}(n,p)\\)（精确），\\(np=1\\) 时 Poisson 近似极佳：\\(P(0)=e^{-1} \\approx 0.368\\)。精确 \\(0.999^{1000} \\approx e^{-1}\\)。这是可靠性工程中的稀事件近似。"
+      },
+      {
+        "id": "probability-ch04-q27",
+        "question": "猴子随机打字机，字母表 \\(26\\) 个，能否最终打出 \"HAMLET\"？",
+        "options": [
+          "以概率 \\(1\\) 最终打出",
+        "概率为 \\(0\\)",
+        "取决于打字速度",
+        "约 \\(50\\%\\)"
+        ],
+        "answer": 0,
+        "explanation": "每 \\(6\\) 个字符窗口匹配 \"HAMLET\" 的概率 \\(p=26^{-6}\\)。不重叠窗口独立，\\(\\sum p=\\infty\\)。BC2: \\(\\limsup\\) 概率 \\(=1\\)。无穷猴子定理是 Borel-Cantelli 的经典通俗表述。"
+      },
+      {
+        "id": "probability-ch04-q28",
+        "question": "\\(n\\) 台独立服务器，各发生故障概率 \\(p\\)。至少一台故障概率随 \\(n\\) 增长的渐近？",
+        "options": [
+          "\\(1-(1-p)^n \\to 1\\)（指数逼近 \\(1\\)）",
+        "\\(np\\)",
+        "保持不变",
+        "\\(p^n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\text{至少一台})=1-(1-p)^n\\)，\\((1-p)^n \\to 0\\)（\\(0<p<1\\)）。近似 \\(\\approx 1-e^{-np}\\)。冗余设计中，独立组件越多总故障率越高——需冗余容错而非简单并联。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="probability"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/probability.html" class="module-name">概率论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 独立随机变量的严格定义</a></li>
+      <li><a href="#kp2">02 · 独立随机变量之和与卷积</a></li>
+      <li><a href="#kp3">03 · Borel-Cantelli 引理</a></li>
+      <li><a href="#kp4">04 · Kolmogorov 0-1 律与尾 \(\sigma\)-代数</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>独立性与乘积空间</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>独立随机变量的严格定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Ch.01 中我们定义了事件的独立性，但随机变量的独立性需要更 精密的 \(\sigma\)-代数语言。为什么「\(X, Y\) 独立」不能简单定义为 「\(\text{Cov}=0\)」？因为不相关只消除了线性关联，而独立性要求 完全没有任何关联——包括非线性的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(X \perp\!\!\!\perp Y\) iff \(\sigma(X)\) 与 \(\sigma(Y)\) 独立（任取两个 \(\sigma\)-代数中的 事件都独立）。这是最一般的定义，涵盖了任意可测函数的 独立性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>严格定义：\(X\) 和 \(Y\) 独立 iff 对所有 \(A, B \in \mathcal{B}(\mathbb{R})\)， \[P(X \in A,\; Y \in B) = P(X \in A) \cdot P(Y \in B)\] 等价于：\(F_{X,Y}(x,y) = F_X(x) \cdot F_Y(y)\)，\(\forall x,y\)。 重要关系： - \(X \perp\!\!\!\perp Y \Rightarrow \text{Cov}(X,Y) = 0\)（独立 → 不相关） - 反之不成立！反例：\(X \sim N(0,1)\)，\(Y = X^2\)， \(\text{Cov}(X,Y) = E[X^3] = 0\)，但 \(Y\) 完全由 \(X\) 决定。 独立时乘积的期望：\(E[XY] = E[X] \cdot E[Y]\)。 更一般地：\(E[g(X)h(Y)] = E[g(X)] \cdot E[h(Y)]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>统计学中，i.i.d. 样本的假设（独立同分布）是几乎所有经典推断 的基础。打破独立假设会导致模型失效（如时间序列数据）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X \sim N(0,1)\)，\(Y = X^2\)。证明不相关但不独立。 解答：\(\text{Cov}(X,Y) = E[XY] - E[X]E[Y] = E[X^3] - 0 \cdot 1 = 0\) （正态分布奇数阶矩为 0）。 但 \(P(Y \leq 1 | X = 2) = 0\)（因 \(Y = 4\)），而 \(P(Y \leq 1) > 0\)。 故 \(X, Y\) 不独立。 易错点：从不相关推出独立。仅当联合正态分布时， 不相关 \(\Rightarrow\) 独立。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \((X,Y) \sim N(\mu, \Sigma)\)（二元正态）且 \(\text{Cov}(X,Y)=0\)，则</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。联合正态分布是唯一的「不相关 ⇒ 独立」的分布族。')">A. \(X, Y\) 不盬立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！联合正态分布是唯一的「不相关 ⇒ 独立」的分布族。')">B. \(X, Y\) 独立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。联合正态分布是唯一的「不相关 ⇒ 独立」的分布族。')">C. 无法判断</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>独立随机变量之和与卷积</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>若 \(X, Y\) 独立，\(Z = X + Y\) 服从什么分布？这是概率论最基本 的问题之一。答案是卷积公式——它将两个密度「折叠」成新密度。 卷积计算在变换域（特征函数/MGF）下将简化为简单乘法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \(X \perp\!\!\!\perp Y\)，\(Z = X + Y\)，则 \(Z\) 的密度为卷积： \[(f_X * f_Y)(z) = \int_{-\infty}^{\infty} f_X(z-y) f_Y(y)\,dy\] 推导：\(F_Z(z) = P(X+Y \leq z) = \iint_{x+y \leq z} f_X(x)f_Y(y)\,dx\,dy\) （独立性使联合密度 = 边缘之积）。换元 \(x = z-y\) 得卷积。 在变换域中： \[\varphi_{X+Y}(t) = \varphi_X(t) \cdot \varphi_Y(t)\] 应用：\(X \sim N(\mu_1, \sigma_1^2)\)，\(Y \sim N(\mu_2, \sigma_2^2)\) 独立， \(X + Y \sim N(\mu_1+\mu_2, \sigma_1^2+\sigma_2^2)\)（特征函数相乘即得）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>信号处理中，信号+噪声的分布是卷积；保险中，多个独立理赔的 总额分布也通过卷积计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X \sim \text{Exp}(1)\)，\(Y \sim \text{Exp}(1)\) 独立。 求 \(Z = X + Y\) 的密度。 解答：\((f*f)(z) = \int_0^z e^{-(z-y)} e^{-y}\,dy = e^{-z} \cdot z\)，\(z > 0\)。 即 \(Z \sim \text{Gamma}(2, 1)\)。 易错点：卷积积分的上下限。当 \(f_X, f_Y\) 仅在正实数上有定义时， 积分从 \(0\) 到 \(z\)（不是 \(-\infty\) 到 \(+\infty\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(X \sim \text{Poisson}(\lambda)\)，\(Y \sim \text{Poisson}(\mu)\) 独立，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。参数相加，不是相乘。可用 MGF 验证：')">A. \(\text{Poisson}(\lambda\mu)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！参数相加，不是相乘。可用 MGF 验证：')">B. \(\text{Poisson}(\lambda + \mu)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。参数相加，不是相乘。可用 MGF 验证：')">C. \(\text{Poisson}(\max(\lambda,\mu))\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Borel-Cantelli 引理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>一个事件序列 \(A_1, A_2, \ldots\) 中，「无穷多个」会发生的条件是什么？ Borel-Cantelli 引理给出了干净的答案：概率之和收敛则只发生有限 次；若独立且发散则发生无穷次。这是概率论中最常用的 0-1 型结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>「无穷多个 \(A_n\) 发生」的事件即上极限： \(\limsup_n A_n = \bigcap_{n=1}^{\infty} \bigcup_{k=n}^{\infty} A_k\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>BC1（第一部分）：若 \(\sum_n P(A_n) < \infty\)，则 \[P(\limsup_n A_n) = 0\] 证明：\(P(\bigcup_{k=n}^{\infty} A_k) \leq \sum_{k=n}^{\infty} P(A_k) \to 0\) （级数尾部趋于 0）。取交集得结果。 BC2（第二部分）：若 \(A_n\) 相互独立且 \(\sum_n P(A_n) = \infty\)，则 \[P(\limsup_n A_n) = 1\] 证明要点：\(P(\bigcap_{k=n}^{m} A_k^c) = \prod_{k=n}^{m}(1-P(A_k)) \leq \exp(-\sum_{k=n}^{m} P(A_k)) \to 0\)（因级数发散）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在随机算法中，BC 用于证明“算法最终必然成功”或 “异常事件只发生有限次”。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(A_n\) 独立，\(P(A_n) = 1/n\)。证明无穷多个 \(A_n\) 几乎必然发生。 解答：\(\sum P(A_n) = \sum 1/n = \infty\)，且 \(A_n\) 独立， 由 BC2：\(P(\limsup A_n) = 1\)。 易错点：BC2 的独立性条件不可省略。若 \(A_n = A\)（同一事件）， \(P(A) = 1/2\)，\(\sum P(A_n) = \infty\)，但 \(P(\limsup A_n) = P(A) = 1/2 \neq 1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(A_n\) 独立，\(P(A_n) = 1/n^2\)。\(P(\limsup A_n) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\sum 1/n^2 = \\pi^2/6 < \\infty\\)，由 BC1 得 \\(P(\\limsup A_n) = 0\\)。')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\sum 1/n^2 = \\pi^2/6 < \\infty\\)，由 BC1 得 \\(P(\\limsup A_n) = 0\\)。')">B. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\sum 1/n^2 = \\pi^2/6 < \\infty\\)，由 BC1 得 \\(P(\\limsup A_n) = 0\\)。')">C. 介于 0 和 1 之间</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Kolmogorov 0-1 律与尾 \(\sigma\)-代数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>独立随机变量序列的「尾部事件」——只与 \(X_{n+1}, X_{n+2}, \ldots\) 有关而与前有限个无关的事件——只能有概率 0 或 1。这个 深刻的 0-1 律表明尾部事件是「确定性」的——要么必然发生， 要么必然不发生。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>尾 \(\sigma\)-代数 \(\mathcal{T} = \bigcap_n \sigma(X_n, X_{n+1}, \ldots)\)。 0-1 律将钢下移到了熵的层面：尾部事件无法携带普通信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>尾 \(\sigma\)-代数：\(\mathcal{T}_n = \sigma(X_n, X_{n+1}, \ldots)\)， \(\mathcal{T} = \bigcap_{n=1}^{\infty} \mathcal{T}_n\)。 尾部事件的例子：\(\{\sum_n X_n \text{ 收敛}\}\)， \(\{\limsup_n S_n/n = c\}\)，\(\{\omega: \bar{X}_n \to \mu\}\)。 Kolmogorov 0-1 律：若 \(X_1, X_2, \ldots\) 独立，则对所有 \(A \in \mathcal{T}\)， \[P(A) = 0 \quad \text{or} \quad P(A) = 1\] 证明要点：\(\mathcal{T}\) 与 \(\sigma(X_1, \ldots, X_n)\) 独立（对所有 \(n\)）， 因此 \(\mathcal{T}\) 与 \(\sigma(X_1, X_2, \ldots)\) 独立，但 \(\mathcal{T} \subseteq \sigma(X_1, X_2, \ldots)\)，所以 \(\mathcal{T}\) 与自己独立， 即 \(P(A) = P(A \cap A) = P(A)^2\)，故 \(P(A) \in \{0,1\}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>0-1 律保证了：对 i.i.d. 序列，\(\bar{X}_n \to \mu\) 的概率只能是 0 或 1，这和强大数定律关系密切。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n\) i.i.d.，\(A = \{\omega: \sum_n X_n \text{ 收敛}\}\)。 证明 \(P(A) \in \{0, 1\}\)。 解答：\(A \in \mathcal{T}\)（级数是否收敛不依赖于前有限项）。 由 Kolmogorov 0-1 律，\(P(A) = 0\) 或 \(P(A) = 1\)。 易错点：误以为 0-1 律对任意事件成立。它仅适用于尾事件 （属于 \(\mathcal{T}\)），且需要独立性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个不是尾事件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\{X_1 + X_2 > 5\\}\\) 依赖于 \\(X_1\\) 和 \\(X_2\\)，不属于尾')">A. \(\{\sum_n X_n \text{ 收敛}\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\{X_1 + X_2 > 5\\}\\) 依赖于 \\(X_1\\) 和 \\(X_2\\)，不属于尾')">B. \(\{\limsup_n X_n / n > 0\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\{X_1 + X_2 > 5\\}\\) 依赖于 \\(X_1\\) 和 \\(X_2\\)，不属于尾')">C. \(\{X_1 + X_2 > 5\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\{X_1 + X_2 > 5\\}\\) 依赖于 \\(X_1\\) 和 \\(X_2\\)，不属于尾')">D. \(\{\limsup_n A_n\}\)（BC 引理的上极限）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/probability/probability.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

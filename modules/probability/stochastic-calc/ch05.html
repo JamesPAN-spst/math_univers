@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Girsanov 定理 — 随机微积分 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-calc-ch05-q1",
+        "question": "Girsanov 定理的核心作用？",
+        "options": [
+          "在等价测度 \\(Q\\) 下将带漂移的过程变为鞅（\\(\\tilde{B}_t=B_t+\\int_0^t \\gamma_s ds\\) 在 \\(Q\\) 下为 Brown 运动）",
+        "改变波动率",
+        "消除随机性",
+        "改变时间尺度"
+        ],
+        "answer": 0,
+        "explanation": "\\(P\\) 下 \\(B_t\\) 是标准 Brown 运动。\\(\\frac{dQ}{dP}=\\mathcal{E}_T=\\exp(-\\int_0^T \\gamma_s dB_s-\\frac{1}{2}\\int_0^T \\gamma_s^2 ds)\\)（Radon-Nikodym 导数）。\\(\\tilde{B}_t=B_t+\\int_0^t \\gamma_s ds\\) 在 \\(Q\\) 下是标准 BM。漂移\"被吸收\"到测度变换中。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q2",
+        "question": "风险中性定价中 Girsanov 的角色？",
+        "options": [
+          "从真实测度 \\(P\\)（\\(dS=\\mu Sdt+\\sigma SdB\\)）换到 \\(Q\\)（\\(dS=rSdt+\\sigma Sd\\tilde{B}\\)）：漂移从 \\(\\mu\\) 变为 \\(r\\)",
+        "改变 \\(\\sigma\\)",
+        "消除波动",
+        "改变利率"
+        ],
+        "answer": 0,
+        "explanation": "市场风险价格 \\(\\gamma=(\\mu-r)/\\sigma\\)。\\(\\tilde{B}_t=B_t+\\gamma t\\) 在 \\(Q\\) 下为 BM。\\(dS=rSdt+\\sigma Sd\\tilde{B}\\)（\\(Q\\) 下漂移 \\(=r\\)）。期权价格 \\(=E^Q[e^{-rT}\\text{payoff}]\\)。波动率 \\(\\sigma\\) 不变！只有漂移改变。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q3",
+        "question": "Novikov 条件 \\(E^P[\\exp(\\frac{1}{2}\\int_0^T \\gamma_t^2 dt)]<\\infty\\) 保证什么？",
+        "options": [
+          "指数鞅 \\(\\mathcal{E}_t\\) 是真鞅（\\(E[\\mathcal{E}_T]=1\\)），\\(Q\\) 是概率测度",
+        "是局部鞅",
+        "期望为 \\(0\\)",
+        "无意义"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{E}_t\\) 自动是非负局部鞅（Itô: \\(d\\mathcal{E}=-\\gamma\\mathcal{E} dB\\)）。局部鞅 + 非负 ⟹ 超鞅 ⟹ \\(E[\\mathcal{E}_T] \\leq 1\\)。Novikov 保证等号 \\(E[\\mathcal{E}_T]=1\\) ⟹ \\(Q(A)=E^P[\\mathcal{E}_T \\mathbf{1}_A]\\) 定义合法概率。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q4",
+        "question": "Black-Scholes 公式 \\(C_0=S_0 \\Phi(d_1)-Ke^{-rT}\\Phi(d_2)\\) 中哪个参数通过 Girsanov \"消失\"了？",
+        "options": [
+          "真实漂移 \\(\\mu\\)——BS 公式不依赖 \\(\\mu\\)，因为换到 \\(Q\\) 后漂移变为 \\(r\\)",
+        "\\(\\sigma\\)",
+        "\\(r\\)",
+        "\\(K\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(C=E^Q[e^{-rT}(S_T-K)^+]\\)。\\(S_T\\) 在 \\(Q\\) 下：\\(\\ln S_T \\sim N(\\ln S_0+(r-\\sigma^2/2)T, \\sigma^2 T)\\)。只含 \\(r, \\sigma, S_0, K, T\\)——\\(\\mu\\) 完全消除。对看涨看跌都成立。这是\"风险中性定价\"的本质。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q5",
+        "question": "多资产模型中风险中性测度 \\(Q\\) 不唯一意味着什么？",
+        "options": [
+          "市场不完全——存在不可对冲的风险，需选择特定 \\(Q\\)（如最小熵鞅测度）",
+        "市场无套利也不可能",
+        "只有一个等价鞅测度",
+        "无影响"
+        ],
+        "answer": 0,
+        "explanation": "资产数 \\(<\\) 风险源数 ⟹ \\(\\gamma\\) 不唯一。例：随机波动率 \\(dv=\\ldots dt+\\xi\\sqrt{v}dB^2\\)——\\(B^2\\) 风险不可交易。\\(Q\\) 的选择 \\(\\leftrightarrow\\) 波动率风险溢价的设定。Heston/SABR 定价需指定风险中性参数。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q6",
+        "question": "信用风险 CDS 定价中的\"默认强度\"测度变换？",
+        "options": [
+          "从真实违约概率 \\(\\lambda^P\\) 换到风险中性 \\(\\lambda^Q\\)（\\(\\lambda^Q>\\lambda^P\\)），Girsanov 类技术实现",
+        "不需要测度变换",
+        "\\(\\lambda^Q<\\lambda^P\\) 总成立",
+        "只用历史违约率"
+        ],
+        "answer": 0,
+        "explanation": "CDS spread \\(\\approx \\lambda^Q \\cdot \\text{LGD}\\)。\\(\\lambda^Q\\) 从市场价格倒推（风险中性）。\\(\\lambda^Q>\\lambda^P\\)（市场要求违约风险溢价）。广义 Girsanov: Cox 过程的强度在测度变换下改变。校准用 \\(Q\\)，风险度量用 \\(P\\)。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q7",
+        "question": "外汇量化中\"quanto 调整\"与 Girsanov 有何关系？",
+        "options": [
+          "从外币测度换到本币测度涉及 Girsanov 变换——漂移修正 \\(=\\rho\\sigma_S\\sigma_{FX}\\)（quanto covariance）",
+        "只是汇率乘法",
+        "无测度变换",
+        "只需当前汇率"
+        ],
+        "answer": 0,
+        "explanation": "外国资产 \\(S\\) 在本币 \\(Q^d\\) 下：\\(dS=(\\mu_S-\\rho\\sigma_S\\sigma_X)Sdt+\\sigma_S SdB\\)（quanto drift adjustment）。\\(-\\rho\\sigma_S\\sigma_X\\) 来自 \\(d(S/X)\\) 的 Itô 交叉项 + Girsanov。Quanto 期权忽略此修正会系统性错误定价。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q8",
+        "question": "第一基本定理 (FTAP) 的核心陈述？",
+        "options": [
+          "无套利 \\(\\Leftrightarrow\\) 存在等价鞅测度 \\(Q\\)（折现资产价格在 \\(Q\\) 下为鞅）",
+        "有套利 \\(\\Leftrightarrow\\) 有鞅测度",
+        "完备市场 \\(\\Leftrightarrow\\) 无套利",
+        "\\(Q\\) 总存在"
+        ],
+        "answer": 0,
+        "explanation": "Delbaen-Schachermayer (1994): NFLVR \\(\\Leftrightarrow\\) \\(\\exists Q \\sim P\\) s.t. \\(\\tilde{S}_t=e^{-rt}S_t\\) 是 \\(Q\\)-sigma-鞅。Girsanov 构造 \\(Q\\)。第二基本定理：\\(Q\\) 唯一 \\(\\Leftrightarrow\\) 市场完备。金融数学的\"宪法定理\"。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q9",
+        "question": "\\(T\\)-forward 测度 \\(Q^T\\)（以零息债券 \\(P(t,T)\\) 为 numéraire）下远期利率的性质？",
+        "options": [
+          "远期利率 \\(F(t,T,T+\\delta)\\) 在 \\(Q^{T+\\delta}\\) 下为鞅——这是 LIBOR 市场模型 (BGM) 的基础",
+        "在 \\(Q\\) 下为鞅",
+        "远期利率恒定",
+        "在 \\(P\\) 下为鞅"
+        ],
+        "answer": 0,
+        "explanation": "numéraire 变换 \\(\\frac{dQ^T}{dQ}=\\frac{P(T,T)}{P(0,T)e^{\\int_0^T r_s ds}}\\)（Girsanov 的推广）。\\(E^{Q^T}[L(T,T,T+\\delta)|\\mathcal{F}_t]=L(t,T,T+\\delta)\\)。BGM/LMM 在各自 forward 测度下对每个 caplet 定价——避免了漂移修正的复杂性。"
+      },
+      {
+        "id": "stochastic-calc-ch05-q10",
+        "question": "CVA (Credit Valuation Adjustment) 计算中测度变换的角色？",
+        "options": [
+          "需在违约可能发生的风险中性测度下计算 \\(\\text{CVA}=\\text{LGD}\\int_0^T E^Q[\\max(V_t,0)|\\tau=t]\\lambda^Q(t)e^{-\\int_0^t(r+\\lambda)ds}dt\\)",
+        "只用历史模拟",
+        "不需要测度",
+        "CVA 为零"
+        ],
+        "answer": 0,
+        "explanation": "CVA = 对手违约带来的期望损失。需同时建模：(1) 衍生品价值 \\(V_t\\)；(2) 违约时间 \\(\\tau\\)（强度 \\(\\lambda^Q\\)）。\\(Q\\) 测度下：两者可能相关（wrong-way risk）。Girsanov 保证定价一致性。Basel III 要求银行计算 CVA charge。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic-calc"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic-calc.html" class="module-name">随机微积分</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 测度变换与 Radon-Nikodym 导数</a></li>
+      <li><a href="#kp2">02 · Girsanov 定理</a></li>
+      <li><a href="#kp3">03 · 等价鞅测度 (EMM)</a></li>
+      <li><a href="#kp4">04 · Novikov 条件与应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Girsanov 定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>测度变换与 Radon-Nikodym 导数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>金融数学的核心思想：换一个概率测度，使得折现股价变成鞅。 这个「测度变换」由 Girsanov 定理实现，它将“有漂移”变为 “无漂移”。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>绝对连续的测度变换 \(Q \ll P\) 通过 R-N 导数 \(dQ/dP\) 实现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \(P, Q\) 是 \(\Omega\) 上的概率测度，\(Q \ll P\)。 Radon-Nikodym 定理：存在 \(Z = dQ/dP \geq 0\)，\(E_P[Z] = 1\)，使 \[E_Q[X] = E_P[ZX]\] 在滤子 \(\mathcal{F}_t\) 上，\(Z_t = E_P[Z | \mathcal{F}_t]\) 是鞅。 变换后的期望：\(E_Q[X_t | \mathcal{F}_s] = E_P[Z_t X_t / Z_s | \mathcal{F}_s]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>风险中性定价：转换到等价鞅测度 \(Q\) 下的期望值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(P\) 下 \(X \sim N(0,1)\)。\(Z = e^{\theta X - \theta^2/2}\)。 求 \(X\) 在 \(Q\) 下的分布。 解答：\(E_Q[e^{iuX}] = E_P[Ze^{iuX}] = e^{iu\theta - u^2/2}\)。 故 \(X \sim N(\theta, 1)\) under \(Q\)。测度变换改了均值！ 易错点：\(Z\) 必须满足 \(E_P[Z]=1\)，否则 \(Q\) 不是概率测度。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">R-N 导数 \(Z = dQ/dP\) 必须满足</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(Z \\geq 0\\) 保证 \\(Q\\) 非负，\\(E_P[Z]=1\\) 保证 \\(Q(\\Omega)=1\\)。')">A. \(E_P[Z] = 1\) 且 \(Z \geq 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(Z \\geq 0\\) 保证 \\(Q\\) 非负，\\(E_P[Z]=1\\) 保证 \\(Q(\\Omega)=1\\)。')">B. \(E_Q[Z] = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(Z \\geq 0\\) 保证 \\(Q\\) 非负，\\(E_P[Z]=1\\) 保证 \\(Q(\\Omega)=1\\)。')">C. \(Z > 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Girsanov 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何改变 BM 的漂移？Girsanov 定理明确给出：用指数鞅作为 R-N 导数，可以把 \(P\) 下的有漂移过程变为 \(Q\) 下的 BM。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Girsanov = “消除漂移的工具”。从物理测度转向风险中性测度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Girsanov 定理：设 \(\theta_t\) 适应，满足 Novikov 条件。定义 \[Z_T = \mathcal{E}_T(\theta) = \exp\!\left(-\int_0^T \theta_t dB_t - \frac{1}{2}\int_0^T \theta_t^2 dt\right)\] 令 \(dQ = Z_T dP\)。则 \[\tilde{B}_t := B_t + \int_0^t \theta_s \, ds\] 在 \(Q\) 下是 Brown 运动。 即：\(P\) 下的 \(B_t + \int \theta ds\) → \(Q\) 下的 BM。 等价地：\(P\) 下 \(B_t\) 有漂移 \(-\theta\)，\(Q\) 下 \(\tilde{B}\) 无漂移。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Black-Scholes 定价的核心步骤：转换到风险中性测度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(P\) 下 \(X_t = \mu t + \sigma B_t\)。找 \(Q\) 使 \(X_t\) 在 \(Q\) 下是 BM。 解答：\(X_t = \sigma(\frac{\mu}{\sigma} t + B_t) = \sigma(B_t + \frac{\mu}{\sigma}t)\)。 取 \(\theta_t = \mu/\sigma\)。\(\tilde{B}_t = B_t + \frac{\mu}{\sigma}t\)。 则 \(X_t = \sigma \tilde{B}_t\)，\(\tilde{B}\) 在 \(Q\) 下是 BM。 易错点：\(\theta\) 的符号取决于约定。严格按定理陈述写。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Girsanov 定理中，\(Z_T = dQ/dP\) 的形式是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(Z_T = \\mathcal{E}_T(\\theta)\\)，即指数鞅。这保证了')">A. 指数鞅</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Z_T = \\mathcal{E}_T(\\theta)\\)，即指数鞅。这保证了')">B. Brown 运动</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Z_T = \\mathcal{E}_T(\\theta)\\)，即指数鞅。这保证了')">C. Poisson 过程</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>等价鞅测度 (EMM)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在无套利市场中，存在一个测度 \(Q\) 使得折现资产价格都是鞅。 这个 \(Q\) 就是等价鞅测度 (EMM)。期权定价 = \(Q\) 下的折现期望。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>无套利 \(\Leftrightarrow\) EMM 存在（基本定理的第一部分）。 完备市场 \(\Leftrightarrow\) EMM 唯一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>股票模型：\(dS_t = \mu S_t dt + \sigma S_t dB_t\)。无风险利率 \(r\)。 折现股价：\(\tilde{S}_t = e^{-rt} S_t\)。 EMM 要求 \(\tilde{S}\) 是 \(Q\)-鞅。用 Girsanov 取 \[\theta = \frac{\mu - r}{\sigma} \quad (\text{市场风险价格})\] 则 \(\tilde{B}_t = B_t + \theta t\) 在 \(Q\) 下是 BM，且 \[d\tilde{S}_t = \sigma \tilde{S}_t \, d\tilde{B}_t\] 折现股价是 \(Q\)-鞅 ✓</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>所有衍生品定价的基础：价格 = \(E_Q[e^{-rT} \text{payoff}]\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mu=0.1, r=0.05, \sigma=0.2\)。求市场风险价格。 解答：\(\theta = (0.1-0.05)/0.2 = 0.25\)。 在 \(Q\) 下，\(S_t = S_0 \exp((r-\sigma^2/2)t + \sigma\tilde{B}_t)\)。 易错点：在 \(Q\) 下，\(S\) 的漂移变为 \(r\)（不是 \(\mu\)）。 “任何资产在 \(Q\) 下漂移都是 \(r\)”。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在等价鞅测度 \(Q\) 下，股票的期望收益率是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。转到 \\(Q\\) 后，漂移从 \\(\\mu\\) 变为 \\(r\\)。这是“风险中性”的')">A. \(\mu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！转到 \\(Q\\) 后，漂移从 \\(\\mu\\) 变为 \\(r\\)。这是“风险中性”的')">B. \(r\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。转到 \\(Q\\) 后，漂移从 \\(\\mu\\) 变为 \\(r\\)。这是“风险中性”的')">C. \(\sigma\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Novikov 条件与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Girsanov 定理需要 \(Z_T\) 是真鞅（而不仅是局部鞅）。Novikov 条件 是最常用的充分条件，保证了测度变换的合法性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Novikov 条件： \[E_P\!\left[\exp\!\left(\frac{1}{2}\int_0^T \theta_t^2 \, dt\right)\right] < \infty\] \(\Rightarrow \mathcal{E}_T(\theta)\) 是真鞅，\(E_P[\mathcal{E}_T] = 1\)。 简化：若 \(\theta_t\) 有界，\(|\theta_t| \leq M\)，则 \(E[\exp(M^2 T/2)] < \infty\) 自动满足。 警告：若 Novikov 不满足，\(\mathcal{E}(\theta)\) 可能是严格局部鞅， \(E_P[\mathcal{E}_T] < 1\)，测度变换失败。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融模型中验证 EMM 存在性时检查 Novikov。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\theta_t = \mu/\sigma\)（常数）。验证 Novikov。 解答：\(E[e^{\mu^2 T/(2\sigma^2)}] = e^{\mu^2 T/(2\sigma^2)} < \infty\) ✓ 因为积分内是确定性常数。 易错点：当 \(\theta_t\) 随机且可能很大时，Novikov 可能不满足。 如 \(\theta_t = B_t^2\) 就会报废。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Novikov 条件失败意味着</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。没有 Novikov，\\(\\mathcal{E}\\) 可能是严格局部鞅，')">A. Girsanov 定理仍可用</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！没有 Novikov，\\(\\mathcal{E}\\) 可能是严格局部鞅，')">B. \(\mathcal{E}(\theta)\) 可能不是真鞅</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。没有 Novikov，\\(\\mathcal{E}\\) 可能是严格局部鞅，')">C. Brown 运动不存在</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/probability/stochastic-calc.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 测地线与完备性 — 黎曼几何 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "riemannian-ch04-q1",
+        "question": "测地线方程 \\(\\nabla_{\\dot\\gamma}\\dot\\gamma = 0\\) 的物理直觉？",
+        "options": [
+          "\"加速度为零\"——自由落体/惯性运动",
+        "最短路径",
+        "A（广义相对论：自由下落粒子沿时空测地线运动）",
+        "匀速直线"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\nabla_{\\dot\\gamma}\\dot\\gamma = 0\\) = 协变加速度为零。弯曲空间中\"直线\"= 测地线。等价于：局部最短路径（在负曲率时可能不全局最短）、能量泛函临界点、惯性运动。\\(\\mathbb{R}^n\\)：直线。\\(S^2\\)：大圆。\\(\\mathbb{H}^2\\)（上半平面）：半圆和垂直线。"
+      },
+      {
+        "id": "riemannian-ch04-q2",
+        "question": "Hopf-Rinow 定理的核心结论？",
+        "options": [
+          "测地完备 \\(\\iff\\) 度量完备 \\(\\iff\\) 闭有界集紧致",
+        "且完备流形上任意两点有最短测地线连接",
+        "A 和 B",
+        "只说完备性"
+        ],
+        "answer": 2,
+        "explanation": "Hopf-Rinow (1931)：以下等价 (i) \\((M, d)\\) 完备度量空间 (ii) \\(\\exp_p\\) 对某/所有 \\(p\\) 在 \\(T_pM\\) 全体上有定义 (iii) 闭有界集紧致。推论：完备黎曼流形上任意 \\(p, q\\) 可被最短测地线（不只是任意测地线）连接——\\(d(p,q) = L(\\gamma)\\) 实际达到。紧致流形总完备。"
+      },
+      {
+        "id": "riemannian-ch04-q3",
+        "question": "\\(\\exp_p(tv)\\) 在什么条件下停止是全局最短？",
+        "options": [
+          "过了割点 (cut point)",
+        "永远最短",
+        "A（割点 = \\(\\exp_p(t_0 v)\\) 是沿 \\(\\gamma_v\\) 的最后一个最短点）",
+        "过任何点"
+        ],
+        "answer": 2,
+        "explanation": "Cut locus \\(\\text{Cut}(p) = \\{\\)所有方向的割点\\(\\}\\)。\\(t < t_{\\text{cut}}(v)\\)：\\(\\gamma_v|_{[0,t]}\\) 是唯一最短测地线。\\(t > t_{\\text{cut}}\\)：不再最短。割点原因：(1) 共轭点（Jacobi 场为零）(2) 两条等长测地线交会。\\(S^n\\)（北极 \\(p\\)）：\\(\\text{Cut}(p) = \\{\\)南极\\(\\}\\)。\\(T^2\\)：cut locus 是菱形。"
+      },
+      {
+        "id": "riemannian-ch04-q4",
+        "question": "\\(S^2(1)\\) 上从北极 \\(N\\) 到南极 \\(S\\) 的测地线有多少条？",
+        "options": [
+          "无穷多（所有经线）",
+        "1 条",
+        "2 条",
+        "A（\\(d(N,S) = \\pi\\), 每条经线都是长度 \\(\\pi\\) 的最短测地线）"
+        ],
+        "answer": 3,
+        "explanation": "所有经线 \\(\\phi = \\text{const}\\) 都是从 \\(N\\) 到 \\(S\\) 的大圆弧，长度 \\(= \\pi\\)。无穷多最短测地线！南极 = 北极的割点和共轭点。\\(\\exp_N(v)\\) 对所有 \\(\\|v\\| = \\pi\\) 映到同一点 \\(S\\)—— \\(\\exp_N\\) 在 \\(S\\) 处不是微分同胚。"
+      },
+      {
+        "id": "riemannian-ch04-q5",
+        "question": "哪些黎曼流形是完备的？",
+        "options": [
+          "紧致流形总完备",
+        "\\(\\mathbb{R}^n\\)（标准度量）完备",
+        "开球 \\(B(0,1) \\subseteq \\mathbb{R}^n\\)（标准度量限制）不完备",
+        "全部正确"
+        ],
+        "answer": 3,
+        "explanation": "(A) 紧致 \\(\\Rightarrow\\) 有界闭 = 紧 \\(\\Rightarrow\\) 完备（Heine-Borel）。(B) \\(\\mathbb{R}^n\\) 度量完备（Cauchy 列收敛）。(C) \\(B(0,1)\\) 开：\\(x_n = (1-1/n, 0, \\ldots)\\) 是 Cauchy 列但极限 \\((1,0,\\ldots) \\notin B\\)。(D) \\(\\mathbb{H}^n\\) 也完备（非紧致但完备）。不完备例子：\\(\\mathbb{R}^n \\setminus \\{0\\}\\)。"
+      },
+      {
+        "id": "riemannian-ch04-q6",
+        "question": "共轭点 (conjugate point) 的定义和检测？",
+        "options": [
+          "\\(\\gamma(t_0)\\) 是 \\(\\gamma(0)\\) 的共轭点 \\(\\iff\\) 存在非零 Jacobi 场 \\(J\\) 沿 \\(\\gamma\\), \\(J(0) = J(t_0) = 0\\)",
+        "\\(\\iff d(\\exp_p)_{t_0v}\\) 奇异",
+        "A 和 B 等价",
+        "共轭点 = 割点"
+        ],
+        "answer": 2,
+        "explanation": "Jacobi 场 \\(J\\) 满足 \\(J'' + R(\\dot\\gamma, J)\\dot\\gamma = 0\\), \\(J(0) = 0, J'(0) \\neq 0\\)。\\(J(t_0) = 0 \\Leftrightarrow t_0v\\) 是 \\(\\exp_p\\) 的临界点 \\(\\Leftrightarrow d(\\exp_p)\\) 奇异。共轭点意味着\"相邻测地线重新聚焦\"。共轭点 \\(\\Rightarrow\\) 割点（割点可以在共轭点之前）。\\(S^n\\)：对径点是共轭点。"
+      },
+      {
+        "id": "riemannian-ch04-q7",
+        "question": "\\(S^n(r)\\) 上距离北极 \\(p\\) 的共轭点在哪里？",
+        "options": [
+          "南极 \\(q\\)（距离 \\(\\pi r\\)）",
+        "赤道（距离 \\(\\pi r/2\\)）",
+        "A（第一共轭点 = 南极, 是唯一共轭点）",
+        "不存在"
+        ],
+        "answer": 2,
+        "explanation": "\\(S^n(r)\\), 曲率 \\(K = 1/r^2\\), 沿测地线（大圆）Jacobi 方程 \\(J'' + K J = 0\\), \\(J(t) = \\sin(t/r)/r \\cdot E(t)\\)。\\(J(t_0) = 0 \\Rightarrow \\sin(t_0/r) = 0 \\Rightarrow t_0 = k\\pi r\\)。第一共轭点 \\(t_0 = \\pi r\\)（南极）。割点 = 共轭点 = 南极。对 \\(\\mathbb{H}^n\\)：无共轭点（\\(K < 0\\), 测地线永不聚焦）。"
+      },
+      {
+        "id": "riemannian-ch04-q8",
+        "question": "Hopf-Rinow 定理\"完备 \\(\\Rightarrow\\) 任意两点有最短测地线\"的证明关键？",
+        "options": [
+          "取距离趋近函数序列 \\(\\gamma_n\\)（\\(L(\\gamma_n) \\to d(p,q)\\)），用 Arzelà-Ascoli 定理取极限",
+        "直接构造",
+        "A 和变分方法结合",
+        "只用指数映射"
+        ],
+        "answer": 2,
+        "explanation": "证明框架：(1) 取 \\(L(\\gamma_n) \\downarrow d(p,q)\\) 的曲线序列。(2) 重参数化为弧长参数 + 等速。(3) 完备性 \\(\\Rightarrow\\) 闭有界集紧致 \\(\\Rightarrow\\) Arzelà-Ascoli 提取收敛子列。(4) 极限曲线 \\(\\gamma_\\infty\\) 长度 \\(= d(p,q)\\), 是测地线（能量最小化 \\(\\Rightarrow\\) E-L 方程）。Lipschitz 条件由弧长参数保证。"
+      },
+      {
+        "id": "riemannian-ch04-q9",
+        "question": "在 \\(\\mathbb{H}^2\\)（上半平面, \\(ds^2 = (dx^2+dy^2)/y^2\\)）中，连接 \\((0,1)\\) 和 \\((1,1)\\) 的测地线是什么形状？",
+        "options": [
+          "以 \\((1/2, 0)\\) 为圆心、\\(\\sqrt{5}/2\\) 为半径的半圆弧（与 \\(x\\)-轴正交）",
+        "水平直线段",
+        "A 不对——是以 \\((1/2, 0)\\) 为圆心的圆弧但需要精确计算",
+        "垂直线"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathbb{H}^2\\) 测地线：\\(x\\)-轴上的垂直半线和以 \\(x\\)-轴上点为圆心的半圆。连接 \\((0,1)\\) 和 \\((1,1)\\)：圆心在 \\(x\\)-轴上 \\((c,0)\\)，\\(c\\) 和半径 \\(R\\) 满足 \\((0-c)^2 + 1 = R^2\\) 和 \\((1-c)^2 + 1 = R^2\\)。\\(c^2 = (1-c)^2 \\Rightarrow c = 1/2\\)。\\(R = \\sqrt{1/4 + 1} = \\sqrt{5}/2\\)。测地距离 \\(d = \\text{arcosh}(1 + \\frac{1}{2}) = \\text{arcosh}(3/2)\\)... 需精确计算。"
+      },
+      {
+        "id": "riemannian-ch04-q10",
+        "question": "在网络科学中，Ollivier-Ricci 曲率用来做什么？",
+        "options": [
+          "将黎曼曲率推广到图（离散空间），检测社区结构",
+        "计算最短路径",
+        "A（正曲率边 = 社区内部, 负曲率边 = 社区之间的桥梁）",
+        "随机漫步"
+        ],
+        "answer": 2,
+        "explanation": "Ollivier-Ricci 曲率：边 \\((x,y)\\) 的曲率 \\(\\kappa(x,y) = 1 - W_1(\\mu_x, \\mu_y)/d(x,y)\\)（\\(W_1\\) = Wasserstein 距离, \\(\\mu_x\\) = \\(x\\) 邻居的均匀分布）。\\(\\kappa > 0\\)：邻居\"重叠\"多（社区内）。\\(\\kappa < 0\\)：邻居\"分散\"（桥）。基于 Ricci 曲率的社区检测算法：迭代移除最负曲率边。黎曼几何概念在离散/数据科学中的应用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="riemannian"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/riemannian.html" class="module-name">黎曼几何</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Jacobi 场与共轭点</a></li>
+      <li><a href="#kp2">02 · 割点与单射半径</a></li>
+      <li><a href="#kp3">03 · Cartan-Hadamard 定理</a></li>
+      <li><a href="#kp4">04 · Bonnet-Myers 定理与直径估计</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>测地线与完备性</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Jacobi 场与共轭点</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>测地线之间如何"分散"或"聚焦"？Jacobi 场描述了"无穷近"测地线 的行为——它是测地线变分的线性化。共轭点是 Jacobi 场首次变为零 的位置，标志着测地线失去局部最短性的临界点。正曲率使测地线聚焦 （球面上经线在对径点重合），负曲率使它们发散。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Jacobi 方程 = 测地偏差方程。曲率通过 Jacobi 方程控制 测地线族的行为——这是"曲率影响几何"的最直接体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Jacobi 方程</strong>：\(\gamma\) 是测地线，\(J\) 是沿 \(\gamma\) 的向量场。 \(J\) 是 Jacobi 场 \(\iff\) \[\frac{D^2 J}{dt^2} + R(\gamma', J)\gamma' = 0\] 这是二阶线性 ODE，给定 \(J(0), J'(0)\) 后解唯一。 Jacobi 场空间维数 \(= 2n\)。 <strong>共轭点</strong>：\(\gamma(t_0)\) 是 \(\gamma(0)\) 的共轭点 \(\iff\) \(\exists\) 非零 Jacobi 场 \(J\)，\(J(0) = 0\)，\(J(t_0) = 0\)。 <strong>几何意义</strong>：共轭点 \(\Leftrightarrow\) \(\exp_p\) 在 \(t_0 v\) 处奇异 （微分不满秩）。从该点起测地线不再是最短的。 <strong>常曲率空间</strong>：\(K > 0\)（球面）：\(J(t) = \sin(\sqrt{K}t) E(t)\) （\(E\) 平行，\(J\) 在 \(t = \pi/\sqrt{K}\) 首次为零——对径点是共轭点）。 \(K = 0\)（\(\mathbb{R}^n\)）：\(J(t) = tE(t)\)，无共轭点。 \(K < 0\)（\(\mathbb{H}^n\)）：\(J(t) = \sinh(\sqrt{|K|}t) E(t)\)，无共轭点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 引力透镜效应：质量弯曲时空（正 Ricci 曲率），使光线聚焦</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^2(1)\) 上从北极出发的测地线（经线）的共轭点。 解答：\(K = 1\)。正交 Jacobi 场 \(J(t) = \sin(t) E(t)\)。 \(J(0) = 0\)，\(J(\pi) = 0\)。共轭点在 \(t = \pi\)（南极）。 所有经线在南极交汇——这就是共轭点的几何含义。 长度 \(> \pi\) 的测地段不再最短。 易错点：共轭点不一定是"对径点"——它取决于曲率在测地线沿途的积分效果。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">负曲率空间中是否存在共轭点？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K \\leq 0\\) 时 Jacobi 场 \\(|J(t)|\\) 单调递增（\\(J(0) = 0\\) 时），')">A. 存在，在每条测地线上</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(K \\leq 0\\) 时 Jacobi 场 \\(|J(t)|\\) 单调递增（\\(J(0) = 0\\) 时），')">B. 不存在</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K \\leq 0\\) 时 Jacobi 场 \\(|J(t)|\\) 单调递增（\\(J(0) = 0\\) 时），')">C. 取决于拓扑</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K \\leq 0\\) 时 Jacobi 场 \\(|J(t)|\\) 单调递增（\\(J(0) = 0\\) 时），')">D. 只在闭测地线上存在</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>割点与单射半径</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>共轭点是测地线失去最短性的一种原因（\(\exp_p\) 奇异），但另一种是 "两条不同的最短测地线相遇"——割点。割迹是从 \(p\) 出发各方向 割点的集合，它是 \(M \setminus \{p\}\) 中"最远能确保测地线唯一最短" 的边界。单射半径 \(\mathrm{inj}(p)\) 是到割迹的距离。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\exp_p\) 只在单射半径内是微分同胚。割迹 = \(\exp_p\) 停止单射的位置。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>割点 (cut point)</strong>：沿测地线 \(\gamma(t) = \exp_p(tv)\) 前进， \(\gamma(t_c)\) 是割点 \(\iff\) \(t_c = \sup\{t : \gamma|_{[0,t]} \text{ 是到 } \gamma(t) \text{ 的唯一最短测地线}\}\)。 割点的出现原因（二者之一）： (1) \(\gamma(t_c)\) 是共轭点 (2) 存在另一条长度相同的最短测地线从 \(p\) 到 \(\gamma(t_c)\) <strong>割迹 (cut locus)</strong>：\(\mathrm{Cut}(p) = \{\text{所有方向的割点}\} \subseteq M\)。 <strong>单射半径</strong>：\(\mathrm{inj}(p) = d(p, \mathrm{Cut}(p)) = \inf_v t_c(v)\)。 \(\mathrm{inj}(M) = \inf_p \mathrm{inj}(p)\)。 \(\exp_p\) 是 \(B(0, \mathrm{inj}(p)) \subseteq T_pM\) 到 \(B(p, \mathrm{inj}(p)) \subseteq M\) 的微分同胚。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S^n(1)\) 上北极 \(N\) 的割点和单射半径。 解答：从 \(N\) 出发的测地线（大圆弧）全部在南极 \(S\) 相遇（\(t = \pi\)）。 \(S\) 既是共轭点也是（所有方向的）割点。 \(\mathrm{Cut}(N) = \{S\}\)（单点），\(\mathrm{inj}(N) = \pi\)。 易错点：平坦环面 \(T^2 = \mathbb{R}^2/\mathbb{Z}^2\)，原点的割迹不是单点 而是一个正方形边缘——有无穷多个割点。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathrm{inj}(\mathbb{R}^n) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{R}^n\\) 中 \\(\\exp_p\\) 是全局微分同胚（\\(= \\mathrm{id}\\)），')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{R}^n\\) 中 \\(\\exp_p\\) 是全局微分同胚（\\(= \\mathrm{id}\\)），')">B. \(\pi\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\mathbb{R}^n\\) 中 \\(\\exp_p\\) 是全局微分同胚（\\(= \\mathrm{id}\\)），')">C. \(\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\mathbb{R}^n\\) 中 \\(\\exp_p\\) 是全局微分同胚（\\(= \\mathrm{id}\\)），')">D. \(0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Cartan-Hadamard 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>非正截面曲率 (\(K \leq 0\)) 对流形的拓扑有极强限制。Cartan-Hadamard 定理说：完备单连通 \(K \leq 0\) 的流形微分同胚于 \(\mathbb{R}^n\)—— 特别地是可缩的！这意味着非正曲率流形的拓扑复杂性完全来自基本群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(K \leq 0 + \) 完备 + 单连通 \(\Rightarrow\) 全局微分同胚于 \(\mathbb{R}^n\)。 指数映射 \(\exp_p\) 在 \(K \leq 0\) 时无共轭点，成为覆叠映射， 单连通则是微分同胚。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cartan-Hadamard 定理</strong>：\((M, g)\) 完备，\(K \leq 0\)。 则 \(\forall p \in M\)，\(\exp_p: T_pM \to M\) 是覆叠映射。 若 \(M\) 还单连通，则 \(\exp_p\) 是微分同胚：\(M \cong \mathbb{R}^n\)。 <strong>证明要点</strong>： (1) \(K \leq 0\) \(\Rightarrow\) 无共轭点（Jacobi 场不为零） (2) 无共轭点 \(\Rightarrow\) \(\exp_p\) 是局部微分同胚 (3) 完备 \(\Rightarrow\) \(\exp_p\) 定义在整个 \(T_pM\) 上 (4) 局部同胚 + 完备 + 覆叠空间理论 \(\Rightarrow\) 覆叠映射 (5) 单连通 \(\Rightarrow\) 覆叠映射是微分同胚 <strong>推论</strong>： - \(\mathbb{H}^n\) 微分同胚于 \(\mathbb{R}^n\)（但度量不同） - \(K \leq 0\) 流形的 \(\pi_k = 0\)（\(k \geq 2\)），所有拓扑信息在 \(\pi_1\) 中</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 几何群论中非正曲率群（CAT(0) 群）的性质来源</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：双曲平面 \(\mathbb{H}^2\)（\(K = -1\)）。验证 Cartan-Hadamard。 解答：\(\mathbb{H}^2\) 完备（Hopf-Rinow），\(K = -1 \leq 0\)，单连通。 Cartan-Hadamard：\(\exp_p: \mathbb{R}^2 \to \mathbb{H}^2\) 微分同胚。 这就是双曲平面的"圆盘模型"——以 \(p\) 为中心用极坐标参数化整个 \(\mathbb{H}^2\)。 易错点：环面 \(T^2\) 有 \(K = 0\) 且完备，但不单连通。 \(\exp_p\) 是覆叠（不是微分同胚）。\(T^2 \not\cong \mathbb{R}^2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">完备单连通 \(K \leq 0\) 流形的 \(\pi_1\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。题目已给出"单连通"，所以 \\(\\pi_1 = \\{e\\}\\)（定义）。')">A. \(\mathbb{Z}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。题目已给出"单连通"，所以 \\(\\pi_1 = \\{e\\}\\)（定义）。')">B. \(\mathbb{Z}^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！题目已给出"单连通"，所以 \\(\\pi_1 = \\{e\\}\\)（定义）。')">C. 平凡群 \(\{e\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。题目已给出"单连通"，所以 \\(\\pi_1 = \\{e\\}\\)（定义）。')">D. 取决于维数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Bonnet-Myers 定理与直径估计</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>正 Ricci 曲率对流形拓扑有强烈约束——Bonnet-Myers 定理说： 如果 \(\mathrm{Ric} \geq (n-1)K > 0\)，则流形直径 \(\leq \pi/\sqrt{K}\)， 因此流形紧致且基本群有限。这与 Cartan-Hadamard 形成鲜明对比 （负曲率 \(\to\) 非紧致，正曲率 \(\to\) 紧致）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Ricci \(> 0\) 迫使测地线聚焦（第二变分分析），限制了直径和拓扑。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Bonnet-Myers 定理</strong>：\((M^n, g)\) 完备，\(\mathrm{Ric} \geq (n-1)K > 0\)。 则： (1) \(\mathrm{diam}(M) \leq \pi/\sqrt{K}\) (2) \(M\) 紧致 (3) \(|\pi_1(M)| < \infty\)（基本群有限） <strong>证明思路</strong>（直径估计）： 取最短测地线 \(\gamma\) 从 \(p\) 到 \(q\)，长度 \(L = d(p,q)\)。 对能量泛函做第二变分：选平行正交场 \(E_i\)，令 \(V_i(t) = \sin(\pi t/L) E_i\)。 \[E''(0) = -\int_0^L \left[\frac{\pi^2}{L^2} - K(E_i, \gamma')\right] \sin^2\frac{\pi t}{L}\, dt\] 对 \(n-1\) 个 \(V_i\) 求和： \(\sum E_i'' \leq 0\) 要求 \((n-1)\pi^2/L^2 \geq (n-1)K\)，即 \(L \leq \pi/\sqrt{K}\)。 若 \(L > \pi/\sqrt{K}\)，\(\gamma\) 不是最短——矛盾。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- \(S^n(1)\) 的 \(\mathrm{Ric} = (n-1)\)，直径 \(= \pi = \pi/\sqrt{1}\)（等号成立）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\((M^3, g)\)，\(\mathrm{Ric} \geq 2\)（即 \(K = 1\)）。估计直径和 \(|\pi_1|\)。 解答：Bonnet-Myers：\(\mathrm{diam}(M) \leq \pi\)。 \(M\) 紧致。\(\pi_1(M)\) 有限。 万有覆叠 \(\tilde{M}\) 也紧致，直径 \(\leq \pi\)。 已知 \(S^3\) 的 \(\mathrm{Ric} = 2\)，\(\mathrm{diam} = \pi\)（等号）。 易错点：Bonnet-Myers 给出的是上界。\(\mathrm{diam}\) 可以 \(< \pi/\sqrt{K}\)。 等号条件很特殊（仅常曲率 \(K\) 球面达到）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Bonnet-Myers 定理要求什么曲率条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Bonnet-Myers 需要 Ricci 曲率下界 \\(> 0\\)。截面曲率条件（A）')">A. \(K > 0\)（截面曲率）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Bonnet-Myers 需要 Ricci 曲率下界 \\(> 0\\)。截面曲率条件（A）')">B. \(\mathrm{Ric} \geq (n-1)K > 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Bonnet-Myers 需要 Ricci 曲率下界 \\(> 0\\)。截面曲率条件（A）')">C. \(S > 0\)（标量曲率）</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Bonnet-Myers 需要 Ricci 曲率下界 \\(> 0\\)。截面曲率条件（A）')">D. \(R = 0\)（平坦）</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/geometry/riemannian.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

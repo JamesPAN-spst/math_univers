@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 概率图模型 — 机器学习数学 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "ml-math-ch05-q1",
+        "question": "贝叶斯网络(Bayesian Network)的核心假设是什么？联合分布如何分解？",
+        "options": [
+          "有向无环图(DAG)中，每个节点在给定其父节点时条件独立于非后代节点——\\(p(x_1,...,x_n)=\\prod_i p(x_i|\\text{Pa}(x_i))\\)",
+        "所有变量独立",
+        "所有变量完全依赖",
+        "分解需要无向图"
+        ],
+        "answer": 0,
+        "explanation": "DAG 编码条件独立关系。每个节点 \\(x_i\\) 只依赖其父节点 \\(\\text{Pa}(x_i)\\): \\(p(x)=\\prod_{i=1}^n p(x_i|\\text{Pa}(x_i))\\)——链式法则+条件独立简化。d-分离(d-separation)判断任意两组变量的条件独立性。例：Naive Bayes 就是最简单的贝叶斯网络（类标签是所有特征的唯一父节点）。参数学习: MLE 或 MAP；结构学习: 评分搜索或约束方法。"
+      },
+      {
+        "id": "ml-math-ch05-q2",
+        "question": "马尔可夫随机场(MRF/无向图模型)与贝叶斯网络的关键区别？",
+        "options": [
+          "MRF 用无向图+势函数(potential function)表示: \\(p(x)=\\frac{1}{Z}\\prod_{c\\in\\text{cliques}}\\psi_c(x_c)\\); 无需指定因果方向但需归一化常数 \\(Z\\)",
+        "MRF 不能表示条件独立",
+        "MRF 一定比贝叶斯网络强",
+        "两者完全等价"
+        ],
+        "answer": 0,
+        "explanation": "MRF: \\(p(x)\\propto\\prod_c\\psi_c(x_c)\\), \\(Z=\\sum_x\\prod_c\\psi_c(x_c)\\)（配分函数，通常难以计算）。Hammersley-Clifford 定理：MRF ↔ 正概率的 Gibbs 分布。对比：BN 有因果语义、易采样、不需\\(Z\\)；MRF 适合对称关系（图像邻域、物理自旋）、但需要处理\\(Z\\)。Ising 模型: \\(\\psi_{ij}(x_i,x_j)=\\exp(J_{ij}x_ix_j)\\)——统计物理经典模型。"
+      },
+      {
+        "id": "ml-math-ch05-q3",
+        "question": "变量消元(Variable Elimination)算法在概率图模型推断中的核心思想？",
+        "options": [
+          "按特定消元顺序逐个对隐变量求和，利用分配律 \\(\\sum_x f(x)g(x)h(y)=h(y)\\sum_x f(x)g(x)\\) 避免枚举全部状态",
+        "同时对所有变量求和",
+        "不需要消元顺序",
+        "只能用于连续变量"
+        ],
+        "answer": 0,
+        "explanation": "直接枚举：\\(O(k^n)\\)（指数）。变量消元利用分配律推迟/提前求和。例：\\(p(x_3)=\\sum_{x_1}\\sum_{x_2}p(x_1)p(x_2|x_1)p(x_3|x_2)=\\sum_{x_2}p(x_3|x_2)\\underbrace{[\\sum_{x_1}p(x_1)p(x_2|x_1)]}_{\\text{先消}x_1}\\)。复杂度取决于消元顺序决定的中间因子大小——树宽(treewidth) \\(w\\) → \\(O(nk^{w+1})\\)。树结构图: \\(w=1\\), 精确推断线性时间。"
+      },
+      {
+        "id": "ml-math-ch05-q4",
+        "question": "信念传播(Belief Propagation/Sum-Product)在树图上可以精确推断。它在有环图上的表现？",
+        "options": [
+          "有环图上称为\"Loopy BP\"——不保证收敛或精确，但实践中常给出好的近似，是 LDPC 译码和 SAT 求解的核心",
+        "有环图上仍精确",
+        "有环图上不能使用",
+        "只能用于连续变量"
+        ],
+        "answer": 0,
+        "explanation": "BP 在树上等价于变量消元，\\(O(nk^2)\\) 精确。在有环图上：消息 \\(\\mu_{i\\to j}(x_j)\\propto\\sum_{x_i}\\psi(x_i,x_j)\\prod_{k\\neq j}\\mu_{k\\to i}(x_i)\\) 迭代——可能振荡不收敛。但：\"BP 的近似精度远好于理论保证\"(Yedidia)。应用：Turbo/LDPC 码（通信）、MRF 图像去噪。改进: Tree-Reweighted BP, Generalized BP, Expectation Propagation。"
+      },
+      {
+        "id": "ml-math-ch05-q5",
+        "question": "变分推断(Variational Inference)将推断转化为优化: \\(\\min_{q\\in\\mathcal{Q}}D_{KL}(q\\|p(z|x))\\)。平均场近似(Mean Field)的假设？",
+        "options": [
+          "\\(q(z)=\\prod_i q_i(z_i)\\)——完全因子化假设，每个潜变量独立优化; 交替更新: \\(\\log q_j^*(z_j)=\\mathbb{E}_{q_{-j}}[\\log p(x,z)]+C\\)",
+        "\\(q\\) 是精确后验",
+        "不需要任何假设",
+        "只适用于高斯分布"
+        ],
+        "answer": 0,
+        "explanation": "精确后验 \\(p(z|x)\\) 通常不可处理。Mean Field: \\(q(z)=\\prod_i q_i(z_i)\\)——牺牲相关性换取可计算性。CAVI (Coordinate Ascent VI): 固定其他分量，更新 \\(q_j\\)——\\(\\log q_j^*=\\mathbb{E}_{-j}[\\log p]+C\\)。对指数族共轭模型有闭式解。局限: 低估方差（KL(q||p) mode-seeking）。改进: 结构化VI (保留部分依赖), 正规化流(Normalizing Flows), 摊销VI (VAE: 用网络 \\(q_\\phi(z|x)\\))。"
+      },
+      {
+        "id": "ml-math-ch05-q6",
+        "question": "MCMC 方法(马尔可夫链蒙特卡洛)与变分推断的比较？Gibbs 采样的更新规则？",
+        "options": [
+          "MCMC 渐近精确但慢; VI 快但有近似偏差; Gibbs: \\(z_i\\sim p(z_i|z_{-i},x)\\) 逐变量从条件分布采样",
+        "MCMC 总是比 VI 好",
+        "VI 总是比 MCMC 精确",
+        "Gibbs 采样不属于 MCMC"
+        ],
+        "answer": 0,
+        "explanation": "MCMC: 构造平稳分布为\\(p(z|x)\\)的马尔可夫链，样本渐近服从目标分布。Gibbs: \\(z_i^{(t+1)}\\sim p(z_i|z_{-i}^{(t)},x)\\)——在共轭模型中条件分布有解析式。Metropolis-Hastings: 更通用，接受概率 \\(\\min(1,\\frac{p(z')q(z|z')}{p(z)q(z'|z)})\\)。HMC: 利用梯度信息。对比: VI适合大数据快速近似; MCMC适合需要精确后验的小/中数据; 混合: MCMC-VI, Stein VI。"
+      },
+      {
+        "id": "ml-math-ch05-q7",
+        "question": "隐马尔可夫模型(HMM)的三大经典问题分别用什么算法？",
+        "options": [
+          "似然计算: Forward 算法; 解码: Viterbi 算法; 参数学习: Baum-Welch (EM) 算法——都利用动态规划 \\(O(TK^2)\\)",
+        "三个问题都用梯度下降",
+        "只有一种统一算法",
+        "HMM 不需要算法"
+        ],
+        "answer": 0,
+        "explanation": "HMM: \\(z_t\\to z_{t+1}\\)（转移 \\(A\\)）, \\(z_t\\to x_t\\)（发射 \\(B\\)）。(1) \\(p(x_{1:T})=\\sum_{z_{1:T}}\\prod_t A_{z_{t-1},z_t}B_{z_t,x_t}\\)→Forward: \\(\\alpha_t(k)=p(x_{1:t},z_t=k)\\), 递推 \\(O(TK^2)\\) vs 暴力 \\(O(K^T)\\)。(2) \\(\\arg\\max_{z_{1:T}} p(z|x)\\)→Viterbi: 用max替代sum的动态规划。(3) MLE: Baum-Welch = EM 特例，E步: Forward-Backward, M步: 更新\\(A,B\\)。"
+      },
+      {
+        "id": "ml-math-ch05-q8",
+        "question": "条件随机场(CRF)相比HMM的优势？线性链CRF的参数学习为什么需要计算配分函数\\(Z\\)？",
+        "options": [
+          "CRF 是判别模型 \\(p(y|x)=\\frac{1}{Z(x)}\\exp(\\sum_k\\lambda_kf_k(y,x))\\), 可用任意特征; \\(Z(x)\\) 是梯度中的归一化因子，用 Forward 算法 \\(O(TK^2)\\) 计算",
+        "CRF 是生成模型",
+        "CRF 不需要 \\(Z\\)",
+        "HMM 总是优于 CRF"
+        ],
+        "answer": 0,
+        "explanation": "HMM: 生成式 \\(p(x,y)=\\prod p(y_t|y_{t-1})p(x_t|y_t)\\)——需要对观测独立假设。CRF: 判别式 \\(p(y|x)\\propto\\exp(\\sum_t\\sum_k\\lambda_kf_k(y_t,y_{t-1},x,t))\\)——可用重叠/长距特征。训练: \\(\\nabla_\\lambda\\log p(y|x)=F_{obs}-\\mathbb{E}_{p(y'|x)}[F]\\), 期望项需要 \\(Z(x)=\\sum_{y'}\\exp(\\cdot)\\), 用 Forward 算法在线性链上 \\(O(TK^2)\\) 计算。NER/POS tagging 经典方法; 被 BiLSTM-CRF 继承。"
+      },
+      {
+        "id": "ml-math-ch05-q9",
+        "question": "图神经网络(GNN)与消息传递(Message Passing)的关系？两者的联系？",
+        "options": [
+          "GNN 的邻域聚合 \\(h_v^{(l+1)}=\\text{Update}(h_v^{(l)},\\text{Aggregate}(\\{h_u^{(l)}:u\\in N(v)\\}))\\) 可视为可微的\"神经消息传递\"——与 BP 结构同构但参数可学习",
+        "GNN 与概率图模型无关",
+        "GNN 就是 BP",
+        "消息传递不能用于图数据"
+        ],
+        "answer": 0,
+        "explanation": "BP: \\(\\mu_{i\\to j}\\propto\\sum_{x_i}\\psi(x_i,x_j)\\prod_{k\\neq j}\\mu_{k\\to i}\\)——固定的势函数。GNN/MPNN: \\(m_{u\\to v}^{(l)}=M_\\theta(h_u^{(l)},h_v^{(l)},e_{uv})\\), \\(h_v^{(l+1)}=U_\\theta(h_v^{(l)},\\sum_u m_u)\\)——可学习的消息函数。两者都是\"局部→全局\"的信息传播。GCN: \\(H^{(l+1)}=\\sigma(\\tilde{D}^{-1/2}\\tilde{A}\\tilde{D}^{-1/2}H^{(l)}W)\\)——是特殊的均值聚合MPNN。过平滑(over-smoothing): 层数多时节点表示趋同——类似BP收敛到平衡态。"
+      },
+      {
+        "id": "ml-math-ch05-q10",
+        "question": "因果推断(Causal Inference)中的 do-演算 \\(p(y|do(x))\\) 与条件概率 \\(p(y|x)\\) 的区别？",
+        "options": [
+          "\\(p(y|do(x))\\) 是干预分布——将\\(X\\)强制设为\\(x\\)后\\(Y\\)的分布; \\(p(y|x)\\)是观测条件分布——二者在存在混淆因子时不同 (辛普森悖论)",
+        "两者总是相同",
+        "do-演算不涉及图模型",
+        "条件概率就是因果效应"
+        ],
+        "answer": 0,
+        "explanation": "\\(p(y|x)\\): 观察到\\(X=x\\)时\\(Y\\)的分布——可能包含反向因果或混淆。\\(p(y|do(x))\\): 干预\\(X=x\\)后\\(Y\\)的分布——去除所有指向\\(X\\)的边。调整公式: \\(p(y|do(x))=\\sum_z p(y|x,z)p(z)\\)（后门准则: \\(Z\\) 阻断所有后门路径）。Pearl 因果层级: 观察→干预→反事实。例: \"吃药与恢复\"相关(\\(p(y|x)\\)高)可能是因为\"病重的人才吃药\"(混淆)，干预效果 \\(p(y|do(x))\\) 才是真实因果。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="ml-math"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/ml-math.html" class="module-name">机器学习数学</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 贝叶斯网络与有向图模型</a></li>
+      <li><a href="#kp2">02 · 马尔可夫随机场与无向图模型</a></li>
+      <li><a href="#kp3">03 · 精确推断——变量消元与信念传播</a></li>
+      <li><a href="#kp4">04 · 近似推断——变分方法与采样</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>概率图模型</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>贝叶斯网络与有向图模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>现实中的概率模型涉及大量随机变量，直接建模联合分布需要指数级 参数。贝叶斯网络(BN)用有向无环图(DAG)编码变量间的条件独立关 系，实现联合分布的因子分解，大幅降低参数量。BN 是因果推理、 医学诊断和专家系统的数学框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>DAG 编码因果/条件独立结构：每个节点条件于其父节点时与非后代节 点独立。图的拓扑 \(\leftrightarrow\) 条件独立约束。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>贝叶斯网络：DAG \(G = (V, E)\)，每个节点 \(X_i\) 配条件概率 \(p(X_i | \mathrm{Pa}(X_i))\)。 因子分解： \[p(X_1, \ldots, X_n) = \prod_{i=1}^n p(X_i | \mathrm{Pa}(X_i))\] d-分离判据：给定集合 \(C\)，若在 \(G\) 中 \(A\) 和 \(B\) 被 \(C\) d-分离，则 \(X_A \perp X_B \mid X_C\)。 三种基本结构：链(\(A \to C \to B\))、分叉(\(A \leftarrow C \to B\))、 对撞(\(A \to C \leftarrow B\)，条件于 \(C\) 后不独立）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>医学诊断系统：症状-疾病-检验结果的 BN 模型（如 QMR-DT 网络）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：3 变量 BN: \(A \to C\), \(B \to C\)（对撞）。\(A, B\) 独立。 问：给定 \(C\) 后 \(A, B\) 是否独立？ 解答：不独立。\(A \to C \leftarrow B\) 是"对撞"(v-structure)， 给定 \(C\) 后开启了 \(A, B\) 之间的依赖（"explain-away"效应）。 易错点：对撞节点未条件化时阻止信息流动，条件化后反而打开——与链和分叉相反。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在对撞结构 \(A \to C \leftarrow B\) 中，\(A \perp B\) 但条件于 \(C\) 后？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对撞的条件化打开路径（explain-away 效应），是 BN 的反直觉特性。')">A. \(A\) 和 \(B\) 仍独立</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！对撞的条件化打开路径（explain-away 效应），是 BN 的反直觉特性。')">B. \(A\) 和 \(B\) 变为依赖</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对撞的条件化打开路径（explain-away 效应），是 BN 的反直觉特性。')">C. 无法确定</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。对撞的条件化打开路径（explain-away 效应），是 BN 的反直觉特性。')">D. \(A\) 和 \(C\) 独立</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>马尔可夫随机场与无向图模型</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>并非所有依赖关系都是"有向"的。图像中相邻像素的关联、社交网 络中的同伴关系等更适合用无向图描述。马尔可夫随机场(MRF)用无 向图编码局部马尔可夫性质，通过势函数定义因子分解。MRF 是图像 分割、纠错编码和统计物理的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>无向图中条件独立通过"路径被阻断"（分离集）判定，比 d-分离更直观。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>MRF 定义：无向图 \(G = (V, E)\)，局部马尔可夫性 \(X_i \perp X_{V \setminus \{i\} \setminus \mathrm{nb}(i)} \mid X_{\mathrm{nb}(i)}\)。 Hammersley-Clifford 定理：（在正性条件下）MRF 性质 \(\Leftrightarrow\) Gibbs 分布： \[p(x) = \frac{1}{Z} \prod_{C \in \mathcal{C}} \psi_C(x_C)\] 其中 \(\mathcal{C}\) 是图的团(cliques)，\(\psi_C\) 是势函数， \(Z = \sum_x \prod_C \psi_C(x_C)\) 是配分函数。 配分函数 \(Z\) 通常难以精确计算（#P-hard），需近似推断方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Ising 模型（统计物理）、CRF 序列标注（NLP）、图像去噪（MRF prior）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：链形 MRF: \(X_1 - X_2 - X_3\)，\(X_i \in \{0,1\}\)。 势函数 \(\psi_{12}(x_1,x_2) = e^{x_1 x_2}\), \(\psi_{23}\) 同理。 求 \(P(X_1=1|X_3=1)\)。 解答：\(p(x) \propto e^{x_1x_2+x_2x_3}\)。条件于 \(X_3=1\): 边缘化 \(X_2\): \(p(X_1=1|X_3=1) \propto \sum_{x_2} e^{x_2+x_2} = 1 + e^2\)。 归一化后 \(P = (1+e^2)/(2+e^0+e^2) = (1+e^2)/(3+e^2) \approx 0.757\)。 易错点：配分函数 \(Z\) 必须在归一化时精确计算，遗忘会导致概率不正确。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">配分函数 \(Z\) 在 MRF 中的作用是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Z = \\sum_x \\prod \\psi_C\\) 是归一化常数，保证 \\(\\sum p(x)=1\\)。')">A. 定义势函数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(Z = \\sum_x \\prod \\psi_C\\) 是归一化常数，保证 \\(\\sum p(x)=1\\)。')">B. 归一化使概率总和为 1</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Z = \\sum_x \\prod \\psi_C\\) 是归一化常数，保证 \\(\\sum p(x)=1\\)。')">C. 计算梯度</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Z = \\sum_x \\prod \\psi_C\\) 是归一化常数，保证 \\(\\sum p(x)=1\\)。')">D. 确定图结构</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>精确推断——变量消元与信念传播</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>图模型建好后，核心计算任务是推断：计算边缘概率、条件概率或 MAP (最大后验)。朴素枚举指数级不可行，但利用图的结构可以高效 进行。变量消元和信念传播利用因子分解的局部性，在树形图上实现 精确推断。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>推断的核心是利用分布式因子化结构避免全局枚举——"局部计算+消息传递"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>变量消元：计算边缘 \(p(X_q) = \sum_{x \setminus x_q} p(x)\)。 关键：利用因子分解将求和"推进"，先消元与 \(X_q\) 无关的变量。 复杂度由消元宽度(treewidth)决定： \[\text{复杂度} = O(n \cdot |\mathcal{X}|^{w+1})\] 其中 \(w\) 是消元顺序对应的树宽。 信念传播(BP)：在因子图上传递消息 \[m_{i \to a}(x_i) \propto \prod_{b \in \mathrm{nb}(i) \setminus a} m_{b \to i}(x_i)\] \[m_{a \to i}(x_i) \propto \sum_{x_{\mathrm{nb}(a) \setminus i}} f_a(x_{\mathrm{nb}(a)}) \prod_{j \in \mathrm{nb}(a) \setminus i} m_{j \to a}(x_j)\] 树形图上 BP 精确，且与变量消元等价。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Turbo 码和 LDPC 码的解码算法本质上是因子图上的信念传播。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：链 \(X_1-X_2-X_3\)，\(p \propto \psi_{12}(x_1,x_2)\psi_{23}(x_2,x_3)\)。 消元 \(X_1\): \(\tau(x_2) = \sum_{x_1}\psi_{12}(x_1,x_2)\)（一条"消息"）。 再消元 \(X_2\): \(p(x_3) \propto \sum_{x_2}\tau(x_2)\psi_{23}(x_2,x_3)\)。 易错点：消元顺序影响复杂度。好的顺序保持中间结果维度低。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">树结构图上的信念传播是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。树形图上 BP 与变量消元等价，给出精确边缘概率。')">A. 近似推断</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！树形图上 BP 与变量消元等价，给出精确边缘概率。')">B. 精确推断</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。树形图上 BP 与变量消元等价，给出精确边缘概率。')">C. 只能计算 MAP</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。树形图上 BP 与变量消元等价，给出精确边缘概率。')">D. 只适用于连续变量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>近似推断——变分方法与采样</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>非树形图（含环）上精确推断通常是 NP-hard 的。两大近似推断策略： 变分推断(VI)将推断转化为优化问题；MCMC 用随机采样近似后验。 两者各有优劣：VI 快但有偏，MCMC 无偏但慢。了解两者是使用 现代概率模型（VAE, BNN）的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>变分推断：用简单分布族 \(q_\phi(z)\) 近似后验 \(p(z|x)\)。 最小化 KL 散度：\(\min_\phi D_{\mathrm{KL}}(q_\phi \| p(\cdot|x))\)。 等价于最大化 ELBO： \[\mathcal{L}(\phi) = \mathbb{E}_{q_\phi}[\log p(x,z) - \log q_\phi(z)] \leq \log p(x)\] 平均场近似：\(q(z) = \prod_i q_i(z_i)\)，每个 \(q_i\) 独立更新。 MCMC（Gibbs 采样）：逐变量从条件分布采样 \(z_i^{(t+1)} \sim p(z_i | z_{-i}^{(t)}, x)\)。 逐步收敛到目标分布（遍历性定理），但 mixing time 可能很长。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>VAE 使用 VI（重参数化技巧）训练生成模型；贝叶斯神经网络用 MCMC 或 VI 做参数后验推断。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：单变量后验 \(p(z|x) \propto e^{-z^2/2-|z-2|}\)。 用 \(q = N(\mu, \sigma^2)\) 做 VI，写出 ELBO。 解答：\(\mathcal{L} = \mathbb{E}_q[\log p(x,z)] + H(q)\) \(= \mathbb{E}_q[-z^2/2 - |z-2|] + \frac{1}{2}\log(2\pi e\sigma^2)\)。 对 \(\mu, \sigma\) 优化（梯度下降或解析）。 易错点：VI 最小化 \(D_{\mathrm{KL}}(q\|p)\)（mode-seeking），倾向低估后验方差。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">ELBO 是 \(\log p(x)\) 的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\log p(x) = \\mathcal{L}(\\phi) + D_{\\mathrm{KL}}(q\\|p) \\geq \\mathcal{L}(\\phi)\\)。')">A. 上界</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\log p(x) = \\mathcal{L}(\\phi) + D_{\\mathrm{KL}}(q\\|p) \\geq \\mathcal{L}(\\phi)\\)。')">B. 下界</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\log p(x) = \\mathcal{L}(\\phi) + D_{\\mathrm{KL}}(q\\|p) \\geq \\mathcal{L}(\\phi)\\)。')">C. 精确值</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\log p(x) = \\mathcal{L}(\\phi) + D_{\\mathrm{KL}}(q\\|p) \\geq \\mathcal{L}(\\phi)\\)。')">D. 无关量</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/applied/ml-math.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

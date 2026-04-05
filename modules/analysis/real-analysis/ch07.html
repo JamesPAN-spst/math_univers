@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.7 Radon-Nikodym 与符号测度 — 实分析/测度论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "real-analysis-ch07-q1",
+        "question": "符号测度（signed measure）与普通测度的根本区别是？",
+        "options": [
+          "符号测度可取负值（但不能同时取 \\(+\\infty\\) 和 \\(-\\infty\\)）",
+        "符号测度只取有限值",
+        "符号测度不满足 \\(\\sigma\\)-可加性",
+        "符号测度必须有界"
+        ],
+        "answer": 0,
+        "explanation": "符号测度 \\(\\nu: \\mathcal{F} \\to [-\\infty, +\\infty]\\) 满足 \\(\\sigma\\)-可加性，但只允许取 \\(+\\infty\\) 或 \\(-\\infty\\) 中的至多一个（避免 \\(\\infty - \\infty\\) 的不确定性）。\\(\\nu(\\emptyset) = 0\\)。例：\\(\\nu(A) = \\int_A f\\, d\\mu\\)（\\(f\\) 可变号）就是一个符号测度。"
+      },
+      {
+        "id": "real-analysis-ch07-q2",
+        "question": "Hahn 分解定理：对符号测度 \\(\\nu\\)，存在可测集 \\(P, N\\) 使得 \\(X = P \\cup N\\)，\\(P \\cap N = \\emptyset\\)，且？",
+        "options": [
+          "\\(\\nu(A) \\geq 0\\) 对所有 \\(A \\subseteq P\\) 可测，\\(\\nu(A) \\leq 0\\) 对所有 \\(A \\subseteq N\\) 可测",
+        "\\(\\nu(P) > 0\\)，\\(\\nu(N) < 0\\)",
+        "\\(P\\) 是开集，\\(N\\) 是闭集",
+        "\\(\\nu(P) = |\\nu|(X)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P\\) 是正集合（其所有可测子集测度 \\(\\geq 0\\)），\\(N\\) 是负集合（其所有可测子集测度 \\(\\leq 0\\)）。注意 \\(P\\) 不仅自身 \\(\\nu(P) \\geq 0\\)，而且所有子集也是。Hahn 分解在 a.e. 意义下唯一。\\(\\nu^+(A) = \\nu(A \\cap P)\\)，\\(\\nu^-(A) = -\\nu(A \\cap N)\\) 给出 Jordan 分解。"
+      },
+      {
+        "id": "real-analysis-ch07-q3",
+        "question": "Jordan 分解 \\(\\nu = \\nu^+ - \\nu^-\\) 中，全变差 \\(|\\nu|\\) 等于？",
+        "options": [
+          "\\(\\nu^+ + \\nu^-\\)",
+        "\\(\\nu^+ - \\nu^-\\)",
+        "\\(\\max(\\nu^+, \\nu^-)\\)",
+        "\\(|\\nu^+ - \\nu^-|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\nu| = \\nu^+ + \\nu^-\\)（两个非负测度之和）。\\(|\\nu|(X) = \\nu^+(X) + \\nu^-(X)\\) 是 \\(\\nu\\) 的全变差。这类似实数分解 \\(a = a^+ - a^-\\)，\\(|a| = a^+ + a^-\\)。\\(\\nu^+, \\nu^-\\) 互相奇异（即支撑在不相交集合上）。"
+      },
+      {
+        "id": "real-analysis-ch07-q4",
+        "question": "测度 \\(\\nu\\) 关于 \\(\\mu\\) 绝对连续（\\(\\nu \\ll \\mu\\)）的定义是？",
+        "options": [
+          "\\(\\mu(A) = 0 \\Rightarrow \\nu(A) = 0\\)",
+        "\\(\\nu(A) = 0 \\Rightarrow \\mu(A) = 0\\)",
+        "\\(\\nu = c \\cdot \\mu\\)",
+        "\\(\\nu \\leq \\mu\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nu \\ll \\mu\\)：\\(\\mu\\)-零集也是 \\(\\nu\\)-零集。直觉：\\(\\nu\\) 不\"看到\"\\(\\mu\\) 看不到的集合。例：\\(\\nu(A) = \\int_A f\\, d\\mu\\)（\\(f \\geq 0\\)），则 \\(\\nu \\ll \\mu\\)。反之，Radon-Nikodym 定理告诉我们绝对连续的测度必有这种积分表示。"
+      },
+      {
+        "id": "real-analysis-ch07-q5",
+        "question": "Radon-Nikodym 定理要求 \\(\\mu\\) 和 \\(\\nu\\) 满足什么条件？",
+        "options": [
+          "\\(\\nu \\ll \\mu\\) 且 \\(\\mu\\) 是 \\(\\sigma\\)-有限的",
+        "\\(\\mu\\) 和 \\(\\nu\\) 是有限测度",
+        "\\(\\nu \\perp \\mu\\)",
+        "\\(\\mu\\) 是概率测度"
+        ],
+        "answer": 0,
+        "explanation": "Radon-Nikodym：若 \\(\\mu\\) 是 \\(\\sigma\\)-有限测度且 \\(\\nu \\ll \\mu\\)（\\(\\nu\\) 为 \\(\\sigma\\)-有限符号测度），则存在可测函数 \\(f\\)（a.e. 唯一）使 \\(\\nu(A) = \\int_A f\\, d\\mu\\)。\\(f = d\\nu/d\\mu\\) 称为 Radon-Nikodym 导数。\\(\\sigma\\)-有限性不可省略。"
+      },
+      {
+        "id": "real-analysis-ch07-q6",
+        "question": "设 \\(\\nu \\ll \\mu\\)，\\(d\\nu/d\\mu = f\\)。若 \\(g\\) 是 \\(\\nu\\)-可积函数，则 \\(\\int g\\, d\\nu = ?\\)",
+        "options": [
+          "\\(\\int g \\cdot f\\, d\\mu\\)",
+        "\\(\\int g / f\\, d\\mu\\)",
+        "\\(\\int g\\, d\\mu + \\int f\\, d\\mu\\)",
+        "\\(\\int g\\, d\\mu\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int g\\, d\\nu = \\int g \\cdot \\frac{d\\nu}{d\\mu}\\, d\\mu = \\int gf\\, d\\mu\\)。这是\"换测度\"公式，类似换元积分。先对简单函数验证（\\(\\int \\mathbf{1}_A d\\nu = \\nu(A) = \\int_A f\\, d\\mu = \\int \\mathbf{1}_A f\\, d\\mu\\)），再由线性性和单调收敛推广。"
+      },
+      {
+        "id": "real-analysis-ch07-q7",
+        "question": "在概率论中，条件期望 \\(E[X|\\mathcal{G}]\\) 是什么的 Radon-Nikodym 导数？",
+        "options": [
+          "\\(\\nu(A) = E[X \\cdot \\mathbf{1}_A]\\)（\\(A \\in \\mathcal{G}\\)）关于 \\(\\mu|_\\mathcal{G}\\) 的 R-N 导数",
+        "\\(P\\) 关于 \\(Q\\) 的 R-N 导数",
+        "\\(X\\) 关于 \\(Y\\) 的比值",
+        "Lebesgue 测度的 R-N 导数"
+        ],
+        "answer": 0,
+        "explanation": "设 \\((\\Omega, \\mathcal{F}, P)\\) 是概率空间，\\(\\mathcal{G} \\subseteq \\mathcal{F}\\) 是子 \\(\\sigma\\)-代数。\\(\\nu(A) = E[X \\mathbf{1}_A] = \\int_A X\\, dP\\)（\\(A \\in \\mathcal{G}\\)）是 \\(\\mathcal{G}\\) 上的符号测度，\\(\\nu \\ll P|_\\mathcal{G}\\)。则 \\(E[X|\\mathcal{G}] = d\\nu/d(P|_\\mathcal{G})\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q8",
+        "question": "设 \\(\\nu(A) = \\int_A (x^2 - 1)\\, dm(x)\\)（\\(A \\in \\mathcal{B}([0,2])\\)）。求 \\(\\nu^+([0,2])\\) 和 \\(\\nu^-([0,2])\\)。",
+        "options": [
+          "\\(\\nu^+ = 4/3\\)，\\(\\nu^- = 2/3\\)",
+        "\\(\\nu^+ = 2/3\\)，\\(\\nu^- = 4/3\\)",
+        "\\(\\nu^+ = 2\\)，\\(\\nu^- = 0\\)",
+        "\\(\\nu^+ = 1\\)，\\(\\nu^- = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(x) = x^2 - 1\\)：\\(f \\leq 0\\) 在 \\([0,1]\\)，\\(f \\geq 0\\) 在 \\([1,2]\\)。Hahn 分解：\\(P = [1,2]\\)，\\(N = [0,1]\\)。\\(\\nu^+([0,2]) = \\nu([1,2]) = \\int_1^2 (x^2-1)\\, dx = [x^3/3 - x]_1^2 = (8/3-2) - (1/3-1) = 2/3 + 2/3 = 4/3\\)。\\(\\nu^-([0,2]) = -\\nu([0,1]) = -\\int_0^1 (x^2-1)\\, dx = -(1/3-1) = 2/3\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q9",
+        "question": "设 \\(\\mu = m\\)（Lebesgue 测度），\\(\\nu(A) = \\int_A 2x\\, dm\\) 在 \\([0,1]\\) 上。\\(d\\nu/d\\mu = ?\\)",
+        "options": [
+          "\\(2x\\)",
+        "\\(x^2\\)",
+        "\\(2\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nu(A) = \\int_A 2x\\, dm\\) 直接表明 \\(d\\nu/d\\mu = 2x\\)（a.e.）。Radon-Nikodym 导数就是在积分表示 \\(\\nu = f\\mu\\) 中的 \\(f\\)。验证：\\(\\nu([0,1/2]) = \\int_0^{1/2} 2x\\, dx = 1/4\\)。这里 \\(\\nu\\) 也可写为 \\(\\nu(A) = m(A \\cap \\varphi^{-1}(\\cdot))\\)，即 \\(x^2\\) 的象测度。"
+      },
+      {
+        "id": "real-analysis-ch07-q10",
+        "question": "Radon-Nikodym 导数的链式法则：若 \\(\\lambda \\ll \\nu \\ll \\mu\\)，则 \\(d\\lambda/d\\mu = ?\\)",
+        "options": [
+          "\\(d\\lambda/d\\nu + d\\nu/d\\mu\\)",
+        "\\((d\\lambda/d\\nu) \\cdot (d\\nu/d\\mu)\\)",
+        "\\(d\\lambda/d\\nu / d\\nu/d\\mu\\)",
+        "不存在"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\lambda(A) = \\int_A \\frac{d\\lambda}{d\\nu}\\, d\\nu = \\int_A \\frac{d\\lambda}{d\\nu} \\cdot \\frac{d\\nu}{d\\mu}\\, d\\mu\\)。因此 \\(\\frac{d\\lambda}{d\\mu} = \\frac{d\\lambda}{d\\nu} \\cdot \\frac{d\\nu}{d\\mu}\\)（\\(\\mu\\)-a.e.）。类比微积分链式法则 \\(dz/dx = (dz/dy)(dy/dx)\\)，Radon-Nikodym 导数的乘法法则。"
+      },
+      {
+        "id": "real-analysis-ch07-q11",
+        "question": "Lebesgue 分解定理：\\(\\nu = \\nu_a + \\nu_s\\)，其中？",
+        "options": [
+          "\\(\\nu_a \\ll \\mu\\)，\\(\\nu_s \\perp \\mu\\)",
+        "\\(\\nu_a \\perp \\mu\\)，\\(\\nu_s \\ll \\mu\\)",
+        "\\(\\nu_a\\) 离散，\\(\\nu_s\\) 连续",
+        "\\(\\nu_a\\) 有限，\\(\\nu_s\\) 无限"
+        ],
+        "answer": 0,
+        "explanation": "Lebesgue 分解将任意 \\(\\sigma\\)-有限测度 \\(\\nu\\) 唯一分解为绝对连续部分 \\(\\nu_a\\)（有 R-N 导数）和奇异部分 \\(\\nu_s\\)（\\(\\exists\\) 集 \\(N\\) 使 \\(\\mu(N) = 0\\)，\\(\\nu_s(N^c) = 0\\)）。例：Cantor 函数的 Stieltjes 测度 \\(\\mu_C \\perp m\\)（支撑在 Cantor 集上，Lebesgue 测度为零）。"
+      },
+      {
+        "id": "real-analysis-ch07-q12",
+        "question": "若 \\(\\nu \\ll \\mu\\) 且 \\(\\mu \\ll \\nu\\)，则 \\(d\\mu/d\\nu = ?\\)",
+        "options": [
+          "\\((d\\nu/d\\mu)^{-1}\\)",
+        "\\(d\\nu/d\\mu\\)",
+        "\\(1\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(1 = d\\mu/d\\mu = (d\\mu/d\\nu)(d\\nu/d\\mu)\\)（链式法则）。因此 \\(d\\mu/d\\nu = (d\\nu/d\\mu)^{-1}\\)（\\(\\mu\\)-a.e.）。\\(d\\nu/d\\mu > 0\\) a.e.（因为 \\(\\mu \\ll \\nu\\) 意味着 \\(\\{d\\nu/d\\mu = 0\\}\\) 的 \\(\\mu\\)-测度为零）。两个测度互相绝对连续称为等价（\\(\\mu \\sim \\nu\\)）。"
+      },
+      {
+        "id": "real-analysis-ch07-q13",
+        "question": "似然比（likelihood ratio）\\(L = dP/dQ\\) 在统计推断中的作用？若 \\(P = N(1,1)\\)，\\(Q = N(0,1)\\)，则 \\(L(x) = ?\\)",
+        "options": [
+          "\\(e^{x - 1/2}\\)",
+        "\\(e^{-x + 1/2}\\)",
+        "\\(x\\)",
+        "\\(e^{x^2/2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(dP/dQ(x) = \\frac{p(x)}{q(x)} = \\frac{(2\\pi)^{-1/2}e^{-(x-1)^2/2}}{(2\\pi)^{-1/2}e^{-x^2/2}} = e^{-(x^2-2x+1)/2 + x^2/2} = e^{x - 1/2}\\)。Neyman-Pearson 引理：最优检验基于 \\(L(x) \\gtrless k\\)，即似然比检验。R-N 导数在假设检验中给出最优判决边界。"
+      },
+      {
+        "id": "real-analysis-ch07-q14",
+        "question": "\\(|\\nu|(A) = \\sup \\sum_{i=1}^n |\\nu(A_i)|\\)，上确界取遍 \\(A\\) 的有限可测分割。对 \\(\\nu(A) = \\int_A f\\, d\\mu\\)，\\(|\\nu|(A) = ?\\)",
+        "options": [
+          "\\(\\int_A |f|\\, d\\mu\\)",
+        "\\(|\\int_A f\\, d\\mu|\\)",
+        "\\(\\int_A f^2\\, d\\mu\\)",
+        "\\((\\int_A f\\, d\\mu)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\nu|(A) = \\int_A |f|\\, d\\mu\\)，即 \\(d|\\nu|/d\\mu = |d\\nu/d\\mu|\\)。证明：\\(\\nu^+(A) = \\int_A f^+\\, d\\mu\\)，\\(\\nu^-(A) = \\int_A f^-\\, d\\mu\\)，\\(|\\nu| = \\nu^+ + \\nu^- = \\int (f^+ + f^-)\\, d\\mu = \\int |f|\\, d\\mu\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q15",
+        "question": "\\(\\nu \\ll \\mu\\)，\\(f = d\\nu/d\\mu\\)。对一般可测集 \\(A\\)，\\(\\nu(A) = 0\\) 是否等价于 \\(f = 0\\) a.e. on \\(A\\)？",
+        "options": [
+          "是",
+        "否，仅 \\(\\Rightarrow\\) 成立",
+        "否，仅 \\(\\Leftarrow\\) 成立",
+        "仅当 \\(f \\geq 0\\) 时等价"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nu(A) = \\int_A f\\, d\\mu = 0\\) 对所有可测 \\(A' \\subseteq A\\) 成立（因为对 \\(A' \\subseteq A\\)，\\(\\nu(A')\\) 也由 \\(\\int_{A'} f\\, d\\mu\\) 给出）当且仅当 \\(f = 0\\) \\(\\mu\\)-a.e. on \\(A\\)。若 \\(\\{f > 0\\} \\cap A\\) 有正 \\(\\mu\\)-测度，则 \\(\\nu(\\{f > 0\\} \\cap A) > 0\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q16",
+        "question": "\\(\\epsilon\\)-\\(\\delta\\) 刻画绝对连续：\\(\\nu \\ll \\mu\\) 且 \\(\\nu\\) 有限，则对任意 \\(\\epsilon > 0\\)，存在 \\(\\delta > 0\\) 使得 \\(\\mu(A) < \\delta \\Rightarrow |\\nu(A)| < \\epsilon\\)。这比定义更强在哪？",
+        "options": [
+          "给出了定量估计，定义只给定性",
+        "不需要 \\(\\sigma\\)-有限",
+        "等价，没有更强",
+        "需要 \\(\\nu\\) 是概率测度"
+        ],
+        "answer": 0,
+        "explanation": "定义 \\(\\nu \\ll \\mu\\)：\\(\\mu(A) = 0 \\Rightarrow \\nu(A) = 0\\)（定性）。\\(\\epsilon\\)-\\(\\delta\\) 版本：\\(\\mu(A)\\) 很小 \\(\\Rightarrow\\) \\(|\\nu(A)|\\) 受控（定量）。当 \\(\\nu\\) 有限时两者等价。\\(\\nu\\) 无限时仅定性版本成立。证明（反证）：若 \\(\\epsilon\\)-\\(\\delta\\) 失效，\\(\\exists A_n\\)，\\(\\mu(A_n) < 2^{-n}\\)，\\(|\\nu(A_n)| \\geq \\epsilon\\)，Borel-Cantelli 矛盾。"
+      },
+      {
+        "id": "real-analysis-ch07-q17",
+        "question": "在贝叶斯统计中，后验密度 \\(\\pi(\\theta|x) \\propto f(x|\\theta)\\pi(\\theta)\\)。这可以用 Radon-Nikodym 导数表述为？",
+        "options": [
+          "\\(d\\Pi(\\cdot|x)/d\\Pi_0 = f(x|\\theta)/m(x)\\)（\\(m(x) = \\int f(x|\\theta)\\, d\\Pi_0\\)）",
+        "\\(d\\Pi_0/d\\Pi(\\cdot|x) = m(x)\\)",
+        "与 R-N 无关",
+        "\\(d\\Pi/dm = \\pi(\\theta)\\)"
+        ],
+        "answer": 0,
+        "explanation": "后验测度 \\(\\Pi(\\cdot|x)\\) 关于先验测度 \\(\\Pi_0\\) 绝对连续（数据不会使零先验概率事件变为正概率）。\\(d\\Pi(\\cdot|x)/d\\Pi_0(\\theta) = f(x|\\theta)/m(x)\\) 是似然比的归一化。这是 Bayes 定理的测度论版本，适用于连续和离散参数空间。"
+      },
+      {
+        "id": "real-analysis-ch07-q18",
+        "question": "设 \\(\\mu\\) 为 \\([0,1]\\) 上 Lebesgue 测度，\\(\\nu_1(A) = \\sum_{q \\in \\mathbb{Q} \\cap A} 2^{-n(q)}\\)（\\(q\\) 的枚举给权重）。考虑 \\(\\nu = \\mu + \\nu_1\\)。\\(\\nu\\) 的 Hahn 分解是？",
+        "options": [
+          "\\(P = [0,1]\\)，\\(N = \\emptyset\\)（\\(\\nu\\) 是非负测度）",
+        "\\(P = [0,1] \\setminus \\mathbb{Q}\\)，\\(N = \\mathbb{Q}\\)",
+        "分解依赖于 \\(\\nu_1\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mu \\geq 0\\) 且 \\(\\nu_1 \\geq 0\\)，故 \\(\\nu = \\mu + \\nu_1 \\geq 0\\) 是非负测度。任何非负测度的 Hahn 分解都是 \\(P = X\\)，\\(N = \\emptyset\\)（平凡分解）。\\(\\nu^+ = \\nu\\)，\\(\\nu^- = 0\\)。Hahn 分解只对符号测度有非平凡意义。"
+      },
+      {
+        "id": "real-analysis-ch07-q19",
+        "question": "Cantor 函数 \\(F_C\\) 对应的 Stieltjes 测度 \\(\\mu_C\\)。\\(\\mu_C \\ll m\\) 是否成立？",
+        "options": [
+          "是",
+        "否，\\(\\mu_C \\perp m\\)",
+        "\\(\\mu_C\\) 和 \\(m\\) 互相绝对连续",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "Cantor 函数在 Cantor 集 \\(C\\) 的补集上常数（导数为零），故 \\(\\mu_C([0,1] \\setminus C) = 0\\)。而 \\(m(C) = 0\\)。因此 \\(m\\) 集中在 \\(C^c\\)，\\(\\mu_C\\) 集中在 \\(C\\)，互相奇异：\\(\\mu_C \\perp m\\)。\\(\\mu_C\\) 是连续奇异测度的典范例子（无密度函数但连续递增）。"
+      },
+      {
+        "id": "real-analysis-ch07-q20",
+        "question": "若 \\(\\nu_n \\ll \\mu\\) 对所有 \\(n\\)，\\(f_n = d\\nu_n/d\\mu\\)，\\(\\nu_n \\to \\nu\\)（集函数收敛），\\(\\nu \\ll \\mu\\)。\\(f_n \\to f = d\\nu/d\\mu\\) 的收敛类型是？",
+        "options": [
+          "一定 \\(\\mu\\)-a.e. 收敛",
+        "在 \\(L^1(\\mu)\\) 中收敛",
+        "一般只有弱收敛",
+        "取决于收敛模式"
+        ],
+        "answer": 3,
+        "explanation": "若 \\(\\nu_n(A) \\to \\nu(A)\\) 对所有 \\(A\\)（强集函数收敛），等价于 \\(\\int_A f_n\\, d\\mu \\to \\int_A f\\, d\\mu\\) 对所有 \\(A\\)，这是 \\(f_n \\to f\\) 弱收敛于 \\(L^1\\)。但要得到 \\(L^1\\) 范数收敛或 a.e. 收敛，需要额外条件（如一致可积性 + a.e. 收敛 \\(\\Rightarrow\\) \\(L^1\\) 收敛）。"
+      },
+      {
+        "id": "real-analysis-ch07-q21",
+        "question": "R-N 定理的 von Neumann 证明用到了？",
+        "options": [
+          "Hilbert 空间上的 Riesz 表示定理",
+        "Hahn-Banach 定理",
+        "Zorn 引理",
+        "测度的正则性"
+        ],
+        "answer": 0,
+        "explanation": "Von Neumann 证法：\\(\\lambda = \\mu + \\nu\\)，在 \\(L^2(\\lambda)\\) 上定义泛函 \\(\\phi(g) = \\int g\\, d\\nu\\)。由 Cauchy-Schwarz，\\(|\\phi(g)| \\leq (\\nu(X))^{1/2}\\|g\\|_2 \\leq (\\lambda(X))^{1/2}\\|g\\|_2\\)。Riesz 表示：\\(\\exists h \\in L^2(\\lambda)\\) 使 \\(\\int g\\, d\\nu = \\int gh\\, d\\lambda\\)。构造 \\(f = h/(1-h)\\) 得 \\(d\\nu/d\\mu = f\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q22",
+        "question": "设 \\(f = d\\nu/d\\mu \\in L^1(\\mu)\\)。\\(\\nu\\) 有限当且仅当？",
+        "options": [
+          "\\(f \\in L^1(\\mu)\\)",
+        "\\(f \\in L^2(\\mu)\\)",
+        "\\(f\\) 有界",
+        "\\(f \\in L^\\infty(\\mu)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\nu|(X) = \\int_X |f|\\, d\\mu = \\|f\\|_{L^1(\\mu)}\\)。所以 \\(\\nu\\) 有限 \\(\\Leftrightarrow\\) \\(|\\nu|(X) < \\infty\\) \\(\\Leftrightarrow\\) \\(f \\in L^1(\\mu)\\)。\\(\\sigma\\)-有限测度的 R-N 导数可能不可积（如 \\(d\\nu/dm = 1/\\sqrt{x}\\) 在 \\((0,1)\\) 上，\\(\\nu\\) 有限但勉强可积）。"
+      },
+      {
+        "id": "real-analysis-ch07-q23",
+        "question": "Girsanov 定理中的测度变换：\\(dQ = L_T\\, dP\\)（\\(L_T = \\mathcal{E}(M)_T\\) 为指数鞅）。在 \\(Q\\) 下，\\(W_t - \\langle M, W \\rangle_t\\) 是什么？",
+        "options": [
+          "\\(Q\\)-布朗运动",
+        "\\(P\\)-鞅",
+        "不变",
+        "超鞅"
+        ],
+        "answer": 0,
+        "explanation": "Girsanov 定理：若 \\(dQ/dP|_{\\mathcal{F}_t} = L_t\\)（\\(L\\) 为正鞅），\\(M_t = \\int_0^t \\theta_s\\, dW_s\\)，则 \\(\\tilde{W}_t = W_t - \\int_0^t \\theta_s\\, ds\\) 在 \\(Q\\) 下是布朗运动。核心是 R-N 导数在不同时间的限制给出一致测度变换。这是金融数学中风险中性定价的基础。"
+      },
+      {
+        "id": "real-analysis-ch07-q24",
+        "question": "设 \\(\\nu_1, \\nu_2\\) 是 \\((X,\\mathcal{F})\\) 上的有限符号测度，\\(|\\nu_1 + \\nu_2|(A) \\leq |\\nu_1|(A) + |\\nu_2|(A)\\) 对所有 \\(A\\)。这叫做？",
+        "options": [
+          "全变差的三角不等式",
+        "Minkowski 不等式",
+        "Hölder 不等式",
+        "Jensen 不等式"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\cdot|\\) 是符号测度空间上的范数（全变差范数）。\\(\\|v\\| = |\\nu|(X)\\)。三角不等式 \\(|\\nu_1 + \\nu_2| \\leq |\\nu_1| + |\\nu_2|\\) 在每个可测集上成立。有限符号测度空间在全变差范数下构成 Banach 空间。这与 \\(L^1\\) 范数一致：若 \\(\\nu_i = f_i \\mu\\)，则 \\(\\|v_i\\| = \\|f_i\\|_1\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q25",
+        "question": "设 \\(\\mu = m\\)，\\(\\nu\\) 的分布函数为 \\(F(x) = x + \\text{Cantor}(x)\\)（\\(x \\in [0,1]\\)）。\\(d\\nu/dm\\) 存在吗？",
+        "options": [
+          "是，\\(d\\nu/dm = F'(x) = 1\\) a.e.（但 \\(\\nu \\neq m\\)）",
+        "不存在（\\(\\nu\\) 不绝对连续于 \\(m\\)）",
+        "\\(d\\nu/dm = 2\\)",
+        "\\(d\\nu/dm = 1 + \\text{Cantor}'(x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(F(x) = x + C(x)\\)。\\(F'(x) = 1 + C'(x) = 1 + 0 = 1\\) a.e.（Cantor 函数导数 a.e. 为零）。Lebesgue 分解：\\(\\nu = \\nu_a + \\nu_s\\)，\\(d\\nu_a/dm = 1\\)（即 \\(\\nu_a = m\\)），\\(\\nu_s = \\mu_C\\)（Cantor 测度，与 \\(m\\) 奇异）。\\(d\\nu/dm\\) 严格说不存在（\\(\\nu\\) 不绝对连续于 \\(m\\)），但 \\(\\nu\\) 的绝对连续部分有 R-N 导数 1。"
+      },
+      {
+        "id": "real-analysis-ch07-q26",
+        "question": "在信息论中，KL 散度 \\(D_{KL}(P \\| Q) = \\int \\log(dP/dQ)\\, dP\\)。若 \\(P = N(\\mu, \\sigma^2)\\)，\\(Q = N(0,1)\\)，则 \\(D_{KL}(P \\| Q) = ?\\)",
+        "options": [
+          "\\((\\mu^2 + \\sigma^2 - 1 - \\ln\\sigma^2)/2\\)",
+        "\\(\\mu^2/(2\\sigma^2)\\)",
+        "\\(|\\mu|\\)",
+        "\\(\\sigma^2/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\log(dP/dQ) = -\\frac{(x-\\mu)^2}{2\\sigma^2} + \\frac{x^2}{2} - \\frac{1}{2}\\ln\\frac{1}{\\sigma^2}\\)。\\(E_P[\\cdot] = \\frac{1}{2}(-1 + \\mu^2 + \\sigma^2 + \\ln\\sigma^2) - \\frac{1}{2}\\ln\\sigma^2\\)... 最终 \\(D_{KL} = \\frac{1}{2}(\\mu^2 + \\sigma^2 - 1 - \\ln\\sigma^2)\\)。R-N 导数 \\(dP/dQ\\) 在信息论中给出\"信息增益\"。\\(D_{KL} \\geq 0\\)（Gibbs 不等式），\\(= 0\\) iff \\(P = Q\\)。"
+      },
+      {
+        "id": "real-analysis-ch07-q27",
+        "question": "在金融中，Black-Scholes 无套利定价需要从物理测度 \\(P\\) 转换到风险中性测度 \\(Q\\)。\\(dQ/dP\\) 的存在性由什么保证？",
+        "options": [
+          "Radon-Nikodym 定理（\\(Q \\ll P\\) 且 \\(\\sigma\\)-有限）",
+        "第一基本定理（无套利 \\(\\Leftrightarrow\\) 等价鞅测度存在）",
+        "A 保证存在性，B 保证金融意义",
+        "中心极限定理"
+        ],
+        "answer": 2,
+        "explanation": "第一基本定理（FTAP）：无套利 \\(\\Leftrightarrow\\) \\(\\exists Q \\sim P\\)（等价鞅测度）。\\(Q \\sim P\\) 即 \\(Q \\ll P\\) 且 \\(P \\ll Q\\)，R-N 定理保证 \\(dQ/dP\\) 存在且 \\(> 0\\) a.e.。在 B-S 模型中，\\(dQ/dP = \\mathcal{E}(-\\theta W)_T = e^{-\\theta W_T - \\theta^2 T/2}\\)（\\(\\theta\\) 为市场风险价格）。"
+      },
+      {
+        "id": "real-analysis-ch07-q28",
+        "question": "在图像分割中，Chan-Vese 模型最小化能量泛函 \\(E = \\int_C ds + \\lambda_1 \\int_{\\text{inside}} (u_0 - c_1)^2 + \\lambda_2 \\int_{\\text{outside}} (u_0 - c_2)^2\\)。其中积分是关于什么测度？",
+        "options": [
+          "第一项关于 1 维 Hausdorff 测度，后两项关于 Lebesgue 测度",
+        "都关于 Lebesgue 测度",
+        "都关于 Hausdorff 测度",
+        "关于离散测度"
+        ],
+        "answer": 0,
+        "explanation": "曲线 \\(C\\) 的长度 \\(\\int_C ds = \\mathcal{H}^1(C)\\)（1 维 Hausdorff 测度）。区域积分关于 2 维 Lebesgue 测度。Chan-Vese 能量涉及不同维度的测度——这是几何测度论在图像处理中的应用。R-N 导数在弱公式化中用于处理测度之间的关系。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="real-analysis"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/real-analysis.html" class="module-name">实分析/测度论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.7 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 符号测度与 Hahn-Jordan 分解</a></li>
+      <li><a href="#kp2">02 · 绝对连续与 Radon-Nikodym 定理</a></li>
+      <li><a href="#kp3">03 · Lebesgue 分解定理</a></li>
+      <li><a href="#kp4">04 · 条件概率与贝叶斯公式的严格化</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 7</p>
+      <h1>Radon-Nikodym 与符号测度</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>符号测度与 Hahn-Jordan 分解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在概率论和物理学中，经常遇到"可以取负值的测度"——例如带符号的 电荷分布，或两个概率测度之差。符号测度将测度的概念从非负推广到 可正可负。Hahn 分解和 Jordan 分解告诉我们：每个符号测度都可以 "分离"为正部和负部，本质上仍可回到非负测度的框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Hahn 分解将空间一分为二（正集和负集），Jordan 分解将符号测度 写为两个非负测度之差 \(\mu = \mu^+ - \mu^-\)。这与实数分解为 正负部 \(x = x^+ - x^-\) 完全类比。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>符号测度</strong>：\(\mu: \mathcal{F} \to [-\infty, +\infty]\) 满足 \(\mu(\emptyset) = 0\) 和 σ-可加性（\(\mu\) 不同时取 \(+\infty\) 和 \(-\infty\)）。 <strong>Hahn 分解定理</strong>：存在 \(P, N \in \mathcal{F}\)，\(P \cup N = X\)， \(P \cap N = \emptyset\)，使得 \(\mu(E) \geq 0\) \(\forall E \subseteq P\)， \(\mu(E) \leq 0\) \(\forall E \subseteq N\)。 <strong>Jordan 分解</strong>：\(\mu = \mu^+ - \mu^-\)，其中 \(\mu^+(E) = \mu(E \cap P)\)，\(\mu^-(E) = -\mu(E \cap N)\)， 且 \(\mu^+ \perp \mu^-\)（互相奇异）。 <strong>全变差测度</strong>：\(|\mu| = \mu^+ + \mu^-\)， \[|\mu|(E) = \sup\left\{\sum_{i=1}^n |\mu(E_i)| : E = \bigsqcup E_i\right\}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(\mu(E) = \int_E f\, d\lambda\)，\(f(x) = x\) 在 \([-1, 1]\) 上。 求 \(\mu\) 的 Hahn 分解和 Jordan 分解。 解答：\(P = [0, 1]\)（\(f \geq 0\)），\(N = [-1, 0)\)（\(f < 0\)）。 \(\mu^+(E) = \int_{E \cap [0,1]} x\, dx\)， \(\mu^-(E) = \int_{E \cap [-1,0)} (-x)\, dx\)。 \(|\mu|([-1,1]) = \int_0^1 x\, dx + \int_{-1}^0 (-x)\, dx = 1/2 + 1/2 = 1\)。 易错点：Hahn 分解不唯一（\(P, N\) 可以差一个零测集）， 但 Jordan 分解 \(\mu^+, \mu^-\) 是唯一的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">符号测度的 Jordan 分解 \(\mu = \mu^+ - \mu^-\) 中？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mu^+ \\perp \\mu^-\\)（互相奇异，即存在分解 \\(X = P \\sqcup N\\)，使 \\(\\mu^+\\) 集中在 \\(P\\) 上，\\(\\mu^-\\) 集中在 \\(N\\) 上）。')">A. \(\mu^+\) 和 \(\mu^-\) 可以有公共支撑</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\mu^+ \\perp \\mu^-\\)（互相奇异，即存在分解 \\(X = P \\sqcup N\\)，使 \\(\\mu^+\\) 集中在 \\(P\\) 上，\\(\\mu^-\\) 集中在 \\(N\\) 上）。')">B. \(\mu^+\) 和 \(\mu^-\) 互相奇异</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mu^+ \\perp \\mu^-\\)（互相奇异，即存在分解 \\(X = P \\sqcup N\\)，使 \\(\\mu^+\\) 集中在 \\(P\\) 上，\\(\\mu^-\\) 集中在 \\(N\\) 上）。')">C. 分解不唯一</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\mu^+ \\perp \\mu^-\\)（互相奇异，即存在分解 \\(X = P \\sqcup N\\)，使 \\(\\mu^+\\) 集中在 \\(P\\) 上，\\(\\mu^-\\) 集中在 \\(N\\) 上）。')">D. \(\mu^+\) 总是有限的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>绝对连续与 Radon-Nikodym 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>什么时候一个测度 \(\mu\) 可以用另一个测度 \(\nu\) 的"密度函数" 表示为 \(d\mu = f\, d\nu\)？直觉上，如果 \(\nu\) 认为某个集合 "大小为零"，\(\mu\) 也应该认为它大小为零——这就是绝对连续性 \(\mu \ll \nu\)。Radon-Nikodym 定理给出了精确的回答： 绝对连续等价于密度函数的存在性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Radon-Nikodym 定理是"求导"在测度论中的推广：\(f = d\mu/d\nu\) 类比实变函数的导数，将两个测度的关系编码为一个函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>绝对连续</strong>：\(\mu \ll \nu\) 若 \(\nu(E) = 0 \Rightarrow \mu(E) = 0\)。 <strong>Radon-Nikodym 定理</strong>：设 \(\mu, \nu\) 是 σ-有限测度， \(\mu \ll \nu\)。则存在 \(\nu\)-a.e. 唯一的非负可测函数 \(f\) 使得 \[\mu(E) = \int_E f\, d\nu, \quad \forall E \in \mathcal{F}\] \(f\) 称为 Radon-Nikodym 导数，记为 \(f = \frac{d\mu}{d\nu}\)。 <strong>链式法则</strong>：若 \(\mu \ll \nu \ll \lambda\)，则 \[\frac{d\mu}{d\lambda} = \frac{d\mu}{d\nu} \cdot \frac{d\nu}{d\lambda} \quad \lambda\text{-a.e.}\] <strong>σ-有限性必要</strong>：反例——计数测度 \(\mu\) 关于 Lebesgue 测度 \(\lambda\) 不满足 \(\mu \ll \lambda\)，但也说明 σ-有限性不能随意去除。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>概率论：条件期望 \(E[X|\mathcal{G}]\) 就是 \(\mu_X\) 关于 \(P|_\mathcal{G}\) 的 Radon-Nikodym 导数；贝叶斯公式中似然比 \(dP_1/dP_0\) 是两个概率测度的 Radon-Nikodym 导数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(\mu(E) = \int_E 2x\, dx\) 在 \(([0,1], \mathcal{B}, \lambda)\) 上。 求 \(d\mu/d\lambda\)。 解答：由定义 \(\mu(E) = \int_E 2x\, d\lambda\)， 故 \(f(x) = d\mu/d\lambda = 2x\)（直接读出）。 易错点：忘记 Radon-Nikodym 导数仅在 a.e. 意义下唯一。 可以在零测集上任意修改 \(f\) 的值。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mu \ll \nu\) 的含义是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。绝对连续 \\(\\mu \\ll \\nu\\) 意味着 \\(\\nu\\)-零测集对 \\(\\mu\\)')">A. \(\mu = c \cdot \nu\)（\(c\) 为常数）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！绝对连续 \\(\\mu \\ll \\nu\\) 意味着 \\(\\nu\\)-零测集对 \\(\\mu\\)')">B. \(\nu(E) = 0 \Rightarrow \mu(E) = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。绝对连续 \\(\\mu \\ll \\nu\\) 意味着 \\(\\nu\\)-零测集对 \\(\\mu\\)')">C. \(\mu\) 和 \(\nu\) 有相同的支撑集</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。绝对连续 \\(\\mu \\ll \\nu\\) 意味着 \\(\\nu\\)-零测集对 \\(\\mu\\)')">D. \(\mu \leq \nu\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Lebesgue 分解定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定两个测度 \(\mu\) 和 \(\nu\)，\(\mu\) 不一定绝对连续于 \(\nu\)。 Lebesgue 分解定理说：\(\mu\) 总可以唯一地分解为关于 \(\nu\) 绝对连续的部分和奇异的部分。这一定理将任意测度对之间的关系 完美刻画，是测度论的收尾性定理之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lebesgue 分解是"正交分解"在测度空间中的类比： \(\mu_{ac}\) 对应投影到 \(\nu\) 方向，\(\mu_s\) 对应 垂直于 \(\nu\) 的分量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Lebesgue 分解)</strong>：设 \(\mu, \nu\) 为 σ-有限测度。则 存在唯一的分解 \[\mu = \mu_{ac} + \mu_s\] 其中 \(\mu_{ac} \ll \nu\)，\(\mu_s \perp \nu\)。 <strong>互相奇异</strong> \(\mu_s \perp \nu\)：存在 \(A\) 使 \(\mu_s(A^c) = 0\) 且 \(\nu(A) = 0\)。 <strong>证明思路</strong>：定义 \(\lambda = \mu + \nu\)。\(\mu \ll \lambda\) 且 \(\nu \ll \lambda\)，由 Radon-Nikodym， \(d\mu = f\, d\lambda\), \(d\nu = g\, d\lambda\)。 令 \(A = \{g > 0\}\)，\(B = \{g = 0\}\)。 \(\mu_{ac}(E) = \mu(E \cap A) = \int_{E \cap A} (f/g)\, d\nu\)， \(\mu_s(E) = \mu(E \cap B)\)，且 \(\nu(B) = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：将 \(\mu = \lambda + \delta_0\)（Lebesgue 测度 + Dirac 测度） 关于 \(\lambda\) 做 Lebesgue 分解。 解答：\(\mu_{ac} = \lambda\)（绝对连续于 \(\lambda\)）， \(\mu_s = \delta_0\)（\(\delta_0 \perp \lambda\)，因为 \(\delta_0\) 集中在 \(\{0\}\)，\(\lambda(\{0\}) = 0\)）。 易错点：将 "绝对连续" 和 "互相奇异" 搞混。 \(\mu \ll \nu\)："\(\nu\) 归零则 \(\mu\) 归零"。 \(\mu \perp \nu\)："\(\mu\) 和 \(\nu\) 住在不相交的集合上"。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mu \perp \nu\) 意味着？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。互相奇异意味着两个测度"住在互补的区域"——')">A. \(\mu + \nu = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！互相奇异意味着两个测度"住在互补的区域"——')">B. 存在 \(A\) 使 \(\mu(A^c) = 0\) 且 \(\nu(A) = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。互相奇异意味着两个测度"住在互补的区域"——')">C. \(\mu \ll \nu\) 且 \(\nu \ll \mu\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。互相奇异意味着两个测度"住在互补的区域"——')">D. \(\mu\) 和 \(\nu\) 有相同的零测集</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>条件概率与贝叶斯公式的严格化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>初等概率论中，条件概率 \(P(A|B) = P(A \cap B)/P(B)\) 在 \(P(B) > 0\) 时有定义。但若条件是一个连续随机变量的取值 （如 \(P(A | X = x)\)），分母 \(P(X = x) = 0\)，公式失效。 Radon-Nikodym 定理为条件概率提供了严格的定义： 条件期望就是一个 Radon-Nikodym 导数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>条件期望 \(E[X | \mathcal{G}]\) 是测度论中的"投影"—— 将随机变量投影到子 σ-代数上，类似于 \(L^2\) 中的正交投影。 Radon-Nikodym 导数将这一抽象概念植根于具体的测度关系。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>条件期望的测度论定义</strong>：\(E[X | \mathcal{G}]\) 是唯一的 \(\mathcal{G}\)-可测函数 \(Y\) 满足 \[\int_G Y\, dP = \int_G X\, dP, \quad \forall G \in \mathcal{G}\] 等价地，定义测度 \(\mu(G) = \int_G X\, dP\) 在 \(\mathcal{G}\) 上， 若 \(\mu \ll P|_\mathcal{G}\)，则 \(Y = d\mu / dP|_\mathcal{G}\)。 <strong>贝叶斯公式的 RN 表达</strong>：若 \(P_0, P_1\) 是两个概率测度， \(P_1 \ll P_0\)，令 \(L = dP_1/dP_0\)（似然比），则对事件 \(A\)： \[P_1(A) = E_{P_0}[L \cdot \mathbf{1}_A]\] 这推广了经典贝叶斯公式到一般测度空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>统计推断：假设检验中的 Neyman-Pearson 引理以似然比 \(dP_1/dP_0\) 为检验统计量；机器学习中的重要性采样 基于密度比 \(dP/dQ\) 校正样本权重。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：设 \(X \sim \text{Exp}(\lambda)\)，\(Y = \mathbf{1}_{\{X > 1\}}\)。 求 \(E[X | Y]\)。 解答：\(\sigma(Y) = \{\emptyset, \{X > 1\}, \{X \leq 1\}, \Omega\}\)， \(E[X | Y]\) 在 \(\{X > 1\}\) 上等于 \(E[X | X > 1] = 1 + 1/\lambda\) （无记忆性），在 \(\{X \leq 1\}\) 上等于 \(E[X | X \leq 1] = \frac{\int_0^1 x \lambda e^{-\lambda x} dx}{1 - e^{-\lambda}}\)。 易错点：试图对连续随机变量写 \(P(A | X = x)\) 时除以 \(P(X = x) = 0\)。正确做法是用条件密度或 RN 导数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">条件期望 \(E[X|\mathcal{G}]\) 在测度论中对应什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(E[X|\\mathcal{G}]\\) 是测度 \\(\\mu(G) = \\int_G X\\, dP\\)')">A. 一个实数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(E[X|\\mathcal{G}]\\) 是测度 \\(\\mu(G) = \\int_G X\\, dP\\)')">B. 一个 Radon-Nikodym 导数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(E[X|\\mathcal{G}]\\) 是测度 \\(\\mu(G) = \\int_G X\\, dP\\)')">C. 一个条件概率</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(E[X|\\mathcal{G}]\\) 是测度 \\(\\mu(G) = \\int_G X\\, dP\\)')">D. 一个 σ-代数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch06.html" class="nav-prev">← Ch.6</a>
+      <a href="../../../modules/analysis/real-analysis.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

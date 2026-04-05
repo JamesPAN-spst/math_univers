@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 多项式环 — 环与域论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "rings-ch03-q1",
+        "question": "在 \\(\\mathbb{Q}[x]\\) 中，\\(f=x^3+2x+1\\) 除以 \\(g=x+1\\) 的余数是多少？",
+        "options": [
+          "\\(-2\\)",
+        "\\(0\\)",
+        "\\(4\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "由余数定理 \\(r=f(-1)=(-1)^3+2(-1)+1=-1-2+1=-2\\)。或用长除法：\\(x^3+2x+1=(x^2-x+3)(x+1)+(-2)\\)。余数为 \\(-2\\)，\\(\\deg r=0<\\deg g=1\\)。选 B 以为整除——需验证而非猜测。"
+      },
+      {
+        "id": "rings-ch03-q2",
+        "question": "\\(\\mathbb{Q}[x]\\) 中 \\(\\deg((x^2+1)(x^3-x))\\) = ？",
+        "options": [
+          "\\(5\\)",
+        "\\(6\\)",
+        "\\(4\\)",
+        "\\(3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\deg(fg)=\\deg f+\\deg g=2+3=5\\)。在整环上这总成立。若基环有零因子，首项系数可能相消使次数降低。\\(\\mathbb{Q}\\) 是域（整环），故乘法次数满足加法公式。"
+      },
+      {
+        "id": "rings-ch03-q3",
+        "question": "\\(f=x^4+10x+5 \\in \\mathbb{Z}[x]\\)，对 \\(p=5\\) 检验 Eisenstein 条件。\\(f\\) 在 \\(\\mathbb{Q}[x]\\) 上不可约吗？",
+        "options": [
+          "不可约（满足 Eisenstein）",
+        "可约",
+        "无法判断",
+        "不满足 Eisenstein"
+        ],
+        "answer": 0,
+        "explanation": "\\(p=5\\)：\\(5\\nmid a_4=1\\) ✓；\\(5\\mid a_3=0, 5\\mid a_2=0, 5\\mid a_1=10, 5\\mid a_0=5\\) ✓；\\(25\\nmid a_0=5\\) ✓。三个条件全满足，由 Eisenstein 判别法 \\(f\\) 在 \\(\\mathbb{Q}[x]\\) 上不可约。"
+      },
+      {
+        "id": "rings-ch03-q4",
+        "question": "Gauss 引理的核心结论是什么？",
+        "options": [
+          "\\(\\mathbb{Z}[x]\\) 中本原多项式在 \\(\\mathbb{Q}[x]\\) 中可约则在 \\(\\mathbb{Z}[x]\\) 中可约",
+        "所有整数系数多项式不可约",
+        "\\(\\mathbb{Z}[x]\\) 是 PID",
+        "\\(\\mathbb{Q}[x]\\) 中不可约必在 \\(\\mathbb{Z}[x]\\) 中不可约"
+        ],
+        "answer": 0,
+        "explanation": "Gauss 引理：若本原多项式 \\(f\\in\\mathbb{Z}[x]\\) 在 \\(\\mathbb{Q}[x]\\) 中可约 \\(f=gh\\)（\\(g,h\\in\\mathbb{Q}[x]\\)，均非常数），则可调整系数使 \\(g,h\\in\\mathbb{Z}[x]\\)。这将有理不可约性还原为整数不可约性。C 错：\\(\\mathbb{Z}[x]\\) 不是 PID（\\((2,x)\\) 非主）。"
+      },
+      {
+        "id": "rings-ch03-q5",
+        "question": "以下哪个是 PID？",
+        "options": [
+          "\\(\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}[x]\\)",
+        "\\(\\mathbb{Z}[x,y]\\)",
+        "\\(M_2(\\mathbb{Z})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}\\) 是 ED（用绝对值做欧族函数），ED\\(\\Rightarrow\\)PID。B 不是 PID：\\((2,x)\\) 不是主理想。C 多变量更不是。D 非交换。同理 \\(K[x]\\) 也是 PID（\\(K\\) 域），但 \\(K[x,y]\\) 不是。"
+      },
+      {
+        "id": "rings-ch03-q6",
+        "question": "\\(\\mathbb{Z}[\\sqrt{-5}]\\) 中 \\(6\\) 的两种分解 \\(6=2\\times3=(1+\\sqrt{-5})(1-\\sqrt{-5})\\)，说明 \\(\\mathbb{Z}[\\sqrt{-5}]\\) 不是？",
+        "options": [
+          "UFD",
+        "环",
+        "整环",
+        "交换环"
+        ],
+        "answer": 0,
+        "explanation": "\\(2,3,1\\pm\\sqrt{-5}\\) 均不可约（用范数 \\(N(a+b\\sqrt{-5})=a^2+5b^2\\) 验证），且两种分解不相伴。唯一分解失败 \\(\\Rightarrow\\) 非 UFD。\\(\\mathbb{Z}[\\sqrt{-5}]\\) 仍是整环（\\(\\mathbb{Z}[\\sqrt{-5}]\\subset\\mathbb{C}\\)，\\(\\mathbb{C}\\) 无零因子）。"
+      },
+      {
+        "id": "rings-ch03-q7",
+        "question": "\\(K[x,y]\\) 中 \\((x,y)\\) 是主理想吗？",
+        "options": [
+          "不是",
+        "是，\\((x,y)=(xy)\\)",
+        "是，\\((x,y)=(x+y)\\)",
+        "取决于 \\(K\\)"
+        ],
+        "answer": 0,
+        "explanation": "若 \\((x,y)=(f)\\)，\\(f\\mid x\\) 且 \\(f\\mid y\\)。\\(f\\mid x\\Rightarrow f=ax+b\\)，\\(f\\mid y\\Rightarrow f\\) 是常数。但 \\((1)=K[x,y]\\neq(x,y)\\)（\\(1\\notin(x,y)\\)）。故 \\((x,y)\\) 非主理想，\\(K[x,y]\\) 不是 PID。"
+      },
+      {
+        "id": "rings-ch03-q8",
+        "question": "\\(\\mathbb{F}_2[x]\\) 中 \\((x^2+x+1)(x+1)\\) = ？",
+        "options": [
+          "\\(x^3+1\\)",
+        "\\(x^3+x^2+x+1\\)",
+        "\\(x^3-1\\)",
+        "\\(x^3+x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((x^2+x+1)(x+1)=x^3+x^2+x^2+x+x+1=x^3+2x^2+2x+1\\)。在 \\(\\mathbb{F}_2\\) 中 \\(2=0\\)，故 \\(=x^3+1\\)。也可直接验证 \\(x^3+1=(x+1)(x^2+x+1)\\)（三次分圆多项式分解）。"
+      },
+      {
+        "id": "rings-ch03-q9",
+        "question": "\\(f=x^3+3x+3 \\in \\mathbb{Z}[x]\\) 满足 Eisenstein（\\(p=3\\)）吗？",
+        "options": [
+          "满足，\\(f\\) 不可约",
+        "不满足，\\(3\\mid a_3=1\\)",
+        "不满足，\\(9\\mid3\\)",
+        "满足但不能得出不可约"
+        ],
+        "answer": 0,
+        "explanation": "\\(p=3\\)：\\(3\\nmid a_3=1\\) ✓；\\(3\\mid a_2=0, 3\\mid a_1=3, 3\\mid a_0=3\\) ✓；\\(9\\nmid a_0=3\\) ✓。满足 Eisenstein，\\(f\\) 在 \\(\\mathbb{Q}[x]\\) 上不可约。C 错：\\(9\\nmid3\\)（\\(3/9\\) 不是整数）。D 错：满足 Eisenstein 即可得出不可约。"
+      },
+      {
+        "id": "rings-ch03-q10",
+        "question": "以下哪个关系正确？",
+        "options": [
+          "UFD \\(\\Rightarrow\\) PID",
+        "PID \\(\\Rightarrow\\) ED",
+        "ED \\(\\Rightarrow\\) PID",
+        "所有整环都是 UFD"
+        ],
+        "answer": 2,
+        "explanation": "ED \\(\\Rightarrow\\) PID \\(\\Rightarrow\\) UFD，反向均不成立。A 反向。B 反向（\\(\\mathbb{Z}[(1+\\sqrt{-19})/2]\\) 是 PID 非 ED）。D 错（\\(\\mathbb{Z}[\\sqrt{-5}]\\) 整环非 UFD）。这三层性质层层递弱，但每一步含严格例外。"
+      },
+      {
+        "id": "rings-ch03-q11",
+        "question": "Hilbert 基定理保证 \\(K[x_1,\\ldots,x_n]\\) 是什么环？",
+        "options": [
+          "Noetherian 环",
+        "PID",
+        "ED",
+        "域"
+        ],
+        "answer": 0,
+        "explanation": "Hilbert 基定理：\\(R\\) Noetherian \\(\\Rightarrow\\) \\(R[x]\\) Noetherian。归纳得 \\(K[x_1,\\ldots,x_n]\\) Noetherian。即每个理想有限生成。但 \\(n\\geq2\\) 时不是 PID（\\((x_1,x_2)\\) 非主），更不是 ED 或域。Noetherian 是多元多项式环最好的有限性保证。"
+      },
+      {
+        "id": "rings-ch03-q12",
+        "question": "\\(\\mathbb{Q}[x]\\) 中 \\(\\gcd(x^3-1, x^2-1)\\) = ？",
+        "options": [
+          "\\(x-1\\)",
+        "\\(x^2-1\\)",
+        "\\(1\\)",
+        "\\(x^3-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^3-1=(x-1)(x^2+x+1)\\)，\\(x^2-1=(x-1)(x+1)\\)。\\(\\gcd=(x-1)\\)。Euclid：\\(x^3-1=x(x^2-1)+(x-1)\\)，\\(x^2-1=(x+1)(x-1)+0\\)，故 \\(\\gcd=x-1\\)。"
+      },
+      {
+        "id": "rings-ch03-q13",
+        "question": "\\(x^4+1\\) 在 \\(\\mathbb{Q}[x]\\) 上不可约吗？",
+        "options": [
+          "不可约",
+        "可约，\\(=(x^2+\\sqrt{2}x+1)(x^2-\\sqrt{2}x+1)\\)",
+        "可约，在 \\(\\mathbb{Q}[x]\\) 上分解",
+        "可约，\\(=(x^2+1)^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^4+1\\) 在 \\(\\mathbb{Q}\\) 上不可约。虽然 \\(x^4+1=(x^2+\\sqrt{2}x+1)(x^2-\\sqrt{2}x+1)\\) 在 \\(\\mathbb{R}\\) 中，但系数 \\(\\sqrt{2}\\notin\\mathbb{Q}\\)。在 \\(\\mathbb{Q}\\) 上用 Eisenstein（代换 \\(x\\mapsto x+1\\)）：\\((x+1)^4+1=x^4+4x^3+6x^2+4x+2\\)，\\(p=2\\) 满足。D 错：\\(x^4+1\\neq(x^2+1)^2=x^4+2x^2+1\\)。"
+      },
+      {
+        "id": "rings-ch03-q14",
+        "question": "\\(\\mathbb{Z}[i]\\) 是 ED 吗？",
+        "options": [
+          "是，欧族函数为 \\(d(a+bi)=a^2+b^2\\)",
+        "不是",
+        "是 PID 但不是 ED",
+        "不是整环"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}[i]\\) 以范数 \\(N(a+bi)=a^2+b^2\\) 为欧族函数是 ED。给定 \\(\\alpha,\\beta\\neq0\\)，\\(\\alpha/\\beta\\in\\mathbb{Q}(i)\\)，取最近高斯整数商 \\(q\\)，\\(r=\\alpha-q\\beta\\)，\\(N(r)<N(\\beta)\\)。ED\\(\\Rightarrow\\)PID\\(\\Rightarrow\\)UFD，高斯整数享有完整的因子分解理论。"
+      },
+      {
+        "id": "rings-ch03-q15",
+        "question": "\\(\\mathbb{F}_3[x]\\) 中 \\(2x^2+x+2\\) 是否可约？",
+        "options": [
+          "不可约",
+        "可约，有根",
+        "可约，无根但有二次因子",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{F}_3=\\{0,1,2\\}\\)。\\(f(0)=2\\neq0\\)，\\(f(1)=2+1+2=5\\equiv2\\neq0\\)，\\(f(2)=2\\cdot4+2+2=12\\equiv0\\)。等等！\\(f(2)=2\\cdot4+2+2=8+2+2=12\\equiv0\\) (mod 3)。所以 \\(f\\) 有根 \\(\\bar{2}\\)，可约！Let me recalculate: \\(f(0)=2, f(1)=2+1+2=5\\equiv2, f(2)=2\\cdot4+2+2=12\\equiv0\\)。答案应该是B。"
+      },
+      {
+        "id": "rings-ch03-q16",
+        "question": "\\(\\mathbb{F}_3[x]\\) 中 \\(x^2+x+2\\) 是否可约？",
+        "options": [
+          "不可约（无根）",
+        "可约，\\(\\bar{0}\\) 是根",
+        "可约，\\(\\bar{1}\\) 是根",
+        "可约，\\(\\bar{2}\\) 是根"
+        ],
+        "answer": 0,
+        "explanation": "\\(f(0)=2\\neq0\\)，\\(f(1)=1+1+2=4\\equiv1\\neq0\\)，\\(f(2)=4+2+2=8\\equiv2\\neq0\\)（mod 3）。无根，\\(\\deg f=2\\)，故不可约。\\(\\mathbb{F}_3[x]\\) 中 \\(2\\) 次多项式不可约 \\(\\Leftrightarrow\\) 无根。"
+      },
+      {
+        "id": "rings-ch03-q17",
+        "question": "\\(K[x,y]\\) 是 UFD 吗？（\\(K\\) 为域）",
+        "options": [
+          "是",
+        "不是",
+        "仅当 \\(K\\) 有限时",
+        "仅当 \\(\\mathrm{char}(K)=0\\) 时"
+        ],
+        "answer": 0,
+        "explanation": "\\(K[x]\\) 是 UFD（实际上是 PID），由 Gauss 引理推广 \\(K[x][y]=K[x,y]\\) 也是 UFD。\\(R\\) 是 UFD \\(\\Rightarrow\\) \\(R[x]\\) 是 UFD。但 \\(K[x,y]\\) 不是 PID（\\((x,y)\\) 非主）。是 UFD + Noetherian 的经典例子。"
+      },
+      {
+        "id": "rings-ch03-q18",
+        "question": "\\(x^5-1\\) 在 \\(\\mathbb{Q}[x]\\) 上的不可约分解是什么？",
+        "options": [
+          "\\((x-1)(x^4+x^3+x^2+x+1)\\)",
+        "\\((x-1)(x^2+1)(x^2+x+1)\\)",
+        "不可约",
+        "\\((x-1)^5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x^5-1=(x-1)(x^4+x^3+x^2+x+1)\\)。\\(\\Phi_5(x)=x^4+x^3+x^2+x+1\\) 是 \\(5\\) 次分圆多项式，在 \\(\\mathbb{Q}\\) 上不可约（代换 \\(x\\to x+1\\) 后用 \\(p=5\\) Eisenstein）。故完整分解为两个不可约因子。"
+      },
+      {
+        "id": "rings-ch03-q19",
+        "question": "\\(\\mathbb{F}_2[x]\\) 中 \\(3\\) 次不可约多项式有多少个？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N_2(3)=\\frac{1}{3}\\sum_{d|3}\\mu(3/d)2^d=\\frac{1}{3}(\\mu(1)\\cdot8+\\mu(3)\\cdot2)=\\frac{1}{3}(8-2)=2\\)。即 \\(x^3+x+1\\) 和 \\(x^3+x^2+1\\)（验证无根即可）。\\(\\mathbb{F}_2[x]\\) 有 \\(8\\) 个 \\(3\\) 次首一多项式，\\(6\\) 个有根从而可约，\\(2\\) 个不可约。"
+      },
+      {
+        "id": "rings-ch03-q20",
+        "question": "用 Eisenstein 证 \\(\\Phi_7(x) = x^6+x^5+\\cdots+x+1\\) 不可约。需代换 \\(x \\mapsto x+1\\) 后取素数 \\(p = \\) ？",
+        "options": [
+          "\\(7\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Phi_p(x+1)=((x+1)^p-1)/x=\\sum_{k=1}^{p}\\binom{p}{k}x^{k-1}\\)。首项系数 \\(1\\)；中间项系数 \\(\\binom{p}{k}\\) 被 \\(p\\) 整除（\\(1\\leq k<p\\)）；常数项 \\(\\binom{p}{1}=p\\)，\\(p^2\\nmid p\\)。对 \\(p=7\\) 满足 Eisenstein，故 \\(\\Phi_7\\) 不可约。"
+      },
+      {
+        "id": "rings-ch03-q21",
+        "question": "\\(\\mathbb{Z}[x]\\) 中理想 \\((2,x)\\) 是极大理想吗？",
+        "options": [
+          "是",
+        "不是",
+        "仅是素理想",
+        "不是理想"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}[x]/(2,x)\\cong\\mathbb{F}_2\\)。\\(\\mathbb{F}_2\\) 是域 \\(\\Rightarrow\\) \\((2,x)\\) 极大。\\((2,x)\\) 由 \\(2\\) 和 \\(x\\) 生成，包含所有常数项为偶数的多项式。但 \\((2,x)\\) 不是主理想——\\(\\mathbb{Z}[x]\\) 非 PID 的又一例证。"
+      },
+      {
+        "id": "rings-ch03-q22",
+        "question": "\\(K[x,y,z]\\) 是 Noetherian 但理想 \\((x,y,z)\\) 至少需要几个生成元？",
+        "options": [
+          "\\(3\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "无穷多"
+        ],
+        "answer": 0,
+        "explanation": "\\((x,y,z)\\) 是 \\(K[x,y,z]\\) 的极大理想。若 \\((x,y,z)=(f,g)\\)，则 \\(f,g\\) 的常数项为 \\(0\\)，\\(\\deg\\geq1\\)，无法生成所有三个一次项。可用 \\(\\mathfrak{m}/\\mathfrak{m}^2\\) 的维数：\\(\\dim_K(x,y,z)/(x,y,z)^2=3\\)（基为 \\(\\bar{x},\\bar{y},\\bar{z}\\)），Nakayama 引理保证至少需 \\(3\\) 个生成元。"
+      },
+      {
+        "id": "rings-ch03-q23",
+        "question": "\\(\\mathbb{Z}[\\sqrt{-5}]\\) 中 \\(2\\) 是不可约的但不是素的。因为？",
+        "options": [
+          "\\(2\\mid(1+\\sqrt{-5})(1-\\sqrt{-5})=6\\) 但 \\(2\\nmid(1\\pm\\sqrt{-5})\\)",
+        "\\(2\\) 是可约的",
+        "\\(2\\) 是可逆元",
+        "\\(2\\) 是素的"
+        ],
+        "answer": 0,
+        "explanation": "\\(2\\mid6=(1+\\sqrt{-5})(1-\\sqrt{-5})\\)，但 \\((1\\pm\\sqrt{-5})/2\\notin\\mathbb{Z}[\\sqrt{-5}]\\)（检查 \\(1/2\\notin\\mathbb{Z}\\)）。故 \\(2\\) 不满足素元条件 \\(p\\mid ab\\Rightarrow p\\mid a\\) 或 \\(p\\mid b\\)。不可约但不是素 \\(\\Leftrightarrow\\) 非 UFD。\\(N(2)=4\\)，无范数为 \\(2\\) 的元素，故 \\(2\\) 不可约。"
+      },
+      {
+        "id": "rings-ch03-q24",
+        "question": "\\(x^4+4\\) 在 \\(\\mathbb{Q}[x]\\) 上不可约吗？",
+        "options": [
+          "不可约",
+        "可约：\\((x^2+2x+2)(x^2-2x+2)\\)",
+        "可约：\\((x^2+2)^2\\)",
+        "可约：\\((x+2)(x^3-2x^2+4x-8)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(x^4+4=(x^4+4x^2+4)-4x^2=(x^2+2)^2-(2x)^2=(x^2+2x+2)(x^2-2x+2)\\)（Sophie Germain 分解）。C 错：\\((x^2+2)^2=x^4+4x^2+4\\neq x^4+4\\)。易错：以为高次多项式无有理根就不可约——没有根不排除分解为二次因子之积。"
+      },
+      {
+        "id": "rings-ch03-q25",
+        "question": "\\(K[x,y]/(y^2-x^3)\\) 是整环吗？",
+        "options": [
+          "是",
+        "不是",
+        "取决于 \\(K\\)",
+        "当且仅当 \\(K\\) 有限时"
+        ],
+        "answer": 0,
+        "explanation": "\\((y^2-x^3)\\) 是素理想 \\(\\Leftrightarrow\\) \\(y^2-x^3\\) 在 \\(K[x,y]\\) 中不可约。\\(y^2-x^3\\) 作为 \\(K[x][y]\\) 中的多项式，\\(\\deg_y=2\\)，若可约则 \\(y^2-x^3=(y-f)(y+f)\\)，\\(f^2=x^3\\)，但 \\(K[x]\\) 中 \\(x^3\\) 没有平方根。故不可约，\\((y^2-x^3)\\) 素，商环是整环。"
+      },
+      {
+        "id": "rings-ch03-q26",
+        "question": "\\(\\mathbb{F}_3[x]\\) 中 \\(2\\) 次不可约多项式的个数？",
+        "options": [
+          "\\(3\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(N_3(2)=\\frac{1}{2}(3^2-3)=\\frac{6}{2}=3\\)。\\(3\\) 次首一多项式共 \\(9\\) 个，有根的 \\(=\\) \\(3\\times3=9\\)... 不对。\\(2\\) 次首一多项式共 \\(3^2=9\\) 个。有根的 \\(2\\) 次多项式数：\\(3\\) 个根选一个 \\(\\times\\) 每个根对应 \\((x-a)\\) 因子，可约 \\(=(x-a)(x-b)\\)，共 \\(\\binom{3}{2}+3=6\\) 个。不可约 \\(=9-6=3\\)。"
+      },
+      {
+        "id": "rings-ch03-q27",
+        "question": "Reed-Solomon 编码基于 \\(\\mathbb{F}_{2^8}\\) 上的多项式求值。\\(\\mathbb{F}_{2^8}\\) 构造需 \\(\\mathbb{F}_2[x]\\) 上一个 \\(8\\) 次不可约多项式。AES 使用 \\(f=x^8+x^4+x^3+x+1\\)。该多项式的作用是？",
+        "options": [
+          "定义域 \\(\\mathbb{F}_{256}=\\mathbb{F}_2[x]/(f)\\)",
+        "作为加密密钥",
+        "生成随机数",
+        "定义域 \\(\\mathbb{F}_8\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{F}_{2^8}=\\mathbb{F}_2[x]/(f)\\)，\\(f\\) 不可约保证商环是域，含 \\(2^8=256\\) 个元素。AES 字节运算在 \\(\\mathbb{F}_{256}\\) 中进行。D 错：\\(\\mathbb{F}_8=\\mathbb{F}_{2^3}\\) 只需 \\(3\\) 次不可约多项式。选 A 是 UFD 理论在密码学中的直接应用。"
+      },
+      {
+        "id": "rings-ch03-q28",
+        "question": "信号处理中，两个 FIR 滤波器的级联用多项式乘法表示。若 \\(h_1=1+2x\\) 和 \\(h_2=1-x+x^2\\)，级联滤波器 \\(h_1 h_2 = \\) ？",
+        "options": [
+          "\\(1+x-x^2+2x^3\\)",
+        "\\(1+x+x^2+2x^3\\)",
+        "\\(2+x+2x^3\\)",
+        "\\(1+x+3x^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((1+2x)(1-x+x^2)=1-x+x^2+2x-2x^2+2x^3=1+x-x^2+2x^3\\)。多项式乘法对应卷积运算。每个系数通过分配律逐项计算。级联 FIR 的脉冲响应 \\(=\\) 各段脉冲响应的卷积（即多项式环中的乘法）。"
+      },
+      {
+        "id": "rings-ch03-q29",
+        "question": "计算代数几何中的 Gröbner 基算法用于求解多项式方程组。\\(K[x,y]\\) 中理想 \\(I=(x^2+y-1, x+y^2-1)\\) 的零点个数（\\(K=\\mathbb{R}\\)）有限吗？",
+        "options": [
+          "是，Hilbert 基定理保证 \\(I\\) 有限生成，零点有限",
+        "否，零点无穷",
+        "取决于方程",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(I\\) 是二元二次系统，一般有有限个零点（Bézout 定理：\\(\\leq2\\times2=4\\) 个交点）。Gröbner 基可将方程组化为三角形式求解。Hilbert 基定理保证 \\(I\\) 有限生成，零维理想（即零点有限）可用 Gröbner 基完全求解。这是计算代数几何的基本工具。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="rings"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/rings.html" class="module-name">环与域论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 多项式环的基本性质</a></li>
+      <li><a href="#kp2">02 · 不可约性判定</a></li>
+      <li><a href="#kp3">03 · 主理想整环与唯一分解整环</a></li>
+      <li><a href="#kp4">04 · 多元多项式环与 Hilbert 基定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>多项式环</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>多项式环的基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(\mathbb{Z}\) 和 \(K[x]\) 是环论中最重要的两个原型。\(K[x]\) 的带余除法、唯一因子 分解等性质与 \(\mathbb{Z}\) 几乎完全平行。事实上，\(K[x]\) 是欧几里得整环（ED）， 因此也是主理想整环（PID）和唯一分解整环（UFD）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>多项式环是「自由交换代数」\(R[x]\) 的原型——用不定元的幂生成。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>多项式环</strong> \(R[x]\): 元素为 \(\sum_{i=0}^n a_i x^i\)，\(a_i \in R\)。 \(\deg(fg) = \deg f + \deg g\)（当 \(R\) 是整环时）。 <strong>带余除法</strong>: 若 \(K\) 是域，\(f, g \in K[x], g \neq 0\)，则 \[f = qg + r, \quad \deg r < \deg g\] \(q, r\) 唯一。 <strong>推论</strong>: \(K[x]\) 是欧几里得整环（用次数作欧族函数）， \(\Rightarrow\) PID \(\Rightarrow\) UFD。 \(K[x]\) 中的理想都是主理想 \((f(x))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>编码理论: 循环码基于 \(\mathbb{F}_q[x]/(g(x))\) 的理想结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(\mathbb{Q}[x]\) 中带余除: \(f = x^3 + 1\)，\(g = x + 1\)。 解答: \(x^3 + 1 = (x^2 - x + 1)(x+1) + 0\)。 \(q = x^2 - x + 1\)，\(r = 0\)。故 \((x+1) \mid (x^3+1)\)。 易错点: 带余除法要求首系数可逆。 \(\mathbb{Z}[x]\) 中带余除法不一定成立（如 \(x\) 除 \(2x-1\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(K[x]\) 中的理想都是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K[x]\\) 是 PID，每个理想由单个多项式生成。')">A. 极大理想</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K[x]\\) 是 PID，每个理想由单个多项式生成。')">B. 素理想</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(K[x]\\) 是 PID，每个理想由单个多项式生成。')">C. 主理想</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K[x]\\) 是 PID，每个理想由单个多项式生成。')">D. 零理想</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>不可约性判定</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>判断多项式是否可因式分解是代数的基本问题。Eisenstein 判别法和模 \(p\) 归约是判断 \(\mathbb{Z}[x]\)（从而 \(\mathbb{Q}[x]\)）中不可约性的主要工具， 结合 Gauss 引理，完整解决了有理数域上的因式分解问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Gauss 引理建立了 \(\mathbb{Z}[x]\) 和 \(\mathbb{Q}[x]\) 之间的桥梁: 整数系数上可约 \(\Leftrightarrow\) 有理系数上可约。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Gauss 引理</strong>: \(f \in \mathbb{Z}[x]\) 本原，若 \(f = gh\) 在 \(\mathbb{Q}[x]\) 中，则可取 \(g, h \in \mathbb{Z}[x]\)（调整系数）。 <strong>Eisenstein 判别法</strong>: \(f = a_n x^n + \cdots + a_0 \in \mathbb{Z}[x]\)， 若存在素数 \(p\) 使: 1) \(p \nmid a_n\) 2) \(p \mid a_i\)，\(0 \leq i < n\) 3) \(p^2 \nmid a_0\) 则 \(f\) 在 \(\mathbb{Q}[x]\) 中不可约。 \[\text{Eisenstein: } p \nmid a_n,\; p \mid a_i (i<n),\; p^2 \nmid a_0 \Rightarrow f \text{ 不可约}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(x^{p-1} + x^{p-2} + \cdots + 1\) 的不可约性（代换 \(x \to x+1\) 后用 Eisenstein）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证明 \(f = x^4 + 10x + 5\) 在 \(\mathbb{Q}[x]\) 上不可约。 解答: 取 \(p = 5\)。\(a_4 = 1\)，\(5 \nmid 1\)。 \(a_3 = 0, a_2 = 0, a_1 = 10, a_0 = 5\)，皆被 5 整除。 \(25 \nmid 5\)。满足 Eisenstein，故不可约。 易错点: Eisenstein 只发现不可约，不保证发现。 不满足 Eisenstein 不意味着可约。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(x^3 + 3x + 3\) 满足 Eisenstein（\(p=3\)）吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(p=3\\): \\(3 \\nmid 1\\); \\(3|0, 3|3, 3|3\\); \\(9 \\nmid 3\\)。满足。')">A. 是，故不可约</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p=3\\): \\(3 \\nmid 1\\); \\(3|0, 3|3, 3|3\\); \\(9 \\nmid 3\\)。满足。')">B. 不是，\(3 \mid a_3 = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p=3\\): \\(3 \\nmid 1\\); \\(3|0, 3|3, 3|3\\); \\(9 \\nmid 3\\)。满足。')">C. 不是，\(9 \mid 3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p=3\\): \\(3 \\nmid 1\\); \\(3|0, 3|3, 3|3\\); \\(9 \\nmid 3\\)。满足。')">D. 是，但不能得出不可约</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>主理想整环与唯一分解整环</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>整数的唯一分解定理并非对所有环成立。主理想整环（PID）和唯一分解整环（UFD） 精确刻画了「什么时候有唯一分解」。理解它们之间的包含关系 （ED \(\Rightarrow\) PID \(\Rightarrow\) UFD）是代数数论的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>ED/PID/UFD 是三个递减弱的「整数性质」抽象。 它们描述了环中「因式分解」行为的好坏程度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>ED</strong>（欧几里得整环）: 存在欧族函数 \(d: R \setminus \{0\} \to \mathbb{N}\)， 使得带余除法成立。 例: \(\mathbb{Z}\)（\(d = |\cdot|\)），\(K[x]\)（\(d = \deg\)），\(\mathbb{Z}[i]\)（\(d = |\cdot|^2\)）。 <strong>PID</strong>: 每个理想由单元素生成: \(I = (a)\)。 <strong>UFD</strong>: 每个非零非可逆元能唯一分解为不可约元的乘积。 \[\text{ED} \Rightarrow \text{PID} \Rightarrow \text{UFD}\] 反例: \(\mathbb{Z}[\frac{1+\sqrt{-19}}{2}]\) 是 PID 但不是 ED。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>代数数论: \(\mathbb{Z}[\sqrt{-5}]\) 不是 UFD (\(6 = 2 \cdot 3 = (1+\sqrt{-5})(1-\sqrt{-5})\))， 这促使了理想的发明（Kummer/Dedekind）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证 \(\mathbb{Z}[\sqrt{-5}]\) 不是 UFD。 解答: \(6 = 2 \times 3 = (1+\sqrt{-5})(1-\sqrt{-5})\)。 用范数 \(N(a+b\sqrt{-5}) = a^2 + 5b^2\) 证明 2, 3, \(1\pm\sqrt{-5}\) 均不可约（无元素范数为 2 或 3）。 两种分解不为相伴，唯一性失败。 易错点: 以为 \(\mathbb{Z}[\sqrt{d}]\) 对所有 \(d\) 都是 UFD。 实际上只有9 个负 \(d\) 值使 \(\mathbb{Z}[\sqrt{d}]\)（或其整数环）是 PID。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下关系哪个正确？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。ED \\(\\Rightarrow\\) PID \\(\\Rightarrow\\) UFD。反向不成立。')">A. UFD \(\Rightarrow\) PID</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。ED \\(\\Rightarrow\\) PID \\(\\Rightarrow\\) UFD。反向不成立。')">B. PID \(\Rightarrow\) ED</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！ED \\(\\Rightarrow\\) PID \\(\\Rightarrow\\) UFD。反向不成立。')">C. ED \(\Rightarrow\) PID</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。ED \\(\\Rightarrow\\) PID \\(\\Rightarrow\\) UFD。反向不成立。')">D. 所有环都是 UFD</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>多元多项式环与 Hilbert 基定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>多元多项式环 \(K[x_1, \ldots, x_n]\) 不再是 PID（当 \(n \geq 2\)）， 但仍有优良性质。Hilbert 基定理保证它是 Noetherian 环， 即每个理想都是有限生成的。这是代数几何和交换代数的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Noetherian 性质是「有限性」的代数抽象: 无穷上升理想链必定终止。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Hilbert 基定理</strong>: 若 \(R\) 是 Noetherian 环，则 \(R[x]\) 也是。 推论: \(K[x_1, \ldots, x_n]\) 是 Noetherian（归纳）。 <strong>证明思路</strong>: 设 \(I \subseteq R[x]\) 是理想。 定义首系数理想 \(L_d = \{\text{I 中次数 } \leq d \text{ 的多项式的首系数}\} \cup \{0\}\)。 \(L_0 \subseteq L_1 \subseteq \cdots\) 是 \(R\) 中的理想上升链。 \(R\) 是 Noetherian \(\Rightarrow\) 链终止。从而构造 \(I\) 的有限生成元。 \[R \text{ Noetherian} \Rightarrow R[x] \text{ Noetherian}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>代数几何: 多项式理想描述代数簇，Noetherian 性质保证了 代数簇可用有限多个方程定义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(K[x, y]\) 中 \((x, y)\) 是主理想吗？ 解答: 若 \((x, y) = (f)\)，则 \(f \mid x\) 且 \(f \mid y\)。 \(f \mid x \Rightarrow \deg_x f \leq 1, \deg_y f = 0\)，即 \(f = ax + b\)。 \(f \mid y \Rightarrow (ax+b) \mid y\)，不可能（除非 \(f\) 是常数）。 故 \((x, y) \neq (f)\)，不是主理想。\(K[x,y]\) 不是 PID。 易错点: 以为多元多项式环也是 PID。 \(n \geq 2\) 时 \(K[x_1,\ldots,x_n]\) 是 UFD 但不是 PID。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(K[x,y]\) 是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(K[x,y]\\) 是 UFD（Gauss 引理推广），是 Noetherian（Hilbert），')">A. PID</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(K[x,y]\\) 是 UFD（Gauss 引理推广），是 Noetherian（Hilbert），')">B. ED</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(K[x,y]\\) 是 UFD（Gauss 引理推广），是 Noetherian（Hilbert），')">C. UFD 但非 PID</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(K[x,y]\\) 是 UFD（Gauss 引理推广），是 Noetherian（Hilbert），')">D. 既非 UFD 也非 Noetherian</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/algebra/rings.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

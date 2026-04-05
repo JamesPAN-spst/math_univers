@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 动态博弈与子博弈完美 — 博弈论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "game-theory-ch04-q1",
+        "question": "博弈树（game tree）由哪些元素组成？",
+        "options": [
+          "节点（决策点）、边（行动）、信息集、终端节点（收益）  B) 仅节点和边  C) 仅收益  D) 与图论无关"
+        ],
+        "answer": 0,
+        "explanation": "扩展式博弈：树根 = 初始节点；每个非终端节点属于某个参与者（或\"自然\"——随机事件）；信息集 = 参与者无法区分的节点集合（完美信息时每个信息集是单点）；终端节点附带各玩家收益向量。例：国际象棋的博弈树有 \\(\\sim10^{43}\\) 个节点。"
+      },
+      {
+        "id": "game-theory-ch04-q2",
+        "question": "完美信息博弈（如国际象棋）中，Zermelo 定理（1913）的结论是什么？",
+        "options": [
+          "任何有限完美信息博弈（两人零和）有确定的结果：第一个玩家必胜/必和/必负  B) 博弈无法求解  C) 随机最优  D) 仅适用于 \\(2\\times2\\)"
+        ],
+        "answer": 0,
+        "explanation": "Zermelo：有限博弈树可通过逆向归纳从叶子到根求解。每个节点的值被唯一确定（假设双方最优行动）。国际象棋：理论上结果确定（很可能是和棋），但树太大无法完全求解。井字棋：\\(O(10^5)\\) 节点→完全求解→最优策略是和棋。Connect Four：先手必胜（Allis 1988 完全求解）。"
+      },
+      {
+        "id": "game-theory-ch04-q3",
+        "question": "逆向归纳（backward induction）的步骤是什么？",
+        "options": [
+          "从终端节点开始，反向标记每个决策节点的最优行动，直到根节点  B) 从根开始  C) 随机回溯  D) 仅适用于零和博弈"
+        ],
+        "answer": 0,
+        "explanation": "步骤：(1) 在最终决策节点，选最大化当前玩家收益的行动。(2) 将该节点替换为选定行动的结果收益。(3) 重复直到根节点。逆向归纳的结果就是 SPNE。复杂度：\\(O(|T|)\\)（遍历所有节点一次）。前提：完美信息（每个信息集是单点），否则无法确定决策顺序。"
+      },
+      {
+        "id": "game-theory-ch04-q4",
+        "question": "进入博弈：进入者选 E（进入）或 O（不进入）。若选 E，在位者选 F（打价格战）或 A（容纳）。收益：\\((E,A)=(2,1)\\)，\\((E,F)=(-1,-1)\\)，\\((O,-)=(0,2)\\)。逆向归纳求 SPNE。",
+        "options": [
+          "在位者选 A（\\(1>-1\\)），进入者预知 A 后选 E（\\(2>0\\)）。SPNE：\\((E,A)\\)  B) \\((O,F)\\)  C) \\((E,F)\\)  D) \\((O,A)\\)"
+        ],
+        "answer": 0,
+        "explanation": "逆向归纳：在位者的子博弈——\\(A\\) 给收益 \\(1\\)，\\(F\\) 给 \\(-1\\)→选 A。进入者预知在位者选 A→\\(E\\) 给 \\(2\\)，\\(O\\) 给 \\(0\\)→选 E。SPNE：\\((\\text{E},\\text{A})\\)。注意 \\((O,F)\\) 也是 NE（\"在位者威胁打价格战\"阻止进入），但不是 SPNE——因为进入后在位者的\"威胁\"不可信（执行 F 使自己损失）。SPNE 排除不可信威胁。"
+      },
+      {
+        "id": "game-theory-ch04-q5",
+        "question": "贝叶斯 Nash 均衡（BNE）适用于什么类型的博弈？",
+        "options": [
+          "不完全信息博弈——参与者的类型（如私有价值、成本等）是私有信息  B) 完美信息  C) 零和博弈  D) 重复博弈"
+        ],
+        "answer": 0,
+        "explanation": "Harsanyi 转化（1967）：不完全信息→不完美信息（\"自然\"先随机分配类型→玩家观察自己的类型→同时行动）。BNE：每种类型的策略是在信念（他人类型的先验分布）下的期望 BR。\\[\\sigma_i^*(\\theta_i)\\in\\arg\\max_{a_i}E_{\\theta_{-i}}[u_i(a_i,\\sigma_{-i}^*(\\theta_{-i}),\\theta_i)|\\theta_i]\\]. 拍卖中竞标者不知道他人估值——BNE 是标准求解概念。"
+      },
+      {
+        "id": "game-theory-ch04-q6",
+        "question": "第一价格密封拍卖（FPSB），\\(n=2\\) 个竞标者，估值 \\(v_i\\sim U[0,1]\\)。对称 BNE 出价策略 \\(b(v)=?\\)",
+        "options": [
+          "\\(b(v)=v/2\\)——每人出自己估值的一半  B) \\(b(v)=v\\)  C) \\(b(v)=0\\)  D) \\(b(v)=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "对称 BNE：\\(b(v)=\\alpha v\\)。赢的概率 \\(=P(b(v_j)<b_i)=P(v_j<b_i/\\alpha)=b_i/\\alpha\\)。期望利润 \\(=(v_i-b_i)(b_i/\\alpha)\\)。\\(\\frac{\\partial}{\\partial b_i}:\\frac{v_i-2b_i}{\\alpha}=0\\Rightarrow b_i=v_i/2\\)。\\(\\alpha=1/2\\) ✓。\\(n\\) 人一般化：\\(b(v)=\\frac{n-1}{n}v\\)。收入等价：FPSB 期望收入 \\(=\\) 第二价格拍卖 \\(=E[\\text{second highest value}]=1/3\\)。"
+      },
+      {
+        "id": "game-theory-ch04-q7",
+        "question": "Shapley 值的公理化定义基于什么原则？",
+        "options": [
+          "效率（总分配 = 总价值）、对称（相同贡献的玩家得相同份额）、虚拟玩家（零贡献得零）、可加性  B) 仅效率  C) 随机  D) 平均分配"
+        ],
+        "answer": 0,
+        "explanation": "Shapley (1953)：满足(1)效率\\(\\sum_i\\phi_i(v)=v(N)\\)、(2)对称、(3)虚拟(dummy)、(4)可加性 的唯一值分配。公式：\\[\\phi_i(v)=\\sum_{S\\subseteq N\\setminus\\{i\\}}\\frac{|S|!(n-|S|-1)!}{n!}[v(S\\cup\\{i\\})-v(S)]\\]——按所有加入顺序的期望边际贡献。计算 \\(O(2^n)\\)（需遍历所有联盟），近似方法：随机抽样加入顺序。"
+      },
+      {
+        "id": "game-theory-ch04-q8",
+        "question": "最后通牒博弈（Ultimatum Game）：玩家 1 提出分配方案 \\((x,1-x)\\)，玩家 2 接受或拒绝（拒绝则双方得 0）。逆向归纳的 SPNE 是什么？",
+        "options": [
+          "玩家 1 提出 \\((1-\\epsilon,\\epsilon)\\)（几乎独占），玩家 2 接受任何 \\(>0\\) 的份额  B) 平均分  C) 拒绝所有  D) 无均衡"
+        ],
+        "answer": 0,
+        "explanation": "逆向归纳：玩家 2 在 \\(x<1\\) 时接受（\\(1-x>0\\)），\\(x=1\\) 时无差异。SPNE：玩家 1 提出 \\(x=1\\)（取走所有），玩家 2 接受（\\(0\\geq0\\)）。但实验中人类通常提出 40-50% 分配，低于 20% 的提案被拒绝率 \\(>50\\%\\)——\"不公平厌恶\"。行为博弈论模型（Fehr-Schmidt 1999）引入不平等厌恶修正效用函数。"
+      },
+      {
+        "id": "game-theory-ch04-q9",
+        "question": "Rubinstein 讨价还价博弈：两玩家交替提出分配方案，折扣因子 \\(\\delta\\in(0,1)\\)。SPNE 中玩家 1 获得多少份额？",
+        "options": [
+          "\\(x_1^*=\\frac{1}{1+\\delta}\\)——先提出者有优势（\\(\\delta<1\\) 时 \\(x_1^*>1/2\\)）  B) \\(1/2\\)  C) \\(1\\)  D) \\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "逆向归纳（无限期）：对称分析下，玩家 2 在自己提出轮次的 SPNE 份额也是 \\(x_2^*=\\frac{1}{1+\\delta}\\)（角色对称）。玩家 1 必须给玩家 2 至少 \\(\\delta x_2^*\\)（下轮 2 的贴现值）→\\(x_1^*=1-\\delta\\cdot\\frac{1}{1+\\delta}=\\frac{1}{1+\\delta}\\)。\\(\\delta\\to1\\)：\\(x_1^*\\to1/2\\)（接近公平分配）。\\(\\delta\\to0\\)：\\(x_1^*\\to1\\)（极端先动者优势——急躁的对手让步更多）。"
+      },
+      {
+        "id": "game-theory-ch04-q10",
+        "question": "第二价格拍卖（Vickrey 拍卖）中，诚实出价 \\(b_i=v_i\\) 是什么类型的策略？",
+        "options": [
+          "弱占优策略——无论他人怎么出价，\\(b_i=v_i\\) 都不比任何其他出价差  B) 仅在特定条件下  C) 严格占优  D) 非均衡"
+        ],
+        "answer": 0,
+        "explanation": "赢时支付 = 第二高价 \\(b_{(2)}\\)。若 \\(b_i>v_i\\)：可能赢但 \\(b_{(2)}>v_i\\)→亏损。若 \\(b_i<v_i\\)：可能输一个本可盈利的拍卖。\\(b_i=v_i\\) 避免两种失误。弱占优（不是严格，因为某些情况下其他出价给相同结果）。Vickrey 1961 年的论文建立了激励相容拍卖的理论基础——2020 年 Milgrom-Wilson 获诺贝尔奖就是拍卖理论。"
+      },
+      {
+        "id": "game-theory-ch04-q11",
+        "question": "三人投票博弈 \\(v(\\{1,2\\})=v(\\{1,3\\})=v(\\{2,3\\})=v(\\{1,2,3\\})=1\\)，\\(v(\\{i\\})=0\\)。Shapley 值？",
+        "options": [
+          "\\(\\phi_i=1/3\\) \\(\\forall i\\)——对称→等分  B) \\(\\phi=(1/2,1/4,1/4)\\)  C) \\(\\phi=(1,0,0)\\)  D) \\(\\phi=(0,0,0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "对称博弈→ Shapley 值的对称公理→\\(\\phi_1=\\phi_2=\\phi_3\\)。效率：\\(\\phi_1+\\phi_2+\\phi_3=v(N)=1\\)。\\(\\phi_i=1/3\\)。直接验证：\\(6\\) 种排列中，每个人是关键（使联盟从 \\(0\\to1\\)）次数 \\(=2\\)（当他是第 2 个加入时）。\\(\\phi_i=2/6=1/3\\) ✓。注意：若博弈不对称（如加权投票——某人有更多票），Shapley 值会不同。"
+      },
+      {
+        "id": "game-theory-ch04-q12",
+        "question": "Stackelberg 博弈中的承诺优势（commitment advantage）。领导者比同时博弈中获得更多吗？",
+        "options": [
+          "不总是——领导者有承诺力时可能更好，但若承诺暴露弱点（如被对手利用）可能更差  B) 总是更好  C) 总是更差  D) 无差异"
+        ],
+        "answer": 0,
+        "explanation": "Cournot Stackelberg：领导者更好（利润 \\(a^2/8>a^2/9\\)）。但在匹配硬币中：如果行玩家先选（被观察到），列玩家总赢→先动者变差！先动优势 vs 先动劣势取决于博弈结构：策略互补（如 Bertrand 价格竞争）→先动可能劣势；策略互替（如 Cournot 产量竞争）→先动优势。"
+      },
+      {
+        "id": "game-theory-ch04-q13",
+        "question": "蜈蚣博弈（Centipede Game）中逆向归纳的预测和实验结果的差异？",
+        "options": [
+          "逆向归纳预测第一步就停止（双方得最低收益），但实验中大多数人继续至少几轮  B) 实验完全符合  C) 逆向归纳预测全部合作  D) 无差异"
+        ],
+        "answer": 0,
+        "explanation": "\\(100\\) 步蜈蚣博弈：逆向归纳→第 \\(100\\) 步拿→第 \\(99\\) 步应拿→...→第 \\(1\\) 步就拿→\\((1,0)\\)。但双方合作到最后可得 \\((100,100)\\)！实验（McKelvey-Palfrey 1992）：大多回合在 \\(60\\)-\\(80\\) 步才停止。原因：有限理性（不做 100 步逆向归纳）、利他偏好、或信念不是共同知识。这是\"backward induction paradox\"的经典案例。"
+      },
+      {
+        "id": "game-theory-ch04-q14",
+        "question": "英式拍卖（公开升价）与第二价格密封拍卖的关系？",
+        "options": [
+          "Private value 下两者策略等价——英式拍卖的占优策略是加价到自己估值后退出（等价于 \\(b=v\\)）  B) 完全不同  C) 英式拍卖更复杂  D) 仅对零和情况"
+        ],
+        "answer": 0,
+        "explanation": "私有价值（Private Value）：\\(v_i\\) 不受他人信息影响。英式拍卖：价格上升→当 \\(P>v_i\\) 时退出→赢者支付 = 第二高估值时的价格 ≈ 第二高价。与 SPSB（\\(b_i=v_i\\)，付第二高价）完全等价。但共同价值（Common Value，如石油拍卖）：英式拍卖中可观察谁退出→获得信息→两者不再等价。赢者诅咒（winner's curse）在密封拍卖中更严重。"
+      },
+      {
+        "id": "game-theory-ch04-q15",
+        "question": "4 人合作博弈 \\(v(\\{1,2\\})=4,v(\\{3,4\\})=2,v(\\{1,2,3,4\\})=10\\)，其他联盟 \\(v=0\\)。Shapley 值？",
+        "options": [
+          "\\(\\phi_1=\\phi_2=3.5,\\phi_3=\\phi_4=1.5\\)（由对称性和计算得出）  B) 均等分 \\(2.5\\)  C) \\((5,5,0,0)\\)  D) \\((4,4,1,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "对 24 种排列计算边际贡献。\\(v(\\{1,2\\})=4\\)→玩家 1（或 2）第二个加入且前面是 2（或 1）时贡献 4。\\(v(\\{3,4\\})=2\\)→类似。\\(v(N)=10\\) 但非简单相加→大联盟有超额价值。详细：按排列枚举 \\(\\phi_1\\)：当 1 加入使联盟含 \\(\\{1,2\\}\\) 时贡献 4；使联盟含全集时贡献 \\(10-v(S)\\)。具体计算需遍历 24 种排列。对称性：\\(\\phi_1=\\phi_2,\\phi_3=\\phi_4\\)。\\(\\phi_1+\\phi_2+\\phi_3+\\phi_4=10\\)。"
+      },
+      {
+        "id": "game-theory-ch04-q16",
+        "question": "完美贝叶斯均衡（PBE）相比 BNE 的额外要求是什么？",
+        "options": [
+          "信念一致性——在信息集上的信念必须由策略和 Bayes 规则导出（在均衡路径上）  B) 无额外要求  C) 仅纯策略  D) 仅零和"
+        ],
+        "answer": 0,
+        "explanation": "PBE = 策略 + 信念系统 \\((\\sigma,\\mu)\\)。要求：(1) 策略是给定信念的 BR（序贯理性）；(2) 信念在均衡路径上由 Bayes 规则更新（\\(\\mu(x|h)=P(x|\\sigma,h)\\)）。均衡路径外（概率 \\(0\\) 的信息集）的信念可以任意——序贯均衡（Kreps-Wilson 1982）进一步约束路径外信念（必须是 \\(\\epsilon\\)-策略扰动的极限）。"
+      },
+      {
+        "id": "game-theory-ch04-q17",
+        "question": "共同知识（common knowledge）在连续推理中的角色。\"两将军问题\"中为什么无法达成协调？",
+        "options": [
+          "确认消息本身需要被确认——无限递归，无法建立共同知识  B) 信号不可靠  C) 将军不理性  D) 无通信"
+        ],
+        "answer": 0,
+        "explanation": "两将军问题（计算机科学版 = 两军问题）：将军 A 发消息给 B→B 需确认收到→A 需确认 B 的确认→...永远无法达到共同知识。Rubinstein (1989) 的电子邮件博弈正式化了此问题：即使信号几乎完全可靠（\\(\\epsilon\\) 丢失率），均衡行为也与无通信时完全一样。共同知识在协调博弈中至关重要——而 TCP 三次握手是在有限步骤下\"近似\"解决此问题的工程方案。"
+      },
+      {
+        "id": "game-theory-ch04-q18",
+        "question": "信号博弈（signaling game）的分离均衡（separating equilibrium）vs 混同均衡（pooling equilibrium）？",
+        "options": [
+          "分离：不同类型发不同信号→接收方可推断类型。混同：所有类型发相同信号→信号无信息量  B) 没有区别  C) 仅分离存在  D) 仅混同存在"
+        ],
+        "answer": 0,
+        "explanation": "典型信号博弈（Spence 1973 教育信号模型）：高能力工人选高教育（信号），低能力工人选低教育。分离均衡：\\(e_H\\neq e_L\\)→雇主推断能力→\\(w_H>w_L\\)。条件：信号成本对高类型更低（单交叉条件）。混同均衡：\\(e_H=e_L\\)→雇主用先验概率定薪。半分离也可能存在。Cho-Kreps (1987) 的直觉准则（Intuitive Criterion）精炼掉\"不合理\"的混同均衡。"
+      },
+      {
+        "id": "game-theory-ch04-q19",
+        "question": "子博弈完美 NE (SPNE) 与 NE 的区别。在有限完美信息博弈中 SPNE 总存在吗？",
+        "options": [
+          "是——逆向归纳在有限完美信息博弈中总产生 SPNE（Kuhn 定理）  B) 不一定  C) 仅零和  D) 仅两人"
+        ],
+        "answer": 0,
+        "explanation": "Kuhn (1953)：有限完美信息博弈可通过逆向归纳求解。如果无平局（generic payoffs），SPNE 唯一。SPNE 是 NE 的子集（更精炼）。不完美信息博弈中 SPNE 可能不存在——需要使用更弱的精炼（如序贯均衡/完美贝叶斯均衡）。注意：SPNE 不适用于只有一个子博弈的同时博弈——此时 SPNE = NE。"
+      },
+      {
+        "id": "game-theory-ch04-q20",
+        "question": "竞争性均衡与 Walrasian 拍卖。\\(n\\) 个物品分配给 \\(m\\) 个买家，各买家有估值函数。Walrasian 价格均衡存在的条件？",
+        "options": [
+          "估值函数满足\"毛替代\"条件（gross substitutes）——某物品涨价不减少其他物品需求  B) 任意估值  C) 仅线性估值  D) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "Kelso-Crawford (1982)：毛替代条件→Walrasian 均衡存在且分配有效。均衡价格向量可用拍卖算法（如升价拍卖）找到。非毛替代情况下均衡可能不存在——例如互补品（需成对购买）。Gul-Stacchetti (1999, 2000) 进一步刻画。实际应用：FCC 频谱拍卖 CCA（组合时钟拍卖）处理互补性。"
+      },
+      {
+        "id": "game-theory-ch04-q21",
+        "question": "Shapley 值在机器学习可解释性中的应用（SHAP）。特征 \\(j\\) 对模型预测 \\(f(x)\\) 的 SHAP 值怎么计算？",
+        "options": [
+          "\\(\\phi_j=\\sum_{S\\subseteq N\\setminus\\{j\\}}\\frac{|S|!(n-|S|-1)!}{n!}[f_S(x_{S\\cup\\{j\\}})-f_S(x_S)]\\)——特征 \\(j\\) 在所有特征子集中的平均边际贡献  B) 偏导数  C) 随机赋权  D) PCA 载荷"
+        ],
+        "answer": 0,
+        "explanation": "SHAP（Lundberg & Lee 2017）将博弈论 Shapley 值应用到 ML：每个特征 = 参与者，\\(v(S)=E[f(x)|x_S]\\)（知道 \\(S\\) 中特征时的模型预测期望）。Shapley 公式给出唯一满足一致性/效率/虚拟公理的归因。计算 \\(O(2^n)\\)→Tree SHAP 对树模型 \\(O(TLD^2)\\)（\\(T\\) 树，\\(L\\) 叶，\\(D\\) 深度）。SHAP 已成为 XAI 的主流工具。"
+      },
+      {
+        "id": "game-theory-ch04-q22",
+        "question": "时间一致性（time consistency）问题。为什么政府的\"不向恐怖分子让步\"是时间不一致的？",
+        "options": [
+          "事前承诺（不让步）是最优的（阻止绑架）。但事后（人质被抓）让步可能是最优的→不可信承诺  B) 承诺可信  C) 总是让步  D) 时间无关"
+        ],
+        "answer": 0,
+        "explanation": "逆向归纳：恐怖分子知道政府事后会让步→绑架的激励存在→承诺无效。Kydland-Prescott (1977)：\"政策的时间不一致性\"——事前最优政策在事后不再最优。形式化：Stackelberg 博弈中如果领导者不能承诺→退化为同时博弈→效率损失。货币政策（央行承诺不通胀但事后有通胀动机）和专利政策（承诺保护知识产权但事后有剥夺动机）都有此问题。"
+      },
+      {
+        "id": "game-theory-ch04-q23",
+        "question": "Sequential equilibrium（Kreps-Wilson 1982）相比 PBE 的额外精炼是什么？",
+        "options": [
+          "信念必须是完全混合策略序列的极限——即使在均衡路径外也有\"合理\"的信念  B) 与 PBE 相同  C) 更弱  D) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "SE = 策略序列 \\((\\sigma^k)\\to\\sigma^*\\)（\\(\\sigma^k\\) 完全混合）+ 信念 \\(\\mu^k\\to\\mu^*\\)（Bayes 规则在 \\(\\sigma^k\\) 下导出）。路径外信念被限制为某种\"合理\"的极限——排除了 PBE 允许的某些任意信念。SE 存在性：Kreps-Wilson 证明有限博弈的 SE 总存在。SE ⊂ PBE ⊂ NE。在实际分析中 PBE 已足够——SE 主要在理论论证中使用。"
+      },
+      {
+        "id": "game-theory-ch04-q24",
+        "question": "组合拍卖中的 VCG 机制。\\(n\\) 个物品分配给 \\(m\\) 个竞标者，VCG 支付规则？",
+        "options": [
+          "赢者 \\(i\\) 支付 = 他人无 \\(i\\) 时的最优社会福利 \\(-\\) 他人有 \\(i\\) 时获得的福利（即 \\(i\\) 对他人造成的外部性）  B) 第一价格  C) 固定价格  D) 仅第二价格"
+        ],
+        "answer": 0,
+        "explanation": "VCG（Vickrey-Clarke-Groves）：分配 \\(x^*=\\arg\\max\\sum_i v_i(x_i)\\)（效率最大化）。支付：\\(p_i=\\max_{x_{-i}}\\sum_{j\\neq i}v_j(x_j)-\\sum_{j\\neq i}v_j(x_j^*)\\)（\\(i\\) 缺席时最优 vs \\(i\\) 存在时他人的福利）。诚实申报是占优策略→VCG 是 DSIC（dominant strategy incentive compatible）。但 VCG 有缺点：(1) 收入非单调；(2) 可能收入低于 0；(3) 共谋脆弱。FCC 频谱拍卖不使用 VCG（因为上述缺点）。"
+      },
+      {
+        "id": "game-theory-ch04-q25",
+        "question": "核心（core）在合作博弈中的定义和存在性？",
+        "options": [
+          "分配 \\(x\\) 在核心中当且仅当 \\(\\sum_{i\\in S}x_i\\geq v(S)\\) \\(\\forall S\\subseteq N\\)——没有联盟有动机偏离。凸博弈中核心非空  B) 总是非空  C) 总是空  D) 等于 Shapley 值"
+        ],
+        "answer": 0,
+        "explanation": "核心 = 稳定分配集合——没有子联盟可以通过自组织获得更多。核心可能为空——如多数投票博弈（\\(3\\) 人 majority game：\\(v(S)=1\\) 若 \\(|S|\\geq2\\)，\\(v(\\{i\\})=0\\)。核心条件要求 \\(x_i+x_j\\geq1\\) \\(\\forall i\\neq j\\) → \\(2(x_1+x_2+x_3)\\geq3\\) → \\(\\sum x_i\\geq1.5\\)，但 \\(\\sum x_i=v(N)=1\\)，矛盾→核心为空！）。Bondareva-Shapley 定理：核心非空 ⟺ 平衡性条件。凸博弈（\\(v\\) 超模）的核心总非空。"
+      },
+      {
+        "id": "game-theory-ch04-q26",
+        "question": "供应链谈判：制造商和零售商之间的批发价格谈判可以用什么博弈模型分析？",
+        "options": [
+          "Rubinstein 交替提出讨价还价模型——双方折扣因子反映耐心程度，SPNE 给出分配  B) 一口价  C) 随机定价  D) 无法建模"
+        ],
+        "answer": 0,
+        "explanation": "制造商（\\(\\delta_M\\)）和零售商（\\(\\delta_R\\)）交替提出分配方案——分配\"联合利润\"。SPNE：份额 \\(\\propto\\) 对方的不耐心（\\(\\delta\\) 小→更急→让步更多）。大零售商（如 Walmart）\\(\\delta_R\\to1\\)——极有耐心→获得大部分议价剩余。实际中 Nash 议价解（\\(\\max(u_M-d_M)(u_R-d_R)\\)）是简化版本——直接给出分配而无需建模谈判过程。"
+      },
+      {
+        "id": "game-theory-ch04-q27",
+        "question": "谈判破裂点（disagreement point / BATNA）如何影响 Nash 议价解？",
+        "options": [
+          "BATNA 越好（disagreement payoff 越高），在 Nash 议价解中获得的份额越多  B) BATNA 无影响  C) BATNA 越好份额越少  D) BATNA 决定是否参与"
+        ],
+        "answer": 0,
+        "explanation": "Nash 议价解：\\(\\max_{u\\geq d}(u_1-d_1)(u_2-d_2)\\)。\\(d_i\\) 是玩家 \\(i\\) 的 BATNA（谈判破裂时的收益）。\\(d_i\\) 越大→\\(i\\) 在 NBS 中获得的份额越大→\"不合作的权利\"是议价力量。例：求职者有多个 offer（\\(d\\) 高）vs 仅一个 offer（\\(d\\) 低）→薪资谈判结果截然不同。法律纠纷中，诉讼预期结果 = BATNA → 决定和解金额。"
+      },
+      {
+        "id": "game-theory-ch04-q28",
+        "question": "在多智能体 AI 系统中（如自动驾驶车群），博弈论的动态均衡概念如何应用？",
+        "options": [
+          "多辆自动驾驶车在十字路口的通行优先级可建模为多人动态博弈——SPNE 预测合理的通行顺序  B) 无需博弈论  C) 集中式控制  D) 随机决策"
+        ],
+        "answer": 0,
+        "explanation": "自动驾驶车群博弈：每车选加速/减速/变道，收益 = 安全 + 效率。SPNE/MPC（模型预测控制）结合：每车预测他车行为（BR）并优化自身轨迹。Level-\\(k\\) reasoning（有限推理深度）更实际：Level-0 = 不考虑他车；Level-1 = 假设他车是 Level-0；Level-2 = 假设他车是 Level-1...实验表明 Level-1 或 Level-2 最准确预测人类驾驶员。Waymo/Tesla 的规划模块包含隐式博弈模型。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="game-theory"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/game-theory.html" class="module-name">博弈论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 扩展型博弈与博弈树</a></li>
+      <li><a href="#kp2">02 · 逆向归纳与子博弈完美均衡</a></li>
+      <li><a href="#kp3">03 · 不完美信息博弈与贝叶斯 NE</a></li>
+      <li><a href="#kp4">04 · 合作博弈与 Shapley 值</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>动态博弈与子博弈完美</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>扩展型博弈与博弈树</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>现实中许多博弈是顺序行动的：国际谈判中先报价再还价， 棋类博弈中交替行棋。策略型表示丢失了行动顺序信息。 扩展型表示（博弈树）保留了时间结构，允许分析动态决策。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>博弈树 = 有向树，节点为决策点/自然节点/终端节点。 从策略型到扩展型是信息的增加。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>扩展型博弈的组成</strong>： - 博弈树 \(T\)：有根有向树 - 决策节点分配函数 \(P: \text{nodes} \to N\) - 信息集 \(H\)：将同一玩家的节点分组，同一信息集内无法区分 - 支付向量 \(u: \text{terminals} \to \mathbb{R}^n\) <strong>行为策略</strong>：\(s_i\) 为每个信息集指定一个行动。 <strong>完美信息博弈</strong>：每个信息集都是单元素集， 玩家知道博弈的完整历史。 \[|h| = 1 \quad \forall h \in H\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 商业谈判中的顺序报价建模 - 棋类博弈的博弈树表示与 AI 搜索</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：两人分蛋糕博弈：玩家1提议分配 \((x, 1-x)\)，玩家2接受或拒绝。 拒绝则双方得 0。画出博弈树。 解答：根节点为玩家1选 \(x\)， 下层玩家2选择 Accept/Reject。 终端支付：Accept→\((x,1-x)\)，Reject→\((0,0)\)。 易错点：不要混淆「完美信息」与「完全信息」（后者指知道支付矩阵）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">扩展型博弈中「信息集」的作用是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。信息集将玩家无法区分的节点分组，捕捉了「不完美信息」。')">A. 表示支付的大小</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！信息集将玩家无法区分的节点分组，捕捉了「不完美信息」。')">B. 表示玩家无法区分的决策节点</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。信息集将玩家无法区分的节点分组，捕捉了「不完美信息」。')">C. 表示博弈的轮数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。信息集将玩家无法区分的节点分组，捕捉了「不完美信息」。')">D. 表示参与者的数量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>逆向归纳与子博弈完美均衡</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>动态博弈可能有「不可信的威胁」：玩家声称会做某事但真到那时 不会执行。子博弈完美均衡(SPE)通过逆向归纳消除这类威胁。 这是动态博弈分析的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>子博弈完美 = 在每个子博弈中都是 NE 的策略组合。 NE 的加强版，排除了不可信威胁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>子博弈</strong>：从博弈树的某个节点开始的子树，本身构成一个博弈。 <strong>子博弈完美均衡(SPE)</strong>：\(\sigma^*\) 是 SPE iff \(\sigma^*\) 在每个子博弈 \(G'\) 中归纳出的策略都是 \(G'\) 的 NE。 <strong>逆向归纳(Backward Induction)</strong>： (1) 从博弈树的叶子开始 (2) 对每个倒数第一个决策节点，选择使该玩家支付最大的行动 (3) 将该节点替换为对应的支付向量 (4) 重复直到根节点 <strong>Zermelo 定理</strong>：每个有限完美信息博弈都有纯策略 SPE。 \[\text{Finite + Perfect info} \Rightarrow \exists \text{ pure SPE}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 国际谈判中识别不可信的威胁 - 算法设计中的动态规划 ↔ 逆向归纳</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：分蛋糕博弈的 SPE。玩家1提议 \(x \in [0,1]\)，玩家2接受/拒绝。 解答：逆向归纳：玩家2对任何 \(1-x > 0\) 都应接受。 玩家1知道这一点，因此提议 \(x \to 1\)。 SPE: 玩家1几乎拿走全部，玩家2接受。 易错点：「玩家2威胁拒绝不公平的提议」不是 SPE， 因为拒绝得 0 不如接受任何正数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">逆向归纳的关键前提是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。逆向归纳需要知道博弈树结构（完美信息）且博弈必须有终点。')">A. 博弈是零和的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！逆向归纳需要知道博弈树结构（完美信息）且博弈必须有终点。')">B. 博弈是完美信息且有限的</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。逆向归纳需要知道博弈树结构（完美信息）且博弈必须有终点。')">C. 博弈有唯一 NE</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。逆向归纳需要知道博弈树结构（完美信息）且博弈必须有终点。')">D. 所有玩家同时行动</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>不完美信息博弈与贝叶斯 NE</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>很多现实博弈中玩家不知道对手的类型或私有信息： 拍卖中不知道他人估值，谈判中不知道对方的底线。 Harsanyi 以「自然」的随机抽取将不完全信息转化为不完美信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不完全信息博弈 → Harsanyi 转换 → 不完美信息博弈 + 贝叶斯更新。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Harsanyi 转换</strong>：「自然」先抽取每个玩家的类型 \(\theta_i \sim F_i\)， 每人知道自己的类型但不知道他人的。 <strong>贝叶斯 NE</strong>：策略 \(\sigma_i(\theta_i)\) 是贝叶斯 NE iff \[\forall i,\; \forall \theta_i,\; \forall s_i':\quad E_{\theta_{-i}|\theta_i}[u_i(\sigma_i(\theta_i), \sigma_{-i}(\theta_{-i}), \theta)] \geq E_{\theta_{-i}|\theta_i}[u_i(s_i', \sigma_{-i}(\theta_{-i}), \theta)]\] 每个类型在给定信念下最优。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 拍卖设计中竞价者的私有估值建模</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：二价拍卖中每人估值 \(v_i \sim U[0,1]\)。证明真实报价是贝叶斯 NE。 解答：二价拍卖中支付 = 第二高价，与自己报价无关（只影响胜负）。 报高不增加支付但可能赢得负收益的物品， 报低可能失去正收益的机会。因此诚实报价 = 占优策略。 易错点：不是所有拍卖都有诚实报价均衡，这是二价拍卖的特殊性质。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Harsanyi 转换的作用是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。“自然”先抽取类型，玩家观察自己但不知对手类型，')">A. 将动态博弈转为静态博弈</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！“自然”先抽取类型，玩家观察自己但不知对手类型，')">B. 将不完全信息转为不完美信息</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。“自然”先抽取类型，玩家观察自己但不知对手类型，')">C. 将混合策略转为纯策略</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。“自然”先抽取类型，玩家观察自己但不知对手类型，')">D. 将零和博弈转为一般博弈</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>合作博弈与 Shapley 值</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>非合作博弈假设玩家独立行动，但现实中常有联盟、合作、 分配的情境（如联合投资、共同项目、政治联盟）。 Shapley 值提供了「公平」分配的公理化方案。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>合作博弈 = \((N, v)\)，其中 \(v: 2^N \to \mathbb{R}\)，\(v(\emptyset)=0\)。 \(v(S)\) = 联盟 \(S\) 能获得的总价值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Shapley 值</strong>：玩家 \(i\) 的分配为 \[\phi_i(v) = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|! (n-|S|-1)!}{n!} [v(S \cup \{i\}) - v(S)]\] 直觉：\(v(S \cup \{i\}) - v(S)\) = \(i\) 对联盟 \(S\) 的边际贡献， 对所有可能的加入顺序取平均。 <strong>Shapley 公理</strong>： (1) 效率：\(\sum_i \phi_i = v(N)\) (2) 对称：可互换玩家得相同分配 (3) 虚拟玩家：不贡献者得 0 (4) 可加性：\(\phi_i(v+w) = \phi_i(v) + \phi_i(w)\) 这四条公理唯一确定了 Shapley 值。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- ML 中的 SHAP 值：用 Shapley 值解释特征贡献 - 投票权力指数（联合国安理会的投票权分析）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：3 人博弈：\(v(\{1\})=0, v(\{2\})=0, v(\{3\})=0\), \(v(\{1,2\})=6, v(\{1,3\})=6, v(\{2,3\})=0, v(\{1,2,3\})=12\)。 计算 Shapley 值。 解答：\(\phi_1\)： 加入 \(\emptyset\): \(v(\{1\})-v(\emptyset) = 0\)，权重 \(2!/6 = 1/3\) 加入 \(\{2\}\): \(6-0=6\)，权重 \(1/6\) 加入 \(\{3\}\): \(6-0=6\)，权重 \(1/6\) 加入 \(\{2,3\}\): \(12-0=12\)，权重 \(1/3\) \(\phi_1 = 0 \cdot 1/3 + 6/6 + 6/6 + 12/3 = 0 + 1 + 1 + 4 = 6\)。 同理 \(\phi_2 = \phi_3 = 3\)。验证：\(6+3+3=12 = v(N)\)✓ 易错点：权重不是均匀的，而是 \(\frac{|S|!(n-|S|-1)!}{n!}\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Shapley 值的「效率」公理要求什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。效率 = 分完所有价值。C 是对称公理的描述，D 是虚拟玩家公理。')">A. 每个人的分配非负</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！效率 = 分完所有价值。C 是对称公理的描述，D 是虚拟玩家公理。')">B. 分配总和等于 \(v(N)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。效率 = 分完所有价值。C 是对称公理的描述，D 是虚拟玩家公理。')">C. 分配与加入顺序无关</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。效率 = 分完所有价值。C 是对称公理的描述，D 是虚拟玩家公理。')">D. 虚拟玩家得 0</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/probability/game-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

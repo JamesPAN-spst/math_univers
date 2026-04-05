@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 熵正则化与 Sinkhorn — 最优传输 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "optimal-transport-ch05-q1",
+        "question": "熵正则化 OT: \\(OT_\\epsilon(\\mu,\\nu)=\\inf_{\\pi\\in\\Pi}\\int c\\,d\\pi+\\epsilon H(\\pi)\\), 其中 \\(H(\\pi)=-\\int\\pi\\log\\pi\\)。正则化的动机？",
+        "options": [
+          "原始 OT 是 LP(解在顶点, 稀疏)→数值不稳定且 \\(O(n^3)\\); 加熵 \\(\\epsilon H(\\pi)\\) → 严格凸, 解唯一且光滑, 可用 Sinkhorn 算法 \\(O(n^2/\\epsilon)\\) 求解",
+        "正则化降低精度无好处",
+        "原始 OT 已经高效",
+        "熵项使问题更难"
+        ],
+        "answer": 0,
+        "explanation": "LP 解: \\(\\pi^*\\) 是 Birkhoff 多面体的顶点——至多 \\(2n-1\\) 个非零元素(极稀疏), 对噪声/扰动敏感。加 \\(\\epsilon H\\): (1) \\(\\pi^\\epsilon\\) 正(所有元素 \\(>0\\)), 连续依赖于 \\(\\mu,\\nu\\); (2) 对偶化为非约束凸优化; (3) Sinkhorn 迭代简洁高效。代价: \\(\\pi^\\epsilon\\) 偏离真实 OT(\\(W_\\epsilon\\neq W\\)), 但 \\(\\epsilon\\to 0\\) 时收敛。Cuturi (2013): Sinkhorn 使 OT 进入 ML 工具箱——是 OT 在 ML 中\"复兴\"的关键论文。"
+      },
+      {
+        "id": "optimal-transport-ch05-q2",
+        "question": "Sinkhorn 算法的核心迭代: 如何交替更新行/列缩放因子？",
+        "options": [
+          "\\(K=e^{-C/\\epsilon}\\), 迭代 \\(u\\leftarrow a/(Kv)\\), \\(v\\leftarrow b/(K^Tu)\\); 收敛后 \\(\\pi^\\epsilon=\\text{diag}(u)K\\text{diag}(v)\\)",
+        "梯度下降",
+        "只更新一次",
+        "不涉及矩阵指数"
+        ],
+        "answer": 0,
+        "explanation": "对偶最优解: \\(\\pi^\\epsilon_{ij}=u_iK_{ij}v_j\\), \\(K_{ij}=e^{-c_{ij}/\\epsilon}\\)。行约束: \\(\\sum_j\\pi_{ij}=a_i\\) → \\(u_i=a_i/\\sum_jK_{ij}v_j\\)。列约束: \\(\\sum_i\\pi_{ij}=b_j\\) → \\(v_j=b_j/\\sum_iK_{ij}u_i\\)。交替投影(Bregman)! 收敛速率: 线性 \\(O(\\|C\\|_\\infty/\\epsilon)\\) 次迭代; 每次 \\(O(n^2)\\)。总复杂度 \\(O(n^2/\\epsilon)\\)。GPU 加速: 矩阵-向量乘 \\(Kv\\) 可高度并行。数值稳定性: log-domain Sinkhorn(对 \\(\\log u, \\log v\\) 操作)避免上/下溢。"
+      },
+      {
+        "id": "optimal-transport-ch05-q3",
+        "question": "\\(\\epsilon\\to 0\\) 和 \\(\\epsilon\\to\\infty\\) 时 \\(\\pi^\\epsilon\\) 分别趋向什么？",
+        "options": [
+          "\\(\\epsilon\\to 0\\): \\(\\pi^\\epsilon\\to\\pi^*\\)(最优 OT 计划, 稀疏); \\(\\epsilon\\to\\infty\\): \\(\\pi^\\epsilon\\to ab^T\\)(独立耦合, \\(\\pi_{ij}=a_ib_j\\))",
+        "都趋向相同",
+        "\\(\\epsilon\\to\\infty\\): \\(\\pi=0\\)",
+        "\\(\\epsilon\\) 不影响结果"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\epsilon\\to 0\\): 熵项权重小→\\(\\pi^\\epsilon\\) 接近 OT 最优解(LP 顶点)。\\(\\epsilon\\to\\infty\\): 熵主导→最大化 \\(H(\\pi)\\)→\\(\\pi=ab^T\\)(独立分布, 信息论中熵最大)。中间值: \\(\\epsilon\\) 越大→\\(\\pi\\) 越\"扩散\"(均匀), 越小→越\"集中\"(稀疏)。Sinkhorn 散度: \\(S_\\epsilon(\\mu,\\nu)=OT_\\epsilon(\\mu,\\nu)-\\frac{1}{2}(OT_\\epsilon(\\mu,\\mu)+OT_\\epsilon(\\nu,\\nu))\\)——去偏差, \\(S_\\epsilon\\geq 0\\), \\(S_\\epsilon(\\mu,\\mu)=0\\)。"
+      },
+      {
+        "id": "optimal-transport-ch05-q4",
+        "question": "Sinkhorn 收敛速率: 需要多少次迭代？与 \\(\\epsilon\\) 的关系？",
+        "options": [
+          "\\(O(\\|C\\|_\\infty^2/\\epsilon^2)\\) 迭代达到 \\(\\delta\\)-精度(原始可行性); 线性收敛, 速率 \\(\\lambda\\sim 1-\\epsilon/\\|C\\|_\\infty\\); \\(\\epsilon\\) 小→收敛慢→精度/速度权衡",
+        "总是 \\(O(1)\\) 次",
+        "与 \\(\\epsilon\\) 无关",
+        "指数次迭代"
+        ],
+        "answer": 0,
+        "explanation": "Sinkhorn = Bregman 交替投影 → 线性收敛。\\(\\epsilon\\) 越小: \\(K\\) 越\"稀疏\"(元素指数小)→条件数大→收敛慢。Franklin-Lorenz: Sinkhorn 收敛速率取决于 \\(K\\) 的 Hilbert 度量收缩率 \\(\\leq\\tanh^2(\\frac{\\max(\\log K)-\\min(\\log K)}{4})\\)。实践: \\(\\epsilon=0.01\\max C\\) 时约 100-500 迭代足够。加速: (1) \\(\\epsilon\\)-scheduling(先大后小); (2) Overrelaxation; (3) Green-Knopp 加速; (4) 多尺度(先粗后细)。"
+      },
+      {
+        "id": "optimal-transport-ch05-q5",
+        "question": "Sinkhorn 散度(Sinkhorn Divergence)比直接用 \\(OT_\\epsilon\\) 有什么优势？",
+        "options": [
+          "\\(S_\\epsilon(\\mu,\\nu)=OT_\\epsilon(\\mu,\\nu)-\\frac{1}{2}OT_\\epsilon(\\mu,\\mu)-\\frac{1}{2}OT_\\epsilon(\\nu,\\nu)\\); 去除了 \\(\\epsilon\\) 引入的偏差——\\(S_\\epsilon(\\mu,\\mu)=0\\) 且 \\(S_\\epsilon\\geq 0\\); 作为损失函数不需要 \\(\\epsilon\\to 0\\)",
+        "散度和距离相同",
+        "\\(OT_\\epsilon(\\mu,\\mu)=0\\) 所以不需要修正",
+        "散度不满足非负性"
+        ],
+        "answer": 0,
+        "explanation": "\\(OT_\\epsilon(\\mu,\\mu)\\neq 0\\)(\\(\\mu\\neq\\delta\\) 时)——\\(\\epsilon\\) 引入正偏差。\\(S_\\epsilon\\) 去偏: 类似 MMD 的 Huber debiasing。Feydy et al. (2019): \\(S_\\epsilon\\) 插值于 OT (\\(\\epsilon\\to 0\\)) 和 MMD (\\(\\epsilon\\to\\infty\\))。梯度: \\(\\nabla_\\mu S_\\epsilon\\) 有简洁形式——可做生成模型损失。\\(S_\\epsilon\\) 的样本复杂度: \\(O(n^{-1/2})\\)（不依赖维度, 优于 \\(W_p\\) 的 \\(n^{-1/d}\\)!）。Sinkhorn 散度+parameter shift: 用于生成模型训练, 比 WGAN 更稳定。"
+      },
+      {
+        "id": "optimal-transport-ch05-q6",
+        "question": "Sinkhorn 的 GPU 实现: 为什么 Sinkhorn 特别适合 GPU 加速？",
+        "options": [
+          "核心操作是矩阵-向量乘 \\(Kv\\) 和元素除法——高度可并行; \\(K=e^{-C/\\epsilon}\\) 在 GPU 上预计算; 批量 OT 可同时处理",
+        "需要串行处理",
+        "GPU 不适合 OT",
+        "只能 CPU 计算"
+        ],
+        "answer": 0,
+        "explanation": "Sinkhorn 每步: \\(u=a\\oslash(Kv)\\), \\(v=b\\oslash(K^Tu)\\)。\\(Kv\\): 矩阵-向量乘→BLAS Level 2, GPU 加速 100-1000x。\\(\\oslash\\): 逐元素→完全并行。批量: \\(K\\) 相同(如图像网格上固定成本)→广播操作。GeomLoss (Feydy): PyTorch 实现, \\(n=10^6\\) 点在几秒内完成。Keops: 不存储完整 \\(K\\) 矩阵(大时 \\(O(n^2)\\) 内存), 用 lazy 评估→内存降至 \\(O(n)\\)。点云 OT: 用 KeOps + Sinkhorn 比线性规划快 \\(10^4\\) 倍。"
+      },
+      {
+        "id": "optimal-transport-ch05-q7",
+        "question": "Sinkhorn 在 NLP 中的应用: 如何用 OT 做文档/句子相似度？",
+        "options": [
+          "Word Mover's Distance (WMD): 将文档视为词嵌入+频率的经验分布, 用 \\(W_1\\) (或 \\(OT_\\epsilon\\)) 计算文档距离——捕捉词义相似性而非精确匹配",
+        "OT 不能用于文本",
+        "只用余弦相似度",
+        "需要句法分析"
+        ],
+        "answer": 0,
+        "explanation": "Kusner et al. (2015): WMD。文档 \\(d\\): 去停用词后, 每个词 \\(w_i\\) 有权重 \\(a_i\\)(TF/IDF)和嵌入 \\(x_i\\)(Word2Vec/GloVe)。\\(\\mu_d=\\sum_i a_i\\delta_{x_i}\\)。\\(W_1(d_1,d_2)\\)=最优将 \\(d_1\\) 的词\"搬运\"到 \\(d_2\\) 的词, 成本=嵌入距离。优点: 考虑语义(同义词距离小)。WMD+Sinkhorn: 加速 \\(O(n^2/\\epsilon)\\) vs LP \\(O(n^3)\\)。BERT 时代: OT 用于对齐 token 级表示(BERTScore-OT), 跨语言对齐(Wasserstein Procrustes)。"
+      },
+      {
+        "id": "optimal-transport-ch05-q8",
+        "question": "Sinkhorn 的收敛性证明: 它等价于 KL 投影的什么迭代？",
+        "options": [
+          "Bregman 交替投影: 交替将 \\(\\pi\\) 投影到行约束集 \\(\\mathcal{R}=\\{\\pi:\\pi\\mathbf{1}=a\\}\\) 和列约束集 \\(\\mathcal{C}=\\{\\pi:\\pi^T\\mathbf{1}=b\\}\\) 上(KL 散度意义下)——收敛到 \\(\\mathcal{R}\\cap\\mathcal{C}\\) 中的 KL 最近点",
+        "梯度下降",
+        "随机投影",
+        "无收敛保证"
+        ],
+        "answer": 0,
+        "explanation": "KL 投影到行约束: \\(\\arg\\min_{\\pi:\\pi\\mathbf{1}=a}D_{KL}(\\pi\\|\\tilde\\pi)\\) → 按行缩放 \\(\\pi_{ij}\\leftarrow\\tilde\\pi_{ij}\\cdot a_i/\\sum_j\\tilde\\pi_{ij}\\)。Bregman (Csiszár): 交替 KL 投影到两个凸集交集→收敛。这里: \\(\\mathcal{R}\\cap\\mathcal{C}=\\Pi(\\mu,\\nu)\\)(传输多面体)。初始 \\(\\tilde\\pi_{ij}=K_{ij}=e^{-c_{ij}/\\epsilon}\\)。Sinkhorn 也可视为 Hilbert 度量下的收缩映射→几何收敛率。等价: 对偶上升(dual ascent)在 \\(\\epsilon\\)-smooth 对偶上的坐标上升。"
+      },
+      {
+        "id": "optimal-transport-ch05-q9",
+        "question": "小批量 Sinkhorn(Mini-batch OT): 如何将 Sinkhorn 扩展到大规模在线学习？",
+        "options": [
+          "每步只在 mini-batch 样本上计算 \\(OT_\\epsilon\\)——有偏但计算可行; 去偏: 用 Sinkhorn 散度 + 经验过程理论控制偏差→随机 Sinkhorn 作为损失函数训练生成模型",
+        "必须用全数据",
+        "mini-batch OT 不收敛",
+        "不适用于生成模型"
+        ],
+        "answer": 0,
+        "explanation": "全数据 Sinkhorn: \\(O(n^2)\\) 内存+计算。Mini-batch: 采样 \\(B\\) 个点 → \\(O(B^2)\\) 成本矩阵 → Sinkhorn → 梯度更新。问题: \\(OT_\\epsilon(\\hat\\mu_B,\\hat\\nu_B)\\) 是有偏估计(+\\(O(1/\\sqrt{B})\\) 偏差)。Genevay et al. (2018): mini-batch + Sinkhorn divergence 去偏→可做 SGD 训练。Fatras et al. (2020): minibatch OT 的偏差分析+改进估计。应用: 大规模 Sinkhorn 损失训练 VAE/GAN; OT 用于 domain adaptation(源域→目标域映射)。"
+      },
+      {
+        "id": "optimal-transport-ch05-q10",
+        "question": "切片 Wasserstein (Sliced Wasserstein, SW): 如何规避 OT 的维度灾难？",
+        "options": [
+          "\\(SW_p(\\mu,\\nu)=(\\int_{S^{d-1}}W_p^p(\\theta_\\#\\mu,\\theta_\\#\\nu)d\\sigma(\\theta))^{1/p}\\)——通过随机一维投影计算, 每个一维 OT \\(O(n\\log n)\\)(排序); 统计估计率 \\(O(n^{-1/2})\\) 无维度灾难",
+        "SW 不是合法度量",
+        "需要所有投影方向",
+        "比 Sinkhorn 更慢"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\theta_\\#\\mu\\): \\(\\mu\\) 在方向 \\(\\theta\\in S^{d-1}\\) 上的投影(一维分布)。一维 \\(W_p\\): 排序+分位数, \\(O(n\\log n)\\)。积分用 Monte Carlo: \\(L\\) 个随机方向→\\(O(Ln\\log n)\\)。Bonneel et al. (2015): SW 是 \\(\\mathcal{P}_p\\) 上的度量, 且拓扑等价于 \\(W_p\\)。优势: 无 \\(n^{-1/d}\\) 维度灾难, 无正则化偏差, 计算快。变体: Max-SW(找最差投影方向, 更判别), Generalized SW(用神经网络学习投影), Tree-SW(树度量上的 SW)。在点云生成(3D)、图像生成、表示学习中广泛使用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="optimal-transport"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/optimal-transport.html" class="module-name">最优传输</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 熵正则化最优传输</a></li>
+      <li><a href="#kp2">02 · Sinkhorn 算法</a></li>
+      <li><a href="#kp3">03 · 收敛性与误差控制</a></li>
+      <li><a href="#kp4">04 · 小批量 OT 与实际加速技术</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>熵正则化与 Sinkhorn</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>熵正则化最优传输</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>精确求解最优传输的 LP 复杂度为 \(O(n^3 \log n)\)（离散，\(n\) 个点）， 在大规模问题中不可行。Cuturi(2013)的突破：加上熵正则化项后，问题 变为严格凸且可用矩阵缩放(Sinkhorn)算法以 \(O(n^2/\varepsilon^2)\) 近 似求解。这一方法使最优传输进入大规模机器学习时代。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>正则化：\(\inf \langle C, P \rangle - \varepsilon H(P)\)，将 LP 角点解"软化"为内部解。 \(\varepsilon \to 0\) 恢复精确 OT。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>熵正则化 Kantorovich 问题： \[\text{OT}_\varepsilon(\mu,\nu) = \inf_{P \in \Pi(a,b)} \langle C, P \rangle - \varepsilon H(P)\] 其中 \(H(P) = -\sum_{ij} P_{ij} (\log P_{ij} - 1)\)（负 KL 散度关于均匀分布）。 正则化使目标严格凸 \(\Rightarrow\) 唯一最优解。 对偶形式： \[\text{OT}_\varepsilon = \sup_{f,g} \langle f,a\rangle + \langle g,b\rangle - \varepsilon \sum_{ij} e^{(f_i+g_j-C_{ij})/\varepsilon} + \varepsilon\] 最优解结构：\(P^*_{ij} = u_i K_{ij} v_j\)，其中 \(K_{ij} = e^{-C_{ij}/\varepsilon}\)（Gibbs 核）， \(u = e^{f/\varepsilon}, v = e^{g/\varepsilon}\) 是缩放向量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>计算机图形学中的颜色传输、文本的 Word Mover's Distance 的加速版本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(n=2\), \(a = b = (1/2, 1/2)\), \(C = \begin{pmatrix}0&1\\1&0\end{pmatrix}\), \(\varepsilon = 1\)。 Gibbs 核 \(K = \begin{pmatrix}1&e^{-1}\\e^{-1}&1\end{pmatrix}\)。 由对称性 \(u = v = (c, c)\)。边缘约束 \(c^2(1+e^{-1}) = 1/2\)。 \(c = 1/\sqrt{2(1+e^{-1})}\)。\(P^*_{ij} = \frac{K_{ij}}{2(1+e^{-1})}\)。 \(\text{OT}_\varepsilon = \frac{2e^{-1}}{2(1+e^{-1})} = \frac{e^{-1}}{1+e^{-1}} \approx 0.269\)。 精确 OT \(= 0\)（对角传输）。正则化使代价增加。 易错点：\(\varepsilon\) 越大正则化越强，解越偏离精确 OT；\(\varepsilon \to 0\) 数值不稳定。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">熵正则化使最优传输矩阵 \(P^*\) 具有什么结构？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K_{ij} = e^{-C_{ij}/\\varepsilon}\\) 是 Gibbs 核，\\(u,v\\) 是正的缩放向量。')">A. 置换矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(K_{ij} = e^{-C_{ij}/\\varepsilon}\\) 是 Gibbs 核，\\(u,v\\) 是正的缩放向量。')">B. \(P^* = \text{diag}(u) K \text{diag}(v)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K_{ij} = e^{-C_{ij}/\\varepsilon}\\) 是 Gibbs 核，\\(u,v\\) 是正的缩放向量。')">C. 稀疏矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(K_{ij} = e^{-C_{ij}/\\varepsilon}\\) 是 Gibbs 核，\\(u,v\\) 是正的缩放向量。')">D. 正交矩阵</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Sinkhorn 算法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Sinkhorn-Knopp 算法（1967）原本是矩阵缩放算法：交替归一化行和 列使矩阵成为双随机矩阵。Cuturi 发现它精确解决了熵正则化 OT！ 算法极其简单——只有矩阵-向量乘法——天然适合 GPU 并行，使百万 级点的 OT 计算成为可能。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sinkhorn \(=\) Bregman 投影的交替投影 \(=\) 坐标上升对偶优化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Sinkhorn 迭代：给定 \(K = e^{-C/\varepsilon}\)，初始化 \(v^{(0)} = \mathbf{1}\)： \[u^{(l+1)} = \frac{a}{K v^{(l)}}, \quad v^{(l+1)} = \frac{b}{K^\top u^{(l+1)}}\] 其中除法是逐元素的。每次迭代复杂度 \(O(n^2)\)（矩阵向量乘法）。 收敛性：对正矩阵 \(K\)，Sinkhorn 迭代线性收敛。 收敛率 \(\leq \left(\frac{\lambda_2(K)}{\lambda_1(K)}\right)^2\)（Birkhoff 收缩系数）。 总复杂度：达到 \(\varepsilon_{\text{approx}}\) 精度需要 \(O(n^2 / \varepsilon \cdot \log(1/\varepsilon_{\text{approx}}))\) 次算术操作。 对数域稳定化：\(f = \varepsilon \log u, g = \varepsilon \log v\)， 更新 \(f^{(l+1)} = \varepsilon \log a - \varepsilon \text{LSE}_j(g^{(l)}_j - C_{ij}/\varepsilon)\)。 避免 \(e^{-C/\varepsilon}\) 的数值上溢/下溢。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Python 库 POT(Python Optimal Transport), GeomLoss 的核心算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(K = \begin{pmatrix}1&0.5\\0.5&1\end{pmatrix}\), \(a = b = (1/2, 1/2)\)。 手工执行 2 次 Sinkhorn 迭代。 解答：\(v^{(0)} = (1,1)\)。 \(Kv^{(0)} = (1.5, 1.5)\)。\(u^{(1)} = a/(Kv^{(0)}) = (1/3, 1/3)\)。 \(K^\top u^{(1)} = (1/3 \cdot 1 + 1/3 \cdot 0.5, 1/3 \cdot 0.5 + 1/3 \cdot 1) = (0.5, 0.5)\)。 \(v^{(1)} = b/(K^\top u^{(1)}) = (1, 1)\)。已收敛！（对称情况） \(P^* = \text{diag}(u)\,K\,\text{diag}(v) = \frac{1}{3}\begin{pmatrix}1&0.5\\0.5&1\end{pmatrix}\)。 验证：行和 \(= (1/2, 1/2)\) ✓，列和 \(= (1/2, 1/2)\) ✓。 易错点：\(\varepsilon\) 很小时 \(K\) 接近 0/1 矩阵，导致除以零——必须用对数域稳定化。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Sinkhorn 每次迭代的复杂度主要由什么决定？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Kv\\) 和 \\(K^\\top u\\) 各需 \\(O(n^2)\\)。GPU 上可用稀疏/近似核加速至接近线性。')">A. 矩阵求逆 \(O(n^3)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(Kv\\) 和 \\(K^\\top u\\) 各需 \\(O(n^2)\\)。GPU 上可用稀疏/近似核加速至接近线性。')">B. 矩阵-向量乘法 \(O(n^2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Kv\\) 和 \\(K^\\top u\\) 各需 \\(O(n^2)\\)。GPU 上可用稀疏/近似核加速至接近线性。')">C. 特征值分解 \(O(n^3)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(Kv\\) 和 \\(K^\\top u\\) 各需 \\(O(n^2)\\)。GPU 上可用稀疏/近似核加速至接近线性。')">D. 排序 \(O(n\log n)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>收敛性与误差控制</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>实际使用 Sinkhorn 需要回答：正则化误差（\(\varepsilon > 0\) 引入的偏差）和 迭代误差（有限次迭代的近似）各有多大？如何选择 \(\varepsilon\) 平衡计算 效率和精度？这些问题的严格分析是将 Sinkhorn 用于科学计算的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>总误差 = 正则化偏差 \(O(\varepsilon \log n)\) + 迭代误差 \(O(e^{-t/\kappa})\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>正则化偏差： \[|\text{OT}_\varepsilon - \text{OT}| \leq \varepsilon \log n\] （\(n\) 个支撑点），更精确地 \(\text{OT}_\varepsilon = \text{OT} + \varepsilon H(\gamma^*_\varepsilon) \to \text{OT}\)。 Sinkhorn 迭代的收敛速率（Altschuler-Weed-Rigollet 2017）： \[\|P^{(l)} - P^*_\varepsilon\|_1 \leq C \cdot e^{-l\varepsilon/\|C\|_\infty}\] 线性收敛，速率取决于 \(\varepsilon / \|C\|_\infty\)。 最优 \(\varepsilon\) 选取：达到加法精度 \(\delta\) 的总复杂度 \[O\!\left(\frac{n^2 \|C\|_\infty}{\delta} \log n\right)\] 取 \(\varepsilon = \delta / (2\log n)\)，迭代 \(O(\|C\|_\infty \log n / \delta)\) 次。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>统计检验：基于 \(W\) 距离的双样本检验需要精确控制 Sinkhorn 误差来保证检验水平。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(n=100\) 个点，\(\|C\|_\infty = 10\)，目标精度 \(\delta = 0.1\)。 Sinkhorn 的 \(\varepsilon\) 和迭代次数？ 解答：\(\varepsilon = \delta/(2\log n) = 0.1/(2\ln 100) \approx 0.0109\)。 迭代 \(\sim \|C\|_\infty \log n / \delta = 10 \cdot \ln 100 / 0.1 \approx 461\) 次。 每次 \(O(n^2) = 10^4\)。总 \(\approx 4.6 \times 10^6\) 次操作。 易错点：\(\varepsilon\) 太小导致迭代次数爆炸；太大导致偏差大。这是精度-效率权衡。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">减小 \(\varepsilon\) 对 Sinkhorn 的影响是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\varepsilon \\to 0\\) 逼近精确 OT（偏差 \\(\\to 0\\)），但收敛速率 \\(\\sim e^{-l\\varepsilon}\\) 变慢。')">A. 更快收敛，更大偏差</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\varepsilon \\to 0\\) 逼近精确 OT（偏差 \\(\\to 0\\)），但收敛速率 \\(\\sim e^{-l\\varepsilon}\\) 变慢。')">B. 更慢收敛，更小偏差</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\varepsilon \\to 0\\) 逼近精确 OT（偏差 \\(\\to 0\\)），但收敛速率 \\(\\sim e^{-l\\varepsilon}\\) 变慢。')">C. 不影响收敛</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\varepsilon \\to 0\\) 逼近精确 OT（偏差 \\(\\to 0\\)），但收敛速率 \\(\\sim e^{-l\\varepsilon}\\) 变慢。')">D. 更快收敛，更小偏差</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>小批量 OT 与实际加速技术</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>即使有 Sinkhorn，\(O(n^2)\) 的内存和计算量对百万级数据仍是瓶颈。 小批量 OT(Mini-batch OT)，多尺度方法，以及基于切片(Sliced)的变 体大幅降低了计算成本，使 OT 成为端到端可训练的损失函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>小批量 OT \(\approx\) 随机梯度下降的 OT 版本。切片 OT 利用一维 的闭式解避免高维计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>小批量 Sinkhorn：从 \(\mu, \nu\) 各采样 \(m \ll n\) 个点，计算 \(m \times m\) 的 Sinkhorn，作为 \(W_\varepsilon\) 的无偏/有偏估计。 偏差分析：\(\mathbb{E}[\text{OT}(\hat{\mu}_m, \hat{\nu}_m)] \neq \text{OT}(\mu,\nu)\)——有偏！ 去偏差(Debiased Sinkhorn)：\(\bar{W}(\mu,\nu) = 2\text{OT}_\varepsilon(\mu,\nu) - \text{OT}_\varepsilon(\mu,\mu) - \text{OT}_\varepsilon(\nu,\nu)\)。 切片 Wasserstein 距离(Sliced)： \[SW_p(\mu,\nu) = \left(\int_{S^{d-1}} W_p^p(\theta_\#\mu, \theta_\#\nu) \, d\sigma(\theta)\right)^{1/p}\] 将高维 OT 分解为一维 OT（闭式解！）在所有方向上的平均。 蒙特卡洛近似：采样 \(L\) 个方向，复杂度 \(O(Ln\log n)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>WGAN 训练中用 mini-batch Sinkhorn 或 Sliced Wasserstein 作为判别器损失。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：2D 数据，\(\mu\) 和 \(\nu\) 各 \(n=1000\) 点。计算 \(SW_2\)。 解答：采样 \(L=50\) 个方向 \(\theta_l \in S^1\)。 对每个 \(\theta_l\)：将所有点投影到 \(\theta_l\) 方向，得到两个一维分布。 排序后用分位数公式 \(W_2^2 = \frac{1}{n}\sum_{i=1}^n (x_{\sigma(i)} - y_{\tau(i)})^2\)。 平均：\(SW_2^2 \approx \frac{1}{50}\sum_{l=1}^{50} W_2^2(\theta_l)\)。 复杂度：\(O(50 \cdot 1000 \cdot \log 1000) \approx 5 \times 10^5\)，而全 Sinkhorn \(= O(10^6)\)。 易错点：\(SW\) 不等于 \(W\)（是下界），但 \(SW = 0 \Leftrightarrow W = 0\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">切片 Wasserstein 距离(Sliced)的核心思想是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。一维 \\(W_p\\) 有分位数闭式解；对所有方向平均保持度量性质。')">A. 将矩阵切片并行计算</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！一维 \\(W_p\\) 有分位数闭式解；对所有方向平均保持度量性质。')">B. 投影到一维后利用闭式解</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。一维 \\(W_p\\) 有分位数闭式解；对所有方向平均保持度量性质。')">C. 只计算最近的 \(k\) 个点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。一维 \\(W_p\\) 有分位数闭式解；对所有方向平均保持度量性质。')">D. 用随机矩阵近似代价矩阵</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/applied/optimal-transport.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 线性方程组的数值解 — 数值分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "numerical-ch04-q1",
+        "question": "Gauss 消元法的运算量（\\(n\\times n\\) 稠密矩阵）?",
+        "options": [
+          "\\(\\frac{2}{3}n^3+O(n^2)\\) 次浮点运算",
+        "\\(O(n^2)\\)",
+        "\\(O(n)\\)",
+        "\\(O(n^4)\\)"
+        ],
+        "answer": 0,
+        "explanation": "前向消元：\\(\\sum_{k=1}^{n-1}2(n-k)^2\\approx\\frac{2}{3}n^3\\)。回代：\\(O(n^2)\\)。LU 分解（\\(A=LU\\)）也是 \\(\\frac{2}{3}n^3\\)——消元等价于分解。\\(b\\) 改变时只需 \\(O(n^2)\\) 的前/后代入。"
+      },
+      {
+        "id": "numerical-ch04-q2",
+        "question": "部分主元（partial pivoting）选择的是？",
+        "options": [
+          "当前列中绝对值最大的元素作为主元",
+        "最小的",
+        "第一个非零",
+        "随机"
+        ],
+        "answer": 0,
+        "explanation": "\\(|l_{ij}|\\leq 1\\)（消元因子有界）→ 增长因子 \\(g\\leq 2^{n-1}\\)。实践中 \\(g\\approx n^{2/3}\\)（远小于理论上限）。部分主元 Gauss 消元是后向稳定的（Wilkinson 分析）。完全主元（行列都搜索）→ \\(g\\leq n^{1/2}\\) 但很少需要。"
+      },
+      {
+        "id": "numerical-ch04-q3",
+        "question": "Cholesky 分解 \\(A=LL^T\\) 适用于什么类型的矩阵？",
+        "options": [
+          "对称正定（SPD）矩阵",
+        "任意矩阵",
+        "对称不定",
+        "非方阵"
+        ],
+        "answer": 0,
+        "explanation": "SPD：对称 + 所有特征值 \\(>0\\)（等价于 \\(x^TAx>0\\)，\\(\\forall x\\neq 0\\)）。\\(L\\) 为下三角，对角元 \\(l_{ii}=\\sqrt{a_{ii}-\\sum_{k<i}l_{ik}^2}>0\\)（正定保证根号下正）。运算量 \\(\\frac{1}{3}n^3\\)（= LU 的一半）。无需主元选择。"
+      },
+      {
+        "id": "numerical-ch04-q4",
+        "question": "Jacobi 迭代解 \\(Ax=b\\)：\\(x^{(k+1)}=D^{-1}(b-(L+U)x^{(k)})\\)。收敛条件？",
+        "options": [
+          "谱半径 \\(\\rho(D^{-1}(L+U))<1\\)（充分条件：\\(A\\) 严格对角占优）",
+        "总是收敛",
+        "\\(A\\) 正定",
+        "\\(A\\) 对称"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=D+L+U\\)（对角 + 严格下三角 + 严格上三角）。迭代矩阵 \\(G_J=D^{-1}(L+U)\\)。\\(\\rho(G_J)<1\\) ↔ 收敛。严格对角占优 \\(|a_{ii}|>\\sum_{j\\neq i}|a_{ij}|\\) → \\(\\|G_J\\|_\\infty<1\\) → 收敛。物理系统常产生此类矩阵。"
+      },
+      {
+        "id": "numerical-ch04-q5",
+        "question": "Krylov 子空间 \\(\\mathcal{K}_k(A,b)=\\text{span}\\{b,Ab,...,A^{k-1}b\\}\\)。共轭梯度法（CG）在 \\(\\mathcal{K}_k\\) 中做什么？",
+        "options": [
+          "最小化 \\(\\|x-x_k\\|_A=\\sqrt{(x-x_k)^T A(x-x_k)}\\)（\\(A\\)-范数误差）",
+        "最大化残差",
+        "随机搜索",
+        "高斯消元"
+        ],
+        "answer": 0,
+        "explanation": "CG 等价于在 \\(\\mathcal{K}_k\\) 中求 \\(\\min\\frac{1}{2}x^TAx-b^Tx\\)。每步只需一次矩阵-向量乘（\\(O(n)\\) 稀疏或 \\(O(n^2)\\) 稠密）。\\(k\\leq n\\) 步精确收敛（精确算术下）。实际 \\(k\\ll n\\) 步已收敛到足够精度。"
+      },
+      {
+        "id": "numerical-ch04-q6",
+        "question": "LU 分解 \\(PA=LU\\) 中 \\(P\\) 是什么？",
+        "options": [
+          "置换矩阵（记录行交换/主元选择）",
+        "投影矩阵",
+        "正交矩阵",
+        "对角矩阵"
+        ],
+        "answer": 0,
+        "explanation": "\\(P\\) 为 \\(n\\times n\\) 置换矩阵：每行每列恰好一个 1。\\(PA\\) = 行重排后的 \\(A\\)。\\(L\\) 下三角（对角 \\(=1\\)，\\(|l_{ij}|\\leq 1\\)），\\(U\\) 上三角。求解：\\(Ax=b\\) → \\(PAx=Pb\\) → \\(LUx=Pb\\) → 前代 \\(Ly=Pb\\)，回代 \\(Ux=y\\)。"
+      },
+      {
+        "id": "numerical-ch04-q7",
+        "question": "Gauss-Seidel 和 Jacobi 的区别？",
+        "options": [
+          "G-S 在每步立刻使用已更新的分量（\\(x^{(k+1)}_i=\\frac{1}{a_{ii}}(b_i-\\sum_{j<i}a_{ij}x^{(k+1)}_j-\\sum_{j>i}a_{ij}x^{(k)}_j)\\)）",
+        "完全相同",
+        "G-S 更慢",
+        "Jacobi 使用更新值"
+        ],
+        "answer": 0,
+        "explanation": "G-S 迭代矩阵 \\(G_{GS}=(D+L)^{-1}U\\)。\\(\\rho(G_{GS})\\leq\\rho(G_J)\\) 对 SPD 和不可约对角占优矩阵成立。每步成本相同但收敛更快（通常快一倍）。缺点：不可天然并行（Jacobi 可以）。"
+      },
+      {
+        "id": "numerical-ch04-q8",
+        "question": "Cholesky 分解 \\(A=\\begin{pmatrix}4&2\\\\2&3\\end{pmatrix}\\)。\\(L=\\)？",
+        "options": [
+          "\\(L=\\begin{pmatrix}2&0\\\\1&\\sqrt{2}\\end{pmatrix}\\)",
+        "\\(L=\\begin{pmatrix}4&0\\\\2&3\\end{pmatrix}\\)",
+        "\\(L=\\begin{pmatrix}2&1\\\\0&\\sqrt{2}\\end{pmatrix}\\)",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(l_{11}=\\sqrt{4}=2\\)。\\(l_{21}=a_{21}/l_{11}=2/2=1\\)。\\(l_{22}=\\sqrt{a_{22}-l_{21}^2}=\\sqrt{3-1}=\\sqrt{2}\\)。验证：\\(LL^T=\\begin{pmatrix}4&2\\\\2&1+2\\end{pmatrix}=\\begin{pmatrix}4&2\\\\2&3\\end{pmatrix}\\) ✓。"
+      },
+      {
+        "id": "numerical-ch04-q9",
+        "question": "CG 法的收敛速率：\\(\\|e_k\\|_A\\leq 2\\left(\\frac{\\sqrt\\kappa-1}{\\sqrt\\kappa+1}\\right)^k\\|e_0\\|_A\\)。\\(\\kappa=\\)？",
+        "options": [
+          "\\(\\kappa=\\kappa_2(A)=\\lambda_{\\max}/\\lambda_{\\min}\\)（\\(A\\) 的条件数）",
+        "\\(\\kappa=n\\)",
+        "\\(\\kappa=\\|A\\|\\)",
+        "\\(\\kappa=\\text{tr}(A)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\rho=\\frac{\\sqrt\\kappa-1}{\\sqrt\\kappa+1}<1\\)。\\(\\kappa=10^6\\)：\\(\\rho\\approx 1-2/\\sqrt\\kappa\\approx 0.998\\)，需 \\(\\sim\\sqrt\\kappa/2\\approx 500\\) 步减半误差。预条件 \\(M^{-1}A\\)：用 \\(\\kappa(M^{-1}A)\\ll\\kappa(A)\\) → 大幅减少迭代。"
+      },
+      {
+        "id": "numerical-ch04-q10",
+        "question": "LU 分解后，解多个右端 \\(Ax=b_1,...,b_m\\) 的总成本？",
+        "options": [
+          "\\(\\frac{2}{3}n^3+O(mn^2)\\)（分解一次 + 每个右端 \\(O(n^2)\\)）",
+        "\\(m\\cdot\\frac{2}{3}n^3\\)",
+        "\\(O(n^2)\\)",
+        "\\(O(mn^3)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=LU\\)：\\(\\frac{2}{3}n^3\\)（一次）。每个 \\(b_k\\)：前代 \\(Ly=Pb_k\\)（\\(n^2/2\\)） + 回代 \\(Ux=y\\)（\\(n^2/2\\)）= \\(O(n^2)\\)。\\(m\\) 个右端：\\(\\frac{2}{3}n^3+mn^2\\)。若 \\(m\\ll n\\) → 分解主导；\\(m\\sim n\\) → 前代回代也显著。"
+      },
+      {
+        "id": "numerical-ch04-q11",
+        "question": "SOR（Successive Over-Relaxation）迭代引入松弛因子 \\(\\omega\\)。最优 \\(\\omega\\) 的选择？",
+        "options": [
+          "\\(\\omega_{\\text{opt}}=\\frac{2}{1+\\sqrt{1-\\rho(G_J)^2}}\\)（\\(\\rho\\) 为 Jacobi 谱半径）",
+        "\\(\\omega=1\\)",
+        "\\(\\omega=2\\)",
+        "任意"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\omega=1\\) → Gauss-Seidel。\\(1<\\omega<2\\) → 过松弛（加速）。最优 \\(\\omega\\) 使 \\(\\rho(G_{SOR})\\) 最小。\\(A\\) 为 Poisson 方程 5点差分（\\(n\\times n\\) 网格）：\\(\\rho(G_J)=\\cos(\\pi h)\\)，\\(\\omega_{\\text{opt}}\\approx 2-2\\pi h\\)，收敛从 \\(O(1/n^2)\\) 步加速到 \\(O(1/n)\\)。"
+      },
+      {
+        "id": "numerical-ch04-q12",
+        "question": "什么情况下 Cholesky 分解失败（根号下出现非正数）？",
+        "options": [
+          "矩阵不是正定的",
+        "矩阵太大",
+        "矩阵非方阵",
+        "主对角元太小"
+        ],
+        "answer": 0,
+        "explanation": "\\(l_{kk}=\\sqrt{a_{kk}-\\sum l_{ki}^2}\\)。如果 \\(a_{kk}-\\sum l_{ki}^2\\leq 0\\) → 失败。这恰好对应 \\(A\\) 不正定（某个 Schur 补非正）。反过来：Cholesky 可作为正定性测试（比计算特征值便宜）。"
+      },
+      {
+        "id": "numerical-ch04-q13",
+        "question": "预条件 CG（PCG）：\\(M^{-1}Ax=M^{-1}b\\)。好的预条件 \\(M\\) 应满足？",
+        "options": [
+          "\\(M\\approx A\\)（使 \\(\\kappa(M^{-1}A)\\approx 1\\)）且 \\(Mz=r\\) 容易求解",
+        "\\(M=I\\)",
+        "\\(M=A\\)",
+        "\\(M\\) 任意"
+        ],
+        "answer": 0,
+        "explanation": "\\(M=A\\) → \\(\\kappa=1\\) → 一步收敛，但 \\(M^{-1}\\) 等于解原问题。\\(M=\\text{diag}(A)\\)（Jacobi 预条件）简单但效果有限。不完全 Cholesky \\(A\\approx\\tilde L\\tilde L^T\\)（填充限制）→ \\(Mz=r\\) 三角回代 \\(O(n)\\)。代数多重网格（AMG）为 \\(O(n)\\) 最优预条件。"
+      },
+      {
+        "id": "numerical-ch04-q14",
+        "question": "带状矩阵（带宽 \\(p\\)）的 LU 分解运算量？",
+        "options": [
+          "\\(O(np^2)\\)（\\(\\ll n^3\\) 当 \\(p\\ll n\\)）",
+        "\\(O(n^3)\\)",
+        "\\(O(n^2)\\)",
+        "\\(O(np)\\)"
+        ],
+        "answer": 0,
+        "explanation": "三对角（\\(p=1\\)）：\\(O(n)\\)（Thomas 算法）。五对角（\\(p=2\\)）：\\(O(n)\\)。一般带宽 \\(p\\)：\\(O(np^2)\\)。PDE 离散化的稀疏结构 → 带状或更一般稀疏 → 直接法 or 迭代法选择取决于问题规模和填充。"
+      },
+      {
+        "id": "numerical-ch04-q15",
+        "question": "迭代法的停止准则通常用什么？",
+        "options": [
+          "相对残差 \\(\\|b-Ax^{(k)}\\|/\\|b\\|<\\varepsilon\\)",
+        "\\(k>1000\\)",
+        "\\(\\|x^{(k)}\\|<1\\)",
+        "仅看绝对残差"
+        ],
+        "answer": 0,
+        "explanation": "注意：\\(\\|r\\|/\\|b\\|<\\varepsilon\\) 保证 \\(\\|x-x^{(k)}\\|/\\|x\\|\\leq\\kappa(A)\\varepsilon\\)。病态问题（\\(\\kappa\\) 大）：小残差不保证小误差！应同时监控 \\(\\|x^{(k)}-x^{(k-1)}\\|\\)。精确停止准则的选择影响结果可信度。"
+      },
+      {
+        "id": "numerical-ch04-q16",
+        "question": "GMRES（Generalized Minimal RESidual）适用于什么类型的矩阵？",
+        "options": [
+          "一般非对称矩阵（最小化 \\(\\|b-Ax_k\\|_2\\) 在 \\(\\mathcal{K}_k\\) 上）",
+        "仅对称",
+        "仅 SPD",
+        "仅正交"
+        ],
+        "answer": 0,
+        "explanation": "CG 限于 SPD。GMRES 用 Arnoldi 过程构造 \\(\\mathcal{K}_k\\) 的正交基，然后解最小二乘问题。缺点：每步存储增长（\\(O(kn)\\)）→ 重启 GMRES(\\(m\\))：每 \\(m\\) 步重启。对称不定 → MINRES。"
+      },
+      {
+        "id": "numerical-ch04-q17",
+        "question": "SPD 矩阵的 LDLT 分解（\\(A=LDL^T\\)，\\(L\\) 下三角单位对角，\\(D\\) 对角正）的优势？",
+        "options": [
+          "避免开方运算（Cholesky 需 \\(\\sqrt\\cdot\\)），且可推广到对称不定（\\(D\\) 允许 \\(2\\times 2\\) 块）",
+        "无优势",
+        "更慢",
+        "不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(A=LDL^T\\)：\\(l_{ij}=\\frac{1}{d_j}(a_{ij}-\\sum_{k<j}l_{ik}d_k l_{jk})\\)。避免 \\(n\\) 次开方。对称不定（如鞍点问题）：Bunch-Kaufman 分解 \\(PAP^T=LDL^T\\)（\\(D\\) 有 \\(1\\times 1\\) 和 \\(2\\times 2\\) 块）。LAPACK 的 `dsytrf` 实现。"
+      },
+      {
+        "id": "numerical-ch04-q18",
+        "question": "Gauss 消元中的增长因子 \\(g=\\frac{\\max|u_{ij}|}{\\max|a_{ij}|}\\)。部分主元时 \\(g\\) 理论上界？",
+        "options": [
+          "\\(g\\leq 2^{n-1}\\)（但实际中几乎不超过 \\(n^{1/2}\\)）",
+        "\\(g\\leq n\\)",
+        "\\(g=1\\)",
+        "\\(g\\leq n^2\\)"
+        ],
+        "answer": 0,
+        "explanation": "Wilkinson 的理论上界 \\(2^{n-1}\\) 非常悲观。60 多年的实践经验：\\(g\\) 极少超过 \\(O(n)\\)。完全主元 → \\(g\\leq n^{1/2}\\)（理论）。\\(g\\) 大 → 误差大：\\(\\|x-\\hat x\\|/\\|x\\|\\leq g\\cdot n\\cdot\\kappa\\cdot\\varepsilon_{\\text{mach}}\\)。"
+      },
+      {
+        "id": "numerical-ch04-q19",
+        "question": "多重网格法（multigrid）解 \\(Ax=b\\)（来自 PDE 离散）的复杂度？",
+        "options": [
+          "\\(O(n)\\)（最优——求解成本与未知数成正比）",
+        "\\(O(n\\log n)\\)",
+        "\\(O(n^{3/2})\\)",
+        "\\(O(n^2)\\)"
+        ],
+        "answer": 0,
+        "explanation": "基本思想：松弛法（如 G-S）快速消除高频误差，低频误差投影到粗网格递归求解。V-cycle / W-cycle / FMG → \\(O(n)\\) 总工作量。这是椭圆 PDE 的最优求解器。代数多重网格（AMG）不需要几何网格信息。"
+      },
+      {
+        "id": "numerical-ch04-q20",
+        "question": "CG 法的 Lanczos 关系：三对角矩阵 \\(T_k=V_k^TAV_k\\)（\\(V_k\\) 是 \\(\\mathcal{K}_k\\) 的正交基）。\\(T_k\\) 的特征值和 \\(A\\) 的特征值关系？",
+        "options": [
+          "\\(T_k\\) 的特征值逐步逼近 \\(A\\) 的极端特征值（Ritz 值）",
+        "相同",
+        "无关",
+        "全为零"
+        ],
+        "answer": 0,
+        "explanation": "\\(T_k\\) 的 \\(k\\) 个特征值（Ritz 值）是 \\(A\\) 的 \\(n\\) 个特征值的近似。\\(k\\) 增加 → 极端 Ritz 值先收敛。CG 收敛快 ↔ \\(A\\) 的特征值聚集（少数不同的极端值 → 少数 CG 步）。预条件使谱聚集。"
+      },
+      {
+        "id": "numerical-ch04-q21",
+        "question": "不完全 Cholesky 分解 \\(\\text{IC}(0)\\)：\"零填充\"意味着？",
+        "options": [
+          "\\(\\tilde L\\) 只在 \\(A\\) 的非零模式位置有非零元（不产生新的填充）",
+        "\\(\\tilde L=L\\)",
+        "\\(\\tilde L=0\\)",
+        "忽略对角"
+        ],
+        "answer": 0,
+        "explanation": "精确 Cholesky → \\(L\\) 有填充（fill-in：原来 \\(a_{ij}=0\\) 的位置变非零）。IC(0) 丢弃填充 → \\(A\\approx\\tilde L\\tilde L^T\\)。\\(M=\\tilde L\\tilde L^T\\) 做 PCG 预条件。更多填充允许 → IC(\\(p\\))（\\(p\\) 级填充）→ 更好的预条件但更多存储。"
+      },
+      {
+        "id": "numerical-ch04-q22",
+        "question": "稀疏矩阵 LU 分解的\"填充\"问题如何处理？",
+        "options": [
+          "重排序（如 Cuthill-McKee, 嵌套解剖 nested dissection）减少填充",
+        "忽略填充",
+        "使用稠密算法",
+        "不可处理"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\times n\\) 二维 Poisson（\\(O(n)\\) 非零元）。自然排序 LU：\\(O(n^{3/2})\\) 填充，\\(O(n^2)\\) 运算。嵌套解剖：\\(O(n\\log n)\\) 填充，\\(O(n^{3/2})\\) 运算。三维更剧烈：\\(O(n^{4/3})\\) vs \\(O(n^2)\\)。METIS/SCOTCH 库做自动重排序。"
+      },
+      {
+        "id": "numerical-ch04-q23",
+        "question": "SOR 收敛的必要条件 \\(0<\\omega<2\\) 的证明关键？",
+        "options": [
+          "\\(\\det(G_{SOR})=(\\omega-1)^n\\) → \\(\\rho(G_{SOR})\\geq|\\omega-1|\\) → 收敛需 \\(|\\omega-1|<1\\)，即 \\(0<\\omega<2\\)",
+        "直接验证",
+        "仅对 SPD 成立",
+        "无必要条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(G_{SOR}=(D+\\omega L)^{-1}((1-\\omega)D-\\omega U)\\)。\\(\\det(G_{SOR})=\\frac{\\det((1-\\omega)D)}{\\det(D+\\omega L)}=(1-\\omega)^n\\)。特征值之积 \\(=(1-\\omega)^n\\) → 至少一个特征值 \\(\\geq|1-\\omega|\\) → 需 \\(|1-\\omega|<1\\)。\\(\\omega=1\\): G-S。\\(\\omega>2\\): 发散。"
+      },
+      {
+        "id": "numerical-ch04-q24",
+        "question": "BiCGSTAB 方法相比 GMRES 的优势？",
+        "options": [
+          "固定的每步存储（\\(O(n)\\)），不需要重启",
+        "更快收敛",
+        "更精确",
+        "仅适用于 SPD"
+        ],
+        "answer": 0,
+        "explanation": "GMRES 存储随迭代增长（\\(O(kn)\\)）→ 需重启（可能不收敛）。BiCGSTAB 基于 bi-Lanczos，每步固定 \\(O(n)\\) 存储，2次矩阵-向量乘。缺点：可能不规则收敛（残差震荡）。QMR 是另一选择。非对称大规模稀疏 → 常用 GMRES(\\(m\\)) 或 BiCGSTAB。"
+      },
+      {
+        "id": "numerical-ch04-q25",
+        "question": "QR 分解 \\(A=QR\\) 的计算成本和主要用途？",
+        "options": [
+          "\\(\\frac{4}{3}n^3\\)（Householder），用于最小二乘和特征值计算（比 LU 贵一倍但更稳定）",
+        "\\(O(n^2)\\)",
+        "仅用于方阵",
+        "与 LU 相同"
+        ],
+        "answer": 0,
+        "explanation": "Householder QR：\\(\\frac{4}{3}n^3\\)（比 LU 的 \\(\\frac{2}{3}n^3\\) 贵一倍）。\\(Q\\) 正交 → \\(\\kappa(Q)=1\\) → 不引入额外误差。最小二乘 \\(\\min\\|Ax-b\\|\\)：\\(Rx=Q^Tb\\)。特征值：先 Hessenberg 化再 QR 迭代。"
+      },
+      {
+        "id": "numerical-ch04-q26",
+        "question": "结构工程中有限元分析：\\(KU=F\\)（\\(K\\) 对称正定刚度矩阵，通常稀疏）。如何求解？",
+        "options": [
+          "稀疏 Cholesky 或 PCG（取决于问题规模）",
+        "Gauss 消元无主元",
+        "Cramer 法则",
+        "矩阵求逆"
+        ],
+        "answer": 0,
+        "explanation": "\\(n<10^5\\)：直接法（稀疏 Cholesky, PARDISO/MUMPS）。\\(n>10^5\\)：迭代法（PCG + AMG 或不完全 Cholesky 预条件）。结构对称 → Cholesky 存储和运算减半。永远不要计算 \\(K^{-1}\\) 再乘——\\(K^{-1}\\) 是稠密的。"
+      },
+      {
+        "id": "numerical-ch04-q27",
+        "question": "Google PageRank 算法本质上是求什么？",
+        "options": [
+          "超大规模稀疏矩阵的主特征向量（幂迭代/Arnoldi）",
+        "LU 分解",
+        "行列式",
+        "矩阵的逆"
+        ],
+        "answer": 0,
+        "explanation": "\\(Gx=x\\)（\\(G\\) 是修正的网络链接矩阵，\\(\\sim 10^{10}\\times 10^{10}\\) 极稀疏）。幂迭代 \\(x^{(k+1)}=Gx^{(k)}\\) 收敛到主特征向量 → 网页排名。每步只需一次稀疏矩阵-向量乘（\\(O(\\text{nnz})\\)）。收敛由\"阻尼因子\" \\(\\alpha=0.85\\) 保证。"
+      },
+      {
+        "id": "numerical-ch04-q28",
+        "question": "计算流体力学（CFD）中 Navier-Stokes 方程离散后的线性系统是鞍点问题 \\(\\begin{pmatrix}A&B^T\\\\B&0\\end{pmatrix}\\begin{pmatrix}u\\\\p\\end{pmatrix}=\\begin{pmatrix}f\\\\g\\end{pmatrix}\\)。求解策略？",
+        "options": [
+          "Schur 补方法 + Krylov 迭代（如 GMRES + 块预条件）",
+        "直接 Cholesky",
+        "Jacobi 迭代",
+        "CG（不适用——矩阵不定）"
+        ],
+        "answer": 0,
+        "explanation": "鞍点矩阵对称但不定 → CG 不适用。Schur 补 \\(S=BA^{-1}B^T\\)：\\(Sp=BA^{-1}f-g\\) → 压力先求出 → 速度 \\(u=A^{-1}(f-B^Tp)\\)。\\(A^{-1}\\) 用近似替代 → 预条件 GMRES。Elman-Silvester-Wathen 的块预条件是当前主流。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="applied" data-module="numerical"
+      style="--domain-color: var(--c-applied);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">APPLIED</span>
+      <a href="../../../modules/applied/numerical.html" class="module-name">数值分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Gauss 消元与 LU 分解</a></li>
+      <li><a href="#kp2">02 · Cholesky 分解与对称正定系统</a></li>
+      <li><a href="#kp3">03 · 迭代法——Jacobi、Gauss-Seidel、SOR</a></li>
+      <li><a href="#kp4">04 · Krylov 子空间方法——共轭梯度与 GMRES</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>线性方程组的数值解</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Gauss 消元与 LU 分解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>\(Ax = b\) 是科学计算中最频繁出现的问题——PDE 离散化、 最小二乘、优化子问题都归结为线性方程组。Gauss 消元法将 \(A\) 化为上三角矩阵后回代，LU 分解 \(A = LU\) 是其矩阵化表述。 \(O(n^3)\) 的成本对稠密矩阵是标准方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Gauss 消元 = 左乘初等矩阵 \(L_k\) 使 \(A\) 上三角化。 \(L_n\cdots L_1 A = U\) → \(A = (L_1^{-1}\cdots L_n^{-1})U = LU\)。 每个 \(L_k^{-1}\) 是下三角单位矩阵，乘积仍是下三角（结构保持）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Gauss 消元</strong>（无选主元版）： 第 \(k\) 步：\(a_{ij}^{(k+1)} = a_{ij}^{(k)} - \frac{a_{ik}^{(k)}}{a_{kk}^{(k)}} a_{kj}^{(k)}\)，\(i > k\)。 乘数 \(l_{ik} = a_{ik}^{(k)}/a_{kk}^{(k)}\) 存入 \(L\) 的下三角部分。 <strong>LU 分解的存在条件</strong>：\(A\) 的所有顺序主子式不为零（\(\det A_{1:k,1:k} \neq 0\)）。 实际使用<strong>部分选主元</strong>（partial pivoting）：每步选取 \(|a_{ik}^{(k)}|\) 最大的行交换到第 \(k\) 行。 结果 \(PA = LU\)（\(P\) 是置换矩阵）。 <strong>复杂度</strong>：消元 \(\frac{2}{3}n^3 + O(n^2)\) flops，回代 \(n^2\) flops。 <strong>后向稳定性</strong>：Gauss 消元 + 部分选主元是后向稳定的（Wilkinson 定理）， \(\hat{x}\) 满足 \((A + \Delta A)\hat{x} = b\)，\(\|\Delta A\| \leq f(n)\epsilon_{\text{mach}}\|A\|\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- LAPACK/BLAS 中的 `dgesv` 是 Gauss 消元 + 部分选主元的工业级实现 - 有限元/有限差分的稠密子问题用直接法求解</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 \(A = \begin{pmatrix}2&1&1\\4&3&3\\8&7&9\end{pmatrix}\) 做 LU 分解。 解答：\(l_{21} = 4/2 = 2\)，\(l_{31} = 8/2 = 4\)。 第一步消元后 \(A^{(2)} = \begin{pmatrix}2&1&1\\0&1&1\\0&3&5\end{pmatrix}\)。 \(l_{32} = 3/1 = 3\)。\(U = \begin{pmatrix}2&1&1\\0&1&1\\0&0&2\end{pmatrix}\)。 \(L = \begin{pmatrix}1&0&0\\2&1&0\\4&3&1\end{pmatrix}\)。验证 \(LU = A\)。✓ 易错点：如果主元 \(a_{kk}^{(k)} = 0\)（或很小），不选主元的 Gauss 消元要么失败 要么数值不稳定。必须使用部分选主元。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">LU 分解（不选主元）存在的充要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A\\) 可逆不足以保证 LU 存在（遇零主元则失败），')">A. \(A\) 可逆</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A\\) 可逆不足以保证 LU 存在（遇零主元则失败），')">B. \(A\) 对称正定</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(A\\) 可逆不足以保证 LU 存在（遇零主元则失败），')">C. \(A\) 的所有顺序主子式非零</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A\\) 可逆不足以保证 LU 存在（遇零主元则失败），')">D. \(A\) 是上三角的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Cholesky 分解与对称正定系统</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>对称正定矩阵（SPD）在物理和工程中无处不在（刚度矩阵、 协方差矩阵、正规方程）。Cholesky 分解 \(A = LL^T\) 利用了 对称正定性，计算量仅为 LU 的一半，且无需选主元天然稳定。 它是 SPD 系统的首选方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Cholesky 分解是「矩阵平方根」的三角化版本。\(L\) 的存在 本身就是 \(A\) 正定的判据——如果 Cholesky 分解过程中出现 非正对角元素，说明 \(A\) 不正定。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cholesky 分解</strong>：对 SPD 矩阵 \(A\)，存在唯一的下三角 \(L\)（对角元 \(>0\)）使 \(A = LL^T\)。 <strong>推导</strong>（按列/按行递推）： \(a_{jj} = l_{j1}^2 + \cdots + l_{jj}^2\) → \(l_{jj} = \sqrt{a_{jj} - \sum_{k=1}^{j-1}l_{jk}^2}\)（正定保证根号内 \(>0\)）。 \(a_{ij} = \sum_{k=1}^j l_{ik}l_{jk}\) → \(l_{ij} = (a_{ij}-\sum_{k=1}^{j-1}l_{ik}l_{jk})/l_{jj}\)（\(i > j\)）。 <strong>复杂度</strong>：\(\frac{1}{3}n^3 + O(n^2)\) flops（LU 的一半）。 <strong>稳定性</strong>：无需选主元，因为 \(|l_{ij}| \leq l_{ii} \leq \sqrt{a_{ii}}\)（增长因子为 1）。 <strong>不完全 Cholesky</strong>（预条件器）：\(A \approx \tilde{L}\tilde{L}^T\)， 丢弃某些非零元素使 \(\tilde{L}\) 稀疏，用作迭代法的预条件器。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 最小二乘正规方程 \(A^TAx = A^Tb\)（\(A^TA\) 是 SPD） - 统计中多元正态分布的采样 \(x = L\xi\)（\(\xi \sim N(0,I)\)）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 \(A = \begin{pmatrix}4&2\\2&5\end{pmatrix}\) 做 Cholesky 分解。 解答：\(l_{11} = \sqrt{4} = 2\)，\(l_{21} = 2/2 = 1\)， \(l_{22} = \sqrt{5-1^2} = 2\)。 \(L = \begin{pmatrix}2&0\\1&2\end{pmatrix}\)，\(LL^T = \begin{pmatrix}4&2\\2&5\end{pmatrix} = A\)。✓ 易错点：如果在计算中遇到 \(l_{jj}^2 < 0\)（平方根内为负）， 说明矩阵不正定，Cholesky 分解不存在。这可作为正定性的数值判据。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Cholesky 分解相比 LU 分解的主要优势是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SPD 矩阵的 Cholesky 分解 \\(n^3/3\\)（vs LU 的 \\(2n^3/3\\)），')">A. 适用于任何可逆矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！SPD 矩阵的 Cholesky 分解 \\(n^3/3\\)（vs LU 的 \\(2n^3/3\\)），')">B. 计算量减半且无需选主元</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SPD 矩阵的 Cholesky 分解 \\(n^3/3\\)（vs LU 的 \\(2n^3/3\\)），')">C. 可以处理奇异矩阵</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。SPD 矩阵的 Cholesky 分解 \\(n^3/3\\)（vs LU 的 \\(2n^3/3\\)），')">D. 精度更高</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>迭代法——Jacobi、Gauss-Seidel、SOR</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>大型稀疏矩阵（如 PDE 离散化产生的 \(n \gg 10^4\) 的系统） 用直接法（\(O(n^3)\)）太昂贵。迭代法从初始猜测出发逐步逼近 精确解，每步只需 \(O(\text{nnz})\)（非零元素数）运算。Jacobi、 Gauss-Seidel 和 SOR 是经典的定常迭代法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>迭代法将 \(Ax = b\) 化为不动点迭代 \(x^{(k+1)} = Bx^{(k)} + c\)。 谱半径 \(\rho(B) < 1\) 是收敛的充要条件——控制谱半径就是设计 迭代法的核心目标。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>矩阵分裂框架</strong>：\(A = M - N\)，\(Mx^{(k+1)} = Nx^{(k)} + b\)。 迭代矩阵 \(B = M^{-1}N\)，收敛 \(\iff \rho(B) < 1\)。 <strong>Jacobi 迭代</strong>：\(M = D\)（对角），\(x_i^{(k+1)} = \frac{1}{a_{ii}}(b_i - \sum_{j\neq i}a_{ij}x_j^{(k)})\)。 <strong>Gauss-Seidel 迭代</strong>：\(M = D + L\)（下三角），使用最新值： \(x_i^{(k+1)} = \frac{1}{a_{ii}}(b_i - \sum_{j<i}a_{ij}x_j^{(k+1)} - \sum_{j>i}a_{ij}x_j^{(k)})\)。 <strong>SOR</strong>（逐次超松弛）：引入参数 \(\omega\)： \[x^{(k+1)} = (1-\omega)x^{(k)} + \omega x^{(k+1)}_{\text{GS}}\] \(\omega \in (1,2)\) 超松弛加速，\(\omega = 1\) 为 Gauss-Seidel。 <strong>收敛判据</strong>（充分条件）：\(A\) 严格对角占优 \(|a_{ii}| > \sum_{j\neq i}|a_{ij}|\) → Jacobi 和 Gauss-Seidel 均收敛。\(A\) SPD → Gauss-Seidel 收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- Laplace 方程的五点差分 → Gauss-Seidel/SOR 是经典求解器 - 图像处理中的平滑滤波可用 Jacobi 迭代实现</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 \(\begin{pmatrix}4&1\\1&3\end{pmatrix}x = \begin{pmatrix}5\\5\end{pmatrix}\) 做 2 步 Jacobi 迭代（\(x^{(0)}=(0,0)^T\)）。 解答：step 1：\(x_1^{(1)} = (5-0)/4 = 1.25\)，\(x_2^{(1)} = (5-0)/3 = 1.667\)。 step 2：\(x_1^{(2)} = (5-1.667)/4 = 0.833\)，\(x_2^{(2)} = (5-1.25)/3 = 1.25\)。 精确解 \((10/11, 15/11) \approx (0.909, 1.364)\)。收敛中。 易错点：SOR 的 \(\omega\) 选取至关重要。\(\omega\) 太大（\(>2\)）必定发散， \(\omega\) 太小收敛慢。最优 \(\omega\) 取决于 \(A\) 的谱结构。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">定常迭代法 \(x^{(k+1)} = Bx^{(k)} + c\) 收敛的充要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\rho(B) < 1\\)（谱半径小于 1）是充要条件。\\(\\|B\\| < 1\\) 是充分条件')">A. \(\|B\| < 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\rho(B) < 1\\)（谱半径小于 1）是充要条件。\\(\\|B\\| < 1\\) 是充分条件')">B. \(\rho(B) < 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\rho(B) < 1\\)（谱半径小于 1）是充要条件。\\(\\|B\\| < 1\\) 是充分条件')">C. \(B\) 对称</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\rho(B) < 1\\)（谱半径小于 1）是充要条件。\\(\\|B\\| < 1\\) 是充分条件')">D. \(B\) 正定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Krylov 子空间方法——共轭梯度与 GMRES</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>经典迭代法收敛慢（\(\rho(B)\) 接近 1 时需要很多步）。Krylov 子空间 方法在 \(\text{span}\{r_0, Ar_0, A^2r_0, \ldots\}\) 中寻找最优近似解， 收敛速度由 \(A\) 的特征值分布（而非谱半径）决定——配合预条件后， 通常远快于定常迭代。CG 和 GMRES 是现代大规模线性方程组的标准方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Krylov 方法在逐步增长的子空间中最优化残差或误差。 共轭梯度 = SPD 矩阵上的能量范数最优化（等价于二次规划）。 GMRES = 一般矩阵上的残差 \(L^2\) 范数最小化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>共轭梯度法（CG）</strong>（\(A\) SPD）： 在 \(x_0 + \mathcal{K}_k(A,r_0)\) 中找 \(x_k\) 使能量误差 \(\|x-x_k\|_A\) 最小。 迭代： \(r_k = b - Ax_k\)（残差），\(p_k\)（搜索方向，与之前所有 \(p_j\) 关于 \(A\) 共轭）。 \[\alpha_k = \frac{r_k^T r_k}{p_k^T A p_k}, \quad x_{k+1} = x_k + \alpha_k p_k\] \[r_{k+1} = r_k - \alpha_k Ap_k, \quad \beta_k = \frac{r_{k+1}^T r_{k+1}}{r_k^T r_k}\] \[p_{k+1} = r_{k+1} + \beta_k p_k\] 每步仅需一次矩阵-向量乘积 \(Ap_k\)（\(O(\text{nnz})\)）。 <strong>收敛速率</strong>：\(\|x-x_k\|_A \leq 2\left(\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}\right)^k\|x-x_0\|_A\)， 其中 \(\kappa = \kappa(A)\)。条件数越小收敛越快 → <strong>预条件</strong>的重要性。 <strong>GMRES</strong>（一般矩阵）：在 \(\mathcal{K}_k\) 中最小化 \(\|b-Ax\|_2\)， 用 Arnoldi 过程构造正交基。通用但每步存储增长。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 有限元求解的核心线性代数步骤几乎都用预条件 CG 或 GMRES - 机器学习中大规模优化的 CG 变体</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：对 \(A = \begin{pmatrix}2&-1\\-1&2\end{pmatrix}\)，\(b = (1,0)^T\) 做 CG 第一步。 解答：\(x_0 = (0,0)^T\)，\(r_0 = b = (1,0)^T\)，\(p_0 = r_0 = (1,0)^T\)。 \(Ap_0 = (2,-1)^T\)，\(\alpha_0 = r_0^Tr_0/(p_0^TAp_0) = 1/2\)。 \(x_1 = (0.5, 0)^T\)，\(r_1 = (1,0)-(1/2)(2,-1) = (0, 0.5)^T\)。 \(\beta_0 = 0.25/1 = 0.25\)，\(p_1 = (0,0.5) + 0.25(1,0) = (0.25, 0.5)^T\)。 易错点：CG 仅适用于 SPD 矩阵。对非对称或不定矩阵必须用 GMRES 或 BiCGSTAB。 对 SPD 矩阵误用 GMRES 会浪费存储。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CG 方法的收敛速率由什么决定？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。收敛因子 \\(\\sim (\\sqrt{\\kappa}-1)/(\\sqrt{\\kappa}+1)\\)，')">A. 矩阵维数 \(n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！收敛因子 \\(\\sim (\\sqrt{\\kappa}-1)/(\\sqrt{\\kappa}+1)\\)，')">B. \(\kappa(A) = \lambda_{\max}/\lambda_{\min}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。收敛因子 \\(\\sim (\\sqrt{\\kappa}-1)/(\\sqrt{\\kappa}+1)\\)，')">C. 矩阵的非零元素个数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。收敛因子 \\(\\sim (\\sqrt{\\kappa}-1)/(\\sqrt{\\kappa}+1)\\)，')">D. 初始猜测与真解的距离</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/applied/numerical.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

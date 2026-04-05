@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 随机微分方程 — 随机微积分 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-calc-ch04-q1",
+        "question": "SDE \\(dX_t=b(X_t)dt+\\sigma(X_t)dB_t\\) 的解存在唯一的经典条件？",
+        "options": [
+          "Lipschitz 条件 \\(|b(x)-b(y)|+|\\sigma(x)-\\sigma(y)| \\leq K|x-y|\\) + 线性增长条件",
+        "\\(b, \\sigma\\) 连续即可",
+        "\\(b, \\sigma\\) 为常数",
+        "无需条件"
+        ],
+        "answer": 0,
+        "explanation": "Lipschitz 保证 Picard 迭代收敛 → 强解存在唯一。线性增长防止有限时间爆炸。GBM: \\(b=\\mu x\\), \\(\\sigma=\\sigma x\\) 满足局部 Lipschitz。CIR: \\(\\sigma=\\xi\\sqrt{x}\\) 在 \\(x=0\\) 不 Lipschitz，但 Yamada-Watanabe 条件给唯一性。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q2",
+        "question": "GBM \\(dS=\\mu S dt+\\sigma S dB\\) 的显式解？",
+        "options": [
+          "\\(S_t=S_0 \\exp\\left((\\mu-\\tfrac{\\sigma^2}{2})t+\\sigma B_t\\right)\\)",
+        "\\(S_t=S_0 e^{\\mu t}\\)",
+        "\\(S_t=S_0(1+\\sigma B_t)\\)",
+        "\\(S_t=S_0+\\mu t+\\sigma B_t\\)"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(Y=\\ln S\\), Itô 公式 → \\(dY=(\\mu-\\sigma^2/2)dt+\\sigma dB\\)。积分 → \\(Y_t=Y_0+(\\mu-\\sigma^2/2)t+\\sigma B_t\\)。取指数得解。\\(S_t>0\\) 始终（对数正态）——GBM 保证价格非负。B 忽略波动；D 是算术 Brown 运动（可为负）。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q3",
+        "question": "Ornstein-Uhlenbeck 过程 \\(dX_t=-\\kappa X_t dt+\\sigma dB_t\\)（\\(\\kappa>0\\)）建模什么金融量？",
+        "options": [
+          "均值回复过程——利率、波动率、价差等有长期均值的量（Vasicek 利率模型）",
+        "股价（无下界）",
+        "交易量",
+        "订单簿深度"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\kappa>0\\) ⟹ \\(X_t\\) 被拉向 \\(0\\)（或一般均值 \\(\\theta\\)）。\\(E[X_t]=X_0 e^{-\\kappa t} \\to 0\\)。\\(\\text{Var}[X_t]=\\frac{\\sigma^2}{2\\kappa}(1-e^{-2\\kappa t}) \\to \\frac{\\sigma^2}{2\\kappa}\\)（平稳方差）。Vasicek: \\(dr=-\\kappa(r-\\theta)dt+\\sigma dB\\)。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q4",
+        "question": "CIR 过程 \\(dr_t=\\kappa(\\theta-r_t)dt+\\xi\\sqrt{r_t}dB_t\\) 的 Feller 条件？",
+        "options": [
+          "\\(2\\kappa\\theta \\geq \\xi^2\\) ⟹ \\(r_t>0\\)（a.s.）——保证利率非负",
+        "\\(\\kappa>0\\)",
+        "\\(\\xi<1\\)",
+        "\\(\\theta>0\\) 即可"
+        ],
+        "answer": 0,
+        "explanation": "漂移在 \\(r \\to 0\\) 时 \\(\\kappa\\theta>0\\)（推离零点）。扩散 \\(\\xi\\sqrt{r} \\to 0\\)（噪声减弱）。\\(2\\kappa\\theta \\geq \\xi^2\\)：漂移强度 \\(\\geq\\) 扩散\"推向零\"的力量。违反时 \\(r\\) 可达 \\(0\\) 并反弹。CIR 广泛用于利率和信用强度模型。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q5",
+        "question": "Euler-Maruyama 离散化 \\(X_{n+1}=X_n+b(X_n)\\Delta t+\\sigma(X_n)\\sqrt{\\Delta t}\\,Z_n\\)（\\(Z_n \\sim N(0,1)\\)）的强收敛阶？",
+        "options": [
+          "\\(O(\\sqrt{\\Delta t})\\)（强收敛阶 \\(0.5\\)）",
+        "\\(O(\\Delta t)\\)",
+        "\\(O((\\Delta t)^2)\\)",
+        "不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[|X_T^{\\Delta}-X_T|]=O(\\sqrt{\\Delta t})\\)（路径级误差）。弱收敛 \\(O(\\Delta t)\\)（分布级）。Milstein 方法加入 \\(\\sigma\\sigma'\\) 项 → 强阶 \\(1.0\\)。Monte Carlo 定价一般只需弱收敛，但对冲需路径精度 → 强收敛重要。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q6",
+        "question": "Milstein 方法与 Euler-Maruyama 的区别？",
+        "options": [
+          "Milstein 加了 \\(\\frac{1}{2}\\sigma(X_n)\\sigma'(X_n)((Z_n^2-1)\\Delta t)\\) 项——来自 Itô-Taylor 展开",
+        "步长不同",
+        "无区别",
+        "Milstein 不含随机项"
+        ],
+        "answer": 0,
+        "explanation": "\\(X_{n+1}=X_n+b\\Delta t+\\sigma\\sqrt{\\Delta t}Z+\\frac{1}{2}\\sigma\\sigma'(\\Delta t)(Z^2-1)\\)。强阶 \\(1.0\\)（vs Euler \\(0.5\\)）。GBM: \\(\\sigma(S)=\\sigma S\\), \\(\\sigma'=\\sigma\\) → Milstein 有精确离散化。多维时需模拟 Lévy 面积。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q7",
+        "question": "跳扩散 SDE \\(dS=\\mu S dt+\\sigma S dB+S^- J dN\\) 中 \\(J\\) 和 \\(N\\) 代表什么？",
+        "options": [
+          "\\(N_t\\) 是 Poisson 过程（跳跃时刻），\\(J\\) 是跳跃幅度（对数正态）——Merton 跳扩散模型",
+        "\\(N\\) 是 Brown 运动",
+        "\\(J\\) 是常数 \\(1\\)",
+        "无金融意义"
+        ],
+        "answer": 0,
+        "explanation": "Merton (1976): 跳跃建模闪崩/并购等极端事件。\\(\\ln(1+J) \\sim N(\\mu_J, \\sigma_J^2)\\)。\\(N_t \\sim \\text{Poisson}(\\lambda)\\)。欧式期权：\\(C=\\sum_{n=0}^\\infty \\frac{e^{-\\lambda'T}(\\lambda'T)^n}{n!}C_{BS}(\\sigma_n)\\)（条件正态加权）。解释厚尾和波动率微笑。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q8",
+        "question": "OU 过程的显式解 \\(X_t=X_0 e^{-\\kappa t}+\\sigma\\int_0^t e^{-\\kappa(t-s)}dB_s\\) 如何求得？",
+        "options": [
+          "令 \\(Y_t=X_t e^{\\kappa t}\\), Itô 公式 → \\(dY=\\sigma e^{\\kappa t}dB\\) → 积分 → \\(Y_t-Y_0=\\sigma\\int_0^t e^{\\kappa s}dB_s\\)",
+        "猜测法",
+        "Fourier 变换",
+        "特征函数法"
+        ],
+        "answer": 0,
+        "explanation": "变量替换 \\(Y=Xe^{\\kappa t}\\)（\"积分因子\"法的随机版）。\\(dY=\\kappa X e^{\\kappa t}dt+e^{\\kappa t}dX=e^{\\kappa t}\\sigma dB\\)。\\(X_t=e^{-\\kappa t}Y_t=X_0 e^{-\\kappa t}+\\sigma\\int_0^t e^{-\\kappa(t-s)}dB_s\\)。\\(X_t\\) 是正态过程（高斯积分的线性组合）。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q9",
+        "question": "Monte Carlo 定价中方差缩减方法\"对偶变量法\"的原理？",
+        "options": [
+          "对每条路径 \\(B_t\\)，同时模拟 \\(-B_t\\)，两者 payoff 取平均 ⟹ 负相关降低方差",
+        "增加模拟次数",
+        "用确定性方法替代",
+        "只用最终值"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\text{Var}[\\frac{f(B)+f(-B)}{2}]=\\frac{1}{2}\\text{Var}[f]+\\frac{1}{2}\\text{Cov}[f(B),f(-B)]\\)。对单调 \\(f\\): \\(\\text{Cov}<0\\) ⟹ 方差减小。对称 payoff 效果最好。还有控制变量、重要性采样等。结合可达数十倍加速。"
+      },
+      {
+        "id": "stochastic-calc-ch04-q10",
+        "question": "SABR 模型 \\(dF=\\alpha F^\\beta dB^1\\), \\(d\\alpha=\\nu\\alpha dB^2\\)（\\(\\rho=\\text{corr}\\)）用于什么？",
+        "options": [
+          "利率衍生品市场的隐含波动率曲面建模（给出解析近似的波动率微笑公式）",
+        "股价预测",
+        "信用风险",
+        "最优执行"
+        ],
+        "answer": 0,
+        "explanation": "Hagan et al. (2002): \\(\\sigma_{BS}(K) \\approx \\frac{\\alpha}{F^{1-\\beta}}\\frac{z}{x(z)}\\left(1+\\cdots\\right)\\)。\\(\\beta\\) 控制 backbone, \\(\\rho\\) 控制 skew, \\(\\nu\\) 控制 smile 凸度。Swaption/Cap 市场标准。SABR 是随机波动率 SDE 的工业应用标杆。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic-calc"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic-calc.html" class="module-name">随机微积分</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · SDE 的含义与存在唯一性</a></li>
+      <li><a href="#kp2">02 · 线性 SDE 与 Ornstein-Uhlenbeck 过程</a></li>
+      <li><a href="#kp3">03 · SDE 解的 Markov 性质</a></li>
+      <li><a href="#kp4">04 · 数值方法初步</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>随机微分方程</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>SDE 的含义与存在唯一性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>物理和金融中的随机演化用 SDE 描述：\(dX_t = b(X_t) dt + \sigma(X_t) dB_t\)。 这是 ODE 加上了“噪声”的扩展。解的存在和唯一性是讨论一切 性质的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>SDE = 随机积分方程。形式上写 \(dX = b \, dt + \sigma \, dB\)， 严格含义是 \(X_t = X_0 + \int_0^t b(X_s) ds + \int_0^t \sigma(X_s) dB_s\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>SDE 的严格含义： \[X_t = X_0 + \int_0^t b(X_s) \, ds + \int_0^t \sigma(X_s) \, dB_s\] 存在唯一性定理（Itô）：若 \(b, \sigma\) 满足 1. Lipschitz 条件：\(|b(x)-b(y)| + |\sigma(x)-\sigma(y)| \leq K|x-y|\) 2. 线性增长：\(|b(x)|^2 + |\sigma(x)|^2 \leq C(1+|x|^2)\) 则 SDE 有唯一强解。 证明要点：用 Picard 迭代 \(X_t^{(n+1)} = X_0 + \int b(X_s^{(n)}) ds + \int \sigma(X_s^{(n)}) dB_s\)。 由 Lipschitz + Itô 等距 + Gronwall 不等式证明收敛。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>股价动态、利率模型、扩散过程、物理系统。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(X_t = X_0 e^{\sigma B_t + (\mu-\sigma^2/2)t}\) 解 \(dX = \mu X dt + \sigma X dB\)。 解答：用 Itô 公式对 \(f(t,B_t) = X_0 e^{\sigma B_t + (\mu-\sigma^2/2)t}\)： \(df = (\mu-\sigma^2/2)f dt + \sigma f dB + \frac{1}{2}\sigma^2 f dt = \mu f dt + \sigma f dB\) ✓ 易错点：\(dX = \mu X dt + \sigma X dB\) 的解不是 \(X_0 e^{\mu t + \sigma B_t}\)。 必须有 \(-\sigma^2/2\) 修正。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">存在唯一性定理的关键条件是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。仅连续不充分（可能爆破）。Lipschitz 保证唯一性，')">A. \(b, \sigma\) 连续</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！仅连续不充分（可能爆破）。Lipschitz 保证唯一性，')">B. \(b, \sigma\) Lipschitz + 线性增长</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。仅连续不充分（可能爆破）。Lipschitz 保证唯一性，')">C. \(b, \sigma\) 有界</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>线性 SDE 与 Ornstein-Uhlenbeck 过程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性 SDE 有显式解，是最重要的可解案例。OU 过程是“带均值 回复”的扩散，广泛用于利率模型和物理建模。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>线性 SDE：\(dX_t = (a(t) + b(t)X_t) dt + (c(t) + d(t)X_t) dB_t\)。 可用积分因子法求解。 OU 过程：\(dX_t = -\theta X_t \, dt + \sigma \, dB_t\)，\(\theta > 0\)。 积分因子 \(e^{\theta t}\)：\(d(e^{\theta t}X_t) = \sigma e^{\theta t} dB_t\)。 \[X_t = X_0 e^{-\theta t} + \sigma \int_0^t e^{-\theta(t-s)} dB_s\] 性质：\(E[X_t] = X_0 e^{-\theta t} \to 0\)， \(\text{Var}(X_t) = \frac{\sigma^2}{2\theta}(1-e^{-2\theta t}) \to \frac{\sigma^2}{2\theta}\)。 平稳分布：\(X_\infty \sim N(0, \sigma^2/(2\theta))\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Vasicek 利率模型；物理中的朗之万方程；机器学习的 SGD 分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(dX = -2X dt + 3 dB\)，\(X_0 = 1\)。求 \(E[X_1]\) 和 \(\text{Var}(X_1)\)。 解答：\(\theta=2, \sigma=3\)。\(E[X_1] = e^{-2} \approx 0.135\)。 \(\text{Var}(X_1) = \frac{9}{4}(1-e^{-4}) \approx 2.209\)。 易错点：OU 是正态过程（\(X_t\) 可负），不混淆与 GBM（始终为正）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">OU 过程 \(dX = -\theta X dt + \sigma dB\) 的平稳分布是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\text{Var} = \\sigma^2/(2\\theta)\\)。注意分母是 \\(2\\theta\\) 不是 \\(\\theta\\)。')">A. \(N(0, \sigma^2/\theta)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\text{Var} = \\sigma^2/(2\\theta)\\)。注意分母是 \\(2\\theta\\) 不是 \\(\\theta\\)。')">B. \(N(0, \sigma^2/(2\theta))\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\text{Var} = \\sigma^2/(2\\theta)\\)。注意分母是 \\(2\\theta\\) 不是 \\(\\theta\\)。')">C. \(\text{Exp}(\theta)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>SDE 解的 Markov 性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>SDE 的解通常是 Markov 过程，即未来只依赖当前状态。这连接了 SDE（随机分析）和 PDE（偏微分方程）的世界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>扩散过程 + Markov 性 → Kolmogorov 方程（PDE）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>设 \(X_t\) 解 \(dX = b(X) dt + \sigma(X) dB\)。 记转移函数 \(u(t,x) = E[f(X_T) | X_t = x]\)。 后向 Kolmogorov 方程： \[\frac{\partial u}{\partial t} + b(x) \frac{\partial u}{\partial x} + \frac{1}{2}\sigma^2(x) \frac{\partial^2 u}{\partial x^2} = 0\] 边界条件：\(u(T, x) = f(x)\)。 前向 Kolmogorov 方程（Fokker-Planck）： \[\frac{\partial p}{\partial t} = -\frac{\partial}{\partial x}(b \cdot p) + \frac{1}{2}\frac{\partial^2}{\partial x^2}(\sigma^2 p)\] 其中 \(p(t,x)\) 是 \(X_t\) 的密度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>期权定价 = 解 PDE；Score-based 扩散模型使用 Fokker-Planck。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(dX = \sigma dB\)（无漂移 BM）。写出 Kolmogorov 方程。 解答：\(b=0\)，\(\sigma=\sigma_0\)。后向：\(u_t + \frac{1}{2}\sigma_0^2 u_{xx} = 0\)。 这就是热方程（时间反向）。解：正态分布的卷积。 易错点：后向 Kolmogorov 是“终值问题”（\(u(T,x)=f(x)\)）， 不是“初值问题”。时间方向是反的。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Fokker-Planck 方程描述的是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Fokker-Planck = 前向 Kolmogorov，描述 \\(p(t,x)\\)。')">A. 期望值的演化</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Fokker-Planck = 前向 Kolmogorov，描述 \\(p(t,x)\\)。')">B. 概率密度的演化</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Fokker-Planck = 前向 Kolmogorov，描述 \\(p(t,x)\\)。')">C. 路径的演化</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>数值方法初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>大多数 SDE 没有解析解，需要数值模拟。Euler-Maruyama 是最基本的 离散化方法，类似于 ODE 的 Euler 方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Euler-Maruyama 方法：\(\Delta t = T/N\)，\(Z_n \sim N(0,1)\) i.i.d.。 \[X_{n+1} = X_n + b(X_n) \Delta t + \sigma(X_n) \sqrt{\Delta t} \, Z_n\] 强收敛阶：\(E[\sup|X_t - X_t^{(N)}|] = O(\sqrt{\Delta t}) = O(N^{-1/2})\)。 弱收敛阶：\(|E[f(X_T)] - E[f(X_T^{(N)})]| = O(\Delta t) = O(N^{-1})\)。 Milstein 方法（强收敛 \(O(\Delta t)\)）： \[X_{n+1} = X_n + b\Delta t + \sigma \sqrt{\Delta t} Z_n + \frac{1}{2}\sigma\sigma'[(\sqrt{\Delta t} Z_n)^2 - \Delta t]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Monte Carlo 期权定价、随机模拟、扩散模型的采样。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：用 EM 方法模拟 GBM：\(dS = 0.1 S dt + 0.2 S dB\)，\(S_0=100\)。 \(\Delta t = 0.01\)。一步：\(S_1 = 100 + 0.1 \times 100 \times 0.01 + 0.2 \times 100 \times 0.1 \times Z_1 = 100.1 + 2Z_1\)。 易错点：\(\sqrt{\Delta t}\) 不能写成 \(\Delta t\)。波动项乘的是 \(\sqrt{\Delta t} \cdot Z\)，不是 \(\Delta t \cdot Z\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Euler-Maruyama 的强收敛阶是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。强收敛 \\(O(\\sqrt{\\Delta t})\\)，弱收敛 \\(O(\\Delta t)\\)。')">A. \(O(\Delta t)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！强收敛 \\(O(\\sqrt{\\Delta t})\\)，弱收敛 \\(O(\\Delta t)\\)。')">B. \(O(\sqrt{\Delta t})\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。强收敛 \\(O(\\sqrt{\\Delta t})\\)，弱收敛 \\(O(\\Delta t)\\)。')">C. \(O((\Delta t)^2)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/probability/stochastic-calc.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

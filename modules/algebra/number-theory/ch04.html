@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 二次剩余与互反律 — 数论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "number-theory-ch04-q1",
+        "question": "模 \\(7\\) 的二次剩余集 QR 为？（检查 \\(1^2, 2^2, \\ldots, 6^2 \\bmod 7\\)）",
+        "options": [
+          "\\(\\{1, 2, 3\\}\\)",
+        "\\(\\{1, 2, 4\\}\\)",
+        "\\(\\{1, 3, 5\\}\\)",
+        "\\(\\{2, 3, 5\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(1^2 = 1, 2^2 = 4, 3^2 = 2, 4^2 = 2, 5^2 = 4, 6^2 = 1 \\pmod{7}\\)。QR \\(= \\{1, 2, 4\\}\\)。模 \\(p\\) 恰好有 \\((p-1)/2 = 3\\) 个二次剩余。"
+      },
+      {
+        "id": "number-theory-ch04-q2",
+        "question": "\\(3^{(7-1)/2} \\bmod 7 = ?\\) 说明 \\(3\\) 是否为模 \\(7\\) 的 QR？",
+        "options": [
+          "\\(1\\)，是 QR",
+        "\\(6\\)，是 NR",
+        "\\(3\\)，无法判断",
+        "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(3^3 = 27 \\equiv 6 \\equiv -1 \\pmod{7}\\)。Euler 判别法：\\(a^{(p-1)/2} \\equiv -1\\) 时 \\(a\\) 为 NR。验证：QR \\(= \\{1, 2, 4\\}\\) 中不含 \\(3\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q3",
+        "question": "\\((-1/p) = 1\\) 的充要条件是？",
+        "options": [
+          "\\(p \\equiv 1 \\pmod{3}\\)",
+        "\\(p \\equiv 1 \\pmod{4}\\)",
+        "\\(p\\) 为奇素数",
+        "\\(p > 5\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((-1/p) = (-1)^{(p-1)/2} = 1 \\Leftrightarrow (p-1)/2\\) 为偶数 \\(\\Leftrightarrow p \\equiv 1 \\pmod{4}\\)。例如 \\(p = 5\\)：\\((-1/5) = (-1)^2 = 1\\)（\\(-1 \\equiv 4 = 2^2\\)）。"
+      },
+      {
+        "id": "number-theory-ch04-q4",
+        "question": "Legendre 符号 \\((a/p)\\) 的乘法性质：\\((ab/p) = ?\\)",
+        "options": [
+          "\\((a/p) + (b/p)\\)",
+        "\\((a/p)(b/p)\\)",
+        "\\((a/p) - (b/p)\\)",
+        "\\((a + b/p)\\)"
+        ],
+        "answer": 1,
+        "explanation": "Legendre 符号是完全乘法的：\\((ab/p) = (a/p)(b/p)\\)。这是因为 QR 的乘积仍是 QR，NR \\(\\times\\) NR = QR，QR \\(\\times\\) NR = NR——与 \\((\\pm 1)\\) 的乘法规则完全一致。"
+      },
+      {
+        "id": "number-theory-ch04-q5",
+        "question": "二次互反律：\\((p/q)(q/p) = (-1)^{\\frac{p-1}{2} \\cdot \\frac{q-1}{2}}\\)。若 \\(p = 3, q = 7\\)，则 \\((3/7)(7/3) = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不适用"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\frac{p-1}{2} \\cdot \\frac{q-1}{2} = 1 \\times 3 = 3\\)。\\((-1)^3 = -1\\)。\\(p, q\\) 都 \\(\\equiv 3 \\pmod{4}\\)，所以互反律有负号。"
+      },
+      {
+        "id": "number-theory-ch04-q6",
+        "question": "Jacobi 符号 \\((a/n) = 1\\)（\\(n\\) 为合数）能否保证 \\(x^2 \\equiv a \\pmod{n}\\) 有解？",
+        "options": [
+          "能",
+        "不能",
+        "当 \\(n\\) 无平方因子时能",
+        "当 \\(a = 1\\) 时能"
+        ],
+        "answer": 1,
+        "explanation": "\\((2/15) = (2/3)(2/5) = (-1)(-1) = 1\\)，但 \\(x^2 \\equiv 2 \\pmod{15}\\) 无解（检查 \\(x = 0, \\ldots, 14\\)）。Jacobi 符号 \\(= 1\\) 只是各 Legendre 符号的积为 \\(1\\)，可能有偶数个 \\(-1\\) 相消。"
+      },
+      {
+        "id": "number-theory-ch04-q7",
+        "question": "模奇素数 \\(p\\) 的非零元中，QR 和 NR 的个数各为多少？",
+        "options": [
+          "各 \\(p/2\\)",
+        "QR: \\((p-1)/2\\)，NR: \\((p-1)/2\\)",
+        "QR: \\(p-1\\)，NR: \\(0\\)",
+        "取决于 \\(p\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((\\mathbb{Z}/p\\mathbb{Z})^*\\) 是 \\((p-1)\\) 阶循环群。平方映射 \\(x \\mapsto x^2\\) 的像恰好是指数为偶数的元素，共 \\((p-1)/2\\) 个。补集（指数为奇数的元素）即 NR，也是 \\((p-1)/2\\) 个。"
+      },
+      {
+        "id": "number-theory-ch04-q8",
+        "question": "\\(5\\) 是否为模 \\(11\\) 的 QR？",
+        "options": [
+          "是，\\(5^5 \\equiv 1 \\pmod{11}\\)",
+        "否，\\(5^5 \\equiv -1 \\pmod{11}\\)",
+        "是，\\(5 = 5^2 \\bmod 11\\)",
+        "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(5^5 = 3125\\)，\\(3125 = 284 \\times 11 + 1\\)，\\(5^5 \\equiv 1 \\pmod{11}\\)。Euler 判别法确认 \\(5\\) 是 QR。验证：\\(4^2 = 16 \\equiv 5 \\pmod{11}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q9",
+        "question": "\\((2/p) = 1\\) 的条件是？",
+        "options": [
+          "\\(p \\equiv 1 \\pmod{4}\\)",
+        "\\(p \\equiv \\pm 1 \\pmod{8}\\)",
+        "\\(p \\equiv 1 \\pmod{8}\\)",
+        "对所有奇素数成立"
+        ],
+        "answer": 1,
+        "explanation": "\\((2/p) = (-1)^{(p^2-1)/8}\\)。\\(p^2 \\equiv 1 \\pmod{8}\\) 当 \\(p\\) 为奇数。\\((p^2-1)/8\\) 为偶 \\(\\Leftrightarrow p \\equiv \\pm 1 \\pmod{8}\\)。如 \\(p = 7\\)：\\((7^2-1)/8 = 6\\)，\\((-1)^6 = 1\\)，\\(2\\) 是 QR（\\(3^2 = 9 \\equiv 2\\)）。"
+      },
+      {
+        "id": "number-theory-ch04-q10",
+        "question": "用互反律计算 \\((5/13)\\)。\\(5 \\equiv 1 \\pmod{4}\\)，故 \\((5/13) = (13/5) = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(5 \\equiv 1 \\pmod{4}\\)，互反律：\\((5/13) = (13/5) = (3/5)\\)。\\(3^{(5-1)/2} = 3^2 = 9 \\equiv -1 \\pmod{5}\\)，故 \\((3/5) = -1\\)。\\((5/13) = -1\\)，\\(5\\) 是模 \\(13\\) 的 NR。验证：\\(1,4,9,3,12,10\\) 是模 \\(13\\) 的 QR，不含 \\(5\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q11",
+        "question": "\\((3/11)(11/3) = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(3 \\equiv 3 \\pmod{4}\\)，\\(11 \\equiv 3 \\pmod{4}\\)。\\((-1)^{\\frac{2}{2} \\cdot \\frac{10}{2}} = (-1)^{1 \\times 5} = -1\\)。两个素数都 \\(\\equiv 3 \\pmod{4}\\) 时互反律带负号。"
+      },
+      {
+        "id": "number-theory-ch04-q12",
+        "question": "\\((6/13) = ?\\)（分解为 \\((2/13)(3/13)\\)）",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "无法计算"
+        ],
+        "answer": 1,
+        "explanation": "\\((2/13)\\)：\\(13 \\equiv 5 \\pmod{8}\\)，\\((p^2-1)/8 = (169-1)/8 = 21\\)（奇数），\\((2/13) = -1\\)。\\((3/13)\\)：\\(3^6 = 729 = 56 \\times 13 + 1\\)，\\((3/13) = 1\\)。\\((6/13) = (-1)(1) = -1\\)。"
+      },
+      {
+        "id": "number-theory-ch04-q13",
+        "question": "Jacobi 符号 \\((15/31)\\) 可以分解为？",
+        "options": [
+          "\\((3/31)(5/31)\\)",
+        "\\((15/3)(15/5)\\)",
+        "无法分解",
+        "\\((1/31)(5/31)\\)"
+        ],
+        "answer": 0,
+        "explanation": "Jacobi/Legendre 符号的乘法性在上位（分子）：\\((15/31) = (3/31)(5/31)\\)。\\(31\\) 是素数，所以这些实际上也是 Legendre 符号。下位的分解需要 Jacobi 符号定义。"
+      },
+      {
+        "id": "number-theory-ch04-q14",
+        "question": "模 \\(13\\) 的二次剩余集为 \\(\\{1, 3, 4, 9, 10, 12\\}\\)。以下哪个是 NR？",
+        "options": [
+          "\\(4\\)",
+        "\\(7\\)",
+        "\\(9\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "QR \\(= \\{1, 3, 4, 9, 10, 12\\}\\)（\\(1^2=1, 2^2=4, 3^2=9, 4^2=3, 5^2=12, 6^2=10\\)）。\\(7\\) 不在 QR 集中，\\(7\\) 是 NR。验证：\\(7^{(13-1)/2} = 7^6 \\equiv -1 \\pmod{13}\\)。"
+      },
+      {
+        "id": "number-theory-ch04-q15",
+        "question": "计算 \\((7/13)\\)。用互反律。",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "需要更多信息"
+        ],
+        "answer": 1,
+        "explanation": "\\((7/13)(13/7) = (-1)^{3 \\times 6} = (-1)^{18} = 1\\)。\\((13/7) = (6/7) = (2/7)(3/7)\\)。\\((2/7)\\)：\\(7 \\equiv -1 \\pmod{8}\\)，\\((2/7) = 1\\)。\\((3/7)(7/3) = (-1)^{1 \\times 3} = -1\\)。\\((7/3) = (1/3) = 1\\)。\\((3/7) = -1\\)。\\((13/7) = (1)(-1) = -1\\)。\\((7/13) = (13/7) = -1\\)。\\(7 \\notin \\{1,3,4,9,10,12\\}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q16",
+        "question": "Jacobi 符号的计算可以类似欧几里得算法递归进行。\\((a/n)\\) 的计算步骤是？",
+        "options": [
+          "分解 \\(n\\)，逐个算 Legendre",
+        "互反律 + 缩减：\\((a/n) \\to (n \\bmod a / a)\\)",
+        "直接幂运算 \\(a^{(n-1)/2}\\)",
+        "A 和 B 等价"
+        ],
+        "answer": 1,
+        "explanation": "Jacobi 符号的递归算法无需分解 \\(n\\)：利用互反律翻转后缩减（取模），提取 \\(2\\) 的因子用 \\((2/n)\\) 公式处理。复杂度 \\(O(\\log^2 n)\\)，与欧几里得算法类似。"
+      },
+      {
+        "id": "number-theory-ch04-q17",
+        "question": "\\((2/17) = ?\\)（\\(17 \\equiv 1 \\pmod{8}\\)）",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(17 \\equiv 1 \\pmod{8}\\)，\\((2/17) = (-1)^{(289-1)/8} = (-1)^{36} = 1\\)。\\(2\\) 是模 \\(17\\) 的 QR。验证：\\(6^2 = 36 \\equiv 2 \\pmod{17}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q18",
+        "question": "计算 \\((11/23)\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不适用"
+        ],
+        "answer": 1,
+        "explanation": "\\((11/23)(23/11) = (-1)^{5 \\times 11} = -1\\)。\\((23/11) = (1/11) = 1\\)。故 \\((11/23) = -1\\)。\\(11\\) 是模 \\(23\\) 的 NR。"
+      },
+      {
+        "id": "number-theory-ch04-q19",
+        "question": "计算 Jacobi 符号 \\((21/55)\\)。\\(55 = 5 \\times 11\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\((21/55) = (21/5)(21/11)\\)。\\((21/5) = (21 \\bmod 5 / 5) = (1/5) = 1\\)。\\((21/11) = (21 \\bmod 11 / 11) = (10/11) = (2/11)(5/11)\\)。\\((2/11) = -1\\)（\\(11 \\equiv 3 \\pmod{8}\\)），\\((5/11) = 1\\)。\\((21/11) = -1\\)。\\((21/55) = 1 \\times (-1) = -1\\)。"
+      },
+      {
+        "id": "number-theory-ch04-q20",
+        "question": "\\(a = -1\\) 是模 \\(p = 13\\) 的 QR 还是 NR？",
+        "options": [
+          "QR",
+        "NR",
+        "既非 QR 也非 NR",
+        "两者都是"
+        ],
+        "answer": 0,
+        "explanation": "\\(p = 13 \\equiv 1 \\pmod{4}\\)，\\((-1/13) = (-1)^{(13-1)/2} = (-1)^6 = 1\\)。\\(-1\\) 是 QR。验证：\\(5^2 = 25 \\equiv 12 \\equiv -1 \\pmod{13}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q21",
+        "question": "利用互反律和补充定律计算 \\((30/53)\\)。\\(30 = 2 \\times 3 \\times 5\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\((30/53) = (2/53)(3/53)(5/53) = (-1)(-1)(-1) = -1\\)。计算各分量：\\((2/53) = -1\\)（\\(53 \\equiv 5 \\pmod{8}\\)），\\((3/53) = -1\\)（互反律 + \\((2/3) = -1\\)），\\((5/53) = -1\\)（互反律 + \\((3/5) = -1\\)）。"
+      },
+      {
+        "id": "number-theory-ch04-q22",
+        "question": "在 \\(\\mathbb{F}_p^*\\) 中，平方映射 \\(\\phi: x \\mapsto x^2\\) 的核 \\(\\ker\\phi = ?\\)",
+        "options": [
+          "\\(\\{1\\}\\)",
+        "\\(\\{1, -1\\}\\)",
+        "\\(\\mathbb{F}_p^*\\)",
+        "\\(\\{0\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker\\phi = \\{x : x^2 = 1\\} = \\{1, -1\\}\\)（\\(p > 2\\) 时 \\(1 \\neq -1\\)）。\\(|\\mathrm{Im}(\\phi)| = |\\mathbb{F}_p^*|/|\\ker\\phi| = (p-1)/2\\)，即 QR 的个数。这给出了 QR 恰有 \\((p-1)/2\\) 个的群论证明。"
+      },
+      {
+        "id": "number-theory-ch04-q23",
+        "question": "Solovay-Strassen 素性测试检查 \\(a^{(n-1)/2} \\equiv (a/n) \\pmod{n}\\)。若 \\(n\\) 为素数，此等式一定成立，因为？",
+        "options": [
+          "费马小定理",
+        "Euler 判别法",
+        "威尔逊定理",
+        "二次互反律"
+        ],
+        "answer": 1,
+        "explanation": "Euler 判别法说 \\(a^{(p-1)/2} \\equiv (a/p) \\pmod{p}\\)（\\(p\\) 素数时）。Solovay-Strassen 将此作为素性判据：若 \\(n\\) 为合数，则对至少一半的 \\(a\\)，此等式不成立。Jacobi 符号 \\((a/n)\\) 可在 \\(O(\\log^2 n)\\) 内计算。"
+      },
+      {
+        "id": "number-theory-ch04-q24",
+        "question": "模 \\(p = 11\\) 的二次剩余集为？",
+        "options": [
+          "\\(\\{1, 2, 3, 4, 5\\}\\)",
+        "\\(\\{1, 3, 4, 5, 9\\}\\)",
+        "\\(\\{1, 4, 9, 5, 3\\}\\)",
+        "B 和 C 相同"
+        ],
+        "answer": 3,
+        "explanation": "\\(1^2=1, 2^2=4, 3^2=9, 4^2=5, 5^2=3 \\pmod{11}\\)。QR \\(= \\{1, 3, 4, 5, 9\\}\\)。B 和 C 是相同的集合（只是排列不同）。"
+      },
+      {
+        "id": "number-theory-ch04-q25",
+        "question": "利用互反律，\\((13/17) = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(13 \\equiv 1 \\pmod{4}\\)。\\((13/17)(17/13) = (-1)^{6 \\times 8} = 1\\)。\\((17/13) = (4/13) = (2/13)^2 = 1\\)。\\((13/17) = 1\\)。验证：需找 \\(x\\) 使 \\(x^2 \\equiv 13 \\pmod{17}\\)。\\(8^2 = 64 \\equiv 13 \\pmod{17}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch04-q26",
+        "question": "在椭圆曲线密码学中，点 \\((x, y)\\) 满足 \\(y^2 \\equiv x^3 + ax + b \\pmod{p}\\)。给定 \\(x\\)，右边的值 \\(c\\) 是否有平方根（即 \\((c/p)\\)）决定了该 \\(x\\) 是否对应曲线上的点。这使用了？",
+        "options": [
+          "二次互反律",
+        "Euler 判别法 / Legendre 符号",
+        "费马小定理",
+        "CRT"
+        ],
+        "answer": 1,
+        "explanation": "计算 \\(c = x^3 + ax + b \\bmod p\\)，然后用 Euler 判别法或等价地计算 \\((c/p)\\)。\\((c/p) = 1\\) 时有两个点 \\((x, y)\\) 和 \\((x, -y)\\)，\\((c/p) = -1\\) 时无点。点压缩技术只存储 \\(x\\) 和 \\(y\\) 的奇偶位，解压时需要计算模 \\(p\\) 的平方根。"
+      },
+      {
+        "id": "number-theory-ch04-q27",
+        "question": "音频信号处理中，某算法需判断 \\(n\\) 是否为完全平方数（模某大素数 \\(p\\)）。快速判定方法是计算 \\((n/p)\\)。若 \\(p = 101, n = 10\\)，则 \\((10/101) = ?\\)",
+        "options": [
+          "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "不确定"
+        ],
+        "answer": 1,
+        "explanation": "\\((10/101) = (2/101)(5/101) = (-1)(1) = -1\\)。\\(10\\) 不是模 \\(101\\) 的二次剩余。\\((2/101) = -1\\)（\\(101 \\equiv 5 \\pmod{8}\\)）。\\((5/101) = (101/5) = (1/5) = 1\\)（互反律，\\(5 \\equiv 1 \\pmod{4}\\)）。"
+      },
+      {
+        "id": "number-theory-ch04-q28",
+        "question": "在密码学 Rabin 加密系统中，加密为 \\(c = m^2 \\bmod n\\)（\\(n = pq\\)），解密需要开平方。解密时需要知道 \\(p, q\\) 的原因是？",
+        "options": [
+          "不知道 \\(p, q\\) 就无法计算 \\(\\varphi(n)\\)",
+        "模素数 \\(p\\) 的平方根可以高效计算，然后 CRT 合并",
+        "A 和 B 都是原因",
+        "不需要知道 \\(p, q\\)"
+        ],
+        "answer": 2,
+        "explanation": "模合数 \\(n = pq\\) 开平方等价于因式分解（已知困难）。知道 \\(p, q\\) 后，分别在 \\(\\mathbb{F}_p\\) 和 \\(\\mathbb{F}_q\\) 中开平方（\\(p \\equiv 3 \\pmod{4}\\) 时 \\(\\sqrt{c} = c^{(p+1)/4}\\)），再用 CRT 合并。每个因子有 \\(2\\) 个根，\\(n\\) 有 \\(4\\) 个根，需要冗余信息确定正确明文。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="number-theory"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/number-theory.html" class="module-name">数论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 二次剩余与 Euler 判别法</a></li>
+      <li><a href="#kp2">02 · Legendre 符号的定义与性质</a></li>
+      <li><a href="#kp3">03 · 二次互反律</a></li>
+      <li><a href="#kp4">04 · Jacobi 符号与计算应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>二次剩余与互反律</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>二次剩余与 Euler 判别法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>二次同余 \(x^2 \equiv a \pmod{p}\) 是否有解？这个问题自然地引出了“二次 剩余”的概念。Euler 判别法给出了简洁的判定条件：\(a^{(p-1)/2}\) 的值决定了 \(a\) 是否为二次剩余。这是理解二次互反律的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Legendre 符号 \((a/p)\) 将“是否为平方”这个问题编码为 \(\pm 1\) 或 \(0\)， 将二次剩余问题代数化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>二次剩余</strong>: \(a\) 是模 \(p\) 的二次剩余（QR），若 \(\exists x,\; x^2 \equiv a \pmod{p}\)。否则称为非二次剩余（NR）。 <strong>Euler 判别法</strong>: 若 \(p\) 为奇素数，\(\gcd(a,p)=1\)，则 \[a^{(p-1)/2} \equiv \begin{cases} 1 \pmod{p} & a \text{ 是 QR} \\ -1 \pmod{p} & a \text{ 是 NR} \end{cases}\] 证明: \((\mathbb{Z}/p\mathbb{Z})^*\) 是 \(p-1\) 阶循环群，设生成元 \(g\)。 \(a = g^k\)。\(a\) 是 QR \(\Leftrightarrow\) \(k\) 为偶数。 \(a^{(p-1)/2} = g^{k(p-1)/2}\)，当 \(k\) 偶时 \(= (g^{p-1})^{k/2} = 1\)； 当 \(k\) 奇时 \(= g^{(p-1)/2} = -1\)（因为 \(x^2=1\) 在 \(\mathbb{Z}/p\mathbb{Z}\) 中 只有 \(\pm 1\) 两个解）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>判断二次剩余性在椅圆曲线密码学中用于点压缩。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 判断 3 是否为模 7 的二次剩余。 解答: \(3^{(7-1)/2} = 3^3 = 27 \equiv 6 \equiv -1 \pmod{7}\)。 故 3 是模 7 的 NR。验证: \(1^2=1, 2^2=4, 3^2=2, 4^2=2, 5^2=4, 6^2=1\)， QR = \(\{1,2,4\}\)，确实不含 3。✓ 易错点: 忘记 \(p=2\) 的特殊情况。Euler 判别法仅适用于奇素数。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(5^{(11-1)/2} \bmod 11 = ?\)，说明 5 是否为模 11 的 QR。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(5^5 = 3125 = 284 \\times 11 + 1\\)，故 \\(5^5 \\equiv 1\\)，5 是 QR。')">A. \(1\)，是 QR</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(5^5 = 3125 = 284 \\times 11 + 1\\)，故 \\(5^5 \\equiv 1\\)，5 是 QR。')">B. \(10\)，是 NR</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(5^5 = 3125 = 284 \\times 11 + 1\\)，故 \\(5^5 \\equiv 1\\)，5 是 QR。')">C. \(5\)，无法判断</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(5^5 = 3125 = 284 \\times 11 + 1\\)，故 \\(5^5 \\equiv 1\\)，5 是 QR。')">D. \(0\)，不适用</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Legendre 符号的定义与性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>为了系统地研究二次剩余，我们引入 Legendre 符号 \((a/p)\) 将“是/否 为二次剩余”编码为 \(+1/-1/0\)。它的乘法性使得复杂问题可以分解为 简单情况的组合。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Legendre 符号是 \((\mathbb{Z}/p\mathbb{Z})^* \to \{\pm 1\}\) 的群同态（取值在 \(\{\pm 1\}\) 乘法群中）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(p\) 奇素数， \((a/p) = \begin{cases} 0 & p \mid a \\ 1 & a \text{ 是 QR mod } p \\ -1 & a \text{ 是 NR mod } p \end{cases}\) <strong>性质</strong>: 1) \((a/p) \equiv a^{(p-1)/2} \pmod{p}\)（Euler 判别法） 2) <strong>乘法性</strong>: \((ab/p) = (a/p)(b/p)\) 3) \(a \equiv b \pmod{p} \Rightarrow (a/p) = (b/p)\) 4) <strong>\(-1\) 的剩余性</strong>: \((-1/p) = (-1)^{(p-1)/2}\)， 即 \(-1\) 是 QR \(\Leftrightarrow p \equiv 1 \pmod{4}\)。 5) <strong>2 的剩余性</strong>: \((2/p) = (-1)^{(p^2-1)/8}\)， 即 2 是 QR \(\Leftrightarrow p \equiv \pm 1 \pmod{8}\)。 \[(-1/p) = (-1)^{(p-1)/2}, \quad (2/p) = (-1)^{(p^2-1)/8}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \((6/13)\)。 解答: \((6/13) = (2/13)(3/13)\)。 \((2/13)\): \(13 \equiv 5 \pmod{8}\)，\((-1)^{(169-1)/8} = (-1)^{21} = -1\)。 \((3/13)\): 需用互反律或直接计算 \(3^6 \bmod 13 = 729 \bmod 13 = 1\)。 故 \((3/13) = 1\)。\((6/13) = (-1)(1) = -1\)，6 是 NR。 易错点: 计算 \((2/p)\) 时用错公式。注意是 \((p^2-1)/8\) 不是 \((p-1)/2\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\((-1/p) = 1\) 的充要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\((-1/p) = (-1)^{(p-1)/2} = 1 \\Leftrightarrow (p-1)/2\\) 为偶')">A. \(p \equiv 1 \pmod{3}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\((-1/p) = (-1)^{(p-1)/2} = 1 \\Leftrightarrow (p-1)/2\\) 为偶')">B. \(p \equiv 1 \pmod{4}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\((-1/p) = (-1)^{(p-1)/2} = 1 \\Leftrightarrow (p-1)/2\\) 为偶')">C. \(p\) 是奇数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\((-1/p) = (-1)^{(p-1)/2} = 1 \\Leftrightarrow (p-1)/2\\) 为偶')">D. \(p > 5\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>二次互反律</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>二次互反律是「数论的宝石」（Gauss）。它揭示了两个不同素数 \(p, q\) 之间的二次剩余性的对称关系: \((p/q)\) 和 \((q/p)\) 之间有 精确的关联。配合 \((-1/p)\) 和 \((2/p)\) 的公式，可以计算任意 Legendre 符号。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>互反律是「对称性的破缺」的精确刻画——\((p/q)(q/p)\) 几乎总是 \(1\)， 除非两者都 \(\equiv 3 \pmod{4}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>二次互反律</strong>: 设 \(p, q\) 为不同奇素数，则 \[(p/q)(q/p) = (-1)^{\frac{p-1}{2} \cdot \frac{q-1}{2}}\] 即: - 若 \(p \equiv 1\) 或 \(q \equiv 1 \pmod{4}\)，则 \((p/q) = (q/p)\)。 - 若 \(p \equiv q \equiv 3 \pmod{4}\)，则 \((p/q) = -(q/p)\)。 这个定理将计算 \((p/q)\) 的问题转化为计算 \((q/p)\)。 配合缩减（\(q \to q \bmod p\)）和乘法性，可以类似欧几里得 算法递归计算任意 Legendre 符号。 Gauss 为这个定理给出了 8 种不同证明，其中最典型的是 Gauss 引理（计数 \(a, 2a, \ldots, \frac{p-1}{2}a \bmod p\) 中 大于 \(p/2\) 的个数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>互反律是代数数论的起点，其推广（Artin 互反律、朗兰兹互反律） 是现代数论的核心主题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 计算 \((7/13)\)。 解答: \((7/13)(13/7) = (-1)^{3 \times 6} = (-1)^{18} = 1\)。 故 \((7/13) = (13/7) = (6/7) = (2/7)(3/7)\)。 \((2/7)\): \(7 \equiv -1 \pmod{8}\)，\((2/7) = 1\)。 \((3/7)(7/3) = (-1)^{1 \times 3} = -1\)。 \((7/3) = (1/3) = 1\)。故 \((3/7) = -1\)。 \((7/13) = (1)(-1) = -1\)。 易错点: 忘记检查 \(p \equiv q \equiv 3 \pmod{4}\) 的特殊情况， 此时需要取负号。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\((3/11)(11/3) = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(3 \\equiv 3 \\pmod{4}\\) 且 \\(11 \\equiv 3 \\pmod{4}\\)，')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(3 \\equiv 3 \\pmod{4}\\) 且 \\(11 \\equiv 3 \\pmod{4}\\)，')">B. \(-1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(3 \\equiv 3 \\pmod{4}\\) 且 \\(11 \\equiv 3 \\pmod{4}\\)，')">C. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(3 \\equiv 3 \\pmod{4}\\) 且 \\(11 \\equiv 3 \\pmod{4}\\)，')">D. 不确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Jacobi 符号与计算应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Legendre 符号要求分母为素数，Jacobi 符号将其推广到任意奇数分母， 使得互反律可以在不分解分母的情况下递归计算，极大地提高了实用性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Jacobi 符号保持了 Legendre 符号的乘法性和互反律， 但不再直接判定二次剩余性——这是一个精妙的权衡。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Jacobi 符号</strong>: 设 \(n = p_1^{a_1} \cdots p_k^{a_k}\)（\(n\) 奇，\(n > 0\)）， \[(a/n) = \prod_{i=1}^{k} (a/p_i)^{a_i}\] 其中 \((a/p_i)\) 是 Legendre 符号。 <strong>性质</strong>: 乘法性、互反律、\((-1/n)\) 和 \((2/n)\) 的公式 均保持与 Legendre 符号相同形式。 <strong>警告</strong>: \((a/n) = 1\) 不保证 \(a\) 是模 \(n\) 的 QR！ 例如 \((2/15) = (2/3)(2/5) = (-1)(-1) = 1\)， 但 \(x^2 \equiv 2 \pmod{15}\) 无解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Jacobi 符号的快速计算算法用于 Solovay-Strassen 素性测试。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 用互反律计算 \((15/43)\)。 解答: \((15/43)(43/15) = (-1)^{7 \times 21} = (-1)^{147} = -1\)。 \((43/15) = (13/15) = (13/3)(13/5)\)。 \((13/3) = (1/3) = 1\)。\((13/5) = (3/5)\)。 \((3/5)(5/3) = (-1)^{1 \times 2} = 1\)。\((5/3) = (2/3) = -1\)。 \((3/5) = -1\)。\((43/15) = (1)(-1) = -1\)。 \((15/43) = -1/(-1) \cdot... \)（应重新算）。 更正: \((15/43) = (-1) \cdot (43/15)^{-1}\)，即 \((15/43) = (-1)(-1)^{-1} = (-1)(-1) = 1\)。实际计算: \((15/43) = -(43/15) = -(-1) = 1\)。 易错点: 混淆 Jacobi 符号的值与实际二次剩余性。 \((a/n) = 1\) 不保证 \(x^2 \equiv a \pmod{n}\) 有解（当 \(n\) 非素时）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Jacobi 符号 \((a/n) = 1\) 能否保证 \(a\) 是模 \(n\) 的 QR？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。当 \\(n = p\\) 为素数时 Jacobi = Legendre，此时 \\((a/p)=1\\)')">A. 能，当 \(n\) 为任意奇数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！当 \\(n = p\\) 为素数时 Jacobi = Legendre，此时 \\((a/p)=1\\)')">B. 能，当且仅当 \(n\) 为素数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。当 \\(n = p\\) 为素数时 Jacobi = Legendre，此时 \\((a/p)=1\\)')">C. 不能，永远不保证</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。当 \\(n = p\\) 为素数时 Jacobi = Legendre，此时 \\((a/p)=1\\)')">D. 能，当 \(n\) 为无平方因子数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/algebra/number-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 小波分析 — 调和分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "harmonic-ch06-q1",
+        "question": "连续小波变换 \\(W_\\psi f(a,b) = ?\\)（\\(a > 0\\), \\(b \\in \\mathbb{R}\\)）",
+        "options": [
+          "\\(\\int f(t) \\frac{1}{\\sqrt{a}}\\overline{\\psi\\left(\\frac{t-b}{a}\\right)}\\, dt\\)（尺度 \\(a\\)，平移 \\(b\\)）",
+        "\\(\\int f(t) e^{-2\\pi ibt}\\, dt\\)",
+        "\\(f(b) \\psi(a)\\)",
+        "\\(\\hat f(a) \\hat\\psi(b)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\psi_{a,b}(t) = a^{-1/2}\\psi((t-b)/a)\\)：母小波 \\(\\psi\\) 的缩放（\\(a\\)）和平移（\\(b\\)）。\\(W_\\psi f(a,b) = \\langle f, \\psi_{a,b}\\rangle\\)——检测 \\(f\\) 在位置 \\(b\\)、尺度 \\(a\\) 的局部频率内容。\\(a\\) 小：高频（细节）。\\(a\\) 大：低频（轮廓）。时频分析：Fourier 变换的\"局部化\"替代。"
+      },
+      {
+        "id": "harmonic-ch06-q2",
+        "question": "母小波 \\(\\psi\\) 的容许条件（admissibility condition）：\\(C_\\psi = \\int_0^\\infty \\frac{|\\hat\\psi(\\xi)|^2}{\\xi}\\, d\\xi < \\infty\\)。这要求？",
+        "options": [
+          "\\(\\hat\\psi(0) = 0\\)（\\(\\int\\psi(t)\\, dt = 0\\)——零均值条件）且 \\(\\hat\\psi\\) 在 \\(\\xi = 0\\) 附近充分衰减",
+        "\\(\\psi \\in L^1\\)",
+        "\\(\\psi\\) 连续",
+        "\\(\\hat\\psi(0) = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int_0^\\infty |\\hat\\psi|^2/\\xi\\, d\\xi\\)：\\(\\xi \\to 0\\) 时需 \\(|\\hat\\psi(\\xi)|^2/\\xi\\) 可积。\\(\\hat\\psi(0) \\neq 0\\)：\\(|\\hat\\psi|^2/\\xi \\sim |\\hat\\psi(0)|^2/\\xi\\)（不可积）。\\(\\hat\\psi(0) = 0\\)（必要条件）+ 足够快衰减。\\(C_\\psi\\) 有限保证逆变换公式和 Parseval 类等式。"
+      },
+      {
+        "id": "harmonic-ch06-q3",
+        "question": "多分辨分析（MRA）由什么定义？",
+        "options": [
+          "\\(L^2(\\mathbb{R})\\) 中嵌套子空间列 \\(\\{V_j\\}\\)：\\(V_j \\subset V_{j+1}\\)，\\(\\overline{\\cup V_j} = L^2\\)，\\(\\cap V_j = \\{0\\}\\)，\\(f \\in V_j \\Leftrightarrow f(2\\cdot) \\in V_{j+1}\\)，且存在尺度函数 \\(\\varphi\\) 使 \\(\\{\\varphi(\\cdot - k)\\}\\) 是 \\(V_0\\) 的正交基",
+        "Fourier 级数",
+        "\\(L^2\\) 的分解",
+        "滤波器组"
+        ],
+        "answer": 0,
+        "explanation": "MRA 的 5 个条件公理化了\"逐步精细化\"的概念。\\(V_j\\) = 分辨率 \\(2^j\\) 下可分辨的信号。缩放关系：\\(\\varphi(x) = \\sqrt{2}\\sum h_k \\varphi(2x-k)\\)（\\(h_k\\) = 低通滤波器系数）。Daubechies、Meyer 等小波都从 MRA 构造。"
+      },
+      {
+        "id": "harmonic-ch06-q4",
+        "question": "MRA 中的尺度方程：\\(\\varphi(x) = \\sqrt{2}\\sum_k h_k \\varphi(2x - k)\\)。滤波器 \\(H(\\xi) = \\frac{1}{\\sqrt{2}}\\sum h_k e^{-2\\pi ik\\xi}\\) 满足？",
+        "options": [
+          "\\(|H(\\xi)|^2 + |H(\\xi+1/2)|^2 = 1\\)（正交条件）",
+        "\\(H(\\xi) = 1\\)",
+        "\\(|H| = 1/2\\)",
+        "\\(H + \\bar H = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat\\varphi(\\xi) = H(\\xi/2)\\hat\\varphi(\\xi/2)\\)。正交性 \\(\\langle\\varphi(\\cdot-k), \\varphi(\\cdot-l)\\rangle = \\delta_{kl}\\) \\(\\Leftrightarrow\\) \\(\\sum_k |\\hat\\varphi(\\xi+k)|^2 = 1\\)。代入尺度方程迭代得 QMF（正交镜像滤波器）条件。Haar：\\(H(\\xi) = (1+e^{-2\\pi i\\xi})/2\\)（验证：\\(|H|^2 = \\cos^2(\\pi\\xi)\\)）。"
+      },
+      {
+        "id": "harmonic-ch06-q5",
+        "question": "从 MRA 构造小波：\\(W_j = V_{j+1} \\ominus V_j\\)（正交补）。小波 \\(\\psi\\) 满足？",
+        "options": [
+          "\\(\\psi(x) = \\sqrt{2}\\sum_k g_k \\varphi(2x-k)\\)（\\(g_k = (-1)^k \\bar h_{1-k}\\)——高通滤波器），\\(\\{\\psi_{j,k} = 2^{j/2}\\psi(2^j x - k)\\}\\) 是 \\(W_j\\) 的 ONB",
+        "\\(\\psi = \\varphi'\\)",
+        "\\(\\psi = \\hat\\varphi\\)",
+        "\\(\\psi \\in V_0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(G(\\xi) = e^{-2\\pi i\\xi}\\overline{H(\\xi+1/2)}\\)（由正交条件唯一确定到相位）。\\(\\hat\\psi(\\xi) = G(\\xi/2)\\hat\\varphi(\\xi/2)\\)。\\(\\psi \\perp V_0\\)（\\(\\psi \\in W_0\\)），\\(\\{\\psi(\\cdot-k)\\}\\) 是 \\(W_0\\) 的 ONB。\\(L^2 = \\bigoplus_j W_j\\)：小波给出 \\(L^2\\) 的正交分解。"
+      },
+      {
+        "id": "harmonic-ch06-q6",
+        "question": "Haar 小波：\\(\\psi(x) = 1\\)（\\(0 \\leq x < 1/2\\)），\\(= -1\\)（\\(1/2 \\leq x < 1\\)），\\(= 0\\) 其余。对应的尺度函数？",
+        "options": [
+          "\\(\\varphi(x) = \\chi_{[0,1)}(x)\\)（特征函数）",
+        "\\(\\varphi = \\psi\\)",
+        "\\(\\varphi = \\sin x\\)",
+        "\\(\\varphi = e^{-x^2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi = \\chi_{[0,1)}\\)。\\(V_0 = \\overline{\\text{span}}\\{\\chi_{[k,k+1)}\\}\\)（分段常数函数）。\\(V_j\\)：间隔 \\(2^{-j}\\) 的分段常数。\\(\\psi = \\varphi(2x) - \\varphi(2x-1)\\)（高通：检测跳跃）。Haar 是最简单的小波——不连续但紧支撑，历史上最早（1909年）。"
+      },
+      {
+        "id": "harmonic-ch06-q7",
+        "question": "小波变换 vs Fourier 变换 vs 窗口 Fourier（STFT）：时频分辨率？",
+        "options": [
+          "Fourier：无时间信息。STFT：固定时频分辨率。小波：自适应——高频时间分辨率高、频率分辨率低，低频反之（符合不确定性原理的最优利用）",
+        "三者相同",
+        "小波无频率信息",
+        "STFT 最好"
+        ],
+        "answer": 0,
+        "explanation": "不确定性：\\(\\Delta t \\cdot \\Delta\\xi \\geq 1/(4\\pi)\\)。STFT：\\(\\Delta t\\), \\(\\Delta\\xi\\) 固定（窗口不变）。小波：\\(\\psi_{a,b}\\) 的 \\(\\Delta t \\propto a\\)，\\(\\Delta\\xi \\propto 1/a\\)（自适应）。高频用窄窗（好时间分辨率），低频用宽窗（好频率分辨率）。\"多分辨率\"的核心。"
+      },
+      {
+        "id": "harmonic-ch06-q8",
+        "question": "逆小波变换（重建公式）：\\(f(t) = \\frac{1}{C_\\psi}\\int_0^\\infty\\int_{-\\infty}^\\infty W_\\psi f(a,b) \\psi_{a,b}(t) \\frac{db\\, da}{a^2}\\)。测度 \\(da\\, db/a^2\\) 的来源？",
+        "options": [
+          "\\(da\\, db/a^2\\) 是仿射群 \\(\\{(a,b): a > 0\\}\\) 的左 Haar 测度（使重建公式群不变）",
+        "Lebesgue 测度",
+        "任意选择",
+        "\\(da\\, db\\)"
+        ],
+        "answer": 0,
+        "explanation": "仿射群 \\((a,b) \\mapsto (a \\cdot, b \\cdot)\\)：\\(d\\mu = da\\, db/a^2\\)（左不变 Haar 测度）。重建公式即\"分辨率恒等式\"：对 \\(L^2\\) 函数按尺度-平移分解后叠加。\\(C_\\psi\\) 归一化使等式成立。Plancherel 类公式：\\(\\|f\\|_2^2 = \\frac{1}{C_\\psi}\\int|W_\\psi f|^2 \\frac{da\\, db}{a^2}\\)。"
+      },
+      {
+        "id": "harmonic-ch06-q9",
+        "question": "Daubechies 小波 \\(\\text{db}N\\)（\\(N\\) 消失矩）的特点？",
+        "options": [
+          "紧支撑（支撑长度 \\(2N-1\\)），\\(\\int t^k\\psi(t)\\, dt = 0\\)（\\(k = 0,...,N-1\\)），滤波器长度 \\(2N\\)，最大平坦性",
+        "无穷支撑",
+        "对称",
+        "仅 \\(N = 1\\)（Haar）"
+        ],
+        "answer": 0,
+        "explanation": "Daubechies（1988）：构造满足 (1) 正交性 \\(|H|^2 + |H(\\cdot+1/2)|^2 = 1\\)，(2) 紧支撑（有限 \\(h_k\\)），(3) \\(N\\) 个消失矩（\\(\\hat\\psi\\) 在 \\(\\xi = 0\\) 处 \\(N\\) 阶零点）。\\(\\text{db}1\\) = Haar。\\(\\text{db}2\\)：4 系数，支撑 \\([0,3]\\)，连续但不可微。\\(N\\) 越大：越光滑但支撑越长。"
+      },
+      {
+        "id": "harmonic-ch06-q10",
+        "question": "小波系数 \\(d_{j,k} = \\langle f, \\psi_{j,k}\\rangle\\) 中消失矩的效果？\\(\\psi\\) 有 \\(N\\) 消失矩，\\(f\\) 在 \\(\\psi_{j,k}\\) 支撑上是 \\(N-1\\) 次多项式，则 \\(d_{j,k} = ?\\)",
+        "options": [
+          "\\(0\\)（\\(\\psi \\perp\\) 低次多项式——\\(N\\) 消失矩意味压缩多项式信号为零）",
+        "\\(\\|f\\|_{L^2}\\)",
+        "\\(f(k/2^j)\\)",
+        "\\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int t^m\\psi(t)\\, dt = 0\\)（\\(m < N\\)）\\(\\Rightarrow\\) \\(\\langle p, \\psi_{j,k}\\rangle = 0\\)（\\(p\\) 是 \\(\\leq N-1\\) 次多项式）。\\(f\\) 局部光滑≈局部多项式 \\(\\Rightarrow d_{j,k}\\) 小。\\(f\\) 有奇异性（跳跃/尖峰）\\(\\Rightarrow d_{j,k}\\) 大。消失矩 = 压缩能力的关键因素。"
+      },
+      {
+        "id": "harmonic-ch06-q11",
+        "question": "小波去噪（Donoho-Johnstone，1994）：\\(y = f + \\sigma z\\)（\\(z\\) 白噪声）。小波收缩方法？",
+        "options": [
+          "计算 \\(d_{j,k} = \\langle y, \\psi_{j,k}\\rangle\\)，阈值处理：\\(\\tilde d_{j,k} = \\text{shrink}(d_{j,k}, \\lambda)\\)（\\(\\lambda \\approx \\sigma\\sqrt{2\\log N}\\)——通用阈值），重建 \\(\\hat f = \\sum \\tilde d_{j,k}\\psi_{j,k}\\)",
+        "低通滤波",
+        "平均",
+        "取中位数"
+        ],
+        "answer": 0,
+        "explanation": "信号：小波系数集中在少数大系数。噪声：系数均匀分布且小。软/硬阈值：\\(|d| \\leq \\lambda\\) 设零，\\(|d| > \\lambda\\) 保留（硬）或收缩（软：\\(\\text{sgn}(d)(|d|-\\lambda)_+\\)）。\\(\\lambda = \\sigma\\sqrt{2\\log N}\\)：以高概率所有纯噪声系数 \\(< \\lambda\\)。近最优风险（minimax）。"
+      },
+      {
+        "id": "harmonic-ch06-q12",
+        "question": "Morlet 小波 \\(\\psi(t) = C e^{i\\omega_0 t} e^{-t^2/2}\\)（\\(\\omega_0 \\approx 5-6\\)，使容许条件近似成立）。这是？",
+        "options": [
+          "复值小波——调制 Gauss 包。CWT 直接给出时频分析。非正交（通常用于 CWT 而非 DWT）",
+        "实值小波",
+        "Haar 小波的变体",
+        "紧支撑小波"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\hat\\psi(\\xi) \\propto e^{-(\\xi-\\omega_0)^2/2}\\)：频域集中在 \\(\\omega_0\\) 附近。\\(\\omega_0\\) 大：接近容许（\\(\\hat\\psi(0) \\approx 0\\)）。Morlet 小波给出\"时间-频率\"图（spectrogram 类似但自适应分辨率）。地球物理、神经科学广泛使用。不紧支撑但衰减极快（Gauss）。"
+      },
+      {
+        "id": "harmonic-ch06-q13",
+        "question": "双正交小波（biorthogonal）和正交小波的区别？",
+        "options": [
+          "双正交：分析小波 \\(\\tilde\\psi\\) 和合成小波 \\(\\psi\\) 不同（\\(\\langle\\psi_{j,k}, \\tilde\\psi_{j',k'}\\rangle = \\delta_{jj'}\\delta_{kk'}\\)），允许对称性和线性相位——JPEG 2000 使用",
+        "完全相同",
+        "双正交不能重建",
+        "双正交不正交"
+        ],
+        "answer": 0,
+        "explanation": "正交小波（紧支撑）不能同时对称（除 Haar）——线性相位不可兼得。双正交放弃正交性：\\(\\psi \\neq \\tilde\\psi\\)，但 \\(\\{(1-\\psi_{j,k}, \\tilde\\psi_{j,k})\\}\\) 双正交 \\(\\Rightarrow\\) 完美重建。CDF 9/7 小波（JPEG 2000）：对称、线性相位、良好压缩性能。"
+      },
+      {
+        "id": "harmonic-ch06-q14",
+        "question": "\\(f \\in C^\\alpha\\)（\\(0 < \\alpha < N\\)，\\(N\\) = 消失矩数）。小波系数衰减 \\(|d_{j,k}| = O(?)\\)（\\(j \\to \\infty\\)）",
+        "options": [
+          "\\(O(2^{-j(\\alpha+1/2)})\\)（指数衰减——光滑性决定衰减速率）",
+        "\\(O(2^{-j})\\)",
+        "\\(O(1)\\)",
+        "\\(O(j^{-1})\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|d_{j,k}| = |\\langle f, \\psi_{j,k}\\rangle| \\leq C \\cdot 2^{-j/2}\\omega_f(2^{-j})\\)（\\(\\omega\\) = 连续模）。\\(f \\in C^\\alpha\\)：\\(\\omega(h) \\leq Ch^\\alpha\\)。\\(|d_{j,k}| \\leq C 2^{-j/2} 2^{-j\\alpha} = C 2^{-j(\\alpha+1/2)}\\)。\\(\\alpha\\) 大（光滑）：快速衰减。\\(\\alpha\\) 小：慢衰减。小波系数精确刻画局部正则性。"
+      },
+      {
+        "id": "harmonic-ch06-q15",
+        "question": "离散小波变换（DWT）的快速算法（Mallat 算法，1989）复杂度？",
+        "options": [
+          "\\(O(N)\\)（\\(N\\) 个数据点——每层滤波 \\(O(N)\\)，层数 \\(O(\\log N)\\) 但每层数据减半，总和 \\(= O(N)\\)）",
+        "\\(O(N\\log N)\\)",
+        "\\(O(N^2)\\)",
+        "\\(O(N^{3/2})\\)"
+        ],
+        "answer": 0,
+        "explanation": "Mallat 算法（又称金字塔/滤波器组算法）：Level \\(j \\to j-1\\)：\\(a_{j-1,k} = \\sum_l h_{l-2k} a_{j,l}\\)（低通下采样），\\(d_{j-1,k} = \\sum_l g_{l-2k} a_{j,l}\\)（高通下采样）。每层 \\(O(N_j)\\)，\\(N_j = N/2^j\\)。总：\\(N + N/2 + N/4 + \\cdots = 2N = O(N)\\)。比 FFT 的 \\(O(N\\log N)\\) 还快！"
+      },
+      {
+        "id": "harmonic-ch06-q16",
+        "question": "Gabor（STFT）原子 \\(g_{b,\\xi}(t) = g(t-b)e^{2\\pi i\\xi t}\\) vs 小波原子 \\(\\psi_{a,b}(t) = a^{-1/2}\\psi((t-b)/a)\\)。时频平面（phase space）中的覆盖不同？",
+        "options": [
+          "STFT：均匀矩形网格（\\(\\Delta t\\), \\(\\Delta\\xi\\) 固定）。小波：对数网格——低频矩形宽（好频率分辨率），高频矩形窄（好时间分辨率）",
+        "相同",
+        "小波均匀",
+        "STFT 对数"
+        ],
+        "answer": 0,
+        "explanation": "STFT Heisenberg 盒：\\((b, \\xi)\\) 处大小 \\(\\sigma_t \\times \\sigma_\\xi\\)（固定）。小波：\\((b, 1/a)\\) 处大小 \\(a\\sigma_t \\times \\sigma_\\xi/a\\)（面积 \\(= \\sigma_t\\sigma_\\xi\\) 恒定但形状自适应）。对数频率轴上等间距：\\(\\xi_j = 2^j\\)。音乐/语音中频率感知是对数的——小波更自然。"
+      },
+      {
+        "id": "harmonic-ch06-q17",
+        "question": "Shannon 小波（sinc 小波）：\\(\\hat\\psi(\\xi) = \\chi_{[-1,-1/2) \\cup [1/2,1)}(\\xi)\\)。性质？",
+        "options": [
+          "理想频带——在频域完美分割。但时域 \\(\\psi(t) = \\frac{\\sin 2\\pi t - \\sin \\pi t}{\\pi t}\\)，缓慢衰减（\\(O(1/t)\\)），不紧支撑",
+        "紧支撑",
+        "指数衰减",
+        "\\(\\psi \\in \\mathcal{S}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Shannon MRA：\\(V_0\\) = 带限于 \\([-1/2, 1/2]\\) 的 \\(L^2\\) 函数。\\(W_0\\) = 带限于 \\([-1, -1/2) \\cup [1/2, 1)\\)。\\(\\psi\\) = Shannon 小波。\\(\\hat\\psi\\) 紧支撑 \\(\\Rightarrow\\) \\(\\psi\\) 是整函数（无穷光滑但不紧支撑）。时域衰减仅 \\(O(1/t)\\)——localization 差。理论理想但实际不用。"
+      },
+      {
+        "id": "harmonic-ch06-q18",
+        "question": "小波在 Besov 空间 \\(B^s_{p,q}\\) 的刻画：\\(f \\in B^s_{p,q} \\Leftrightarrow \\|f\\|_{B^s_{p,q}} \\approx ?\\)（用小波系数）",
+        "options": [
+          "\\(\\left(\\sum_j 2^{j(s+1/2-1/p)q}\\left(\\sum_k |d_{j,k}|^p\\right)^{q/p}\\right)^{1/q} < \\infty\\)（小波系数的加权混合范数）",
+        "\\(\\sum |d_{j,k}|\\)",
+        "\\(\\sup |d_{j,k}|\\)",
+        "\\(\\|f\\|_{L^p}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Besov 空间：\\(s\\)（光滑性）、\\(p\\)（空间可积性）、\\(q\\)（尺度可积性）。小波给出等价范数——将函数空间\"离散化\"。\\(B^s_{2,2} = H^s\\)（Sobolev）。\\(B^{1/p}_{p,p} = W^{1/p,p}\\)（分数 Sobolev）。\\(B^s_{\\infty,\\infty} = C^s\\)（Hölder，\\(s\\) 非整数）。小波基是 Besov 空间的无条件基。"
+      },
+      {
+        "id": "harmonic-ch06-q19",
+        "question": "小波收缩去噪在 Besov 球 \\(B^s_{p,p}\\)（\\(p \\leq 2\\)）上达到 minimax 速率。最优收敛速率？",
+        "options": [
+          "\\(R_n \\asymp n^{-2s/(2s+1)}\\)（非参数估计的经典速率——\\(s\\) = 光滑性，\\(n\\) = 样本量）",
+        "\\(1/n\\)",
+        "\\(1/\\sqrt{n}\\)",
+        "\\(\\log n / n\\)"
+        ],
+        "answer": 0,
+        "explanation": "Besov 球：\\(\\|f\\|_{B^s_{p,p}} \\leq C\\)。Minimax 风险（\\(L^2\\) 损失）：\\(R_n = \\inf_{\\hat f}\\sup_{f \\in B} E\\|\\hat f - f\\|_2^2 \\asymp n^{-2s/(2s+1)}\\)。小波阈值估计达到此速率——自适应（无需知道 \\(s\\)）。\\(s\\) 大（光滑）：速率接近 \\(1/n\\)（参数速率）。\\(s\\) 小（粗糙）：速率慢。"
+      },
+      {
+        "id": "harmonic-ch06-q20",
+        "question": "连续小波变换的冗余性：\\(W_\\psi f\\) 定义在 \\((a,b) \\in \\mathbb{R}^+ \\times \\mathbb{R}\\)（2维），而 \\(f\\) 是 1维函数。这意味？",
+        "options": [
+          "CWT 高度冗余——\\(W_\\psi f\\) 满足再生核方程 \\(W_\\psi f = W_\\psi f * K_\\psi\\)（仿射群上的卷积）。不是所有 2 维函数都是合法 CWT",
+        "无冗余",
+        "信息丢失",
+        "需要抽样"
+        ],
+        "answer": 0,
+        "explanation": "\\(W_\\psi f\\) 的像空间：\\(\\text{Im}(W_\\psi) \\subsetneq L^2(\\mathbb{R}^+ \\times \\mathbb{R}, da\\, db/a^2)\\)。再生核：\\(K_\\psi(a,b; a',b') = \\langle\\psi_{a,b}, \\psi_{a',b'}\\rangle/C_\\psi\\)。\\(W_\\psi f(a,b) = \\int\\int K_\\psi \\cdot W_\\psi f\\, \\frac{da' db'}{a'^2}\\)。DWT 离散化消除冗余（正交基：无冗余）。"
+      },
+      {
+        "id": "harmonic-ch06-q21",
+        "question": "Meyer 小波的特点？",
+        "options": [
+          "\\(\\hat\\psi \\in C^\\infty\\)、紧支撑于 \\(2\\pi/3 \\leq |\\xi| \\leq 8\\pi/3\\)（频域紧支撑），\\(\\psi \\in \\mathcal{S}\\)（Schwartz 类——无穷光滑且速降），非紧支撑但超多项式衰减",
+        "紧支撑",
+        "不光滑",
+        "Haar 的推广"
+        ],
+        "answer": 0,
+        "explanation": "Meyer（1985）：第一个构造的光滑正交小波。\\(\\hat\\psi\\) 在 \\([2\\pi/3, 8\\pi/3]\\) 通过 \\(C^\\infty\\) 过渡函数连接。时域：\\(\\psi \\in \\mathcal{S}\\)（衰减超过任何多项式）。牺牲紧支撑换取无穷光滑。对比 Daubechies：紧支撑但有限光滑。"
+      },
+      {
+        "id": "harmonic-ch06-q22",
+        "question": "小波给出 \\(L^p\\)（\\(1 < p < \\infty\\)）的无条件基（unconditional basis）。这比 Schauder 基强在？",
+        "options": [
+          "无条件：\\(\\sum \\epsilon_k c_k \\psi_k\\) 收敛（\\(\\forall \\epsilon_k = \\pm 1\\)）\\(\\Leftrightarrow\\) \\(\\sum c_k\\psi_k\\) 收敛——重排不影响收敛。Fourier 基在 \\(L^p\\)（\\(p \\neq 2\\)）不是无条件基",
+        "相同",
+        "Schauder 更强",
+        "无差异"
+        ],
+        "answer": 0,
+        "explanation": "Schauder 基：特定顺序收敛。无条件：任意顺序/符号变化都收敛。三角系在 \\(L^p\\)（\\(p \\neq 2\\)）不是无条件基（Carleson-Hunt 给 a.e. 收敛但非无条件 \\(L^p\\)）。小波基在 \\(L^p\\)：无条件（\\(1 < p < \\infty\\)）——通过 CZ 理论（小波乘子 = CZ 算子的特例）。"
+      },
+      {
+        "id": "harmonic-ch06-q23",
+        "question": "小波压缩：\\(N\\) 项最佳近似 \\(\\sigma_N(f) = \\inf_{\\#\\Lambda = N}\\|f - \\sum_{(j,k)\\in\\Lambda}d_{j,k}\\psi_{j,k}\\|_2\\)。对 \\(f \\in B^s_{p,p}\\)（\\(p < 2\\)），\\(\\sigma_N = O(?)\\)",
+        "options": [
+          "\\(O(N^{-s})\\)（远优于线性近似速率 \\(N^{-s/(1+2s-2/p)}\\)——非线性近似的优势）",
+        "\\(O(N^{-1/2})\\)",
+        "\\(O(1/N)\\)",
+        "\\(O(\\log N / N)\\)"
+        ],
+        "answer": 0,
+        "explanation": "非线性 \\(N\\) 项近似：选最大的 \\(N\\) 个系数（自适应）。\\(f \\in B^s_{p,p}\\)（\\(p < 2\\)，稀疏信号）：系数衰减排列 \\(|d|_{(k)} \\leq Ck^{-s-1/2+1/p}\\)。\\(\\sigma_N^2 \\leq C\\sum_{k>N}|d|_{(k)}^2 \\leq CN^{-2s}\\)。\\(p < 2\\)：非线性远优于线性——图像压缩的理论基础（图像在 Besov 空间粗糙但稀疏）。"
+      },
+      {
+        "id": "harmonic-ch06-q24",
+        "question": "Scalogram（尺度图）\\(|W_\\psi f(a,b)|^2\\) 在时频平面的解释？",
+        "options": [
+          "\\((b, 1/a)\\) 处的能量密度——展示信号在不同时间和尺度/频率的局部能量分布",
+        "功率谱",
+        "相位",
+        "频谱"
+        ],
+        "answer": 0,
+        "explanation": "\\(|W_\\psi f(a,b)|^2\\)：\\(f\\) 在时间 \\(b\\)、尺度 \\(a\\)（频率 \\(\\propto 1/a\\)）的能量。总能量：\\(\\frac{1}{C_\\psi}\\int\\int|W_\\psi f|^2 \\frac{da\\, db}{a^2} = \\|f\\|_2^2\\)（Plancherel）。比 spectrogram 分辨率更灵活：高频窄时间窗、低频宽时间窗。"
+      },
+      {
+        "id": "harmonic-ch06-q25",
+        "question": "Coiflet 小波的特殊性质？",
+        "options": [
+          "尺度函数 \\(\\varphi\\) 也有消失矩（\\(\\int t^k\\varphi = \\delta_{k0}\\)，\\(k < N\\)）——使小波系数近似采样值 \\(d_{j,k} \\approx 2^{-j/2}f(2^{-j}k)\\)",
+        "与 Daubechies 相同",
+        "对称",
+        "无穷光滑"
+        ],
+        "answer": 0,
+        "explanation": "Daubechies 小波：\\(\\psi\\) 有 \\(N\\) 消失矩但 \\(\\varphi\\) 没有。Coiflet（Coifman 建议，Daubechies 构造）：\\(\\varphi\\) 也有近 \\(N\\) 消失矩。\\(\\int\\varphi = 1\\)，\\(\\int t^k\\varphi \\approx 0\\)（\\(k \\geq 1\\)）。效果：\\(\\langle f, \\varphi_{j,k}\\rangle \\approx 2^{-j/2}f(k2^{-j})\\)（直接采样近似），数值计算更方便。"
+      },
+      {
+        "id": "harmonic-ch06-q26",
+        "question": "JPEG 2000 使用的小波？",
+        "options": [
+          "CDF 9/7（有损）和 CDF 5/3（无损）——双正交小波，支持对称/线性相位",
+        "Haar",
+        "Daubechies db4",
+        "Fourier"
+        ],
+        "answer": 0,
+        "explanation": "CDF 9/7（Cohen-Daubechies-Feauveau）：9 和 7 个系数的分析/合成滤波器。双正交→对称（线性相位），避免边界伪影。图像 2D 变换：行列分别滤波（可分离）。压缩：量化小波系数 + 熵编码。比 JPEG（DCT）块效应少，压缩率更高。"
+      },
+      {
+        "id": "harmonic-ch06-q27",
+        "question": "地震数据分析中小波变换检测什么？",
+        "options": [
+          "不同时间点、不同频率的局部事件——如地震波到达（高频瞬态）和低频振荡（面波），时频分析区分各种波相",
+        "仅频谱",
+        "仅振幅",
+        "仅相位"
+        ],
+        "answer": 0,
+        "explanation": "地震信号：非平稳（频率随时间变化）。Fourier 变换：丢失时间信息。小波 CWT/DWT：定位每个频率分量出现的时间。P 波（高频，先到）、S 波（中频）、面波（低频，后到）在scalogram 中清晰分离。金融时间序列、医学信号分析类似。"
+      },
+      {
+        "id": "harmonic-ch06-q28",
+        "question": "FBI 指纹数据库使用小波压缩。压缩比约 \\(26:1\\)，使用什么小波？",
+        "options": [
+          "WSQ（Wavelet Scalar Quantization）——专用双正交小波，对指纹特征（脊线、分叉点）保留良好",
+        "JPEG 压缩",
+        "Haar 小波",
+        "Fourier"
+        ],
+        "answer": 0,
+        "explanation": "WSQ 标准（1993）：FBI 选定的指纹图像压缩格式。\\(26:1\\) 压缩且指纹识别率不降低。关键：小波压缩保留局部细节（脊线结构）而非全局平滑——比 DCT 更适合指纹。500 dpi 灰度图像：原始 \\(\\sim\\)750KB \\(\\to\\) WSQ \\(\\sim\\)30KB。自适应量化保留高频边缘信息。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="harmonic"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/harmonic.html" class="module-name">调和分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 多分辨分析与小波基</a></li>
+      <li><a href="#kp2">02 · Daubechies 小波族</a></li>
+      <li><a href="#kp3">03 · 离散小波变换与快速算法</a></li>
+      <li><a href="#kp4">04 · 时频分析与短时 Fourier 变换</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>小波分析</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>多分辨分析与小波基</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 分析在频域精确但丢失了时间信息——不知道频率成分 "何时出现"。小波分析通过伸缩和平移的母小波族 \(\psi_{j,k}(x) = 2^{j/2}\psi(2^j x - k)\) 同时捕获时间和频率 信息。多分辨分析（MRA）提供了系统构造小波基的框架。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>MRA 将 \(L^2\) 分解为嵌套子空间链 \(\cdots V_{-1} \subseteq V_0 \subseteq V_1 \cdots\)， 每层的"新信息" \(W_j = V_{j+1} \ominus V_j\) 由小波基张成。 这是 Littlewood-Paley 频率分层的时域对应。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>MRA 公理</strong>：\(\{V_j\}_{j \in \mathbb{Z}}\) 满足 (1) \(V_j \subseteq V_{j+1}\) (2) \(f \in V_j \Leftrightarrow f(2\cdot) \in V_{j+1}\)（伸缩） (3) \(\bigcap V_j = \{0\}\), \(\overline{\bigcup V_j} = L^2\) (4) 存在 \(\phi\)（尺度函数）使 \(\{\phi(\cdot - k)\}_{k \in \mathbb{Z}}\) 是 \(V_0\) 的 ONB <strong>小波空间</strong>：\(W_j = V_{j+1} \ominus V_j\)（正交补）。 \(L^2 = \bigoplus_{j \in \mathbb{Z}} W_j\)。 存在 \(\psi\)（母小波）使 \(\{2^{j/2}\psi(2^j x - k)\}_{j,k}\) 是 \(L^2\) 的 ONB。 <strong>尺度方程</strong>：\(\phi(x) = \sqrt{2}\sum_k h_k \phi(2x - k)\)（\(h_k\) 为滤波器系数）。 <strong>小波方程</strong>：\(\psi(x) = \sqrt{2}\sum_k g_k \phi(2x - k)\)， \(g_k = (-1)^k h_{1-k}\)（正交镜像滤波器）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>JPEG 2000 图像压缩使用 CDF 9/7 小波；去噪通过 小波阈值化处理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Haar 小波。\(\phi = \chi_{[0,1)}\)（尺度函数）。 \(h_0 = h_1 = 1/\sqrt{2}\)。 \(\psi = \chi_{[0,1/2)} - \chi_{[1/2,1)}\)。 验证：\(\psi_{j,k}(x) = 2^{j/2}\psi(2^j x - k)\) 构成 \(L^2(\mathbb{R})\) 的 ONB。 易错点：Haar 小波不连续——对光滑函数逼近效率低。 Daubechies 小波是连续/光滑的替代品，但支集更长。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">MRA 的核心结构是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！MRA = 嵌套子空间链 + 尺度函数 → 导出小波基。')">A. 嵌套子空间链 \(V_j\) 和尺度函数 \(\phi\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。MRA = 嵌套子空间链 + 尺度函数 → 导出小波基。')">B. 单个基函数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。MRA = 嵌套子空间链 + 尺度函数 → 导出小波基。')">C. Fourier 级数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。MRA = 嵌套子空间链 + 尺度函数 → 导出小波基。')">D. CZ 分解</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Daubechies 小波族</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Haar 小波太粗糙（不连续），Fourier 基太全局（无局部化）。 Daubechies 构造了一族紧支集正交小波 \(\psi_N\)——随着 \(N\) 增大， 小波越光滑，消失矩越多。这一突破使小波分析从理论走向 实际应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>消失矩</strong>：\(\int x^k \psi(x) dx = 0\)（\(k = 0, 1, \ldots, N-1\)）。 消失矩越多，小波对多项式"视而不见"，更善于捕捉细节。 <strong>Daubechies 条件</strong>：滤波器 \(h_0, \ldots, h_{2N-1}\) 满足 (1) 正交性：\(\sum_k h_k h_{k+2l} = \delta_{l0}\) (2) 归一化：\(\sum h_k = \sqrt{2}\) (3) \(N\) 阶消失矩条件 最小支集长度 \(= 2N - 1\)。 <strong>Daubechies-\(N\) 小波</strong>（\(N = 1\)：Haar；\(N = 2\)：db2；\(\ldots\)）。 \(N\) 增大 ⇒ 更光滑（连续性阶约 \(\sim 0.2N\)），但支集更长。 <strong>正则性</strong>：\(\psi_N \in C^{0.2N}\)（近似），\(N \to \infty\) 时光滑性趋于无穷。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>指纹压缩（FBI 标准使用 WSQ 小波），心电图分析（db4 小波 与 QRS 波群形状匹配）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：db2（\(N = 2\)）滤波器系数。 解答：\(h_0 = (1+\sqrt{3})/(4\sqrt{2})\), \(h_1 = (3+\sqrt{3})/(4\sqrt{2})\), \(h_2 = (3-\sqrt{3})/(4\sqrt{2})\), \(h_3 = (1-\sqrt{3})/(4\sqrt{2})\)。 支集 \(= [0, 3]\)（\(2N - 1 = 3\)）。一阶消失矩：\(\int \psi = 0\), \(\int x\psi = 0\)。 易错点：Daubechies 小波没有解析表达式（除 Haar）， 只能通过滤波器系数迭代计算。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Daubechies-\(N\) 小波的支集长度是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最小紧支集长度 \\(= 2N - 1\\)（\\(2N\\) 个滤波器系数，支撑长度 \\(= 2N - 1\\)）。')">A. \(N\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！最小紧支集长度 \\(= 2N - 1\\)（\\(2N\\) 个滤波器系数，支撑长度 \\(= 2N - 1\\)）。')">B. \(2N - 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最小紧支集长度 \\(= 2N - 1\\)（\\(2N\\) 个滤波器系数，支撑长度 \\(= 2N - 1\\)）。')">C. \(2N\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。最小紧支集长度 \\(= 2N - 1\\)（\\(2N\\) 个滤波器系数，支撑长度 \\(= 2N - 1\\)）。')">D. \(N^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>离散小波变换与快速算法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>理论上小波变换是连续的积分变换，但实际应用中我们需要离散版本。 Mallat 的快速小波变换（FWT）利用 MRA 的嵌套结构，通过 滤波器组的级联实现 \(O(N)\) 复杂度的分解与重构——比 FFT 的 \(O(N\log N)\) 还快！</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>FWT 的原理：将信号分解为"逼近系数"（低频）和"细节系数" （高频），逐层递归——每层将采样率减半。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分解</strong>：设信号 \(f \in V_J\)（最精细层）。 \(V_J = V_{J-1} \oplus W_{J-1}\)。 逼近系数：\(a_{J-1}[k] = \langle f, \phi_{J-1,k} \rangle = \sum_n h_{n-2k} a_J[n]\) 细节系数：\(d_{J-1}[k] = \langle f, \psi_{J-1,k} \rangle = \sum_n g_{n-2k} a_J[n]\) 即：低通滤波 \(h\) + 下采样 → 逼近系数 高通滤波 \(g\) + 下采样 → 细节系数 递归到 \(J-1, J-2, \ldots, 0\)。 <strong>重构</strong>：上采样 + 滤波器 \(\tilde{h}, \tilde{g}\)： \(a_j[n] = \sum_k a_{j-1}[k] \tilde{h}_{n-2k} + \sum_k d_{j-1}[k] \tilde{g}_{n-2k}\) <strong>复杂度</strong>：\(N + N/2 + N/4 + \cdots = O(N)\)（每层数据量减半）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>MP3 音频压缩的子带编码本质上是小波变换的变体。 地震信号分析中用小波检测不同时刻的频率变化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Haar FWT 一步分解 \(a = [4, 6, 5, 1]\)。 解答：\(h = [1/\sqrt{2}, 1/\sqrt{2}]\), \(g = [1/\sqrt{2}, -1/\sqrt{2}]\)。 \(a'[0] = (4+6)/\sqrt{2} = 5\sqrt{2}\), \(a'[1] = (5+1)/\sqrt{2} = 3\sqrt{2}\)。 \(d'[0] = (4-6)/\sqrt{2} = -\sqrt{2}\), \(d'[1] = (5-1)/\sqrt{2} = 2\sqrt{2}\)。 （或用非归一化版本：逼近 \(= [5, 3]\)，细节 \(= [-1, 2]\)。） 易错点：FWT 输入长度必须是 \(2^J\)（或用边界延拓处理）。 下采样使得信号长度逐层减半。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">快速小波变换的计算复杂度是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(N + N/2 + N/4 + \\cdots < 2N = O(N)\\)。')">A. \(O(N^2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(N + N/2 + N/4 + \\cdots < 2N = O(N)\\)。')">B. \(O(N\log N)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(N + N/2 + N/4 + \\cdots < 2N = O(N)\\)。')">C. \(O(N)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(N + N/2 + N/4 + \\cdots < 2N = O(N)\\)。')">D. \(O(N\log^2 N)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>时频分析与短时 Fourier 变换</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Fourier 变换完全丢失时间信息，小波变换在低频处时间分辨率差。 短时 Fourier 变换（STFT）通过窗函数 \(g\) 在每个时刻取一段 信号做 Fourier 变换，同时保留时间和频率信息。Gabor 框架理论 为 STFT 的离散化提供了数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>STFT 将函数映到时频平面（phase space）上的函数。 不确定性原理限制了时频分辨率的乘积——Gabor 原子 \(g_{m,n}(x) = e^{2\pi imx}g(x-n)\) 不能太密也不能太稀。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>短时 Fourier 变换 (STFT)</strong>： \[Vg f(x, \xi) = \int f(t) \overline{g(t-x)} e^{-2\pi it\xi}\, dt\] \(= \langle f, M_\xi T_x g \rangle\)（\(T_x\) 平移, \(M_\xi\) 调制）。 <strong>反转</strong>（若 \(g, \gamma\) 满足条件）： \(f = \int\int Vg f(x,\xi) M_\xi T_x \gamma\, dx\, d\xi\) <strong>Gabor 框架</strong>：\(\{e^{2\pi imx}g(x-n)\}_{m,n \in \mathbb{Z}}\) 构成 \(L^2\) 的框架 \(\Leftrightarrow\) 存在 \(A, B > 0\) 使 \[A\|f\|^2 \leq \sum_{m,n} |Vg f(n, m)|^2 \leq B\|f\|^2\] <strong>Balian-Low 定理</strong>：若 Gabor 系统 \(\{g_{m,n}\}\)（整数格点） 构成 \(L^2\) 的正交基，则 \(g\) 不能同时在时域和频域快速衰减 （\(\int x^2|g|^2 \cdot \int \xi^2|\hat{g}|^2 = \infty\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>语音识别中的"频谱图"就是 \(|Vg f(x,\xi)|^2\) 的可视化。 超声波检测中用 Gabor 变换定位缺陷的时间位置和频率特征。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：以 \(g(t) = e^{-\pi t^2}\)（Gauss 窗）为窗的 STFT 在 \(f(t) = e^{2\pi i \xi_0 t}\)（纯频率）上的结果。 解答：\(Vg f(x, \xi) = \int e^{2\pi i\xi_0 t} e^{-\pi(t-x)^2} e^{-2\pi it\xi} dt\) \(= e^{2\pi ix(\xi_0 - \xi)} e^{-\pi(\xi - \xi_0)^2}\)。 在时频平面上集中在 \(\xi = \xi_0\) 线上（频率精确定位）， 时间方向无局部化（纯频率信号在所有时间都存在）。 易错点：Balian-Low 定理说 Gabor <strong>正交基</strong>不能有好的 时频集中性。但 Gabor <strong>框架</strong>（非正交）可以有好的集中性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">STFT 中窗函数 \(g\) 越窄？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！窄窗 → 时间精确但频率模糊（不确定性原理）。')">A. 时间分辨率越好，频率分辨率越差</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。窄窗 → 时间精确但频率模糊（不确定性原理）。')">B. 频率分辨率越好，时间分辨率越差</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。窄窗 → 时间精确但频率模糊（不确定性原理）。')">C. 两者都变好</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。窄窗 → 时间精确但频率模糊（不确定性原理）。')">D. 两者都变差</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/analysis/harmonic.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

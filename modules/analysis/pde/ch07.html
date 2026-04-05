@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.7 弱解与 Sobolev 空间入门 — 偏微分方程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "pde-ch07-q1",
+        "question": "为什么需要\"弱解\"概念？",
+        "options": [
+          "经典解要求函数足够光滑（\\(C^2\\)），但许多物理问题的解不够光滑（如激波）",
+        "弱解就是近似解",
+        "经典解总是存在",
+        "仅为数学方便"
+        ],
+        "answer": 0,
+        "explanation": "弦上有一个尖角（\\(C^0\\) 但非 \\(C^1\\)）→ 经典波方程无解。但物理上弦确实振动。弱解放宽光滑性要求：将导数通过分部积分\"转移\"到光滑的测试函数上。\\(\\int u(-\\Delta\\phi)=\\int f\\phi\\)（\\(\\forall\\phi\\in C_0^\\infty\\)）。"
+      },
+      {
+        "id": "pde-ch07-q2",
+        "question": "\\(-\\Delta u=f\\) 的弱形式是？",
+        "options": [
+          "\\(\\int_\\Omega\\nabla u\\cdot\\nabla\\phi\\,dx=\\int_\\Omega f\\phi\\,dx\\)（\\(\\forall\\phi\\in H^1_0\\)）",
+        "\\(\\Delta u=f\\)",
+        "\\(\\int u\\phi=\\int f\\phi\\)",
+        "\\(u=f\\)"
+        ],
+        "answer": 0,
+        "explanation": "对 \\(-\\Delta u=f\\) 两边乘 \\(\\phi\\) 并积分，分部积分一次：\\(\\int\\nabla u\\cdot\\nabla\\phi-\\oint u\\partial_n\\phi=\\int f\\phi\\)。\\(\\phi\\in H^1_0\\)（边界 \\(=0\\)）→ 边界项 \\(=0\\)。弱形式只需 \\(u\\in H^1\\)（一阶导在 \\(L^2\\) 中），不需要二阶导。"
+      },
+      {
+        "id": "pde-ch07-q3",
+        "question": "Sobolev 空间 \\(H^1(\\Omega)\\) 的定义？",
+        "options": [
+          "\\(H^1=\\{u\\in L^2:\\nabla u\\in L^2\\}\\)，范数 \\(\\|u\\|_{H^1}=(\\|u\\|_{L^2}^2+\\|\\nabla u\\|_{L^2}^2)^{1/2}\\)",
+        "\\(C^1\\) 函数",
+        "\\(L^1\\) 函数",
+        "解析函数"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\nabla u\\) 是弱导数（分布导数在 \\(L^2\\) 中）。\\(H^1\\) 是 Hilbert 空间（内积 \\(\\langle u,v\\rangle_{H^1}=\\int(uv+\\nabla u\\cdot\\nabla v)\\)）。\\(H^1_0\\) = \\(H^1\\) 中边界值为零的子空间（\\(C_0^\\infty\\) 在 \\(H^1\\) 范数下的完备化）。"
+      },
+      {
+        "id": "pde-ch07-q4",
+        "question": "Lax-Milgram 定理的条件：双线性形式 \\(a(u,v)\\) 需满足？",
+        "options": [
+          "连续性（\\(|a(u,v)|\\leq M\\|u\\|\\|v\\|\\)）和强制性（\\(a(u,u)\\geq\\alpha\\|u\\|^2\\)，\\(\\alpha>0\\)）",
+        "仅对称",
+        "仅连续",
+        "无条件"
+        ],
+        "answer": 0,
+        "explanation": "在 Hilbert 空间 \\(V\\) 上，\\(a:V\\times V\\to\\mathbb{R}\\) 连续 + 强制 → \\(\\forall F\\in V'\\)，\\(\\exists!u\\in V\\)：\\(a(u,v)=F(v)\\)（\\(\\forall v\\)）。不要求 \\(a\\) 对称。这是 Riesz 表示定理的推广。"
+      },
+      {
+        "id": "pde-ch07-q5",
+        "question": "\\(W^{k,p}(\\Omega)\\) 空间的一般定义？",
+        "options": [
+          "\\(\\{u\\in L^p:D^\\alpha u\\in L^p,\\,|\\alpha|\\leq k\\}\\)",
+        "\\(C^k\\) 函数",
+        "\\(L^p\\) 函数",
+        "仅 \\(p=2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(W^{k,p}\\) 是具有 \\(k\\) 阶弱导数且都在 \\(L^p\\) 中的函数空间。范数 \\(\\|u\\|_{W^{k,p}}=\\sum_{|\\alpha|\\leq k}\\|D^\\alpha u\\|_{L^p}^p)^{1/p}\\)。\\(p=2\\) 时 \\(W^{k,2}=H^k\\)（Hilbert）。\\(p\\neq 2\\) 时只是 Banach 空间。"
+      },
+      {
+        "id": "pde-ch07-q6",
+        "question": "\\(u(x)=|x|\\) 在 \\((-1,1)\\) 上。\\(u\\) 是否属于 \\(H^1(-1,1)\\)？",
+        "options": [
+          "是：\\(u\\in L^2\\)，弱导数 \\(u'=\\text{sgn}(x)\\in L^2\\)",
+        "否：\\(u\\) 在 \\(0\\) 不可微",
+        "否：\\(u''\\notin L^2\\)",
+        "需额外条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(u'\\) 在经典意义下在 \\(0\\) 不存在，但弱导数 \\(u'=\\text{sgn}(x)\\)（\\(=1\\) 当 \\(x>0\\)，\\(=-1\\) 当 \\(x<0\\)）满足 \\(\\int u\\phi'=-\\int u'\\phi\\)。\\(u'\\in L^2\\) → \\(u\\in H^1\\)。但 \\(u''\\sim 2\\delta(x)\\notin L^2\\) → \\(u\\notin H^2\\)。"
+      },
+      {
+        "id": "pde-ch07-q7",
+        "question": "椭圆正则性的基本结论：\\(-\\Delta u=f\\in L^2(\\Omega)\\)（弱解），\\(u\\in H^1_0\\)。期望 \\(u\\) 有多少正则性？",
+        "options": [
+          "\\(u\\in H^2(\\Omega)\\)（获得两阶额外正则性）",
+        "\\(u\\in C^\\infty\\)",
+        "\\(u\\) 仍在 \\(H^1\\)",
+        "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "椭圆估计 \\(\\|u\\|_{H^2}\\leq C(\\|f\\|_{L^2}+\\|u\\|_{L^2})\\)。\\(f\\in H^k\\) → \\(u\\in H^{k+2}\\)（每次获得 2 阶）。\\(f\\in C^\\infty\\) → \\(u\\in C^\\infty\\)（椭圆光滑性）。但需区域正则性（如 \\(\\partial\\Omega\\in C^2\\) 或凸）。"
+      },
+      {
+        "id": "pde-ch07-q8",
+        "question": "Sobolev 嵌入定理（一维）：\\(H^1(0,1)\\hookrightarrow C^0[0,1]\\)。这意味着？",
+        "options": [
+          "\\(H^1\\) 中的函数可以取点值（连续），且 \\(\\max|u|\\leq C\\|u\\|_{H^1}\\)",
+        "\\(H^1=C^0\\)",
+        "\\(C^0\\subset H^1\\)",
+        "嵌入不存在"
+        ],
+        "answer": 0,
+        "explanation": "一维中 \\(H^1\\hookrightarrow C^{0,1/2}\\)（Hölder 连续）。\\(|u(x)-u(y)|\\leq\\sqrt{|x-y|}\\|u'\\|_{L^2}\\)。边界值有意义 → 可以定义 \\(H^1_0\\) 为\"边界值 \\(=0\\)\"。高维中嵌入依赖 \\(kp>n\\)（Morrey 嵌入）。"
+      },
+      {
+        "id": "pde-ch07-q9",
+        "question": "用 Lax-Milgram 证明 \\(-\\Delta u+u=f\\)（\\(f\\in L^2\\)），\\(u|_{\\partial\\Omega}=0\\) 的弱解存在唯一。\\(a(u,v)=\\)？",
+        "options": [
+          "\\(\\int(\\nabla u\\cdot\\nabla v+uv)\\,dx\\)，\\(F(v)=\\int fv\\)",
+        "\\(\\int\\Delta u\\cdot v\\)",
+        "\\(\\int uv\\)",
+        "\\(\\int\\nabla u\\cdot\\nabla v\\)"
+        ],
+        "answer": 0,
+        "explanation": "弱形式：\\(\\int\\nabla u\\nabla v+\\int uv=\\int fv\\)。\\(a(u,v)=\\int(\\nabla u\\nabla v+uv)\\) → 连续性：\\(|a|\\leq\\|u\\|_{H^1}\\|v\\|_{H^1}\\)。强制性：\\(a(u,u)=\\|u\\|_{H^1}^2\\geq\\|u\\|_{H^1}^2\\)（\\(\\alpha=1\\)）。Lax-Milgram → \\(\\exists!u\\in H^1_0\\)。"
+      },
+      {
+        "id": "pde-ch07-q10",
+        "question": "Sobolev 嵌入在高维 \\(n\\geq 2\\)：\\(H^1(\\Omega)\\hookrightarrow L^q(\\Omega)\\)，\\(q\\) 最大可取？",
+        "options": [
+          "\\(q=2^*=\\frac{2n}{n-2}\\)（\\(n\\geq 3\\)）；\\(n=2\\) 时 \\(q<\\infty\\)（任意有限）",
+        "\\(q=2\\)",
+        "\\(q=\\infty\\)",
+        "\\(q=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "Sobolev 不等式 \\(\\|u\\|_{L^{2^*}}\\leq C\\|\\nabla u\\|_{L^2}\\)。\\(n=3\\)：\\(2^*=6\\)；\\(n=4\\)：\\(2^*=4\\)。\\(n=2\\) 无 \\(L^\\infty\\) 嵌入（\\(H^1\\not\\hookrightarrow L^\\infty\\)，例 \\(\\ln\\ln(1/|x|)\\)）。\\(n=1\\)：\\(H^1\\hookrightarrow L^\\infty\\)（连续函数）。"
+      },
+      {
+        "id": "pde-ch07-q11",
+        "question": "弱解和经典解的关系？",
+        "options": [
+          "经典解一定是弱解；弱解若足够光滑（\\(C^2\\)）则是经典解",
+        "无关",
+        "弱解更强",
+        "经典解不是弱解"
+        ],
+        "answer": 0,
+        "explanation": "\\(u\\in C^2\\) 且满足 \\(-\\Delta u=f\\) → 对任意 \\(\\phi\\) 乘以并积分分部得弱形式 → \\(u\\) 是弱解。反之：弱解 \\(u\\in H^2\\) → \\(-\\Delta u=f\\) a.e. → 若 \\(u\\in C^2\\) 则是经典解。椭圆正则性在两者之间搭桥。"
+      },
+      {
+        "id": "pde-ch07-q12",
+        "question": "Poincaré 不等式：\\(u\\in H^1_0(\\Omega)\\) → \\(\\|u\\|_{L^2}\\leq C_P\\|\\nabla u\\|_{L^2}\\)。\\(C_P\\) 与什么有关？",
+        "options": [
+          "区域 \\(\\Omega\\) 的大小（直径）",
+        "\\(u\\) 的值",
+        "维数无关",
+        "\\(C_P=1\\) 恒成立"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_P\\leq\\text{diam}(\\Omega)/\\pi\\)（一维最优常数 \\(=L/\\pi\\)）。推论：\\(\\|\\nabla u\\|_{L^2}\\) 是 \\(H^1_0\\) 上的等价范数。这对强制性证明至关重要：\\(a(u,u)=\\|\\nabla u\\|^2\\geq C_P^{-2}\\|u\\|_{L^2}^2\\) → \\(a\\) 在 \\(H^1_0\\) 上强制。"
+      },
+      {
+        "id": "pde-ch07-q13",
+        "question": "正则性\"bootstrap\"：如果 \\(-\\Delta u=f\\) 且 \\(f\\in H^k\\)，则 \\(u\\in\\)？",
+        "options": [
+          "\\(H^{k+2}\\)（每次提升两阶）",
+        "\\(H^k\\)",
+        "\\(H^{k+1}\\)",
+        "\\(C^k\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\in L^2=H^0\\) → \\(u\\in H^2\\)。\\(f\\in H^1\\) → \\(u\\in H^3\\)。一般 \\(f\\in H^k\\) → \\(u\\in H^{k+2}\\)。\\(f\\in C^\\infty\\) → \\(u\\in H^k\\)（\\(\\forall k\\)）→ Sobolev 嵌入 → \\(u\\in C^\\infty\\)。逐步提升正则性的技术叫\"bootstrapping\"。"
+      },
+      {
+        "id": "pde-ch07-q14",
+        "question": "紧嵌入 Rellich-Kondrachov：\\(H^1(\\Omega)\\hookrightarrow\\hookrightarrow L^2(\\Omega)\\)（\\(\\Omega\\) 有界）。\"紧\"意味着？",
+        "options": [
+          "\\(H^1\\) 中的有界序列在 \\(L^2\\) 中有收敛子列",
+        "\\(H^1=L^2\\)",
+        "每个 \\(L^2\\) 函数在 \\(H^1\\) 中",
+        "不连续"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{u_n\\}\\subset H^1,\\|u_n\\|_{H^1}\\leq M\\) → \\(\\exists u_{n_k}\\to u\\) 在 \\(L^2\\) 中（强收敛）。紧嵌入是证明特征值问题解存在（变分法）和收敛性分析的核心工具。无界区域 \\(\\Omega=\\mathbb{R}^n\\) 时紧嵌入失效。"
+      },
+      {
+        "id": "pde-ch07-q15",
+        "question": "Lax-Milgram 定理中，\\(a\\) 不对称也适用。如果 \\(a\\) 对称，结论可以加强为？",
+        "options": [
+          "\\(u\\) 是能量泛函 \\(J[v]=\\frac{1}{2}a(v,v)-F(v)\\) 的唯一极小值",
+        "无加强",
+        "两个解",
+        "\\(u=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(a\\) 对称 + 强制 → \\(J\\) 严格凸 → 唯一极小。\\(J'(u)=0\\) 即 \\(a(u,v)=F(v)\\) ← Euler-Lagrange 方程。Ritz 方法：在有限维子空间上最小化 \\(J\\) → 有限元法的理论基础。"
+      },
+      {
+        "id": "pde-ch07-q16",
+        "question": "分布导数（弱导数）\\(D^\\alpha u\\) 的定义使用？",
+        "options": [
+          "对偶关系：\\(\\int D^\\alpha u\\cdot\\phi=(-1)^{|\\alpha|}\\int u\\cdot D^\\alpha\\phi\\)（\\(\\forall\\phi\\in C_0^\\infty\\)）",
+        "极限",
+        "差商",
+        "Taylor 展开"
+        ],
+        "answer": 0,
+        "explanation": "不要求 \\(u\\) 可微——只要存在 \\(L^p_\\text{loc}\\) 函数 \\(g\\) 满足 \\(\\int g\\phi=(-1)^{|\\alpha|}\\int uD^\\alpha\\phi\\)，就称 \\(g=D^\\alpha u\\)。这是 Laurent Schwartz 分布理论在 PDE 中最重要的应用。"
+      },
+      {
+        "id": "pde-ch07-q17",
+        "question": "关键反例：\\(u(x,y)=\\ln\\ln(1/\\sqrt{x^2+y^2})\\) 在二维单位圆盘中。\\(u\\in H^1\\) 但 \\(u\\notin L^\\infty\\)。这说明？",
+        "options": [
+          "\\(n=2\\) 时 \\(H^1\\not\\hookrightarrow L^\\infty\\)（Sobolev 嵌入的极限情况）",
+        "嵌入定理有误",
+        "\\(u\\notin H^1\\)",
+        "二维不存在 Sobolev 空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(|\\nabla u|\\sim\\frac{1}{r|\\ln r|}\\) → \\(\\int|\\nabla u|^2\\sim\\int_0^1\\frac{1}{r(\\ln r)^2}\\,dr<\\infty\\)（收敛）。但 \\(u\\to\\infty\\) 在 \\(r\\to 0\\)。\\(n=2\\) 恰好是临界维度：\\(H^1\\hookrightarrow L^q\\)（\\(\\forall q<\\infty\\)）但不嵌入 \\(L^\\infty\\)。Trudinger 不等式给出指数可积性的替代。"
+      },
+      {
+        "id": "pde-ch07-q18",
+        "question": "对流-扩散方程 \\(-\\varepsilon\\Delta u+\\mathbf{b}\\cdot\\nabla u=f\\) 的弱形式的强制性条件？",
+        "options": [
+          "\\(a(u,u)=\\varepsilon\\|\\nabla u\\|^2+\\int(\\mathbf{b}\\cdot\\nabla u)u\\geq\\varepsilon\\|\\nabla u\\|^2-\\frac{1}{2}\\|\\nabla\\cdot\\mathbf{b}\\|_\\infty\\|u\\|^2\\)（需 \\(\\varepsilon\\) 足够大或 \\(\\text{div}\\,\\mathbf{b}\\) 控制）",
+        "总是强制",
+        "从不强制",
+        "仅 \\(\\mathbf{b}=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int\\mathbf{b}\\cdot\\nabla u\\cdot u=\\frac{1}{2}\\int\\mathbf{b}\\cdot\\nabla(u^2)=-\\frac{1}{2}\\int(\\nabla\\cdot\\mathbf{b})u^2\\)（分部积分，\\(u|_{\\partial\\Omega}=0\\)）。\\(a(u,u)\\geq\\varepsilon\\|\\nabla u\\|^2-\\frac{1}{2}\\|\\nabla\\cdot\\mathbf{b}\\|_\\infty\\|u\\|^2\\)。Poincaré + 条件 → 强制性。"
+      },
+      {
+        "id": "pde-ch07-q19",
+        "question": "椭圆正则性对区域边界有什么要求？",
+        "options": [
+          "\\(\\partial\\Omega\\in C^2\\)（或凸）→ \\(H^2\\) 正则性；角域/非光滑边界可能使正则性下降",
+        "无要求",
+        "仅凸域",
+        "仅球域"
+        ],
+        "answer": 0,
+        "explanation": "L 形域：\\(-\\Delta u=0\\) 的解在凹角处 \\(u\\sim r^{2/3}\\sin(2\\theta/3)\\in H^{5/3-\\varepsilon}\\) 但 \\(\\notin H^2\\)。非光滑边界降低正则性 → 影响有限元收敛速率。自适应网格加密在角点附近弥补。"
+      },
+      {
+        "id": "pde-ch07-q20",
+        "question": "Gagliardo-Nirenberg-Sobolev 不等式（\\(n\\geq 3\\)，\\(p=2\\)）：\\(\\|u\\|_{L^{2^*}}\\leq C\\|\\nabla u\\|_{L^2}\\)。等号成立的函数？",
+        "options": [
+          "Aubin-Talenti 函数（Instanton）\\(u_\\varepsilon=\\frac{C}{(\\varepsilon+|x|^2)^{(n-2)/2}}\\)",
+        "常数函数",
+        "三角函数",
+        "等号不可取"
+        ],
+        "answer": 0,
+        "explanation": "极值函数是 \\(-\\Delta u=Cu^{2^*-1}\\) 的正解（临界非线性）。\\(n=3\\)：\\(u\\sim(1+|x|^2)^{-1/2}\\)（共形不变）。这些极值函数在变分法、微分几何（Yamabe 问题）中至关重要。"
+      },
+      {
+        "id": "pde-ch07-q21",
+        "question": "为什么 \\(L^2\\) 不足以作为 PDE 弱解的空间？",
+        "options": [
+          "\\(L^2\\) 没有导数信息——\\(\\nabla u\\) 无意义；\\(H^1\\) 包含一阶导数在 \\(L^2\\) 中的要求",
+        "\\(L^2\\) 太大",
+        "\\(L^2\\) 太小",
+        "\\(L^2\\) 足够"
+        ],
+        "answer": 0,
+        "explanation": "弱形式 \\(\\int\\nabla u\\cdot\\nabla\\phi\\) 需要 \\(\\nabla u\\in L^2\\) → \\(u\\in H^1\\)。\\(L^2\\) 函数的导数可能是分布而非 \\(L^2\\) 函数。Sobolev 空间精确捕捉了\"有多少阶导数在 \\(L^p\\) 中\"。"
+      },
+      {
+        "id": "pde-ch07-q22",
+        "question": "Céa 引理：有限元解 \\(u_h\\) 在子空间 \\(V_h\\subset H^1_0\\) 中。误差估计？",
+        "options": [
+          "\\(\\|u-u_h\\|_{H^1}\\leq\\frac{M}{\\alpha}\\inf_{v_h\\in V_h}\\|u-v_h\\|_{H^1}\\)（拟最优）",
+        "\\(u_h=u\\)",
+        "误差不可控",
+        "\\(\\|u-u_h\\|\\leq h\\)"
+        ],
+        "answer": 0,
+        "explanation": "Galerkin 正交：\\(a(u-u_h,v_h)=0\\)（\\(\\forall v_h\\)）。\\(\\alpha\\|u-u_h\\|^2\\leq a(u-u_h,u-u_h)=a(u-u_h,u-v_h)\\leq M\\|u-u_h\\|\\|u-v_h\\|\\)。\\(\\|u-u_h\\|\\leq(M/\\alpha)\\|u-v_h\\|\\)。有限元只需好的逼近空间 \\(V_h\\)。"
+      },
+      {
+        "id": "pde-ch07-q23",
+        "question": "Schauder 估计 \\(\\|u\\|_{C^{2,\\alpha}}\\leq C(\\|f\\|_{C^{0,\\alpha}}+\\|u\\|_{C^0})\\) 适用于什么情境？",
+        "options": [
+          "\\(f\\in C^{0,\\alpha}\\)（Hölder 连续）→ 解 \\(u\\in C^{2,\\alpha}\\)（获得 2+α 阶 Hölder 正则性）",
+        "仅 \\(f\\in L^2\\)",
+        "仅一维",
+        "Schauder 估计不存在"
+        ],
+        "answer": 0,
+        "explanation": "Schauder 理论是 \\(L^p\\) 正则性理论（Calderón-Zygmund）的 Hölder 版本。\\(f\\in C^{k,\\alpha}\\) → \\(u\\in C^{k+2,\\alpha}\\)。比 Sobolev 正则性更精细——直接给出 Hölder 模的估计。证明技术：冻结系数 + 奇异积分估计。"
+      },
+      {
+        "id": "pde-ch07-q24",
+        "question": "迹定理：\\(u\\in H^1(\\Omega)\\) → \\(u|_{\\partial\\Omega}\\in\\)？",
+        "options": [
+          "\\(H^{1/2}(\\partial\\Omega)\\)（\"损失半阶\"导数）",
+        "\\(H^1(\\partial\\Omega)\\)",
+        "\\(L^2(\\partial\\Omega)\\)",
+        "边界值无意义"
+        ],
+        "answer": 0,
+        "explanation": "\\(H^1\\) 函数在边界上的限制（迹）定义明确，属于分数阶空间 \\(H^{1/2}(\\partial\\Omega)\\)。\\(\\|u|_{\\partial\\Omega}\\|_{H^{1/2}}\\leq C\\|u\\|_{H^1}\\)。反之，迹映射有右逆（延拓算子）：\\(H^{1/2}\\to H^1\\)。\\(H^1_0=\\ker(\\text{trace})\\)。"
+      },
+      {
+        "id": "pde-ch07-q25",
+        "question": "守恒律 \\(u_t+f(u)_x=0\\) 的弱解可能不唯一。如何选择\"物理\"弱解？",
+        "options": [
+          "熵条件：\\(\\eta(u)_t+q(u)_x\\leq 0\\)（熵不增），选满足熵条件的唯一解",
+        "选最大的",
+        "无法选择",
+        "选光滑的"
+        ],
+        "answer": 0,
+        "explanation": "Burgers 方程 \\(u_t+uu_x=0\\) 的间断解（激波）不唯一——熵条件排除非物理解（膨胀激波）。Kruzhkov 理论：在满足无穷多熵不等式的弱解中有唯一性。这是双曲守恒律理论的核心。"
+      },
+      {
+        "id": "pde-ch07-q26",
+        "question": "有限元法 (FEM) 的理论基础：Galerkin 方法在 \\(V_h\\subset H^1_0\\) 中求弱解。核心步骤？",
+        "options": [
+          "将弱形式 \\(a(u_h,v_h)=F(v_h)\\)（\\(\\forall v_h\\in V_h\\)）转化为线性方程组 \\(KU=F\\)",
+        "直接离散 PDE",
+        "用 Taylor 展开",
+        "仅数值积分"
+        ],
+        "answer": 0,
+        "explanation": "选基 \\(\\{\\phi_j\\}_{j=1}^N\\) → \\(u_h=\\sum U_j\\phi_j\\)。\\(a(\\phi_j,\\phi_i)U_j=F(\\phi_i)\\) → 刚度矩阵 \\(K_{ij}=a(\\phi_j,\\phi_i)\\)。\\(K\\) 稀疏（基函数紧支）→ 高效求解。Lax-Milgram 保证 \\(K\\) 可逆。"
+      },
+      {
+        "id": "pde-ch07-q27",
+        "question": "材料力学中弹性体的平衡方程 \\(-\\nabla\\cdot\\boldsymbol\\sigma=\\mathbf{f}\\) 的弱形式（虚功原理）？",
+        "options": [
+          "\\(\\int\\boldsymbol\\sigma:\\boldsymbol\\varepsilon(\\mathbf{v})\\,dx=\\int\\mathbf{f}\\cdot\\mathbf{v}\\,dx+\\int_{\\Gamma_N}\\mathbf{t}\\cdot\\mathbf{v}\\,dS\\)",
+        "\\(\\sigma=f\\)",
+        "\\(\\int\\nabla u\\nabla v=\\int fv\\)",
+        "不适用"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\boldsymbol\\sigma\\) = 应力张量，\\(\\boldsymbol\\varepsilon(\\mathbf{v})=\\frac{1}{2}(\\nabla\\mathbf{v}+\\nabla\\mathbf{v}^T)\\) = 应变。弱形式 = 虚功原理：内力虚功 = 外力虚功。Korn 不等式（替代 Poincaré）保证强制性。这是结构有限元的出发点。"
+      },
+      {
+        "id": "pde-ch07-q28",
+        "question": "图像去噪的 TV（全变分）模型 \\(\\min\\int|\\nabla u|+\\frac{\\lambda}{2}\\int(u-f)^2\\)。为什么用 \\(BV\\) 空间而不是 \\(H^1\\)？",
+        "options": [
+          "\\(BV\\) 允许跳跃间断（图像边缘）而 \\(H^1\\) 函数在 \\(n\\geq 2\\) 时不可跳跃",
+        "\\(H^1\\) 更好",
+        "无区别",
+        "\\(BV\\) 更光滑"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\int|\\nabla u|=\\|u\\|_{TV}\\)（全变分范数）。阶跃函数 \\(u\\in BV\\) 但 \\(\\notin H^1\\)（\\(\\int|\\nabla u|^2=\\infty\\) 在间断处）。\\(TV\\) 正则化保留边缘的同时平滑内部——ROF 模型（Rudin-Osher-Fatemi 1992）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="pde"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/pde.html" class="module-name">偏微分方程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.7 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 经典解的局限与弱解的动机</a></li>
+      <li><a href="#kp2">02 · Sobolev 空间 \(H^k\) 与 \(W^{k,p}\)</a></li>
+      <li><a href="#kp3">03 · Lax-Milgram 定理与弱解存在性</a></li>
+      <li><a href="#kp4">04 · 正则性理论初步</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 7</p>
+      <h1>弱解与 Sobolev 空间入门</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>经典解的局限与弱解的动机</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>许多物理上自然的 PDE 没有经典（\(C^2\)）解：激波、裂纹尖端的 应力场、量子力学中的 Coulomb 势都产生不光滑的解。弱解概念 放宽了「解」的定义——不要求逐点满足方程，而要求对所有 测试函数满足积分恒等式。这是 20 世纪 PDE 理论最重要的突破。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>弱解将微分方程的「逐点等式」提升为泛函空间中的「对偶等式」， 用分布（广义函数）取代经典函数。这使 PDE 理论进入泛函分析框架， 解的存在性可用拓扑/代数方法（如不动点、变分）证明。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>从经典到弱</strong>：考虑 \(-\Delta u = f\)（\(u \in C^2\)）， 乘以测试函数 \(\varphi \in C_c^\infty(\Omega)\) 并分部积分： \[\int_\Omega \nabla u \cdot \nabla\varphi\,dx = \int_\Omega f\varphi\,dx\] 右侧不再需要 \(u\) 的二阶导数存在！ <strong>弱解定义</strong>：\(u \in H^1_0(\Omega)\) 称为弱解，若 \[\int_\Omega \nabla u \cdot \nabla\varphi\,dx = \int_\Omega f\varphi\,dx, \quad \forall \varphi \in H^1_0(\Omega)\] <strong>弱导数的定义</strong>：\(v\) 是 \(u\) 的弱导数 \(D^\alpha u\)，若 \(\int_\Omega u D^\alpha\varphi\,dx = (-1)^{|\alpha|}\int_\Omega v\varphi\,dx\)，\(\forall\varphi \in C_c^\infty\)。 弱导数不要求逐点可微，只要求分布意义下的导数在 \(L^p\) 中。 <strong>例：\(u(x) = |x|\) 的弱导数是 \(\text{sgn}(x) \in L^\infty\)</strong>，但弱二阶 导数是 \(2\delta(x)\)（不在 \(L^p\) 中）→ \(|x| \in H^1\) 但 \(\notin H^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 流体力学中的 Navier-Stokes 方程解的存在性都在弱意义下 - 有限元方法本质上是弱形式的离散化</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：验证 \(u(x,y) = \sqrt{x^2+y^2}\) 在单位圆盘上是 \(\Delta u = 1/r\) 的弱解（\(u \in H^1\) 但 \(\notin C^2\) at origin）。 解答：\(\nabla u = (x,y)/r\)，\(|\nabla u| = 1\) a.e.，故 \(\nabla u \in L^2\)，\(u \in H^1\)。 \(\int \nabla u\cdot\nabla\varphi = \int \frac{x\varphi_x+y\varphi_y}{r}\,dx\,dy\)。 分部积分（在 \(r > \epsilon\) 上）得 \(-\int \text{div}(\nabla u)\varphi + \text{边界项}\)。 \(\text{div}(\nabla u) = 1/r\) for \(r > 0\)，边界项 \(\to 0\)。 故 \(\int\nabla u\cdot\nabla\varphi = \int\frac{\varphi}{r}\)，即 \(u\) 是弱解。 易错点：弱解不唯一需要加边界条件。\(u + c\) 对任意常数 \(c\) 也满足 弱形式（如果不限制在 \(H^1_0\) 中）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">弱解与经典解的关系是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。经典解满足逐点方程，通过分部积分必然满足弱形式；')">A. 弱解一定是经典解</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！经典解满足逐点方程，通过分部积分必然满足弱形式；')">B. 经典解一定是弱解，反之不然</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。经典解满足逐点方程，通过分部积分必然满足弱形式；')">C. 两者完全无关</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。经典解满足逐点方程，通过分部积分必然满足弱形式；')">D. 弱解一定不光滑</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Sobolev 空间 \(H^k\) 与 \(W^{k,p}\)</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>弱解需要一个恰当的函数空间来「居住」。Sobolev 空间 \(W^{k,p}(\Omega)\) 收集所有弱导数至 \(k\) 阶都在 \(L^p\) 中的函数。 这是 PDE 弱理论的基本功能空间——它同时兼顾了可微性 （通过弱导数）和可积性（通过 \(L^p\) 范数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sobolev 空间是 Banach 空间（\(p \neq 2\) 时）或 Hilbert 空间（\(p=2\) 时 \(H^k = W^{k,2}\)）。 它在 \(L^p\) 与 \(C^k\) 之间建立了精细的阶梯：\(C^k \subset W^{k,p} \subset L^p\)， 且配备了完整的嵌入定理来描述这些包含的精确程度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(W^{k,p}(\Omega) = \{u \in L^p(\Omega) : D^\alpha u \in L^p(\Omega),\;|\alpha| \leq k\}\)， 范数 \(\|u\|_{W^{k,p}} = \left(\sum_{|\alpha|\leq k}\|D^\alpha u\|_{L^p}^p\right)^{1/p}\)。 \(H^k(\Omega) = W^{k,2}(\Omega)\)（Hilbert 空间）。 <strong>\(H^1_0(\Omega)\)</strong>：\(C_c^\infty(\Omega)\) 在 \(H^1\) 范数下的闭包。 物理意义：「零边界条件」的 Sobolev 函数。 <strong>Sobolev 嵌入定理</strong>（最核心的结果）：\(\Omega \subset \mathbb{R}^n\) 有界光滑。 - \(kp < n\) 时：\(W^{k,p} \hookrightarrow L^{p^*}\)，\(p^* = np/(n-kp)\) - \(kp = n\) 时：\(W^{k,p} \hookrightarrow L^q\)（\(\forall q < \infty\)） - \(kp > n\) 时：\(W^{k,p} \hookrightarrow C^{0,\alpha}\)（\(\alpha = k - n/p\)） <strong>Poincaré 不等式</strong>：\(\|u\|_{L^2(\Omega)} \leq C_\Omega\|\nabla u\|_{L^2(\Omega)}\)（\(u \in H^1_0\)）。 推论：\(\|\nabla u\|_{L^2}\) 是 \(H^1_0\) 上的等价范数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 有限元方法的收敛性证明完全依赖 Sobolev 嵌入 - 图像处理中的 \(H^1\) 正则化（去噪的 Sobolev 惩罚）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：判断 \(u(x) = |x|^\alpha\)（\(x \in B_1 \subset \mathbb{R}^3\)）对哪些 \(\alpha\) 属于 \(H^1(B_1)\)。 解答：\(\nabla u = \alpha|x|^{\alpha-1}\hat{x}\)，\(|\nabla u|^2 = \alpha^2|x|^{2(\alpha-1)}\)。 \(\int_{B_1}|\nabla u|^2 = 4\pi\alpha^2\int_0^1 r^{2\alpha-2}\cdot r^2\,dr = 4\pi\alpha^2\int_0^1 r^{2\alpha}\,dr\)。 收敛条件：\(2\alpha > -1\)，即 \(\alpha > -1/2\)。 结合 \(u \in L^2\) 的条件（\(2\alpha > -3/2\)，自动满足），\(u \in H^1 \iff \alpha > -1/2\)。 易错点：\(\alpha = 0\) 时 \(u = 1\) 当然 \(\in H^1\)；\(\alpha = -1/2\) 时刚好发散。 三维中 \(1/r \notin H^1(B_1)\)（\(\alpha = -1\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在三维中 \(n=3\)，\(W^{1,2}\) 嵌入到哪个 \(L^p\) 空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p^* = np/(n-kp) = 3\\times2/(3-2) = 6\\)。这是 Sobolev 不等式')">A. \(L^\infty\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(p^* = np/(n-kp) = 3\\times2/(3-2) = 6\\)。这是 Sobolev 不等式')">B. \(L^6\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p^* = np/(n-kp) = 3\\times2/(3-2) = 6\\)。这是 Sobolev 不等式')">C. \(L^3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p^* = np/(n-kp) = 3\\times2/(3-2) = 6\\)。这是 Sobolev 不等式')">D. \(L^2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Lax-Milgram 定理与弱解存在性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了弱形式和 Sobolev 空间，如何证明弱解存在且唯一？ Lax-Milgram 定理给出了决定性的回答：对椭圆型 PDE， 只要双线性形式满足连续性和强制性（coercivity），弱解就 存在且唯一。这是现代 PDE 理论和有限元方法的理论基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Lax-Milgram 定理是 Riesz 表示定理的推广：在 Hilbert 空间 \(V\) 中， 连续强制双线性形式 \(a: V \times V \to \mathbb{R}\) 诱导的算子 \(A: V \to V'\) 是同构，\(Au = f\) 有唯一解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>问题的弱形式</strong>：找 \(u \in V = H^1_0(\Omega)\) 使得 \[a(u,v) = L(v), \quad \forall v \in V\] 其中 \(a(u,v) = \int_\Omega\nabla u\cdot\nabla v\) 是双线性形式，\(L(v) = \int_\Omega fv\) 是线性形式。 <strong>Lax-Milgram 定理</strong>：设 \(V\) 是 Hilbert 空间，\(a: V \times V \to \mathbb{R}\) 满足： 1. <strong>连续性</strong>：\(|a(u,v)| \leq M\|u\|\|v\|\) 2. <strong>强制性</strong>：\(a(u,u) \geq \alpha\|u\|^2\)（\(\alpha > 0\)） 则对任意 \(L \in V'\)，存在唯一 \(u \in V\) 使得 \(a(u,v) = L(v)\)（\(\forall v\)）， 且 \(\|u\| \leq \|L\|_{V'}/\alpha\)。 <strong>证明思路</strong>：Riesz 定理 → 存在 \(Au \in V\) 使 \(a(u,v) = (Au,v)\)， 证 \(A\) 是连续的双射（强制性 → 单射 + 闭值域 + 稠密像 → 满射）。 <strong>验证 Laplace 方程</strong>：\(a(u,v) = \int\nabla u\cdot\nabla v\)， 强制性由 Poincaré 不等式保证 \(a(u,u) = \|\nabla u\|^2 \geq C\|u\|_{H^1}^2\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 有限元方法 = Lax-Milgram 在有限维子空间上的应用（Galerkin 方法） - 弹性力学中的虚功原理就是弱形式</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(-\Delta u + u = f\)（\(f \in L^2\)）在 \(H^1_0(\Omega)\) 中有唯一弱解。 解答：弱形式 \(a(u,v) = \int(\nabla u\cdot\nabla v + uv)\)，\(L(v) = \int fv\)。 连续性：\(|a(u,v)| \leq \|u\|_{H^1}\|v\|_{H^1}\)（Cauchy-Schwarz）。 强制性：\(a(u,u) = \|\nabla u\|^2 + \|u\|^2 = \|u\|_{H^1}^2 \geq 1\cdot\|u\|_{H^1}^2\)。 Lax-Milgram → 存在唯一弱解。✓ 易错点：Lax-Milgram 要求 \(a\) 的强制性，不要求对称性。 对称情况可用能量泛函极小化（Ritz 方法），非对称时 Galerkin 方法仍适用。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Lax-Milgram 定理中「强制性」条件的作用是什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。强制性 \\(a(u,u) \\geq \\alpha\\|u\\|^2\\) 保证了相关算子 \\(A\\) 是单射')">A. 保证解的光滑性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。强制性 \\(a(u,u) \\geq \\alpha\\|u\\|^2\\) 保证了相关算子 \\(A\\) 是单射')">B. 保证弱形式有意义</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！强制性 \\(a(u,u) \\geq \\alpha\\|u\\|^2\\) 保证了相关算子 \\(A\\) 是单射')">C. 保证算子可逆（解存在唯一）</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。强制性 \\(a(u,u) \\geq \\alpha\\|u\\|^2\\) 保证了相关算子 \\(A\\) 是单射')">D. 保证解满足极大值原理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>正则性理论初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>弱解只保证在积分意义下满足方程，可能并不光滑。正则性理论 回答了关键问题：弱解在什么条件下其实是经典解？答案是 「椭圆正则性」：如果 \(f\) 和 \(\partial\Omega\) 足够光滑，弱解就会自动获得 更高的可微性。这完美闭合了「弱解→经典解」的理论环路。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>正则性是「椭圆算子的平滑化效应」的体现。椭圆 PDE 的解 不能有「局部奇异性」，多出来的正则性直接从方程结构推出。 用语言来说是：\(f \in H^k \Rightarrow u \in H^{k+2}\)（椭圆提升 2 阶）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>椭圆正则性定理</strong>：设 \(-\Delta u = f\) 在 \(\Omega\) 中（弱意义）， \(u \in H^1_0(\Omega)\)。若 \(f \in H^k(\Omega)\)（\(k \geq 0\)），\(\partial\Omega\) 足够光滑，则 \[u \in H^{k+2}(\Omega), \quad \|u\|_{H^{k+2}} \leq C(\|f\|_{H^k} + \|u\|_{L^2})\] <strong>内部正则性的证明思路</strong>（\(k=0\) 情况）： 1. 差分近似：取方向 \(e\)，定义 \(D_h u = (u(x+he)-u(x))/h\) 2. 在弱形式中取 \(v = -D_{-h}D_h u\) 作为测试函数 3. 利用强制性估计得 \(\|D_h\nabla u\|_{L^2} \leq C\|f\|_{L^2}\) 4. \(h \to 0\) 时弱极限给出 \(\nabla^2 u \in L^2\)，即 \(u \in H^2\) <strong>结合 Sobolev 嵌入</strong>：\(u \in H^{k+2}\)，若 \(k+2 > n/2\)（即 \((k+2)\cdot2 > n\)）， 则 \(u \in C^l\)。在 \(\mathbb{R}^2\) 中：\(H^2 \hookrightarrow C^0\)（弱解必连续！）。 在 \(\mathbb{R}^3\) 中：\(H^2 \hookrightarrow L^\infty\)，\(H^3 \hookrightarrow C^1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 有限元误差估计：正则性决定了 Galerkin 逼近的收敛阶 - 如果域有角点（非光滑边界），正则性降低，数值方法需要网格加密</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(-\Delta u = f\) in \(\Omega \subset \mathbb{R}^2\)，\(f \in L^2\)，\(\partial\Omega\) 光滑。 弱解 \(u \in H^1_0\) 是否连续？ 解答：椭圆正则性 → \(u \in H^2\)。Sobolev 嵌入 \(H^2(\mathbb{R}^2)\)： \(kp = 2 \times 2 = 4 > n = 2\)，故 \(H^2 \hookrightarrow C^{0,\alpha}\)（\(\alpha = 2 - 1 = 1\)，实际 \(< 1\)）。 结论：\(u\) 不仅连续，还 Hölder 连续。弱解自动是经典意义下的「好」函数。 易错点：非光滑域（如 L 型区域）上正则性定理退化，弱解可能只在 \(H^{1+s}\)（\(s < 1\)），不是 \(H^2\)。域的几何直接影响解的正则性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">椭圆正则性定理说 \(f \in H^k\) 时弱解 \(u\) 属于哪个空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。椭圆算子（如 \\(-\\Delta\\)）每次「提升 2 阶」正则性。')">A. \(H^k\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。椭圆算子（如 \\(-\\Delta\\)）每次「提升 2 阶」正则性。')">B. \(H^{k+1}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！椭圆算子（如 \\(-\\Delta\\)）每次「提升 2 阶」正则性。')">C. \(H^{k+2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。椭圆算子（如 \\(-\\Delta\\)）每次「提升 2 阶」正则性。')">D. \(C^\infty\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch06.html" class="nav-prev">← Ch.6</a>
+      <a href="../../../modules/analysis/pde.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

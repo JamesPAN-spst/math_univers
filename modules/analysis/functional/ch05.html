@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 Hahn-Banach 定理 — 泛函分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "functional-ch05-q1",
+        "question": "Hahn-Banach 延拓定理（实数版）：设 \\(p\\) 是次线性函数，\\(f\\) 定义在子空间 \\(Y\\) 上且 \\(f \\leq p\\)。则？",
+        "options": [
+          "\\(f\\) 可延拓到全空间 \\(X\\)，保持 \\(F \\leq p\\)",
+        "\\(f\\) 可延拓但不保持控制",
+        "仅在 Hilbert 空间可延拓",
+        "延拓不唯一"
+        ],
+        "answer": 0,
+        "explanation": "Hahn-Banach：\\(\\exists F: X \\to \\mathbb{R}\\)，\\(F|_Y = f\\)，\\(F(x) \\leq p(x)\\)（\\(\\forall x \\in X\\)）。\\(p\\) 次线性（正齐次 + 次可加）控制延拓。\\(F\\) 不一定唯一（不同延拓可能对 \\(Y\\) 外的元素取不同值）。这是泛函分析最基本的存在定理——不需要完备性！"
+      },
+      {
+        "id": "functional-ch05-q2",
+        "question": "Hahn-Banach 推论：\\(x_0 \\in X\\)（\\(x_0 \\neq 0\\)），存在 \\(f \\in X^*\\) 使 \\(f(x_0) = \\|x_0\\|\\) 且 \\(\\|f\\| = 1\\)。这叫？",
+        "options": [
+          "支撑泛函 / 分离泛函",
+        "Riesz 表示",
+        "投影算子",
+        "对偶映射"
+        ],
+        "answer": 0,
+        "explanation": "在 \\(Y = \\text{span}\\{x_0\\}\\) 上定义 \\(f(\\alpha x_0) = \\alpha \\|x_0\\|\\)。\\(p(x) = \\|x\\|\\) 次线性，\\(f \\leq p\\)。Hahn-Banach 延拓到 \\(X\\)。\\(f(x_0) = \\|x_0\\|\\)，\\(\\|f\\| = 1\\)。几何意义：通过 \\(x_0\\) 的支撑超平面存在。应用：\\(\\|x\\| = \\max_{\\|f\\|=1} |f(x)|\\)。"
+      },
+      {
+        "id": "functional-ch05-q3",
+        "question": "Hahn-Banach 的几何形式（分离定理）：\\(A, B\\) 是非空凸集，\\(A\\) 开，\\(A \\cap B = \\emptyset\\)。则？",
+        "options": [
+          "存在闭超平面分离 \\(A\\) 和 \\(B\\)",
+        "存在连续线性泛函严格分离 \\(A\\) 和 \\(B\\)",
+        "不一定可分离",
+        "仅在有限维空间可分离"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\exists f \\in X^*\\)，\\(\\exists \\alpha \\in \\mathbb{R}\\)：\\(f(a) < \\alpha \\leq f(b)\\)（\\(a \\in A\\)，\\(b \\in B\\)）。超平面 \\(\\{x: f(x) = \\alpha\\}\\) 分离 \\(A\\) 和 \\(B\\)。\\(A\\) 开保证严格不等式（一侧）。若 \\(A, B\\) 都闭且其一紧，则可严格分离。凸集分离是优化理论的几何基础。"
+      },
+      {
+        "id": "functional-ch05-q4",
+        "question": "伴随算子 \\(T^*: Y^* \\to X^*\\) 定义为 \\((T^* g)(x) = g(Tx)\\)（\\(T: X \\to Y\\)）。\\(\\|T^*\\| = ?\\)",
+        "options": [
+          "\\(\\|T\\|\\)",
+        "\\(\\|T\\|^2\\)",
+        "\\(1\\)",
+        "不一定等于 \\(\\|T\\|\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|T^*\\| = \\sup_{\\|g\\|=1} \\|T^* g\\| = \\sup_{\\|g\\|=1} \\sup_{\\|x\\|=1} |g(Tx)| = \\sup_{\\|x\\|=1} \\sup_{\\|g\\|=1} |g(Tx)| = \\sup_{\\|x\\|=1} \\|Tx\\| = \\|T\\|\\)。最后一步用了 \\(\\sup_{\\|g\\|=1} |g(y)| = \\|y\\|\\)（Hahn-Banach 推论）。\\(T^*\\) 保持算子范数。"
+      },
+      {
+        "id": "functional-ch05-q5",
+        "question": "Hahn-Banach 应用：\\(Y\\) 是 \\(X\\) 的闭子空间，\\(x_0 \\notin Y\\)。则存在 \\(f \\in X^*\\) 使 \\(f|_Y = 0\\) 且 \\(f(x_0) \\neq 0\\)。这意味着？",
+        "options": [
+          "\\(X^*\\) 分离点（\\(X^*\\) 足够大来区分 \\(X\\) 中的元素）",
+        "\\(Y\\) 不闭",
+        "\\(x_0 \\in Y\\)",
+        "\\(f\\) 唯一"
+        ],
+        "answer": 0,
+        "explanation": "在 \\(Y + \\text{span}\\{x_0\\}\\) 上定义 \\(f(y + \\alpha x_0) = \\alpha\\)（\\(f|_Y = 0\\)，\\(f(x_0) = 1\\)）。\\(f\\) 连续（\\(Y\\) 闭保证 \\(\\text{dist}(x_0, Y) > 0\\)）。Hahn-Banach 延拓到 \\(X\\)。推论：闭子空间等于环灭它的泛函的公共零集。"
+      },
+      {
+        "id": "functional-ch05-q6",
+        "question": "\\(X = \\ell^\\infty\\)，\\(Y = c\\)（收敛序列），定义 \\(f(x) = \\lim_{n} x_n\\)（\\(x \\in c\\)）。\\(f\\) 可以延拓到 \\(\\ell^\\infty\\) 吗？",
+        "options": [
+          "可以（Hahn-Banach，\\(p(x) = \\limsup x_n\\) 作为次线性控制）",
+        "不可以",
+        "仅用 Zorn 引理",
+        "A 和 C（Hahn-Banach 证明用了 Zorn）"
+        ],
+        "answer": 3,
+        "explanation": "\\(f(x) = \\lim x_n \\leq \\limsup x_n = p(x)\\)。\\(p\\) 次线性（正齐次 + 次可加：\\(\\limsup(x+y) \\leq \\limsup x + \\limsup y\\)）。Hahn-Banach 延拓 \\(F \\leq p\\)。\\(F\\) 是\"广义极限\"（Banach 极限的一种）。Hahn-Banach 的证明本身用了 Zorn 引理（或等价的超限归纳）。"
+      },
+      {
+        "id": "functional-ch05-q7",
+        "question": "严格分离定理：\\(A\\) 闭凸，\\(B\\) 紧凸，\\(A \\cap B = \\emptyset\\)。则 \\(\\exists f \\in X^*\\)：\\(\\sup_{a \\in A} f(a) < \\inf_{b \\in B} f(b)\\)（严格分离）。为什么需要紧性？",
+        "options": [
+          "保证 \\(\\inf\\) 和 \\(\\sup\\) 之间有间隙",
+        "保证 \\(f\\) 连续",
+        "保证存在性",
+        "不需要紧性"
+        ],
+        "answer": 0,
+        "explanation": "\\(A, B\\) 都闭凸但不紧时可能只有弱分离（\\(\\leq\\) 而非 \\(<\\)）。反例：\\(\\mathbb{R}^2\\) 中 \\(A = \\{(x,y): y \\geq 1/x, x > 0\\}\\)，\\(B = \\{(x,0): x \\geq 0\\}\\)，都闭凸不交，但无严格分离超平面。紧性保证距离 \\(\\text{dist}(A,B) > 0\\)。"
+      },
+      {
+        "id": "functional-ch05-q8",
+        "question": "\\(X = C[0,1]\\)，\\(Y = \\{f : f(0) = 0\\}\\)。\\(h(f) = f(0)\\)（\\(f \\in X\\)）是连续线性泛函。\\(\\|h\\| = 1\\)。在 \\(Y\\) 上 \\(h = 0\\)。这说明？",
+        "options": [
+          "\\(h\\) 在 \\(Y\\) 上的零延拓就是零泛函，非零延拓就是 \\(h\\) 本身",
+        "Hahn-Banach 延拓唯一",
+        "延拓不存在",
+        "需要 Zorn 引理"
+        ],
+        "answer": 0,
+        "explanation": "\\(h|_Y = 0\\)。在 \\(Y + \\text{span}\\{1\\} = X\\) 上，\\(h\\) 由 \\(h(f) = f(0)\\) 唯一确定（一旦 \\(h(1) = 1\\) 确定）。但 Hahn-Banach 一般给出不唯一延拓——此例特殊因为 \\(\\text{codim}(Y) = 1\\)。"
+      },
+      {
+        "id": "functional-ch05-q9",
+        "question": "设 \\(T: X \\to Y\\)，\\(\\text{Im}(T)\\) 的范数闭包 \\(\\overline{\\text{Im}(T)}\\) 与 \\(\\ker(T^*)\\) 的关系？",
+        "options": [
+          "\\(\\overline{\\text{Im}(T)} = (\\ker T^*)^\\perp\\)，即 \\(y \\in \\overline{\\text{Im}(T)} \\Leftrightarrow g(y) = 0, \\forall g \\in \\ker T^*\\)",
+        "\\(\\overline{\\text{Im}(T)} = \\ker T^*\\)",
+        "无关系",
+        "\\(\\text{Im}(T) = Y / \\ker T^*\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(g \\in \\ker T^* \\Leftrightarrow T^* g = 0 \\Leftrightarrow g(Tx) = 0, \\forall x \\Leftrightarrow g|_{\\text{Im}(T)} = 0\\)。\\(\\overline{\\text{Im}(T)} = ^\\perp(\\ker T^*) = \\{y : g(y) = 0, \\forall g \\in \\ker T^*\\}\\)（Hahn-Banach 保证）。类比有限维：\\(\\text{Im}(A) = (\\ker A^T)^\\perp\\)（基本子空间定理）。"
+      },
+      {
+        "id": "functional-ch05-q10",
+        "question": "Hahn-Banach 应用：\\(X\\) 赋范空间，\\(x_1 \\neq x_2\\)。则存在 \\(f \\in X^*\\) 使 \\(f(x_1) \\neq f(x_2)\\)。这说明 \\(X^*\\) 是？",
+        "options": [
+          "分离 \\(X\\) 中点的（\\(X^*\\) separates points of \\(X\\)）",
+        "与 \\(X\\) 同构",
+        "\\(X\\) 的子空间",
+        "有限维"
+        ],
+        "answer": 0,
+        "explanation": "\\(x_1 \\neq x_2 \\Rightarrow x_1 - x_2 \\neq 0\\)。Hahn-Banach：\\(\\exists f\\)，\\(f(x_1 - x_2) = \\|x_1 - x_2\\| \\neq 0\\)，故 \\(f(x_1) \\neq f(x_2)\\)。\\(X^*\\) separates points：\\(\\forall x \\neq y\\)，\\(\\exists f \\in X^*\\)，\\(f(x) \\neq f(y)\\)。这是弱拓扑 Hausdorff 的保证。"
+      },
+      {
+        "id": "functional-ch05-q11",
+        "question": "复数版 Hahn-Banach：设 \\(f: Y \\to \\mathbb{C}\\) 是复线性泛函，\\(|f| \\leq p\\)。延拓的关键步骤？",
+        "options": [
+          "分解 \\(f = u + iv\\)（\\(u = \\text{Re} f\\)），对 \\(u\\) 实延拓，\\(F(x) = U(x) - iU(ix)\\)",
+        "直接复延拓",
+        "用 Zorn 引理对复数域",
+        "仅实部延拓"
+        ],
+        "answer": 0,
+        "explanation": "复线性 \\(f = u + iv\\)，\\(v(x) = -u(ix)\\)（\\(f\\) 由实部 \\(u\\) 确定）。实 Hahn-Banach 延拓 \\(u\\) 到 \\(U\\)。\\(F(x) = U(x) - iU(ix)\\)。验证 \\(F\\) 复线性：\\(F(ix) = U(ix) - iU(-x) = U(ix) + iU(x) = i(U(x) - iU(ix)) = iF(x)\\)。\\(|F| \\leq p\\) 由 \\(U \\leq p\\) 推出。"
+      },
+      {
+        "id": "functional-ch05-q12",
+        "question": "凸集分离在优化中：\\(\\min f(x)\\) s.t. \\(x \\in C\\)（\\(C\\) 闭凸）。KKT 条件的几何解释？",
+        "options": [
+          "最优点处，目标函数的负梯度被约束锥分离",
+        "目标函数连续",
+        "\\(C\\) 有限",
+        "无几何解释"
+        ],
+        "answer": 0,
+        "explanation": "在 \\(x^*\\) 处，\\(-\\nabla f(x^*) \\in N_C(x^*)\\)（法锥）。等价：\\(\\langle -\\nabla f(x^*), x - x^* \\rangle \\leq 0\\)（\\(\\forall x \\in C\\)）。Hahn-Banach 分离：\\(\\{-\\nabla f\\}\\) 和 \\(T_C(x^*)\\)（切锥）被超平面分离。凸分离 \\(\\Rightarrow\\) Lagrange 乘子存在 \\(\\Rightarrow\\) KKT 条件。"
+      },
+      {
+        "id": "functional-ch05-q13",
+        "question": "\\(T: X \\to Y\\) 有界线性。\\(T^*: Y^* \\to X^*\\)。\\(T\\) 单射 \\(\\Leftrightarrow\\) \\(T^*\\) 满射吗？",
+        "options": [
+          "\\(T\\) 单射 \\(\\Leftrightarrow\\) \\(\\text{Im}(T^*)\\) 弱*稠密（在有限维等价于 \\(T^*\\) 满射）",
+        "\\(T\\) 单射 \\(\\Leftrightarrow\\) \\(T^*\\) 满射（一般情况）",
+        "无关系",
+        "\\(T\\) 满射 \\(\\Leftrightarrow\\) \\(T^*\\) 单射"
+        ],
+        "answer": 0,
+        "explanation": "\\(T\\) 单射 \\(\\Leftrightarrow\\) \\(\\ker T = \\{0\\}\\) \\(\\Leftrightarrow\\) \\(\\overline{\\text{Im}(T^*)}^{w^*} = X^*\\)（弱*稠密）。有限维：弱*稠密 = 稠密 = 满射。无限维：\\(\\text{Im}(T^*)\\) 可以弱*稠密但不范数闭。\\(T\\) 满射 \\(\\Leftrightarrow\\) \\(T^*\\) 单射且像闭。"
+      },
+      {
+        "id": "functional-ch05-q14",
+        "question": "\\(X\\) 赋范空间，\\(S \\subseteq X\\)。\\(S\\) 的环灭 \\(S^\\perp = \\{f \\in X^*: f(x) = 0, \\forall x \\in S\\}\\)。\\((S^\\perp)_\\perp = ?\\)",
+        "options": [
+          "\\(\\overline{\\text{span}(S)}\\)",
+        "\\(S\\)",
+        "\\(X\\)",
+        "\\(\\{0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((S^\\perp)_\\perp = \\{x \\in X: f(x) = 0, \\forall f \\in S^\\perp\\} = \\overline{\\text{span}(S)}\\)。Hahn-Banach 保证：\\(x \\notin \\overline{\\text{span}(S)} \\Rightarrow \\exists f\\) 使 \\(f|_S = 0\\) 但 \\(f(x) \\neq 0\\)。这是有限维线性代数 \\((\\ker A)^\\perp = \\text{Im}(A^T)\\) 的无限维推广。"
+      },
+      {
+        "id": "functional-ch05-q15",
+        "question": "Hahn-Banach 延拓在 \\(\\ell^\\infty\\) 上不唯一。\\(Y = c_0\\)，\\(f(x) = \\sum x_n / 2^n\\)。延拓到 \\(\\ell^\\infty\\) 的不同方式？",
+        "options": [
+          "任何满足 \\(|F(x)| \\leq \\|x\\|_\\infty \\sum 1/2^n = \\|x\\|_\\infty\\) 的延拓都行",
+        "延拓唯一",
+        "不可延拓",
+        "延拓仅存在于可分子空间"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 在 \\(c_0\\) 上范数 \\(= \\sum 1/2^n = 1\\)。Hahn-Banach 延拓 \\(F\\) 满足 \\(\\|F\\| = 1\\)。在 \\(\\ell^\\infty / c_0\\)（极大的商空间！）上有选择自由，延拓不唯一。\\((\\ell^\\infty)^*\\) 远比 \\(\\ell^1\\) 大（包含奇异泛函），给出不同延拓的空间。"
+      },
+      {
+        "id": "functional-ch05-q16",
+        "question": "在 Banach 空间中，两个凸集 \\(A, B\\) 满足 \\(A \\cap B = \\emptyset\\)。若都闭但都不紧，能否分离？",
+        "options": [
+          "一般只能弱分离（存在 \\(f\\) 使 \\(\\sup_A f \\leq \\inf_B f\\)，但不严格）",
+        "一定能严格分离",
+        "不能分离",
+        "需要有限维"
+        ],
+        "answer": 0,
+        "explanation": "两个闭凸集的弱分离（\\(\\leq\\)）由 Hahn-Banach 保证（在其中一个上取内部或用闭凸集分离定理变体）。严格分离需紧性（保证间隙）。反例：\\(H = \\ell^2\\)，\\(A = \\{e_n\\}\\) 的闭凸包，\\(B = \\{e_n + e_n/n\\}\\) 的闭凸包——都闭凸不交，但 \\(\\text{dist}(A,B) = 0\\)。"
+      },
+      {
+        "id": "functional-ch05-q17",
+        "question": "\\(T: X \\to Y\\)，\\(T^{**}: X^{**} \\to Y^{**}\\) 是 \\(T^*\\) 的伴随。\\(T^{**}|_X = T\\)（通过典范嵌入）。这意味着？",
+        "options": [
+          "\\(T\\) 可以\"延拓\"到双对偶上",
+        "\\(T^{**} = T\\)",
+        "仅在自反空间成立",
+        "\\(T^{**}\\) 不存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(J_X: X \\hookrightarrow X^{**}\\)。\\((T^{**} J_X x)(g) = (J_X x)(T^* g) = (T^* g)(x) = g(Tx) = (J_Y Tx)(g)\\)。故 \\(T^{**} J_X = J_Y T\\)，即 \\(T^{**}|_{J(X)} = J \\circ T\\)。\\(T^{**}\\) 是 \\(T\\) 到双对偶的自然延拓。\\(\\|T^{**}\\| = \\|T^*\\| = \\|T\\|\\)。"
+      },
+      {
+        "id": "functional-ch05-q18",
+        "question": "Hahn-Banach 延拓不唯一的几何意义：\\(Y\\) 到 \\(X\\) 的泛函延拓 \\(\\Leftrightarrow\\) \\(X^*\\) 中某集合的？",
+        "options": [
+          "所有延拓构成 \\(X^*\\) 中的闭凸集（仿射集与单位球的截面）",
+        "所有延拓构成一个点",
+        "所有延拓构成开集",
+        "所有延拓构成线性子空间"
+        ],
+        "answer": 0,
+        "explanation": "满足 \\(F|_Y = f\\)，\\(\\|F\\| \\leq M\\) 的所有延拓 \\(F\\) 构成 \\(X^*\\) 中的闭凸集（仿射线性约束 + 范数球的交集）。极端点对应\"最经济\"的延拓。在 \\(X\\) 严格凸时延拓唯一；一般情况下有无穷多个。"
+      },
+      {
+        "id": "functional-ch05-q19",
+        "question": "Eidelheit 分离定理：\\(A\\) 开凸，\\(B\\) 仿射子空间（\\(B = x_0 + M\\)，\\(M\\) 闭子空间），\\(A \\cap B = \\emptyset\\)。则存在 \\(f \\in X^*\\) 使？",
+        "options": [
+          "\\(f|_M = 0\\) 且 \\(f\\) 在 \\(A\\) 和 \\(B\\) 上取不同值",
+        "\\(f\\) 无界",
+        "\\(f = 0\\)",
+        "不一定存在"
+        ],
+        "answer": 0,
+        "explanation": "\\(A \\cap (x_0 + M) = \\emptyset\\) 等价于 \\(A - x_0\\) 与 \\(M\\) 的分离。Hahn-Banach（几何形式）：\\(\\exists f\\)，\\(f|_M = 0\\)（\\(f\\) 消灭 \\(M\\)），且 \\(f(a) < f(x_0)\\)（\\(a \\in A\\)）。这是约束优化中 Lagrange 乘子存在性的抽象版本。"
+      },
+      {
+        "id": "functional-ch05-q20",
+        "question": "Bishop-Phelps 定理：\\(B_X\\) 的支撑泛函（\\(f(x_0) = \\|f\\| = 1\\) 在某 \\(\\|x_0\\| = 1\\) 处达到）在 \\(X^*\\) 中稠密。这有什么意义？",
+        "options": [
+          "虽然不是所有泛函都在单位球上达到范数（非自反时），但\"差一点\"就可以",
+        "所有泛函都达到范数",
+        "仅在自反空间成立",
+        "与 Hahn-Banach 无关"
+        ],
+        "answer": 0,
+        "explanation": "James 定理：\\(X\\) 自反 \\(\\Leftrightarrow\\) \\(\\forall f \\in X^*\\)，\\(\\exists x\\)，\\(\\|x\\| = 1\\)，\\(f(x) = \\|f\\|\\)（范数达到）。非自反时有些泛函范数不可达。但 Bishop-Phelps 说范数可达的泛函是稠密集——\"大部分\"泛函还是在某点达到范数。"
+      },
+      {
+        "id": "functional-ch05-q21",
+        "question": "Hahn-Banach 定理的证明中，一维延拓步骤：\\(Y \\subsetneq X\\)，取 \\(z \\notin Y\\)，\\(Y_1 = Y + \\mathbb{R}z\\)。如何选 \\(F(z) = c\\) 使 \\(F \\leq p\\)？",
+        "options": [
+          "\\(\\sup_{y \\in Y} [f(y) - p(y-z)] \\leq c \\leq \\inf_{y \\in Y} [p(y+z) - f(y)]\\)（有效区间非空）",
+        "\\(c = 0\\)",
+        "\\(c = p(z)\\)",
+        "任意 \\(c\\) 都行"
+        ],
+        "answer": 0,
+        "explanation": "\\(F(y + \\alpha z) = f(y) + \\alpha c\\)。\\(F \\leq p\\) 要求：\\(\\alpha > 0\\)：\\(f(y) + \\alpha c \\leq p(y + \\alpha z) \\Rightarrow c \\leq [p(y/\\alpha + z) - f(y/\\alpha)]\\)；\\(\\alpha < 0\\) 类似。\\(c\\) 的可行区间：\\(\\sup_y [f(y) - p(y-z)] \\leq c \\leq \\inf_y [p(y+z) - f(y)]\\)。\\(\\sup \\leq \\inf\\) 由 \\(f \\leq p\\) 保证。"
+      },
+      {
+        "id": "functional-ch05-q22",
+        "question": "\\(T: \\ell^1 \\to \\ell^1\\)，\\(T(e_n) = e_{n+1}\\)（右移）。\\(T^*: (\\ell^1)^* = \\ell^\\infty \\to \\ell^\\infty\\)。\\(T^*\\) 的作用？",
+        "options": [
+          "\\(T^*(a_1, a_2, a_3, ...) = (a_2, a_3, a_4, ...)\\)（左移）",
+        "\\((0, a_1, a_2, ...)\\)（右移）",
+        "\\((a_1, a_1, a_2, ...)\\)",
+        "\\((0, 0, a_1, ...)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((T^* a)(e_n) = a(Te_n) = a(e_{n+1}) = a_{n+1}\\)。\\(T^* a = (a_2, a_3, a_4, ...)\\)（左移）。右移的伴随是左移——直觉：\\(\\sum (Tx)_n a_n = \\sum x_n a_{n+1}\\)，所以作用在对偶上是下标移位。矩阵形式：\\(T\\) 的矩阵转置后给出 \\(T^*\\)。"
+      },
+      {
+        "id": "functional-ch05-q23",
+        "question": "在优化中，Farkas 引理是 Hahn-Banach 分离定理的有限维特例。\\(Ax = b, x \\geq 0\\) 有解 \\(\\Leftrightarrow\\) ？",
+        "options": [
+          "\\(A^T y \\leq 0, b^T y > 0\\) 无解（择一定理）",
+        "\\(A\\) 满秩",
+        "\\(b \\geq 0\\)",
+        "\\(\\det A \\neq 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(K = \\{Ax : x \\geq 0\\}\\)（闭凸锥）。\\(b \\in K\\) 或 \\(b \\notin K\\)。\\(b \\notin K\\) 时分离：\\(\\exists y\\)，\\(y^T(Ax) \\leq 0\\)（\\(\\forall x \\geq 0\\)）且 \\(y^T b > 0\\)，即 \\(A^T y \\leq 0\\)，\\(b^T y > 0\\)。这是线性规划强对偶的基石——凸集分离的直接推论。"
+      },
+      {
+        "id": "functional-ch05-q24",
+        "question": "Hahn-Banach 推论：\\(Y \\leq X\\) 闭，\\(X/Y\\) 的对偶 \\((X/Y)^* \\cong Y^\\perp\\)。等距同构如何构造？",
+        "options": [
+          "\\(f \\in Y^\\perp \\mapsto \\tilde{f} \\in (X/Y)^*\\)，\\(\\tilde{f}([x]) = f(x)\\)",
+        "\\(f \\mapsto f|_Y\\)",
+        "投影",
+        "逆映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(f \\in Y^\\perp\\)（\\(f|_Y = 0\\)）：\\(\\tilde{f}([x]) = f(x)\\) 良定义（\\(x + y \\in [x]\\)，\\(f(x+y) = f(x)\\)）。\\(\\|\\tilde{f}\\| = \\inf_{y \\in Y} \\sup_{\\|x+y\\|=1} |f(x+y)| = \\|f\\|\\)。反向：\\(\\tilde{f} \\in (X/Y)^* \\mapsto \\tilde{f} \\circ \\pi \\in Y^\\perp\\)。等距同构。"
+      },
+      {
+        "id": "functional-ch05-q25",
+        "question": "Hahn-Banach 定理需要选择公理（或 Zorn 引理）。在可分空间中需要吗？",
+        "options": [
+          "可分空间的 Hahn-Banach 可用可数选择（ZF + DC 足够）",
+        "仍需完整 AC",
+        "可分空间不需任何选择公理",
+        "Hahn-Banach 与 AC 等价"
+        ],
+        "answer": 0,
+        "explanation": "可分空间：取稠密可数集，一维一维延拓（可数步），用可数依赖选择（DC）。一般空间需超限归纳（Zorn 引理 = AC 的等价形式）。Hahn-Banach 严格弱于 AC：存在 ZF + HB（Hahn-Banach）但 \\(\\neg\\) AC 的模型。但 HB 蕴含一些弱形式的选择。"
+      },
+      {
+        "id": "functional-ch05-q26",
+        "question": "在凸优化中，若问题 \\(\\min f(x)\\) s.t. \\(g_i(x) \\leq 0\\) 满足 Slater 条件（存在严格可行点），则强对偶成立。这与 Hahn-Banach 的联系？",
+        "options": [
+          "Slater 条件保证 epigraph 集合可分离，从而 Lagrange 乘子存在",
+        "无联系",
+        "Slater 条件等价于 Hahn-Banach",
+        "仅在线性规划中有联系"
+        ],
+        "answer": 0,
+        "explanation": "\\(C = \\{(u,t) : \\exists x, g_i(x) \\leq u_i, f(x) \\leq t\\}\\)（约束 epigraph）。\\((0, f^*)\\) 在 \\(C\\) 边界。Slater 条件 \\(\\Rightarrow\\) \\(C\\) 有内点 \\(\\Rightarrow\\) Hahn-Banach 分离定理给出支撑超平面 \\(\\Rightarrow\\) Lagrange 乘子 \\(\\lambda_i \\geq 0\\) 存在。凸分析的核心：分离 \\(\\Rightarrow\\) 对偶 \\(\\Rightarrow\\) KKT。"
+      },
+      {
+        "id": "functional-ch05-q27",
+        "question": "在控制论中，可观测性 \\(\\Leftrightarrow\\) \\(\\text{Im}(O^*) = X\\)（\\(O\\) 为观测算子，\\(O^*\\) 其伴随）。伴随算子的像与原算子的核的关系？",
+        "options": [
+          "\\(\\ker O = \\{0\\} \\Leftrightarrow \\overline{\\text{Im}(O^*)} = X\\)",
+        "\\(\\ker O = X\\)",
+        "\\(O\\) 满射",
+        "无关系"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ker O = (\\text{Im}(O^*))^\\perp\\)（在 Hilbert 空间中）。\\(\\ker O = \\{0\\} \\Leftrightarrow \\overline{\\text{Im}(O^*)} = X\\)（可观测 = \\(O\\) 单射 = \\(O^*\\) 像稠密）。有限维：\\(\\overline{\\text{Im}(O^*)} = \\text{Im}(O^T)\\)，Kalman 可观测性秩条件：\\(\\text{rank}[C, CA, ..., CA^{n-1}] = n\\)。"
+      },
+      {
+        "id": "functional-ch05-q28",
+        "question": "在博弈论中，minimax 定理 \\(\\min_x \\max_y f(x,y) = \\max_y \\min_x f(x,y)\\)（\\(f\\) 凸-凹，\\(X,Y\\) 紧凸）的证明用到？",
+        "options": [
+          "Hahn-Banach 分离定理（分离凸集，构造鞍点）",
+        "不动点定理",
+        "A 和 B 都可以",
+        "微积分"
+        ],
+        "answer": 2,
+        "explanation": "Von Neumann minimax 定理有多种证明：(1) 分离法：\\(S = \\{(f(x, \\cdot)) : x \\in X\\}\\) 凸（\\(X\\) 凸），用 Hahn-Banach 分离。(2) Brouwer/Kakutani 不动点。Sion minimax 推广用 KKM 引理。凸分析路径直接来自 Hahn-Banach，是泛函分析在博弈论中的经典应用。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="functional"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/functional.html" class="module-name">泛函分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Hahn-Banach 解析形式与延拓</a></li>
+      <li><a href="#kp2">02 · Hahn-Banach 几何形式与凸集分离</a></li>
+      <li><a href="#kp3">03 · Hahn-Banach 的推论</a></li>
+      <li><a href="#kp4">04 · 对偶理论的基础应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>Hahn-Banach 定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Hahn-Banach 解析形式与延拓</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在有限维空间中，线性泛函可以自由延拓（给基赋值即可）。但在 无穷维空间中，一个定义在子空间上的泛函能否延拓到全空间，并且 保持范数不变？Hahn-Banach 定理给出肯定回答，它是泛函分析 三大定理中用途最广的一个——保证了对偶空间"足够大"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Hahn-Banach 定理的证明使用 Zorn 引理（类比选择公理）， 体现了"极大延拓"的思想——将泛函一步步延拓到越来越大的 子空间，直到覆盖全空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Hahn-Banach, 解析形式)</strong>：设 \(X\) 为实线性空间， \(p: X \to \mathbb{R}\) 次线性（\(p(x+y) \leq p(x)+p(y)\), \(p(\alpha x) = \alpha p(x)\)（\(\alpha \geq 0\)））， \(f: Y \to \mathbb{R}\) 线性（\(Y\) 为子空间），\(f \leq p\) on \(Y\)。 则存在线性 \(F: X \to \mathbb{R}\) 使 \(F|_Y = f\) 且 \(F \leq p\) on \(X\)。 <strong>赋范空间版本</strong>：设 \(Y \subseteq X\) 为子空间，\(f \in Y^*\)。 则存在 \(F \in X^*\) 使 \(F|_Y = f\) 且 \(\|F\|_{X^*} = \|f\|_{Y^*}\)。 （取 \(p(x) = \|f\| \cdot \|x\|\)。） <strong>推论</strong>：对任意 \(x_0 \neq 0\)，存在 \(f \in X^*\) 使 \(f(x_0) = \|x_0\|\) 且 \(\|f\| = 1\)。 （在 \(Y = \text{span}\{x_0\}\) 上定义 \(f(\alpha x_0) = \alpha \|x_0\|\)， 然后延拓。） 这意味 \(X^*\) 分离 \(X\) 中的点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>在优化理论中，Hahn-Banach 保证凸集可以被超平面分离（几何形式）， 是支持向量机理论的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(c_0\) （趋于 0 的序列空间）中，\(Y = \{x : x_1 = 0\}\)， \(f(x) = x_2\) 定义在 \(Y\) 上。求 \(\|f\|\) 并延拓到 \(c_0\)。 解答：\(\|f\|_Y = \sup\{|x_2| : x \in Y, \|x\|_\infty \leq 1\} = 1\)。 延拓：\(F(x) = x_2\) 在全 \(c_0\) 上（因为 \(|x_2| \leq \|x\|_\infty\)， \(\|F\| = 1\)）。此例中延拓很自然。 易错点：Hahn-Banach 延拓不唯一（除非在 Hilbert 空间中用正交补）。 只保证存在性，不保证唯一性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hahn-Banach 定理的证明依赖什么公理？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！实数版 Hahn-Banach 可以在 ZF + 布尔素理想定理')">A. 选择公理（或等价的 Zorn 引理）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。实数版 Hahn-Banach 可以在 ZF + 布尔素理想定理')">B. 连续统假设</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。实数版 Hahn-Banach 可以在 ZF + 布尔素理想定理')">C. 不依赖任何额外公理</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。实数版 Hahn-Banach 可以在 ZF + 布尔素理想定理')">D. 排中律</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Hahn-Banach 几何形式与凸集分离</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hahn-Banach 定理不仅有泛函延拓的"解析形式"，还有超平面 分离凸集的"几何形式"。几何形式直观地说：在赋范空间中， 不相交的凸集可以用一个超平面（连续线性泛函的水平集）隔开。 这一结果是凸分析、优化理论和博弈论中 minimax 定理的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>几何 Hahn-Banach 将凸集分离推广到无穷维。超平面 \(\{x : f(x) = c\}\) 是"广义的平面"，凸集分离就是 找到这样的平面将两个凸集隔开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>分离定理 (弱形式)</strong>：设 \(A, B \subseteq X\) 为非空凸集， \(A \cap B = \emptyset\)，\(A\) 开。则存在 \(f \in X^*\), \(c \in \mathbb{R}\) 使 \[f(a) < c \leq f(b), \quad \forall a \in A,\; b \in B\] <strong>严格分离定理</strong>：若 \(A\) 紧, \(B\) 闭, \(A \cap B = \emptyset\)， 则存在 \(f \in X^*\) 和 \(c_1 < c_2\) 使 \[f(a) \leq c_1 < c_2 \leq f(b)\] <strong>支撑超平面定理</strong>：闭凸集边界上每一点都存在支撑超平面。 <strong>推论</strong>：\(X^*\) 分离 \(X\) 中的点——若 \(x \neq y\)，则存在 \(f \in X^*\) 使 \(f(x) \neq f(y)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>SVM 最大间隔分类器：数据点分属两个凸集，分离超平面 即 \(\{x : w^T x = b\}\)，最大间隔 = 两超平面间距离的最大化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}^2\) 中，\(A = \{(x,y) : x^2 + y^2 < 1\}\)（开单位圆盘）， \(B = \{(2, 0)\}\)。找分离超平面。 解答：\(f(x, y) = x\)，\(c = 3/2\)。\(f(a) < 1 < 3/2 \leq f(b) = 2\)。✓ 实际上最佳分离是 \(x = 1\)（支撑超平面）。 易错点：两个闭凸集不相交不一定能严格分离。 例：\(A = \{(x,y) : y \geq 1/x, x > 0\}\)，\(B = \{(x,0) : x \geq 0\}\)， 不相交但无法严格分离。严格分离需要其中一个紧致。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">分离定理可以分离下列哪种情况？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 可以弱分离；C 可以严格分离。B 不一定能分离')">A. 两个开凸集不相交</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 可以弱分离；C 可以严格分离。B 不一定能分离')">B. 两个闭凸集不相交</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。A 可以弱分离；C 可以严格分离。B 不一定能分离')">C. 一个紧凸集和一个闭凸集不相交</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！A 可以弱分离；C 可以严格分离。B 不一定能分离')">D. A 和 C 都可以</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Hahn-Banach 的推论</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hahn-Banach 定理看似抽象，但其推论极为具体和有用：对偶空间 足以"看见"原空间的每个点和区分不同的元素。这些推论建立了 "对偶方法"——通过研究泛函来推断空间元素的性质——的合法性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>推论 1 (范数达到性)</strong>：\(\forall x \in X\), \(\exists f \in X^*\) 使 \(f(x) = \|x\|\), \(\|f\| = 1\)。 证明：在 \(Y = \text{span}\{x\}\) 上定义 \(g(\alpha x) = \alpha \|x\|\)， \(\|g\| = 1\)，由 Hahn-Banach 延拓。 <strong>推论 2 (对偶分离点)</strong>：若 \(f(x) = f(y)\) 对所有 \(f \in X^*\)，则 \(x = y\)。 即 \(X^*\) 分离 \(X\) 中的点。 <strong>推论 3 (范数公式)</strong>： \[\|x\| = \sup\{|f(x)| : f \in X^*,\; \|f\| \leq 1\}\] <strong>推论 4 (子空间闭包)</strong>：\(x \in \overline{Y}\)（\(Y\) 为子空间） \(\Leftrightarrow\) 对所有 \(f \in X^*\)，\(f|_Y = 0 \Rightarrow f(x) = 0\)。 证明：若 \(x \notin \overline{Y}\)，在 \(\overline{Y} \oplus \text{span}\{x\}\) 上定义 \(f = 0\) on \(\overline{Y}\), \(f(x) = 1\)，延拓即得。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(L^1([0,1])\) 中，\(\|f\|_1 = \sup\{|\int fg\, dx| : g \in L^\infty,\, \|g\|_\infty \leq 1\}\)。 验证：取 \(g = \text{sgn}(f)\)，\(\int fg = \int |f| = \|f\|_1\)。✓ 易错点：范数公式中的 sup 不一定能达到（非自反空间中）。 只保证是 sup，不保证是 max。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Hahn-Banach 保证对任意 \(x \neq 0\)，存在 \(f \in X^*\) 使得？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这是 Hahn-Banach 的直接推论，又称"支持泛函"的存在性。')">A. \(f(x) &gt; 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！这是 Hahn-Banach 的直接推论，又称"支持泛函"的存在性。')">B. \(f(x) = \|x\|\) 且 \(\|f\| = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这是 Hahn-Banach 的直接推论，又称"支持泛函"的存在性。')">C. \(f(x) = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这是 Hahn-Banach 的直接推论，又称"支持泛函"的存在性。')">D. \(f\) 是唯一的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>对偶理论的基础应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Hahn-Banach 定理和对偶理论不仅是抽象工具，还直接联系到 凸优化中的 Lagrange 对偶和最优化条件。从函数空间的角度看， "原问题"和"对偶问题"之间的间隙由分离定理控制——强对偶性 等价于超平面分离的某种"完美"实现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>对偶对</strong> \((X, X^*)\)：\(X\) 和 \(X^*\) 通过双线性配对 \(\langle x, f \rangle = f(x)\) 关联。 <strong>双极定理（陈述）</strong>：对 \(A \subseteq X\)，极集 \(A^\circ = \{f \in X^* : |f(x)| \leq 1, \forall x \in A\}\)， \((A^\circ)^\circ = \overline{\text{conv}}(A \cup \{0\})\)（弱闭凸包）。 <strong>Goldstine 定理（陈述）</strong>：\(X\) 的闭单位球在 \(X^{**}\) 的 弱*拓扑下稠密于 \(X^{**}\) 的闭单位球。 推论：\(X\) 自反 \(\Leftrightarrow\) 闭单位球弱紧。 <strong>应用于凸优化</strong>：最小化 \(f(x)\) subject to \(x \in C\)（闭凸集）， \(x_0\) 是最优解 \(\Leftrightarrow\) \(0 \in \partial f(x_0) + N_C(x_0)\) （次梯度条件），而法锥 \(N_C(x_0)\) 由支持泛函描述。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>SVM 对偶问题通过核技巧将有限维对偶推广到 RKHS（再生核 Hilbert 空间），Hahn-Banach 保证了这种推广的合法性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：在 \(\mathbb{R}^n\) 中，\(A = \{x : \|x\|_1 \leq 1\}\)。 求极集 \(A^\circ\)。 解答：\(A^\circ = \{y \in \mathbb{R}^n : |\langle x, y \rangle| \leq 1, \forall \|x\|_1 \leq 1\}\)。 \(\sup_{\|x\|_1 \leq 1} |\langle x, y \rangle| = \|y\|_\infty\) （Hölder 对偶），故 \(A^\circ = \{y : \|y\|_\infty \leq 1\}\)。 \(l^1\) 球的极集是 \(l^\infty\) 球。✓ 易错点：极集在无穷维中更复杂，需注意弱*闭性。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Goldstine 定理说？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Goldstine 定理说 \\(J(B_X)\\) 在 \\(B_{X^{**}}\\) 中弱*稠密。')">A. \(X \hookrightarrow X^{**}\) 总是满射</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Goldstine 定理说 \\(J(B_X)\\) 在 \\(B_{X^{**}}\\) 中弱*稠密。')">B. \(B_X\) 在 \(X^{**}\) 的弱*拓扑下稠密于 \(B_{X^{**}}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Goldstine 定理说 \\(J(B_X)\\) 在 \\(B_{X^{**}}\\) 中弱*稠密。')">C. \(X^{**} = X\) 对所有 Banach 空间</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Goldstine 定理说 \\(J(B_X)\\) 在 \\(B_{X^{**}}\\) 中弱*稠密。')">D. 每个 Banach 空间自反</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/analysis/functional.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 同余与模运算 — 数论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "number-theory-ch02-q1",
+        "question": "\\(25 \\equiv \\; ? \\pmod{7}\\)",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(5\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(25 = 7 \\times 3 + 4\\)，故 \\(25 \\equiv 4 \\pmod{7}\\)。同余的定义：\\(7 \\mid (25 - 4) = 21\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch02-q2",
+        "question": "\\((\\mathbb{Z}/12\\mathbb{Z})^*\\) 的阶（可逆元个数）为？",
+        "options": [
+          "\\(4\\)",
+        "\\(6\\)",
+        "\\(10\\)",
+        "\\(11\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(12) = 12(1-1/2)(1-1/3) = 4\\)。可逆元为 \\(\\{\\overline{1}, \\overline{5}, \\overline{7}, \\overline{11}\\}\\)——恰好是与 \\(12\\) 互素的小于 \\(12\\) 的正整数。"
+      },
+      {
+        "id": "number-theory-ch02-q3",
+        "question": "\\(4x \\equiv 3 \\pmod{6}\\) 有解吗？",
+        "options": [
+          "有，\\(x = 3\\)",
+        "有，\\(x = 5\\)",
+        "无解",
+        "有无穷多解"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\gcd(4, 6) = 2\\)，但 \\(2 \\nmid 3\\)，故无解。线性同余方程 \\(ax \\equiv b \\pmod{n}\\) 有解 \\(\\Leftrightarrow \\gcd(a,n) \\mid b\\)。验证：\\(4 \\times 0 = 0, 4 \\times 1 = 4, 4 \\times 2 = 8 \\equiv 2, 4 \\times 3 = 12 \\equiv 0, \\ldots\\)，余数只取 \\(0, 2, 4\\)，永远不是奇数。"
+      },
+      {
+        "id": "number-theory-ch02-q4",
+        "question": "解方程组 \\(\\begin{cases} x \\equiv 2 \\pmod{3} \\\\ x \\equiv 3 \\pmod{5} \\end{cases}\\)，\\(x\\) 在模 \\(15\\) 下等于？",
+        "options": [
+          "\\(5\\)",
+        "\\(8\\)",
+        "\\(11\\)",
+        "\\(13\\)"
+        ],
+        "answer": 1,
+        "explanation": "逐一检验：\\(x \\equiv 3 \\pmod{5}\\) 的解为 \\(3, 8, 13\\)。\\(3 \\bmod 3 = 0 \\neq 2\\)；\\(8 \\bmod 3 = 2\\) ✓。\\(x \\equiv 8 \\pmod{15}\\)。CRT 保证了 \\(\\gcd(3,5)=1\\) 时解模 \\(15\\) 唯一。"
+      },
+      {
+        "id": "number-theory-ch02-q5",
+        "question": "\\(-13 \\equiv \\; ? \\pmod{5}\\)（\\(0 \\leq r < 5\\)）",
+        "options": [
+          "\\(-3\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(-2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(-13 = 5 \\times (-3) + 2\\)，故 \\(-13 \\equiv 2 \\pmod{5}\\)。易错点：直接取 \\(-13 \\bmod 5 = -3\\)（许多编程语言返回负余数），必须加 \\(5\\) 得到非负余数 \\(2\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q6",
+        "question": "在 \\(\\mathbb{Z}/15\\mathbb{Z}\\) 中，\\(\\overline{7}^{-1}\\) 等于？",
+        "options": [
+          "\\(\\overline{2}\\)",
+        "\\(\\overline{8}\\)",
+        "\\(\\overline{13}\\)",
+        "\\(\\overline{7}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(7 \\times 13 = 91 = 6 \\times 15 + 1\\)，故 \\(7 \\times 13 \\equiv 1 \\pmod{15}\\)。\\(\\overline{7}^{-1} = \\overline{13}\\)。也可用扩展欧几里得：\\(15 = 7 \\times 2 + 1\\)，\\(1 = 15 - 7 \\times 2\\)，\\(7 \\times (-2) \\equiv 1\\)，\\(-2 \\equiv 13 \\pmod{15}\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q7",
+        "question": "同余运算中，以下哪个操作不能直接进行？",
+        "options": [
+          "两边加同一个数",
+        "两边乘同一个数",
+        "两边除以同一个数",
+        "两边取幂"
+        ],
+        "answer": 2,
+        "explanation": "同余保持加法和乘法，但除法不能直接做。\\(2 \\times 3 \\equiv 2 \\times 1 \\pmod{4}\\) 但 \\(3 \\not\\equiv 1 \\pmod{4}\\)。只有当除数与模数互素时才能消去：\\(\\gcd(c, n) = 1 \\Rightarrow ca \\equiv cb \\pmod{n} \\Rightarrow a \\equiv b \\pmod{n}\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q8",
+        "question": "求 \\(7^{100} \\bmod 10\\)。",
+        "options": [
+          "\\(1\\)",
+        "\\(3\\)",
+        "\\(7\\)",
+        "\\(9\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(7^1 \\equiv 7, 7^2 \\equiv 9, 7^3 \\equiv 3, 7^4 \\equiv 1 \\pmod{10}\\)。周期为 \\(4\\)。\\(100 = 4 \\times 25\\)，故 \\(7^{100} \\equiv (7^4)^{25} \\equiv 1^{25} = 1 \\pmod{10}\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q9",
+        "question": "\\(\\overline{6}\\) 在 \\(\\mathbb{Z}/15\\mathbb{Z}\\) 中有乘法逆元吗？",
+        "options": [
+          "有，\\(\\overline{6}^{-1} = \\overline{3}\\)",
+        "有，\\(\\overline{6}^{-1} = \\overline{9}\\)",
+        "没有",
+        "有，\\(\\overline{6}^{-1} = \\overline{6}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\gcd(6, 15) = 3 \\neq 1\\)，故 \\(\\overline{6} \\notin (\\mathbb{Z}/15\\mathbb{Z})^*\\)，无逆元。验证：\\(6 \\times 3 = 18 \\equiv 3\\)，\\(6 \\times 9 = 54 \\equiv 9\\)，没有任何 \\(x\\) 使 \\(6x \\equiv 1 \\pmod{15}\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q10",
+        "question": "解 \\(6x \\equiv 9 \\pmod{15}\\)。解集为？",
+        "options": [
+          "\\(x \\equiv 4 \\pmod{5}\\)",
+        "\\(x \\equiv 4, 9, 14 \\pmod{15}\\)",
+        "无解",
+        "\\(x \\equiv 3 \\pmod{15}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\gcd(6, 15) = 3\\)，\\(3 \\mid 9\\)，有解（\\(d = 3\\) 个解）。简化：\\(2x \\equiv 3 \\pmod{5}\\)。\\(2^{-1} \\equiv 3 \\pmod{5}\\)（\\(2 \\times 3 = 6 \\equiv 1\\)）。\\(x_0 = 3 \\times 3 = 9 \\equiv 4 \\pmod{5}\\)。模 \\(15\\) 下解为 \\(x = 4, 9, 14\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q11",
+        "question": "CRT 的环同构形式：\\(\\mathbb{Z}/15\\mathbb{Z} \\cong \\mathbb{Z}/3\\mathbb{Z} \\times \\mathbb{Z}/5\\mathbb{Z}\\)。\\(\\overline{7}_{15}\\) 对应的像为？",
+        "options": [
+          "\\((\\overline{1}_3, \\overline{2}_5)\\)",
+        "\\((\\overline{2}_3, \\overline{1}_5)\\)",
+        "\\((\\overline{1}_3, \\overline{1}_5)\\)",
+        "\\((\\overline{0}_3, \\overline{2}_5)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(7 \\bmod 3 = 1\\)，\\(7 \\bmod 5 = 2\\)。映射 \\(\\phi(\\overline{7}) = (\\overline{1}, \\overline{2})\\)。CRT 同构将模 \\(mn\\) 的环「分解」为两个较小模的直积。"
+      },
+      {
+        "id": "number-theory-ch02-q12",
+        "question": "解 \\(\\begin{cases} x \\equiv 1 \\pmod{4} \\\\ x \\equiv 2 \\pmod{3} \\end{cases}\\)，\\(x \\bmod 12 = ?\\)",
+        "options": [
+          "\\(5\\)",
+        "\\(7\\)",
+        "\\(9\\)",
+        "\\(11\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(x \\equiv 2 \\pmod{3}\\) 的解：\\(2, 5, 8, 11, \\ldots\\)。检查 \\(\\pmod{4}\\)：\\(2 \\equiv 2, 5 \\equiv 1\\) ✓。\\(x \\equiv 5 \\pmod{12}\\)。CRT：\\(\\gcd(4,3)=1\\)，解模 \\(12\\) 唯一。"
+      },
+      {
+        "id": "number-theory-ch02-q13",
+        "question": "\\(3x \\equiv 6 \\pmod{9}\\) 的解个数为？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(9\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\gcd(3, 9) = 3\\)，\\(3 \\mid 6\\)，有解。解个数 \\(= d = 3\\)。简化：\\(x \\equiv 2 \\pmod{3}\\)。模 \\(9\\) 下：\\(x = 2, 5, 8\\)。验证：\\(3 \\times 2 = 6 \\equiv 6\\)，\\(3 \\times 5 = 15 \\equiv 6\\)，\\(3 \\times 8 = 24 \\equiv 6 \\pmod{9}\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch02-q14",
+        "question": "\\((\\mathbb{Z}/8\\mathbb{Z})^*\\) 同构于哪个群？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((\\mathbb{Z}/8\\mathbb{Z})^* = \\{\\overline{1}, \\overline{3}, \\overline{5}, \\overline{7}\\}\\)，\\(\\varphi(8) = 4\\)。检查元素的阶：\\(3^2 = 9 \\equiv 1\\)，\\(5^2 = 25 \\equiv 1\\)，\\(7^2 = 49 \\equiv 1\\)。每个非单位元的阶都是 \\(2\\)，故 \\(\\cong (\\mathbb{Z}/2\\mathbb{Z})^2\\)，不是循环群。"
+      },
+      {
+        "id": "number-theory-ch02-q15",
+        "question": "若 \\(a \\equiv 3 \\pmod{7}\\) 且 \\(b \\equiv 5 \\pmod{7}\\)，则 \\(ab \\equiv \\; ? \\pmod{7}\\)",
+        "options": [
+          "\\(8\\)",
+        "\\(1\\)",
+        "\\(15\\)",
+        "\\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(ab \\equiv 3 \\times 5 = 15 \\equiv 15 - 2 \\times 7 = 1 \\pmod{7}\\)。同余运算的乘法性质：分别取余后再相乘，结果与先乘后取余相同。"
+      },
+      {
+        "id": "number-theory-ch02-q16",
+        "question": "RSA 中计算私钥 \\(d\\) 满足 \\(ed \\equiv 1 \\pmod{\\varphi(N)}\\)。若 \\(e = 3, \\varphi(N) = 40\\)，\\(d = ?\\)",
+        "options": [
+          "\\(13\\)",
+        "\\(27\\)",
+        "\\(37\\)",
+        "\\(7\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(3d \\equiv 1 \\pmod{40}\\)。\\(3 \\times 27 = 81 = 2 \\times 40 + 1\\)。\\(d = 27\\)。扩展欧几里得：\\(40 = 3 \\times 13 + 1\\)，\\(1 = 40 - 3 \\times 13\\)，\\(3 \\times (-13) \\equiv 1\\)，\\(-13 \\equiv 27 \\pmod{40}\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q17",
+        "question": "CRT 要求模数两两互素。\\(\\begin{cases} x \\equiv 1 \\pmod{4} \\\\ x \\equiv 2 \\pmod{6} \\end{cases}\\) 能直接用 CRT 吗？",
+        "options": [
+          "能，\\(x = 14\\)",
+        "不能，\\(\\gcd(4, 6) = 2 \\neq 1\\)",
+        "不能，方程组无解",
+        "B 和 C 都对"
+        ],
+        "answer": 3,
+        "explanation": "\\(\\gcd(4, 6) = 2 \\neq 1\\)，不满足 CRT 前提。进一步检查：\\(x \\equiv 1 \\pmod{4}\\) 要求 \\(x\\) 为奇数，但 \\(x \\equiv 2 \\pmod{6}\\) 要求 \\(x\\) 为偶数，矛盾。所以不仅不能用 CRT，方程组本身也无解。"
+      },
+      {
+        "id": "number-theory-ch02-q18",
+        "question": "\\((\\mathbb{Z}/p\\mathbb{Z})^*\\)（\\(p\\) 素数）是什么结构？",
+        "options": [
+          "阶为 \\(p\\) 的循环群",
+        "阶为 \\(p-1\\) 的循环群",
+        "阶为 \\(\\varphi(p)\\) 的非循环群",
+        "阶为 \\(p+1\\) 的群"
+        ],
+        "answer": 1,
+        "explanation": "\\(|(\\mathbb{Z}/p\\mathbb{Z})^*| = p - 1\\)，且它是循环群（原根的存在性）。这是模素数乘法群结构的核心结论。B 和 C 中 \\(\\varphi(p) = p - 1\\) 虽然相同，但 C 说\"非循环\"不对。"
+      },
+      {
+        "id": "number-theory-ch02-q19",
+        "question": "用 CRT 解 \\(\\begin{cases} x \\equiv 3 \\pmod{7} \\\\ x \\equiv 4 \\pmod{11} \\end{cases}\\)。\\(x \\bmod 77 = ?\\)",
+        "options": [
+          "\\(15\\)",
+        "\\(37\\)",
+        "\\(59\\)",
+        "\\(48\\)"
+        ],
+        "answer": 2,
+        "explanation": "Bézout：\\(7 \\times (-3) + 11 \\times 2 = 1\\)。\\(x = 3 \\times 11 \\times 2 + 4 \\times 7 \\times (-3) = 66 - 84 = -18 \\equiv 59 \\pmod{77}\\)。验证：\\(59 = 7 \\times 8 + 3\\)，\\(59 = 11 \\times 5 + 4\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch02-q20",
+        "question": "\\(5x \\equiv 15 \\pmod{25}\\) 的解在模 \\(25\\) 下有多少个？",
+        "options": [
+          "\\(1\\)",
+        "\\(5\\)",
+        "\\(0\\)",
+        "\\(25\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\gcd(5, 25) = 5\\)，\\(5 \\mid 15\\)，有解。解个数 \\(= 5\\)。简化：\\(x \\equiv 3 \\pmod{5}\\)。模 \\(25\\)：\\(x \\in \\{3, 8, 13, 18, 23\\}\\)。验证：\\(5 \\times 3 = 15, 5 \\times 8 = 40 \\equiv 15, \\ldots\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch02-q21",
+        "question": "\\(\\varphi(100) = ?\\)",
+        "options": [
+          "\\(20\\)",
+        "\\(40\\)",
+        "\\(50\\)",
+        "\\(80\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(100 = 2^2 \\times 5^2\\)。\\(\\varphi(100) = 100(1 - 1/2)(1 - 1/5) = 100 \\times 1/2 \\times 4/5 = 40\\)。即 \\(1\\) 到 \\(100\\) 中与 \\(100\\) 互素的整数有 \\(40\\) 个。"
+      },
+      {
+        "id": "number-theory-ch02-q22",
+        "question": "满足 \\(a^2 \\equiv a \\pmod{12}\\) 的 \\(a \\in \\{0, 1, \\ldots, 11\\}\\) 有几个？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(a^2 \\equiv a \\Leftrightarrow a(a-1) \\equiv 0 \\pmod{12}\\)。逐一检查：\\(a = 0\\)：\\(0 \\equiv 0\\) ✓；\\(a = 1\\)：\\(0 \\equiv 0\\) ✓；\\(a = 4\\)：\\(12 \\equiv 0\\) ✓；\\(a = 9\\)：\\(72 \\equiv 0\\) ✓。共 \\(4\\) 个。这些是 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 中的幂等元。"
+      },
+      {
+        "id": "number-theory-ch02-q23",
+        "question": "\"三三数之剩二，五五数之剩三，七七数之剩二\"。\\(x \\equiv 2 \\pmod{3}\\)，\\(x \\equiv 3 \\pmod{5}\\)，\\(x \\equiv 2 \\pmod{7}\\)。最小正整数解为？",
+        "options": [
+          "\\(23\\)",
+        "\\(53\\)",
+        "\\(128\\)",
+        "\\(233\\)"
+        ],
+        "answer": 0,
+        "explanation": "先解前两个：\\(x \\equiv 8 \\pmod{15}\\)（由 Q04）。再与第三个合并：\\(x \\equiv 8 \\pmod{15}\\)，\\(x \\equiv 2 \\pmod{7}\\)。\\(8 \\bmod 7 = 1 \\neq 2\\)。\\(8+15 = 23\\)，\\(23 \\bmod 7 = 2\\) ✓。\\(x \\equiv 23 \\pmod{105}\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q24",
+        "question": "在 \\(\\mathbb{Z}/n\\mathbb{Z}\\) 中，\\(a\\) 是零因子的条件是？",
+        "options": [
+          "\\(\\gcd(a, n) = 1\\)",
+        "\\(\\gcd(a, n) > 1\\)",
+        "\\(a = 0\\)",
+        "\\(a > n/2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\overline{a}\\) 是零因子 \\(\\Leftrightarrow \\exists \\overline{b} \\neq \\overline{0}, \\overline{a}\\overline{b} = \\overline{0} \\Leftrightarrow n \\mid ab\\) 但 \\(n \\nmid b\\)。当 \\(d = \\gcd(a,n) > 1\\) 时取 \\(b = n/d\\)：\\(ab = a(n/d) = (a/d) \\cdot n\\)…不完全对。更准确地：\\(\\overline{a}\\) 非零因子 \\(\\Leftrightarrow\\) 左乘 \\(\\overline{a}\\) 是单射 \\(\\Leftrightarrow \\gcd(a,n) = 1\\)。故零因子条件为 \\(\\gcd(a,n) > 1\\)（且 \\(a \\not\\equiv 0\\)）。"
+      },
+      {
+        "id": "number-theory-ch02-q25",
+        "question": "\\((\\mathbb{Z}/n\\mathbb{Z})^*\\) 中 \\(\\overline{a}\\) 的阶 \\(\\mathrm{ord}_n(a)\\) 整除 \\(\\varphi(n)\\)。若 \\(\\mathrm{ord}_{15}(2) = ?\\)",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(15\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(2^1 \\equiv 2, 2^2 \\equiv 4, 2^3 \\equiv 8, 2^4 \\equiv 16 \\equiv 1 \\pmod{15}\\)。\\(\\mathrm{ord}_{15}(2) = 4\\)。验证：\\(4 \\mid \\varphi(15) = 8\\) ✓。"
+      },
+      {
+        "id": "number-theory-ch02-q26",
+        "question": "某快递系统中，包裹编号的校验位满足 \\(\\sum_{i=1}^{12} d_i \\equiv 0 \\pmod{9}\\)。编号 \\(123456789012\\) 的数字和为 \\(1+2+\\cdots+9+0+1+2 = 48\\)。\\(48 \\bmod 9 = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(9\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(48 = 9 \\times 5 + 3\\)，\\(48 \\equiv 3 \\pmod{9}\\)。若校验不通过（\\(3 \\neq 0\\)），说明编号有误。模 \\(9\\) 校验利用了 \\(10 \\equiv 1 \\pmod{9}\\)，使得十进制数模 \\(9\\) 等于其数字之和模 \\(9\\)。"
+      },
+      {
+        "id": "number-theory-ch02-q27",
+        "question": "在计算机科学中，哈希表的大小通常取素数 \\(p\\)。键 \\(k\\) 的存储位置为 \\(h(k) = k \\bmod p\\)。若 \\(p = 13\\)，键 \\(k = 100\\) 的位置为？",
+        "options": [
+          "\\(5\\)",
+        "\\(9\\)",
+        "\\(10\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(100 = 13 \\times 7 + 9\\)，\\(h(100) = 9\\)。选素数作为哈希表大小可减少冲突：若表大小为合数 \\(m\\)，步长 \\(s\\) 与 \\(m\\) 不互素时探测序列无法覆盖全部位置。"
+      },
+      {
+        "id": "number-theory-ch02-q28",
+        "question": "信用卡号的 Luhn 校验算法对数字序列进行加权求和后检查 \\(S \\equiv 0 \\pmod{10}\\)。这利用了模运算的哪个性质？",
+        "options": [
+          "只关心余数，忽略位数多少",
+        "乘法保持同余",
+        "A 和 B 都对",
+        "N/A"
+        ],
+        "answer": 2,
+        "explanation": "Luhn 算法对奇数位和偶数位分别加权（乘 \\(1\\) 或乘 \\(2\\)），利用乘法保持同余性质。最后取模 \\(10\\) 检查——只关心末位数字（余数）。两个性质共同保证了校验码可以检测单个数字错误和相邻交换错误。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="number-theory"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/number-theory.html" class="module-name">数论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 同余关系与基本运算</a></li>
+      <li><a href="#kp2">02 · 模 n 的环与群结构</a></li>
+      <li><a href="#kp3">03 · 线性同余方程</a></li>
+      <li><a href="#kp4">04 · 中国剩余定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>同余与模运算</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>同余关系与基本运算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同余是整数间的等价关系：「只关心余数」。时钟的 12 小时循环、星期的 7 天循环都是同余的日常实例。同余运算将无穷的整数问题压缩到有限 世界，是数论的核心工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同余是带余除法导出的等价关系，产生商环 \(\mathbb{Z}/n\mathbb{Z}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(a \equiv b \pmod{n}\) iff \(n \mid (a - b)\)。 同余是等价关系（自反、对称、传递）。 <strong>运算法则</strong>: 若 \(a \equiv a' \pmod{n}\)，\(b \equiv b' \pmod{n}\)，则 \(a + b \equiv a' + b'\)，\(a - b \equiv a' - b'\)， \(ab \equiv a'b' \pmod{n}\)。 <strong>注意</strong>: 除法不能直接做! \(2 \times 3 \equiv 2 \times 1 \pmod{4}\) 但 \(3 \not\equiv 1 \pmod{4}\)。只有当 \(\gcd(c,n)=1\) 时 才能消去 \(c\)。 \[a \equiv b \pmod{n} \Leftrightarrow n \mid (a-b)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>ISBN 校验码、身份证号校验都基于模运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(7^{100} \bmod 10\)。 解答: \(7^1 \equiv 7\)，\(7^2 \equiv 49 \equiv 9\)， \(7^3 \equiv 63 \equiv 3\)，\(7^4 \equiv 21 \equiv 1 \pmod{10}\)。 周期为 4。\(100 = 4 \times 25\)，故 \(7^{100} \equiv 1 \pmod{10}\)。 易错点: 在同余运算中直接「两边除」。 \(6 \equiv 0 \pmod{6}\) 不能推出 \(3 \equiv 0\) 也不能推出 \(2 \equiv 0\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(25 \equiv ? \pmod{7}\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(25 = 7 \\times 3 + 4\\)，故 \\(25 \\equiv 4 \\pmod{7}\\)。')">A. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(25 = 7 \\times 3 + 4\\)，故 \\(25 \\equiv 4 \\pmod{7}\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(25 = 7 \\times 3 + 4\\)，故 \\(25 \\equiv 4 \\pmod{7}\\)。')">C. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(25 = 7 \\times 3 + 4\\)，故 \\(25 \\equiv 4 \\pmod{7}\\)。')">D. 5</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>模 n 的环与群结构</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>同余类不仅保持加减乘，还形成了严格的代数结构: \(\mathbb{Z}/n\mathbb{Z}\) 是 环，其中可逆元构成乘法群 \((\mathbb{Z}/n\mathbb{Z})^*\)。理解这两个结构 是应用欧拉定理、费马小定理等工具的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(\mathbb{Z}/n\mathbb{Z}\) 是 \(\mathbb{Z}\) 关于理想 \(n\mathbb{Z}\) 的商环， 可逆元构成单位群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>\(\mathbb{Z}/n\mathbb{Z} = \{\overline{0}, \overline{1}, \ldots, \overline{n-1}\}\)， 加法和乘法模 \(n\)。 <strong>可逆元</strong>: \(\overline{a}\) 在乘法下可逆 \(\Leftrightarrow \gcd(a, n) = 1\)。 \((\mathbb{Z}/n\mathbb{Z})^* = \{\overline{a} : \gcd(a,n) = 1\}\)， \(|(\mathbb{Z}/n\mathbb{Z})^*| = \varphi(n)\)。 <strong>逆元计算</strong>: 用扩展欧几里得: \(\gcd(a,n)=1\)， 求 \(ax + ny = 1\)，则 \(\overline{a}^{-1} = \overline{x}\)。 \[\overline{a} \in (\mathbb{Z}/n\mathbb{Z})^* \Leftrightarrow \gcd(a,n) = 1\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\((\mathbb{Z}/n\mathbb{Z})^*\) 是 RSA、ElGamal 等公钥密码体系的工作群。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 在 \(\mathbb{Z}/15\mathbb{Z}\) 中求 \(\overline{7}^{-1}\)。 解答: 扩展欧几里得: \(15 = 7 \times 2 + 1\)， 故 \(1 = 15 - 7 \times 2\)，即 \(7 \times (-2) \equiv 1 \pmod{15}\)。 \(-2 \equiv 13 \pmod{15}\)，故 \(\overline{7}^{-1} = \overline{13}\)。 验证: \(7 \times 13 = 91 = 6 \times 15 + 1\)。✓ 易错点: 误以为每个非零元素都有逆元。 \(\overline{6}\) 在 \(\mathbb{Z}/15\mathbb{Z}\) 中无逆元（\(\gcd(6,15) = 3 \neq 1\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|(\mathbb{Z}/12\mathbb{Z})^*| = ?\)</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\varphi(12) = 12(1-1/2)(1-1/3) = 4\\)。')">A. 4</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\varphi(12) = 12(1-1/2)(1-1/3) = 4\\)。')">B. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\varphi(12) = 12(1-1/2)(1-1/3) = 4\\)。')">C. 10</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(\\varphi(12) = 12(1-1/2)(1-1/3) = 4\\)。')">D. 11</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>线性同余方程</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>求解 \(ax \equiv b \pmod{n}\) 是数论中最基本的方程问题。它的可解性 完全由 \(\gcd(a,n)\) 决定，解法依赖 Bézout 等式。这是密码学中求 私钥的基本操作。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>\(ax \equiv b \pmod{n}\) 的可解性</strong>: 设 \(d = \gcd(a, n)\)。 - 有解 \(\Leftrightarrow\) \(d \mid b\) - 若有解，解的个数为 \(d\)（在模 \(n\) 意义下） 求解步骤: 若 \(d \mid b\)，简化为 \((a/d)x \equiv b/d \pmod{n/d}\)，其中 \(\gcd(a/d, n/d) = 1\)。 用扩展欧几里得求 \((a/d)^{-1} \pmod{n/d}\)， 得 \(x_0 = (b/d)(a/d)^{-1} \pmod{n/d}\)。 全部解: \(x = x_0 + k(n/d)\)，\(k = 0, 1, \ldots, d-1\)。 \[ax \equiv b \pmod{n} \text{ 有解} \Leftrightarrow \gcd(a,n) \mid b\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RSA 中计算私钥 \(d\) 满足 \(ed \equiv 1 \pmod{\varphi(N)}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求解 \(6x \equiv 9 \pmod{15}\)。 解答: \(\gcd(6, 15) = 3\)，\(3 \mid 9\)，有解。 简化: \(2x \equiv 3 \pmod{5}\)。 \(2^{-1} \equiv 3 \pmod{5}\)（\(2 \times 3 = 6 \equiv 1\)）。 \(x_0 = 3 \times 3 = 9 \equiv 4 \pmod{5}\)。 全部解: \(x \equiv 4, 9, 14 \pmod{15}\)。 易错点: 忘记检查 \(\gcd(a,n) \mid b\)，直接计算逆元。 当 \(\gcd(a,n) > 1\) 时 \(a\) 没有模 \(n\) 逆元，需先简化。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(4x \equiv 3 \pmod{6}\) 有解吗？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\gcd(4,6) = 2\\)，但 \\(2 \\nmid 3\\)，故无解。')">A. 有，\(x = 3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\gcd(4,6) = 2\\)，但 \\(2 \\nmid 3\\)，故无解。')">B. 有，\(x = 5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\gcd(4,6) = 2\\)，但 \\(2 \\nmid 3\\)，故无解。')">C. 无解</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\gcd(4,6) = 2\\)，但 \\(2 \\nmid 3\\)，故无解。')">D. 有无穷多解</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>中国剩余定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>「今有物不知其数，三三数之剩二，五五数之剩三，七七数之剩二」—— 《孙子算经》中的经典问题引出了中国剩余定理（CRT）。CRT 将大模数 的同余方程分解为若干小模数的独立方程，是数论计算的重要工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>CRT 本质是环同构: \(\mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)（当 \(\gcd(m,n)=1\)）。这是局部-全局思想的体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>CRT</strong>: 若 \(\gcd(m,n) = 1\)，则对任意 \(a, b\)，同余方程组 \(\begin{cases} x \equiv a \pmod{m} \\ x \equiv b \pmod{n} \end{cases}\) 有唯一解模 \(mn\)。 <strong>构造性证明</strong>: 由 Bézout，\(\exists u,v\) 使 \(mu + nv = 1\)。 令 \(x = a \cdot nv + b \cdot mu\)。 \(x \equiv a \cdot nv \equiv a \cdot 1 = a \pmod{m}\)（因为 \(mu \equiv 0\) mod \(m\)）。 \(x \equiv b \cdot mu \equiv b \cdot 1 = b \pmod{n}\)。 <strong>环同构形式</strong>: 映射 \(\phi: \mathbb{Z}/mn\mathbb{Z} \to \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)， \(\overline{x} \mapsto (\overline{x}_m, \overline{x}_n)\) 是环同构。 \[\mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z} \quad (\gcd(m,n)=1)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>RSA 的快速解密（用 CRT 分别模 \(p\) 和 \(q\) 计算后合并）； 计算机中大数运算的并行化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 解 \(\begin{cases} x \equiv 2 \pmod{3} \\ x \equiv 3 \pmod{5} \end{cases}\)。 解答: \(\gcd(3,5)=1\)。Bézout: \(3 \times 2 + 5 \times (-1) = 1\)。 \(x = 2 \times 5 \times (-1) + 3 \times 3 \times 2 = -10 + 18 = 8\)。 \(8 \bmod 15 = 8\)。验证: \(8 \equiv 2 \pmod{3}\)， \(8 \equiv 3 \pmod{5}\)。✓ 易错点: 忘记验证 \(\gcd(m,n)=1\) 的前提条件。 若 \(\gcd(m,n) > 1\)，CRT 可能无解（如 \(x \equiv 1 \pmod{4}\)， \(x \equiv 2 \pmod{6}\) 无解）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">CRT 要求两个模数满足什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。CRT 要求模数两两互素，不一定是素数（如 4 和 9 互素）。')">A. 都是素数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！CRT 要求模数两两互素，不一定是素数（如 4 和 9 互素）。')">B. 互素</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。CRT 要求模数两两互素，不一定是素数（如 4 和 9 互素）。')">C. 奇数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。CRT 要求模数两两互素，不一定是素数（如 4 和 9 互素）。')">D. 无需条件</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/algebra/number-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

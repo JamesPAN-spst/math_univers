@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 同态与同构 — 群论 Groupes — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "groups-ch04-q1",
+        "question": "设 \\(\\varphi: \\mathbb{Z} \\to \\mathbb{Z}/5\\mathbb{Z}\\) 为自然同态 \\(n \\mapsto \\overline{n}\\)。\\(\\varphi(17)\\) 等于多少？",
+        "options": [
+          "\\(\\overline{2}\\)",
+        "\\(\\overline{3}\\)",
+        "\\(\\overline{7}\\)",
+        "\\(\\overline{17}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(17) = \\overline{17} = \\overline{17 \\bmod 5} = \\overline{2}\\)。\\(17 = 3 \\times 5 + 2\\)。自然同态保持加法：\\(\\varphi(a+b) = \\overline{a+b} = \\overline{a} + \\overline{b} = \\varphi(a) + \\varphi(b)\\)。"
+      },
+      {
+        "id": "groups-ch04-q2",
+        "question": "行列式映射 \\(\\det: GL_2(\\mathbb{R}) \\to \\mathbb{R}^*\\) 是群同态。\\(\\ker(\\det)\\) 等于什么？",
+        "options": [
+          "\\(\\{I_2\\}\\)",
+        "\\(SL_2(\\mathbb{R})\\)",
+        "\\(\\mathbb{R}^*\\)",
+        "\\(GL_2(\\mathbb{R})\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker(\\det) = \\{A \\in GL_2(\\mathbb{R}) : \\det(A) = 1\\} = SL_2(\\mathbb{R})\\)。\\(\\det(AB) = \\det(A)\\det(B)\\) 保证了 \\(\\det\\) 是同态。核是行列式为 \\(1\\) 的全体矩阵。"
+      },
+      {
+        "id": "groups-ch04-q3",
+        "question": "若 \\(\\varphi: G \\to H\\) 是满射同态，\\(|\\ker\\varphi| = 4\\)，\\(|G| = 20\\)。则 \\(|H|\\) 为多少？",
+        "options": [
+          "\\(4\\)",
+        "\\(5\\)",
+        "\\(16\\)",
+        "\\(80\\)"
+        ],
+        "answer": 1,
+        "explanation": "第一同构定理：\\(G/\\ker\\varphi \\cong H\\)，\\(|H| = |G|/|\\ker\\varphi| = 20/4 = 5\\)。也可从 \\(|\\mathrm{Im}(\\varphi)| = [G:\\ker\\varphi] = 5\\) 得出（\\(\\varphi\\) 满射时 \\(\\mathrm{Im}(\\varphi) = H\\)）。"
+      },
+      {
+        "id": "groups-ch04-q4",
+        "question": "第一同构定理的内容是？",
+        "options": [
+          "任何同态的核都是正规子群",
+        "\\(G/\\ker\\varphi \\cong \\mathrm{Im}(\\varphi)\\)",
+        "任何两个同阶群同构",
+        "群同态保持元素的阶"
+        ],
+        "answer": 1,
+        "explanation": "第一同构定理（基本同构定理）：\\(G/\\ker\\varphi \\cong \\mathrm{Im}(\\varphi)\\)。A 虽然正确但只是基本性质不是定理内容。C 错（反例：\\(\\mathbb{Z}/4\\) 和 \\(V_4\\)）。D 一般不正确（非单射同态可能降低阶）。"
+      },
+      {
+        "id": "groups-ch04-q5",
+        "question": "设 \\(6\\mathbb{Z} \\subseteq 3\\mathbb{Z} \\subseteq \\mathbb{Z}\\)。第三同构定理给出 \\((\\mathbb{Z}/6\\mathbb{Z})/(3\\mathbb{Z}/6\\mathbb{Z}) \\cong\\) 什么？",
+        "options": [
+          "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(\\{0\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "第三同构定理：\\((G/K)/(N/K) \\cong G/N\\)。\\(G=\\mathbb{Z}, K=6\\mathbb{Z}, N=3\\mathbb{Z}\\)：\\(\\mathbb{Z}/3\\mathbb{Z}\\)。\\(3\\mathbb{Z}/6\\mathbb{Z} = \\{\\overline{0}, \\overline{3}\\}\\) 阶 \\(2\\)，商群阶 \\(= 6/2 = 3\\)。"
+      },
+      {
+        "id": "groups-ch04-q6",
+        "question": "\\(\\mathrm{Aut}(\\mathbb{Z}/5\\mathbb{Z})\\) 的阶为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(10\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Z}/5\\mathbb{Z}\\) 的自同构由 \\(\\overline{1}\\) 的像决定。\\(\\overline{1}\\) 必须映到阶 \\(5\\) 的元素（即生成元），有 \\(\\varphi(5) = 4\\) 个：\\(\\{\\overline{1}, \\overline{2}, \\overline{3}, \\overline{4}\\}\\)。故 \\(|\\mathrm{Aut}(\\mathbb{Z}/5\\mathbb{Z})| = 4\\)。"
+      },
+      {
+        "id": "groups-ch04-q7",
+        "question": "Cayley 定理将 \\(3\\) 阶群 \\(G\\) 嵌入哪个对称群？",
+        "options": [
+          "\\(S_2\\)",
+        "\\(S_3\\)",
+        "\\(S_6\\)",
+        "\\(S_9\\)"
+        ],
+        "answer": 1,
+        "explanation": "Cayley 定理：\\(G\\) 嵌入 \\(S_{|G|}\\)。\\(|G| = 3\\) 时 \\(G \\hookrightarrow S_3\\)。实际上 \\(G \\cong \\mathbb{Z}/3\\mathbb{Z} \\cong A_3 \\leq S_3\\)。嵌入通过左乘作用 \\(\\lambda: G \\to S_G\\) 实现。"
+      },
+      {
+        "id": "groups-ch04-q8",
+        "question": "设 \\(\\varphi: S_3 \\to \\{1, -1\\}\\) 为符号映射 \\(\\mathrm{sgn}\\)。\\(|\\mathrm{Im}(\\varphi)|\\) 和 \\(|\\ker\\varphi|\\) 分别为？",
+        "options": [
+          "\\(2\\) 和 \\(3\\)",
+        "\\(1\\) 和 \\(6\\)",
+        "\\(3\\) 和 \\(2\\)",
+        "\\(6\\) 和 \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{sgn}\\) 是满射同态（存在偶置换和奇置换），\\(|\\mathrm{Im}| = 2\\)。\\(\\ker(\\mathrm{sgn}) = A_3\\)（偶置换），\\(|A_3| = 6/2 = 3\\)。验证：\\(|S_3| = |\\ker| \\cdot |\\mathrm{Im}| = 3 \\times 2 = 6\\)。✓"
+      },
+      {
+        "id": "groups-ch04-q9",
+        "question": "\\(\\varphi: \\mathbb{Z} \\to \\mathbb{Z}/4\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\)，\\(\\varphi(n) = (\\overline{n}, \\overline{n})\\)。\\(\\ker\\varphi\\) 等于什么？",
+        "options": [
+          "\\(4\\mathbb{Z}\\)",
+        "\\(3\\mathbb{Z}\\)",
+        "\\(12\\mathbb{Z}\\)",
+        "\\(7\\mathbb{Z}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\varphi(n) = (\\overline{0}, \\overline{0}) \\Leftrightarrow 4 \\mid n\\) 且 \\(3 \\mid n \\Leftrightarrow 12 \\mid n\\)（\\(\\mathrm{lcm}(4,3) = 12\\)）。故 \\(\\ker\\varphi = 12\\mathbb{Z}\\)。\\(\\varphi\\) 还是满射（\\(\\gcd(4,3) = 1\\)），由中国剩余定理 \\(\\mathbb{Z}/12\\mathbb{Z} \\cong \\mathbb{Z}/4\\mathbb{Z} \\times \\mathbb{Z}/3\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "groups-ch04-q10",
+        "question": "设 \\(\\varphi: G \\to H\\) 是群同态，\\(g \\in G\\) 且 \\(\\mathrm{ord}(g) = 10\\)。则 \\(\\mathrm{ord}(\\varphi(g))\\) 必定满足什么条件？",
+        "options": [
+          "\\(\\mathrm{ord}(\\varphi(g)) = 10\\)",
+        "\\(\\mathrm{ord}(\\varphi(g)) \\mid 10\\)",
+        "\\(\\mathrm{ord}(\\varphi(g)) \\geq 10\\)",
+        "\\(\\mathrm{ord}(\\varphi(g))\\) 与 \\(10\\) 无关"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(g)^{10} = \\varphi(g^{10}) = \\varphi(e) = e\\)，故 \\(\\mathrm{ord}(\\varphi(g)) \\mid 10\\)。不一定等于 \\(10\\)：非单射同态可能降低阶。例如零同态 \\(\\varphi(g)=e\\) 时 \\(\\mathrm{ord}(\\varphi(g))=1\\)。"
+      },
+      {
+        "id": "groups-ch04-q11",
+        "question": "\\(\\det: GL_n(\\mathbb{R}) \\to \\mathbb{R}^*\\) 是满射同态。由第一同构定理，\\(GL_n(\\mathbb{R})/SL_n(\\mathbb{R}) \\cong\\) 什么？",
+        "options": [
+          "\\(\\mathbb{R}^*\\)",
+        "\\(SL_n(\\mathbb{R})\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\{1\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ker(\\det) = SL_n(\\mathbb{R})\\)，\\(\\mathrm{Im}(\\det) = \\mathbb{R}^*\\)（满射）。第一同构定理：\\(GL_n(\\mathbb{R})/SL_n(\\mathbb{R}) \\cong \\mathbb{R}^*\\)。C 错：\\(\\mathbb{R}^*\\) 不是两元素群。"
+      },
+      {
+        "id": "groups-ch04-q12",
+        "question": "设 \\(\\varphi: \\mathbb{Z}/12\\mathbb{Z} \\to \\mathbb{Z}/4\\mathbb{Z}\\)，\\(\\varphi(\\overline{a}) = \\overline{a}\\)。\\(\\ker\\varphi\\) 的阶为？",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ker\\varphi = \\{\\overline{a} \\in \\mathbb{Z}/12\\mathbb{Z} : 4 \\mid a\\} = \\{\\overline{0}, \\overline{4}, \\overline{8}\\}\\)，阶 \\(3\\)。第一同构定理验证：\\(|\\mathrm{Im}(\\varphi)| = 12/3 = 4 = |\\mathbb{Z}/4\\mathbb{Z}|\\)，故 \\(\\varphi\\) 满射且 \\(\\mathbb{Z}/12\\mathbb{Z}/\\ker\\varphi \\cong \\mathbb{Z}/4\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "groups-ch04-q13",
+        "question": "设 \\(H \\leq G\\)，\\(N \\trianglelefteq G\\)。第二同构定理指出 \\(H/(H \\cap N) \\cong\\) 什么？",
+        "options": [
+          "\\(HN/N\\)",
+        "\\(G/N\\)",
+        "\\(H/N\\)",
+        "\\(G/H\\)"
+        ],
+        "answer": 0,
+        "explanation": "第二同构定理（菱形定理）：\\(HN \\leq G\\)，\\(H \\cap N \\trianglelefteq H\\)，且 \\(H/(H \\cap N) \\cong HN/N\\)。C 不正确因为一般 \\(N \\not\\subseteq H\\)，\\(H/N\\) 无意义。"
+      },
+      {
+        "id": "groups-ch04-q14",
+        "question": "对应定理中，\\(G/N\\) 的子群与 \\(G\\) 中哪些子群一一对应？",
+        "options": [
+          "\\(G\\) 的所有子群",
+        "\\(G\\) 中包含 \\(N\\) 的子群",
+        "\\(G\\) 的正规子群",
+        "\\(N\\) 的子群"
+        ],
+        "answer": 1,
+        "explanation": "对应定理：\\(G/N\\) 的子群与 \\(G\\) 中包含 \\(N\\) 的子群之间存在保序双射 \\(\\bar{H} \\leftrightarrow H\\)（\\(N \\subseteq H \\leq G\\)）。且正规性也保持：\\(\\bar{H} \\trianglelefteq G/N \\Leftrightarrow H \\trianglelefteq G\\)。"
+      },
+      {
+        "id": "groups-ch04-q15",
+        "question": "\\(\\mathrm{Aut}(\\mathbb{Z}/6\\mathbb{Z})\\) 同构于什么群？",
+        "options": [
+          "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{Z}/6\\mathbb{Z}\\) 是循环群，自同构由 \\(\\overline{1}\\) 的像确定。\\(\\overline{1}\\) 必须映到生成元，即阶为 \\(6\\) 的元素。\\(\\overline{a}\\) 阶 \\(6\\) 当且仅当 \\(\\gcd(a,6)=1\\)：\\(a \\in \\{1,5\\}\\)，共 \\(\\varphi(6)=2\\) 个。\\(\\mathrm{Aut}(\\mathbb{Z}/6\\mathbb{Z}) \\cong \\mathbb{Z}/2\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "groups-ch04-q16",
+        "question": "群 \\(G = \\mathbb{Z}/6\\mathbb{Z}\\) 的内自同构群 \\(\\mathrm{Inn}(G)\\) 是？",
+        "options": [
+          "\\(\\{e\\}\\)（平凡群）",
+        "\\(\\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/3\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/6\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathrm{Inn}(G) \\cong G/Z(G)\\)。\\(G = \\mathbb{Z}/6\\mathbb{Z}\\) 是交换群，\\(Z(G) = G\\)。故 \\(\\mathrm{Inn}(G) \\cong G/G = \\{e\\}\\)。交换群的所有内自同构都是恒等映射。"
+      },
+      {
+        "id": "groups-ch04-q17",
+        "question": "验证映射 \\(\\varphi: \\mathbb{Z} \\to \\mathbb{Z}\\)，\\(\\varphi(n) = 2n\\) 是否为群同态（加法群）。若是，求 \\(\\ker\\varphi\\)。",
+        "options": [
+          "是同态，\\(\\ker\\varphi = \\{0\\}\\)",
+        "不是同态",
+        "是同态，\\(\\ker\\varphi = 2\\mathbb{Z}\\)",
+        "是同态，\\(\\ker\\varphi = \\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\varphi(a+b) = 2(a+b) = 2a + 2b = \\varphi(a) + \\varphi(b)\\)，是同态。\\(\\ker\\varphi = \\{n : 2n = 0\\} = \\{0\\}\\)（单射）。\\(\\mathrm{Im}(\\varphi) = 2\\mathbb{Z}\\)，\\(\\mathbb{Z}/\\{0\\} \\cong 2\\mathbb{Z}\\)。易错：以为 \\(\\ker = 2\\mathbb{Z}\\)。"
+      },
+      {
+        "id": "groups-ch04-q18",
+        "question": "设 \\(\\varphi: S_4 \\to S_3\\) 是满射同态。\\(|\\ker\\varphi|\\) 为多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(12\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\ker\\varphi| = |S_4|/|\\mathrm{Im}(\\varphi)| = 24/6 = 4\\)。由 \\(\\ker\\varphi \\trianglelefteq S_4\\)，\\(|\\ker\\varphi| = 4\\)，这只能是 Klein 四元群 \\(V\\)（\\(S_4\\) 中唯一的 \\(4\\) 阶正规子群）。"
+      },
+      {
+        "id": "groups-ch04-q19",
+        "question": "设 \\(G\\) 为群，\\(N \\trianglelefteq G\\)，\\(|G| = 100\\)，\\(|N| = 25\\)。若 \\(G/N\\) 是循环群，\\(G/N\\) 同构于什么？",
+        "options": [
+          "\\(\\mathbb{Z}/4\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/25\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z}\\)",
+        "\\(\\mathbb{Z}/5\\mathbb{Z}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|G/N| = 100/25 = 4\\)。\\(4\\) 阶循环群只有 \\(\\mathbb{Z}/4\\mathbb{Z}\\)。C 也是 \\(4\\) 阶但不是循环的（Klein 四元群）。D 阶为 \\(5\\) 不符。"
+      },
+      {
+        "id": "groups-ch04-q20",
+        "question": "\\(\\mathrm{sgn}: S_n \\to \\{\\pm 1\\}\\) 的核为 \\(A_n\\)。由第一同构定理 \\(S_n/A_n \\cong \\mathbb{Z}/2\\mathbb{Z}\\)。若 \\(n=5\\)，\\(|S_5/A_5|\\) 为？",
+        "options": [
+          "\\(2\\)",
+        "\\(10\\)",
+        "\\(60\\)",
+        "\\(120\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|S_5/A_5| = |S_5|/|A_5| = 120/60 = 2\\)。\\(S_5/A_5 \\cong \\mathbb{Z}/2\\mathbb{Z}\\)，两个元素分别对应偶置换类和奇置换类。这对任何 \\(n \\geq 2\\) 都成立。"
+      },
+      {
+        "id": "groups-ch04-q21",
+        "question": "设 \\(H \\leq S_4\\)，\\(N = A_4 \\trianglelefteq S_4\\)，\\(H = \\{e, (1\\;2)\\}\\)。\\(HN\\) 的阶和 \\(H \\cap N\\) 的阶分别是？",
+        "options": [
+          "\\(|HN| = 24\\), \\(|H \\cap N| = 1\\)",
+        "\\(|HN| = 12\\), \\(|H \\cap N| = 2\\)",
+        "\\(|HN| = 24\\), \\(|H \\cap N| = 2\\)",
+        "\\(|HN| = 6\\), \\(|H \\cap N| = 1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(H \\cap N = \\{e, (1\\;2)\\} \\cap A_4 = \\{e\\}\\)（\\((1\\;2)\\) 是奇置换不在 \\(A_4\\) 中）。\\(|HN| = |H| \\cdot |N| / |H \\cap N| = 2 \\times 12 / 1 = 24 = |S_4|\\)。故 \\(HN = S_4\\)。第二同构定理验证：\\(H/(H \\cap N) \\cong HN/N\\)，即 \\(\\mathbb{Z}/2 \\cong S_4/A_4\\)。✓"
+      },
+      {
+        "id": "groups-ch04-q22",
+        "question": "对应定理：\\(\\mathbb{Z}/12\\mathbb{Z}\\) 包含 \\(\\langle \\overline{4} \\rangle\\) 的子群有多少个？（等价于 \\(\\mathbb{Z}\\) 中包含 \\(12\\mathbb{Z}\\) 并被 \\(4\\mathbb{Z}\\) 包含的子群数。）",
+        "options": [
+          "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\langle \\overline{4} \\rangle = \\{\\overline{0}, \\overline{4}, \\overline{8}\\}\\)，对应 \\(\\mathbb{Z}\\) 中 \\(4\\mathbb{Z}\\)。包含 \\(\\langle \\overline{4} \\rangle\\) 的子群对应 \\(\\mathbb{Z}\\) 中包含 \\(4\\mathbb{Z}\\) 且包含 \\(12\\mathbb{Z}\\) 的子群，即 \\(d\\mathbb{Z}\\) 其中 \\(d \\mid 4\\)。\\(d \\in \\{1, 2, 4\\}\\)，对应 \\(\\mathbb{Z}/12\\mathbb{Z}\\) 的子群 \\(\\langle \\overline{1} \\rangle\\)、\\(\\langle \\overline{2} \\rangle\\)、\\(\\langle \\overline{4} \\rangle\\)，共 \\(3\\) 个。"
+      },
+      {
+        "id": "groups-ch04-q23",
+        "question": "\\(\\mathrm{Aut}(\\mathbb{Z}/2\\mathbb{Z} \\times \\mathbb{Z}/2\\mathbb{Z})\\) 的阶为多少？（提示：\\(V_4\\) 的自同构群同构于 \\(S_3\\)。）",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(6\\)",
+        "\\(8\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(V_4 = \\mathbb{Z}/2 \\times \\mathbb{Z}/2\\) 有 \\(3\\) 个非零元素，全部阶为 \\(2\\)。自同构将非零元素置换，且任何 \\(3\\) 个非零元素的置换都可扩展为自同构。故 \\(\\mathrm{Aut}(V_4) \\cong S_3\\)，\\(|\\mathrm{Aut}(V_4)| = 6\\)。"
+      },
+      {
+        "id": "groups-ch04-q24",
+        "question": "设 \\(G\\) 非交换。\\(\\mathrm{Inn}(G) \\cong G/Z(G)\\)。若 \\(|G| = 8\\)，\\(|Z(G)| = 2\\)，则 \\(|\\mathrm{Inn}(G)|\\) 为？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(|\\mathrm{Inn}(G)| = |G/Z(G)| = |G|/|Z(G)| = 8/2 = 4\\)。例如 \\(D_4\\)：\\(|Z(D_4)| = 2\\)，\\(\\mathrm{Inn}(D_4) \\cong D_4/Z(D_4)\\) 阶 \\(4\\)，同构于 \\(V_4\\)。"
+      },
+      {
+        "id": "groups-ch04-q25",
+        "question": "设 \\(\\varphi: G \\to H\\)，\\(\\psi: H \\to K\\) 都是群同态。复合 \\(\\psi \\circ \\varphi: G \\to K\\) 的核包含什么？",
+        "options": [
+          "\\(\\ker\\varphi\\)",
+        "\\(\\ker\\psi\\)",
+        "\\(\\mathrm{Im}(\\varphi)\\)",
+        "\\(H\\)"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(g \\in \\ker\\varphi\\)，则 \\((\\psi \\circ \\varphi)(g) = \\psi(e_H) = e_K\\)，故 \\(g \\in \\ker(\\psi \\circ \\varphi)\\)。因此 \\(\\ker\\varphi \\subseteq \\ker(\\psi \\circ \\varphi)\\)。\\(\\ker\\psi\\) 是 \\(H\\) 的子群，不直接是 \\(G\\) 的子集。"
+      },
+      {
+        "id": "groups-ch04-q26",
+        "question": "数字图像处理中，灰度值取模 \\(256\\) 加法群 \\(\\mathbb{Z}/256\\mathbb{Z}\\)。映射 \\(\\varphi: \\mathbb{Z}/256\\mathbb{Z} \\to \\mathbb{Z}/4\\mathbb{Z}\\)（\\(\\varphi(\\overline{n}) = \\overline{n}\\)）将 \\(256\\) 级灰度量化为 \\(4\\) 级。\\(\\ker\\varphi\\) 的阶为？",
+        "options": [
+          "\\(4\\)",
+        "\\(32\\)",
+        "\\(64\\)",
+        "\\(128\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\ker\\varphi = \\{\\overline{n} : 4 \\mid n\\}\\)，阶 \\(= 256/4 = 64\\)。每个量化后的灰度级对应 \\(64\\) 个原始值（一个陪集）。这种同态量化在图像压缩中减少数据量。"
+      },
+      {
+        "id": "groups-ch04-q27",
+        "question": "在密码学中，RSA 加密利用同态 \\(\\varphi: (\\mathbb{Z}/n\\mathbb{Z})^* \\to (\\mathbb{Z}/n\\mathbb{Z})^*\\)，\\(\\varphi(m) = m^e \\bmod n\\)。设 \\(n=15\\)，\\(e=3\\)，\\(\\varphi(\\overline{2})\\) 等于？",
+        "options": [
+          "\\(\\overline{6}\\)",
+        "\\(\\overline{8}\\)",
+        "\\(\\overline{2}\\)",
+        "\\(\\overline{3}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\varphi(\\overline{2}) = 2^3 \\bmod 15 = 8 \\bmod 15 = 8\\)。验证 \\(\\gcd(2,15)=1\\)（\\(\\overline{2} \\in (\\mathbb{Z}/15\\mathbb{Z})^*\\)）和 \\(\\gcd(8,15)=1\\)（结果仍在乘法群中）。注意这不是群同态而是幂映射，但利用了群结构。"
+      },
+      {
+        "id": "groups-ch04-q28",
+        "question": "在纠错编码中，奇偶校验映射 \\(\\varphi: \\mathbb{F}_2^4 \\to \\mathbb{F}_2\\)，\\(\\varphi(x_1,x_2,x_3,x_4) = x_1 \\oplus x_2 \\oplus x_3 \\oplus x_4\\) 是群同态。\\(|\\ker\\varphi|\\) 等于多少？",
+        "options": [
+          "\\(2\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|\\ker\\varphi| = |\\mathbb{F}_2^4|/|\\mathrm{Im}(\\varphi)| = 16/2 = 8\\)。\\(\\ker\\varphi\\) 是所有分量和为偶数的四元组，有 \\(8\\) 个。这就是 \\([4,3,2]\\) 奇偶校验码，能检测单比特错误。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="groups"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/groups.html" class="module-name">群论 Groupes</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 群同态的定义、核与像</a></li>
+      <li><a href="#kp2">02 · 第一同构定理</a></li>
+      <li><a href="#kp3">03 · 第二、第三同构定理与对应定理</a></li>
+      <li><a href="#kp4">04 · Cayley 定理与自同构群</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>同态与同构</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>群同态的定义、核与像</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>群同态是连接两个群的「结构保持映射」。就像两个国家的地图可能比 例不同但保持了地理关系一样，群同态 \(\varphi(ab)=\varphi(a)\varphi(b)\) 保持了群运算。核和像分别刻画了映射「丢失了什么信息」和「覆盖了 多少目标」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>同态是范畴论中态射的原型——保持结构的映射。 核 \(\ker\varphi\) 度量信息损失，像 \(\mathrm{Im}(\varphi)\) 度量覆盖范围。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: \(\varphi: G \to H\) 是群同态，若 \(\forall a,b \in G,\; \varphi(ab) = \varphi(a)\varphi(b)\)。 自动有: \(\varphi(e_G) = e_H\)，\(\varphi(a^{-1}) = \varphi(a)^{-1}\)。 <strong>核</strong>: \(\ker\varphi = \{g \in G : \varphi(g) = e_H\}\)。 \(\ker\varphi \trianglelefteq G\)（正规子群！）。 证: \(g \in G, n \in \ker\varphi \Rightarrow \varphi(gng^{-1}) = \varphi(g)e_H \varphi(g)^{-1} = e_H\)。 <strong>像</strong>: \(\mathrm{Im}(\varphi) = \{\varphi(g) : g \in G\} \leq H\)。 \(\varphi\) 单射 \(\Leftrightarrow \ker\varphi = \{e\}\)。 \(\varphi\) 满射 \(\Leftrightarrow \mathrm{Im}(\varphi) = H\)。 \[|\mathrm{Im}(\varphi)| = [G : \ker\varphi]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>行列式 \(\det: GL_n(K) \to K^*\) 是群同态，其核为 \(SL_n(K)\)； 符号映射 \(\mathrm{sgn}: S_n \to \{\pm 1\}\) 的核为 \(A_n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 设 \(\varphi: \mathbb{Z} \to \mathbb{Z}/5\mathbb{Z}\) 为自然投射 \(n \mapsto \overline{n}\)。求 \(\ker\varphi\) 和 \(\mathrm{Im}(\varphi)\)。 解答: \(\ker\varphi = 5\mathbb{Z} = \{\ldots,-5,0,5,10,\ldots\}\)。 \(\mathrm{Im}(\varphi) = \mathbb{Z}/5\mathbb{Z}\)（满射）。 \([\mathbb{Z} : 5\mathbb{Z}] = 5 = |\mathbb{Z}/5\mathbb{Z}|\)。✓ 易错点: 忘记验证 \(\varphi(e_G) = e_H\) 不是额外条件—— 它自动由 \(\varphi(ab)=\varphi(a)\varphi(b)\) 推出 （取 \(a = b = e\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">群同态 \(\varphi: G \to H\) 的核一定是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\ker\\varphi\\) 是 \\(G\\) 的正规子群（不是 \\(H\\) 的子群）。')">A. \(G\) 的子群</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\ker\\varphi\\) 是 \\(G\\) 的正规子群（不是 \\(H\\) 的子群）。')">B. \(G\) 的正规子群</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\ker\\varphi\\) 是 \\(G\\) 的正规子群（不是 \\(H\\) 的子群）。')">C. \(H\) 的子群</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\ker\\varphi\\) 是 \\(G\\) 的正规子群（不是 \\(H\\) 的子群）。')">D. \(H\) 的正规子群</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>第一同构定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>第一同构定理（也称基本同构定理）是群论中最核心的定理：它将 同态的核、像和商群三者精确联系起来。直觉上说，「商掉映射丢失的 信息（核），得到的恰好就是映射实际到达的部分（像）」。这个定理 几乎是后续所有结构定理的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(G/\ker\varphi \cong \mathrm{Im}(\varphi)\) 体现了「商 = 像」的 范畴化原则——任何满同态都可以分解为自然投射后跟同构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>第一同构定理</strong>: 设 \(\varphi: G \to H\) 为群同态，则 \[G / \ker\varphi \;\cong\; \mathrm{Im}(\varphi)\] 证明: 定义 \(\bar{\varphi}: G/\ker\varphi \to \mathrm{Im}(\varphi)\)， \(\bar{\varphi}(g \ker\varphi) = \varphi(g)\)。 - 良定义: \(g' \in g\ker\varphi \Rightarrow g' = gn,\; \varphi(g') = \varphi(g)\varphi(n) = \varphi(g)\)。 - 同态: \(\bar{\varphi}(g_1 N \cdot g_2 N) = \varphi(g_1 g_2) = \varphi(g_1)\varphi(g_2)\)。 - 单射: \(\bar{\varphi}(gN) = e \Rightarrow g \in \ker\varphi \Rightarrow gN = N\)。 - 满射: 由定义直接成立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(\det: GL_n \to K^*\) 给出 \(GL_n / SL_n \cong K^*\)； \(\mathrm{sgn}: S_n \to \{\pm 1\}\) 给出 \(S_n / A_n \cong \mathbb{Z}/2\mathbb{Z}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 设 \(\varphi: \mathbb{Z} \to \mathbb{Z}/n\mathbb{Z}\) 为自然同态， 用第一同构定理确定 \(\mathbb{Z}/n\mathbb{Z}\) 的结构。 解答: \(\ker\varphi = n\mathbb{Z}\)，\(\mathrm{Im}(\varphi) = \mathbb{Z}/n\mathbb{Z}\)。 由第一同构定理 \(\mathbb{Z}/n\mathbb{Z} \cong \mathbb{Z}/n\mathbb{Z}\)。✓ 这看起来同义反复，但它确认了商群构造确实产生了正确的结构。 易错点: 使用第一同构定理时忘记验证 \(\varphi\) 是同态。 必须先确认映射保持运算，才能应用定理。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\varphi: G \to H\) 是满射同态且 \(|\ker\varphi| = 5\)，</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。由第一同构定理 \\(G/\\ker\\varphi \\cong H\\)，')">A. 5</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！由第一同构定理 \\(G/\\ker\\varphi \\cong H\\)，')">B. 6</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。由第一同构定理 \\(G/\\ker\\varphi \\cong H\\)，')">C. 25</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。由第一同构定理 \\(G/\\ker\\varphi \\cong H\\)，')">D. 150</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>第二、第三同构定理与对应定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>第一同构定理只是开始。第二定理（菱形定理）刻画两个子群的「交互」； 第三定理告诉我们「商的商还是商」；对应定理则建立了 \(G/N\) 的子群 与 \(G\) 中包含 \(N\) 的子群之间的完美双射。这些定理构成了群结构 分析的完整工具箱。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>对应定理是「格同构」的体现——商群的子群格与母群中包含核的 子群格保持包含关系和正规性。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>第二同构定理（菱形定理）</strong>: 设 \(H \leq G\)，\(N \trianglelefteq G\)， 则 \(HN \leq G\)，\(H \cap N \trianglelefteq H\)，且 \[H / (H \cap N) \cong HN / N\] <strong>第三同构定理</strong>: 设 \(K \trianglelefteq N \trianglelefteq G\)， \(K \trianglelefteq G\)，则 \[(G/K) / (N/K) \cong G/N\] <strong>对应定理</strong>: 设 \(N \trianglelefteq G\)，则 \(G/N\) 的子群 与 \(G\) 中包含 \(N\) 的子群之间存在保序双射： \(\overline{H} \leftrightarrow H\)（\(N \subseteq H \subseteq G\)）， 且 \(\overline{H} \trianglelefteq G/N \Leftrightarrow H \trianglelefteq G\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 在 \(\mathbb{Z}\) 中，\(6\mathbb{Z} \subseteq 2\mathbb{Z}\)， 用第三同构定理描述 \((\mathbb{Z}/6\mathbb{Z}) / (2\mathbb{Z}/6\mathbb{Z})\)。 解答: 由第三同构定理: \((\mathbb{Z}/6\mathbb{Z}) / (2\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。 其中 \(2\mathbb{Z}/6\mathbb{Z} = \{\overline{0}, \overline{2}, \overline{4}\}\) 是 \(\mathbb{Z}/6\mathbb{Z}\) 的 3 阶子群，商群阶 = 6/3 = 2。✓ 易错点: 使用第三同构定理时忘记验证 \(K \trianglelefteq G\) （不仅仅是 \(K \trianglelefteq N\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">对应定理中，\(G/N\) 的正规子群对应于 \(G\) 中什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。对应定理保持正规性：\\(\\overline{H} \\trianglelefteq G/N\\)')">A. 包含 \(N\) 的子群</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！对应定理保持正规性：\\(\\overline{H} \\trianglelefteq G/N\\)')">B. 包含 \(N\) 的正规子群</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。对应定理保持正规性：\\(\\overline{H} \\trianglelefteq G/N\\)')">C. \(G\) 的所有子群</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。对应定理保持正规性：\\(\\overline{H} \\trianglelefteq G/N\\)')">D. \(G\) 的所有正规子群</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Cayley 定理与自同构群</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>「每个群都可以看成置换群」——Cayley 定理说每个群都同构于某个 对称群的子群。这不仅给出了群的具体几何图像，也说明了对称群的 普遍性。自同构群 \(\mathrm{Aut}(G)\) 则刻画了群自身的「对称性」， 其中内自同构子群与中心的关系揭示了群结构的深层信息。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Cayley 定理是群作用理论的特例（\(G\) 通过左乘作用于自身）。 \(\mathrm{Inn}(G) \cong G/Z(G)\) 将自同构群与中心联系起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Cayley 定理</strong>: 每个群 \(G\) 同构于 \(S_G\)（\(G\) 上置换群）的子群。 证明: 定义 \(\lambda: G \to S_G,\; \lambda_g(x) = gx\)（左乘）。 \(\lambda_{gh}(x) = ghx = \lambda_g(\lambda_h(x))\)，故 \(\lambda\) 是同态。\(\lambda_g = \mathrm{id} \Rightarrow gx = x\) 对所有 \(x\)，故 \(g = e\)，即 \(\lambda\) 单射。 由此 \(G \cong \mathrm{Im}(\lambda) \leq S_G\)。 若 \(|G| = n\)，则 \(G\) 嵌入 \(S_n\)。 <strong>自同构群</strong>: \(\mathrm{Aut}(G)\) 是 \(G\) 到自身的所有同构组成的群。 <strong>内自同构</strong>: \(\mathrm{Inn}(G) = \{\varphi_g : x \mapsto gxg^{-1}\}\)。 \(\mathrm{Inn}(G) \trianglelefteq \mathrm{Aut}(G)\)，且 \[\mathrm{Inn}(G) \cong G / Z(G)\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Cayley 定理为有限群的计算机表示提供了基础—— 任何群都可用置换矩阵来存储和运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 求 \(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z})\)。 解答: \(\mathbb{Z}/6\mathbb{Z}\) 的自同构由生成元的像决定。 生成元 \(\overline{1}\) 必须映到同阶元素（阶 6）， 即 \(\{\overline{1}, \overline{5}\}\)。 故 \(|\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z})| = \varphi(6) = 2\)， \(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。 易错点: 以为 \(\overline{1}\) 可以映到任意非零元素。 自同构必须保持阶，故像也必须是生成元。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Cayley 定理告诉我们什么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cayley 定理的核心内容是 \\(G\\) 可嵌入 \\(S_{|G|}\\)。')">A. 每个群都是交换群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！Cayley 定理的核心内容是 \\(G\\) 可嵌入 \\(S_{|G|}\\)。')">B. 每个群都同构于某个对称群的子群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cayley 定理的核心内容是 \\(G\\) 可嵌入 \\(S_{|G|}\\)。')">C. 每个群都同构于某个矩阵群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。Cayley 定理的核心内容是 \\(G\\) 可嵌入 \\(S_{|G|}\\)。')">D. 每个有限群都是循环群</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3</a>
+      <a href="../../../modules/algebra/groups.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

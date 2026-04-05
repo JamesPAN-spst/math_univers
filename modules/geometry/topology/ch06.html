@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 连通性 — 点集拓扑 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "topology-ch06-q1",
+        "question": "拓扑空间 \\(X\\) 连通的定义是什么？",
+        "options": [
+          "\\(X\\) 不能写成两个非空开集的并",
+        "\\(X\\) 不能写成两个非空不相交开集的并",
+        "\\(X\\) 中任意两点有道路相连",
+        "\\(X\\) 的每个开覆盖有有限子覆盖"
+        ],
+        "answer": 1,
+        "explanation": "连通 = 不存在 \\(X = U \\sqcup V\\)（\\(U, V\\) 非空开、不相交）。等价地：\\(X\\) 中仅有的 clopen（既开又闭）集是 \\(\\emptyset\\) 和 \\(X\\)。A 漏掉了\"不相交\"条件（\\(X\\) 总是两个非空开集的并，如 \\(X = U_1 \\cup U_2\\)）。C 是道路连通（更强）。D 是紧致性。"
+      },
+      {
+        "id": "topology-ch06-q2",
+        "question": "\\(\\mathbb{R}\\) 是否连通？",
+        "options": [
+          "是",
+        "否",
+        "取决于拓扑",
+        "\\(\\mathbb{R}\\) 紧致但不连通"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{R}\\)（标准拓扑）连通。证明：若 \\(\\mathbb{R} = U \\sqcup V\\)（\\(U, V\\) 非空开不相交），取 \\(a \\in U\\)，\\(b \\in V\\)（不妨 \\(a < b\\)），\\(c = \\sup(U \\cap [a,b])\\)。\\(c \\in \\overline{U} \\cap [a,b]\\)。若 \\(c \\in V\\)，\\(V\\) 开 \\(\\Rightarrow\\) \\(c\\) 附近有 \\(U\\) 的元素矛盾。若 \\(c \\in U\\)，\\(U\\) 开 \\(\\Rightarrow\\) \\(c < b\\) 附近有 \\(U\\) 元素 \\(> c\\)，矛盾 supremum。"
+      },
+      {
+        "id": "topology-ch06-q3",
+        "question": "\\(\\mathbb{Q}\\)（标准拓扑）是否连通？",
+        "options": [
+          "是",
+        "否",
+        "\\(\\mathbb{Q}\\) 道路连通",
+        "\\(\\mathbb{Q}\\) 的连通分量包含整数子集"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{Q}\\) 完全不连通（totally disconnected）：对任意 \\(p < q \\in \\mathbb{Q}\\)，取无理数 \\(\\xi \\in (p,q)\\)（如 \\(\\xi = p + (q-p)/\\sqrt{2}\\)）。\\(\\mathbb{Q} = (\\mathbb{Q} \\cap (-\\infty, \\xi)) \\sqcup (\\mathbb{Q} \\cap (\\xi, +\\infty))\\) 是非平凡分离。每个连通分量是单点集。"
+      },
+      {
+        "id": "topology-ch06-q4",
+        "question": "连续函数的像保持连通性吗？",
+        "options": [
+          "是",
+        "否",
+        "只在满射时保持",
+        "只在同胚时保持"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 连通、\\(f: X \\to Y\\) 连续 \\(\\Rightarrow f(X)\\) 连通。反证：若 \\(f(X) = A \\sqcup B\\)（\\(A, B\\) 非空开不相交），则 \\(X = f^{-1}(A) \\sqcup f^{-1}(B)\\)，\\(f^{-1}(A), f^{-1}(B)\\) 非空开不相交，矛盾 \\(X\\) 连通。不需要满射或双射。"
+      },
+      {
+        "id": "topology-ch06-q5",
+        "question": "中间值定理：\\(f: [a,b] \\to \\mathbb{R}\\) 连续，\\(f(a) < c < f(b)\\)，则存在 \\(\\xi \\in (a,b)\\) 使 \\(f(\\xi) = c\\)。该定理的拓扑本质是什么？",
+        "options": [
+          "\\([a,b]\\) 紧致",
+        "\\([a,b]\\) 连通且连续像保持连通性",
+        "\\(f\\) 可微",
+        "\\(\\mathbb{R}\\) 完备"
+        ],
+        "answer": 1,
+        "explanation": "\\([a,b]\\) 连通 \\(\\Rightarrow f([a,b])\\) 连通。\\(\\mathbb{R}\\) 中连通子集是区间。\\(f(a), f(b) \\in f([a,b])\\)，\\(c\\) 在 \\(f(a)\\) 和 \\(f(b)\\) 之间，\\(f([a,b])\\) 是区间 \\(\\Rightarrow c \\in f([a,b])\\)。紧致性不直接相关（IVT 对非紧连通域也成立）。可微性不需要。\\(\\mathbb{R}\\) 的完备性保证了\"连通 = 区间\"，但根本是连通性。"
+      },
+      {
+        "id": "topology-ch06-q6",
+        "question": "道路连通的定义是什么？",
+        "options": [
+          "任意两点之间有连续曲线相连",
+        "空间是连通的",
+        "空间的基本群是平凡的",
+        "空间的任何开覆盖有链式相连"
+        ],
+        "answer": 0,
+        "explanation": "道路连通：\\(\\forall x, y \\in X\\)，\\(\\exists\\) 连续 \\(\\gamma: [0,1] \\to X\\)，\\(\\gamma(0) = x\\), \\(\\gamma(1) = y\\)。道路连通 \\(\\Rightarrow\\) 连通，但反之不成立。B 是更弱条件。C 是单连通的条件（更强）。D 是连通性的一种等价表述（链连通）。"
+      },
+      {
+        "id": "topology-ch06-q7",
+        "question": "\\(\\mathbb{R}^n\\)（\\(n \\geq 1\\)）的连通分量是什么？",
+        "options": [
+          "单点集",
+        "开球",
+        "\\(\\mathbb{R}^n\\) 本身",
+        "不存在连通分量"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathbb{R}^n\\) 道路连通（任意两点 \\(x, y\\) 可用线段 \\(\\gamma(t) = (1-t)x + ty\\) 连接），因此连通。连通空间的唯一连通分量是整个空间。"
+      },
+      {
+        "id": "topology-ch06-q8",
+        "question": "拓扑学家正弦曲线 \\(S = \\{(x, \\sin(1/x)) : 0 < x \\leq 1\\} \\cup \\{(0,y) : -1 \\leq y \\leq 1\\}\\) 是否道路连通？",
+        "options": [
+          "是",
+        "否，\\(S\\) 连通但不道路连通",
+        "否，\\(S\\) 不连通",
+        "是，因为 \\(\\sin(1/x)\\) 是连续函数"
+        ],
+        "answer": 1,
+        "explanation": "\\(S\\) 由曲线 \\(\\{(x, \\sin(1/x)) : 0 < x \\leq 1\\}\\) 和线段 \\(\\{0\\} \\times [-1,1]\\) 组成。曲线部分道路连通。\\(\\{0\\} \\times [-1,1]\\) 在曲线部分的闭包中（\\(x \\to 0\\) 时 \\(\\sin(1/x)\\) 值域充满 \\([-1,1]\\)），所以 \\(S\\) 连通。但不存在从 \\((0,0)\\) 到 \\((1, \\sin 1)\\) 的连续道路——道路会在 \\(x = 0\\) 附近\"无限振荡\"，这是经典反例：连通 \\(\\not\\Rightarrow\\) 道路连通。"
+      },
+      {
+        "id": "topology-ch06-q9",
+        "question": "\\(\\mathbb{R}^n \\setminus \\{0\\}\\) 在什么条件下连通？",
+        "options": [
+          "总是连通",
+        "\\(n \\geq 2\\) 时连通",
+        "\\(n \\geq 3\\) 时连通",
+        "从不连通"
+        ],
+        "answer": 1,
+        "explanation": "\\(n = 1\\)：\\(\\mathbb{R} \\setminus \\{0\\} = (-\\infty, 0) \\cup (0, +\\infty)\\)，两个非空开集不相交，不连通。\\(n \\geq 2\\)：对 \\(x, y \\in \\mathbb{R}^n \\setminus \\{0\\}\\)，若线段 \\([x,y]\\) 不过原点则直接连。若过原点，折线 \\(x \\to z \\to y\\)（\\(z\\) 不在 \\(xy\\) 直线上）绕过原点。所以道路连通 \\(\\Rightarrow\\) 连通。"
+      },
+      {
+        "id": "topology-ch06-q10",
+        "question": "连通集的闭包是否连通？",
+        "options": [
+          "是",
+        "否",
+        "只在度量空间中",
+        "只在 Hausdorff 空间中"
+        ],
+        "answer": 0,
+        "explanation": "设 \\(A\\) 连通。若 \\(\\overline{A} = U \\sqcup V\\)（\\(U, V\\) 非空开于 \\(\\overline{A}\\)），\\(A = (A \\cap U) \\sqcup (A \\cap V)\\)，\\(A\\) 连通 \\(\\Rightarrow A \\cap U = \\emptyset\\) 或 \\(A \\cap V = \\emptyset\\)。不妨 \\(A \\subseteq U\\)。\\(U\\) 在 \\(\\overline{A}\\) 中闭（\\(U = \\overline{A} \\setminus V\\)，\\(V\\) 开）\\(\\Rightarrow U \\supseteq \\overline{A}\\)（\\(A \\subseteq U\\) 且 \\(U\\) 闭含 \\(A\\) 的闭包），\\(V = \\emptyset\\)，矛盾。"
+      },
+      {
+        "id": "topology-ch06-q11",
+        "question": "\\(X\\) 的连通分量 \\(C_x\\)（包含 \\(x\\) 的最大连通子集）是闭集吗？",
+        "options": [
+          "是",
+        "不一定",
+        "是开集",
+        "既开又闭"
+        ],
+        "answer": 0,
+        "explanation": "\\(C_x\\) 连通 \\(\\Rightarrow \\overline{C_x}\\) 连通（闭包保持连通性）。\\(\\overline{C_x}\\) 连通且含 \\(x\\)，由 \\(C_x\\) 的极大性，\\(\\overline{C_x} \\subseteq C_x\\)。所以 \\(C_x = \\overline{C_x}\\)，闭。连通分量不一定是开的（如 \\(\\mathbb{Q}\\) 的连通分量是单点集，不开）。在局部连通空间中，连通分量既开又闭。"
+      },
+      {
+        "id": "topology-ch06-q12",
+        "question": "道路连通空间的连续像是否道路连通？",
+        "options": [
+          "是",
+        "否",
+        "只在单射时",
+        "只在同胚时"
+        ],
+        "answer": 0,
+        "explanation": "\\(X\\) 道路连通，\\(f: X \\to Y\\) 连续。对 \\(y_1 = f(x_1), y_2 = f(x_2) \\in f(X)\\)，\\(X\\) 中存在道路 \\(\\gamma: [0,1] \\to X\\)，\\(\\gamma(0) = x_1, \\gamma(1) = x_2\\)。\\(f \\circ \\gamma: [0,1] \\to Y\\) 是从 \\(y_1\\) 到 \\(y_2\\) 的连续道路。不需要任何额外条件。"
+      },
+      {
+        "id": "topology-ch06-q13",
+        "question": "空间 \\(X\\) 局部连通是什么意思？",
+        "options": [
+          "每个连通分量是开集",
+        "每个点有连通邻域基",
+        "\\(X\\) 连通",
+        "\\(X\\) 道路连通"
+        ],
+        "answer": 1,
+        "explanation": "局部连通：每个点 \\(x\\) 的每个邻域 \\(U\\) 中存在连通开邻域 \\(V\\)，\\(x \\in V \\subseteq U\\)。等价：每点有由连通开集组成的邻域基。A 是局部连通的推论（局部连通 \\(\\Rightarrow\\) 连通分量开），但不是定义。\\(X\\) 不需要全局连通。"
+      },
+      {
+        "id": "topology-ch06-q14",
+        "question": "乘积 \\(X \\times Y\\) 连通的充要条件是什么？",
+        "options": [
+          "\\(X\\) 连通或 \\(Y\\) 连通",
+        "\\(X\\) 连通且 \\(Y\\) 连通",
+        "\\(X \\times Y\\) 道路连通",
+        "\\(X\\) 和 \\(Y\\) 非空"
+        ],
+        "answer": 1,
+        "explanation": "\\(X \\times Y\\) 连通 \\(\\iff\\) \\(X\\) 连通且 \\(Y\\) 连通（两者非空时）。\\(\\Rightarrow\\)：投影连续，连续像保持连通。\\(\\Leftarrow\\)：固定 \\((x_0, y_0)\\)。对每个 \\((x, y)\\)，\\(\\{x_0\\} \\times Y \\cup X \\times \\{y\\}\\) 连通（两个连通集有交点 \\((x_0, y)\\)），包含 \\((x_0, y_0)\\) 和 \\((x, y)\\)。所以 \\((x_0, y_0)\\) 与任一点在同一连通子集中。"
+      },
+      {
+        "id": "topology-ch06-q15",
+        "question": "\\(f: X \\to \\{0, 1\\}\\)（\\(\\{0,1\\}\\) 离散拓扑）连续。\\(X\\) 连通等价于什么？",
+        "options": [
+          "\\(f\\) 是满射",
+        "\\(f\\) 是常值的",
+        "\\(f\\) 不连续",
+        "不存在这样的 \\(f\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(X\\) 连通 \\(\\iff\\) 每个连续 \\(f: X \\to \\{0,1\\}\\) 是常值。\\(\\Leftarrow\\)：若 \\(X = U \\sqcup V\\)（非空、开、不相交），\\(f = \\chi_U\\) 连续非常值，矛盾。\\(\\Rightarrow\\)：\\(f\\) 连续 \\(\\Rightarrow f^{-1}(0)\\) 和 \\(f^{-1}(1)\\) 都开（\\(\\{0\\}, \\{1\\}\\) 在离散拓扑中开）。\\(X = f^{-1}(0) \\sqcup f^{-1}(1)\\)，\\(X\\) 连通 \\(\\Rightarrow\\) 其一为空，\\(f\\) 常值。"
+      },
+      {
+        "id": "topology-ch06-q16",
+        "question": "拓扑学家正弦曲线 \\(S\\) 和\"闭合拓扑学家正弦曲线\"\\(\\overline{S}\\)（再连一条从 \\((1, \\sin 1)\\) 到 \\((0,0)\\) 的线段）有什么拓扑差异？",
+        "options": [
+          "两者都道路连通",
+        "\\(S\\) 不道路连通，\\(\\overline{S}\\) 道路连通",
+        "两者都不道路连通",
+        "\\(S\\) 道路连通，\\(\\overline{S}\\) 不道路连通"
+        ],
+        "answer": 1,
+        "explanation": "\\(S\\) 连通但不道路连通（从线段 \\(\\{0\\} \\times [-1,1]\\) 到曲线 \\((x, \\sin 1/x)\\) 部分无连续道路）。\\(\\overline{S}\\) 加上一条从 \\((1, \\sin 1)\\) 到 \\((0,0)\\) 的线段后，曲线部分可以通过这条线段回到原点——构成一个闭合环路。\\(\\overline{S}\\) 道路连通但不单连通。"
+      },
+      {
+        "id": "topology-ch06-q17",
+        "question": "\\(\\{0,1\\}^{\\mathbb{N}}\\)（Cantor 空间）是否连通？",
+        "options": [
+          "是",
+        "否，完全不连通",
+        "连通但不紧致",
+        "道路连通"
+        ],
+        "answer": 1,
+        "explanation": "Cantor 空间是完全不连通的（每个连通分量是单点集）。对 \\(x \\neq y\\)，存在坐标 \\(n_0\\) 使 \\(x_{n_0} \\neq y_{n_0}\\)。\\(\\pi_{n_0}^{-1}(\\{0\\})\\) 和 \\(\\pi_{n_0}^{-1}(\\{1\\})\\) 是 clopen 集（\\(\\{0\\}, \\{1\\}\\) 在 \\(\\{0,1\\}\\) 中开），分离 \\(x\\) 和 \\(y\\)。Cantor 空间紧致（Tychonoff）但完全不连通。"
+      },
+      {
+        "id": "topology-ch06-q18",
+        "question": "\\(\\mathbb{R}\\) 中连通子集恰好是区间。以下哪个是证明\"区间连通\"的关键？",
+        "options": [
+          "Heine-Borel 定理",
+        "\\(\\mathbb{R}\\) 的序完备性（最小上界性质）",
+        "Bolzano-Weierstrass 定理",
+        "Archimedean 性质"
+        ],
+        "answer": 1,
+        "explanation": "设 \\(I\\) 是区间，\\(I = U \\sqcup V\\)，\\(a \\in U\\), \\(b \\in V\\), \\(a < b\\)。\\(c = \\sup(U \\cap [a,b])\\)。\\(\\mathbb{R}\\) 的最小上界性质保证 \\(c\\) 存在。然后用 \\(U, V\\) 的开性推出矛盾。这个证明的核心就是 \\(\\mathbb{R}\\) 的序完备性。Heine-Borel 用到了紧致性而非连通性。"
+      },
+      {
+        "id": "topology-ch06-q19",
+        "question": "\\(f: \\mathbb{R} \\to \\mathbb{R}\\) 连续，满足 \\(f^2(x) = x^2\\)。以下哪个是 \\(f\\) 的全部可能？",
+        "options": [
+          "\\(f(x) = x\\) 或 \\(f(x) = -x\\)",
+        "\\(f(x) = |x|\\) 或 \\(f(x) = -|x|\\)",
+        "\\(f(x) = x\\), \\(f(x) = -x\\), \\(f(x) = |x|\\), \\(f(x) = -|x|\\)",
+        "只有 \\(f(x) = x\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(f^2(x) = x^2 \\Rightarrow |f(x)| = |x|\\)，即 \\(f(x) = x\\) 或 \\(f(x) = -x\\) 逐点。\\(f\\) 连续，\\(\\mathbb{R}\\) 连通，\\(\\{x : f(x) = x\\}\\) 和 \\(\\{x : f(x) = -x\\}\\) 是闭集。\\(x \\neq 0\\) 时两者不相交。连通性限制翻转只能在 \\(0\\) 处发生。四种情况：正半轴和负半轴上各选 \\(x\\) 或 \\(-x\\)，在 \\(0\\) 处匹配。结果恰好是 \\(x, -x, |x|, -|x|\\)。"
+      },
+      {
+        "id": "topology-ch06-q20",
+        "question": "道路连通且局部道路连通空间中，连通 \\(\\iff\\) 道路连通。如果空间只是局部道路连通（不预先知道全局连通），结论如何？",
+        "options": [
+          "连通 \\(\\Rightarrow\\) 道路连通",
+        "连通 \\(\\not\\Rightarrow\\) 道路连通",
+        "道路连通 \\(\\not\\Rightarrow\\) 连通",
+        "两者不可比较"
+        ],
+        "answer": 0,
+        "explanation": "局部道路连通 + 连通 \\(\\Rightarrow\\) 道路连通。证明：固定 \\(x_0\\)，\\(P = \\{y : \\exists\\) 从 \\(x_0\\) 到 \\(y\\) 的道路 \\(\\}\\)。\\(P\\) 非空（\\(x_0 \\in P\\)）。\\(P\\) 开：\\(y \\in P\\)，局部道路连通给出道路连通开邻域 \\(U \\ni y\\)，\\(U \\subseteq P\\)。\\(P\\) 闭：\\(y \\notin P\\)，同理 \\(y\\) 的道路连通邻域 \\(\\subseteq X \\setminus P\\)。\\(X\\) 连通 \\(\\Rightarrow P = X\\)。"
+      },
+      {
+        "id": "topology-ch06-q21",
+        "question": "\\(X\\) 有有限多个连通分量 \\(\\iff\\) 什么条件？",
+        "options": [
+          "\\(X\\) 紧致",
+        "每个连通分量既开又闭",
+        "\\(X\\) 局部连通且紧致",
+        "\\(X\\) 有限"
+        ],
+        "answer": 1,
+        "explanation": "连通分量总是闭的。若有有限个连通分量 \\(C_1, \\ldots, C_n\\)，每个 \\(C_i\\) 的补 \\(\\bigcup_{j \\neq i} C_j\\) 是有限个闭集的并，闭，所以 \\(C_i\\) 开。反之，若每个连通分量 clopen，\\(X\\) 紧致则有限个 clopen 集覆盖，但不需要紧致性也可以——关键是 clopen 分量不会\"无穷细分\"。实际上有限个 clopen 连通分量 \\(\\iff\\) 恰好有限个连通分量。"
+      },
+      {
+        "id": "topology-ch06-q22",
+        "question": "\\(\\mathbb{R}^2\\) 去掉一个点仍然连通。但 \\(\\mathbb{R}^1\\) 去掉一个点不连通。这可以用来证明什么？",
+        "options": [
+          "\\(\\mathbb{R}\\) 和 \\(\\mathbb{R}^2\\) 不同胚",
+        "\\(\\mathbb{R}^2\\) 紧致",
+        "\\(\\mathbb{R}\\) 不是道路连通的",
+        "\\(\\mathbb{R}^2\\) 是度量空间"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(f: \\mathbb{R} \\to \\mathbb{R}^2\\) 是同胚，则 \\(f\\) 限制到 \\(\\mathbb{R} \\setminus \\{0\\}\\) 给出与 \\(\\mathbb{R}^2 \\setminus \\{f(0)\\}\\) 的同胚。但 \\(\\mathbb{R} \\setminus \\{0\\}\\) 不连通（两个半直线），\\(\\mathbb{R}^2 \\setminus \\{f(0)\\}\\) 连通。连通性是拓扑不变量，同胚空间连通性相同。矛盾。这是证明不同维欧氏空间不同胚的经典方法。"
+      },
+      {
+        "id": "topology-ch06-q23",
+        "question": "设 \\(A \\subseteq X\\) 连通，\\(A \\subseteq B \\subseteq \\overline{A}\\)。\\(B\\) 是否连通？",
+        "options": [
+          "是",
+        "否",
+        "只在 \\(B = \\overline{A}\\) 时",
+        "只在 \\(X\\) 度量时"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(B = U \\sqcup V\\)（\\(U, V\\) 非空、开于 \\(B\\)、不相交），\\(A = (A \\cap U) \\sqcup (A \\cap V)\\)。\\(A\\) 连通 \\(\\Rightarrow A \\subseteq U\\) 或 \\(A \\subseteq V\\)。不妨 \\(A \\subseteq U\\)。\\(V \\subseteq B \\subseteq \\overline{A}\\)，\\(V\\) 中每点是 \\(A\\) 的极限点。但 \\(V\\) 开于 \\(B\\) 且 \\(V \\cap A = \\emptyset\\)...对 \\(v \\in V\\)，\\(V\\) 是 \\(v\\) 在 \\(B\\) 中的开邻域，\\(V \\cap A = \\emptyset\\)，\\(v\\) 不是 \\(A\\) 的聚点于 \\(B\\)。但 \\(v \\in \\overline{A}\\)（在 \\(X\\) 中），\\(B\\) 中 \\(v\\) 的邻域不一定是 \\(X\\) 中已证？实际上...取 \\(X\\) 中开集 \\(W\\) 使 \\(V = W \\cap B\\)。\\(v \\in W\\)，\\(W\\) 是 \\(X\\) 中开邻域。\\(v \\in \\overline{A} \\Rightarrow W \\cap A \\neq \\emptyset\\)。\\(W \\cap A \\subseteq W \\cap B \\cap A = V \\cap A = \\emptyset\\)，矛盾！所以 \\(V = \\emptyset\\)。"
+      },
+      {
+        "id": "topology-ch06-q24",
+        "question": "单连通空间的定义是什么？",
+        "options": [
+          "连通",
+        "道路连通且基本群平凡",
+        "每条闭曲线包围一个区域",
+        "没有\"洞\""
+        ],
+        "answer": 1,
+        "explanation": "单连通 = 道路连通 + \\(\\pi_1(X, x_0) = \\{e\\}\\)（基本群平凡）。等价于：每条闭道路可以连续收缩为一点。\\(\\mathbb{R}^n\\) 单连通。\\(S^1\\) 不单连通（\\(\\pi_1 = \\mathbb{Z}\\)）。\\(S^2\\) 单连通（\\(\\pi_1 = 0\\)）。C 只在 \\(\\mathbb{R}^2\\) 子集中直觉正确。D 太模糊。"
+      },
+      {
+        "id": "topology-ch06-q25",
+        "question": "局部连通但不连通的空间例子是什么？",
+        "options": [
+          "不存在",
+        "\\(\\mathbb{R} \\setminus \\{0\\}\\)（删去原点）",
+        "拓扑学家正弦曲线",
+        "\\(\\mathbb{Q}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathbb{R} \\setminus \\{0\\} = (-\\infty, 0) \\cup (0, +\\infty)\\)。不连通（两个连通分量）。但局部连通：每个点的每个邻域含一个开区间（连通）。C 不局部连通（\\((0,0)\\) 附近没有连通开邻域）。\\(\\mathbb{Q}\\) 不局部连通。局部连通是局部性质，与全局连通无关。"
+      },
+      {
+        "id": "topology-ch06-q26",
+        "question": "在电路设计中，电路图的连通性对应什么电气性质？",
+        "options": [
+          "电路有唯一解",
+        "电路中所有节点有电流路径相连（可通电）",
+        "电路有最大功率",
+        "电路是线性的"
+        ],
+        "answer": 1,
+        "explanation": "电路图的连通性意味着任意两个节点之间存在由导线和元件组成的路径。不连通的电路有\"孤立\"部分，无法相互通电。在 PCB 设计和网络分析中，连通性检查（connectivity check / DRC）是最基本的验证步骤。不连通分量对应电气隔离的子电路。"
+      },
+      {
+        "id": "topology-ch06-q27",
+        "question": "在图像处理中，\"连通分量标记\"（Connected Component Labeling）的数学基础是什么拓扑概念？",
+        "options": [
+          "紧致性",
+        "连通分量",
+        "同调群",
+        "覆叠空间"
+        ],
+        "answer": 1,
+        "explanation": "图像中相邻像素（4-连通或8-连通）且具有相同属性（如颜色）分为一组，每组是一个\"连通分量\"。CCL 算法本质上是计算像素图的连通分量分解。这是拓扑连通分量概念在离散（格点）图上的直接应用。用于目标检测、OCR、医学影像分割等。"
+      },
+      {
+        "id": "topology-ch06-q28",
+        "question": "在网络安全中，若攻击者切断网络中的一个节点使网络断裂为两部分（不连通），该节点称为？",
+        "options": [
+          "桥接节点",
+        "割点/关节点 (articulation point)",
+        "路由器",
+        "防火墙"
+        ],
+        "answer": 1,
+        "explanation": "图论中，删除后使图不连通的顶点称为割点/关节点（articulation point）。类比拓扑学：连通空间中去掉某个点后变为不连通——这是不动点和分离性质的研究对象。在网络安全中，识别割点对于评估网络鲁棒性至关重要。加强割点的冗余（双连通化）可以防止单点故障。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="geometry" data-module="topology"
+      style="--domain-color: var(--c-geometry);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">GÉOMÉTRIE</span>
+      <a href="../../../modules/geometry/topology.html" class="module-name">点集拓扑</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 7</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 连通空间的定义与等价刻画</a></li>
+      <li><a href="#kp2">02 · 连续映射保连通与中间值定理</a></li>
+      <li><a href="#kp3">03 · 道路连通与拓扑学家的正弦曲线</a></li>
+      <li><a href="#kp4">04 · 连通分量与局部连通性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>连通性</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>连通空间的定义与等价刻画</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>直觉上，一个空间是"连通"的意味着它是"一整块"——不能被切成两 个分开的部分。这个概念是中间值定理的拓扑本质，也是讨论空间 "整体性"的基础。精确化"不可分割"需要用开集语言：一个空间 连通当且仅当它不能写成两个非空不相交开集的并。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>连通性是拓扑不变量，被连续映射保持。它是代数拓扑中零阶 同调群 \(H_0\) 的"影子"（\(H_0(X) \cong \mathbb{Z}^k\)，\(k\) = 连通分量数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(X\) 连通 \(\iff\) 不存在非空开集 \(U, V\) 使 \(X = U \sqcup V\)（\(U \cap V = \emptyset\)）。 <strong>等价条件</strong>： (1) \(X\) 中既开又闭的集合只有 \(\emptyset\) 和 \(X\)（clopen 条件）。 (2) 不存在连续满射 \(f: X \to \{0, 1\}\)（离散拓扑）。 证明 (1)\(\iff\)原定义：若 \(A\) 是非空真 clopen 子集， 则 \(X = A \sqcup (X \setminus A)\)，两个非空开集。反之类似。 <strong>连通子集的性质</strong>： - 连通子集的闭包仍连通。 - 若 \(\{A_\alpha\}\) 都连通且 \(\bigcap A_\alpha \neq \emptyset\)， 则 \(\bigcup A_\alpha\) 连通。 <strong>R 的连通性</strong>：\(\mathbb{R}\) 连通。 证明：设 \(\mathbb{R} = U \sqcup V\)（非空开）。取 \(a \in U, b \in V\)，\(a < b\)。 令 \(c = \sup(U \cap [a,b])\)。若 \(c \in U\)，\(U\) 开 \(\Rightarrow\) \((c-\varepsilon, c+\varepsilon) \subseteq U\)，与 \(c = \sup\) 矛盾。 若 \(c \in V\)，\(V\) 开 \(\Rightarrow\) \((c-\varepsilon, c) \subseteq V\)， 与 \(c = \sup(U \cap [a,b])\) 矛盾（存在 \(U\) 中元素更接近 \(c\)）。 故 \(\mathbb{R}\) 不可分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 中间值定理：\(f: [a,b] \to \mathbb{R}\) 连续，\(f(a) < 0 < f(b)\) \(\Rightarrow \exists c,\; f(c) = 0\)（连通性保持）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{Q}\)（标准拓扑子空间）是否连通？ 解答：不连通。取任意无理数 \(\alpha\)， \(\mathbb{Q} = (\mathbb{Q} \cap (-\infty, \alpha)) \sqcup (\mathbb{Q} \cap (\alpha, +\infty))\)。 两个集合在子空间拓扑下都开且非空。 易错点：\(\mathbb{Q}\) "稠密"≠"连通"。稠密性和连通性是不同概念。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个空间连通？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\([0,1]\\) 是 \\(\\mathbb{R}\\) 的连通子集（闭区间连通）。')">A. \(\mathbb{Q}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\([0,1]\\) 是 \\(\\mathbb{R}\\) 的连通子集（闭区间连通）。')">B. \(\{0\} \cup (1,2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\([0,1]\\) 是 \\(\\mathbb{R}\\) 的连通子集（闭区间连通）。')">C. \([0,1]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\([0,1]\\) 是 \\(\\mathbb{R}\\) 的连通子集（闭区间连通）。')">D. \(\{0,1\}\)（离散拓扑）</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>连续映射保连通与中间值定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>连通性的核心应用是中间值定理的拓扑推广：连续函数将连通集映为 连通集。在 \(\mathbb{R}\) 中，连通集就是区间，因此连续函数的像 是区间——这正是中间值定理。这个简单的观察是证明方程有解的 强大工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理：连续映射保连通性</strong>。 设 \(f: X \to Y\) 连续，\(X\) 连通。若 \(f(X) = A \sqcup B\)（\(A, B\) 在 \(f(X)\) 中开且不相交），则 \(X = f^{-1}(A) \sqcup f^{-1}(B)\)， \(f^{-1}(A), f^{-1}(B)\) 在 \(X\) 中开且不相交。 \(X\) 连通 \(\Rightarrow\) 其中之一为空 \(\Rightarrow\) \(A\) 或 \(B\) 为空。 故 \(f(X)\) 连通。 <strong>中间值定理（拓扑版）</strong>：\(f: X \to \mathbb{R}\) 连续，\(X\) 连通。 \(f(X)\) 是 \(\mathbb{R}\) 的连通子集 = 区间。 特别地，若 \(f(a) < c < f(b)\)，则 \(\exists x \in X\)，\(f(x) = c\)。 <strong>\(\mathbb{R}\) 中连通集的刻画</strong>：\(A \subseteq \mathbb{R}\) 连通 \(\iff\) \(A\) 是区间（含退化情况）。 证明充分性：设 \(a < c < b\)，\(a, b \in A\)。若 \(c \notin A\)， 则 \(A = (A \cap (-\infty, c)) \sqcup (A \cap (c, +\infty))\)， 两非空开集，矛盾。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 证明奇数次实系数多项式至少有一个实根 - 物理中连续介质的中间值性质</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明方程 \(x^5 + x = 1\) 在 \((0,1)\) 中有解。 解答：\(f(x) = x^5 + x - 1\)，\(f(0) = -1 < 0\)，\(f(1) = 1 > 0\)。 \(f\) 连续（多项式），\([0,1]\) 连通。由中间值定理， \(\exists c \in (0,1)\)，\(f(c) = 0\)。 易错点：中间值定理保证存在性但不保证唯一性。 验证唯一需要单调性或其他分析工具。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f: S^1 \to \mathbb{R}\) 连续。以下哪个一定成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(S^1\\) 紧致，连续实函数在紧集上取到最大值。')">A. \(f\) 有零点</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(S^1\\) 紧致，连续实函数在紧集上取到最大值。')">B. \(f\) 是常数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(S^1\\) 紧致，连续实函数在紧集上取到最大值。')">C. \(\exists x,\; f(x) = f(-x)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(S^1\\) 紧致，连续实函数在紧集上取到最大值。')">D. \(f\) 有最大值</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>道路连通与拓扑学家的正弦曲线</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>连通性的定义看似抽象（用开集），一个更直观的概念是"道路连通"： 任何两点之间都可以用连续路径连接。道路连通蕴含连通，但反之 不成立——著名的反例是"拓扑学家的正弦曲线"。理解两者的区别 对于正确使用基本群等工具（要求道路连通）至关重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>道路连通是更强的"可达性"条件，直接关联到基本群的定义 （基本群需要道路来定义回路）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>道路连通</strong>：\(X\) 道路连通 \(\iff\) \(\forall x, y \in X\)， \(\exists \gamma: [0,1] \to X\) 连续，\(\gamma(0) = x\)，\(\gamma(1) = y\)。 <strong>道路连通 \(\Rightarrow\) 连通</strong>：若 \(X = U \sqcup V\)， 取 \(x \in U, y \in V\)。\(\gamma: [0,1] \to X\) 连续路径。 \([0,1]\) 连通 \(\Rightarrow \gamma([0,1])\) 连通 \(\Rightarrow\) \(\gamma([0,1]) \subseteq U\) 或 \(\gamma([0,1]) \subseteq V\)。 但 \(\gamma(0) = x \in U\)，\(\gamma(1) = y \in V\)，矛盾。 <strong>反之不成立——拓扑学家的正弦曲线</strong>： \(S = \{(x, \sin(1/x)) : x > 0\} \cup \{(0, y) : -1 \leq y \leq 1\}\)。 \(S\) 连通（\(S_0 = \{(x, \sin(1/x)) : x > 0\}\) 连通，\(S = \overline{S_0}\)， 连通集的闭包连通）。但 \(S\) 不道路连通：不存在从 \((0,0)\) 到 \((1/\pi, 0)\) 的连续路径（直觉：曲线在 \(x=0\) 附近"震荡无穷多次"）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{R}^n \setminus \{0\}\)（\(n \geq 2\)）是否道路连通？ 解答：是。对任意 \(x, y \in \mathbb{R}^n \setminus \{0\}\)（\(n \geq 2\)）， 若线段 \(tx + (1-t)y\) 不经过原点，直接连。 若经过原点（即 \(y = -\lambda x\)，\(\lambda > 0\)），取中间点 \(z\) 不在 \(x, y\) 的直线上（\(n \geq 2\) 保证可以）， 用两段折线 \(x \to z \to y\) 连接。 易错点：\(\mathbb{R} \setminus \{0\}\) 不道路连通（甚至不连通： \((-\infty, 0) \sqcup (0, +\infty)\)）。维度 \(n \geq 2\) 是关键。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下哪个是连通但不道路连通的空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A 和 C 都道路连通；D 不连通。')">A. \(S^1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！A 和 C 都道路连通；D 不连通。')">B. 拓扑学家的正弦曲线</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A 和 C 都道路连通；D 不连通。')">C. \(\mathbb{R}^2 \setminus \{0\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。A 和 C 都道路连通；D 不连通。')">D. \([0,1] \cup [2,3]\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>连通分量与局部连通性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>即使空间不连通，我们也想理解它的"组成部分"。每个点属于唯一的 最大连通子集——连通分量。类似地有道路连通分量。局部连通性则 是保证连通分量是开集（而不仅仅闭集）的条件——这在基本群理论 和覆叠空间理论中是重要的技术假设。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>连通分量</strong>：\(x\) 的连通分量 \(C(x) = \bigcup\{A : x \in A,\; A \text{ 连通}\}\)。 \(C(x)\) 是包含 \(x\) 的最大连通子集。 性质：\(C(x)\) 是闭集（连通集的闭包连通）。 \(\{C(x)\}_{x \in X}\) 构成 \(X\) 的分划。 <strong>道路连通分量</strong>：\(P(x) = \{y : \exists \gamma \text{ 从 } x \text{ 到 } y\}\)。 \(P(x) \subseteq C(x)\)，但不一定相等。 <strong>局部连通</strong>：\(\forall x\)，\(\forall U \ni x\) 开，\(\exists V\) 连通开， \(x \in V \subseteq U\)。 <strong>局部道路连通</strong>：类似，用道路连通开集。 关键定理： \[\text{局部连通} \Rightarrow \text{连通分量是开集（也是闭集）}\] \[\text{局部道路连通 + 连通} \Rightarrow \text{道路连通}\] <strong>全不连通</strong>：每个连通分量是单点集。 例：\(\mathbb{Q}\)，Cantor 集。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 覆叠空间理论要求底空间局部道路连通且半局部单连通 - Cantor 集（全不连通紧集）在动力系统和分形理论中扮演重要角色</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：Cantor 集 \(C\) 是全不连通的。简述原因。 解答：\(C\) 是从 \([0,1]\) 中反复去掉中间三分之一开区间得到的。 对任意 \(x \neq y \in C\)，\(|x-y| > 0\)，存在某一步被去掉的 区间 \((a,b) \subseteq [0,1] \setminus C\) 且 \(a < \min(x,y)\) 或 \(\max(x,y) < b\) 的情况使得 \(x, y\) 被分隔。 更精确：\(C\) 中不包含任何区间（其补在 \([0,1]\) 中稠密）， 所以 \(C\) 的任何含两个以上点的子集都不连通。 易错点：全不连通 ≠ 离散拓扑。\(C\) 全不连通但不离散 （\(C\) 无孤立点，每点都是聚点）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">以下关于连通分量的说法，哪个正确？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。连通分量是闭集（连通集的闭包连通，故最大连通集是闭的）。')">A. 连通分量总是开集</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！连通分量是闭集（连通集的闭包连通，故最大连通集是闭的）。')">B. 连通分量总是闭集</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。连通分量是闭集（连通集的闭包连通，故最大连通集是闭的）。')">C. 连通分量可能既不开也不闭</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。连通分量是闭集（连通集的闭包连通，故最大连通集是闭的）。')">D. 连通分量总是单点集</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/geometry/topology.html" class="nav-overview">📋 概览</a>
+      <a href="ch07.html" class="nav-next">Ch.7 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

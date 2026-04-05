@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 共形映射 — 复分析 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "complex-ch05-q1",
+        "question": "共形映射（conformal mapping）的定义？",
+        "options": [
+          "保角且保向的映射——\\(f'(z_0) \\neq 0\\) 的全纯函数在 \\(z_0\\) 处共形",
+        "保面积的映射",
+        "线性映射",
+        "保距的映射"
+        ],
+        "answer": 0,
+        "explanation": "\\(f\\) 全纯，\\(f'(z_0) \\neq 0\\)：\\(f\\) 在 \\(z_0\\) 附近是局部双射，且保持两条曲线的交角（大小和方向）。\\(f'(z_0) = 0\\)：角度被 \\(m\\) 倍化（\\(m\\) 阶零点），不共形。共形 = 局部形状不变（无穷小圆仍映为圆）。"
+      },
+      {
+        "id": "complex-ch05-q2",
+        "question": "\\(f(z) = z^2\\) 在 \\(z_0 = 0\\) 处共形吗？在 \\(z_0 = 1\\) 处呢？",
+        "options": [
+          "\\(z = 0\\)：\\(f'(0) = 0\\)，不共形。\\(z = 1\\)：\\(f'(1) = 2 \\neq 0\\)，共形",
+        "两处都共形",
+        "两处都不共形",
+        "0 处共形，1 处不共形"
+        ],
+        "answer": 0,
+        "explanation": "\\(f'(z) = 2z\\)。\\(f'(0) = 0\\)：原点处角度加倍（两条直线的夹角在像中变为原来的 \\(2\\) 倍）。\\(f'(1) = 2 \\neq 0\\)：在 \\(z = 1\\) 处共形。共形性逐点检验——只需导数非零。"
+      },
+      {
+        "id": "complex-ch05-q3",
+        "question": "Möbius 变换（分式线性变换）的一般形式？",
+        "options": [
+          "\\(T(z) = \\frac{az + b}{cz + d}\\)（\\(ad - bc \\neq 0\\)）",
+        "\\(T(z) = az + b\\)",
+        "\\(T(z) = z^n\\)",
+        "\\(T(z) = e^z\\)"
+        ],
+        "answer": 0,
+        "explanation": "四个参数 \\(a, b, c, d\\)（\\(ad - bc \\neq 0\\) 保证非退化）。Möbius 变换将 \\(\\hat{\\mathbb{C}} = \\mathbb{C} \\cup \\{\\infty\\}\\) 双射到自身。基本性质：(1) 将圆/直线映为圆/直线；(2) 保交比；(3) 组成群 \\(\\cong PSL(2, \\mathbb{C})\\)。"
+      },
+      {
+        "id": "complex-ch05-q4",
+        "question": "将上半平面 \\(\\text{Im}(z) > 0\\) 映到单位圆盘 \\(|w| < 1\\) 的 Möbius 变换？",
+        "options": [
+          "\\(w = \\frac{z - i}{z + i}\\)（将 \\(i \\mapsto 0\\)，实轴 \\(\\mapsto\\) 单位圆）",
+        "\\(w = z^2\\)",
+        "\\(w = e^z\\)",
+        "\\(w = 1/z\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(z = i\\)：\\(w = 0\\)（上半平面中心点映到圆盘中心）。\\(z = 0\\)（实轴）：\\(w = -i/i = -1\\)（\\(|w| = 1\\)）。\\(z = 1\\)：\\(w = (1-i)/(1+i) = -i\\)（\\(|w| = 1\\)）。实轴 \\(\\to\\) 单位圆。上半平面 \\(\\to |w| < 1\\)。这是最基本的共形映射之一。"
+      },
+      {
+        "id": "complex-ch05-q5",
+        "question": "Riemann 映射定理：任何单连通真子域 \\(D \\subsetneq \\mathbb{C}\\) 都可以共形映到？",
+        "options": [
+          "单位圆盘 \\(\\mathbb{D} = \\{|z| < 1\\}\\)",
+        "上半平面",
+        "A 和 B 等价（两者可互相共形映射）",
+        "任意域"
+        ],
+        "answer": 2,
+        "explanation": "Riemann 映射定理：\\(D\\) 单连通 + \\(D \\neq \\mathbb{C}\\) \\(\\Rightarrow\\) \\(\\exists\\) 双全纯 \\(f: D \\to \\mathbb{D}\\)。固定 \\(z_0 \\in D\\)，\\(f(z_0) = 0\\)，\\(f'(z_0) > 0\\)，映射唯一。\\(\\mathbb{D}\\) 和上半平面共形等价 \\(\\Rightarrow\\) C 对。\\(\\mathbb{C}\\) 本身不能（Liouville：\\(\\mathbb{C} \\to \\mathbb{D}\\) 有界整函数 = 常数）。"
+      },
+      {
+        "id": "complex-ch05-q6",
+        "question": "Möbius 变换 \\(T(z) = 1/z\\) 的几何作用？",
+        "options": [
+          "反演 + 关于实轴反射——将圆/直线映为圆/直线",
+        "旋转",
+        "平移",
+        "缩放"
+        ],
+        "answer": 0,
+        "explanation": "\\(1/z = 1/\\bar z \\cdot |z|^{-2} \\cdot \\bar z / |z|^0\\)... 更直观：\\(z \\mapsto 1/\\bar z\\)（关于单位圆反演）再取共轭。\\(|z| = r \\to |w| = 1/r\\)。圆/直线映为圆/直线（广义圆）。\\(0 \\mapsto \\infty\\)，\\(\\infty \\mapsto 0\\)。"
+      },
+      {
+        "id": "complex-ch05-q7",
+        "question": "Schwarz-Christoffel 公式将上半平面映到多边形。三角形对应几个参数？",
+        "options": [
+          "三个预顶点 \\(x_1, x_2, x_3\\)（实轴上）和三个外角 \\(\\alpha_k\\)（由三角形内角决定）",
+        "一个参数",
+        "六个参数",
+        "零个参数"
+        ],
+        "answer": 0,
+        "explanation": "SC 公式：\\(f'(z) = C \\prod_{k=1}^n (z - x_k)^{\\alpha_k/\\pi - 1}\\)。三角形 \\(n = 3\\)。三个预顶点 \\(x_k\\)（可用 Möbius 固定三个中的三个到 \\(0, 1, \\infty\\)），三个外角 \\(\\alpha_k\\)（\\(\\sum \\alpha_k = 2\\pi\\)，仅两个自由）。SC 映射是古典几何函数论的核心。"
+      },
+      {
+        "id": "complex-ch05-q8",
+        "question": "\\(f(z) = e^z\\) 将哪些域共形映射到哪些域？\\(\\{0 < \\text{Im}(z) < \\pi\\}\\) 映到？",
+        "options": [
+          "上半平面 \\(\\text{Im}(w) > 0\\)",
+        "单位圆盘",
+        "右半平面",
+        "下半平面"
+        ],
+        "answer": 0,
+        "explanation": "\\(z = x + iy\\)（\\(0 < y < \\pi\\)）：\\(w = e^z = e^x e^{iy}\\)。\\(|w| = e^x \\in (0, \\infty)\\)，\\(\\arg w = y \\in (0, \\pi)\\)。\\(w\\) 扫过上半平面。\\(e^z\\) 将水平带域映为角域或半平面。条形域 → 上半平面是经典的共形映射。"
+      },
+      {
+        "id": "complex-ch05-q9",
+        "question": "三点决定 Möbius 变换：\\(T\\) 将 \\(z_1, z_2, z_3\\) 分别映到 \\(w_1, w_2, w_3\\)。用交比表达？",
+        "options": [
+          "\\((w, w_1; w_2, w_3) = (z, z_1; z_2, z_3)\\)（交比相等）",
+        "\\(T(z) = (z - z_1)/(z - z_3)\\)",
+        "需四点",
+        "无唯一解"
+        ],
+        "answer": 0,
+        "explanation": "交比 \\((z, z_1; z_2, z_3) = \\frac{(z-z_1)(z_2-z_3)}{(z-z_3)(z_2-z_1)}\\)。Möbius 变换保交比。将 \\(z_k \\mapsto w_k\\)（\\(k=1,2,3\\)）：\\((w, w_1; w_2, w_3) = (z, z_1; z_2, z_3)\\) 给出 \\(w = T(z)\\)。三点确定唯一 Möbius（\\(\\hat{\\mathbb{C}}\\) 上 \\(4\\) 参数 \\(-1\\) 射影等价 \\(= 3\\) 自由度）。"
+      },
+      {
+        "id": "complex-ch05-q10",
+        "question": "Riemann 映射定理对多连通域成立吗？",
+        "options": [
+          "不成立——环域 \\(\\{r < |z| < R\\}\\) 和 \\(\\{r' < |z| < R'\\}\\) 共形等价 \\(\\Leftrightarrow\\) \\(R/r = R'/r'\\)",
+        "成立",
+        "任何域都能映到圆盘",
+        "双连通域都等价"
+        ],
+        "answer": 0,
+        "explanation": "Riemann 映射仅对单连通域。双连通域的共形分类：每个双连通域共形等价于某环域 \\(\\{1 < |z| < R\\}\\)（\\(R\\) 唯一）或穿孔圆盘/穿孔平面。共形模 \\(= \\log R\\)。\\(n\\)-连通域需 \\(3n - 6\\)（\\(n \\geq 3\\)）个实参数——共形映射空间更复杂。"
+      },
+      {
+        "id": "complex-ch05-q11",
+        "question": "\\(f(z) = z + 1/z\\)（Joukowski 变换）。单位圆外部 \\(|z| > 1\\) 映到什么域？",
+        "options": [
+          "\\(\\mathbb{C} \\setminus [-2, 2]\\)（复平面减去线段 \\([-2, 2]\\)）",
+        "上半平面",
+        "单位圆盘",
+        "全平面"
+        ],
+        "answer": 0,
+        "explanation": "\\(z = e^{i\\theta}\\)：\\(f = 2\\cos\\theta \\in [-2, 2]\\)（单位圆映到线段）。\\(|z| > 1\\)：\\(f'(z) = 1 - 1/z^2 \\neq 0\\)（\\(z \\neq \\pm 1\\)）。\\(f\\) 在 \\(|z| > 1\\) 上一一（可验证）。像 \\(= \\mathbb{C} \\setminus [-2,2]\\)。航空工程：将圆柱外域映为机翼外域（Joukowski 翼型）。"
+      },
+      {
+        "id": "complex-ch05-q12",
+        "question": "\\(T(z) = \\frac{z - a}{1 - \\bar a z}\\)（\\(|a| < 1\\)）。这是单位圆盘到自身的 Möbius 自同构。\\(T\\) 将 \\(a\\) 映到？",
+        "options": [
+          "\\(0\\)",
+        "\\(a\\)",
+        "\\(1\\)",
+        "\\(-a\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(a) = (a-a)/(1 - |a|^2) = 0\\)。\\(|z| = 1\\)：\\(|T| = |z-a|/|1-\\bar a z| = |z-a|/|\\bar z(\\bar z - \\bar a)| = |z-a|/|z-a| = 1\\)（\\(|z|=1\\)时\\(|1-\\bar a z| = |z||z^{-1} - \\bar a| = |\\bar z - \\bar a| = |z-a|\\)）。\\(T:\\mathbb{D}\\to\\mathbb{D}\\) 双全纯。\\(\\mathbb{D}\\) 的自同构群 \\(= \\{e^{i\\theta}\\frac{z-a}{1-\\bar a z}\\}\\)。"
+      },
+      {
+        "id": "complex-ch05-q13",
+        "question": "Riemann 映射定理的证明核心用到？",
+        "options": [
+          "Montel 定理（正规族：一致有界的全纯函数族紧）+ 极值方法",
+        "留数定理",
+        "Cauchy 定理直接",
+        "Schwarz 引理单独足够"
+        ],
+        "answer": 0,
+        "explanation": "设 \\(\\mathcal{F} = \\{f: D \\to \\mathbb{D},\\ f 单射，f(z_0)=0,\\ f'(z_0)>0\\}\\)。\\(\\mathcal{F} \\neq \\emptyset\\)（\\(D \\neq \\mathbb{C}\\) 保证）。\\(\\sup_{f \\in \\mathcal{F}} f'(z_0)\\) 有限（有界族）。Montel：\\(\\mathcal{F}\\) 正规 \\(\\Rightarrow\\) 极值序列有收敛子列 \\(\\to f^* \\in \\mathcal{F}\\)。\\(f^*\\) 是满射（Schwarz 引理 + 极值性）。"
+      },
+      {
+        "id": "complex-ch05-q14",
+        "question": "将上半平面映到正三角形内部的 SC 公式：\\(f'(z) = C(z-x_1)^{-2/3}(z-x_2)^{-2/3}(z-x_3)^{-2/3}\\)。外角 \\(= 2\\pi/3\\)（正三角形内角 \\(\\pi/3\\)，外角 \\(2\\pi/3\\)）。指数 \\(\\alpha/\\pi - 1 = ?\\)",
+        "options": [
+          "\\(2/3/\\pi \\cdot \\pi - 1 = -1/3\\)——等等，外角 \\(\\beta_k = \\pi - \\alpha_k\\)。SC中指数 \\(= -\\beta_k/\\pi\\)。\\(\\beta_k = 2\\pi/3 \\Rightarrow\\) 指数 \\(= -2/3\\)",
+        "\\(-1/3\\)",
+        "\\(1/3\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 0,
+        "explanation": "SC 公式：\\(f'(z) = C'\\prod(z-x_k)^{-\\beta_k/\\pi}\\)（\\(\\beta_k\\) = 外角 \\(= \\pi - \\) 内角）。正三角形内角 \\(= \\pi/3\\)，外角 \\(\\beta_k = 2\\pi/3\\)。指数 \\(= -2/3\\)。\\(f'(z) = C' (z-x_1)^{-2/3}(z-x_2)^{-2/3}(z-x_3)^{-2/3}\\)。三个预顶点可用 Möbius 固定为 \\(0, 1, \\infty\\)。"
+      },
+      {
+        "id": "complex-ch05-q15",
+        "question": "共形映射保持 Laplace 方程。若 \\(u\\) 在 \\(D\\) 上调和，\\(w = f(z)\\) 共形，则 \\(U(w) = u(f^{-1}(w))\\) 在 \\(f(D)\\) 上？",
+        "options": [
+          "调和（\\(\\Delta_w U = 0\\)）",
+        "不一定调和",
+        "满足热方程",
+        "满足波方程"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\Delta_w U = |f'^{-1}|^{-2} \\Delta_z u = 0\\)（共形映射下 Laplacian 差一个正因子）。调和函数在共形映射下保持调和——这是用共形映射求解 Dirichlet 问题的关键。将复杂域映到圆盘，在圆盘上解出 Poisson 积分，再映回。"
+      },
+      {
+        "id": "complex-ch05-q16",
+        "question": "所有 Möbius 变换构成的群同构于？",
+        "options": [
+          "\\(PSL(2, \\mathbb{C}) = SL(2, \\mathbb{C})/\\{\\pm I\\}\\)",
+        "\\(GL(2, \\mathbb{R})\\)",
+        "\\(SO(3)\\)",
+        "\\(S_3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(z) = \\frac{az+b}{cz+d} \\leftrightarrow \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}\\)。矩阵乘法 \\(\\leftrightarrow\\) 变换复合。\\(\\lambda T \\leftrightarrow \\lambda \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}\\)（同一变换），故商掉标量 \\(\\Rightarrow\\) \\(PGL(2) = PSL(2)\\)。子群：单位圆盘自同构 \\(\\cong PSU(1,1)\\)，上半平面自同构 \\(\\cong PSL(2,\\mathbb{R})\\)。"
+      },
+      {
+        "id": "complex-ch05-q17",
+        "question": "\\(f: \\mathbb{D} \\to \\mathbb{D}\\) 双全纯，\\(f(0) = 0\\)。Schwarz 引理 \\(\\Rightarrow\\) \\(f\\) 是？",
+        "options": [
+          "旋转：\\(f(z) = e^{i\\theta} z\\)",
+        "恒等",
+        "常数",
+        "任意"
+        ],
+        "answer": 0,
+        "explanation": "Schwarz：\\(|f(z)| \\leq |z|\\)。\\(f^{-1}: \\mathbb{D} \\to \\mathbb{D}\\) 双全纯，\\(f^{-1}(0) = 0\\)：\\(|f^{-1}(w)| \\leq |w|\\)。\\(|z| = |f^{-1}(f(z))| \\leq |f(z)| \\leq |z|\\)。\\(|f(z)| = |z|\\)：Schwarz 取等 \\(\\Rightarrow\\) \\(f(z) = e^{i\\theta}z\\)。圆盘保原点的自同构只有旋转。"
+      },
+      {
+        "id": "complex-ch05-q18",
+        "question": "\\(f(z) = \\sqrt{z}\\)（主值）将 \\(\\mathbb{C} \\setminus (-\\infty, 0]\\) 映到？",
+        "options": [
+          "右半平面 \\(\\text{Re}(w) > 0\\)",
+        "上半平面",
+        "单位圆盘",
+        "全平面"
+        ],
+        "answer": 0,
+        "explanation": "\\(z = re^{i\\theta}\\)（\\(\\theta \\in (-\\pi, \\pi)\\)）：\\(\\sqrt{z} = \\sqrt{r} e^{i\\theta/2}\\)。\\(\\theta/2 \\in (-\\pi/2, \\pi/2)\\) \\(\\Rightarrow\\) \\(\\text{Re}(\\sqrt{z}) = \\sqrt{r}\\cos(\\theta/2) > 0\\)。像 = 右半平面。\\(\\sqrt{z}\\) 是 \\(z^2\\) 的逆映射（在适当割线下）。"
+      },
+      {
+        "id": "complex-ch05-q19",
+        "question": "将右半平面 \\(\\text{Re}(z) > 0\\) 映到单位圆盘的 Möbius 变换？",
+        "options": [
+          "\\(w = \\frac{z - 1}{z + 1}\\)（将 \\(1 \\mapsto 0\\)，\\(0 \\mapsto -1\\)，\\(\\infty \\mapsto 1\\)）",
+        "\\(w = z/(z+1)\\)",
+        "\\(w = (z-i)/(z+i)\\)",
+        "\\(w = 1/z\\)"
+        ],
+        "answer": 0,
+        "explanation": "虚轴（\\(\\text{Re}(z) = 0\\)）\\(\\to\\) 单位圆。\\(z = iy\\)：\\(w = (iy-1)/(iy+1)\\)，\\(|w| = |iy-1|/|iy+1| = 1\\) ✓。\\(z = 1\\)：\\(w = 0 \\in \\mathbb{D}\\)。右半平面 \\(\\to \\mathbb{D}\\)。组合 \\(w = (z-1)/(z+1)\\) 和 \\((z-i)/(z+i)\\)（上半平面\\(\\to \\mathbb{D}\\)）可得各域之间的标准映射。"
+      },
+      {
+        "id": "complex-ch05-q20",
+        "question": "Koebe 1/4 定理：\\(f: \\mathbb{D} \\to \\mathbb{C}\\) 单射全纯，\\(f(0) = 0\\)，\\(f'(0) = 1\\)。\\(f(\\mathbb{D}) \\supseteq ?\\)",
+        "options": [
+          "\\(\\{|w| < 1/4\\}\\)（像包含半径 \\(1/4\\) 的圆盘）",
+        "\\(\\{|w| < 1\\}\\)",
+        "\\(\\{|w| < 1/2\\}\\)",
+        "\\(\\mathbb{C}\\)"
+        ],
+        "answer": 0,
+        "explanation": "Koebe 函数 \\(k(z) = z/(1-z)^2\\) 取到等号：\\(k(\\mathbb{D}) = \\mathbb{C} \\setminus (-\\infty, -1/4]\\)（距原点最近点 \\(= 1/4\\)）。任何 \\(f\\) 在 \\(S\\) 类（\\(f(0)=0\\)，\\(f'(0)=1\\)，单叶）中，\\(f(\\mathbb{D}) \\supseteq D(0, 1/4)\\)。\\(1/4\\) 是最优常数。"
+      },
+      {
+        "id": "complex-ch05-q21",
+        "question": "SC 映射将上半平面映到矩形。当矩形长宽比变化时，涉及哪个特殊函数？",
+        "options": [
+          "椭圆积分 \\(K(k) = \\int_0^1 \\frac{dt}{\\sqrt{(1-t^2)(1-k^2t^2)}}\\)（模 \\(k\\) 决定长宽比）",
+        "Gamma 函数",
+        "Bessel 函数",
+        "Legendre 多项式"
+        ],
+        "answer": 0,
+        "explanation": "矩形 SC：\\(f'(z) = C(z-x_1)^{-1/2}(z-x_2)^{-1/2}(z-x_3)^{-1/2}(z-x_4)^{-1/2}\\)。\\(x_k = 0, 1, 1/k^2, \\infty\\)（典型选取）。\\(f = C\\int \\frac{dz}{\\sqrt{z(z-1)(z-1/k^2)}}\\)——椭圆积分。矩形长宽比 \\(= K'(k)/K(k)\\)。SC 映射与椭圆函数理论深刻关联。"
+      },
+      {
+        "id": "complex-ch05-q22",
+        "question": "\\(f(z) = \\sin z\\) 将竖条带 \\(\\{-\\pi/2 < \\text{Re}(z) < \\pi/2\\}\\) 映到？",
+        "options": [
+          "\\(\\mathbb{C} \\setminus ((-\\infty, -1] \\cup [1, \\infty))\\)（复平面减去两条射线）",
+        "上半平面",
+        "单位圆盘",
+        "全平面"
+        ],
+        "answer": 0,
+        "explanation": "边界 \\(\\text{Re}(z) = \\pm\\pi/2\\)：\\(\\sin(\\pm\\pi/2 + iy) = \\pm\\cosh y\\)，\\(|\\sin| \\to \\infty\\)。像：\\(\\sin z\\) 将半条带 \\(\\{0 < x < \\pi/2, y > 0\\}\\) 映到第一象限减去 \\((1,\\infty)\\)——组合四份得完整像。\\(\\sin z\\) 在此条带内单叶。"
+      },
+      {
+        "id": "complex-ch05-q23",
+        "question": "Möbius 变换的分类：\\(T(z) = (az+b)/(cz+d)\\)（\\(c \\neq 0\\)）有几个不动点？\\(T(z) = z\\) 的解？",
+        "options": [
+          "通常 \\(2\\) 个不动点（\\(cz^2 + (d-a)z - b = 0\\)），一元二次；相等时为抛物型",
+        "总是 \\(1\\) 个",
+        "\\(3\\) 个",
+        "\\(0\\) 个"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(z) = z \\Rightarrow az + b = z(cz + d) \\Rightarrow cz^2 + (d-a)z - b = 0\\)。\\(\\Delta = (d-a)^2 + 4bc\\)。\\(\\Delta \\neq 0\\)：两个不动点（椭圆/双曲/loxodromic 型）。\\(\\Delta = 0\\)：一个不动点（抛物型，如 \\(z \\mapsto z + 1\\)）。不动点分类决定 Möbius 变换的几何行为。"
+      },
+      {
+        "id": "complex-ch05-q24",
+        "question": "数值 SC 映射：Driscoll-Trefethen 的 SC Toolbox 用什么方法计算预顶点 \\(x_k\\)？",
+        "options": [
+          "通过求解非线性方程组（预顶点使多边形边长匹配给定值），用 Newton 迭代",
+        "解析公式",
+        "Monte Carlo 方法",
+        "FFT"
+        ],
+        "answer": 0,
+        "explanation": "SC 公式中 \\(x_k\\) 不能解析给出（除特殊对称情况）。预顶点满足 \\(|f(x_{k+1}) - f(x_k)| = \\) 第 \\(k\\) 边长度——\\(n-3\\) 个非线性方程（3 个自由度被 Möbius 固定）。SC Toolbox 用高效 Newton 法 + 自适应数值积分。数值共形映射在工程（电磁、流体）中广泛应用。"
+      },
+      {
+        "id": "complex-ch05-q25",
+        "question": "Riemann 映射是否对 \\(\\mathbb{C}\\) 本身成立？\\(\\mathbb{C}\\) 和 \\(\\mathbb{D}\\) 共形等价吗？",
+        "options": [
+          "不等价（\\(f: \\mathbb{C} \\to \\mathbb{D}\\) 全纯有界 \\(\\Rightarrow\\) 常数，Liouville）",
+        "等价",
+        "取决于映射",
+        "\\(\\mathbb{C}\\) 不是单连通"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathbb{C}\\) 单连通但 \\(= \\mathbb{C}\\)（不是真子域）。Riemann 映射定理排除 \\(\\mathbb{C}\\)。若 \\(f: \\mathbb{C} \\xrightarrow{\\sim} \\mathbb{D}\\)：\\(f\\) 有界整函数 \\(\\Rightarrow\\) 常数。\\(\\mathbb{C}\\) 和 \\(\\mathbb{D}\\) 拓扑同胚但不共形等价——共形结构比拓扑结构更精细。"
+      },
+      {
+        "id": "complex-ch05-q26",
+        "question": "在电磁学中，二维静电场的电势满足 \\(\\Delta \\phi = 0\\)。用共形映射求解平行板电容器（条带域）的电势：映到什么域最方便？",
+        "options": [
+          "上半平面或单位圆盘——在标准域上 Poisson 积分是已知的",
+        "正方形",
+        "三角形",
+        "无穷域"
+        ],
+        "answer": 0,
+        "explanation": "条带 \\(\\{0 < y < d\\}\\)（两平行板 \\(y = 0\\) 和 \\(y = d\\)）——线性势 \\(\\phi = V_0 y/d\\) 直接可解。复杂边界：先 \\(w = f(z)\\) 共形映到已知域。\\(\\phi\\) 调和 + 共形不变 \\(\\Rightarrow\\) 在 \\(w\\)-平面求解，拉回到 \\(z\\)-平面。这是潜力论中共形映射的经典应用。"
+      },
+      {
+        "id": "complex-ch05-q27",
+        "question": "Joukowski 翼型：\\(w = z + c^2/z\\)（\\(c > 0\\)）将偏心圆映为具有尖后缘的翼型。绕翼型的环流 \\(\\Gamma\\) 由什么条件确定？",
+        "options": [
+          "Kutta 条件——流体在后缘光滑分离（后缘不产生无穷速度），唯一确定 \\(\\Gamma\\)",
+        "环流由翼弦决定",
+        "\\(\\Gamma = 0\\)",
+        "由边界层厚度决定"
+        ],
+        "answer": 0,
+        "explanation": "Joukowski 映射将圆的外流场（\\(W(z) = Uz + U R^2/z + i\\Gamma\\log z/(2\\pi)\\)）变换为翼型外场。后缘对应圆上 \\(z = c\\)（\\(w'(c) = 0\\) 的奇点）。Kutta 条件要求 \\(dW/dz\\) 在 \\(z = c\\) 的零点抵消 \\(dz/dw\\) 的极点 \\(\\Rightarrow\\) \\(\\Gamma = -4\\pi U R \\sin\\alpha\\)。共形映射 + Kutta 条件 = 经典升力理论。"
+      },
+      {
+        "id": "complex-ch05-q28",
+        "question": "在地球物理中，Schwarz-Christoffel 映射用于模拟地下断层（多边形边界）。半无穷划线 \\(\\{y < 0, x = 0\\}\\) 导致的 SC 映射 \\(f(z) = z^{1/2}\\) 将上半平面映到？",
+        "options": [
+          "第一象限 \\(\\{u > 0, v > 0\\}\\)（角度减半：\\(\\pi \\to \\pi/2\\)）",
+        "上半平面",
+        "全平面",
+        "条带"
+        ],
+        "answer": 0,
+        "explanation": "\\(w = z^{1/2}\\)：\\(\\arg z \\in (0, \\pi) \\Rightarrow \\arg w \\in (0, \\pi/2)\\)——第一象限。上半平面的\"角\"为 \\(\\pi\\)，映后角为 \\(\\pi/2\\)。SC 推广：\\(w = z^\\alpha\\)（\\(0 < \\alpha < 2\\)）映为角域 \\(\\{0 < \\arg w < \\alpha\\pi\\}\\)。裂缝/断层附近的场用幂函数映射处理——应力奇异性 \\(\\sim r^{\\alpha-1}\\)。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="analysis" data-module="complex"
+      style="--domain-color: var(--c-analysis);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ANALYSE</span>
+      <a href="../../../modules/analysis/complex.html" class="module-name">复分析</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 共形映射的定义与基本性质</a></li>
+      <li><a href="#kp2">02 · Möbius 变换</a></li>
+      <li><a href="#kp3">03 · Riemann 映射定理</a></li>
+      <li><a href="#kp4">04 · Schwarz-Christoffel 公式与应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>共形映射</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>共形映射的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>全纯函数不仅是函数——它还是几何变换。导数非零的全纯映射 保持角度不变（共形），这意味着无穷小的"形状"被保持。 共形映射理论将复分析与几何紧密联系，是流体力学、电磁学 和地图投影的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>共形性 = 局部保角 + 保向。\(f'(z_0) \neq 0\) 保证在 \(z_0\) 处 的微观放大因子 \(|f'(z_0)|\) 和旋转角 \(\arg f'(z_0)\) 一致。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>共形映射</strong>：\(f: D \to \Omega\) 全纯且 \(f'(z) \neq 0\) 在 \(D\) 上。 则 \(f\) 在每一点保持两条曲线的夹角（大小和方向）。 <strong>几何意义</strong>：\(f(z) \approx f(z_0) + f'(z_0)(z - z_0)\)（局部线性近似）。 乘以 \(f'(z_0) = |f'(z_0)| e^{i\theta}\)： - 伸缩因子 \(|f'(z_0)|\) - 旋转角 \(\theta = \arg f'(z_0)\) 两条曲线的夹角不变。 <strong>单叶（单射）全纯函数</strong>自动是共形映射（\(f'\) 非零由单射推出）。 <strong>反函数</strong>：\(f\) 单叶全纯 ⇒ \(f^{-1}\) 全纯（开映射定理的复分析版）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>机翼设计：Joukowski 变换 \(w = z + 1/z\) 将圆映为翼型， 共形性保证流速场正确变换。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(f(z) = z^2\) 在 \(z_0 = 1 + i\) 处的伸缩因子和旋转角。 解答：\(f'(z) = 2z\), \(f'(1+i) = 2(1+i) = 2\sqrt{2} e^{i\pi/4}\)。 伸缩因子 \(= 2\sqrt{2}\)，旋转角 \(= \pi/4 = 45°\)。 易错点：\(z^2\) 在 \(z = 0\) 处 \(f'(0) = 0\)，不共形！ 角度加倍（\(\theta \to 2\theta\)），不保角。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(f(z) = z^2\) 在哪里不共形？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(f\\'(0) = 0\\)，在 \\(z = 0\\) 处角度加倍，不保角。')">A. \(z = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(f\\'(0) = 0\\)，在 \\(z = 0\\) 处角度加倍，不保角。')">B. \(z = i\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(f\\'(0) = 0\\)，在 \\(z = 0\\) 处角度加倍，不保角。')">C. \(z = 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(f\\'(0) = 0\\)，在 \\(z = 0\\) 处角度加倍，不保角。')">D. 处处共形</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Möbius 变换</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Möbius 变换（分式线性变换）\(w = (az + b)/(cz + d)\) 是最基本 的共形映射。它保持"广义圆"（圆与直线）不变，且恰好构成 Riemann 球面的自同构群。任何两个圆盘之间的共形映射都可以 用 Möbius 变换实现，它是更复杂共形映射的基本构件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Möbius 变换 ↔ \(\text{PSL}(2, \mathbb{C})\) 矩阵群。 变换的复合 = 矩阵乘法，求逆 = 矩阵求逆。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>：\(T(z) = \frac{az + b}{cz + d}\)（\(ad - bc \neq 0\)）。 <strong>性质</strong>： (1) 将广义圆（圆和直线）映为广义圆 (2) 保持交比：\((z_1, z_2; z_3, z_4) = \frac{(z_1 - z_3)(z_2 - z_4)}{(z_1 - z_4)(z_2 - z_3)}\) (3) 三点唯一确定：指定三对像即可确定 \(T\) (4) \(\text{Aut}(\hat{\mathbb{C}}) = \text{PSL}(2, \mathbb{C})\) <strong>单位圆盘的自同构群</strong>：\(T(z) = e^{i\theta} \frac{z - a}{1 - \bar{a}z}\) （\(|a| < 1\)，\(\theta \in \mathbb{R}\)）。 <strong>上半平面 ↔ 单位圆盘</strong>：\(w = \frac{z - i}{z + i}\)（Cayley 变换）。 将 \(\text{Im}\, z > 0\) 映为 \(|w| < 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Smith 圆图（微波工程）本质上是 Möbius 变换： 阻抗 ↔ 反射系数的映射 \(\Gamma = (Z - Z_0)/(Z + Z_0)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：求将 \(0, 1, \infty\) 映为 \(1, i, -1\) 的 Möbius 变换。 解答：\((z, 0; 1, \infty) = z\)，\((w, 1; i, -1) = \frac{(w-i)(1+1)}{(w+1)(1-i)}\)。 令两者相等：\(z = \frac{2(w - i)}{(w + 1)(1 - i)}\)。 解出 \(w = \frac{(1 - i)z + 2i}{(1 - i)z + 2}\)（化简后）。 易错点：\(ad - bc = 0\) 时退化为常数映射，不是 Möbius 变换。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Möbius 变换保持什么不变？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Möbius 变换保持交比不变——这是射影几何的基本不变量。')">A. 面积</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Möbius 变换保持交比不变——这是射影几何的基本不变量。')">B. 交比</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Möbius 变换保持交比不变——这是射影几何的基本不变量。')">C. 模长</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Möbius 变换保持交比不变——这是射影几何的基本不变量。')">D. 实部</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Riemann 映射定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在复平面中，不同形状的单连通区域看起来很不一样——矩形、 椭圆、多边形等。Riemann 映射定理给出了惊人的结论： 除了 \(\mathbb{C}\) 本身，任何单连通区域都可以共形映射到 单位圆盘！这意味着从共形几何的角度，所有"有洞"以外的 区域都是"一样的"。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Riemann 映射定理是复分析中最深刻的存在性定理之一。 证明（Koebe 方法）使用正规族理论——从候选映射族中 用 Montel 定理提取收敛子列。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定理 (Riemann)</strong>：设 \(D \subsetneq \mathbb{C}\) 为单连通区域， \(D \neq \mathbb{C}\)。则存在双全纯映射（共形同构）\(f: D \to \mathbb{D}\)。 若固定 \(z_0 \in D\) 和 \(f(z_0) = 0\), \(f'(z_0) > 0\)，则 \(f\) 唯一。 <strong>证明框架</strong>（不展开细节）： Step 1. 取 \(\mathcal{F} = \{f: D \to \mathbb{D} \text{ 单射全纯},\; f(z_0) = 0\}\)。 Step 2. \(\mathcal{F}\) 非空（利用 \(D \neq \mathbb{C}\)，取平方根分支后适当 Möbius）。 Step 3. 取 \(|f'(z_0)|\) 的上确界——由 Montel 定理（正规族），存在子列 一致收敛于 \(f_0 \in \mathcal{F}\)。 Step 4. 证 \(f_0\) 满射（否则可构造一个 \(|f'(z_0)|\) 更大的映射，矛盾）。 <strong>不包括 \(D = \mathbb{C}\)</strong>：\(\mathbb{C}\) 不能共形映射到 \(\mathbb{D}\)（Liouville）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>数值共形映射（Schwarz-Christoffel 公式）在计算流体力学和 电场计算中用于将复杂区域映射为简单区域。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：上半平面 \(\mathbb{H} = \{z : \text{Im}\, z > 0\}\) 共形映射到 \(\mathbb{D}\)。 解答：Cayley 变换 \(f(z) = (z - i)/(z + i)\)。 验证：\(f(i) = 0\), \(f(\mathbb{R}) = \{|w| = 1\}\)（实轴映为单位圆），\(f(\mathbb{H}) = \mathbb{D}\)。 易错点：Riemann 映射定理仅对严格子区域成立。 \(\mathbb{C} \to \mathbb{D}\) 的双全纯映射不存在。 且定理仅保证存在性——显式求出映射通常很困难。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Riemann 映射定理对以下哪个区域不成立？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。环形区域不是单连通的（有"洞"），')">A. 矩形</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。环形区域不是单连通的（有"洞"），')">B. 多边形</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！环形区域不是单连通的（有"洞"），')">C. 环形区域 \(\{1 &lt; |z| &lt; 2\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。环形区域不是单连通的（有"洞"），')">D. 上半平面</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Schwarz-Christoffel 公式与应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Riemann 映射定理保证了映射的存在性，但如何显式构造？ 对多边形区域，Schwarz-Christoffel 公式给出从上半平面到 多边形的共形映射的导数公式。这是为数不多的能写出 "几乎显式"共形映射的情形，在工程计算中极为重要。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Schwarz-Christoffel 公式</strong>：设多边形 \(P\) 的顶点为 \(w_1, \ldots, w_n\)， 内角为 \(\alpha_1\pi, \ldots, \alpha_n\pi\)。从上半平面 \(\mathbb{H}\) 到 \(P\) 的共形映射 \(f\) 满足 \[f'(z) = C \prod_{k=1}^n (z - x_k)^{\alpha_k - 1}\] 其中 \(x_k \in \mathbb{R}\) 是顶点的原像，\(C\) 是常数。 <strong>原理</strong>：\(\arg f'(z)\) 在实轴上经过 \(x_k\) 时跳变 \((\alpha_k - 1)\pi\)， 恰好使像的方向旋转产生内角 \(\alpha_k \pi\)。 <strong>特例</strong>： - 无穷条带 \(\{0 < \text{Im}\, w < \pi\}\)：\(f(z) = \log z\) - 等腰直角三角形：椭圆积分 - 矩形：椭圆积分（涉及 Schwarz 函数的反函数）</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>翼型周围流场：用 S-C 公式将多边形翼型映为半平面， 在半平面上解 Laplace 方程后映射回去。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：从 \(\mathbb{H}\) 到无穷条带 \(\{0 < \text{Im}\, w < h\}\) 的共形映射。 解答：\(f(z) = \frac{h}{\pi}\log z\)。 验证：\(\text{Im}(\frac{h}{\pi}\log z) = \frac{h}{\pi}\arg z\)。 \(z \in \mathbb{H}\) 时 \(\arg z \in (0, \pi)\)， 故 \(\text{Im}\, f \in (0, h)\)。✓ 易错点：S-C 公式中 \(x_k\) 的具体值（"accessory parameters"） 通常无法显式确定，需数值求解。只有形状对称时才有解析解。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Schwarz-Christoffel 公式给出的是 \(f\) 的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。公式给出 \\(f\\'(z)\\)，需要积分 \\(f = \\int f\\' dz\\)')">A. \(f\) 本身的显式表达</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！公式给出 \\(f\\'(z)\\)，需要积分 \\(f = \\int f\\' dz\\)')">B. \(f\) 的导数的积分表达</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。公式给出 \\(f\\'(z)\\)，需要积分 \\(f = \\int f\\' dz\\)')">C. \(f\) 的 Taylor 系数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。公式给出 \\(f\\'(z)\\)，需要积分 \\(f = \\int f\\' dz\\)')">D. \(f\) 的留数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/analysis/complex.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

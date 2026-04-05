@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 鞅论 — 随机过程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-ch03-q1",
+        "question": "离散时间鞅 \\((M_n)\\) 关于滤 \\((\\mathcal{F}_n)\\) 的定义？",
+        "options": [
+          "\\(E[M_{n+1}|\\mathcal{F}_n]=M_n\\)（条件期望等于当前值）",
+        "\\(E[M_{n+1}]=E[M_n]\\)（无条件期望相等）",
+        "\\(M_{n+1} \\geq M_n\\) a.s.",
+        "\\(M_n\\) 独立"
+        ],
+        "answer": 0,
+        "explanation": "鞅三条件：(i) 适应 \\(\\mathcal{F}_n\\)；(ii) \\(E|M_n|<\\infty\\)；(iii) \\(E[M_{n+1}|\\mathcal{F}_n]=M_n\\)。B 是必要非充分（鞅蕴含 \\(E[M_n]=\\)常数，但反之不然）。C 是下鞅。"
+      },
+      {
+        "id": "stochastic-ch03-q2",
+        "question": "下鞅 (submartingale) 的定义？",
+        "options": [
+          "\\(E[X_{n+1}|\\mathcal{F}_n] \\geq X_n\\)",
+        "\\(E[X_{n+1}|\\mathcal{F}_n] \\leq X_n\\)",
+        "\\(E[X_{n+1}|\\mathcal{F}_n]=X_n\\)",
+        "\\(X_n\\) 递减"
+        ],
+        "answer": 0,
+        "explanation": "下鞅：\"平均趋于上升\"。B 是上鞅。C 是鞅。若 \\(M_n\\) 是鞅，则 \\(|M_n|\\) 是下鞅（Jensen 不等式：\\(E[|M_{n+1}||\\mathcal{F}_n] \\geq |E[M_{n+1}|\\mathcal{F}_n]|=|M_n|\\)）。"
+      },
+      {
+        "id": "stochastic-ch03-q3",
+        "question": "\\(S_n=\\sum_{k=1}^n X_k\\)（\\(X_k\\) iid, \\(E[X_k]=0\\)）。\\((S_n)\\) 是？",
+        "options": [
+          "鞅",
+        "下鞅",
+        "上鞅",
+        "都不是"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[S_{n+1}|\\mathcal{F}_n]=S_n+E[X_{n+1}|\\mathcal{F}_n]=S_n+0=S_n\\)（独立性）。若 \\(E[X_k]=\\mu>0\\) 则 \\(S_n\\) 是下鞅。零均值随机游走是最基本的鞅。"
+      },
+      {
+        "id": "stochastic-ch03-q4",
+        "question": "停时 \\(\\tau\\) 关于 \\((\\mathcal{F}_n)\\) 的定义？",
+        "options": [
+          "\\(\\{\\tau \\leq n\\} \\in \\mathcal{F}_n\\)（\\(\\forall n\\)）",
+        "\\(\\tau\\) 是常数",
+        "\\(\\{\\tau=n\\} \\in \\mathcal{F}_{n+1}\\)",
+        "\\(\\tau\\) 独立于 \\(\\mathcal{F}_n\\)"
+        ],
+        "answer": 0,
+        "explanation": "停时 = \"到时间 \\(n\\) 能判断是否已停\"。等价条件：\\(\\{\\tau=n\\} \\in \\mathcal{F}_n\\)。C 中 \\(\\mathcal{F}_{n+1}\\) 是预见时间（不是停时）。赌徒的策略必须基于已知信息，故规定停时。"
+      },
+      {
+        "id": "stochastic-ch03-q5",
+        "question": "可选停时定理 (OST) 最基本版本的条件？",
+        "options": [
+          "\\(M_n\\) 鞅，\\(\\tau\\) 有界停时",
+        "\\(M_n\\) 鞅，\\(\\tau\\) 任意",
+        "\\(M_n\\) 下鞅，\\(\\tau\\) 有界",
+        "无需条件"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\tau \\leq N\\)（有界）⟹ \\(E[M_\\tau]=E[M_0]\\)。无界时需额外条件（一致可积或有界增量+\\(E[\\tau]<\\infty\\)）。B 的反例：赌徒翻倍策略（\\(\\tau\\) 无界时 OST 失效）。"
+      },
+      {
+        "id": "stochastic-ch03-q6",
+        "question": "Doob 鞅收敛定理要求什么？",
+        "options": [
+          "\\((M_n)\\) 是 \\(L^1\\)-有界鞅（\\(\\sup_n E|M_n|<\\infty\\)），则 \\(M_n \\to M_\\infty\\) a.s.",
+        "\\(M_n\\) 有界",
+        "\\(M_n\\) 均匀可积",
+        "\\(M_n\\) iid"
+        ],
+        "answer": 0,
+        "explanation": "\\(L^1\\)-有界 ⟹ a.s. 收敛（但极限可能 \\(E[M_\\infty] \\neq E[M_0]\\)——Fatou 间隙）。C（均匀可积）更强：保证 \\(L^1\\) 收敛且 \\(E[M_\\infty]=E[M_0]\\)。B 是特殊情况。"
+      },
+      {
+        "id": "stochastic-ch03-q7",
+        "question": "Doob 分解 \\(X_n=M_n+A_n\\) 中 \\(M_n\\) 和 \\(A_n\\) 分别是？",
+        "options": [
+          "\\(M_n\\) 鞅，\\(A_n\\) 可料递增（\\(A_0=0\\), \\(A_n\\) 关于 \\(\\mathcal{F}_{n-1}\\) 可测）",
+        "\\(M_n\\) 递增，\\(A_n\\) 递减",
+        "两者都是鞅",
+        "\\(M_n\\) 常数，\\(A_n=X_n\\)"
+        ],
+        "answer": 0,
+        "explanation": "任何下鞅 \\((X_n)\\) 可唯一分解为鞅 + 可料递增过程。\\(A_n=\\sum_{k=1}^n (E[X_k|\\mathcal{F}_{k-1}]-X_{k-1}) \\geq 0\\)（下鞅条件）。\\(M_n=X_n-A_n\\)。这是 Doob-Meyer 分解的离散版。"
+      },
+      {
+        "id": "stochastic-ch03-q8",
+        "question": "\\(M_n=S_n^2-n\\)（\\(S_n\\) 简单随机游走）。\\((M_n)\\) 是鞅吗？",
+        "options": [
+          "是",
+        "否，是下鞅",
+        "否，是上鞅",
+        "取决于 \\(n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[S_{n+1}^2|\\mathcal{F}_n]=E[(S_n+X_{n+1})^2|\\mathcal{F}_n]=S_n^2+2S_n \\cdot 0+1=S_n^2+1\\)。\\(E[M_{n+1}|\\mathcal{F}_n]=S_n^2+1-(n+1)=S_n^2-n=M_n\\) ✓。这表明 \\(E[S_n^2]=n\\)。"
+      },
+      {
+        "id": "stochastic-ch03-q9",
+        "question": "\\(Z_n=\\prod_{k=1}^n X_k\\)（\\(X_k>0\\) iid, \\(E[X_k]=1\\)）。\\((Z_n)\\) 是？",
+        "options": [
+          "非负鞅",
+        "下鞅",
+        "不一定是鞅",
+        "上鞅"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[Z_{n+1}|\\mathcal{F}_n]=Z_n E[X_{n+1}]=Z_n \\cdot 1=Z_n\\)。非负（\\(X_k>0\\)），故由 Doob 收敛定理 \\(Z_n \\to Z_\\infty\\) a.s.。若 \\(\\text{Var}(X_k)>0\\) 则 \\(Z_\\infty=0\\) a.s.（集中不等式）。"
+      },
+      {
+        "id": "stochastic-ch03-q10",
+        "question": "简单随机游走从 \\(a\\)（\\(0<a<N\\)）出发。\\(\\tau=\\min\\{n:S_n=0 \\text{ or } N\\}\\)。\\(P(S_\\tau=N)=\\)？",
+        "options": [
+          "\\(a/N\\)",
+        "\\(1/2\\)",
+        "\\(a/(N-a)\\)",
+        "\\((N-a)/N\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(S_n\\) 是鞅（\\(p=q=1/2\\)）。OST: \\(E[S_\\tau]=S_0=a\\)。\\(E[S_\\tau]=N \\cdot P(S_\\tau=N)+0 \\cdot P(S_\\tau=0)\\)。\\(P(S_\\tau=N)=a/N\\)。经典赌徒破产公式。"
+      },
+      {
+        "id": "stochastic-ch03-q11",
+        "question": "使用 \\(M_n=S_n^2-n\\) 和 OST 求 \\(E[\\tau]\\)（\\(\\tau\\) 为随机游走首次到达 \\(0\\) 或 \\(N\\)，起点 \\(a\\)）？",
+        "options": [
+          "\\(a(N-a)\\)",
+        "\\(N^2\\)",
+        "\\(a^2\\)",
+        "\\(N\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[M_\\tau]=M_0\\): \\(E[S_\\tau^2]-E[\\tau]=a^2-0\\)。\\(E[S_\\tau^2]=N^2 \\cdot (a/N)+0 \\cdot(1-a/N)=Na\\)。\\(E[\\tau]=Na-a^2=a(N-a)\\)。\\(a=N/2\\) 时最大 \\(E[\\tau]=N^2/4\\)。"
+      },
+      {
+        "id": "stochastic-ch03-q12",
+        "question": "Doob 极大不等式：非负下鞅 \\((X_n)\\) 满足 \\(\\lambda P(\\max_{k \\leq n}X_k \\geq \\lambda) \\leq\\)？",
+        "options": [
+          "\\(E[X_n]\\)",
+        "\\(E[X_0]\\)",
+        "\\(E[\\max X_k]\\)",
+        "\\(n E[X_1]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\lambda P(X^* \\geq \\lambda) \\leq E[X_n \\mathbf{1}_{X^* \\geq \\lambda}] \\leq E[X_n]\\)（\\(X^*=\\max_{k \\leq n} X_k\\)）。类似 Markov 不等式但利用了下鞅结构。\\(L^p\\) 版本：\\(\\|X^*\\|_p \\leq \\frac{p}{p-1}\\|X_n\\|_p\\)（\\(p>1\\)）。"
+      },
+      {
+        "id": "stochastic-ch03-q13",
+        "question": "Doob 收敛定理中 \\(L^1\\)-有界但不一致可积的鞅例子？",
+        "options": [
+          "简单随机游走在 \\([0,N]\\) 上的分支过程灭绝概率",
+        "常数鞅",
+        "有界鞅",
+        "不存在这样的例子"
+        ],
+        "answer": 0,
+        "explanation": "\\(Z_n\\) 分支过程正则化鞅 \\(W_n=Z_n/m^n\\)（\\(m=E[Z_1]>1\\)）。\\(W_n \\to W\\) a.s.。若后代方差无穷则 \\(W=0\\) a.s.，\\(E[W]=0 \\neq 1=E[W_0]\\)（Fatou 间隙）。非一致可积。"
+      },
+      {
+        "id": "stochastic-ch03-q14",
+        "question": "适应过程 \\((X_n)\\) 的 Doob 分解 \\(X_n=M_n+A_n\\) 中 \\(A_n\\) 的递推式？",
+        "options": [
+          "\\(A_n-A_{n-1}=E[X_n|\\mathcal{F}_{n-1}]-X_{n-1}\\)",
+        "\\(A_n=E[X_n]\\)",
+        "\\(A_n=X_n-X_0\\)",
+        "\\(A_n=\\sum X_k\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A_n=\\sum_{k=1}^n (E[X_k|\\mathcal{F}_{k-1}]-X_{k-1})\\)。下鞅时每项 \\(\\geq 0\\)，故 \\(A_n\\) 递增。鞅时 \\(A_n \\equiv 0\\)。\\(M_n=X_n-A_n\\) 是鞅部分。唯一性由可料性保证。"
+      },
+      {
+        "id": "stochastic-ch03-q15",
+        "question": "鞅变换 \\((H \\cdot M)_n=\\sum_{k=1}^n H_k(M_k-M_{k-1})\\)。如果 \\(H\\) 可料有界，\\((M_n)\\) 是鞅，则 \\((H \\cdot M)_n\\) 是？",
+        "options": [
+          "鞅",
+        "下鞅",
+        "上鞅",
+        "不一定"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[(H \\cdot M)_n-(H \\cdot M)_{n-1}|\\mathcal{F}_{n-1}]=H_n E[M_n-M_{n-1}|\\mathcal{F}_{n-1}]=H_n \\cdot 0=0\\)。\\(H\\) 有界保证可积性。这是\"不能靠赌博策略战胜公平赌局\"的数学表述。"
+      },
+      {
+        "id": "stochastic-ch03-q16",
+        "question": "滤 \\((\\mathcal{F}_n)\\) 的直觉含义？",
+        "options": [
+          "到时间 \\(n\\) 为止可获得的全部信息",
+        "时间 \\(n\\) 的概率分布",
+        "\\(\\sigma\\)-代数的补集",
+        "鞅收敛的极限"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}\\)（信息递增）。\\(\\mathcal{F}_n=\\sigma(X_0,...,X_n)\\) 是自然滤。适应：\\(M_n\\) 关于 \\(\\mathcal{F}_n\\) 可测 =\"只用已知信息\"。条件期望 \\(E[\\cdot|\\mathcal{F}_n]\\) 是在信息 \\(\\mathcal{F}_n\\) 下的最佳预测。"
+      },
+      {
+        "id": "stochastic-ch03-q17",
+        "question": "Wald 等式：若 \\(X_i\\) iid, \\(E|X_1|<\\infty\\), \\(\\tau\\) 是停时, \\(E[\\tau]<\\infty\\)，则 \\(E[S_\\tau]=\\)？",
+        "options": [
+          "\\(E[X_1] \\cdot E[\\tau]\\)",
+        "\\(E[X_\\tau] \\cdot \\tau\\)",
+        "\\(E[S_n]\\) 对某个 \\(n\\)",
+        "\\(0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[\\sum_{i=1}^\\tau X_i]=E[X_1]E[\\tau]\\)。证明利用 \\(S_n-n\\mu\\) 是鞅 + OST（需 \\(E[\\tau]<\\infty\\) + 可积条件）。应用：赌徒破产中 \\(E[\\tau]\\) 的计算。"
+      },
+      {
+        "id": "stochastic-ch03-q18",
+        "question": "指数鞅 \\(M_n=e^{\\theta S_n}/(\\phi(\\theta))^n\\)（\\(\\phi(\\theta)=E[e^{\\theta X}]\\)）是鞅当且仅当？",
+        "options": [
+          "对所有 \\(\\theta\\) 使得 \\(\\phi(\\theta)<\\infty\\) 都成立",
+        "仅 \\(\\theta=0\\)",
+        "\\(\\theta=1\\)",
+        "\\(\\phi(\\theta)=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[M_{n+1}|\\mathcal{F}_n]=M_n \\cdot E[e^{\\theta X_{n+1}}]/\\phi(\\theta)=M_n\\)。只需矩母函数有限。应用：大偏差概率 \\(P(S_n \\geq na)\\) 的 Chernoff 界。Cramér 定理的核心工具。"
+      },
+      {
+        "id": "stochastic-ch03-q19",
+        "question": "OST 对无界停时失效的经典反例？",
+        "options": [
+          "赌徒翻倍策略：\\(\\tau=\\min\\{n:S_n=1\\}\\)（\\(S_n\\) 对称随机游走），\\(E[S_\\tau]=1 \\neq 0=E[S_0]\\)",
+        "常数停时",
+        "\\(\\tau \\leq 10\\)",
+        "不存在反例"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(\\tau<\\infty)=1\\)（一维随机游走常返），\\(S_\\tau=1\\) a.s.，但 \\(E[\\tau]=\\infty\\)。OST 要求 \\(E[\\tau]<\\infty\\) 或一致可积。翻倍策略在实际中因有限资金而无法执行。"
+      },
+      {
+        "id": "stochastic-ch03-q20",
+        "question": "Doob \\(L^p\\) 极大不等式：\\((M_n)\\) 鞅，\\(p>1\\)。\\(E[\\max_{k \\leq n}|M_k|^p] \\leq\\)？",
+        "options": [
+          "\\(\\left(\\frac{p}{p-1}\\right)^p E[|M_n|^p]\\)",
+        "\\(E[|M_n|^p]\\)",
+        "\\(p \\cdot E[|M_n|^p]\\)",
+        "\\(n \\cdot E[|M_n|^p]\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|M^*\\|_p \\leq \\frac{p}{p-1}\\|M_n\\|_p\\)（\\(p>1\\)）。\\(p \\to 1\\) 时常数爆炸（\\(L^1\\) 版本用弱型估计）。证明用 Doob 极大不等式 + 截断 + Hölder。常数 \\(p/(p-1)\\) 是最优的。"
+      },
+      {
+        "id": "stochastic-ch03-q21",
+        "question": "\\(L^1\\) 有界鞅 \\(M_n \\to M_\\infty\\) a.s. 的证明关键步骤？",
+        "options": [
+          "上穿估计 (upcrossing inequality): \\(E[U_n[a,b]] \\leq \\frac{E[(M_n-a)^+]}{b-a}\\)",
+        "Markov 不等式",
+        "Borel-Cantelli 引理",
+        "中心极限定理"
+        ],
+        "answer": 0,
+        "explanation": "Doob 上穿引理：\\([a,b]\\) 上穿次数 \\(U_n\\) 满足 \\((b-a)E[U_n] \\leq E[(M_n-a)^+] \\leq E|M_n|+|a|\\)（有界）。\\(n \\to \\infty\\): \\(U_\\infty<\\infty\\) a.s.。对所有有理 \\(a<b\\) 成立 ⟹ \\(\\lim M_n\\) 存在 a.s.。"
+      },
+      {
+        "id": "stochastic-ch03-q22",
+        "question": "可料过程 \\(H_n\\) 对下鞅 \\((X_n)\\) 的鞅变换 \\((H \\cdot X)_n\\)。若 \\(H_n \\geq 0\\)，结果是？",
+        "options": [
+          "下鞅",
+        "上鞅",
+        "鞅",
+        "不确定"
+        ],
+        "answer": 0,
+        "explanation": "\\(E[(H \\cdot X)_n-(H \\cdot X)_{n-1}|\\mathcal{F}_{n-1}]=H_n E[X_n-X_{n-1}|\\mathcal{F}_{n-1}] \\geq H_n \\cdot 0=0\\)。非负权重保持下鞅性。直觉：按正比例缩放增长趋势仍为正。"
+      },
+      {
+        "id": "stochastic-ch03-q23",
+        "question": "似然比鞅 \\(L_n=\\prod_{k=1}^n \\frac{dQ}{dP}(X_k)\\)。在测度 \\(P\\) 下 \\((L_n)\\) 是？",
+        "options": [
+          "非负鞅，\\(E_P[L_n]=1\\)",
+        "下鞅",
+        "上鞅",
+        "常数"
+        ],
+        "answer": 0,
+        "explanation": "\\(E_P[L_{n+1}|\\mathcal{F}_n]=L_n E_P[\\frac{dQ}{dP}(X_{n+1})]=L_n \\cdot 1=L_n\\)。这是 Radon-Nikodym 导数的核心。Neyman-Pearson 假设检验中序贯概率比检验 (SPRT) 的基础。"
+      },
+      {
+        "id": "stochastic-ch03-q24",
+        "question": "Azuma-Hoeffding 不等式：鞅差 \\(|M_k-M_{k-1}| \\leq c_k\\)。\\(P(M_n-M_0 \\geq t) \\leq\\)？",
+        "options": [
+          "\\(\\exp\\left(-\\frac{t^2}{2\\sum c_k^2}\\right)\\)",
+        "\\(\\frac{\\text{Var}(M_n)}{t^2}\\)",
+        "\\(e^{-t}\\)",
+        "\\(\\sum c_k/t\\)"
+        ],
+        "answer": 0,
+        "explanation": "有界差 + 指数鞅方法。比 Chebyshev (B) 更强。应用：随机图性质的集中不等式。McDiarmid 不等式是推广版（函数的 Lipschitz 条件）。\\(c_k\\) 等常数时简化为 \\(e^{-t^2/(2nc^2)}\\)。"
+      },
+      {
+        "id": "stochastic-ch03-q25",
+        "question": "一致可积鞅 \\((M_n)\\) 保证什么比 \\(L^1\\)-有界更强的结论？",
+        "options": [
+          "\\(M_n \\to M_\\infty\\) 在 \\(L^1\\) 中（\\(E|M_n-M_\\infty| \\to 0\\)），且 \\(M_n=E[M_\\infty|\\mathcal{F}_n]\\)",
+        "只保证 a.s. 收敛",
+        "\\(M_n\\) 有界",
+        "\\(M_\\infty=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "一致可积 ⟹ \\(L^1\\) 收敛（de la Vallée-Poussin）⟹ 可闭合（\\(M_n=E[M_\\infty|\\mathcal{F}_n]\\)）。反向也成立：可闭合 ⟹ 一致可积。\\(L^p\\)-有界鞅（\\(p>1\\)）自动一致可积。"
+      },
+      {
+        "id": "stochastic-ch03-q26",
+        "question": "序贯概率比检验 (SPRT)：\\(H_0: p=p_0\\) vs \\(H_1: p=p_1\\)。什么时候停止？",
+        "options": [
+          "似然比 \\(L_n=\\prod (p_1/p_0)^{X_i}((1-p_1)/(1-p_0))^{1-X_i}\\) 超过上界 \\(B\\) 或下穿 \\(A\\)",
+        "固定 \\(n\\) 后判断",
+        "\\(L_n=1\\) 时",
+        "先验概率改变时"
+        ],
+        "answer": 0,
+        "explanation": "SPRT: \\(L_n \\geq B\\) 则接受 \\(H_1\\)，\\(L_n \\leq A\\) 则接受 \\(H_0\\)，否则继续。\\(A \\approx \\beta/(1-\\alpha)\\), \\(B \\approx (1-\\beta)/\\alpha\\)。Wald 证明 SPRT 在两类错误约束下平均样本量最小。"
+      },
+      {
+        "id": "stochastic-ch03-q27",
+        "question": "金融中鞅的用途：无套利 ⟺ 存在等价鞅测度。这是？",
+        "options": [
+          "资产定价基本定理 (FTAP)",
+        "Black-Scholes 公式",
+        "CAPM 模型",
+        "有效市场假说"
+        ],
+        "answer": 0,
+        "explanation": "Harrison-Kreps (1979)：无套利 ⟺ 存在 \\(Q \\sim P\\) 使折现价格过程是 \\(Q\\)-鞅。\\(C_0=E_Q[e^{-rT}\\max(S_T-K,0)]\\)（期权定价）。Doob 分解在连续时间推广为 Doob-Meyer 分解。"
+      },
+      {
+        "id": "stochastic-ch03-q28",
+        "question": "分支过程 \\(Z_n\\)（后代均值 \\(m>1\\)）。\\(W_n=Z_n/m^n\\) 收敛到？",
+        "options": [
+          "\\(W_\\infty \\geq 0\\)，\\(P(W_\\infty>0)=1-q\\)（\\(q\\) 为灭绝概率）",
+        "\\(W_\\infty=\\infty\\)",
+        "\\(W_\\infty=0\\) a.s.",
+        "\\(W_n\\) 不收敛"
+        ],
+        "answer": 0,
+        "explanation": "\\(W_n\\) 非负鞅 ⟹ a.s. 收敛。\\(E[\\ln Z_1]>0\\) 且 \\(E[Z_1 \\ln Z_1]<\\infty\\)（Kesten-Stigum 条件）⟹ \\(W_\\infty>0\\) on survival。\\(Z_n \\sim m^n W_\\infty\\) 给出指数增长速率。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic.html" class="module-name">随机过程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 滤与鞅的定义</a></li>
+      <li><a href="#kp2">02 · 停时与 Doob 可选停时定理</a></li>
+      <li><a href="#kp3">03 · Doob 鞅收敛定理与极大不等式</a></li>
+      <li><a href="#kp4">04 · Doob 分解与鞅变换</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>鞅论</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>滤与鞅的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>鞅是概率论中最优美的概念之一，它描述了「公平赌博」的精确 数学结构。从股价模型到随机分析，鞅无处不在。它的定义 \(E[X_{n+1}|\mathcal{F}_n] = X_n\) 意味着：基于当前世界状态的最佳 预测就是当前值本身。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>滤(filtration) \(\{\mathcal{F}_n\}\) 描述信息的累积；适应过程要求 \(X_n\) 只能依赖于到 \(n\) 时刻的信息；鞅则添加了 「无漂移」的约束。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：滤 \(\{\mathcal{F}_n\}_{n \geq 0}\) 是 \(\sigma\)-代数的递增序列： \(\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots \subseteq \mathcal{F}\)。 过程 \(\{X_n\}\) 适应于 \(\{\mathcal{F}_n\}\) iff \(X_n\) 是 \(\mathcal{F}_n\)-可测 （即 \(X_n\) 只依赖于时刻 \(n\) 及之前的信息）。 鞅：若 \(E[|X_n|] < \infty\) 且 \[E[X_{n+1}|\mathcal{F}_n] = X_n \quad \text{a.s.}, \forall n\] 上鞅：\(E[X_{n+1}|\mathcal{F}_n] \leq X_n\)（期望趋降） 下鞅：\(E[X_{n+1}|\mathcal{F}_n] \geq X_n\)（期望趋升） 性质：\(\{X_n\}\) 鞅 iff \(\{X_n\}\) 同时是上鞅和下鞅。 \(\{X_n\}\) 鞅 \(\Rightarrow\) \(E[X_n] = E[X_0]\)（常数）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>金融中，折现股价在有效市场假说下是鞅；赌博中， 公平赌徒的财富过程是鞅。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：证明 \(M_n = e^{\theta S_n - n \psi(\theta)}\) 是鞅，其中 \(S_n = \sum X_i\)， \(X_i\) i.i.d.，\(\psi(\theta) = \ln E[e^{\theta X_1}]\)。 解答：\(E[M_{n+1}|\mathcal{F}_n] = M_n \cdot E[e^{\theta X_{n+1} - \psi(\theta)}] = M_n \cdot e^{-\psi(\theta)} E[e^{\theta X}] = M_n \cdot 1 = M_n\)。 易错点：忘记验证 \(E[|M_n|] < \infty\)（可积性条件）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(\{X_n\}\) 是鞅，则 \(E[X_n]\) 的行为是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。由塔性质 $E[X_n] = E[E[X_n|\\mathcal{F}_{n-1}]] = E[X_{n-1}]')">A. 递增</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。由塔性质 $E[X_n] = E[E[X_n|\\mathcal{F}_{n-1}]] = E[X_{n-1}]')">B. 递减</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！由塔性质 $E[X_n] = E[E[X_n|\\mathcal{F}_{n-1}]] = E[X_{n-1}]')">C. 常数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。由塔性质 $E[X_n] = E[E[X_n|\\mathcal{F}_{n-1}]] = E[X_{n-1}]')">D. 无法确定</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>停时与 Doob 可选停时定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在赌博中，「赢了就走」是一种停止策略。停时是基于当前信息 做出的「何时停止」的决策。Doob 可选停时定理告诉我们： 对于鞅（公平游戏），任何停止策略都无法创造获利机会。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>停时 \(\tau\) 是「不偏瞀未来」的随机时刻：\(\{\tau \leq n\} \in \mathcal{F}_n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>停时定义：\(\tau: \Omega \to \{0,1,2,\ldots\} \cup \{\infty\}\) 为停时 iff \(\{\tau \leq n\} \in \mathcal{F}_n\)，\(\forall n\)。 Doob 可选停时定理：若 \(\{X_n\}\) 是鞅，\(\tau\) 是 a.s. 有界停时 （\(\tau \leq N\) a.s.），则 \[E[X_\tau] = E[X_0]\] 更一般的版本：若 \(\{X_n\}\) 鞅且 \(\tau\) a.s. 有限，则 \(E[X_\tau] = E[X_0]\) 在以下任一条件下成立： (a) \(\tau\) 有界 (b) \(E[\tau] < \infty\) 且 \(|X_{n+1} - X_n|\) 有界 (c) \(E[|X_\tau|] < \infty\) 且 \(E[X_n \mathbf{1}_{\tau > n}] \to 0\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>证明赌博中无必胜策略；金融中的期权定价。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：随机游走 \(S_n = \sum_{i=1}^n Y_i\)（\(Y_i = \pm 1\) 等概率）。 \(\tau = \min\{n: S_n = a \text{ or } S_n = -b\}\)，\(S_0 = 0\)。求 \(P(S_\tau = a)\)。 解答：\(S_n\) 是鞅。\(E[\tau] < \infty\)（可证），且 \(|S_{n+1}-S_n|=1\)。 \(E[S_\tau] = E[S_0] = 0\)。\(E[S_\tau] = a \cdot P(S_\tau = a) + (-b)(1-P(S_\tau = a))\)。 解得 \(P(S_\tau = a) = b/(a+b)\)。 易错点：直接用 OST 而不验证其适用条件（如 \(E[\tau] < \infty\)）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若赌徒的财富 \(\{S_n\}\) 是鞅，则任何停止策略 \(\tau\) 下</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。这是 OST 的直接推论（在适用条件下）。')">A. \(E[S_\tau] &gt; 0\)（策略可获利）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！这是 OST 的直接推论（在适用条件下）。')">B. \(E[S_\tau] = E[S_0]\)（无法获利）</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。这是 OST 的直接推论（在适用条件下）。')">C. \(E[S_\tau] &lt; 0\)（必定亏损）</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Doob 鞅收敛定理与极大不等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>鞅会收敛吗？Doob 的收敛定理给出了肯定答案：\(L^1\)-有界上鞅 a.s. 收敛。而 Doob 极大不等式控制了鞅的波动大小，是 鞅论中最重要的工具性结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>收敛定理的核心思想是「穿越」(upcrossing)论证： 有界上鞅穿越任意区间 \([a,b]\) 的次数有限，即不会无限振荡。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Doob 鞅收敛定理：若 \(\{X_n\}\) 为上鞅且 \(\sup_n E[X_n^+] < \infty\)， 则 \(X_n \to X_\infty\) a.s.，且 \(E[|X_\infty|] < \infty\)。 证明要点：设 \(U_n([a,b])\) = \(X_0, \ldots, X_n\) 穿越 \([a,b]\) 的次数。 Doob 穿越引理：\((b-a) E[U_n([a,b])] \leq E[(X_n - a)^-]\)。 有界性保证 \(E[U_\infty] < \infty\)，故 \(U_\infty < \infty\) a.s.， 即 \(X_n\) 不无限振荡，必收敛。 Doob 极大不等式：若 \(\{X_n\}\) 为下鞅，则 \[P\!\left(\max_{0 \leq k \leq n} X_k \geq \lambda\right) \leq \frac{E[X_n^+]}{\lambda}\] \(L^p\) 版本 (\(p > 1\))： \[E\!\left[\max_{0 \leq k \leq n} |X_k|^p\right] \leq \left(\frac{p}{p-1}\right)^p E[|X_n|^p]\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>收敛定理保证了许多随机算法的收敛性；极大不等式用于 控制随机过程的尾部概率。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n\) 为非负上鞅，\(E[X_0] = 10\)。求 \(P(\max_n X_n \geq 50)\) 的上界。 解答：\(X_n\) 非负上鞅，则 \(-X_n\) 是非正下鞅。 由鞅性质 \(E[X_n] \leq E[X_0] = 10\)。 由 Doob 极大不等式：\(P(\max_n X_n \geq 50) \leq 10/50 = 1/5\)。 易错点：对上鞅与下鞅的极大不等式方向混淆。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Doob 鞅收敛定理要求什么条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。条件是上鞅 + \\(\\sup_n E[X_n^+] < \\infty\\)，后者是 \\(L^1\\) 有界性。')">A. 鞅性 + a.s. 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！条件是上鞅 + \\(\\sup_n E[X_n^+] < \\infty\\)，后者是 \\(L^1\\) 有界性。')">B. 上鞅性 + \(L^1\) 有界</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。条件是上鞅 + \\(\\sup_n E[X_n^+] < \\infty\\)，后者是 \\(L^1\\) 有界性。')">C. 下鞅性 + \(L^2\) 有界</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Doob 分解与鞅变换</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>任何适应可积过程都可分解为「鞅部分」+「可预测部分」。 Doob 分解是随机版的「信号+漂移」分离。鞅变换则是 离散版随机积分，为 Itô 积分铺路。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Doob 分解将随机世界分为「惊喜」（鞅）和「趋势」（可预测）， 是随机分析的基本分解工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>Doob 分解：任何适应可积过程 \(\{X_n\}\) 可唯一分解为 \[X_n = X_0 + M_n + A_n\] 其中 \(M_n\) 是鞅（\(M_0 = 0\)），\(A_n\) 是可预测过程（\(A_0 = 0\)， \(A_n\) 是 \(\mathcal{F}_{n-1}\)-可测的）。 构造：\(A_n = \sum_{k=1}^{n}(E[X_k|\mathcal{F}_{k-1}] - X_{k-1})\)， \(M_n = X_n - X_0 - A_n\)。 若 \(\{X_n\}\) 是上鞅，则 \(A_n\) 递减；若是鞅，则 \(A_n = 0\)。 鞅变换（离散随机积分）：若 \(\{M_n\}\) 是鞅，\(\{H_n\}\) 可预测，则 \[(H \cdot M)_n = \sum_{k=1}^{n} H_k (M_k - M_{k-1})\] 也是鞅（「确定性赌注策略不能将公平游戏变为有利」）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>鞅变换是离散版 Itô 积分，在金融中对应自融资交易策略。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(X_n\) 为随机游走（鞅）。\(H_n = 1\)（常数策略）。 \((H \cdot X)_n = \sum_{k=1}^n (X_k - X_{k-1}) = X_n - X_0\)。 这仍是鞅（整体平移），确认确定性策略无法获利。 易错点：\(H_n\) 必须是可预测的（\(\mathcal{F}_{n-1}\)-可测）， 不能依赖于未来信息。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Doob 分解 \(X_n = X_0 + M_n + A_n\) 中，\(A_n\) 是</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A_n\\) 是可预测过程，即 \\(A_n\\) 是 \\(\\mathcal{F}_{n-1}\\)-可测的')">A. \(\mathcal{F}_n\)-可测的</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(A_n\\) 是可预测过程，即 \\(A_n\\) 是 \\(\\mathcal{F}_{n-1}\\)-可测的')">B. \(\mathcal{F}_{n-1}\)-可测的</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(A_n\\) 是可预测过程，即 \\(A_n\\) 是 \\(\\mathcal{F}_{n-1}\\)-可测的')">C. 独立于 \(\mathcal{F}_n\) 的</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/probability/stochastic.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

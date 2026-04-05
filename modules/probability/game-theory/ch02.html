@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 Nash 均衡 — 博弈论 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "game-theory-ch02-q1",
+        "question": "Nash 均衡的正式定义是什么？",
+        "options": [
+          "策略组合 \\((s_1^*,...,s_n^*)\\) 满足 \\(\\forall i,\\forall s_i\\in S_i:u_i(s_i^*,s_{-i}^*)\\geq u_i(s_i,s_{-i}^*)\\)——没有人有单边偏离动机  B) 所有人收益最大  C) 社会福利最大  D) Pareto 最优"
+        ],
+        "answer": 0,
+        "explanation": "NE：每人策略都是对他人策略的最优反应。不要求全局最优——NE 可以是 Pareto 劣的（囚徒困境）。不要求唯一——可能多个 NE（协调博弈）。存在性：Nash 1950 定理——有限博弈一定有混合策略 NE。NE 是稳定状态概念：若所有人知道他人策略且已处于 NE，无人有动机改变。"
+      },
+      {
+        "id": "game-theory-ch02-q2",
+        "question": "\\(2\\times2\\) 博弈用\"下划线法\"（underline method）找纯策略 NE。博弈矩阵：\\((3,3),(1,4)\\); \\((4,1),(2,2)\\)。NE 是什么？",
+        "options": [
+          "\\((D,R)=(2,2)\\)——两个下划线交叉点  B) \\((U,L)\\)  C) \\((U,R)\\)  D) \\((D,L)\\)"
+        ],
+        "answer": 0,
+        "explanation": "行玩家 BR：列 L 中 \\(\\max(3,4)=4\\)→下划线 \\(D\\)；列 R 中 \\(\\max(1,2)=2\\)→下划线 \\(D\\)。列玩家 BR：行 U 中 \\(\\max(3,4)=4\\)→下划线 \\(R\\)；行 D 中 \\(\\max(1,2)=2\\)→下划线 \\(R\\)。交叉点：\\((\\text{D},\\text{R})=(2,2)\\)。这是囚徒困境变体——\\((U,L)=(3,3)\\) Pareto 优于 NE \\((D,R)=(2,2)\\)。注意行玩家的 BR 下划线出现在行上，列玩家下划线出现在列上。"
+      },
+      {
+        "id": "game-theory-ch02-q3",
+        "question": "NE 存在性定理（Nash 1950）：任何有限博弈至少有一个___。",
+        "options": [
+          "混合策略 Nash 均衡  B) 纯策略 Nash 均衡  C) 严格占优策略  D) Pareto 最优点"
+        ],
+        "answer": 0,
+        "explanation": "Nash 定理保证混合策略 NE 的存在，但不保证纯策略 NE（匹配硬币博弈无纯策略 NE）。证明使用 Kakutani 不动点定理——BR 对应在混合策略单纯形（紧凸集）上满足不动点定理条件。有限=有限参与者×有限纯策略。无限博弈（连续策略空间）的存在性需要额外条件（如拟凹性+连续性→Debreu-Glicksberg-Fan 定理）。"
+      },
+      {
+        "id": "game-theory-ch02-q4",
+        "question": "Cournot 双寡头博弈（线性需求 \\(P=a-Q\\)，\\(Q=q_1+q_2\\)，零成本）的 Nash 均衡产量 \\(q_i^*=?\\)",
+        "options": [
+          "\\(q_i^*=a/3\\)，\\(P^*=a/3\\)  B) \\(q_i^*=a/2\\)  C) \\(q_i^*=a/4\\)  D) \\(q_i^*=a\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_i=(a-q_1-q_2)q_i\\)。\\(\\frac{\\partial\\pi_i}{\\partial q_i}=a-2q_i-q_j=0\\Rightarrow q_i=(a-q_j)/2\\)（best response function）。对称 NE：\\(q^*=(a-q^*)/2\\Rightarrow q^*=a/3\\)。\\(P^*=a-2a/3=a/3\\)。利润 \\(\\pi_i=(a/3)^2=a^2/9\\)。对比垄断 \\(q_M=a/2,\\pi_M=a^2/4\\) 和完全竞争 \\(q_C=a,\\pi=0\\)。\\(n\\) 厂商对称 Cournot：\\(q_i^*=a/(n+1)\\), 当 \\(n\\to\\infty\\) 趋于竞争。"
+      },
+      {
+        "id": "game-theory-ch02-q5",
+        "question": "Braess 悖论是什么？",
+        "options": [
+          "在交通网络中增加一条路反而增加所有人的旅行时间——因为 NE 不是社会最优  B) 减少道路改善交通  C) NE 总是最优  D) 无法建模"
+        ],
+        "answer": 0,
+        "explanation": "经典 4 节点网络：增加中间直连路后，所有人都切换到新路（NE），但由于拥塞加剧，均衡旅行时间反而增加。根本原因：个体最优 \\(\\neq\\) 社会最优（每个人的路径选择给他人带来负外部性——拥塞）。Braess 悖论在互联网路由、电力网络等多个实际系统中被观察到。解决方案：收费（将外部性内部化）或信息管制。"
+      },
+      {
+        "id": "game-theory-ch02-q6",
+        "question": "Price of Anarchy（PoA）的定义是什么？",
+        "options": [
+          "\\(\\text{PoA}=\\frac{\\text{最差 NE 的社会成本}}{\\text{社会最优成本}}\\geq1\\)——衡量自私行为的效率损失  B) \\(\\text{PoA}=\\frac{\\text{最优NE}}{\\text{最差NE}}\\)  C) \\(\\text{PoA}<1\\)  D) 与 NE 无关"
+        ],
+        "answer": 0,
+        "explanation": "PoA（Koutsoupias-Papadimitriou 1999）：最坏的 NE 相对社会最优的效率比。PoA \\(=1\\) → NE 是社会最优。拥塞博弈中线性延迟函数：\\(\\text{PoA}\\leq4/3\\)（Roughgarden-Tardos 2002）。PoS（Price of Stability）\\(=\\frac{\\text{最好 NE}}{\\text{最优}}\\)≤PoA。Braess 悖论中 \\(\\text{PoA}=4/3\\)（经典例子）。"
+      },
+      {
+        "id": "game-theory-ch02-q7",
+        "question": "NE 的精炼（refinement）概念为什么重要？",
+        "options": [
+          "一个博弈可能有多个 NE，精炼排除\"不合理\"的均衡——如子博弈完美（排除空威胁）  B) 增加 NE 数量  C) 不重要  D) 仅适用于混合策略"
+        ],
+        "answer": 0,
+        "explanation": "精炼目的：从多个 NE 中选择更\"可信\"的。主要精炼：(1)子博弈完美 NE（SPNE）——排除不可信的威胁/承诺；(2)颤抖手完美（trembling-hand perfect）——对微小错误概率鲁棒；(3)序贯均衡（信念一致性）。例如：进入博弈中\"在位者威胁打价格战\"是 NE 但不是 SPNE——因为进入后打价格战不是在位者的最优反应。"
+      },
+      {
+        "id": "game-theory-ch02-q8",
+        "question": "\\(3\\times3\\) 博弈中找所有纯策略 NE。应用下划线法的步骤？",
+        "options": [
+          "对每列找行玩家最大收益（下划线），对每行找列玩家最大收益（下划线），双下划线格子是 NE  B) 只看对角线  C) 找最大值  D) 随机猜测"
+        ],
+        "answer": 0,
+        "explanation": "下划线法系统化：\\(m\\times n\\) 矩阵 \\((u_1,u_2)\\)。步骤 1：对每列 \\(j\\) 找 \\(\\max_i u_1(i,j)\\)，标记该格（行玩家 BR）。步骤 2：对每行 \\(i\\) 找 \\(\\max_j u_2(i,j)\\)，标记该格（列玩家 BR）。步骤 3：两个标记重合的格子就是纯策略 NE。时间 \\(O(mn)\\)——对小博弈高效。若无双标记格子→无纯策略 NE→需求混合 NE。"
+      },
+      {
+        "id": "game-theory-ch02-q9",
+        "question": "连续策略空间的 NE 求解。两厂商选广告支出 \\(a_1,a_2\\geq0\\)，利润 \\(\\pi_i=a_i(1-a_i-a_j/2)\\)。NE？",
+        "options": [
+          "\\(a_i^*=2/5\\)（对称），由 BR 函数交点求解  B) \\(a_i^*=1/2\\)  C) \\(a_i^*=0\\)  D) \\(a_i^*=1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\frac{\\partial\\pi_i}{\\partial a_i}=1-2a_i-a_j/2=0\\Rightarrow a_i=(1-a_j/2)/2=(2-a_j)/4\\)。对称 NE：\\(a^*=(2-a^*)/4\\Rightarrow4a^*=2-a^*\\Rightarrow5a^*=2\\Rightarrow a^*=2/5=0.4\\)。\\(\\pi_i=0.4(1-0.4-0.2)=0.4\\times0.4=0.16\\)。若两人同意各花 \\(a=0.25\\)：\\(\\pi_i=0.25(1-0.25-0.125)=0.25\\times0.625=0.156\\)——NE 中广告过度（\\(>\\) 社会最优），类似囚徒困境。"
+      },
+      {
+        "id": "game-theory-ch02-q10",
+        "question": "简单拥塞博弈：4000 辆车从 A 到 B，两条路。路 1 固定延迟 \\(45\\) 分钟，路 2 延迟 \\(x/100\\)（\\(x\\) = 车辆数）。NE 中各路车辆数？",
+        "options": [
+          "路 2 有 \\(x=4000\\) 辆（所有车！），延迟 \\(40<45\\)。但若增加新路...  B) 路 1 \\(2000\\)，路 2 \\(2000\\)  C) 路 1 \\(4000\\)  D) 路 2 \\(1000\\)"
+        ],
+        "answer": 0,
+        "explanation": "NE 条件：两路延迟相等（否则人们会切换）。路 2 延迟 \\(x/100\\)，路 1 延迟 \\(45\\)。\\(x/100=45\\Rightarrow x=4500>4000\\)。所以路 2 延迟 \\(=4000/100=40<45\\)→所有车选路 2 是 NE。社会最优也是所有车走路 2（\\(40<45\\)）。这里 NE=社会最优（因为路 1 是常数→没有拥塞外部性）。Braess 悖论需要更复杂的网络结构。"
+      },
+      {
+        "id": "game-theory-ch02-q11",
+        "question": "\\(\\epsilon\\)-Nash 均衡的定义：\\(\\forall i,\\forall s_i:u_i(s_i^*,s_{-i}^*)\\geq u_i(s_i,s_{-i}^*)-\\epsilon\\)。其意义是什么？",
+        "options": [
+          "允许每个玩家偏离最多损失 \\(\\epsilon\\) 收益——近似均衡，计算上比精确 NE 更容易  B) 精确 NE  C) \\(\\epsilon=0\\)  D) 仅理论概念"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\epsilon\\)-NE 放松了精确最优性要求——存在偏离但收益改善 \\(\\leq\\epsilon\\)。实际意义：有限理性玩家可能满足于近似最优。计算意义：精确 NE 是 PPAD-complete（可能没有多项式算法），但 \\(\\epsilon\\)-NE 在某些情况下可高效计算（如 \\(\\epsilon\\sim1/n^c\\) 时多项式算法存在）。Lipton-Markakis-Mehta 2003：\\(\\epsilon\\)-NE 可用支撑大小 \\(O(\\log n/\\epsilon^2)\\) 的均匀混合策略近似。"
+      },
+      {
+        "id": "game-theory-ch02-q12",
+        "question": "Stackelberg 博弈（先动者优势）与同时 Cournot 博弈的比较。先动者产量 \\(q_L\\) 和跟随者产量 \\(q_F\\)（\\(P=a-Q\\)，零成本）？",
+        "options": [
+          "\\(q_L=a/2,q_F=a/4\\)——先动者比 Cournot NE 产量更高，利润更大  B) \\(q_L=q_F=a/3\\)  C) \\(q_L=a/4,q_F=a/2\\)  D) \\(q_L=q_F=a/2\\)"
+        ],
+        "answer": 0,
+        "explanation": "逆向归纳：跟随者 BR \\(q_F=(a-q_L)/2\\)。先动者代入：\\(\\pi_L=(a-q_L-\\frac{a-q_L}{2})q_L=\\frac{(a-q_L)}{2}q_L\\)。\\(\\frac{\\partial\\pi_L}{\\partial q_L}=\\frac{a-2q_L}{2}=0\\Rightarrow q_L=a/2\\)。\\(q_F=(a-a/2)/2=a/4\\)。\\(\\pi_L=a^2/8>\\pi_{\\text{Cournot}}=a^2/9\\)。先动者承诺大产量，挤压跟随者空间。这是\"承诺的价值\"——先动 = 可信承诺。"
+      },
+      {
+        "id": "game-theory-ch02-q13",
+        "question": "NE 的唯一性条件。在什么条件下 NE 唯一？",
+        "options": [
+          "若博弈可被 IESDS 唯一求解（dominance solvable），或 BR 函数是压缩映射（contraction mapping）  B) 总是唯一  C) 从不唯一  D) 仅两人博弈"
+        ],
+        "answer": 0,
+        "explanation": "充分条件 1：IESDS 收敛到唯一策略组合→该博弈有唯一 NE。充分条件 2：对角严格凹博弈（Rosen 1965）——\\(B\\) 矩阵（BR 导数的 Jacobi 矩阵）谱半径 \\(<1\\) → BR 迭代收敛→NE 唯一。Cournot 在线性需求下满足此条件。超模博弈有最大和最小 NE——若相等则唯一。一般地 NE 唯一性难以保证——Wilson 1971 证明\"几乎所有\"博弈有奇数个 NE。"
+      },
+      {
+        "id": "game-theory-ch02-q14",
+        "question": "无政府状态代价 \\(\\text{PoA}\\) 在原子拥塞博弈（有限玩家，各有流量权重 \\(w_i\\)）和非原子拥塞博弈（连续玩家）中的区别？",
+        "options": [
+          "非原子拥塞博弈（Wardrop 均衡）中线性延迟的 \\(\\text{PoA}=4/3\\)；原子博弈中 \\(\\text{PoA}\\) 可能更大  B) 完全相同  C) 原子更小  D) 无法比较"
+        ],
+        "answer": 0,
+        "explanation": "非原子（无穷小玩家）：Wardrop 均衡——每条使用路径延迟相等。PoA\\(=4/3\\)（Roughgarden-Tardos 2002, 线性延迟）。原子（有限玩家，各有权重）：单个大玩家的偏离影响显著→PoA 可达 \\(5/2\\)（加权拥塞博弈的紧界）。现实网络通常介于两者之间——大量小用户 + 少量大用户（如 CDN）。"
+      },
+      {
+        "id": "game-theory-ch02-q15",
+        "question": "颤抖手完美均衡（trembling-hand perfect, THP）的定义和用途？",
+        "options": [
+          "NE 是 THP 如果它是扰动博弈（每个策略至少以 \\(\\epsilon>0\\) 概率被选）的极限 NE——排除弱劣策略均衡  B) 与 NE 相同  C) 仅适用于完美信息  D) 仅理论概念"
+        ],
+        "answer": 0,
+        "explanation": "每个玩家以 \\(\\epsilon\\) \"颤抖\"（以小概率犯错选到非目标策略）。THP NE = \\(\\forall\\) 足够小的 \\(\\epsilon\\)，\\(\\epsilon\\)-扰动博弈中 NE 的极限。排除：\\(2\\times2\\) 博弈中两人都玩弱劣策略的 NE（颤抖后弱劣策略不再是 BR）。关系：THP NE \\(\\subset\\) NE。\\(2\\times2\\) 中 THP NE 排除弱占优的\"退化\"均衡。Selten (1975) 提出。"
+      },
+      {
+        "id": "game-theory-ch02-q16",
+        "question": "计算 NE 的复杂度。二人博弈的 NE 计算属于什么复杂度类？",
+        "options": [
+          "PPAD-complete——不太可能有多项式时间算法  B) P  C) NP-complete  D) undecidable"
+        ],
+        "answer": 0,
+        "explanation": "Nash 定理保证 NE 存在→搜索问题（不是判定问题）→不是 NP-complete（存在性有保证）。PPAD = Polynomial Parity Arguments on Directed graphs（一类总有解的搜索问题）。Chen-Deng 2006 / Daskalakis et al. 2009 证明 2-Nash 是 PPAD-complete。实际算法：Lemke-Howson（最坏指数）、支撑枚举（小博弈有效）、Homotopy 方法。\\(n\\geq3\\) 人博弈更难。"
+      },
+      {
+        "id": "game-theory-ch02-q17",
+        "question": "收费（tolling）如何改善 PoA？Pigouvian 税的博弈论解释？",
+        "options": [
+          "对造成拥塞的行为收取边际外部成本——使 NE 接近社会最优。收费 \\(=\\) 边际社会成本 \\(-\\) 边际私人成本  B) 取消所有道路  C) 补贴拥塞  D) 随机收费"
+        ],
+        "answer": 0,
+        "explanation": "Pigouvian 税：\\(\\tau_e=x_e\\cdot c_e'(x_e)\\)（每个用户造成的边际外部性）。加税后：用户面对的边际成本 \\(=c_e(x_e)+\\tau_e=c_e(x_e)+x_e c_e'(x_e)=\\) 边际社会成本。NE 变为社会最优（第一最佳）。实际中精确 Pigouvian 税难以计算（需要知道确切的需求和延迟函数）——伦敦/新加坡的拥堵收费是近似实现。"
+      },
+      {
+        "id": "game-theory-ch02-q18",
+        "question": "全支付拍卖（all-pay auction）：两人为价值 \\(v\\) 的奖品竞标，各出 \\(b_i\\geq0\\)，最高者获奖品但两人都支付自己的出价。混合策略 NE 中的出价分布 \\(F(b)=?\\)",
+        "options": [
+          "\\(F(b)=b/v\\) 在 \\([0,v]\\) 上均匀分布  B) \\(b=v/2\\)  C) \\(b=0\\)  D) \\(b=v\\)"
+        ],
+        "answer": 0,
+        "explanation": "混合 NE 中玩家 \\(i\\) 出价 \\(b\\) 的期望收益：\\(u(b)=F(b)\\cdot v-b\\)（\\(F(b)\\) = 对手出价 \\(<b\\) 的概率）。NE 要求所有 \\(b\\in\\text{supp}\\) 的收益相等：\\(F(b)\\cdot v-b=0\\)（= 出价 0 的收益）→ \\(F(b)=b/v\\)。验证：\\(F(0)=0,F(v)=1\\)。期望出价 \\(=v/2\\)→两人总支出 \\(=v\\)→卖方榨取全部剩余！全支付拍卖等价于游说/竞选支出模型。"
+      },
+      {
+        "id": "game-theory-ch02-q19",
+        "question": "不完全信息博弈（Bayesian game）：两人同时选 H 或 L。玩家 1 的类型 \\(\\theta_1\\in\\{H,L\\}\\) 等概率，玩家 2 不知道 \\(\\theta_1\\)。Bayesian Nash 均衡（BNE）的求解方法？",
+        "options": [
+          "每种类型视为独立\"玩家\"——\\(\\theta_1=H\\) 型和 \\(\\theta_1=L\\) 型各有策略；BNE 中每种类型的策略是对期望对手策略的最优反应  B) 忽略类型  C) 仅对高类型求解  D) 无法求解"
+        ],
+        "answer": 0,
+        "explanation": "Harsanyi (1967-68) 转化：不完全信息博弈→不完美信息博弈（\"自然\"先选择类型→玩家观察自己的类型→同时行动）。BNE：每种类型的策略是在信念（其他人的类型分布）下的 BR。\\(\\sigma_1(\\theta_1)\\) 是 \\(\\theta_1\\) 的函数——\"策略\"变为\"类型→行动\"的映射。求解：写出每种类型在给定对手策略下的期望收益，联立求解。"
+      },
+      {
+        "id": "game-theory-ch02-q20",
+        "question": "Roughgarden 定理：非原子拥塞博弈中多项式延迟 \\(c_e(x)=a_e x^d\\) 的 PoA 上界和下界？",
+        "options": [
+          "\\(\\text{PoA}=\\Theta\\left(\\frac{d}{\\ln d}\\right)\\)（\\(d\\) 为多项式次数），对线性 \\(d=1\\)：\\(\\text{PoA}=4/3\\)  B) 常数  C) \\(\\infty\\)  D) \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(d=1\\)（线性）：PoA \\(=4/3\\)。\\(d=2\\)（二次）：PoA \\(=\\frac{8+4\\sqrt{2}}{9}\\approx1.52\\)。\\(d\\to\\infty\\)：PoA \\(\\to d/\\ln d\\)（渐近）。证明核心：构造 variational inequality 并利用延迟函数的性质。更一般的：对任何延迟函数族 \\(\\mathcal{C}\\)，PoA \\(=\\sup_{c\\in\\mathcal{C}}\\frac{1}{1-\\beta(c)}\\)，\\(\\beta(c)=\\sup_{x,x^*}\\frac{xc(x)-x^*c(x)}{xc(x)}\\)。"
+      },
+      {
+        "id": "game-theory-ch02-q21",
+        "question": "演化稳定策略（ESS）与 NE 的关系。ESS 的定义比 NE 更强在哪里？",
+        "options": [
+          "ESS 要求不仅是最优反应，还能\"入侵抵抗\"——少数突变者不能获得更高适应度  B) ESS 更弱  C) 相同  D) 无关"
+        ],
+        "answer": 0,
+        "explanation": "ESS（Maynard Smith & Price 1973）：\\(\\sigma^*\\) 是 ESS 如果 \\(\\forall\\sigma\\neq\\sigma^*\\)：(1) \\(u(\\sigma^*,\\sigma^*)\\geq u(\\sigma,\\sigma^*)\\)（NE 条件）；(2) 若等号成立，\\(u(\\sigma^*,\\sigma)>u(\\sigma,\\sigma)\\)（入侵壁垒）。ESS \\(\\subset\\) NE（更精炼）。\\(2\\times2\\) 对称博弈中 ESS = 严格 NE。鹰鸽博弈中混合 NE 是 ESS。剩余所有 NE 非 ESS 当且仅当存在中性突变者可漂移入侵。"
+      },
+      {
+        "id": "game-theory-ch02-q22",
+        "question": "拍卖中的收入等价定理（Revenue Equivalence Theorem）：在什么条件下，不同拍卖机制产生相同的期望收入？",
+        "options": [
+          "独立私有价值（IPV）、风险中性、对称竞标者、估值连续分布。第一价格/第二价格/英式/荷式拍卖期望收入相同  B) 任何条件  C) 仅对称  D) 不存在等价"
+        ],
+        "answer": 0,
+        "explanation": "Vickrey (1961) / Myerson (1981)：IPV + 风险中性 + 对称 + 正则分布 → 任何使价值最低的人期望支付 \\(=0\\) 且分配效率相同的机制→期望收入相同。第一价格（竞标者策略性出低价）和第二价格（诚实出价是占优策略）→相同期望收入！直觉：两种力量平衡——第一价格中赢者付出更低但策略性降低出价。"
+      },
+      {
+        "id": "game-theory-ch02-q23",
+        "question": "支撑枚举算法（support enumeration）求解两人博弈所有 NE 的步骤？",
+        "options": [
+          "枚举所有可能的支撑对 \\((S_1,S_2)\\)，对每对解无差异条件方程组（indifference equations），验证解是否为合法概率分布且支撑外策略不更优  B) 随机搜索  C) 梯度下降  D) 仅枚举纯策略"
+        ],
+        "answer": 0,
+        "explanation": "步骤：(1) 枚举 \\((S_1,S_2)\\subseteq(S_1,S_2)\\)，\\(|S_1|=|S_2|\\)（Lemma：\\(|S_1|=|S_2|\\) 对非退化博弈）。(2) 对 \\(S_1\\)：玩家 2 的无差异条件是 \\(|S_1|\\) 个方程 \\(+\\) 概率和为 1。(3) 解方程组得到 \\(\\sigma_2\\)。(4) 验证：\\(\\sigma_2\\geq0\\) 且 \\(S_1\\) 外策略收益 \\(\\leq\\) \\(S_1\\) 内。对称地求 \\(\\sigma_1\\)。复杂度：\\(O(2^{m+n})\\) 最坏（需枚举所有子集对）。对 \\(m,n\\leq10\\) 的小博弈很实用。"
+      },
+      {
+        "id": "game-theory-ch02-q24",
+        "question": "网络路由是否为潜在博弈？若是，其势函数是什么？",
+        "options": [
+          "是（Rosenthal 势函数）：\\(\\Phi=\\sum_{e\\in E}\\sum_{k=1}^{x_e}c_e(k)\\)——NE 对应 \\(\\Phi\\) 的局部极小（拥塞最小化）  B) 否  C) 仅对线性延迟  D) 势函数不存在"
+        ],
+        "answer": 0,
+        "explanation": "原子拥塞博弈（每个玩家选路径 = 边的子集）：\\(\\Phi=\\sum_e\\sum_{k=1}^{x_e}c_e(k)\\)。当单个玩家从路径 \\(P\\) 切换到 \\(P'\\) 时：\\(\\Delta\\Phi=\\sum_{e\\in P'\\setminus P}c_e(x_e+1)-\\sum_{e\\in P\\setminus P'}c_e(x_e)=\\Delta u_i\\)（延迟变化）→精确潜在博弈。NE 是 \\(\\Phi\\) 的局部最小值（有限改善路径终止于 NE）。对非原子情况：Beckmann 等人的凸规划等价——\\(\\min\\sum_e\\int_0^{x_e}c_e(t)dt\\)。"
+      },
+      {
+        "id": "game-theory-ch02-q25",
+        "question": "超模博弈（supermodular game）的特殊性质。如果所有 \\(u_i\\) 关于 \\((s_i,s_{-i})\\) 满足递增差分（increasing differences），NE 有什么结构？",
+        "options": [
+          "存在最大 NE 和最小 NE——BR 是单调递增的，最优反应迭代（从极端点出发）单调收敛  B) NE 唯一  C) 无 NE  D) 无法分析"
+        ],
+        "answer": 0,
+        "explanation": "递增差分：\\(u_i(s_i',s_{-i}')-u_i(s_i,s_{-i}')\\geq u_i(s_i',s_{-i})-u_i(s_i,s_{-i})\\)（\\(s_i'>s_i,s_{-i}'>s_{-i}\\)）→策略互补（他人策略增加时自己也应增加）。Topkis 定理：BR 单调→ Tarski 不动点定理保证最大/最小不动点（NE）存在。比较静态：参数增→NE 单调增。应用：武器竞赛（策略互补）、技术标准竞争。"
+      },
+      {
+        "id": "game-theory-ch02-q26",
+        "question": "在线广告中的关键词拍卖（如 Google Ads）本质上是什么博弈？",
+        "options": [
+          "多位置广义第二价格拍卖（GSP）——广告商竞标关键词，按 NE 出价，排名靠前获更多点击  B) 一对一谈判  C) 完全竞争市场  D) 垄断定价"
+        ],
+        "answer": 0,
+        "explanation": "GSP：\\(k\\) 个广告位，第 \\(i\\) 位点击率 \\(\\alpha_i\\)（\\(\\alpha_1>\\alpha_2>...\\)）。出价排名 \\(\\to\\) 广告位分配。每次点击支付 = 下一名的出价。NE 分析（Edelman-Ostrovsky-Schwarz 2007）：局部进步-稳定均衡（locally envy-free）收入 \\(=\\) VCG 收入。Google 年收入 \\(\\sim\\)1500亿 美元大部分来自此拍卖机制。"
+      },
+      {
+        "id": "game-theory-ch02-q27",
+        "question": "交通导航应用（Waze/高德/百度地图）改变了路由博弈的信息结构。从 NE 角度如何分析？",
+        "options": [
+          "导航推荐使更多人获知最优路径→拥塞更快趋近 Wardrop 均衡，但可能加速 Braess 悖论效应  B) 导航消除拥塞  C) 与博弈论无关  D) 导航减少 NE 数量"
+        ],
+        "answer": 0,
+        "explanation": "无导航时：异质信息→部分人走非最优路→可能偏离 NE（对某些人更好，对社会可能更好）。导航后：所有人信息趋同→快速收敛到 NE（Wardrop 均衡）。如果 NE \\(\\neq\\) 社会最优→导航实际上可能\"恶化\"效率。研究（Roughgarden 2020s）建议：导航应协调推荐路径而非仅推荐各人最快路——即实现 CE 而非 NE。"
+      },
+      {
+        "id": "game-theory-ch02-q28",
+        "question": "碳排放减排的国际谈判可以用多人囚徒困境（公共品博弈）建模。为什么巴黎协定的\"自愿承诺\"机制可能不够？",
+        "options": [
+          "NE 是各国最小化己方减排成本（搭便车）——自愿承诺缺乏强制机制，每国有激励少减排并享受他国减排的公共品效益  B) 巴黎协定已解决问题  C) 各国都有激励减排  D) 博弈论不适用"
+        ],
+        "answer": 0,
+        "explanation": "气候减排是 \\(N\\) 人囚徒困境：每国减排成本私人承担，收益（气候改善）全球共享。NE：搭便车不减排。自愿承诺→无惩罚→偏离动机强。可能的解决：(1) 重复博弈——\"不减排者被贸易制裁\"（触发策略）；(2) 碳边境税（将外部性内部化）；(3) 分配机制（给发展中国家补偿减排成本）。Barrett (2003) 分析了国际环境协议的自执行条件——参与者数量有内生上限。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="game-theory"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/game-theory.html" class="module-name">博弈论</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Nash 均衡的定义与存在性</a></li>
+      <li><a href="#kp2">02 · 纯策略 NE 的求解</a></li>
+      <li><a href="#kp3">03 · 多重均衡与 Braess 悖论</a></li>
+      <li><a href="#kp4">04 · NE 的性质与局限性</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>Nash 均衡</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Nash 均衡的定义与存在性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Nash 均衡是博弈论最核心的解概念：没有人有动力单方面偏离。 Nash 在 1950 年证明了每个有限博弈都有混合策略 NE，获得 1994 年诺贝尔经济学奖。所有博弈分析都围绕 NE 展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>NE = 互为最优反应的策略组合 = 最优反应映射的不动点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Nash 均衡定义</strong>：策略组合 \(\sigma^*\) 是 NE iff \[\forall i,\; \forall \sigma_i \in \Delta(S_i):\quad u_i(\sigma_i^*, \sigma_{-i}^*) \geq u_i(\sigma_i, \sigma_{-i}^*)\] 即没有参与者可通过单方面改变策略获利。 <strong>Nash 存在性定理</strong>：每个有限博弈至少有一个混合策略 NE。 证明思路：定义最优反应对应 \(BR: \prod \Delta(S_i) \to \prod \Delta(S_i)\)， 它是凸集上的上半连续集值映射，由 Kakutani 不动点定理， \(\exists \sigma^* \in BR(\sigma^*)\)。 等价条件：\(\sigma^*\) 是 NE \(\Leftrightarrow\) \(\sigma_i^* \in BR_i(\sigma_{-i}^*)\) \(\forall i\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 交通网络中的 Wardrop 均衡（连续 NE 的类似物） - 博弈 AI 训练中寻找 NE 作为收敛目标</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：找出下述博弈的所有纯策略 NE： \(\begin{pmatrix}(2,1)&(0,0)\\(0,0)&(1,2)\end{pmatrix}\)。 解答：BR1(L)=T, BR1(R)=B; BR2(T)=L, BR2(B)=R。 NE: (T,L)=(2,1) 和 (B,R)=(1,2)。 易错点：忘记检查混合策略 NE。本博弈还有一个混合 NE。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Nash 存在性定理使用的不动点定理是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Nash 原始证明用 Brouwer，现代版本用 Kakutani')">A. Banach 不动点定理</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！Nash 原始证明用 Brouwer，现代版本用 Kakutani')">B. Brouwer 或 Kakutani 不动点定理</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Nash 原始证明用 Brouwer，现代版本用 Kakutani')">C. Zorn 引理</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。Nash 原始证明用 Brouwer，现代版本用 Kakutani')">D. 压缩映射原理</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>纯策略 NE 的求解</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在小规模博弈中如何找到所有纯策略 NE？标准方法是下划线法： 在支付矩阵中标记每个玩家的最优反应，两者重合即为 NE。 这是博弈论中最基本且必须掌握的技术。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>下划线法</strong>：对于两人博弈 \((A, B)\)（\(A\) 为行玩家支付，\(B\) 为列玩家）： (1) 对每列 \(j\)，找 B行中最大值 \(\max_i A_{ij}\)，下划线标记 (2) 对每行 \(i\)，找 A列中最大值 \(\max_j B_{ij}\)，下划线标记 (3) 两个下划线重合的单元格即为纯策略 NE 为什么：下划线标记的就是各玩家的最优反应， 双方下划线 = 互为最优反应 = NE 定义。 <strong>2×2 博弈的混合 NE</strong>：利用支撑定理， 设行玩家选 T 概率 \(p\)，使列玩家对 L 和 R 无差异： \[p \cdot B_{TL} + (1-p) \cdot B_{BL} = p \cdot B_{TR} + (1-p) \cdot B_{BR}\] 解出 \(p\)，同理解 \(q\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 算法博弈论中计算 NE 的复杂度分析</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(A=\begin{pmatrix}3&0\\5&1\end{pmatrix}\), \(B=\begin{pmatrix}3&5\\0&1\end{pmatrix}\)。找所有 NE。 解答：BR1(L)=B(5>3), BR1(R)=B(1>0); 故行玩家占优选 B。 BR2(T)=R(5>3), BR2(B)=R(1>0); 列玩家占优选 R。 唯一 NE: (B,R)=(1,1)。这是囚徒困境结构！ 易错点：Pareto 更优的 \((T,L)=(3,3)\) 不是 NE，因为双方都想偏离。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下划线法的原理是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。下划线标记最优反应，双方下划线重合 = NE。')">A. 找支付最大的单元格</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！下划线标记最优反应，双方下划线重合 = NE。')">B. 找双方同时为最优反应的策略组合</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。下划线标记最优反应，双方下划线重合 = NE。')">C. 找 Pareto 最优的结果</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。下划线标记最优反应，双方下划线重合 = NE。')">D. 消除被占优策略</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>多重均衡与 Braess 悖论</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>多个 NE 并存时如何选择？均衡精练尝试缩小 NE 集合。 Braess 悖论则揭示了更深层的悲观结果：在交通网络中增加道路 反而可能让所有人更慢——个体最优与社会最优的冒突无处不在。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>均衡精练：通过额外标准（风险占优、Pareto 占优、焦点等）缩小 NE 集。 Braess 悖论：增加资源可能降低均衡性能。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Braess 悖论</strong>：考虑交通网络，4000 人从 A 到 B。 原博弈两条路，均衡时间各45分钟。 增加一条速度极快的捷径后，均衡时所有人都选择捷径， 拥堵导致所有人时间65分钟。 形式化：原均衡中 \(C_1(x) + C_2(x)\) 较小， 新均衡中每人走拥堵路段，\(C_{\text{new}} > C_{\text{old}}\)。 <strong>无政府价格(PoA)</strong>：\(\text{PoA} = \frac{\text{最差 NE 的社会成本}}{\text{社会最优的成本}}\)。 度量 NE 相对于社会最优的效率损失。 线性拥堵模型中 \(\text{PoA} \leq 4/3\)（Roughgarden-Tardos）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- 城市交通规划中避免 Braess 类型的逻辑 - 网络路由中的 PoA 分析</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：解释为什么关闭某些道路可能减少拥堵。 解答：关闭「捷径」迫使车辆分散到其他路径，新均衡可能 对所有人更好。这就是 Braess 悖论的逆向应用。 首尔 2003 年实际关闭了一条干道，拥堵确实减少。 易错点：Braess 悖论不是说增加资源「总是」有害，而是「可能」有害。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Braess 悖论的核心启示是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Braess 悖论表明个体理性增加选择后均衡可能变差，')">A. 均衡总是最优的</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！Braess 悖论表明个体理性增加选择后均衡可能变差，')">B. 增加选择可能降低均衡支付</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Braess 悖论表明个体理性增加选择后均衡可能变差，')">C. 混合策略优于纯策略</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。Braess 悖论表明个体理性增加选择后均衡可能变差，')">D. NE 总是唯一的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>NE 的性质与局限性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>NE 是一个强大但不完美的概念。它不必然 Pareto 最优、可能 不唯一、计算可能困难。理解这些局限性是正确应用博弈论的前提， 也推动了均衡精练、机制设计等后续研究。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>NE 不保证 Pareto 最优</strong>：囚徒困境就是例子。 <strong>NE 可能不唯一</strong>：纳什议价博弈有两个纯策略 NE + 一个混合 NE。 <strong>计算复杂度</strong>：找 NE 是 PPAD-完全的（Daskalakis-Goldberg-Papadimitriou，2009）。 这意味着在最坏情况下，找到 NE 不存在已知的高效算法。 <strong>均衡精练方向</strong>： - 风险占优：选择最差情况下损失最小的 NE - Pareto 占优：选择所有人都不更差的 NE - 焦点点(Schelling)：文化/惯例驱动的均衡选择</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>- PPAD-完全性解释了为什么 GAN 训练不稳定</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：协调博弈 \(\begin{pmatrix}(2,2)&(0,0)\\(0,0)&(1,1)\end{pmatrix}\)。 哪个 NE 是 Pareto 占优的？ 解答：NE: (T,L)=(2,2) 和 (B,R)=(1,1)。 (T,L) Pareto 占优 (B,R)，因为两人都严格更好。 易错点：Pareto 占优不意味着玩家一定会达到该 NE， 还需要协调机制。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">找 NE 的计算复杂度属于哪个类？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。PPAD (Polynomial Parity Arguments on Directed graphs) 是')">A. P</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。PPAD (Polynomial Parity Arguments on Directed graphs) 是')">B. NP-完全</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！PPAD (Polynomial Parity Arguments on Directed graphs) 是')">C. PPAD-完全</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。PPAD (Polynomial Parity Arguments on Directed graphs) 是')">D. 不可判定</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1</a>
+      <a href="../../../modules/probability/game-theory.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

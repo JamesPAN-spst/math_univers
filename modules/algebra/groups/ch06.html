@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 Sylow 定理 — 群论 Groupes — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "groups-ch06-q1",
+        "question": "列举 \\(|G| = p^2\\)（\\(p\\) 素数）的群的同构类型。共有几种？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(p\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(p^2\\) 阶群必为交换群（由 \\(p\\)-群中心非平凡 + \\(G/Z(G)\\) 循环 \\(\\Rightarrow G\\) 交换推得），只有 \\(\\mathbb{Z}/p^2\\mathbb{Z}\\) 和 \\((\\mathbb{Z}/p\\mathbb{Z})^2\\) 两种。常见错误是忘记 \\(p^2\\) 阶群必须交换，误以为有非交换类型。"
+      },
+      {
+        "id": "groups-ch06-q2",
+        "question": "\\(|G| = 20 = 2^2 \\cdot 5\\)。Sylow 第一定理保证存在的 Sylow 子群阶分别为？",
+        "options": [
+          "\\(2\\) 和 \\(5\\)",
+        "\\(4\\) 和 \\(5\\)",
+        "\\(4\\) 和 \\(10\\)",
+        "\\(2\\) 和 \\(10\\)"
+        ],
+        "answer": 1,
+        "explanation": "Sylow \\(p\\)-子群阶 = \\(p\\) 的最高幂次。\\(20 = 2^2 \\cdot 5^1\\)，所以 Sylow 2-子群阶 \\(= 2^2 = 4\\)，Sylow 5-子群阶 \\(= 5^1 = 5\\)。易错点：取 \\(p\\) 而非 \\(p^n\\)，把 Sylow 2-子群阶误认为 \\(2\\)。"
+      },
+      {
+        "id": "groups-ch06-q3",
+        "question": "\\(|G| = 15 = 3 \\cdot 5\\)。\\(n_3\\)（Sylow 3-子群个数）的可能值为？",
+        "options": [
+          "\\(\\{1, 5\\}\\)",
+        "\\(\\{1\\}\\)",
+        "\\(\\{1, 3, 5, 15\\}\\)",
+        "\\(\\{5\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(n_3 \\mid 5\\) 且 \\(n_3 \\equiv 1 \\pmod{3}\\)。\\(5\\) 的因子为 \\(1, 5\\)。\\(5 \\equiv 2 \\pmod{3} \\neq 1\\)。故 \\(n_3 = 1\\) 是唯一可能。Sylow 3-子群唯一且正规。"
+      },
+      {
+        "id": "groups-ch06-q4",
+        "question": "\\(|G| = 12 = 2^2 \\cdot 3\\)。\\(n_3\\) 的可能值为？",
+        "options": [
+          "\\(\\{1, 4\\}\\)",
+        "\\(\\{1, 2, 4\\}\\)",
+        "\\(\\{1, 3\\}\\)",
+        "\\(\\{4\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_3 \\mid 4\\) 且 \\(n_3 \\equiv 1 \\pmod{3}\\)。\\(4\\) 的因子：\\(1, 2, 4\\)。\\(2 \\equiv 2 \\pmod{3} \\neq 1\\)，排除。留下 \\(\\{1, 4\\}\\)。必须同时满足整除条件和模条件。"
+      },
+      {
+        "id": "groups-ch06-q5",
+        "question": "\\(p\\)-群 \\(G\\)（\\(|G| = p^3\\)）。以下哪项一定正确？",
+        "options": [
+          "\\(G\\) 是交换群",
+        "\\(|Z(G)| \\geq p\\)",
+        "\\(G\\) 是循环群",
+        "\\(G\\) 没有正规子群"
+        ],
+        "answer": 1,
+        "explanation": "\\(p\\)-群的中心非平凡：\\(|Z(G)| \\equiv 0 \\pmod{p}\\)，故 \\(|Z(G)| \\geq p\\)。\\(p^3\\) 阶群不一定是交换群（如 \\(D_4\\), \\(Q_8\\) 在 \\(p=2\\) 时），也不一定是循环群。"
+      },
+      {
+        "id": "groups-ch06-q6",
+        "question": "\\(|G| = 35 = 5 \\cdot 7\\)。\\(G\\) 的结构是？",
+        "options": [
+          "\\(G\\) 是单群",
+        "\\(G \\cong \\mathbb{Z}/35\\mathbb{Z}\\)",
+        "\\(G \\cong S_5\\)",
+        "无法确定"
+        ],
+        "answer": 1,
+        "explanation": "\\(n_5 \\mid 7, n_5 \\equiv 1 \\pmod{5}\\)：可能 \\(1, 7\\)；\\(7 \\equiv 2 \\pmod{5}\\)，\\(n_5 = 1\\)。\\(n_7 \\mid 5, n_7 \\equiv 1 \\pmod{7}\\)：可能 \\(1, 5\\)；\\(5 \\equiv 5 \\pmod{7}\\)，\\(n_7 = 1\\)。两个 Sylow 子群均唯一且正规，阶互素，\\(G \\cong \\mathbb{Z}/5 \\times \\mathbb{Z}/7 \\cong \\mathbb{Z}/35\\)。"
+      },
+      {
+        "id": "groups-ch06-q7",
+        "question": "Sylow 第一定理可以看作 Lagrange 定理逆命题在什么条件下的肯定回答？",
+        "options": [
+          "子群阶为任意因子",
+        "子群阶为素数幂",
+        "群为交换群",
+        "群为循环群"
+        ],
+        "answer": 1,
+        "explanation": "Lagrange 定理说子群阶整除群阶，但逆命题（群阶的每个因子都对应一个子群）一般不成立。Sylow 第一定理在素数幂因子的特殊情况下给出了逆命题的肯定回答：若 \\(p^n \\mid |G|\\)，则确实存在 \\(p^n\\) 阶子群。"
+      },
+      {
+        "id": "groups-ch06-q8",
+        "question": "\\(|G| = 56 = 2^3 \\cdot 7\\)。\\(n_7\\) 的可能值为？",
+        "options": [
+          "\\(\\{1, 8\\}\\)",
+        "\\(\\{1, 2, 4, 8\\}\\)",
+        "\\(\\{1, 7\\}\\)",
+        "\\(\\{8\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_7 \\mid 8\\) 且 \\(n_7 \\equiv 1 \\pmod{7}\\)。\\(8\\) 的因子：\\(1, 2, 4, 8\\)。检查模 \\(7\\)：\\(1 \\equiv 1\\) ✓，\\(2 \\equiv 2\\)，\\(4 \\equiv 4\\)，\\(8 \\equiv 1\\) ✓。故 \\(n_7 \\in \\{1, 8\\}\\)。"
+      },
+      {
+        "id": "groups-ch06-q9",
+        "question": "\\(|G| = 30 = 2 \\cdot 3 \\cdot 5\\)。\\(n_5\\) 的可能值为？",
+        "options": [
+          "\\(\\{1, 6\\}\\)",
+        "\\(\\{1, 3, 6\\}\\)",
+        "\\(\\{6\\}\\)",
+        "\\(\\{1\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_5 \\mid 6\\) 且 \\(n_5 \\equiv 1 \\pmod{5}\\)。\\(6\\) 的因子：\\(1, 2, 3, 6\\)。\\(\\pmod{5}\\)：\\(1 \\equiv 1\\) ✓，\\(2 \\equiv 2\\)，\\(3 \\equiv 3\\)，\\(6 \\equiv 1\\) ✓。故 \\(n_5 \\in \\{1, 6\\}\\)。"
+      },
+      {
+        "id": "groups-ch06-q10",
+        "question": "\\(|G| = 36 = 2^2 \\cdot 3^2\\)。要证 \\(G\\) 不是单群，先考虑 \\(n_3\\)。若 \\(n_3 = 4\\)，\\(G\\) 共轭作用于 \\(4\\) 个 Sylow 3-子群，得同态 \\(\\varphi: G \\to S_4\\)。这导致矛盾，因为？",
+        "options": [
+          "\\(\\ker\\varphi = G\\)",
+        "\\(36 \\nmid 24\\)，故 \\(\\varphi\\) 不能是单射",
+        "\\(S_4\\) 不包含 9 阶元素",
+        "Sylow 3-子群不能被共轭"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(\\ker\\varphi = \\{e\\}\\) 则 \\(G \\hookrightarrow S_4\\)，但 \\(|G| = 36\\) 而 \\(|S_4| = 24\\)，\\(36 \\nmid 24\\)，矛盾。故 \\(\\ker\\varphi \\neq \\{e\\}\\)，\\(G\\) 有非平凡正规子群。"
+      },
+      {
+        "id": "groups-ch06-q11",
+        "question": "\\(8\\) 阶群共有几种同构类型？",
+        "options": [
+          "\\(3\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(8\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(|G| = 8 = 2^3\\) 的群共 \\(5\\) 种：交换的有 \\(\\mathbb{Z}/8\\)、\\(\\mathbb{Z}/4 \\times \\mathbb{Z}/2\\)、\\((\\mathbb{Z}/2)^3\\)；非交换的有 \\(D_4\\)（二面体群）和 \\(Q_8\\)（四元数群）。易错点：只考虑交换群（\\(3\\) 种）而忘记非交换 \\(p\\)-群。"
+      },
+      {
+        "id": "groups-ch06-q12",
+        "question": "\\(|G| = 99 = 9 \\cdot 11\\)。\\(G\\) 一定是什么类型的群？",
+        "options": [
+          "非交换群",
+        "单群",
+        "循环群",
+        "对称群"
+        ],
+        "answer": 2,
+        "explanation": "\\(n_{11} \\mid 9, n_{11} \\equiv 1 \\pmod{11}\\)：因子 \\(1, 3, 9\\)，\\(\\pmod{11}\\)：仅 \\(1\\) 满足，\\(n_{11} = 1\\)。\\(n_3 \\mid 11, n_3 \\equiv 1 \\pmod{3}\\)：因子 \\(1, 11\\)，\\(11 \\equiv 2 \\pmod{3}\\)，\\(n_3 = 1\\)。两个 Sylow 子群都唯一正规，阶互素，\\(G \\cong \\mathbb{Z}/9 \\times \\mathbb{Z}/11 \\cong \\mathbb{Z}/99\\)。"
+      },
+      {
+        "id": "groups-ch06-q13",
+        "question": "Sylow 第一定理的 Wielandt 证明中，\\(G\\) 作用于哪个集合？",
+        "options": [
+          "\\(G\\) 的所有子群",
+        "\\(G\\) 中大小为 \\(p^n\\) 的所有子集",
+        "\\(G\\) 的所有正规子群",
+        "\\(G\\) 的陪集集合"
+        ],
+        "answer": 1,
+        "explanation": "Wielandt 证明选取 \\(\\Omega = \\{S \\subseteq G : |S| = p^n\\}\\)（大小为 \\(p^n\\) 的子集，不要求是子群）。\\(G\\) 通过左乘作用于 \\(\\Omega\\)。关键：\\(|\\Omega| = \\binom{p^n m}{p^n} \\not\\equiv 0 \\pmod{p}\\)，故存在轨道长度不被 \\(p\\) 整除的子集。"
+      },
+      {
+        "id": "groups-ch06-q14",
+        "question": "若 \\(n_p = 1\\)，以下哪个结论正确？",
+        "options": [
+          "Sylow \\(p\\)-子群是正规子群",
+        "\\(G\\) 是交换群",
+        "\\(G\\) 是单群",
+        "\\(|G| = p\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_p = 1\\) 意味着 Sylow \\(p\\)-子群唯一。共轭作用保持 Sylow \\(p\\)-子群的性质，唯一性 \\(\\Rightarrow\\) 共轭不变 \\(\\Rightarrow\\) 正规。但这不意味着 \\(G\\) 交换（可能有非交换的半直积结构）或 \\(G\\) 单纯（正规子群的存在恰好说明不单纯）。"
+      },
+      {
+        "id": "groups-ch06-q15",
+        "question": "\\(|G| = 16 = 2^4\\)，\\(|Z(G)|\\) 的最小可能值为？",
+        "options": [
+          "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(16\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(G\\) 是 \\(2\\)-群，\\(|Z(G)| \\geq 2\\)。最小值 \\(2\\) 可以实现：例如 \\(D_8\\)（\\(16\\) 阶二面体群）的中心 \\(Z(D_8) = \\{e, r^4\\}\\) 阶为 \\(2\\)。"
+      },
+      {
+        "id": "groups-ch06-q16",
+        "question": "\\(|G| = 24 = 2^3 \\cdot 3\\)。\\(n_3\\) 的可能值为？",
+        "options": [
+          "\\(\\{1, 4\\}\\)",
+        "\\(\\{1, 2, 4, 8\\}\\)",
+        "\\(\\{1, 8\\}\\)",
+        "\\(\\{4\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_3 \\mid 8, n_3 \\equiv 1 \\pmod{3}\\)。\\(8\\) 的因子：\\(1, 2, 4, 8\\)。\\(\\pmod{3}\\)：\\(1 \\equiv 1\\) ✓，\\(2 \\equiv 2\\)，\\(4 \\equiv 1\\) ✓，\\(8 \\equiv 2\\)。故 \\(n_3 \\in \\{1, 4\\}\\)。例如 \\(S_4\\) 中 \\(n_3 = 4\\)。"
+      },
+      {
+        "id": "groups-ch06-q17",
+        "question": "\\(|G| = 45 = 3^2 \\cdot 5\\)。\\(G\\) 的 Sylow 3-子群是什么类型？",
+        "options": [
+          "阶 \\(3\\) 循环群",
+        "阶 \\(9\\) 交换群",
+        "阶 \\(15\\) 群",
+        "阶 \\(45\\) 群"
+        ],
+        "answer": 1,
+        "explanation": "Sylow 3-子群阶 \\(= 3^2 = 9\\)。\\(9 = 3^2\\)，\\(p^2\\) 阶群必交换，\\(\\cong \\mathbb{Z}/9\\) 或 \\((\\mathbb{Z}/3)^2\\)。注意不是阶 \\(3\\)（那只是 \\(3^1\\) 阶子群，不是 Sylow 3-子群）。"
+      },
+      {
+        "id": "groups-ch06-q18",
+        "question": "\\(|G| = 60\\)。若 \\(n_5 = 6\\)，\\(n_3 = 10\\)，\\(n_2 = 15\\)。\\(n_5 = 6\\) 个 Sylow 5-子群贡献多少个 \\(5\\) 阶元素？",
+        "options": [
+          "\\(6\\)",
+        "\\(24\\)",
+        "\\(30\\)",
+        "\\(5\\)"
+        ],
+        "answer": 1,
+        "explanation": "每个 Sylow 5-子群 \\(\\cong \\mathbb{Z}/5\\) 包含 \\(4\\) 个 \\(5\\) 阶元素 + 单位元。不同 Sylow 5-子群的交为 \\(\\{e\\}\\)（阶 \\(5\\) 为素数）。故 \\(5\\) 阶元素总数 \\(= 6 \\times 4 = 24\\)。这正是 \\(A_5\\) 的情况。"
+      },
+      {
+        "id": "groups-ch06-q19",
+        "question": "\\(|G| = 200 = 2^3 \\cdot 5^2\\)。\\(n_5\\) 的可能值为？",
+        "options": [
+          "\\(\\{1\\}\\)",
+        "\\(\\{1, 8\\}\\)",
+        "\\(\\{1, 4, 8\\}\\)",
+        "\\(\\{1, 2, 4, 8\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_5 \\mid 8\\)，\\(n_5 \\equiv 1 \\pmod{5}\\)。\\(8\\) 的因子：\\(1, 2, 4, 8\\)。\\(\\pmod{5}\\)：\\(1 \\equiv 1\\) ✓，\\(2 \\equiv 2\\)，\\(4 \\equiv 4\\)，\\(8 \\equiv 3\\)。仅 \\(n_5 = 1\\)。Sylow 5-子群唯一且正规。"
+      },
+      {
+        "id": "groups-ch06-q20",
+        "question": "证明 \\(|G| = 30\\) 的群不是单群的关键步骤是什么？",
+        "options": [
+          "证明 \\(G\\) 是交换群",
+        "计数论证：若所有 \\(n_p > 1\\)，则非单位元素数超过 \\(|G|\\)",
+        "直接构造正规子群",
+        "找到阶 \\(15\\) 的子群"
+        ],
+        "answer": 1,
+        "explanation": "\\(30 = 2 \\cdot 3 \\cdot 5\\)。若 \\(n_5 = 6\\)：\\(6 \\times 4 = 24\\) 个 \\(5\\) 阶元素。若 \\(n_3 = 10\\)：\\(10 \\times 2 = 20\\) 个 \\(3\\) 阶元素。加上至少 \\(1\\) 个 \\(2\\)-阶元素和单位元。\\(24 + 20 + 1 + 1 = 46 > 30\\)，矛盾。故某个 \\(n_p = 1\\)，该 Sylow 子群正规，\\(G\\) 不是单群。"
+      },
+      {
+        "id": "groups-ch06-q21",
+        "question": "\\(|G| = 168 = 2^3 \\cdot 3 \\cdot 7\\)。\\(n_7\\) 的可能值为？",
+        "options": [
+          "\\(\\{1, 8\\}\\)",
+        "\\(\\{1, 8, 24\\}\\)",
+        "\\(\\{8\\}\\)",
+        "\\(\\{1, 24\\}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_7 \\mid 24, n_7 \\equiv 1 \\pmod{7}\\)。\\(24\\) 的因子：\\(1,2,3,4,6,8,12,24\\)。\\(\\pmod{7}\\)：\\(1 \\equiv 1\\) ✓，\\(8 \\equiv 1\\) ✓，其余不满足。\\(n_7 \\in \\{1, 8\\}\\)。\\(\\mathrm{PSL}(2,7)\\) 中 \\(n_7 = 8\\)。"
+      },
+      {
+        "id": "groups-ch06-q22",
+        "question": "设 \\(G\\) 是 \\(27 = 3^3\\) 阶群。以下哪项一定正确？",
+        "options": [
+          "\\(G\\) 有 \\(9\\) 阶正规子群",
+        "\\(Z(G) = G\\)",
+        "\\(G\\) 没有 \\(3\\) 阶子群",
+        "\\(G\\) 是单群"
+        ],
+        "answer": 0,
+        "explanation": "\\(G\\) 是 \\(p\\)-群，\\(|Z(G)| \\geq 3\\)（\\(p=3\\)）。\\(Z(G)\\) 是 \\(G\\) 的正规子群，\\(G/Z(G)\\) 也是 \\(p\\)-群（或平凡）。\\(p\\)-群有每个阶为 \\(p^j\\)（\\(j \\leq k\\)）的子群，特别有 \\(9\\) 阶子群。更强地，\\(p\\)-群的 \\(p^j\\) 阶子群总可以取为正规子群。\\(G\\) 不能是单群（\\(p\\)-群的中心给出正规子群）。"
+      },
+      {
+        "id": "groups-ch06-q23",
+        "question": "设 \\(|G| = 48 = 2^4 \\cdot 3\\)。\\(n_2\\) 的可能值中，哪种情况下 Sylow 2-子群正规？",
+        "options": [
+          "\\(n_2 = 1\\)",
+        "\\(n_2 = 3\\)",
+        "两种都使其正规",
+        "都不正规"
+        ],
+        "answer": 0,
+        "explanation": "\\(n_2 \\mid 3, n_2 \\equiv 1 \\pmod{2}\\)。可能值：\\(1, 3\\)（均为奇数，满足 \\(\\equiv 1 \\pmod{2}\\)）。\\(n_2 = 1\\) 时 Sylow 2-子群唯一正规；\\(n_2 = 3\\) 时有 \\(3\\) 个 Sylow 2-子群，不唯一，不一定正规。"
+      },
+      {
+        "id": "groups-ch06-q24",
+        "question": "\\(|G| = 180 = 2^2 \\cdot 3^2 \\cdot 5\\)。Sylow 第一定理保证的子群阶的完整列表是？",
+        "options": [
+          "\\(2, 3, 4, 5, 9\\)",
+        "\\(4, 9, 5\\)",
+        "\\(1, 2, 3, 4, 5, 9\\)",
+        "\\(2, 4, 3, 9, 5, 15, 45\\)"
+        ],
+        "answer": 2,
+        "explanation": "Sylow 定理保证整除 \\(|G|\\) 的每个素数幂阶子群都存在：\\(1, 2, 4 = 2^2, 3, 9 = 3^2, 5\\)。不保证复合阶（如 \\(15, 45\\)）的子群一定存在。但平凡群 \\(\\{e\\}\\)（阶 \\(1\\)）总存在。"
+      },
+      {
+        "id": "groups-ch06-q25",
+        "question": "\\(|G| = 42 = 2 \\cdot 3 \\cdot 7\\)。若 \\(n_7 = 1\\) 且 \\(n_3 = 7\\)，设 \\(P_7\\) 为唯一 Sylow 7-子群。\\(P_7 \\trianglelefteq G\\)。若另外 \\(P_3\\) 是某个 Sylow 3-子群，\\(P_3 P_7\\) 的阶为？",
+        "options": [
+          "\\(10\\)",
+        "\\(21\\)",
+        "\\(42\\)",
+        "\\(7\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(P_7 \\trianglelefteq G\\)，故 \\(P_3 P_7 \\leq G\\)。\\(|P_3 P_7| = |P_3| \\cdot |P_7| / |P_3 \\cap P_7|\\)。\\(|P_3| = 3\\)，\\(|P_7| = 7\\)，\\(\\gcd(3,7) = 1\\)，\\(P_3 \\cap P_7 = \\{e\\}\\)。\\(|P_3 P_7| = 3 \\cdot 7 = 21\\)。"
+      },
+      {
+        "id": "groups-ch06-q26",
+        "question": "在密码学 RSA 中，\\(n = pq\\)（\\(p, q\\) 素数），\\(\\mathbb{Z}/n\\mathbb{Z}^*\\) 的阶 \\(\\phi(n) = (p-1)(q-1)\\)。若 \\(p = 5, q = 11\\)，\\(|\\mathbb{Z}/55\\mathbb{Z}^*| = 40 = 2^3 \\cdot 5\\)。Sylow 5-子群阶为？",
+        "options": [
+          "\\(4\\)",
+        "\\(5\\)",
+        "\\(8\\)",
+        "\\(40\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(40 = 2^3 \\cdot 5\\)，Sylow 5-子群阶 \\(= 5\\)。在 \\(\\mathbb{Z}/55\\mathbb{Z}^*\\) 中，\\(5\\) 阶元素（如 \\(\\overline{12}\\), \\(12^4 \\equiv 1 \\pmod{55}\\)需验证）构成唯一 Sylow 5-子群。Sylow 结构揭示了 RSA 底层群的代数结构。"
+      },
+      {
+        "id": "groups-ch06-q27",
+        "question": "在纠错编码中，\\(\\mathrm{GL}(3, \\mathbb{F}_2)\\)（\\(3 \\times 3\\) 可逆矩阵群）的阶为 \\((2^3-1)(2^3-2)(2^3-4) = 168\\)。此群有 Sylow 7-子群，每个的阶为？",
+        "options": [
+          "\\(3\\)",
+        "\\(7\\)",
+        "\\(8\\)",
+        "\\(24\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(168 = 2^3 \\cdot 3 \\cdot 7\\)，Sylow 7-子群阶 \\(= 7\\)。\\(\\mathrm{GL}(3, \\mathbb{F}_2) \\cong \\mathrm{PSL}(2, 7)\\) 是 \\(168\\) 阶的单群。其 Sylow 7-子群同构于 \\(\\mathbb{Z}/7\\mathbb{Z}\\)，在编码理论中对应特定的错误模式对称性。"
+      },
+      {
+        "id": "groups-ch06-q28",
+        "question": "在晶体学中，正四面体对称群 \\(T_d\\) 满足 \\(|T_d| = 24\\)。设 \\(n_3\\) 是 Sylow 3-子群个数。\\(n_3 \\mid 8\\)，\\(n_3 \\equiv 1 \\pmod{3}\\)。\\(n_3\\) 等于？",
+        "options": [
+          "\\(1\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(1\\) 或 \\(4\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(24 = 2^3 \\cdot 3\\)。\\(n_3 \\mid 8, n_3 \\equiv 1 \\pmod{3}\\)。\\(8\\) 的因子：\\(1, 2, 4, 8\\)。\\(\\pmod{3}\\)：\\(1 \\equiv 1\\) ✓，\\(4 \\equiv 1\\) ✓。\\(n_3 \\in \\{1, 4\\}\\)。实际上 \\(T_d \\cong S_4\\)（对称群）中 \\(n_3 = 4\\)。Sylow 3-子群对应正四面体的 \\(4\\) 条 \\(C_3\\) 旋转轴。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="algebra" data-module="groups"
+      style="--domain-color: var(--c-algebra);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">ALGEBRA</span>
+      <a href="../../../modules/algebra/groups.html" class="module-name">群论 Groupes</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · p-群的定义与基本性质</a></li>
+      <li><a href="#kp2">02 · Sylow 第一定理及其证明</a></li>
+      <li><a href="#kp3">03 · Sylow 第二、第三定理</a></li>
+      <li><a href="#kp4">04 · Sylow 定理的应用</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>Sylow 定理</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>p-群的定义与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>在研究有限群时，素数 \(p\) 扮演特殊角色。阶为 \(p\) 的幂的群（\(p\)-群） 是有限群的「基本构件」。\(p\)-群有丰富的结构性质，如中心非平凡， 这使得它们比一般群更易分析，也是 Sylow 定理的出发点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>\(p\)-群的特殊性源于素数 \(p\) 的算术性质——模 \(p\) 运算的简单性 转化为群结构的强约束。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>定义</strong>: 群 \(G\) 是 \(p\)-群，若 \(|G| = p^k\)（\(p\) 素数，\(k \geq 1\)）。 <strong>基本性质</strong>: 1) <strong>中心非平凡</strong>: \(|Z(G)| \geq p\)（由类方程证明）。 2) <strong>\(|G| = p^2\) 的群是交换群</strong>: 由中心非平凡 + \(G/Z(G)\) 循环 \(\Rightarrow\) \(G\) 交换推出。 因此 \(|G|=p^2\) 的群只有两种: \(\mathbb{Z}/p^2\mathbb{Z}\) 或 \(\mathbb{Z}/p\mathbb{Z} \times \mathbb{Z}/p\mathbb{Z}\)。 3) \(p\)-群有每个阶的子群: 若 \(p^j \mid |G|\)，则存在 \(p^j\) 阶子群。 \[|G| = p^k \Rightarrow |Z(G)| \equiv 0 \pmod{p}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>\(p\)-群分类用于研究密码学中椅圆曲线的自同态群； 也是分类小阶群的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 列出所有 \(8 = 2^3\) 阶群（不证）。 解答: 共 5 种（up to isomorphism）: \(\mathbb{Z}/8\mathbb{Z}\)、\(\mathbb{Z}/4\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)、 \((\mathbb{Z}/2\mathbb{Z})^3\)、\(D_4\)、\(Q_8\)（四元数群）。 前三个交换，后两个非交换。 易错点: 以为「8 阶群只有 \(\mathbb{Z}/8\mathbb{Z}\) 和 \((\mathbb{Z}/2\mathbb{Z})^3\)」——忘记了非交换 \(p\)-群的存在。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">阶为 \(p^2\)（\(p\) 素数）的群有几种同构类？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(p^2\\) 阶群必为交换群，只有')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(p^2\\) 阶群必为交换群，只有')">B. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(p^2\\) 阶群必为交换群，只有')">C. \(p\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(p^2\\) 阶群必为交换群，只有')">D. \(p+1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Sylow 第一定理及其证明</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Lagrange 定理告诉我们子群的阶必须整除群的阶，但其逆不一定成立。 Sylow 第一定理在「素数幂」的情况下给出了肯定答案：对于每个整除 \(|G|\) 的素数幂 \(p^n\)，群中必存在阶为 \(p^n\) 的子群。这是有限 群结构理论最重要的存在性定理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Sylow 第一定理的证明综合了群作用和组合计数，将存在性问题 转化为模 \(p\) 运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Sylow 第一定理</strong>: 设 \(|G| = p^n m\)，\(\gcd(p, m) = 1\)。 则存在 \(G\) 的子群 \(P\) 使 \(|P| = p^n\)（称为 Sylow \(p\)-子群）。 <strong>证明框架</strong>（Wielandt 1959）: 设 \(\Omega = \{S \subseteq G : |S| = p^n\}\)（所有大小为 \(p^n\) 的子集）。 \(G\) 通过左乘作用于 \(\Omega\): \(g \cdot S = gS\)。 \(|\Omega| = \binom{p^n m}{p^n}\)。 关键组合恒等式: \(\binom{p^n m}{p^n} \equiv m \pmod{p}\)， 因此 \(p \nmid |\Omega|\)。 轨道分解 \(|\Omega| = \sum |\mathrm{Orb}(S_i)|\)， 必存在某个轨道使 \(p \nmid |\mathrm{Orb}(S_0)|\)。 \(|\mathrm{Orb}(S_0)| = [G : G_{S_0}]\)，故 \(p^n \mid |G_{S_0}|\)。 又 \(G_{S_0} \subseteq G\)，\(|G_{S_0}| \leq p^n\)（由 \(G_{S_0}\) 保持 \(S_0\) 不变推出），故 \(|G_{S_0}| = p^n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Sylow 子群的存在性是分析有限群结构的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: \(|G| = 12 = 2^2 \cdot 3\)。Sylow 第一定理保证什么？ 解答: 存在 4 阶子群（Sylow 2-子群）和 3 阶子群 （Sylow 3-子群）。 易错点: 以为 Sylow 定理保证了任意阶的子群存在。 它只保证素数幂阶 \(p^n\) 的子群存在，不保证任意因子的子群存在。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|G| = 45 = 3^2 \cdot 5\)，Sylow 第一定理保证的 Sylow</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！Sylow \\(p\\)-子群的阶是 \\(p\\) 的最高幂次：')">A. \(9\) 和 \(5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Sylow \\(p\\)-子群的阶是 \\(p\\) 的最高幂次：')">B. \(3\) 和 \(5\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Sylow \\(p\\)-子群的阶是 \\(p\\) 的最高幂次：')">C. \(9\) 和 \(15\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。Sylow \\(p\\)-子群的阶是 \\(p\\) 的最高幂次：')">D. \(3\) 和 \(15\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Sylow 第二、第三定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>知道 Sylow \(p\)-子群存在后，自然的问题是：它有多少个？它们之间 的关系是什么？Sylow 第二定理说它们全部共轭，第三定理给出它们 个数 \(n_p\) 的强整除性约束。这两个定理是有限群结构分析的利器。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>共轭性说明了 Sylow \(p\)-子群在群内部「本质相同」。 数量约束 \(n_p \equiv 1 \pmod{p}\) 是一个市算条件。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>Sylow 第二定理</strong>: \(G\) 的所有 Sylow \(p\)-子群两两共轭。 即若 \(P, Q\) 都是 Sylow \(p\)-子群，则 \(\exists g \in G, Q = gPg^{-1}\)。 <strong>Sylow 第三定理</strong>: 设 \(|G| = p^n m\)，\(n_p\) 表示 Sylow \(p\)-子群个数，则: (i) \(n_p \equiv 1 \pmod{p}\) (ii) \(n_p \mid m\) \[n_p = [G : N_G(P)] \equiv 1 \pmod{p}, \quad n_p \mid m\] <strong>重要推论</strong>: \(n_p = 1 \Leftrightarrow\) Sylow \(p\)-子群唯一 \(\Leftrightarrow\) Sylow \(p\)-子群正规。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Sylow 第三定理的数量约束是判定特定阶的群是否为单群的 主要工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 设 \(|G| = 15 = 3 \cdot 5\)。求 \(n_3\) 和 \(n_5\)。 解答: \(n_3 \mid 5\) 且 \(n_3 \equiv 1 \pmod{3}\)， 可能值: \(1, 5\)。\(5 \equiv 2 \pmod{3} \neq 1\)，故 \(n_3 = 1\)。 \(n_5 \mid 3\) 且 \(n_5 \equiv 1 \pmod{5}\)， 可能值: \(1, 3\)。\(3 \equiv 3 \pmod{5} \neq 1\)，故 \(n_5 = 1\)。 两个 Sylow 子群均唯一且正规，\(G \cong \mathbb{Z}/3 \times \mathbb{Z}/5 \cong \mathbb{Z}/15\)。 易错点: 在查找 \(n_p\) 时只检查了 \(n_p \mid m\) 而忘记 \(n_p \equiv 1 \pmod{p}\) 的约束（或反之）。必须同时满足两个条件。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(|G| = 30\)，\(n_5\) 的可能值是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(n_5 \\mid 6\\) 且 \\(n_5 \\equiv 1 \\pmod{5}\\)。')">A. \(\{1, 6\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(n_5 \\mid 6\\) 且 \\(n_5 \\equiv 1 \\pmod{5}\\)。')">B. \(\{1, 2, 3, 6\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(n_5 \\mid 6\\) 且 \\(n_5 \\equiv 1 \\pmod{5}\\)。')">C. \(\{1, 6, 10\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(n_5 \\mid 6\\) 且 \\(n_5 \\equiv 1 \\pmod{5}\\)。')">D. \(\{1\}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Sylow 定理的应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Sylow 定理的威力在于应用: 它能证明特定阶的群不是单群，或确定 其完整结构。这是有限群分类的第一步：用数量约束排除单性， 找出正规 Sylow 子群，然后利用半直积等工具确定群结构。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>「数量约束 + 计数论证」是有限群理论的基本方法论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p><strong>应用思路</strong>: 要证 \(G\) 不是单群，找到某个素数 \(p\) 使 \(n_p = 1\)，则 Sylow \(p\)-子群正规，\(G\) 不单纯。 <strong>例: 阶 36 的群不是单群</strong>: \(36 = 2^2 \cdot 3^2\)。\(n_3 \mid 4,\; n_3 \equiv 1 \pmod{3}\)， 可能: \(1, 4\)。若 \(n_3 = 1\)，则有正规子群，做完。 若 \(n_3 = 4\)，4 个 Sylow 3-子群，每个 9 阶。 \(G\) 作用于这 4 个 Sylow 3-子群（通过共轭）， 得到同态 \(\varphi: G \to S_4\)。\(|\ker\varphi| \mid |G|=36\) 且 \(|\ker\varphi| \mid |S_4|=24\)。若 \(\ker\varphi \neq \{e\}\)， 则 \(G\) 有非平凡正规子群。若 \(\ker\varphi = \{e\}\)， 则 \(G \hookrightarrow S_4\)，但 \(36 \nmid 24\)，矛盾。 故无论如何 \(G\) 都不是单群。 <strong>阶 < 60 的非交换单群不存在</strong>: 类似的 Sylow 分析可 排除所有小于 60 的候选阶。 \[|A_5| = 60 \text{ 是最小的非交换单群}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>有限单群分类（完成于 2004 年）的第一步就是用 Sylow 分析 排除小阶候选。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题: 证明 15 阶群是循环群。 解答: 由 KP3 例题，\(n_3 = n_5 = 1\)。 设 Sylow 3-子群 \(P_3 \cong \mathbb{Z}/3\)， Sylow 5-子群 \(P_5 \cong \mathbb{Z}/5\)。 \(P_3 \cap P_5 = \{e\}\)（阶互素），\(|P_3 P_5| = 15 = |G|\)。 \(G = P_3 \times P_5 \cong \mathbb{Z}/3 \times \mathbb{Z}/5 \cong \mathbb{Z}/15\)。 易错点: 在得到 \(P_3 \cap P_5 = \{e\}\) 后直接写 \(G = P_3 \times P_5\)， 忘记还需要两个子群都正规这个条件。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(|G| = 20\)，\(n_5 = 1\)，那么？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(n_5 = 1\\) 意味着 Sylow 5-子群唯一，因此正规。')">A. \(G\) 是 5 阶循环群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(n_5 = 1\\) 意味着 Sylow 5-子群唯一，因此正规。')">B. \(G\) 有唯一正规的 Sylow 5-子群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(n_5 = 1\\) 意味着 Sylow 5-子群唯一，因此正规。')">C. \(G\) 是单群</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(n_5 = 1\\) 意味着 Sylow 5-子群唯一，因此正规。')">D. \(G\) 是交换群</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5</a>
+      <a href="../../../modules/algebra/groups.html" class="nav-overview">📋 概览</a>
+      <a href="#" class="nav-next"></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

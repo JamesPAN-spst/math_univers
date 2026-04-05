@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 离散时间 Markov 链 — 随机过程 — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "stochastic-ch01-q1",
+        "question": "Markov 性的含义？",
+        "options": [
+          "\\(P(X_{n+1}|X_0,...,X_n)=P(X_{n+1}|X_n)\\)",
+        "\\(X_n\\) 独立同分布",
+        "\\(X_{n+1}\\) 仅取决于 \\(X_0\\)",
+        "\\(E[X_{n+1}]=E[X_n]\\)"
+        ],
+        "answer": 0,
+        "explanation": "Markov 性=\"给定现在，未来与过去独立\"。条件分布仅依赖当前状态 \\(X_n\\)，不依赖 \\(X_0,...,X_{n-1}\\)。B 是 iid（更强）。D 是鞅性质。"
+      },
+      {
+        "id": "stochastic-ch01-q2",
+        "question": "转移矩阵 \\(P\\) 的行必须满足？",
+        "options": [
+          "每行之和为 \\(1\\)，所有元素 \\(\\geq 0\\)",
+        "每列之和为 \\(1\\)",
+        "矩阵对称",
+        "行列式为 \\(1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P_{ij}=P(X_{n+1}=j|X_n=i) \\geq 0\\)，\\(\\sum_j P_{ij}=1\\)（行随机）。列随机是另一种约定（某些文献用于左乘）。对称不要求（详细平衡时可对称化）。"
+      },
+      {
+        "id": "stochastic-ch01-q3",
+        "question": "状态 \\(i\\) 为吸收态(absorbing)的条件？",
+        "options": [
+          "\\(P_{ii}=1\\)",
+        "\\(P_{ii}=0\\)",
+        "所有 \\(P_{ij}=1/n\\)",
+        "\\(i\\) 不可达"
+        ],
+        "answer": 0,
+        "explanation": "吸收态：一旦进入永不离开，\\(P_{ii}=1\\)，\\(P_{ij}=0\\)（\\(j \\neq i\\)）。随机游走中的边界、赌徒破产中的 \\(0\\) 和 \\(N\\) 都是吸收态。B 是暂态的必要条件之一。"
+      },
+      {
+        "id": "stochastic-ch01-q4",
+        "question": "状态 \\(i\\) 与 \\(j\\) 互通 (\\(i \\leftrightarrow j\\)) 的条件？",
+        "options": [
+          "存在 \\(m,n>0\\) 使 \\(P^m_{ij}>0\\) 且 \\(P^n_{ji}>0\\)",
+        "\\(P_{ij}>0\\)",
+        "\\(P_{ij}=P_{ji}\\)",
+        "\\(i=j\\)"
+        ],
+        "answer": 0,
+        "explanation": "互通要求双向可达（不要求一步）。\\(i \\to j\\)（存在 \\(m\\) 使 \\(P^m_{ij}>0\\)）且 \\(j \\to i\\)。互通是等价关系，将状态空间划分为互通类。B 只是一步可达。"
+      },
+      {
+        "id": "stochastic-ch01-q5",
+        "question": "不可约 (irreducible) 的 Markov 链指什么？",
+        "options": [
+          "所有状态互通（只有一个互通类）",
+        "所有状态吸收",
+        "转移矩阵可逆",
+        "\\(P_{ij}>0\\)（\\(\\forall i,j\\)）"
+        ],
+        "answer": 0,
+        "explanation": "不可约：任意两状态间都可到达。D 更强（正矩阵 → 非周期不可约）。不可约但周期的例子：偶/奇状态交替。不可约保证唯一平稳分布（若存在）。"
+      },
+      {
+        "id": "stochastic-ch01-q6",
+        "question": "\\(P=\\begin{pmatrix}0.7&0.3\\\\0.4&0.6\\end{pmatrix}\\)。求平稳分布 \\(\\pi\\)。",
+        "options": [
+          "\\(\\pi=(4/7, 3/7)\\)",
+        "\\(\\pi=(1/2, 1/2)\\)",
+        "\\(\\pi=(0.7, 0.3)\\)",
+        "\\(\\pi=(3/7, 4/7)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi P=\\pi\\): \\(0.7\\pi_1+0.4\\pi_2=\\pi_1 \\Rightarrow 0.3\\pi_1=0.4\\pi_2 \\Rightarrow \\pi_1/\\pi_2=4/3\\)。\\(\\pi=(4/7,3/7)\\)。选 D 颠倒了。选 C 只是第一行（非平稳）。"
+      },
+      {
+        "id": "stochastic-ch01-q7",
+        "question": "细致平衡条件 \\(\\pi_i P_{ij}=\\pi_j P_{ji}\\) 的含义？",
+        "options": [
+          "链是可逆的：稳态下 \\(i \\to j\\) 的流量 = \\(j \\to i\\) 的流量",
+        "\\(P\\) 是对称矩阵",
+        "\\(\\pi\\) 均匀分布",
+        "链是周期的"
+        ],
+        "answer": 0,
+        "explanation": "细致平衡 ⟹ \\(\\pi\\) 是平稳分布（对 \\(j\\) 求和：\\(\\sum_i \\pi_i P_{ij}=\\pi_j\\)）。可逆链的时间反转与正向同分布。B 仅当 \\(\\pi\\) 均匀时。MCMC 的 Metropolis-Hastings 算法利用此条件设计接受率。"
+      },
+      {
+        "id": "stochastic-ch01-q8",
+        "question": "\\(P=\\begin{pmatrix}0&1&0\\\\0&0&1\\\\1&0&0\\end{pmatrix}\\)。链的周期？",
+        "options": [
+          "\\(3\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "无穷"
+        ],
+        "answer": 0,
+        "explanation": "\\(P^3=I\\)（\\(3\\) 步后必回原态），\\(P^1,P^2\\) 不含对角正元素。\\(d(i)=\\gcd\\{n:P^n_{ii}>0\\}=3\\)。链不可约但周期 \\(3\\)，不收敛到平稳分布而是循环。"
+      },
+      {
+        "id": "stochastic-ch01-q9",
+        "question": "链非周期 (aperiodic) + 不可约 + 有限状态空间，保证什么？",
+        "options": [
+          "\\(P^n \\to \\mathbf{1}\\pi^T\\)（每行趋于 \\(\\pi\\)）",
+        "\\(P^n=\\pi\\) 对所有 \\(n\\)",
+        "不一定收敛",
+        "仅收敛到零矩阵"
+        ],
+        "answer": 0,
+        "explanation": "有限不可约非周期 Markov 链：\\(\\lim P^n_{ij}=\\pi_j\\)（\\(\\forall i\\)）。收敛速率由第二大特征值 \\(|\\lambda_2|\\) 控制：\\(\\|P^n-\\mathbf{1}\\pi^T\\| \\sim |\\lambda_2|^n\\)。这是 MCMC 收敛的基础。"
+      },
+      {
+        "id": "stochastic-ch01-q10",
+        "question": "简单随机游走 \\(S_n=S_0+\\sum X_i\\)（\\(X_i=\\pm 1\\) 等概率）在 \\(\\mathbb{Z}\\) 上。状态 \\(0\\) 是暂态还是常返？",
+        "options": [
+          "常返（\\(P(\\text{return to 0})=1\\)）",
+        "暂态",
+        "吸收",
+        "正常返"
+        ],
+        "answer": 0,
+        "explanation": "一维等概率随机游走：\\(P(\\text{回到原点})=1\\)（常返）。\\(\\sum P^{2n}_{00}=\\sum \\binom{2n}{n}2^{-2n} \\sim \\sum 1/\\sqrt{\\pi n}=\\infty\\)（Stirling）。但为零常返（\\(E[\\text{回访时间}]=\\infty\\)）。三维中为暂态（Pólya 定理）。"
+      },
+      {
+        "id": "stochastic-ch01-q11",
+        "question": "\\(P=\\begin{pmatrix}1/2&1/2&0\\\\1/3&1/3&1/3\\\\0&1/2&1/2\\end{pmatrix}\\)。该链不可约吗？",
+        "options": [
+          "是，可验证任意两状态间可达",
+        "否，\\(P_{13}=0\\) 所以 \\(1 \\not\\to 3\\)",
+        "否，存在吸收态",
+        "取决于初始分布"
+        ],
+        "answer": 0,
+        "explanation": "\\(1 \\to 2\\)（\\(P_{12}=1/2>0\\)），\\(2 \\to 3\\)（\\(P_{23}=1/3>0\\)），故 \\(1 \\to 3\\)（两步）。类似 \\(3 \\to 1\\)。不可约不要求一步可达。B 犯了常见错误：只看一步转移。"
+      },
+      {
+        "id": "stochastic-ch01-q12",
+        "question": "二状态链 \\(P=\\begin{pmatrix}1-a&a\\\\b&1-b\\end{pmatrix}\\)（\\(0<a,b<1\\)）。\\(\\pi_1=\\)？",
+        "options": [
+          "\\(b/(a+b)\\)",
+        "\\(a/(a+b)\\)",
+        "\\(1/2\\)",
+        "\\(a\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_1(1-a)+\\pi_2 b=\\pi_1\\)，\\(\\pi_1+\\pi_2=1\\)。\\(\\pi_1 a=\\pi_2 b\\)，\\(\\pi_1=b/(a+b)\\)。当 \\(a=b\\) 时 \\(\\pi=(1/2,1/2)\\)。选 B 颠倒了 \\(a,b\\)——常见错误。"
+      },
+      {
+        "id": "stochastic-ch01-q13",
+        "question": "Google PageRank 模型中添加的\"随机传送\"(teleportation) 概率 \\(\\alpha\\) 的作用？",
+        "options": [
+          "保证链不可约且非周期，从而有唯一平稳分布",
+        "加速收敛",
+        "仅防止周期性",
+        "使所有页面等权重"
+        ],
+        "answer": 0,
+        "explanation": "\\(P'=(1-\\alpha)P+\\alpha \\mathbf{1}\\mathbf{v}^T\\)：原始 Web 图可约（悬挂节点），加 teleportation 使 \\(P'>0\\)（不可约+非周期）。\\(\\alpha=0.15\\) 典型值。平稳分布 \\(\\pi\\) 即 PageRank 向量。"
+      },
+      {
+        "id": "stochastic-ch01-q14",
+        "question": "Metropolis-Hastings 接受概率 \\(\\alpha(i,j)=\\min\\left(1,\\frac{\\pi_j Q_{ji}}{\\pi_i Q_{ij}}\\right)\\) 保证什么？",
+        "options": [
+          "细致平衡 \\(\\pi_i P_{ij}=\\pi_j P_{ji}\\)",
+        "\\(P\\) 对称",
+        "\\(\\pi\\) 均匀",
+        "链可约"
+        ],
+        "answer": 0,
+        "explanation": "\\(P_{ij}=Q_{ij}\\alpha(i,j)\\)。\\(\\pi_i Q_{ij}\\alpha(i,j)=\\min(\\pi_i Q_{ij},\\pi_j Q_{ji})=\\pi_j Q_{ji}\\alpha(j,i)\\)。细致平衡 ✓。这使得 MCMC 可以从目标 \\(\\pi\\) 采样而无需归一化常数。"
+      },
+      {
+        "id": "stochastic-ch01-q15",
+        "question": "Gibbs 采样是 MH 的特例，其接受率？",
+        "options": [
+          "恒为 \\(1\\)",
+        "\\(\\min(1, \\pi_j/\\pi_i)\\)",
+        "\\(1/2\\)",
+        "取决于维度"
+        ],
+        "answer": 0,
+        "explanation": "Gibbs 用完整条件分布 \\(P(X_k|X_{-k})\\) 作为提议。可验证 MH 比率 \\(=1\\)。优点是永不拒绝（效率高），但需要条件分布易采样。高维时 Gibbs 是最常用的 MCMC 方法之一。"
+      },
+      {
+        "id": "stochastic-ch01-q16",
+        "question": "Markov 链的 Chapman-Kolmogorov 方程？",
+        "options": [
+          "\\(P^{m+n}_{ij}=\\sum_k P^m_{ik} P^n_{kj}\\)",
+        "\\(P^{m+n}=P^m+P^n\\)",
+        "\\(P^{mn}=P^m P^n\\)",
+        "\\(P^n_{ij}=P_{ij}^n\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(P(X_{m+n}=j|X_0=i)=\\sum_k P(X_m=k|X_0=i)P(X_{m+n}=j|X_m=k)\\)。即矩阵乘法 \\(P^{m+n}=P^m P^n\\)（A 和这等价但 A 是分量形式）。C 对 \\(m+n\\) 写成了 \\(mn\\)（错误）。"
+      },
+      {
+        "id": "stochastic-ch01-q17",
+        "question": "常返 (recurrent) vs 暂态 (transient)：状态 \\(i\\) 常返当且仅当？",
+        "options": [
+          "\\(\\sum_{n=0}^\\infty P^n_{ii}=\\infty\\)",
+        "\\(P^n_{ii}>0\\) 对某个 \\(n\\)",
+        "\\(\\sum P^n_{ii}<\\infty\\)",
+        "\\(P_{ii}>0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sum P^n_{ii}=E[\\text{访问 }i\\text{ 的次数}|X_0=i]\\)。\\(=\\infty\\) 当且仅当 \\(P(\\text{回到 }i)=1\\)（常返）。\\(<\\infty\\) 即暂态（回访有限次）。B 只说可达，D 只是自环。"
+      },
+      {
+        "id": "stochastic-ch01-q18",
+        "question": "混合时间 \\(t_{\\text{mix}}(\\varepsilon)=\\min\\{n:d(n) \\leq \\varepsilon\\}\\)（\\(d(n)=\\max_i \\|P^n(i,\\cdot)-\\pi\\|_{TV}\\)）。对 \\(N\\)-卡片随机洗牌，\\(t_{\\text{mix}} \\sim\\)？",
+        "options": [
+          "\\(\\frac{3}{2}N\\ln N\\)（切断现象）",
+        "\\(N\\)",
+        "\\(N^2\\)",
+        "\\(2^N\\)"
+        ],
+        "answer": 0,
+        "explanation": "Aldous-Diaconis (1986)：riffle shuffle 的混合时间 \\(\\approx \\frac{3}{2}\\log_2 N\\)。但随机对换 (random transposition) 的混合时间 \\(\\sim \\frac{1}{2}N\\ln N\\)。切断现象：TV 距离在 \\(t_{\\text{mix}}\\) 附近急剧下降。"
+      },
+      {
+        "id": "stochastic-ch01-q19",
+        "question": "不可约有限 Markov 链的 Perron-Frobenius 定理保证？",
+        "options": [
+          "特征值 \\(1\\) 是最大的，对应的左特征向量（即 \\(\\pi\\)）为正",
+        "所有特征值为实数",
+        "\\(P\\) 可对角化",
+        "最大特征值 \\(>1\\)"
+        ],
+        "answer": 0,
+        "explanation": "正行随机矩阵的 Perron-Frobenius: \\(\\lambda_1=1\\)（最大），对应 \\(\\pi>0\\)（分量均正）。\\(|\\lambda_i|<1\\)（\\(i \\geq 2\\)，非周期时）。B 不一定（\\(P\\) 非对称时特征值可复数）。"
+      },
+      {
+        "id": "stochastic-ch01-q20",
+        "question": "赌徒破产：初始 \\(i\\)，目标 \\(N\\)，\\(p \\neq 1/2\\)。破产概率 \\(P_i(\\text{ruin})=\\)？",
+        "options": [
+          "\\(\\frac{(q/p)^N-(q/p)^i}{(q/p)^N-1}\\)",
+        "\\(1-i/N\\)",
+        "\\((1-p)^i\\)",
+        "\\(i/N\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(r=q/p \\neq 1\\)。\\(P_i=\\frac{r^N-r^i}{r^N-1}\\)。\\(p=q=1/2\\) 时退化为 \\(1-i/N\\)（选 B）。\\(p<1/2\\)（赌场有利）时 \\(P_i \\to 1\\)（几乎必定破产）。差分方程 \\(P_i=pP_{i+1}+qP_{i-1}\\) 的经典解。"
+      },
+      {
+        "id": "stochastic-ch01-q21",
+        "question": "Ehrenfest 模型（\\(N\\) 球在两瓮之间随机跳转）的平稳分布？",
+        "options": [
+          "\\(\\text{Bin}(N, 1/2)\\)",
+        "\\(U\\{0,...,N\\}\\)",
+        "Poisson",
+        "几何分布"
+        ],
+        "answer": 0,
+        "explanation": "状态 \\(k\\)（A 瓮球数），\\(P(k \\to k-1)=k/N\\)，\\(P(k \\to k+1)=(N-k)/N\\)。验证细致平衡：\\(\\binom{N}{k}(k+1)/N=\\binom{N}{k+1}(k+1)/N\\) ✓。\\(\\pi_k=\\binom{N}{k}2^{-N}\\)。"
+      },
+      {
+        "id": "stochastic-ch01-q22",
+        "question": "MCMC 中 burn-in 期的目的？",
+        "options": [
+          "丢弃初始分布的影响，使样本近似来自 \\(\\pi\\)",
+        "加速计算",
+        "减少内存",
+        "保证独立性"
+        ],
+        "answer": 0,
+        "explanation": "初始状态 \\(X_0\\) 任意，前 \\(B\\) 步的分布 \\(\\mu_0 P^B\\) 尚未接近 \\(\\pi\\)。丢弃前 \\(B\\) 个样本（burn-in）后，\\(P^B(X_0,\\cdot) \\approx \\pi\\)。\\(B\\) 选取通常用诊断工具（Gelman-Rubin \\(\\hat{R}\\)）。"
+      },
+      {
+        "id": "stochastic-ch01-q23",
+        "question": "可逆链的谱间隙 \\(\\gamma=1-\\lambda_2\\) 控制什么？",
+        "options": [
+          "收敛到平稳分布的速率：\\(d(n) \\leq C e^{-\\gamma n}\\)",
+        "平稳分布的熵",
+        "链的周期",
+        "状态空间大小"
+        ],
+        "answer": 0,
+        "explanation": "谱间隙越大收敛越快。\\(\\|P^n(x,\\cdot)-\\pi\\|_{TV} \\leq \\sqrt{\\pi_{\\max}/\\pi_{\\min}} (1-\\gamma)^n\\)。\\(\\gamma\\) 小则混合慢（近可约链）。Poincaré 不等式：\\(\\text{Var}_\\pi(f) \\leq \\frac{1}{\\gamma}\\mathcal{E}(f,f)\\)（Dirichlet form）。"
+      },
+      {
+        "id": "stochastic-ch01-q24",
+        "question": "二维格点上的简单随机游走是常返还是暂态？",
+        "options": [
+          "常返（Pólya 定理）",
+        "暂态",
+        "正常返",
+        "取决于初始点"
+        ],
+        "answer": 0,
+        "explanation": "Pólya (1921)：\\(d\\)维格点简单随机游走 \\(d=1,2\\) 常返，\\(d \\geq 3\\) 暂态。二维：\\(P^{2n}_{00}=[\\binom{2n}{n}2^{-2n}]^2 \\sim 1/(\\pi n)\\)，\\(\\sum 1/n=\\infty\\)。三维 \\(\\sim n^{-3/2}\\)，\\(\\sum<\\infty\\)。"
+      },
+      {
+        "id": "stochastic-ch01-q25",
+        "question": "有限 Markov 链中 \\(\\pi_i=1/(m_i E[\\tau_i])\\)（\\(\\tau_i\\) 为首次回到 \\(i\\) 的时间，\\(m_i\\) 为总平稳质量），简化为？",
+        "options": [
+          "\\(\\pi_i=1/E[\\tau_i]\\)",
+        "\\(\\pi_i=E[\\tau_i]\\)",
+        "\\(\\pi_i=1/i\\)",
+        "\\(\\pi_i=P_{ii}\\)"
+        ],
+        "answer": 0,
+        "explanation": "正常返态：\\(\\pi_i=1/E[\\tau_i]\\)。访问频率 = 平稳概率 = 平均回访时间的倒数。\\(E[\\tau_i]\\) 大（稀少访问）→ \\(\\pi_i\\) 小。这连接了长期时间平均和空间分布。"
+      },
+      {
+        "id": "stochastic-ch01-q26",
+        "question": "天气模型：晴(\\(S\\))/雨(\\(R\\))，\\(P(S|S)=0.8, P(R|R)=0.6\\)。长期下雨天比例？",
+        "options": [
+          "\\(1/3\\)",
+        "\\(1/2\\)",
+        "\\(2/3\\)",
+        "\\(0.6\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_R \\cdot 0.4=\\pi_S \\cdot 0.2\\)（流量平衡）。\\(\\pi_S/\\pi_R=2\\)。\\(\\pi_R=1/3\\)。长期 \\(33\\%\\) 下雨天。也可用 \\(a=0.2, b=0.4\\): \\(\\pi_R=a/(a+b)=1/3\\)。"
+      },
+      {
+        "id": "stochastic-ch01-q27",
+        "question": "MCMC Metropolis 算法对目标分布 \\(\\pi(x) \\propto e^{-x^2/2}\\) 采样。提议 \\(q(x'|x)=N(x,1)\\)。接受率 \\(\\alpha=\\)？",
+        "options": [
+          "\\(\\min(1, e^{-(x'^2-x^2)/2})\\)",
+        "\\(e^{-x'^2/2}\\)",
+        "\\(1\\)",
+        "\\(\\pi(x')/\\pi(x)\\)"
+        ],
+        "answer": 0,
+        "explanation": "对称提议 \\(q(x'|x)=q(x|x')\\)（Random Walk MH）。\\(\\alpha=\\min(1,\\pi(x')/\\pi(x))=\\min(1,e^{(x^2-x'^2)/2})\\)。向密度更高处必接受，向低处按比率接受。选 D 缺 \\(\\min\\)。"
+      },
+      {
+        "id": "stochastic-ch01-q28",
+        "question": "品牌转换模型：A→B 概率 \\(0.1\\)，B→A 概率 \\(0.2\\)。长期市场份额？",
+        "options": [
+          "A: \\(2/3\\)，B: \\(1/3\\)",
+        "A: \\(1/2\\)，B: \\(1/2\\)",
+        "A: \\(0.1\\)，B: \\(0.2\\)",
+        "A: \\(0.9\\)，B: \\(0.1\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\pi_A=b/(a+b)=0.2/0.3=2/3\\)。B 的忠诚度低（\\(20\\%\\) 回流 A），A 的忠诚度高（\\(90\\%\\) 留存）。平稳分布反映长期均衡市场份额。营销策略可改变转移概率。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="probability" data-module="stochastic"
+      style="--domain-color: var(--c-probability);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">PROBABILITÉS</span>
+      <a href="../../../modules/probability/stochastic.html" class="module-name">随机过程</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Markov 性质与转移矩阵</a></li>
+      <li><a href="#kp2">02 · 状态分类与不可约性</a></li>
+      <li><a href="#kp3">03 · 平稳分布与收敛</a></li>
+      <li><a href="#kp4">04 · 可逆链与细致平衡</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>离散时间 Markov 链</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Markov 性质与转移矩阵</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>天气预报、股价模型、网页排名算法——这些矋看迫不相关的问题都有一个 共同结构：未来只依赖于当前状态，不依赖于历史。这就是 Markov 性质（无记忆性）。Markov 链是最基本的随机过程模型，它将复杂的 随机动态归结为矩阵运算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>无记忆性将随机过程的全部信息压缩到一个转移矩阵 \(P\)。 \(n\) 步转移只需计算 \(P^n\)——矩阵幂替代了复杂的路径计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：取值于可数状态空间 \(S\) 的序列 \(\{X_n\}\) 是 Markov 链 iff \[P(X_{n+1} = j \;|\; X_n = i, X_{n-1}, \ldots, X_0) = P(X_{n+1} = j \;|\; X_n = i)\] 转移概率：\(p_{ij} = P(X_{n+1} = j \;|\; X_n = i)\)（时齐情形）。 转移矩阵 \(P = (p_{ij})\) 满足：\(p_{ij} \geq 0\)， \(\sum_j p_{ij} = 1\)（行随机矩阵）。 \(n\) 步转移概率： \[p_{ij}^{(n)} = P(X_{m+n} = j \;|\; X_m = i) = (P^n)_{ij}\] Chapman-Kolmogorov 方程：\(P^{m+n} = P^m \cdot P^n\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>Google PageRank 算法将网页视为 Markov 链的状态， 平稳分布对应网页重要性排名。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：天气模型，\(S = \{\text{晴}, \text{雨}\}\)， \(P = \begin{pmatrix} 0.7 & 0.3 \\ 0.4 & 0.6 \end{pmatrix}\)。 今天晴，后天晴的概率？ 解答：\(P^2 = P \cdot P\)。\((P^2)_{11} = 0.7 \times 0.7 + 0.3 \times 0.4 = 0.61\)。 易错点：混淆行和列的含义。约定 \(p_{ij}\) 是从 \(i\)（行）到 \(j\)（列）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">Markov 链的转移矩阵每行之和等于</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。转移矩阵是行随机矩阵，每行元素是从该状态出发的')">A. 0</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！转移矩阵是行随机矩阵，每行元素是从该状态出发的')">B. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。转移矩阵是行随机矩阵，每行元素是从该状态出发的')">C. 取决于状态数</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。转移矩阵是行随机矩阵，每行元素是从该状态出发的')">D. 可以是任意正数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>状态分类与不可约性</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>并非所有状态都一样：有些状态会被反复访问（常返），有些将被 永久离开（暂态）。另外，「不可约」意味着任意两状态可达， 「非周期」意味着不会被困在固定周期中。这些分类决定了 Markov 链的长期行为。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>可达性：\(i \to j\) iff \(\exists n \geq 1\) 使 \(p_{ij}^{(n)} > 0\)。 互通(communicate)：\(i \leftrightarrow j\) iff \(i \to j\) 且 \(j \to i\)。 不可约(irreducible)：所有状态互通。 常返(recurrent)：从 \(i\) 出发，回到 \(i\) 的概率 = 1： \[f_i = P(\exists n \geq 1: X_n = i \;|\; X_0 = i) = 1\] 暂态(transient)：\(f_i < 1\)。 等价判定：\(i\) 常返 iff \(\sum_{n=1}^{\infty} p_{ii}^{(n)} = \infty\)。 正常返 vs 零常返：设 \(\mu_i = E[T_i \;|\; X_0 = i]\)（平均回返时间）。 \(\mu_i < \infty\)：正常返；\(\mu_i = \infty\)：零常返。 周期：\(d(i) = \gcd\{n \geq 1: p_{ii}^{(n)} > 0\}\)。\(d(i)=1\) 即非周期。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>网络的连通性分析可用不可约性判断；随机游走在 \(\mathbb{Z}\) 上 常返但在 \(\mathbb{Z}^3\) 上暂态（Pólya 定理）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(\mathbb{Z}\) 上简单随机游走（\(p = q = 1/2\)）是常返还是暂态？ 解答：\(p_{00}^{(2n)} = \binom{2n}{n}(1/2)^{2n} \sim 1/\sqrt{\pi n}\)。 \(\sum p_{00}^{(2n)} \sim \sum 1/\sqrt{n} = \infty\)，故常返。 但 \(\mu_0 = \infty\)，是零常返。 易错点：常返不等于「很快回来」。\(\mathbb{Z}\) 上的随机游走 确定会回来，但平均回返时间无穷大。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">有限状态不可约 Markov 链不可能有暂态状态，原因？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。有限状态中不可能所有状态都是暂态的（“鸽巢原理”——必有某个状态被无穷次返回）。')">A. 有限状态保证每个状态被无穷次访问</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！有限状态中不可能所有状态都是暂态的（“鸽巢原理”——必有某个状态被无穷次返回）。')">B. 不可约性和有限性共同保证常返</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。有限状态中不可能所有状态都是暂态的（“鸽巢原理”——必有某个状态被无穷次返回）。')">C. 所有有限 Markov 链都是常返的</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>平稳分布与收敛</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Markov 链运行很久后会达到「平衡」吗？平稳分布 \(\pi\) 描述了 这种平衡状态，它满足 \(\pi P = \pi\)。什么条件下平稳分布存在、 唯一，且链确实收敛到它？这是 Markov 链理论的核心问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>平稳分布是转移矩阵的「左特征向量」（特征值 = 1）。这将 Markov 链的长期行为与线性代数的谱理论联系起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>定义：分布 \(\pi = (\pi_j)\) 为平稳分布 iff \[\pi_j = \sum_i \pi_i p_{ij}, \quad \forall j \qquad (\text{即 } \pi P = \pi)\] 且 \(\sum_j \pi_j = 1\)，\(\pi_j \geq 0\)。 存在与唯一性定理：若 Markov 链不可约且正常返，则 平稳分布唯一存在，且 \(\pi_i = 1/\mu_i\)。 收敛定理：若不可约、正常返、非周期，则 \[\lim_{n \to \infty} p_{ij}^{(n)} = \pi_j, \quad \forall i, j\] 收敛速度用混合时间(mixing time)度量： \(t_{\text{mix}}(\varepsilon) = \min\{n: \max_i \|P^n(i,\cdot) - \pi\|_{TV} \leq \varepsilon\}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>MCMC 方法利用收敛定理：构造以目标分布为平稳分布的 Markov 链，运行足够久后即得到目标分布的样本。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：天气模型 \(P = \begin{pmatrix} 0.7 & 0.3 \\ 0.4 & 0.6 \end{pmatrix}\)。 求平稳分布。 解答：\(\pi P = \pi\)：\(\pi_1 = 0.7\pi_1 + 0.4\pi_2\)， \(\pi_2 = 0.3\pi_1 + 0.6\pi_2\)。加上 \(\pi_1 + \pi_2 = 1\)。 \(0.3\pi_1 = 0.4\pi_2 \Rightarrow \pi_1/\pi_2 = 4/3\)。 \(\pi = (4/7, 3/7)\)。 易错点：解 \(\pi P = \pi\) 时忘记加归一化条件 \(\sum \pi_j = 1\)。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">MCMC 方法依赖于 Markov 链的哪个性质？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。MCMC 的核心是链收敛到平稳分布，从而得到目标分布的样本。')">A. 常返性</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！MCMC 的核心是链收敛到平稳分布，从而得到目标分布的样本。')">B. 收敛到平稳分布</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。MCMC 的核心是链收敛到平稳分布，从而得到目标分布的样本。')">C. 周期性</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>可逆链与细致平衡</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>如何构造以指定 \(\pi\) 为平稳分布的 Markov 链？细致平衡条件 提供了简单的充分条件。Metropolis-Hastings 算法和 Gibbs 采样 正是基于此原理设计的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>可逆性是时间反演对称性：链的前进和后退看起来一样。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <p>细致平衡(detailed balance)：若存在分布 \(\pi\) 使得 \[\pi_i p_{ij} = \pi_j p_{ji}, \quad \forall i, j\] 则 \(\pi\) 是平稳分布。 证明：\(\sum_i \pi_i p_{ij} = \sum_i \pi_j p_{ji} = \pi_j \sum_i p_{ji} = \pi_j\)。 Metropolis-Hastings：给定目标 \(\pi\) 和提议矩阵 \(Q\)， 令接受率 \[\alpha(i,j) = \min\!\left(1, \frac{\pi_j q_{ji}}{\pi_i q_{ij}}\right)\] 则转移 \(p_{ij} = q_{ij} \alpha(i,j)\)（\(i \neq j\)）满足细致平衡。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p>MCMC 中的 Metropolis-Hastings 和 Gibbs 采样是贝叶斯统计和 机器学习中从复杂后验分布采样的标准工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p>例题：\(S = \{1,2,3\}\)，\(\pi = (0.2, 0.5, 0.3)\)。提议矩阵为均匀 \(q_{ij} = 1/2\)（\(i \neq j\)）。求 \(\alpha(1,2)\)。 解答：\(\alpha(1,2) = \min(1, \pi_2 q_{21} / (\pi_1 q_{12})) = \min(1, 0.5/(0.2)) = \min(1, 2.5) = 1\)。 易错点：忘记 M-H 接受率中 \(q_{ji}/q_{ij}\) 的比值（当提议矩阵 不对称时）。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">细致平衡 \(\pi_i p_{ij} = \pi_j p_{ji}\) 是 \(\pi\) 为平稳分布的</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。细致平衡⇒平稳，但平稳分布不一定满足细致平衡。')">A. 充要条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！细致平衡⇒平稳，但平稳分布不一定满足细致平衡。')">B. 充分条件</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。细致平衡⇒平稳，但平稳分布不一定满足细致平衡。')">C. 必要条件</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="#" class="nav-prev"></a>
+      <a href="../../../modules/probability/stochastic.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>
