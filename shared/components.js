@@ -413,10 +413,14 @@ function initSearch() {
    Page Transitions
    ═════════════════════════════════════════ */
 function initPageTransitions() {
-  // Remove page-exit class when restored from bfcache (browser back/forward)
-  window.addEventListener('pageshow', function (e) {
-    if (e.persisted) {
+  // Ensure page is always visible when shown (handles bfcache restore on back/forward)
+  window.addEventListener('pageshow', function () {
+    if (document.body.classList.contains('page-exit')) {
       document.body.classList.remove('page-exit');
+      // Force repaint so pageIn animation restarts
+      document.body.style.animation = 'none';
+      void document.body.offsetHeight;          // trigger reflow
+      document.body.style.animation = '';        // re-apply CSS animation
     }
   });
 
