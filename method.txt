@@ -105,15 +105,108 @@
 
 
 ████████████████████████████████████████████████████████████████████████
-  阶段六 · HTML 页面生成（后续）
+  阶段六 · HTML 页面批量生成
 ████████████████████████████████████████████████████████████████████████
 
-  （待题库审核通过后启动）
-  1) 按 page_modularization_rules.txt 骨架生成 174 章节 HTML
-  2) 将 knowledge_outline.txt 内容填入 step-card
-  3) 将 question_bank.txt 题目填入 QUESTIONS 数组
-  4) 生成 28 个概览页
-  5) 全站集成测试
+  1) 编写 _build_pages.js (32KB) 批量生成引擎:
+     - 读取 knowledge_outline.txt 提取各章 4 KP 的 6 项子结构
+     - 读取 question_bank.txt 匹配章节题目，注入 QUESTIONS 数组
+     - 按 page_modularization_rules.txt 骨架生成 168 章节 HTML
+     - 生成 28 个模块概览页（三列卡片布局 + 进度条）
+     - 每页包含 topbar、toc-sidebar、step-card、inline-quiz、quick-check
+
+  2) 页面质量修复脚本链:
+     - _fix_formatting.js → 修复 step-card 结构、section 嵌套
+     - _fix_formatting2.js → 修复残余格式异常
+     - _fix_stepcards.js → 补全缺失 step-card 容器
+     - _fix_truncated.js / _fix_truncated2.js → 修复内容截断
+     - _fix_remaining.js → 修复剩余边缘 case
+     - _fix_v3.js → 第三轮整体修复
+
+  3) 最终产出: 168 章节页 + 28 概览页 + 1 首页 = 197 HTML 页面
+
+
+████████████████████████████████████████████████████████████████████████
+  阶段七 · 视觉设计与交互增强
+████████████████████████████████████████████████████████████████████████
+
+  1) 共享 CSS/JS 基础设施:
+     - theme.css (3KB): CSS 变量定义，三套主题（亮/暗/霓虹），
+       字体加载（Cormorant Garamond / Raleway / Fira Code / Noto Sans SC）
+     - layout.css (10KB): 页面布局（topbar + toc-sidebar + main），
+       CSS Grid 自适应，移动端响应式
+     - components.css (16KB): 组件样式（step-card 渐变边框、quiz 卡片、
+       wrong-book 弹窗、搜索胶囊、霓虹主题 glassmorphism 覆写）
+     - components.js (14KB): quiz 渲染/答案检查、scroll-spy 目录高亮、
+       wrong-book UI、浮动胶囊全文搜索、页面过渡动画
+     - storage.js (9KB): localStorage 主题持久化、进度追踪、
+       WrongBook 错题本、WebGL 霓虹画布
+
+  2) 视觉特色:
+     - index.html (35KB): 5 阶段路线图、domain 着色模块卡片、
+       悬浮章节大纲、SVG feTurbulence 有机渐变背景
+     - 三模式主题切换: 亮色(🌙) → 暗色(✨) → 霓虹(☀️) → 循环
+     - 霓虹模式: WebGL domain-warping fBm 着色器，
+       7 套余弦调色板（默认虹彩 + 6 个学科色），每板约 28s 过渡，
+       全周期约 3 分钟，smoothstep 平滑切换
+
+  3) 全文搜索系统:
+     - _gen_search_index.js: 从 197 页提取正文、去 TeX 标记、
+       每页上限 2000 字符，生成 search-data.js (325KB)
+     - 浮动胶囊搜索框: 固定左侧，侧边栏感知，实时匹配 body 文本
+
+
+████████████████████████████████████████████████████████████████████████
+  阶段八 · 全局质量修复
+████████████████████████████████████████████████████████████████████████
+
+  1) LaTeX 渲染修复:
+     - 问题: inline-quiz onclick 反馈中 \( \int \infty 等被 JS 转义吞掉
+     - 方案: _fix_inline_latex.js 对所有 checkInlineQuiz() onclick 中的
+       反斜杠执行双重转义（\( → \\(）
+     - 修复: 162 个文件、1,856 处 inline-quiz 反馈字符串
+     - 验证: _verify_latex.js 确认 0 处残留
+
+  2) 文字勘误修复:
+     - "Lévy 刺画" → "Lévy 刻画" (4 文件)
+     - "泳松过程" → "泊松过程" (ch03.html + outline)
+     - 博弈论 7 类 AI 幻觉错误: 博很→博弈(7处)、鹰鸿→鹰鸽(2处)、
+       代复量→其复制量、前动→驱动、局门分类→拟线性框架、
+       原子铟购→频谱竞购、Ch.04→KP2
+     - _fix_outline_typos.js 跨 knowledge_outline.txt + 4 HTML 文件修复
+
+  3) HTML 结构修复: 搜索胶囊溢出（left:10px 修复）、
+     CSS animation fill-mode: backwards（非 both，避免破坏 fixed 定位）
+
+
+████████████████████████████████████████████████████████████████████████
+  阶段九 · 最终测试、整理与发布
+████████████████████████████████████████████████████████████████████████
+
+  1) 宏观验证 (_validate_pages.js):
+     - 168 章节 · 672 知识点 · 4,153 道题 · 0 错误
+     - 1 条警告 (info-theory ch04: 4 KP 仅 3 inline-quiz) — 非关键
+     - 1,719 个图片占位位置（待后续插图）
+
+  2) 核心文件健康检查:
+     - index.html 35KB · search-data.js 325KB · components.js 14KB
+     - components.css 16KB · storage.js 9KB · theme.css 3KB · layout.css 10KB
+
+  3) 文件整理:
+     - 创建 _dev/ 文件夹，将以下移入:
+       · 20 个 _*.js 构建/修复脚本
+       · knowledge_outline.txt (1.6MB)、question_bank.txt (2.5MB)、
+         full_knowledge_tree_deep.txt
+       · sample_chapter.html、sample_menu.html、background_special.html
+       · reports/ 目录（7 份 Agent 报告 + 5 份 Quiz 报告 + 其他）
+     - 根目录仅保留: index.html、method.txt、modules/、shared/、.github/
+
+  4) GitHub 发布:
+     - 仓库: github.com/JamesPAN-spst/math_univers
+     - 清理远程旧内容（force push 覆写 main 分支）
+     - 删除旧分支 github-actions/rewrite-queue
+     - 最终提交: 221 文件、1.98 MiB
+     - .gitignore 排除 _dev/ 开发文件
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -126,6 +219,23 @@
   • 增量可追溯 — 每步产出有文件记录（outline、reports、method）
   • 统一格式 — 所有输出严格遵循预定义的结构和格式模板
 
+
 ════════════════════════════════════════════════════════════════════════
-  END
+  最终统计
+════════════════════════════════════════════════════════════════════════
+
+  页面总数        197 (168 章节 + 28 概览 + 1 首页)
+  知识点          672 (每章 4 KP × 168 章)
+  题目            4,153 (选择题 + 应用题)
+  模块            28 (7 板块)
+  学科域          7 (代数 / 分析 / 微方 / 几何 / 概率 / 应用 / 基离)
+  主题模式        3 (亮色 / 暗色 / 霓虹 WebGL)
+  搜索索引        197 条目、325 KB
+  构建脚本        20 个 (Node.js)
+  Agent 指令      14 个 (.agent.md)
+  生产文件        221 个 (git tracked)
+  开发文件        ~50 个 (_dev/ excluded)
+
+════════════════════════════════════════════════════════════════════════
+  END · version 2.0 · 2026-04-05
 ════════════════════════════════════════════════════════════════════════
