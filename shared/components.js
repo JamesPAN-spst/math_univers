@@ -100,10 +100,20 @@ function checkInlineQuiz(quizId, btn, isCorrect, feedback) {
     var pageBody = document.body;
     var mod = pageBody.getAttribute('data-module') || '';
     var prompt = quiz.querySelector('.iq-prompt');
+    // Find the correct answer button by scanning onclick attributes
+    var correctLetter = '—';
+    var allBtns = quiz.querySelectorAll('.iq-options button');
+    for (var k = 0; k < allBtns.length; k++) {
+      var oc = allBtns[k].getAttribute('onclick') || '';
+      if (/,\s*this\s*,\s*true\b/.test(oc)) {
+        correctLetter = allBtns[k].textContent.trim().substring(0, 1);
+        break;
+      }
+    }
     WrongBook.record(quizId, {
       question: _iqOriginalHtml[quizId] || (prompt ? prompt.innerHTML : quizId),
-      correctAnswer: '—',
-      userAnswer: btn.textContent.substring(0, 1),
+      correctAnswer: correctLetter,
+      userAnswer: btn.textContent.trim().substring(0, 1),
       module: mod,
       chapter: mod + ' ' + quizId
     });
