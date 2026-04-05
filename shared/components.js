@@ -3,6 +3,16 @@
    Quiz rendering, inline quiz, scroll spy
    ═════════════════════════════════════════ */
 
+/* ── Cache original .iq-prompt HTML before MathJax processes them ── */
+var _iqOriginalHtml = {};
+(function() {
+  var prompts = document.querySelectorAll('.iq-prompt');
+  for (var i = 0; i < prompts.length; i++) {
+    var quiz = prompts[i].closest('.inline-quiz');
+    if (quiz && quiz.id) _iqOriginalHtml[quiz.id] = prompts[i].innerHTML;
+  }
+})();
+
 /* ── Render QUESTIONS into #quiz-zone ── */
 function escapeQuizHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -91,7 +101,7 @@ function checkInlineQuiz(quizId, btn, isCorrect, feedback) {
     var mod = pageBody.getAttribute('data-module') || '';
     var prompt = quiz.querySelector('.iq-prompt');
     WrongBook.record(quizId, {
-      question: prompt ? prompt.textContent : quizId,
+      question: _iqOriginalHtml[quizId] || (prompt ? prompt.innerHTML : quizId),
       correctAnswer: '—',
       userAnswer: btn.textContent.substring(0, 1),
       module: mod,
@@ -218,7 +228,10 @@ function renderWrongBookList() {
       '<div class="wb-item-answer">你的答案: <strong style="color:var(--error)">' + escapeHtmlWb(item.userAnswer) + '</strong> · 正确: <strong style="color:var(--success)">' + escapeHtmlWb(item.correctAnswer) + '</strong></div>' +
     '</div>';
   }).join('');
-  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([body]);
+  if (window.MathJax && MathJax.typesetPromise) {
+    if (MathJax.typesetClear) MathJax.typesetClear([body]);
+    MathJax.typesetPromise([body]);
+  }
 }
 
 function escapeHtmlWb(s) {
