@@ -413,6 +413,13 @@ function initSearch() {
    Page Transitions
    ═════════════════════════════════════════ */
 function initPageTransitions() {
+  // Remove page-exit class when restored from bfcache (browser back/forward)
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      document.body.classList.remove('page-exit');
+    }
+  });
+
   document.addEventListener('click', function (e) {
     var link = e.target.closest('a[href]');
     if (!link) return;
