@@ -1,0 +1,38 @@
+# SVG Figure Style Guide for Mathematica
+
+## File Convention
+- Path: `shared/figures/{module}-{chapter}-{kp}.svg`
+- Example: `shared/figures/groups-ch01-kp3.svg`
+- Only create figures where visualization genuinely aids understanding
+
+## SVG Template
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" font-family="'Raleway','Noto Sans SC',sans-serif">
+  <style>
+    .fg{fill:#334155} .fg2{fill:#64748b} .line{stroke:#334155;fill:none}
+    .accent{fill:#6366f1} .accent2{fill:#8b5cf6} .accent3{fill:#ec4899}
+    .bg-box{fill:#f8fafc;stroke:#e2e8f0} .arrow{marker-end:url(#ah)}
+    text{font-size:13px}
+    @media(prefers-color-scheme:dark){
+      .fg{fill:#e2e8f0} .fg2{fill:#94a3b8} .line{stroke:#e2e8f0}
+      .bg-box{fill:#1e293b;stroke:#334155}
+    }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" class="line" stroke-width="1.2"/>
+    </marker>
+  </defs>
+  <!-- content here -->
+</svg>
+```
+
+## Rules
+1. viewBox width: 360-480, height as needed (180-360)
+2. Use class names (.fg, .fg2, .accent, .line, .bg-box) for theme compatibility
+3. Text: 12-14px, use `text-anchor="middle"` for centered labels
+4. Math: use Unicode symbols (∈, ∀, →, ×, ℤ, ℝ, ℚ, ∞, ∘, ⊂, ∪, ∩, φ, π, σ, λ, μ)
+5. LaTeX NOT supported in SVG — use Unicode or plain text
+6. Arrows: use the #ah marker for directed edges
+7. Keep it minimal — small file size, no gradients/filters
+8. Colors: .accent (indigo) for primary highlight, .accent2 (violet) secondary, .accent3 (pink) tertiary
