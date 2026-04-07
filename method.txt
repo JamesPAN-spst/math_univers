@@ -1,6 +1,6 @@
 ════════════════════════════════════════════════════════════════════════
   Mathematica · 项目方法论 (Project Methodology)
-  版本: 4.0    日期: 2026-04-06
+  版本: 5.0    日期: 2026-04-07
 ════════════════════════════════════════════════════════════════════════
 
 本文件记录 Mathematica 数学教育网站从规划到交付的完整工作流。
@@ -339,10 +339,60 @@
       梯度垂直等值线的证明、Hessian 判别式 AC-B² 的代数由来、
       隐函数定理的圆的直觉例子、两个定理的互推关系
 
-  后续扩展:
-    - 此方法适用于任何章节——当学习者反馈"太抽象/跳跃太大"时触发
-    - 可按学习进度逐章应用，无需一次性重写全站
-    - 每次精细化后更新 method.txt 记录
+  系统化模块精细化 (批量 Refinement):
+    将上述单章方法推广为整模块批量精细化流程。每次选择一个模块
+    (7 章 × 4 KP = 28 个知识点)，按章顺序逐 KP 扩展。
+
+    标准化扩展模式:
+      - 🎯 Motivation: ul/li 列表，3 条动因（为什么学、与前文联系、直觉）
+      - 🔍 Abstraction: ul/li 列表，3-4 条抽象化方法
+      - 📐 Derivation: h4 子标题分块，编号步骤，条件必要性解释
+      - 🌐 Application: 2-3 个 bold-titled 段落（具体领域 + 场景描述）
+      - ✏️ Example: h4 例题标题 + Step 1/2/3 分步解题；
+        h4 常见错误 + ul/li 列表 (3 条) 带 ❌/✅ 对比
+
+    缺失卡片补全:
+      批量生成阶段产生的 terse KP 经常缺少 abstraction 或 application
+      step-card（仅 3-4 张卡，而非标准 5 张）。精细化时同步插入缺失卡片，
+      确保每个 KP 严格具备 5 张 step-card (motivation / abstraction /
+      derivation / application / example)。每章验证 = 20 张卡。
+
+    已完成模块 (按时间顺序):
+
+      ① foundation/mc2 — 多元微积分初步 (1 章 4 KP · 试点)
+         · 首次应用，验证方法可行性
+         · commit: dcee09c
+
+      ② analysis/edo — 常微分方程 (7 章 28 KP)
+         · 插入缺失卡片: 多处 application/abstraction 补全
+         · 140 step-cards 验证通过
+         · commit: 935aef4
+
+      ③ geometry/topology — 点集拓扑 (7 章 28 KP)
+         · 140 step-cards 验证通过
+         · commit: a0bf1e4
+
+      ④ geometry/diffgeo — 微分几何 (7 章 28 KP)
+         · 140 step-cards 验证通过
+         · commit: 76a5c81
+
+      ⑤ geometry/alg-topo — 代数拓扑 (7 章 28 KP)
+         · 140 step-cards 验证通过
+         · commit: 3f3cd10
+
+      ⑥ geometry/riemannian — 黎曼几何 (7 章 28 KP)
+         · 140 step-cards 验证通过
+         · commit: ba585e9
+
+      ⑦ analysis/real-analysis — 实分析/测度论 (7 章 28 KP)
+         · 缺失卡片: ch03 (4处), ch04 (2处), ch05 (1处),
+           ch06 (3处: KP2 abstraction+application, KP3 abstraction),
+           ch07 (2处: KP1+KP3 application)
+         · 140 step-cards 验证通过, +1216/-123 行
+         · commit: 1fcf9d5
+
+    统计: 7 个模块 · 49 章 · 196 KP · 980 step-cards 已精细化
+    剩余: 21 个模块尚为 terse 状态，可按需继续
 
 
 ════════════════════════════════════════════════════════════════════════
@@ -374,7 +424,7 @@
   构建脚本        20+ 个 (Node.js)
   Agent 指令      14 个 (.agent.md)
   图例生成 Agent  10 个 (顺序执行)
-  Git 提交        11 次 (v1.0 → v3.0)
+  Git 提交        18 次 (v1.0 → v5.0)
   生产文件        221+ 个 (git tracked)
   开发文件        ~50 个 (_dev/ excluded)
 
@@ -391,7 +441,19 @@
   2c0b4d2  fix: blank page on browser back (bfcache)
   fa1e0bb  fix: robust page transition recovery
   bfcac23  fix: neon WebGL animation freeze on theme toggle
+  dcee09c  fix: truncated quiz feedback + refine mc2/ch07
+  935aef4  refine: expand all edo chapter knowledge points
+  a0bf1e4  refine: expand all topology chapter knowledge points
+  76a5c81  refine: expand all diffgeo chapter knowledge points
+  3f3cd10  refine: expand all alg-topo chapter knowledge points
+  ba585e9  refine: expand all riemannian chapter knowledge points
+  1fcf9d5  refine: expand all real-analysis chapter knowledge points
+
+  精细化模块      7/28 (edo, topology, diffgeo, alg-topo, riemannian,
+                       real-analysis, mc2)
+  精细化 KP       196 (49 章 × 4 KP)
+  精细化 step-cards 980 (196 KP × 5 cards)
 
 ════════════════════════════════════════════════════════════════════════
-  END · version 3.0 · 2026-04-05
+  END · version 5.0 · 2026-04-07
 ════════════════════════════════════════════════════════════════════════
