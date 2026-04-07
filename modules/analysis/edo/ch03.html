@@ -394,35 +394,82 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>许多物理系统（弹簧-质点、RLC 电路、梁的弯曲）都由高阶线性 ODE 描述。这类方程的关键特征是「叠加原理」：解的线性组合仍是解。 理解齐次方程的解空间是 \(n\) 维向量空间，是求解的理论基础—— 只需找到 \(n\) 个线性无关的特解，就能写出通解。</p>
+            <p>高阶线性 ODE 在物理和工程中无处不在：</p>
+            <ul>
+              <li><strong>力学振动</strong>：弹簧-质点系统 \(my'' + cy' + ky = F(t)\) 是二阶线性 ODE，描述从汽车悬挂到建筑抗震的一切振动问题。</li>
+              <li><strong>电路分析</strong>：RLC 电路 \(L\ddot{q} + R\dot{q} + q/C = V(t)\) 与力学振动具有完全相同的数学结构。</li>
+              <li><strong>梁的弯曲</strong>：Euler-Bernoulli 方程 \(EI y^{(4)} = w(x)\) 是四阶线性 ODE。</li>
+            </ul>
+            <p>这类方程的核心特征是<strong>叠加原理</strong>——解的线性组合仍是解。这意味着只需找到 \(n\) 个「基本解」，就能用线性代数的方法写出通解。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>高阶线性 ODE 的解集构成线性空间，其维数等于方程的阶数。这让 我们可以用线性代数的语言来研究 ODE：基、维数、线性组合。 微分算子 \(L = a_n D^n + \cdots + a_1 D + a_0\) 是线性算子。</p>
+            <p>高阶线性 ODE 的解集具有丰富的代数结构：</p>
+            <ul>
+              <li><strong>解空间是向量空间</strong>：齐次方程 \(L[y] = 0\) 的解集构成 \(n\) 维向量空间 \(V\)。这让我们可以用线性代数的语言——基、维数、线性组合——来描述解集。</li>
+              <li><strong>微分算子</strong>：\(L = a_n D^n + a_{n-1}D^{n-1} + \cdots + a_0\)（其中 \(D = d/dx\)）是线性算子，\(\ker L = V\)。</li>
+              <li><strong>非齐次 = 齐次 + 特解</strong>：\(L[y] = g\) 的解集是 \(V\) 的一个仿射子空间 \(y_p + V\)，类似于线性方程组 \(Ax = b\) 的解结构。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>\(n\) 阶线性方程</strong>： \[a_n(x)y^{(n)} + a_{n-1}(x)y^{(n-1)} + \cdots + a_0(x)y = g(x)\] 标准形：\(y^{(n)} + p_{n-1}(x)y^{(n-1)} + \cdots + p_0(x)y = q(x)\)。 <strong>叠加原理</strong>：齐次方程 \(L[y] = 0\) 的解集 \(V\) 是向量空间。 若 \(y_1, y_2\) 是齐次解，\(c_1 y_1 + c_2 y_2\) 也是齐次解。 <strong>维数定理</strong>：\(\dim V = n\)。 证明思路：考虑映射 \(\Phi: V \to \mathbb{R}^n\)， \(\Phi(y) = (y(x_0), y'(x_0), \ldots, y^{(n-1)}(x_0))\)。 由存在唯一性定理，\(\Phi\) 是双射，故 \(\dim V = n\)。 <strong>通解结构</strong>：非齐次方程 \(L[y] = g(x)\) 的通解为 \[y = c_1 y_1 + c_2 y_2 + \cdots + c_n y_n + y_p\] 其中 \(\{y_1, \ldots, y_n\}\) 是齐次方程的基本解组，\(y_p\) 是特解。</p>
+            <h4>1. \(n\) 阶线性 ODE 的标准形式</h4>
+            <p>一般形式：</p>
+            \[a_n(x)y^{(n)} + a_{n-1}(x)y^{(n-1)} + \cdots + a_1(x)y' + a_0(x)y = g(x)\]
+            <p>除以 \(a_n(x)\)（假设 \(a_n \neq 0\)）得标准形：</p>
+            \[y^{(n)} + p_{n-1}(x)y^{(n-1)} + \cdots + p_0(x)y = q(x)\]
+
+            <h4>2. 叠加原理</h4>
+            <p>对齐次方程 \(L[y] = 0\)，若 \(y_1, y_2\) 是解，则 \(\forall c_1, c_2 \in \mathbb{R}\)，\(c_1y_1 + c_2y_2\) 也是解。</p>
+            <p><strong>证明</strong>：\(L[c_1y_1 + c_2y_2] = c_1 L[y_1] + c_2 L[y_2] = 0 + 0 = 0\)（利用 \(L\) 的线性性）。</p>
+
+            <h4>3. 解空间的维数定理</h4>
+            <p><strong>定理</strong>：\(\dim(\ker L) = n\)。</p>
+            <p><strong>证明思路</strong>：构造映射 \(\Phi: \ker L \to \mathbb{R}^n\)，\(\Phi(y) = (y(x_0),\, y'(x_0),\, \ldots,\, y^{(n-1)}(x_0))\)。</p>
+            <ul>
+              <li>\(\Phi\) 是<strong>线性</strong>的（显然）。</li>
+              <li>\(\Phi\) 是<strong>单射</strong>：若 \(\Phi(y) = 0\)，则 \(y\) 满足零初值 IVP，由唯一性定理 \(y \equiv 0\)。</li>
+              <li>\(\Phi\) 是<strong>满射</strong>：\(\forall (a_0, \ldots, a_{n-1}) \in \mathbb{R}^n\)，由存在性定理，存在解满足这些初值。</li>
+            </ul>
+            <p>故 \(\Phi\) 是同构，\(\dim V = n\)。</p>
+
+            <h4>4. 通解结构</h4>
+            <p>非齐次方程 \(L[y] = g(x)\) 的通解为</p>
+            \[y = c_1 y_1 + c_2 y_2 + \cdots + c_n y_n + y_p\]
+            <p>其中 \(\{y_1, \ldots, y_n\}\) 是齐次方程的<strong>基本解组</strong>（\(n\) 个线性无关的齐次解），\(y_p\) 是 \(L[y_p] = g\) 的<strong>任意一个特解</strong>，\(c_1, \ldots, c_n\) 为任意常数。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 弹簧-质点系统：\(my'' + cy' + ky = F(t)\) 描述阻尼受迫振动 - RLC 电路：\(L\ddot{q} + R\dot{q} + q/C = V(t)\)</p>
+            <p><strong>弹簧-质点系统</strong>：\(my'' + cy' + ky = F(t)\)。齐次解 \(y_h\) 描述自由振动（瞬态响应，通常因阻尼衰减），特解 \(y_p\) 描述受迫振动（稳态响应）。工程上关心的通常是稳态特解。</p>
+            <p><strong>RLC 串联电路</strong>：\(LI'' + RI' + I/C = V'(t)\)，与力学系统通过 \(L \leftrightarrow m\)，\(R \leftrightarrow c\)，\(1/C \leftrightarrow k\) 完全类比。电气工程师和力学工程师使用同一套数学工具。</p>
+            <p><strong>量子力学</strong>：定态 Schrödinger 方程 \(-\frac{\hbar^2}{2m}\psi'' + V(x)\psi = E\psi\) 是二阶线性 ODE，其解空间结构直接决定能级和波函数。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：验证 \(y_1 = e^x\)，\(y_2 = e^{2x}\) 是 \(y'' - 3y' + 2y = 0\) 的基本解组。 解答：代入验证 \(y_1\)：\(e^x - 3e^x + 2e^x = 0\)。✓ 代入验证 \(y_2\)：\(4e^{2x} - 6e^{2x} + 2e^{2x} = 0\)。✓ 线性无关：\(e^x / e^{2x} = e^{-x}\) 非常数。✓ 通解：\(y = c_1 e^x + c_2 e^{2x}\)。 易错点：找到 \(n\) 个解不够，还需验证线性无关性。 例如 \(y_1 = e^x\) 和 \(y_2 = 3e^x\) 都是解但不构成基。</p>
+            <h4>例题：验证基本解组</h4>
+            <p>验证 \(y_1 = e^x\)，\(y_2 = e^{2x}\) 是 \(y'' - 3y' + 2y = 0\) 的基本解组。</p>
+            <p><strong>第 1 步</strong>：验证 \(y_1\) 是解。\(y_1'' - 3y_1' + 2y_1 = e^x - 3e^x + 2e^x = 0\)。✓</p>
+            <p><strong>第 2 步</strong>：验证 \(y_2\) 是解。\(y_2'' - 3y_2' + 2y_2 = 4e^{2x} - 6e^{2x} + 2e^{2x} = 0\)。✓</p>
+            <p><strong>第 3 步</strong>：验证线性无关。\(y_1/y_2 = e^{-x}\) 非常数函数，故线性无关。✓</p>
+            <p><strong>结论</strong>：通解 \(y = c_1 e^x + c_2 e^{2x}\)。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 找到 \(n\) 个解就以为是基本解组。\(y_1 = e^x\) 和 \(y_2 = 3e^x\) 都是解，但 \(y_2 = 3y_1\)，线性相关，不构成基。</li>
+              <li>❌ 忘记非齐次通解中要加特解。只写 \(c_1y_1 + c_2y_2\) 而遗漏 \(y_p\) 是常见错误。</li>
+              <li>❌ 在解存在唯一性的论证中，忘记要求 \(a_n(x) \neq 0\)。若首项系数在某点为零，该点称为奇点（singular point），解的结构可能与正则情形完全不同。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -473,35 +520,81 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>给定若干解，如何判断它们是否线性无关？直接验证定义（某线性组合恒为零 ⇒ 系数全零）在实际中很难操作。Wronskian 行列式提供了一个强有力的 判据：它要么恒不为零（线性无关），要么恒为零（线性相关）。 Abel 公式则给出 Wronskian 的闭合表达式，无需逐个求解。</p>
+            <p>找到 \(n\) 个齐次解后，如何判断它们是否线性无关（即构成基本解组）？</p>
+            <ul>
+              <li><strong>直接验证困难</strong>：需要证明 \(c_1y_1 + \cdots + c_ny_n \equiv 0 \Rightarrow c_i = 0\)，这在实际中很难操作。</li>
+              <li><strong>Wronskian 判据</strong>：只需计算一个行列式 \(W(x)\)，若在某一点 \(W(x_0) \neq 0\)，则线性无关。</li>
+              <li><strong>Abel 公式</strong>：给出 \(W(x)\) 的显式表达式，无需逐个求解方程。更实用的是，它还提供了从一个已知解求第二个解的降阶法。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Wronskian 是将 ODE 的线性无关性问题转化为行列式计算的桥梁。 Abel 公式 \(W(x) = W(x_0) \exp(-\int p_{n-1}\,dx)\) 揭示了 Wronskian 本身满足一个一阶 ODE，其解的指数结构意味着 \(W\) 要么处处非零要么处处为零。</p>
+            <p>Wronskian 是连接 ODE 理论与线性代数的桥梁：</p>
+            <ul>
+              <li><strong>行列式检测</strong>：将 \(n\) 个函数及其导数排成矩阵，行列式非零等价于线性无关——与有限维向量的线性无关判据完全类比。</li>
+              <li><strong>\(W\) 自身满足 ODE</strong>：Abel 公式揭示 Wronskian 满足一阶 ODE \(W' = -p_{n-1}W\)，其解为指数函数 \(W = Ce^{-\int p_{n-1}}\)。这立即说明 \(W\) 要么<strong>处处非零</strong>，要么<strong>恒为零</strong>——不存在中间状态。</li>
+              <li><strong>降阶原理</strong>：已知一个解 \(y_1\)，用 Abel 公式可以将 \(n\) 阶方程降为 \(n-1\) 阶方程。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Wronskian 定义</strong>：给定 \(n\) 个函数 \(y_1, \ldots, y_n\)， \[W(y_1,\ldots,y_n)(x) = \det\begin{pmatrix} y_1 & \cdots & y_n \\ y_1' & \cdots & y_n' \\ \vdots & & \vdots \\ y_1^{(n-1)} & \cdots & y_n^{(n-1)} \end{pmatrix}\] <strong>判定定理</strong>：若 \(y_1,\ldots,y_n\) 是齐次线性 ODE 的解，则： 线性无关 \(\Leftrightarrow\) \(W(x) \neq 0\) 对某个（等价地，每个）\(x\)。 <strong>Abel 公式</strong>（二阶情况）：对 \(y'' + p(x)y' + q(x)y = 0\)， \[W(x) = W(x_0) \exp\left(-\int_{x_0}^x p(s)\,ds\right)\] 证明：\(W = y_1 y_2' - y_1' y_2\)。求导： \(W' = y_1 y_2'' - y_1'' y_2 = y_1(-py_2'-qy_2) - (-py_1'-qy_1)y_2 = -p W\)。 解此一阶 ODE 得 Abel 公式。</p>
+            <h4>1. Wronskian 的定义</h4>
+            <p>给定 \(n\) 个（充分光滑的）函数 \(y_1, \ldots, y_n\)，定义</p>
+            \[W(y_1,\ldots,y_n)(x) = \det\begin{pmatrix} y_1 & y_2 & \cdots & y_n \\ y_1' & y_2' & \cdots & y_n' \\ \vdots & \vdots & \ddots & \vdots \\ y_1^{(n-1)} & y_2^{(n-1)} & \cdots & y_n^{(n-1)} \end{pmatrix}\]
+
+            <h4>2. 线性无关的判定</h4>
+            <p><strong>定理</strong>：设 \(y_1, \ldots, y_n\) 是 \(n\) 阶齐次线性 ODE 的 \(n\) 个解，则</p>
+            <p>\(y_1, \ldots, y_n\) 线性无关 \(\Leftrightarrow\) \(W(x_0) \neq 0\) 对<strong>某个</strong>（等价地，<strong>每个</strong>）\(x_0\)。</p>
+            <p>关键：由于 Abel 公式，\(W\) 要么恒非零要么恒零，所以「某个」和「每个」等价。</p>
+
+            <h4>3. Abel 公式的推导（二阶情况）</h4>
+            <p>对 \(y'' + p(x)y' + q(x)y = 0\)，设 \(y_1, y_2\) 是两个解。</p>
+            <p>\(W = y_1 y_2' - y_1' y_2\)。对 \(W\) 求导：</p>
+            \[W' = y_1 y_2'' - y_1'' y_2\]
+            <p>因为 \(y_i'' = -py_i' - qy_i\)，代入得</p>
+            \[W' = y_1(-py_2' - qy_2) - (-py_1' - qy_1)y_2 = -p(y_1y_2' - y_1'y_2) = -pW\]
+            <p>这是关于 \(W\) 的一阶线性 ODE，解为</p>
+            \[W(x) = W(x_0) \exp\left(-\int_{x_0}^{x} p(s)\,ds\right)\]
+
+            <h4>4. 降阶法</h4>
+            <p>已知一个解 \(y_1 \neq 0\)，可用 Abel 公式求第二个线性无关解。设 \(y_2 = y_1 v(x)\)，则</p>
+            \[W = y_1(y_1 v)' - y_1'(y_1 v) = y_1^2 v'\]
+            <p>由 Abel 公式 \(v' = W/(y_1^2) = Ce^{-\int p}/(y_1^2)\)，积分得</p>
+            \[y_2 = y_1 \int \frac{e^{-\int p(s)\,ds}}{y_1^2(x)}\,dx\]
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Abel 公式可以从一个已知解 \(y_1\) 求第二个线性无关解 \(y_2\) （降阶法：\(y_2 = y_1 \int W/(y_1^2)\,dx\)）</p>
+            <p><strong>降阶求解</strong>：在实际中，高阶方程往往可以通过物理直觉猜出一个特解。Abel 公式/降阶法允许从这个已知解出发，系统地构造完整的基本解组——无需再猜。</p>
+            <p><strong>Green 函数</strong>：常数变易法中需要 Wronskian 的逆。\(W \neq 0\)（由 Abel 公式保证）是构造 Green 函数和公式解的前提。</p>
+            <p><strong>Sturm-Liouville 理论</strong>：在特征值问题 \(-(py')' + qy = \lambda wy\) 中，Wronskian 的性质决定了特征函数的零点分布和正交性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：已知 \(y_1 = x\) 是 \(x^2 y'' - 2xy' + 2y = 0\) 的解，求 \(y_2\)。 解答：标准形 \(y'' - (2/x)y' + (2/x^2)y = 0\)，\(p(x) = -2/x\)。 Abel 公式：\(W = Ce^{\int 2/x\,dx} = Cx^2\)。 \(W = y_1 y_2' - y_1' y_2 = x y_2' - y_2 = Cx^2\)。 即 \((y_2/x)' = y_2'/x - y_2/x^2 \cdot x/x = C\)... 更直接地： \(y_2 = y_1 \int \frac{W}{y_1^2}dx = x\int \frac{Cx^2}{x^2}dx = x(Cx+D)\)。 取 \(C=1, D=0\)：\(y_2 = x^2\)。验证：\(x^2(2) - 2x(2x) + 2x^2 = 0\)。✓ 易错点：Abel 公式仅对线性 ODE 的解成立，对一般函数组无效。</p>
+            <h4>例题：用降阶法求第二个解</h4>
+            <p>已知 \(y_1 = x\) 是 \(x^2 y'' - 2xy' + 2y = 0\) 的解，求 \(y_2\)。</p>
+            <p><strong>第 1 步</strong>：化为标准形 \(y'' - \frac{2}{x}y' + \frac{2}{x^2}y = 0\)，得 \(p(x) = -2/x\)。</p>
+            <p><strong>第 2 步</strong>：由降阶公式</p>
+            \[y_2 = y_1 \int \frac{e^{-\int(-2/x)\,dx}}{y_1^2}\,dx = x \int \frac{e^{2\ln x}}{x^2}\,dx = x \int \frac{x^2}{x^2}\,dx = x \int dx = x^2\]
+            <p><strong>第 3 步</strong>：验证 \(y_2 = x^2\)：\(x^2(2) - 2x(2x) + 2(x^2) = 2x^2 - 4x^2 + 2x^2 = 0\)。✓</p>
+            <p><strong>结论</strong>：通解 \(y = c_1 x + c_2 x^2\)。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 对<strong>一般函数</strong>误用 Wronskian 判据。\(W \neq 0 \Rightarrow\) 线性无关对任何函数成立，但 \(W = 0 \Rightarrow\) 线性相关<strong>仅对 ODE 的解</strong>成立。反例：\(y_1 = x^2\)，\(y_2 = x|x|\)，\(W(0) = 0\) 但线性无关（它们不是同一个 ODE 的解）。</li>
+              <li>❌ 降阶法中忘记先化为<strong>标准形</strong>（首项系数为 1）再提取 \(p(x)\)。</li>
+              <li>❌ 积分时丢失积分常数——降阶法中只需一个特解，可以取积分常数为 0。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -528,35 +621,85 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当系数为常数时，\(a_n y^{(n)} + \cdots + a_0 y = 0\) 有一种优美的 代数求解方法：令 \(y = e^{\lambda x}\) 代入得到特征方程 \(a_n \lambda^n + \cdots + a_0 = 0\)。不同类型的根（实、复、重） 分别对应不同形式的基本解。这将微分方程的求解转化为代数方程。</p>
+            <p>当系数为常数时（物理中最常见的情况），高阶线性 ODE 有一种优美的代数求解方法：</p>
+            <ul>
+              <li><strong>指数猜测</strong>：令 \(y = e^{\lambda x}\) 代入方程，微分方程变为关于 \(\lambda\) 的代数方程（特征方程）。这将无穷维的微分方程问题转化为有限维的多项式求根问题。</li>
+              <li><strong>根的类型决定解的形态</strong>：实根 → 指数增长/衰减，复根 → 振荡，重根 → 多项式调制的指数。物理上分别对应过阻尼、欠阻尼、临界阻尼。</li>
+              <li><strong>完全可解</strong>：只要能求出特征多项式的所有根，就能写出通解的显式表达式——不需要积分。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>微分算子 \(D = d/dx\) 在指数函数上的作用是乘以 \(\lambda\)： \(D(e^{\lambda x}) = \lambda e^{\lambda x}\)。因此常系数线性 ODE 等价于多项式 \(p(D)\) 的核的求解，解的结构完全由 \(p(\lambda)\) 的根决定。</p>
+            <p>微分算子 \(D = d/dx\) 在指数函数上的作用特别简单：</p>
+            <ul>
+              <li>\(D(e^{\lambda x}) = \lambda e^{\lambda x}\)——指数函数是 \(D\) 的<strong>特征函数</strong>，\(\lambda\) 是<strong>特征值</strong>。</li>
+              <li>常系数方程 \(p(D)y = 0\) 等价于求多项式算子 \(p(D)\) 的核，而 \(p(D)(e^{\lambda x}) = p(\lambda)e^{\lambda x}\)。</li>
+              <li>因此 \(e^{\lambda x} \in \ker p(D) \Leftrightarrow p(\lambda) = 0\)——特征根完全决定了指数型解。</li>
+            </ul>
+            <p>对重根的处理涉及 Jordan 标准形的思想：\((D - \lambda)^k\) 的核由 \(\{e^{\lambda x}, xe^{\lambda x}, \ldots, x^{k-1}e^{\lambda x}\}\) 张成。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>特征方程</strong>：对 \(y'' + py' + qy = 0\)，令 \(y = e^{\lambda x}\) 得 \[\lambda^2 + p\lambda + q = 0\] <strong>三种情况</strong>： 1. <strong>两个不等实根</strong> \(\lambda_1 \neq \lambda_2\)： 通解 \(y = c_1 e^{\lambda_1 x} + c_2 e^{\lambda_2 x}\) 2. <strong>重根</strong> \(\lambda_1 = \lambda_2 = \lambda\)： 通解 \(y = (c_1 + c_2 x)e^{\lambda x}\) （\(xe^{\lambda x}\) 的来源：\((D - \lambda)^2[xe^{\lambda x}] = 0\) 因为 \(e^{-\lambda x}(D-\lambda)[xe^{\lambda x}] = 1\)，再作用一次得 0） 3. <strong>共轭复根</strong> \(\lambda = \alpha \pm i\beta\)： \(e^{(\alpha+i\beta)x} = e^{\alpha x}(\cos\beta x + i\sin\beta x)\)（Euler 公式）， 取实部和虚部得实解： \[y = e^{\alpha x}(c_1\cos\beta x + c_2\sin\beta x)\] <strong>\(n\) 阶推广</strong>：\(k\) 重根 \(\lambda\) 贡献 \(k\) 个解 \(e^{\lambda x}, xe^{\lambda x}, \ldots, x^{k-1}e^{\lambda x}\)。</p>
+            <h4>1. 特征方程</h4>
+            <p>对常系数方程 \(a_ny^{(n)} + a_{n-1}y^{(n-1)} + \cdots + a_0y = 0\)，令 \(y = e^{\lambda x}\)：</p>
+            \[a_n\lambda^n + a_{n-1}\lambda^{n-1} + \cdots + a_0 = 0\]
+            <p>这是 \(n\) 次代数方程，在 \(\mathbb{C}\) 上恰好有 \(n\) 个根（计重数）。</p>
+
+            <h4>2. 不同类型根对应的基本解</h4>
+            <p><strong>情形 1：不等实根</strong> \(\lambda_1 \neq \lambda_2\)。</p>
+            <p>通解（二阶）：\(y = c_1 e^{\lambda_1 x} + c_2 e^{\lambda_2 x}\)。</p>
+
+            <p><strong>情形 2：重根</strong> \(\lambda\) 为 \(k\) 重根。</p>
+            <p>\(e^{\lambda x}\) 只提供 1 个解，还需 \(k-1\) 个。基本解为</p>
+            \[e^{\lambda x},\; xe^{\lambda x},\; x^2 e^{\lambda x},\; \ldots,\; x^{k-1}e^{\lambda x}\]
+            <p><strong>为什么 \(x e^{\lambda x}\) 是解？</strong> 考虑 \((D - \lambda)^2\)。令 \(y = e^{\lambda x} v(x)\)，则 \((D - \lambda)[e^{\lambda x}v] = e^{\lambda x}v'\)，再作用一次 \((D - \lambda)[e^{\lambda x}v'] = e^{\lambda x}v''\)。所以 \((D-\lambda)^2 y = 0 \Leftrightarrow v'' = 0 \Leftrightarrow v = c_1 + c_2 x\)。</p>
+
+            <p><strong>情形 3：共轭复根</strong> \(\lambda = \alpha \pm i\beta\)（\(\beta \neq 0\)）。</p>
+            <p>由 Euler 公式 \(e^{i\theta} = \cos\theta + i\sin\theta\)：</p>
+            \[e^{(\alpha + i\beta)x} = e^{\alpha x}(\cos\beta x + i\sin\beta x)\]
+            <p>取实部和虚部得到两个实解。通解贡献为</p>
+            \[e^{\alpha x}(c_1\cos\beta x + c_2\sin\beta x)\]
+            <p>若 \(\alpha \pm i\beta\) 是 \(k\) 重复根，则还需乘上 \(1, x, \ldots, x^{k-1}\)。</p>
+
+            <h4>3. 汇总：\(n\) 阶方程的基本解组构造</h4>
+            <p>将特征多项式在 \(\mathbb{C}\) 上因式分解，每个根按以上规则贡献基本解，共 \(n\) 个线性无关解。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 阻尼振动：\(mx'' + cx' + kx = 0\)，特征根决定过阻尼/临界阻尼/欠阻尼</p>
+            <p><strong>阻尼振动的三种模态</strong>：对 \(mx'' + cx' + kx = 0\)，特征方程 \(m\lambda^2 + c\lambda + k = 0\) 的判别式 \(\Delta = c^2 - 4mk\) 决定三种物理行为：</p>
+            <ul>
+              <li>\(\Delta > 0\)（两个负实根）：<strong>过阻尼</strong>——系统缓慢回到平衡位置，无振荡。</li>
+              <li>\(\Delta = 0\)（重负实根）：<strong>临界阻尼</strong>——最快回到平衡位置而不振荡。门关闭器的理想设计。</li>
+              <li>\(\Delta < 0\)（复根 \(\alpha \pm i\beta\)）：<strong>欠阻尼</strong>——衰减振荡，\(\alpha < 0\) 控制衰减速率，\(\beta\) 为振荡频率。</li>
+            </ul>
+            <p><strong>电路工程</strong>：RLC 电路中的过渡过程完全类比力学振动，电气工程师通过调整 R、L、C 来控制电路的阻尼特性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(y''' - 3y'' + 3y' - y = 0\) 的通解。 解答：特征方程 \(\lambda^3 - 3\lambda^2 + 3\lambda - 1 = 0\)，即 \((\lambda-1)^3 = 0\)。 三重根 \(\lambda = 1\)。 通解：\(y = (c_1 + c_2 x + c_3 x^2)e^x\)。 易错点：重根时忘记乘 \(x\) 的幂次。\(\lambda = 1\) 的三重根给出 \(e^x, xe^x, x^2 e^x\) 而非 \(e^x, e^x, e^x\)。</p>
+            <h4>例题：三阶方程的重根</h4>
+            <p>求 \(y''' - 3y'' + 3y' - y = 0\) 的通解。</p>
+            <p><strong>第 1 步</strong>：写出特征方程 \(\lambda^3 - 3\lambda^2 + 3\lambda - 1 = 0\)。</p>
+            <p><strong>第 2 步</strong>：识别因式分解 \((\lambda - 1)^3 = 0\)。三重根 \(\lambda = 1\)。</p>
+            <p><strong>第 3 步</strong>：基本解组 \(\{e^x,\; xe^x,\; x^2 e^x\}\)。</p>
+            <p><strong>通解</strong>：\(y = (c_1 + c_2 x + c_3 x^2)e^x\)。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 重根时忘记乘 \(x\) 的幂次。三重根 \(\lambda = 1\) 给出 \(e^x, xe^x, x^2e^x\)，而不是三个相同的 \(e^x\)。</li>
+              <li>❌ 复根时写出复指数而非实三角函数。最终答案应为实函数形式 \(e^{\alpha x}(c_1\cos\beta x + c_2\sin\beta x)\)。</li>
+              <li>❌ 混淆 \(\alpha\) 和 \(\beta\) 的物理意义。\(\alpha\) 控制包络线的指数变化，\(\beta\) 是振荡频率（角频率）。\(\alpha < 0\) 对应衰减，\(\alpha > 0\) 对应不稳定增长。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -583,28 +726,76 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>实际物理系统通常有外力驱动（受迫振动 \(mx''+kx = F\cos\omega t\)、 非齐次电路方程等），对应非齐次 ODE \(L[y] = g(x)\)。 两种主要方法——待定系数法（高效但受限于特殊右端）和常数变易法 （普适但计算量大）——各有适用场景，是工程和物理中最常用的技术。</p>
+            <p>实际物理系统几乎总有外力驱动，对应非齐次方程 \(L[y] = g(x)\)：</p>
+            <ul>
+              <li><strong>受迫振动</strong>：\(mx'' + cx' + kx = F_0\cos\omega t\)——外力 \(F(t)\) 驱动弹簧系统。</li>
+              <li><strong>电路的交流驱动</strong>：RLC 电路接入正弦电压源。</li>
+              <li><strong>梁的载荷</strong>：\(EIy^{(4)} = w(x)\)——分布载荷 \(w(x)\) 引起梁的挠曲。</li>
+            </ul>
+            <p>两种主要求解方法各有优势：<strong>待定系数法</strong>快速高效但仅适用于特殊右端函数，<strong>常数变易法</strong>完全通用但计算量较大。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>待定系数法的代数本质</strong>：由于 \(D(e^{\alpha x}) = \alpha e^{\alpha x}\)，指数-多项式-三角函数构成的函数类对微分算子 \(p(D)\) 封闭。因此可以在有限维子空间中「猜」特解的形式，将问题化为代数方程组。</li>
+              <li><strong>常数变易法的泛函分析视角</strong>：将齐次通解中的常数 \(c_i\) 替换为待定函数 \(u_i(x)\)，通过额外约束条件使系统变为可解的代数系统。本质上是利用 Wronskian 矩阵的可逆性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>常数变易法</strong>（\(n\) 阶）：设齐次通解为 \(y_h = \sum c_i y_i\)。 令 \(y_p = \sum u_i(x) y_i\) 并施加 \(n-1\) 个约束： \(\sum u_i' y_i = 0\)，\(\sum u_i' y_i' = 0\)，...，\(\sum u_i' y_i^{(n-2)} = 0\)。 剩余方程 \(\sum u_i' y_i^{(n-1)} = g(x)/a_n\) 与约束组成 \(n \times n\) 线性系统： \[\begin{pmatrix} y_1 & \cdots & y_n \\ \vdots & & \vdots \\ y_1^{(n-1)} & \cdots & y_n^{(n-1)} \end{pmatrix} \begin{pmatrix} u_1' \\ \vdots \\ u_n' \end{pmatrix} = \begin{pmatrix} 0 \\ \vdots \\ g/a_n \end{pmatrix}\] 由 Cramer 法则解出 \(u_i'\)，积分得 \(u_i\)。系数矩阵为 Wronskian（非零）。 <strong>待定系数法</strong>（常系数情况）：若 \(g(x) = P(x)e^{\alpha x}\)，\(P\) 为多项式， 则特解形如 \(y_p = x^s Q(x)e^{\alpha x}\)，其中 \(\deg Q = \deg P\)， \(s\) 为 \(\alpha\) 作为特征根的重数。对 \(g = e^{\alpha x}(P\cos\beta x + Q\sin\beta x)\) 类似处理。</p>
+            <h4>1. 常数变易法（Variation of Parameters）</h4>
+            <p>设齐次方程的基本解组为 \(y_1, \ldots, y_n\)。令</p>
+            \[y_p = u_1(x)y_1 + u_2(x)y_2 + \cdots + u_n(x)y_n\]
+            <p>施加 \(n-1\) 个约束条件（消除高阶导数中的 \(u_i''\) 等项）：</p>
+            \[\sum_{i=1}^{n} u_i' y_i = 0, \quad \sum_{i=1}^{n} u_i' y_i' = 0, \quad \ldots, \quad \sum_{i=1}^{n} u_i' y_i^{(n-2)} = 0\]
+            <p>代入原方程后，第 \(n\) 个方程为 \(\sum u_i' y_i^{(n-1)} = g(x)/a_n\)。合并为线性系统</p>
+            \[\begin{pmatrix} y_1 & \cdots & y_n \\ y_1' & \cdots & y_n' \\ \vdots & & \vdots \\ y_1^{(n-1)} & \cdots & y_n^{(n-1)} \end{pmatrix} \begin{pmatrix} u_1' \\ u_2' \\ \vdots \\ u_n' \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \\ \vdots \\ g/a_n \end{pmatrix}\]
+            <p>系数矩阵即 Wronskian 矩阵，\(W \neq 0\)（基本解组线性无关），由 Cramer 法则唯一解出各 \(u_i'\)，再积分得 \(u_i\)。</p>
+
+            <h4>2. 待定系数法（Undetermined Coefficients）</h4>
+            <p>适用于<strong>常系数方程</strong>且右端 \(g(x)\) 形如 \(P_m(x)e^{\alpha x}\)（\(P_m\) 为 \(m\) 次多项式）或 \(e^{\alpha x}[P(x)\cos\beta x + Q(x)\sin\beta x]\) 的情况。</p>
+            <p><strong>规则</strong>：设特解形式为</p>
+            \[y_p = x^s \cdot R_m(x) \cdot e^{\alpha x}\]
+            <p>其中 \(R_m(x)\) 是待定的 \(m\) 次多项式，\(s\) 是 \(\alpha\) 作为特征根的<strong>重数</strong>（若 \(\alpha\) 不是特征根则 \(s = 0\)）。</p>
+            <p><strong>\(x^s\) 因子的必要性</strong>：若 \(\alpha\) 是特征根（\(s \geq 1\)），则 \(e^{\alpha x}\) 已是齐次解，代入 \(L[e^{\alpha x}] = 0\)。需要乘以 \(x^s\) 使得 \(L[x^s e^{\alpha x}]\) 的首项非零。</p>
+
+            <h4>3. 共振项的处理</h4>
+            <p>对 \(g(x) = e^{\alpha x}[P\cos\beta x + Q\sin\beta x]\)，将 \(\alpha + i\beta\) 视为「复频率」。若 \(\alpha + i\beta\) 是特征根的 \(s\) 重根，则特解中需乘 \(x^s\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 受迫振动分析中的共振现象：当驱动频率等于固有频率时， \(s \geq 1\)，特解含 \(x\) 因子使振幅线性增长</p>
+            <p><strong>共振现象</strong>：受迫振动 \(mx'' + kx = F_0\cos\omega t\)。当驱动频率 \(\omega\) 等于固有频率 \(\omega_0 = \sqrt{k/m}\) 时，\(i\omega_0\) 是特征根（\(s = 1\)），特解含 \(x\sin\omega_0 t\) 因子——振幅<strong>线性增长</strong>，这就是共振。实际工程中通过加阻尼（\(c > 0\)）或避开共振频率来防止结构损坏。</p>
+            <p><strong>电气工程中的频率响应</strong>：交流电路中，待定系数法的复数形式即为<strong>相量法</strong>（phasor method），是电路分析的标准工具。特解的振幅和相位给出系统的频率响应函数。</p>
+            <p><strong>Green 函数法</strong>：常数变易法的核心公式可以写成卷积形式 \(y_p(x) = \int G(x,s)g(s)\,ds\)，其中 \(G\) 是 Green 函数。这为更一般的边值问题和 PDE 提供了统一框架。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(y'' - y = e^x\) 的通解。 解答：齐次解 \(y_h = c_1 e^x + c_2 e^{-x}\)。 待定系数法：\(\alpha = 1\) 是特征根（\(s = 1\)）， 故设 \(y_p = Axe^x\)。代入：\(y_p'' = A(2e^x + xe^x)\)， \(y_p'' - y_p = 2Ae^x = e^x\)，\(A = 1/2\)。 通解：\(y = c_1 e^x + c_2 e^{-x} + \frac{1}{2}xe^x\)。 易错点：使用待定系数法时，忘记检查 \(e^{\alpha x}\) 是否已是齐次解。 若 \(\alpha\) 是 \(s\) 重特征根，必须乘 \(x^s\)。</p>
+            <h4>例题：待定系数法</h4>
+            <p>求 \(y'' - y = e^x\) 的通解。</p>
+            <p><strong>第 1 步</strong>：齐次解。特征方程 \(\lambda^2 - 1 = 0\)，\(\lambda = \pm 1\)。\(y_h = c_1 e^x + c_2 e^{-x}\)。</p>
+            <p><strong>第 2 步</strong>：确定特解形式。\(g(x) = e^x\)，\(\alpha = 1\) 是单重特征根（\(s = 1\)）。设 \(y_p = Axe^x\)。</p>
+            <p><strong>第 3 步</strong>：代入方程。\(y_p' = A(1 + x)e^x\)，\(y_p'' = A(2 + x)e^x\)。</p>
+            \[y_p'' - y_p = A(2 + x)e^x - Axe^x = 2Ae^x = e^x\]
+            <p>\(A = 1/2\)。</p>
+            <p><strong>通解</strong>：\(y = c_1 e^x + c_2 e^{-x} + \frac{1}{2}xe^x\)。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 使用待定系数法时忘记检查 \(e^{\alpha x}\) 是否已是齐次解。若 \(\alpha\) 是 \(s\) 重特征根，必须乘 \(x^s\)——否则代入后右端恒为零，无法确定系数。</li>
+              <li>❌ 对含三角函数的右端 \(g = \cos\beta x\)，只设 \(y_p = A\cos\beta x\) 而遗漏 \(B\sin\beta x\) 项。微分会混合 \(\cos\) 和 \(\sin\)，两者必须同时出现。</li>
+              <li>❌ 常数变易法中，忘记先将方程化为<strong>标准形</strong>（首项系数为 1）再代入公式。\(g(x)/a_n\) 中的 \(a_n\) 不可省略。</li>
+            </ul>
           </div>
         </div>
       </div>

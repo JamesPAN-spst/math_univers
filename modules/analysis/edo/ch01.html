@@ -238,35 +238,84 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>自然界最直接的建模方式往往导致一阶 ODE：牛顿冷却定律 \(dT/dt = -k(T - T_{\text{env}})\)、放射性衰变 \(dN/dt = -\lambda N\)、 种群增长 \(dP/dt = rP\)。这些方程有一个共性——变量可以分离 到等号两侧分别积分。可分离变量方程是最简单也最基本的一类 ODE， 齐次方程通过换元 \(v = y/x\) 化归为可分离型，体现了「化归」思想。</p>
+            <p>自然界最直接的建模方式往往导致一阶 ODE。考虑以下几个例子：</p>
+            <ul>
+              <li><strong>牛顿冷却定律</strong>：\(\frac{dT}{dt} = -k(T - T_{\text{env}})\) — 物体温度变化速率与温差成正比；</li>
+              <li><strong>放射性衰变</strong>：\(\frac{dN}{dt} = -\lambda N\) — 衰变速率与现有原子数成正比；</li>
+              <li><strong>种群增长</strong>：\(\frac{dP}{dt} = rP\) — 指数增长模型（Malthus 模型）。</li>
+            </ul>
+            <p>这些方程有一个共性——右端可以写成 \(f(t) \cdot g(y)\) 的乘积形式，变量可以"分离"到等号两侧分别积分。可分离变量方程是最简单也最基本的一类 ODE，而齐次方程通过换元 \(v = y/x\) 可化归为可分离型——这体现了 ODE 求解中最核心的「化归」思想：把不会解的方程变成会解的。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心思想是「分离与化归」：将方程中不同变量的有关项分到等号两侧， 使积分成为可能。齐次方程 \(y' = f(y/x)\) 通过引入比值变量 \(v = y/x\) 降低耦合度，这是 ODE 求解中「换元降阶」策略的原型。</p>
+            <p>核心思想是<strong>「分离与化归」</strong>：</p>
+            <ul>
+              <li><strong>分离</strong>：将方程中只含 \(x\) 的项和只含 \(y\) 的项分到等号两侧，使两边独立可积；</li>
+              <li><strong>化归</strong>：当方程不直接可分离时，通过换元（如 \(v = y/x\)）将其转化为可分离型。</li>
+            </ul>
+            <p>齐次方程 \(y' = f(y/x)\) 的关键观察是：右端只依赖比值 \(y/x\)，而非 \(x,y\) 的独立值。引入 \(v = y/x\) 作为新变量后，方程中 \(x\) 和 \(v\) 的耦合被解开，化为可分离型。这个「换元降阶」策略是整个 ODE 求解方法论的原型——后续的 Bernoulli 换元、降阶法等都遵循相同理念。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>可分离变量方程</strong>：\(y' = f(x)g(y)\)。当 \(g(y) \neq 0\) 时分离变量： \[\frac{dy}{g(y)} = f(x)\,dx\] 两边积分得 \(\int \frac{dy}{g(y)} = \int f(x)\,dx + C\)。 注意：\(g(y_0) = 0\) 的常数解 \(y \equiv y_0\) 需要单独验证。 <strong>齐次方程</strong>：\(y' = f(y/x)\)（\(f\) 是 \(y/x\) 的函数）。 令 \(v = y/x\)，则 \(y = vx\)，\(y' = v + xv'\)，代入得 \[v + xv' = f(v) \quad\Longrightarrow\quad \frac{dv}{f(v) - v} = \frac{dx}{x}\] 这是关于 \(v\) 和 \(x\) 的可分离变量方程。积分后回代 \(v = y/x\)。</p>
+            <h4>1. 可分离变量方程</h4>
+            <p>标准形式：\(y' = f(x)g(y)\)，右端是 \(x\) 的函数与 \(y\) 的函数之积。</p>
+            <p><strong>求解步骤</strong>：当 \(g(y) \neq 0\) 时，将 \(y\) 的因子移到左边：</p>
+            <p>\[\frac{dy}{g(y)} = f(x)\,dx\]</p>
+            <p>两边分别积分：</p>
+            <p>\[\int \frac{dy}{g(y)} = \int f(x)\,dx + C\]</p>
+            <p>这一步的合理性来自：\(y'dx = dy\)（微分记号的严格化由积分变换定理保证）。</p>
+            <p><strong>奇异解的检查</strong>：在分离变量时我们除以了 \(g(y)\)，因此 \(g(y_0) = 0\) 对应的常数解 \(y \equiv y_0\) 必须单独代入验证。例如 \(y' = y^2\) 中 \(y \equiv 0\) 是解，但不在通解 \(y = -1/(x + C)\) 中——它是<strong>奇异解</strong>。</p>
+
+            <h4>2. 齐次方程</h4>
+            <p>形式：\(y' = f\!\left(\frac{y}{x}\right)\)，即右端是 \(y/x\) 的函数。</p>
+            <p><strong>如何判别</strong>：把 \(x, y\) 同时替换为 \(tx, ty\)，如果方程不变，则为齐次。等价地，右端函数 \(h(x,y)\) 满足 \(h(tx,ty) = h(x,y)\)（零次齐次）。</p>
+            <p><strong>换元过程</strong>：令 \(v = y/x\)，则 \(y = vx\)，由乘积法则：</p>
+            <p>\[y' = v + xv'\]</p>
+            <p>代入方程 \(y' = f(v)\) 得：</p>
+            <p>\[v + xv' = f(v) \quad\Longrightarrow\quad xv' = f(v) - v\]</p>
+            <p>分离变量：</p>
+            <p>\[\frac{dv}{f(v) - v} = \frac{dx}{x}\]</p>
+            <p>这是关于 \(v\) 和 \(x\) 的可分离变量方程。积分后回代 \(v = y/x\) 即得原方程的通解。</p>
+            <p><strong>注意</strong>：当 \(f(v_0) = v_0\) 时，\(y = v_0 x\) 是一条过原点的直线解，分离变量时被除掉，需单独检查。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 放射性衰变 \(N' = -\lambda N\)（可分离）→ \(N(t) = N_0 e^{-\lambda t}\) - 化学反应动力学：二级反应 \(dc/dt = -kc^2\) → \(c(t) = c_0/(1+kc_0 t)\)</p>
+            <p><strong>放射性衰变</strong>：\(N' = -\lambda N\)（可分离），分离积分得 \(N(t) = N_0 e^{-\lambda t}\)。半衰期 \(t_{1/2} = \ln 2/\lambda\) 直接由此推出。碳-14 定年法正是基于这一模型。</p>
+            <p><strong>化学反应动力学</strong>：二级反应 \(dc/dt = -kc^2\)，分离变量得 \(c(t) = c_0/(1 + kc_0 t)\)。与一级反应的指数衰减不同，二级反应浓度以代数速率衰减——衰减更慢。</p>
+            <p><strong>自由落体（含阻力）</strong>：\(mv' = mg - bv^2\)，可分离为 \(\frac{dv}{g - (b/m)v^2} = dt\)。积分给出终端速度 \(v_\infty = \sqrt{mg/b}\) 和趋近的时间尺度。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求解 \((x^2 + y^2)\,dx - 2xy\,dy = 0\)。 解答：改写为 \(y' = \frac{x^2+y^2}{2xy}\)。 令 \(v = y/x\)，则 \(y' = \frac{1+v^2}{2v}\)。 \(v + xv' = \frac{1+v^2}{2v}\)，\(xv' = \frac{1-v^2}{2v}\)， \(\frac{2v\,dv}{1-v^2} = \frac{dx}{x}\)，积分得 \(-\ln|1-v^2| = \ln|x| + C_1\)，即 \(|x(1-v^2)| = C\)。 回代 \(v = y/x\)：\(|x - y^2/x| = C\)，即 \(x^2 - y^2 = Cx\)。 易错点：忘记检验 \(g(y) = 0\) 可能给出的奇异解。 如 \(y' = y^2\) 中 \(y \equiv 0\) 是解但不在通解 \(y = -1/(x+C)\) 中。</p>
+            <h4>例题：齐次方程求解</h4>
+            <p>求解 \((x^2 + y^2)\,dx - 2xy\,dy = 0\)。</p>
+            <p><strong>第 1 步 — 改写为标准形式</strong>：\(y' = \frac{x^2+y^2}{2xy}\)。</p>
+            <p><strong>第 2 步 — 判别齐次</strong>：分子分母都是 \(x,y\) 的二次齐次式，比值为零次齐次 → 齐次方程。</p>
+            <p><strong>第 3 步 — 换元</strong>：令 \(v = y/x\)，则 \(y' = \frac{1+v^2}{2v}\)，代入得：</p>
+            <p>\[v + xv' = \frac{1+v^2}{2v} \quad\Rightarrow\quad xv' = \frac{1+v^2 - 2v^2}{2v} = \frac{1-v^2}{2v}\]</p>
+            <p><strong>第 4 步 — 分离积分</strong>：</p>
+            <p>\[\frac{2v\,dv}{1-v^2} = \frac{dx}{x}\]</p>
+            <p>积分得 \(-\ln|1-v^2| = \ln|x| + C_1\)，即 \(|x(1-v^2)| = C\)。</p>
+            <p><strong>第 5 步 — 回代</strong>：\(v = y/x\)，得 \(x^2 - y^2 = Cx\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忘记检验 \(g(y) = 0\) 的奇异解。如 \(y' = y^2\) 中 \(y \equiv 0\) 是解但不在通解 \(y = -1/(x+C)\) 中。</li>
+              <li>❌ 齐次方程换元后忘记回代 \(v = y/x\)，答案中残留 \(v\)。</li>
+              <li>❌ 分离变量时对 \(\int \frac{2v}{1-v^2}\,dv\) 积分符号搞错：正确结果是 \(-\ln|1-v^2|\)（注意负号）。</li>
+              <li>✅ 检验技巧：求完通解后取一组特定的 \(C\) 值代回原方程验算。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -293,35 +342,87 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>一阶线性方程 \(y' + p(x)y = q(x)\) 在工程和物理中无处不在： RC 电路的电压响应、药物在血液中的浓度变化、一阶系统的强迫振动。 它有完整的求解公式，是 ODE 理论的基石。Bernoulli 方程和 Riccati 方程则是重要的非线性推广，但能通过巧妙换元化归为线性方程。</p>
+            <p>一阶线性方程 \(y' + p(x)y = q(x)\) 是 ODE 中最重要的方程类型之一，原因有三：</p>
+            <ul>
+              <li><strong>普遍性</strong>：RC 电路的电压响应、药物在血液中的浓度变化、一阶控制系统的强迫响应都是这种形式；</li>
+              <li><strong>可解性</strong>：它有完整的通解公式（积分因子法），不像多数非线性方程只能近似求解；</li>
+              <li><strong>基石作用</strong>：高阶线性方程理论（ch03）的叠加原理、常数变易法等都是在这里首先建立的。</li>
+            </ul>
+            <p>Bernoulli 方程 \(y' + p(x)y = q(x)y^n\) 和 Riccati 方程是重要的<strong>非线性推广</strong>——但通过巧妙换元可以化归为线性方程。这展示了一个深刻的方法论：非线性世界中的某些问题可以通过变量替换回到线性的舒适区。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>线性方程的核心是「叠加原理」：齐次解空间是一维线性空间， 通解 = 齐次通解 + 特解。积分因子法的本质是乘以一个函数使左端 变为全导数 \(d(\mu y)/dx\)，这是微分运算的逆操作。</p>
+            <p>线性方程的核心是<strong>叠加原理</strong>：</p>
+            <ul>
+              <li>齐次方程 \(y' + py = 0\) 的解空间是<strong>一维线性空间</strong>：\(y_h = Ce^{-\int p\,dx}\)，任何常数倍仍是解；</li>
+              <li>非齐次方程的通解 = 齐次通解 + 一个特解：\(y = y_h + y_p\)；</li>
+              <li>任意两个特解之差是齐次解（线性性的直接推论）。</li>
+            </ul>
+            <p><strong>积分因子法</strong>的本质：乘以一个函数 \(\mu(x)\) 使左端变为全导数 \(\frac{d}{dx}[\mu \cdot y]\)。这不是凭空的技巧——它恰好是求解线性算子 \(L[y] = y' + py\) 的「逆操作」：把微分方程变回积分问题。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>一阶线性方程</strong> \(y' + p(x)y = q(x)\)。 积分因子 \(\mu(x) = e^{\int p(x)\,dx}\)，两边乘 \(\mu\)： \[\frac{d}{dx}[\mu(x) y] = \mu(x) q(x)\] 积分得通解： \[y(x) = e^{-\int p\,dx}\left[\int e^{\int p\,dx}\,q(x)\,dx + C\right]\] <strong>Bernoulli 方程</strong> \(y' + p(x)y = q(x)y^n\)（\(n \neq 0,1\)）。 令 \(v = y^{1-n}\)，则 \(v' = (1-n)y^{-n}y'\)。 原方程两边同除 \(y^n\) 得 \(y^{-n}y' + p(x)y^{1-n} = q(x)\)， 即 \(\frac{1}{1-n}v' + p(x)v = q(x)\)，化为关于 \(v\) 的一阶线性方程。 <strong>Riccati 方程</strong> \(y' = a(x)y^2 + b(x)y + c(x)\)： 已知特解 \(y_1\) 时，令 \(y = y_1 + 1/v\) 可化为一阶线性方程。</p>
+            <h4>1. 一阶线性方程的积分因子法</h4>
+            <p>标准形式：\(y' + p(x)y = q(x)\)。</p>
+            <p><strong>构造积分因子</strong>：寻找 \(\mu(x)\) 使得 \(\mu(y' + py) = (\mu y)'\)。展开右边：\((\mu y)' = \mu' y + \mu y'\)，比较得 \(\mu' = \mu p\)，即 \(\frac{\mu'}{\mu} = p\)。积分：</p>
+            <p>\[\mu(x) = e^{\int p(x)\,dx}\]</p>
+            <p>（积分常数取 0 即可，因为 \(\mu\) 只需要满足比例关系。）</p>
+            <p><strong>求解</strong>：两边乘 \(\mu\)，左端变为全导数：</p>
+            <p>\[\frac{d}{dx}[\mu(x) y] = \mu(x) q(x)\]</p>
+            <p>积分得：</p>
+            <p>\[y(x) = e^{-\int p\,dx}\left[\int e^{\int p\,dx}\,q(x)\,dx + C\right]\]</p>
+            <p>这个公式虽然看起来复杂，但结构清晰：\(e^{-\int p\,dx}\) 是齐次解（衰减/增长因子），括号内的积分给出特解。</p>
+
+            <h4>2. Bernoulli 方程</h4>
+            <p>形式：\(y' + p(x)y = q(x)y^n\)（\(n \neq 0, 1\)）。</p>
+            <p><strong>换元</strong>：令 \(v = y^{1-n}\)，则 \(v' = (1-n)y^{-n}y'\)。</p>
+            <p>原方程两边同除 \(y^n\)：\(y^{-n}y' + p(x)y^{1-n} = q(x)\)。</p>
+            <p>注意到 \(y^{-n}y' = \frac{1}{1-n}v'\)，代入得：</p>
+            <p>\[\frac{1}{1-n}v' + p(x)v = q(x) \quad\Longrightarrow\quad v' + (1-n)p(x)v = (1-n)q(x)\]</p>
+            <p>这是关于 \(v\) 的<strong>一阶线性方程</strong>，用积分因子法求解即可。</p>
+            <p><strong>注意</strong>：当 \(n > 1\) 时，\(y = 0\) 也是方程的解（代入验证 \(0 = 0\)），但在换元时被除掉了——需要单独检查。</p>
+
+            <h4>3. Riccati 方程</h4>
+            <p>形式：\(y' = a(x)y^2 + b(x)y + c(x)\)。一般情况下不可积。</p>
+            <p>但若已知一个特解 \(y_1(x)\)，令 \(y = y_1 + 1/v\)，代入后二次项消去，化为关于 \(v\) 的一阶线性方程。</p>
+            <p>这说明 Riccati 方程的「困难」本质在于找到第一个特解——之后的工作都是线性的。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- RC 电路：\(RC\,dV_C/dt + V_C = V_{\text{in}}(t)\)， 是标准一阶线性方程，描述电容充放电过程 - Logistic 方程 \(P' = rP(1-P/K)\) 是 Bernoulli 方程（\(n=2\)）</p>
+            <p><strong>RC 电路</strong>：电容电压满足 \(RC\frac{dV_C}{dt} + V_C = V_{\text{in}}(t)\)，这是标准一阶线性方程。积分因子 \(\mu = e^{t/RC}\)，时间常数 \(\tau = RC\) 决定了充放电速度。阶跃输入下的解 \(V_C(t) = V_0(1 - e^{-t/RC})\) 是工程中最常见的瞬态响应。</p>
+            <p><strong>Logistic 方程</strong>：\(P' = rP(1 - P/K)\)，整理为 \(P' - rP = -(r/K)P^2\)，这是 Bernoulli 方程（\(n=2\)）。令 \(v = 1/P\) 化为线性方程，得经典解 \(P(t) = \frac{K}{1 + (K/P_0 - 1)e^{-rt}}\)——S 形增长曲线，广泛用于种群生态学和流行病学。</p>
+            <p><strong>药物代谢</strong>：血药浓度模型 \(c' + kc = D\delta(t)\)，其中 \(k\) 是消除速率，\(D\) 是给药剂量。一阶线性方程给出指数衰减的消除曲线，药物半衰期 \(t_{1/2} = \ln 2/k\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求解 \(y' + \frac{2}{x}y = x^2\)，\(y(1)=0\)。 解答：\(p(x)=2/x\)，积分因子 \(\mu = e^{\int 2/x\,dx} = x^2\)。 乘以 \(\mu\)：\((x^2 y)' = x^4\)，积分得 \(x^2 y = x^5/5 + C\)。 \(y = x^3/5 + C/x^2\)。代入 \(y(1)=0\)：\(0 = 1/5 + C\)，\(C = -1/5\)。 故 \(y = \frac{x^3 - x^{-2}}{5} = \frac{x^5 - 1}{5x^2}\)。 易错点：积分因子中忘记常数可以省略（取 \(C=0\) 即可）， 或对 Bernoulli 方程在 \(n>1\) 时忘记 \(y=0\) 也是解。</p>
+            <h4>例题：一阶线性方程的初值问题</h4>
+            <p>求解 \(y' + \frac{2}{x}y = x^2\)，\(y(1) = 0\)。</p>
+            <p><strong>第 1 步 — 计算积分因子</strong>：\(p(x) = 2/x\)，\(\mu = e^{\int 2/x\,dx} = e^{2\ln|x|} = x^2\)。</p>
+            <p><strong>第 2 步 — 乘以 \(\mu\) 并积分</strong>：</p>
+            <p>\[(x^2 y)' = x^4 \quad\Rightarrow\quad x^2 y = \frac{x^5}{5} + C\]</p>
+            <p><strong>第 3 步 — 求通解</strong>：\(y = \frac{x^3}{5} + \frac{C}{x^2}\)。</p>
+            <p><strong>第 4 步 — 代入初值</strong>：\(y(1) = 0\)：\(0 = \frac{1}{5} + C\)，\(C = -\frac{1}{5}\)。</p>
+            <p>故 \(y = \frac{x^5 - 1}{5x^2}\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 积分因子中保留积分常数：\(e^{2\ln|x| + C}\)。积分因子只需要一个特解，取 \(C = 0\) 即可。</li>
+              <li>❌ 对 Bernoulli 方程在 \(n > 1\) 时忘记 \(y = 0\) 也是解——换元 \(v = y^{1-n}\) 在 \(y = 0\) 处无意义。</li>
+              <li>❌ 使用通解公式但忘记 \(q(x)\) 不是常数时需要保留在积分号内。</li>
+              <li>✅ 验证技巧：将求出的 \(y\) 代回原方程的左端 \(y' + py\)，检查是否等于右端 \(q(x)\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -348,35 +449,80 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当方程可以写成某个二元函数的全微分 \(dF = 0\) 时，解就是等值线 \(F(x,y) = C\)。但大多数方程不是天然恰当的——此时需要寻找 积分因子使它变得恰当。恰当方程的判别法和积分因子的求法， 构成了一阶 ODE 求解的另一条重要路径。</p>
+            <p>当方程可以写成某个二元函数的全微分 \(dF = 0\) 时，解就是等值线 \(F(x,y) = C\)——方程的「解」变成了一个隐式曲线族，求解问题化为寻找势函数。</p>
+            <p>但大多数一阶方程并非天然恰当。此时我们需要<strong>积分因子</strong>——一个乘上去就能让方程变恰当的函数。这与多元微积分中「保守场」的概念直接相关：</p>
+            <ul>
+              <li>恰当方程 ↔ 保守力场 \(\mathbf{F} = -\nabla V\)</li>
+              <li>积分因子 ↔ 使非保守场变成保守场的「标量乘子」</li>
+              <li>恰当性条件 ↔ 旋度为零（二维情况下混合偏导相等）</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>恰当方程的本质是外微分：\(M\,dx + N\,dy = dF\) 当且仅当 \(dF\) 是 恰当 1-形式。恰当性条件 \(\partial M/\partial y = \partial N/\partial x\) 就是 Poincaré 引理在 \(\mathbb{R}^2\) 上的具体表现。</p>
+            <p>恰当方程的本质是<strong>外微分</strong>。一阶微分形式 \(\omega = M\,dx + N\,dy\) 恰当当且仅当它是某个函数 \(F\) 的全微分：\(\omega = dF\)。</p>
+            <p>在单连通域上，Poincaré 引理告诉我们：<strong>闭形式 = 恰当形式</strong>。"闭"的条件就是 \(\frac{\partial M}{\partial y} = \frac{\partial N}{\partial x}\)——这是因为 \(d\omega = \left(\frac{\partial N}{\partial x} - \frac{\partial M}{\partial y}\right)dx \wedge dy = 0\)。</p>
+            <p>如果域不单连通（如有洞），闭形式不一定恰当——这是代数拓扑（de Rham 上同调）的起点。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>恰当方程</strong>：\(M(x,y)\,dx + N(x,y)\,dy = 0\) 称为恰当的，如果存在 \(F(x,y)\) 使得 \(F_x = M\)，\(F_y = N\)。 <strong>判别条件</strong>（单连通域上）： \[\frac{\partial M}{\partial y} = \frac{\partial N}{\partial x}\] <strong>求解方法</strong>：从 \(F_x = M\) 积分得 \(F = \int M\,dx + \varphi(y)\)， 再由 \(F_y = N\) 确定 \(\varphi'(y)\)。 <strong>积分因子</strong>：若不恰当，寻找 \(\mu(x,y)\) 使 \(\mu M\,dx + \mu N\,dy = 0\) 恰当。特殊情况： - 若 \(\frac{M_y - N_x}{N}\) 仅依赖 \(x\)，则 \(\mu = e^{\int \frac{M_y-N_x}{N}dx}\) - 若 \(\frac{N_x - M_y}{M}\) 仅依赖 \(y\)，则 \(\mu = e^{\int \frac{N_x-M_y}{M}dy}\)</p>
+            <h4>1. 恰当方程的判别</h4>
+            <p>方程 \(M(x,y)\,dx + N(x,y)\,dy = 0\) 恰当，意味着存在 \(F(x,y)\) 使得 \(F_x = M\)，\(F_y = N\)。</p>
+            <p>由 Schwarz 定理（混合偏导交换），恰当的<strong>必要条件</strong>：</p>
+            <p>\[\frac{\partial M}{\partial y} = F_{xy} = F_{yx} = \frac{\partial N}{\partial x}\]</p>
+            <p>在单连通域上，这也是<strong>充分条件</strong>。</p>
+
+            <h4>2. 恰当方程的求解</h4>
+            <p><strong>第 1 步</strong>：从 \(F_x = M\) 对 \(x\) 积分：</p>
+            <p>\[F(x,y) = \int M(x,y)\,dx + \varphi(y)\]</p>
+            <p>其中 \(\varphi(y)\) 是"积分常数"（对 \(x\) 是常数，但可以依赖 \(y\)）。</p>
+            <p><strong>第 2 步</strong>：由 \(F_y = N\) 确定 \(\varphi'(y)\)：</p>
+            <p>\[\frac{\partial}{\partial y}\int M\,dx + \varphi'(y) = N \quad\Rightarrow\quad \varphi'(y) = N - \frac{\partial}{\partial y}\int M\,dx\]</p>
+            <p>右端必须仅依赖 \(y\)（否则方程不恰当），积分得 \(\varphi(y)\)。</p>
+            <p><strong>第 3 步</strong>：通解为 \(F(x,y) = C\)。</p>
+
+            <h4>3. 积分因子</h4>
+            <p>若方程不恰当，寻找 \(\mu(x,y)\) 使得 \(\mu M\,dx + \mu N\,dy = 0\) 恰当。一般来说求 \(\mu\) 需解偏微分方程，但有两种重要的特殊情况：</p>
+            <ul>
+              <li>若 \(\frac{M_y - N_x}{N}\) 仅依赖 \(x\)，则 \(\mu(x) = \exp\!\left(\int \frac{M_y - N_x}{N}\,dx\right)\)</li>
+              <li>若 \(\frac{N_x - M_y}{M}\) 仅依赖 \(y\)，则 \(\mu(y) = \exp\!\left(\int \frac{N_x - M_y}{M}\,dy\right)\)</li>
+            </ul>
+            <p>这两个公式的推导方式相同：假设 \(\mu\) 只依赖一个变量，代入恰当性条件 \((\mu M)_y = (\mu N)_x\)，展开后解出 \(\mu'/\mu\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 力学中保守力场 \(\mathbf{F} = -\nabla V\) 的等势线即为恰当方程的解 - 热力学中状态方程 \(dU = T\,dS - P\,dV\) 的恰当性条件给出 Maxwell 关系</p>
+            <p><strong>保守力场</strong>：在力学中，若力 \(\mathbf{F} = (M, N)\) 是保守的（\(M_y = N_x\)），则存在势能 \(V\) 使 \(\mathbf{F} = -\nabla V\)。沿任何闭合路径做功为零。恰当方程 \(M\,dx + N\,dy = 0\) 的解 \(F = C\) 就是<strong>等势线</strong>。</p>
+            <p><strong>热力学 Maxwell 关系</strong>：态函数 \(U\) 的全微分 \(dU = T\,dS - P\,dV\) 是恰当的（因为 \(U\) 是状态函数），恰当性条件给出 Maxwell 关系 \(\frac{\partial T}{\partial V}\Big|_S = -\frac{\partial P}{\partial S}\Big|_V\)——一个非常有用的热力学恒等式。</p>
+            <p><strong>流体力学</strong>：二维不可压流 \(\nabla \cdot \mathbf{v} = 0\) 意味着 \(v_x\,dy - v_y\,dx = 0\) 恰当，存在流函数 \(\psi\) 使 \(v_x = \psi_y\)，\(v_y = -\psi_x\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：判断 \((2xy + 3)\,dx + (x^2 + 4y)\,dy = 0\) 是否恰当并求解。 解答：\(M = 2xy+3\)，\(N = x^2+4y\)。 \(M_y = 2x\)，\(N_x = 2x\)。\(M_y = N_x\)，恰当。 \(F = \int (2xy+3)\,dx = x^2y + 3x + \varphi(y)\)。 \(F_y = x^2 + \varphi'(y) = x^2 + 4y\)，故 \(\varphi'(y) = 4y\)， \(\varphi(y) = 2y^2\)。通解：\(x^2 y + 3x + 2y^2 = C\)。 易错点：对 \(M\) 关于 \(x\) 积分时，「常数」\(\varphi(y)\) 不能漏掉， 否则 \(F_y\) 将缺少关键项，导致矛盾或错误。</p>
+            <h4>例题：恰当方程求解</h4>
+            <p>判断 \((2xy + 3)\,dx + (x^2 + 4y)\,dy = 0\) 是否恰当并求解。</p>
+            <p><strong>第 1 步 — 验证恰当性</strong>：\(M = 2xy+3\)，\(N = x^2+4y\)。</p>
+            <p>\(M_y = 2x = N_x\) ✓ 恰当。</p>
+            <p><strong>第 2 步 — 求势函数</strong>：\(F = \int (2xy+3)\,dx = x^2y + 3x + \varphi(y)\)。</p>
+            <p>\(F_y = x^2 + \varphi'(y) = N = x^2 + 4y\)，故 \(\varphi'(y) = 4y\)，\(\varphi(y) = 2y^2\)。</p>
+            <p><strong>通解</strong>：\(x^2 y + 3x + 2y^2 = C\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对 \(M\) 关于 \(x\) 积分时漏掉"常数" \(\varphi(y)\)——这会导致 \(F_y\) 丢失项，使 \(F_y = N\) 出现矛盾。</li>
+              <li>❌ 混淆哪个变量求偏导哪个变量积分：\(F_x = M\) 意味着对 \(x\) 积分，\(y\) 当作常数。</li>
+              <li>❌ 不恰当时强行用恰当方程的方法求解，忘记先找积分因子。</li>
+              <li>✅ 快速验证：求出 \(F\) 后，分别计算 \(F_x\) 和 \(F_y\)，检查是否等于 \(M\) 和 \(N\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -403,28 +549,85 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>ODE 的通解是一族曲线（由任意常数 \(C\) 参数化），这族曲线可能 拥有「包络」——一条与每条曲线相切的特殊曲线。包络满足方程 但不包含在通解族中，称为奇解。理解奇解对于完整描述方程的 解集至关重要，也揭示了 ODE 解结构的微妙几何性质。</p>
+            <p>ODE 的通解是一族曲线（由任意常数 \(C\) 参数化）。这族曲线有时会"聚集"在某条特殊曲线附近——每条曲线都与它相切。这条特殊曲线叫做<strong>包络</strong>。</p>
+            <p>包络满足原方程但<strong>不属于通解族</strong>（对任何 \(C\) 取值都得不到它），称为<strong>奇解</strong>。奇解的存在揭示了 ODE 解结构的微妙之处：</p>
+            <ul>
+              <li>在奇解经过的点上，解的唯一性定理（Lipschitz 条件）失效；</li>
+              <li>不考虑奇解就无法完整描述方程的所有解；</li>
+              <li>几何上，包络常对应物理中的极限状态（如焦散线、极限环）。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从微分几何的视角看，通解族 \(F(x,y,C) = 0\) 定义了 \((x,y,C)\) 空间中的一个曲面。投影到 \((x,y)\) 平面时：</p>
+            <ul>
+              <li>一般点对应一条（或有限条）通过的曲线——解唯一。</li>
+              <li>投影的<strong>折叠处</strong>（\(\partial F/\partial C = 0\) 的位置）对应<strong>包络</strong>——此处相邻参数值的曲线几乎重合，发生"切触"。</li>
+            </ul>
+            <p>因此求包络的方法是自然的：找到曲面上 \(C\) 方向的"转折点"，即联立 \(F = 0\) 和 \(F_C = 0\)，消去 \(C\)。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>通解族的包络</strong>：设通解为 \(F(x, y, C) = 0\)。包络由以下方程组确定： \[F(x, y, C) = 0 \quad\text{且}\quad \frac{\partial F}{\partial C}(x, y, C) = 0\] 消去 \(C\) 得到包络曲线。 <strong>奇解</strong>：满足 ODE 但不能由通解 \(y = y(x; C)\) 对任何 \(C\) 取值得到。 奇解上每一点都与通解族中某条曲线相切。 <strong>Clairaut 方程</strong> \(y = xy' + f(y')\) 的通解为 \(y = Cx + f(C)\)（直线族）， 奇解由消去 \(p\)：\(x + f'(p) = 0\)，\(y = px + f(p)\) 得到参数形式。 此奇解就是直线族的包络。 <strong>判别曲线法</strong>：对 \(F(x,y,y') = 0\)，\(p\)-判别曲线由消去 \(y'\) 得到： \(F = 0,\; F_{y'} = 0\)。该曲线包含奇解，但也可能包含非解（需验证）。</p>
+            <h4>1. 包络的求法</h4>
+            <p>设通解为 \(F(x, y, C) = 0\)。包络由以下方程组确定：</p>
+            <p>\[F(x, y, C) = 0 \quad\text{且}\quad \frac{\partial F}{\partial C}(x, y, C) = 0\]</p>
+            <p>从第二个方程解出 \(C = C(x,y)\)，代入第一个方程消去 \(C\)，得到包络曲线。</p>
+            <p><strong>直觉</strong>：\(F_C = 0\) 意味着参数 \(C\) 的微小变化不改变曲线经过的点——即该点 is "两条无限接近的曲线的交点"，这正是包络的定义。</p>
+
+            <h4>2. 奇解与唯一性</h4>
+            <p><strong>奇解</strong>是满足 ODE 但不能由通解对任何 \(C\) 取值得到的解。在奇解上的每一点，它与通解族中的某条曲线<strong>相切</strong>。</p>
+            <p>为什么唯一性失效？在奇解与通解的切点处，两个不同的解（奇解和通解中的一条曲线）通过同一个点且方向相同——这意味着 \(f(x,y)\) 在该处不满足 Lipschitz 条件。</p>
+
+            <h4>3. Clairaut 方程</h4>
+            <p>形式：\(y = xy' + g(y')\)。令 \(y' = p\)，则 \(y = xp + g(p)\)。</p>
+            <p>对 \(x\) 求导：\(p = p + xp' + g'(p)p'\)，即 \((x + g'(p))p' = 0\)。</p>
+            <p>两种情况：</p>
+            <ul>
+              <li>\(p' = 0\)，即 \(p = C\)（常数）→ 通解 \(y = Cx + g(C)\)——这是一族<strong>直线</strong>。</li>
+              <li>\(x + g'(p) = 0\)，即 \(x = -g'(p)\)，连同 \(y = xp + g(p)\) 给出<strong>参数形式的奇解</strong>（以 \(p\) 为参数）——这就是直线族的包络。</li>
+            </ul>
+
+            <h4>4. p-判别曲线法</h4>
+            <p>对一般方程 \(F(x, y, y') = 0\)，将 \(y' = p\) 视为参数，联立：</p>
+            <p>\[F(x, y, p) = 0 \quad\text{且}\quad F_p(x, y, p) = 0\]</p>
+            <p>消去 \(p\) 得到 \(p\)-判别曲线。它<strong>包含</strong>奇解，但也可能包含退化因子（如节点轨迹）——需要将结果代回原方程验证。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 光学中的焦散线(caustic)是光线族的包络 - 几何光学中波前的形成与包络密切相关</p>
+            <p><strong>光学焦散线</strong>：光线经凹面镜反射后形成的焦散线（caustic），就是光线族的包络。近轴光线的焦散是一个点（焦点），但大角度光线的焦散是一条明亮的曲线——咖啡杯底部的光斑就是日常可见的例子。</p>
+            <p><strong>波前与惠更斯原理</strong>：波前在传播过程中的形状由次波球的包络确定。Huygens 原理本质上就是在求包络——每个次波源发出球面波，所有球面波的公切面构成新的波前。</p>
+            <p><strong>几何光学</strong>：子午面上光线族 \(y = x\tan\alpha - \frac{x^2}{4f\cos^2\alpha}\) 的包络给出抛物面焦散的形状。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 Clairaut 方程 \(y = xy' + (y')^2\) 的通解和奇解。 解答：通解：\(y = Cx + C^2\)（直线族）。 求包络：\(F(x,y,C) = Cx + C^2 - y = 0\)，\(F_C = x + 2C = 0\)。 由 \(C = -x/2\) 代入：\(y = (-x/2)x + x^2/4 = -x^2/4\)。 奇解：\(y = -x^2/4\)（抛物线，与每条直线相切）。 验证：\(y' = -x/2\)，\(xy' + (y')^2 = -x^2/2 + x^2/4 = -x^2/4 = y\)。✓ 易错点：\(p\)-判别曲线不一定全是奇解，需要代回原方程验证。</p>
+            <h4>例题：Clairaut 方程的通解与奇解</h4>
+            <p>求解 \(y = xy' + (y')^2\)。</p>
+            <p><strong>第 1 步 — 通解</strong>：令 \(y' = C\)（常数），得直线族 \(y = Cx + C^2\)。</p>
+            <p><strong>第 2 步 — 求包络</strong>：\(F(x, y, C) = Cx + C^2 - y = 0\)，\(F_C = x + 2C = 0\)。</p>
+            <p>由 \(C = -x/2\) 代入：\(y = (-x/2)x + x^2/4 = -x^2/4\)。</p>
+            <p><strong>第 3 步 — 验证奇解</strong>：\(y = -x^2/4\)，\(y' = -x/2\)。代入原方程：</p>
+            <p>\[xy' + (y')^2 = x(-x/2) + x^2/4 = -x^2/2 + x^2/4 = -x^2/4 = y \quad\checkmark\]</p>
+            <p>奇解 \(y = -x^2/4\) 是一条抛物线，与每条直线 \(y = Cx + C^2\) 相切。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 将 \(p\)-判别曲线直接当作奇解而不代回验证——它可能包含非解部分。</li>
+              <li>❌ 混淆通解（含参数 \(C\) 的一族曲线）和特解（取定 \(C\) 后的一条曲线）。奇解不是特解——它不能通过取任何 \(C\) 值得到。</li>
+              <li>❌ Clairaut 方程中对 \(x\) 求导后忘记因式分解 \((x + g'(p))p' = 0\)，只取了 \(p' = 0\) 而漏掉了另一支。</li>
+              <li>✅ 几何验证：画出通解的直线族和奇解曲线，检查它们确实相切。</li>
+            </ul>
           </div>
         </div>
       </div>

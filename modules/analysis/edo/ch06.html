@@ -394,35 +394,74 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>工程师设计控制系统、物理学家分析力学平衡时，最关心的问题是： 系统受到小扰动后是否会「回来」？Lyapunov 在 1892 年给出了 严格的数学定义：稳定、渐近稳定、不稳定。这些概念不依赖具体 求解方程，而是直接刻画解的长期行为。</p>
+            <p>系统受到小扰动后是否会「回来」？这是工程和科学中最基本的问题：</p>
+            <ul>
+              <li><strong>控制系统</strong>：卫星姿态受微小推力扰动后能否恢复？自动驾驶遇到侧风后能否保持车道？稳定性决定设计是否可行。</li>
+              <li><strong>物理平衡</strong>：倒立摆是不稳定的（任何扰动都导致倾倒），普通摆是稳定的（小角度扰动后振荡回归）——这种区别需要精确的数学刻画。</li>
+              <li><strong>不求解的判定</strong>：Lyapunov（1892）的革命性思想是直接从方程结构判定稳定性，无需求解——这使得非线性系统的稳定性分析成为可能。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>稳定性是一种「拓扑」性质：它关心的是轨线之间的定性关系（靠近/远离）， 而非解的具体公式。这种观点使得我们可以在不求解方程的情况下 判断稳定性（Lyapunov 直接法）。</p>
+            <p>稳定性是一种<strong>拓扑/定性</strong>性质——关心轨线之间的定性关系而非解的具体公式：</p>
+            <ul>
+              <li><strong>\(\epsilon\)-\(\delta\) 语言</strong>：Lyapunov 稳定性的严格定义直接模仿分析学中的连续性定义——初值在 \(\delta\)-球内 → 解始终在 \(\epsilon\)-球内。</li>
+              <li><strong>稳定性层次</strong>：Lyapunov 稳定 ⊂ 渐近稳定 ⊂ 指数稳定，每一层增加更强的收敛要求。</li>
+              <li><strong>能量类比</strong>：物理系统中小球在碗底是稳定的（势能最小值），碗底的形状决定了稳定性的类型——这个直觉将被 Lyapunov 函数严格化。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>设 \(\mathbf{X}^*\) 为 \(\mathbf{X}' = \mathbf{F}(\mathbf{X})\) 的平衡点（不妨设为原点）。 <strong>Lyapunov 稳定</strong>：\(\forall \epsilon > 0\)，\(\exists \delta > 0\)， \(\|\mathbf{X}(0)\| < \delta \Rightarrow \|\mathbf{X}(t)\| < \epsilon\) 对所有 \(t \geq 0\)。 <strong>渐近稳定</strong>：Lyapunov 稳定 + \(\lim_{t \to \infty}\mathbf{X}(t) = \mathbf{0}\) （在某邻域内的初值）。 <strong>指数稳定</strong>：存在 \(M, \alpha > 0\) 使得 \[\|\mathbf{X}(t)\| \leq M\|\mathbf{X}(0)\|e^{-\alpha t}\] 指数稳定 \(\Rightarrow\) 渐近稳定 \(\Rightarrow\) Lyapunov 稳定。反之不成立。 <strong>不稳定</strong>：不满足 Lyapunov 稳定的条件，即存在任意小的扰动 导致轨线离开某 \(\epsilon\)-邻域。</p>
+            <h4>1. Lyapunov 稳定</h4>
+            <p>设 \(\mathbf{X}^*\) 为 \(\mathbf{X}' = \mathbf{F}(\mathbf{X})\) 的平衡点（不妨设为原点）。原点称为 <strong>Lyapunov 稳定</strong>的，若</p>
+            \[\forall \epsilon > 0,\ \exists \delta > 0:\ \|\mathbf{X}(0)\| < \delta \implies \|\mathbf{X}(t)\| < \epsilon,\quad \forall t \geq 0\]
+            <p>直觉：初值足够近 → 解永远不会太远。但解不一定趋向平衡点（可能在附近振荡）。</p>
+
+            <h4>2. 渐近稳定</h4>
+            <p>原点称为<strong>渐近稳定</strong>的，若 Lyapunov 稳定 <strong>且</strong> 存在 \(\delta_0 > 0\) 使得</p>
+            \[\|\mathbf{X}(0)\| < \delta_0 \implies \lim_{t \to \infty}\mathbf{X}(t) = \mathbf{0}\]
+            <p>注意两个条件缺一不可。仅有 \(\mathbf{X}(t) \to 0\) 但不 Lyapunov 稳定的例子是存在的（尽管不常见）。</p>
+
+            <h4>3. 指数稳定</h4>
+            <p>原点称为<strong>指数稳定</strong>的，若存在 \(M > 0\)、\(\alpha > 0\) 使得</p>
+            \[\|\mathbf{X}(t)\| \leq M\|\mathbf{X}(0)\|e^{-\alpha t},\quad \forall t \geq 0\]
+            <p>指数衰减是最强的要求。蕴含关系：指数稳定 \(\Rightarrow\) 渐近稳定 \(\Rightarrow\) Lyapunov 稳定。反之均不成立。</p>
+
+            <h4>4. 不稳定</h4>
+            <p>不满足 Lyapunov 稳定：存在 \(\epsilon_0 > 0\) 使得对任意小的 \(\delta\)，都有初值 \(\|\mathbf{X}(0)\| < \delta\) 的解在某时刻 \(\|\mathbf{X}(t)\| \geq \epsilon_0\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 卫星姿态控制中的稳定性要求 - 电力系统暂态稳定性分析</p>
+            <p><strong>卫星姿态控制</strong>：自旋稳定卫星绕最大/最小惯量轴旋转是稳定的，绕中间惯量轴旋转是不稳定的（网球定理/Dzhanibekov 效应）。</p>
+            <p><strong>电力系统</strong>：发电机受到短路故障扰动后能否恢复同步运行（暂态稳定性），取决于「临界清除时间」——这直接对应 Lyapunov 分析中的吸引域大小。</p>
+            <p><strong>生态学</strong>：种群平衡的<strong>全局渐近稳定性</strong>意味着无论初始种群如何，长期都趋向共存状态（持久性 vs 灭绝由稳定类型决定）。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：判断 \(x' = -x^3\) 在 \(x=0\) 的稳定类型。 解答：解为 \(x(t) = x_0/\sqrt{1+2x_0^2 t}\)。\(x(t) \to 0\)（渐近稳定）。 衰减速率：\(|x(t)| \sim 1/\sqrt{2t}\)（多项式衰减，非指数衰减）。 故 \(x=0\) 是渐近稳定但非指数稳定的。 易错点：渐近稳定不等于指数稳定。指数稳定要求衰减速度至少为 \(e^{-\alpha t}\)，多项式衰减（如上例）不够快。</p>
+            <h4>例题：渐近稳定但非指数稳定</h4>
+            <p>判断 \(x' = -x^3\) 在 \(x = 0\) 的稳定类型。</p>
+            <p><strong>第 1 步</strong>：求解。分离变量得 \(x(t) = \frac{x_0}{\sqrt{1 + 2x_0^2 t}}\)。</p>
+            <p><strong>第 2 步</strong>：\(x(t) \to 0\) as \(t \to \infty\) → 渐近稳定。</p>
+            <p><strong>第 3 步</strong>：衰减速率分析。\(|x(t)| \sim \frac{1}{\sqrt{2t}}\) 是<strong>多项式衰减</strong>，不存在 \(\alpha > 0\) 使 \(|x(t)| \leq Me^{-\alpha t}\)。</p>
+            <p><strong>结论</strong>：\(x = 0\) 是渐近稳定但<strong>非</strong>指数稳定的。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 将渐近稳定等同于指数稳定。非线性系统的衰减可以任意慢（多项式甚至对数衰减），指数稳定是额外的强条件。</li>
+              <li>❌ 忘记「Lyapunov 稳定」是「渐近稳定」的前提条件。仅有 \(\mathbf{X}(t) \to 0\) 不够——还需要解对初值的连续依赖（不能先跑远再回来）。</li>
+              <li>❌ 混淆<strong>局部</strong>与<strong>全局</strong>渐近稳定。上述定义是局部的（初值足够近）。全局渐近稳定要求对所有初值都趋向平衡点。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -493,28 +532,82 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>对于线性系统 \(\mathbf{X}' = A\mathbf{X}\)，稳定性完全由矩阵 \(A\) 的 特征值决定：所有特征值实部为负 \(\Leftrightarrow\) 渐近稳定。这个 优美的结果是线性 ODE 理论的最终结论，也是控制理论（Routh-Hurwitz 判据）的数学基础。</p>
+            <p>对于线性系统 \(\mathbf{X}' = A\mathbf{X}\)，稳定性有一个<strong>完美的判据</strong>——完全由矩阵特征值决定：</p>
+            <ul>
+              <li><strong>特征值判据</strong>：所有特征值实部为负 \(\Leftrightarrow\) 渐近稳定。这是线性 ODE 理论最优美的结论之一。</li>
+              <li><strong>Routh-Hurwitz</strong>：不直接求特征值，通过特征多项式的系数判断所有根是否在左半平面——高阶系统的实用工具。</li>
+              <li><strong>线性化的基础</strong>：由 Hartman-Grobman 定理，非线性系统在双曲平衡点的稳定性由线性化决定。因此线性判据间接适用于非线性系统。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>线性系统稳定性的核心是<strong>谱条件</strong>——矩阵的谱（特征值集合）完全决定系统行为：</p>
+            <ul>
+              <li><strong>谱与指数增长</strong>：\(e^{tA}\) 的增长由 \(\max_i \mathrm{Re}(\lambda_i)\)（谱横坐标）控制。谱横坐标 &lt; 0 \(\Leftrightarrow\) \(e^{tA} \to 0\)。</li>
+              <li><strong>Jordan 形的角色</strong>：幂零部分引起多项式增长 \(t^k\)，但当 \(\mathrm{Re}(\lambda) < 0\) 时被指数衰减 \(e^{\mathrm{Re}(\lambda)t}\) 压制。边界情况（\(\mathrm{Re}(\lambda) = 0\)）时多项式增长决定稳定/不稳定。</li>
+              <li><strong>Hurwitz 矩阵</strong>：所有特征值实部为负的矩阵称为 Hurwitz 矩阵，在控制论中有核心地位。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>常系数线性系统</strong> \(\mathbf{X}' = A\mathbf{X}\)： 解为 \(\mathbf{X}(t) = e^{tA}\mathbf{X}_0\)。\(e^{tA}\) 的行为由 \(A\) 的 Jordan 形决定。 <strong>定理</strong>：\(\mathbf{X} = \mathbf{0}\) 是 - <strong>渐近稳定</strong> \(\Leftrightarrow\) \(\text{Re}(\lambda_i) < 0\) 对所有特征值 （此时也是指数稳定的，\(\alpha = -\max_i \text{Re}(\lambda_i)\)） - <strong>Lyapunov 稳定</strong> \(\Leftarrow\) \(\text{Re}(\lambda_i) \leq 0\) 且纯虚特征值 对应的 Jordan 块为 \(1 \times 1\) - <strong>不稳定</strong> \(\Leftarrow\) 存在 \(\text{Re}(\lambda_i) > 0\)，或纯虚特征值 有 \(>1\) 的 Jordan 块 <strong>证明关键</strong>：Jordan 块 \(J_k(\lambda)\) 对应解含 \(t^j e^{\lambda t}\)（\(j = 0,\ldots,k-1\)）。 当 \(\text{Re}(\lambda) < 0\) 时 \(t^j e^{\lambda t} \to 0\)。 当 \(\text{Re}(\lambda) = 0\) 且 \(k > 1\) 时 \(t^j e^{i\omega t}\) 无界。</p>
+            <h4>1. 核心定理</h4>
+            <p>常系数线性系统 \(\mathbf{X}' = A\mathbf{X}\)，解 \(\mathbf{X}(t) = e^{tA}\mathbf{X}_0\)。原点是</p>
+            <ul>
+              <li><strong>渐近稳定</strong>（也是指数稳定）\(\Leftrightarrow\) \(\mathrm{Re}(\lambda_i) < 0\) 对所有特征值。衰减率 \(\alpha = -\max_i \mathrm{Re}(\lambda_i) > 0\)。</li>
+              <li><strong>Lyapunov 稳定</strong> \(\Leftarrow\) \(\mathrm{Re}(\lambda_i) \leq 0\) 对所有特征值，且纯虚/零特征值的 Jordan 块为 \(1 \times 1\)。</li>
+              <li><strong>不稳定</strong> \(\Leftarrow\) 存在 \(\mathrm{Re}(\lambda_i) > 0\)，或纯虚/零特征值有 \(> 1\) 的 Jordan 块。</li>
+            </ul>
+
+            <h4>2. 证明要点</h4>
+            <p>Jordan 块 \(J_k(\lambda)\) 对应解含 \(t^j e^{\lambda t}\)（\(j = 0, \ldots, k-1\)）。</p>
+            <ul>
+              <li>\(\mathrm{Re}(\lambda) < 0\) 时：\(t^j e^{\mathrm{Re}(\lambda)t} \to 0\)（指数杀死多项式）</li>
+              <li>\(\mathrm{Re}(\lambda) = 0\)，\(k = 1\)：\(e^{i\omega t}\) 有界</li>
+              <li>\(\mathrm{Re}(\lambda) = 0\)，\(k > 1\)：\(t^j e^{i\omega t}\) 无界 → 不稳定</li>
+            </ul>
+
+            <h4>3. Routh-Hurwitz 判据</h4>
+            <p>给定特征多项式 \(p(\lambda) = \lambda^n + a_1\lambda^{n-1} + \cdots + a_n\)，构造 Routh 表。所有特征值实部为负 \(\Leftrightarrow\) Routh 表第一列全为正。</p>
+            <p><strong>必要条件</strong>：所有系数 \(a_i > 0\)（二阶以下也是充分条件）。</p>
+
+            <h4>4. Lyapunov 方程判据</h4>
+            <p>\(A\) 是 Hurwitz 矩阵 \(\Leftrightarrow\) 对任意正定 \(Q\)，存在唯一正定 \(P\) 满足</p>
+            \[A^TP + PA = -Q\]
+            <p>此时 \(V = \mathbf{X}^TP\mathbf{X}\) 是 Lyapunov 函数。这是线性系统 Lyapunov 方法的代数等价。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Routh-Hurwitz 判据：不直接算特征值，通过系数判断所有特征值 实部是否为负（用于高阶控制系统设计）</p>
+            <p><strong>控制系统设计</strong>：状态反馈 \(u = -Kx\) 使闭环矩阵 \(A - BK\) 的特征值全在左半平面（极点配置）。Routh-Hurwitz 判据用于验证设计的正确性。</p>
+            <p><strong>电路稳定性</strong>：RLC 网络的特征多项式系数由电路参数决定。Routh 判据直接给出「电阻/电容/电感的取值范围使电路稳定」。</p>
+            <p><strong>Nyquist 判据</strong>：频域方法，通过开环传递函数的频率响应判断闭环稳定性。与 Routh-Hurwitz 互补——一个用于参数设计，一个用于频率分析。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：矩阵 \(A = \begin{pmatrix} -2 & 1 \\ 0 & -3 \end{pmatrix}\) 的系统是否渐近稳定？ 解答：上三角矩阵特征值为对角元 \(\lambda_1=-2\)，\(\lambda_2=-3\)。 \(\text{Re}(\lambda_i) < 0\) 对所有 \(i\)，故渐近稳定（也是指数稳定的）。 衰减率 \(\alpha = \min(2,3) = 2\)：\(\|\mathbf{X}(t)\| \leq Me^{-2t}\)。 易错点：\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)（特征值 \(\pm i\)） 是 Lyapunov 稳定但非渐近稳定（中心，解为周期函数）。</p>
+            <h4>例题：特征值判据与边界情况</h4>
+            <p>矩阵 \(A = \begin{pmatrix} -2 & 1 \\ 0 & -3 \end{pmatrix}\) 的系统是否渐近稳定？</p>
+            <p><strong>第 1 步</strong>：上三角矩阵，特征值为对角元 \(\lambda_1 = -2\)，\(\lambda_2 = -3\)。</p>
+            <p><strong>第 2 步</strong>：\(\mathrm{Re}(\lambda_i) < 0\) 对所有 \(i\) → <strong>渐近稳定</strong>（也是指数稳定）。</p>
+            <p><strong>第 3 步</strong>：衰减率 \(\alpha = \min(2, 3) = 2\)，\(\|\mathbf{X}(t)\| \leq Me^{-2t}\|\mathbf{X}(0)\|\)。</p>
+            <h4>边界情况对比</h4>
+            <p>\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)：特征值 \(\lambda = \pm i\)（纯虚，\(1 \times 1\) 块） → Lyapunov 稳定但<strong>非</strong>渐近稳定（中心，解为周期函数）。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 将「所有特征值实部 \(\leq 0\)」等同于渐近稳定。\(\leq 0\) 只保证 Lyapunov 稳定（在 Jordan 块条件满足时），渐近稳定要求<strong>严格&lt; 0</strong>。</li>
+              <li>❌ 对纯虚特征值忘记检查 Jordan 块大小。\(\lambda = 0\) 是 \(2 \times 2\) Jordan 块时系统不稳定（解含 \(t\) 项）。</li>
+              <li>❌ Routh-Hurwitz 中误以为「所有系数为正」就足够。三阶及以上还需检查 Routh 表的附加条件。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -541,35 +634,74 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当方程无法求解时（非线性系统），如何判断稳定性？Lyapunov 的 天才想法是：构造一个「能量函数」\(V(\mathbf{X})\)，如果它沿轨线 单调递减，系统就是稳定的——无需求解方程。这是 ODE 稳定性理论 中最重要的方法，也是控制理论中 Lyapunov 设计的基础。</p>
+            <p>非线性系统通常无法求解，但 Lyapunov 直接法允许我们<strong>不求解方程就判断稳定性</strong>：</p>
+            <ul>
+              <li><strong>能量函数思想</strong>：构造一个「广义能量」\(V(\mathbf{X})\)。如果 \(V\) 沿轨线单调递减，系统就在「耗散能量」，必然趋向平衡点。</li>
+              <li><strong>通用性</strong>：适用于任意非线性系统、变系数系统、甚至无穷维系统（PDE）。是 ODE 稳定性理论中最重要、最通用的方法。</li>
+              <li><strong>设计工具</strong>：Lyapunov 方法不仅用于分析，还可以反向使用——<strong>先选 \(V\)，再设计控制使 \(\dot{V} < 0\)</strong>（Lyapunov 重构设计/backstepping）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Lyapunov 函数是广义的「能量」：正定函数 \(V > 0\)（除原点外）， 其沿系统轨线的「耗散率」\(\dot{V} = \nabla V \cdot \mathbf{F}\) 反映系统 是否在「消耗能量」。这将稳定性从轨线分析转化为标量函数分析。</p>
+            <p>Lyapunov 函数是<strong>广义能量</strong>，将稳定性从轨线分析转化为标量函数分析：</p>
+            <ul>
+              <li><strong>正定性</strong>：\(V(\mathbf{0}) = 0\)，\(V(\mathbf{X}) > 0\) 对 \(\mathbf{X} \neq \mathbf{0}\)——\(V\) 的等值面是「嵌套碗」。</li>
+              <li><strong>导数的物理意义</strong>：\(\dot{V} = \nabla V \cdot \mathbf{F}\) 是 \(V\) 沿系统流的变化率。\(\dot{V} < 0\) 意味着轨线穿越等值面的方向是<strong>向内</strong>的。</li>
+              <li><strong>困难</strong>：没有通用的 Lyapunov 函数构造方法——这是一门「艺术」。但对线性系统有系统的代数方法（Lyapunov 方程）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Lyapunov 函数</strong>：\(V: U \to \mathbb{R}\) 在原点邻域上满足： - \(V(\mathbf{0}) = 0\)，\(V(\mathbf{X}) > 0\) 对 \(\mathbf{X} \neq \mathbf{0}\)（正定） 沿系统轨线的导数： \[\dot{V}(\mathbf{X}) = \nabla V(\mathbf{X}) \cdot \mathbf{F}(\mathbf{X}) = \sum_i \frac{\partial V}{\partial x_i} F_i(\mathbf{X})\] <strong>Lyapunov 稳定性定理</strong>：若存在正定 \(V\) 使得 \(\dot{V} \leq 0\)（负半定）， 则原点 Lyapunov 稳定。 <strong>渐近稳定性定理</strong>：若 \(V\) 正定且 \(\dot{V}\) <strong>负定</strong>（\(\dot{V} < 0\) 对 \(\mathbf{X} \neq \mathbf{0}\)）， 则原点渐近稳定。 <strong>常见构造</strong>：对于线性系统 \(\mathbf{X}' = A\mathbf{X}\)，取 \(V = \mathbf{X}^T P\mathbf{X}\) （\(P\) 正定对称矩阵），则 \(\dot{V} = \mathbf{X}^T(A^T P + PA)\mathbf{X}\)。 \(A^T P + PA = -Q\)（\(Q\) 正定）时渐近稳定。这是 <strong>Lyapunov 方程</strong>。</p>
+            <h4>1. Lyapunov 函数与轨线导数</h4>
+            <p>\(V: U \to \mathbb{R}\)，\(V(\mathbf{0}) = 0\)，\(V(\mathbf{X}) > 0\) 对 \(\mathbf{X} \neq \mathbf{0}\)（正定）。沿系统 \(\mathbf{X}' = \mathbf{F}(\mathbf{X})\) 的导数：</p>
+            \[\dot{V}(\mathbf{X}) = \nabla V(\mathbf{X}) \cdot \mathbf{F}(\mathbf{X}) = \sum_{i=1}^n \frac{\partial V}{\partial x_i}F_i(\mathbf{X})\]
+            <p>注意 \(\dot{V}\) 的计算<strong>不需要求解 ODE</strong>——直接代入 \(\mathbf{F}\) 即可。</p>
+
+            <h4>2. Lyapunov 稳定性定理</h4>
+            <p>若存在正定 \(V\) 使得 \(\dot{V}(\mathbf{X}) \leq 0\)（负半定），则原点 <strong>Lyapunov 稳定</strong>。</p>
+            <p><strong>证明思路</strong>：\(V\) 沿轨线不增 → \(V(\mathbf{X}(t)) \leq V(\mathbf{X}(0)) < V_\epsilon\) → \(\mathbf{X}(t)\) 留在 \(\{V < V_\epsilon\} \subset B_\epsilon\)。</p>
+
+            <h4>3. 渐近稳定性定理</h4>
+            <p>若 \(V\) 正定且 \(\dot{V}(\mathbf{X}) < 0\) 对所有 \(\mathbf{X} \neq \mathbf{0}\)（<strong>负定</strong>），则原点<strong>渐近稳定</strong>。</p>
+
+            <h4>4. 线性系统的 Lyapunov 方程</h4>
+            <p>对 \(\mathbf{X}' = A\mathbf{X}\)，取 \(V = \mathbf{X}^TP\mathbf{X}\)（\(P\) 正定对称），则</p>
+            \[\dot{V} = \mathbf{X}^T(A^TP + PA)\mathbf{X} = -\mathbf{X}^TQ\mathbf{X}\]
+            <p>其中 \(Q = -(A^TP + PA)\)。渐近稳定 \(\Leftrightarrow\) 对任意正定 \(Q\)，Lyapunov 方程 \(A^TP + PA = -Q\) 有唯一正定解 \(P\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 机器人控制中的 Lyapunov 稳定性设计 - 电力系统暂态稳定性分析中的能量函数构造</p>
+            <p><strong>机器人控制</strong>：PD 控制器 \(\tau = -K_p q - K_d \dot{q}\) 的稳定性通过 Lyapunov 函数 \(V = \frac{1}{2}\dot{q}^TM(q)\dot{q} + \frac{1}{2}q^TK_p q\)（动能+势能）证明。\(\dot{V} = -\dot{q}^TK_d\dot{q} \leq 0\)（负半定），再用 LaSalle 原理得渐近稳定。</p>
+            <p><strong>电力系统</strong>：暂态稳定性分析中，「等面积法则」本质上是一维 Lyapunov 函数方法。多机系统使用构造性能量函数估计<strong>临界清除角</strong>。</p>
+            <p><strong>神经网络</strong>：Hopfield 网络的收敛性通过 Lyapunov 函数 \(V = -\frac{1}{2}x^TWx + \sum \int g^{-1}(x_i)dx_i\) 证明，保证能量单调下降到局部最小值。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用 Lyapunov 方法证明 \(x' = -x + y^2\)，\(y' = -y\) 在原点渐近稳定。 解答：取 \(V = x^2 + y^2\)（正定）。 \(\dot{V} = 2x(-x+y^2) + 2y(-y) = -2x^2 + 2xy^2 - 2y^2\)。 在 \(x^2+y^2 \leq r^2\) 小邻域内：\(|2xy^2| \leq 2r(x^2+y^2)/2\)（由 AM-GM）， 故当 \(r\) 足够小时 \(\dot{V} \leq -(2-r)(x^2+y^2) < 0\)。渐近稳定。 易错点：\(\dot{V} \leq 0\)（负半定）只能得出 Lyapunov 稳定， 要得到渐近稳定需要 \(\dot{V} < 0\)（负定）或使用 LaSalle 不变性原理。</p>
+            <h4>例题：Lyapunov 函数构造与验证</h4>
+            <p>用 Lyapunov 方法证明 \(x' = -x + y^2\)，\(y' = -y\) 在原点渐近稳定。</p>
+            <p><strong>第 1 步</strong>：取 \(V = x^2 + y^2\)（正定）。</p>
+            <p><strong>第 2 步</strong>：计算 \(\dot{V} = 2x(-x + y^2) + 2y(-y) = -2x^2 + 2xy^2 - 2y^2\)。</p>
+            <p><strong>第 3 步</strong>：在小邻域 \(x^2 + y^2 \leq r^2\) 内估计交叉项。由 \(|y^2| \leq r^2\) 和 \(|2xy^2| \leq 2|x| \cdot r^2 \leq r(x^2 + r^2)\)，当 \(r\) 足够小时：</p>
+            \[\dot{V} \leq -2x^2 + r(x^2 + r^2) - 2y^2 \leq -(2-r)(x^2 + y^2) < 0\]
+            <p><strong>结论</strong>：在 \(r < 2\) 的邻域内 \(\dot{V}\) 负定 → 渐近稳定。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ \(\dot{V} \leq 0\)（负半定）只能得 Lyapunov 稳定，<strong>不能</strong>直接得渐近稳定。需要 \(\dot{V} < 0\)（负定）或使用 LaSalle 不变性原理。</li>
+              <li>❌ 忘记验证 \(V\) 的正定性。\(V = x^2 - y^2\) 不是正定的（在 \(y\) 轴上为负），不能作为 Lyapunov 函数。</li>
+              <li>❌ Lyapunov 方法给出<strong>充分条件</strong>而非必要条件。找不到 Lyapunov 函数不代表系统不稳定——可能只是 \(V\) 没选好。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -628,28 +760,85 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Lyapunov 直接法的两个重要补充：Chetaev 定理处理不稳定性 （构造一个在某区域递增的函数），LaSalle 不变性原理放宽了 \(\dot{V}\) 负定的要求——只需负半定加上一个不变集条件。 LaSalle 原理在工程中极为实用，因为许多物理系统的耗散恰好 只在部分方向上发生（如摩擦力只作用于速度方向）。</p>
+            <p>Lyapunov 直接法有两个常见困难，需要补充工具：</p>
+            <ul>
+              <li><strong>不稳定性判定</strong>：Lyapunov 方法给出稳定的充分条件，但如何<strong>证明</strong>不稳定？Chetaev 定理提供了系统性的方法——构造一个在某区域<strong>递增</strong>的函数。</li>
+              <li><strong>\(\dot{V}\) 负半定的困境</strong>：许多物理系统的耗散只在部分方向发生（如摩擦力只作用于速度方向），导致 \(\dot{V}\) 仅为负半定。LaSalle 不变性原理放宽了负定的要求，仍能得出渐近稳定。</li>
+              <li><strong>工程实用性</strong>：LaSalle 原理是控制工程中最常用的稳定性证明工具——几乎所有带阻尼的机械/电气系统都需要它。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>Chetaev 的对偶思想</strong>：如果 Lyapunov 方法是「找递减的正定函数证稳定」，Chetaev 方法就是「找递增的函数证不稳定」——轨线被强制推离平衡点。</li>
+              <li><strong>LaSalle 的精炼</strong>：\(\dot{V} \leq 0\) 保证 \(V\) 单调下降且有下界(0)，故 \(V(\mathbf{X}(t)) \to c\)。轨线的极限集必须在 \(\dot{V} = 0\) 的集合上——再排除非平衡点即可。</li>
+              <li><strong>正不变集的核心角色</strong>：LaSalle 原理的关键是「\(\dot{V} = 0\) 中最大的正不变集 \(M\)」——轨线不是趋向 \(\dot{V} = 0\) 的所有点，而是只趋向那些可以一直停留的点。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Chetaev 不稳定定理</strong>：设 \(V\) 连续，\(V(\mathbf{0}) = 0\)。若存在域 \(D\) 使得在 \(D \cap B_\epsilon(\mathbf{0})\) 中 \(V > 0\) 且 \(\dot{V} > 0\)， 且 \(\mathbf{0} \in \partial D\)，则原点不稳定。 直觉：\(V\) 在 \(D\) 内持续增大，轨线不能回到原点附近。 <strong>LaSalle 不变性原理</strong>：设 \(\Omega\) 为正不变紧集，\(V\) 在 \(\Omega\) 上满足 \(\dot{V} \leq 0\)。令 \(E = \{\mathbf{X} \in \Omega : \dot{V}(\mathbf{X}) = 0\}\)， \(M\) 为 \(E\) 中最大的正不变集。则 \(\Omega\) 中的每条轨线趋向 \(M\)。 \[\omega(\mathbf{X}_0) \subseteq M \quad\text{for all } \mathbf{X}_0 \in \Omega\] <strong>典型应用</strong>（阻尼摆）：\(\theta'' + c\theta' + \sin\theta = 0\)。 \(V = \frac{1}{2}(\theta')^2 + (1-\cos\theta)\)，\(\dot{V} = -c(\theta')^2 \leq 0\)（仅负半定）。 \(E = \{\theta' = 0\}\)，\(M\) 中 \(\dot{V} = 0\) 且 \(\theta'' = 0\) ⇒ \(\sin\theta = 0\) ⇒ \(\theta = 0\)。 LaSalle 原理 ⇒ \((\theta,\theta') \to (0,0)\)，渐近稳定。</p>
+            <h4>1. Chetaev 不稳定定理</h4>
+            <p>设 \(V\) 连续，\(V(\mathbf{0}) = 0\)。若存在域 \(D\)（\(\mathbf{0} \in \partial D\)）使得在 \(D \cap B_\epsilon(\mathbf{0})\) 中：</p>
+            <ul>
+              <li>\(V(\mathbf{X}) > 0\)（函数正值）</li>
+              <li>\(\dot{V}(\mathbf{X}) > 0\)（函数递增）</li>
+            </ul>
+            <p>则原点<strong>不稳定</strong>。</p>
+            <p><strong>直觉</strong>：在 \(D\) 中 \(V\) 持续增大，轨线不能回到 \(V = 0\) 的边界（即原点附近），因此被推向远方。</p>
+
+            <h4>2. LaSalle 不变性原理</h4>
+            <p>设 \(\Omega \subset \mathbb{R}^n\) 为<strong>正不变紧集</strong>（轨线从 \(\Omega\) 出发不离开），\(V \in C^1\) 在 \(\Omega\) 上满足 \(\dot{V} \leq 0\)。定义</p>
+            \[E = \{\mathbf{X} \in \Omega : \dot{V}(\mathbf{X}) = 0\}\]
+            <p>设 \(M\) 为 \(E\) 中<strong>最大的正不变集</strong>。则 \(\Omega\) 中的每条轨线都趋向 \(M\)：</p>
+            \[\omega(\mathbf{X}_0) \subseteq M,\quad \forall \mathbf{X}_0 \in \Omega\]
+
+            <h4>3. 证明思路</h4>
+            <ul>
+              <li>\(\dot{V} \leq 0\) → \(V(\mathbf{X}(t))\) 单调不增且有下界 → \(V(\mathbf{X}(t)) \to c\) 存在</li>
+              <li>\(\omega\)-极限集 \(\omega(\mathbf{X}_0)\) 是紧不变集，在其上 \(V \equiv c\) → \(\dot{V} \equiv 0\) → \(\omega(\mathbf{X}_0) \subset E\)</li>
+              <li>又 \(\omega(\mathbf{X}_0)\) 是不变集 → \(\omega(\mathbf{X}_0) \subset M\)</li>
+            </ul>
+
+            <h4>4. 经典应用：阻尼摆</h4>
+            <p>\(\theta'' + c\theta' + \sin\theta = 0\)（\(c > 0\)）。取 \(V = \frac{1}{2}(\theta')^2 + (1 - \cos\theta)\)（动能+势能），则</p>
+            \[\dot{V} = \theta'(\theta'' + \sin\theta) = -c(\theta')^2 \leq 0\]
+            <p>\(\dot{V}\) 仅负半定（\(\theta' = 0\) 时为零）。\(E = \{\theta' = 0\}\)。在 \(E\) 中：\(\theta' = 0\) → \(\theta'' = 0\) → \(\sin\theta = 0\) → \(\theta = 0\)（在小邻域内）。故 \(M = \{(0,0)\}\)，LaSalle 原理 → 渐近稳定。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 机器人控制中，PD 控制器的渐近稳定性证明（利用 LaSalle 原理） - 能量耗散系统（阻尼振动、电阻电路）的长期行为分析</p>
+            <p><strong>机器人 PD 控制</strong>：机器人方程 \(M(q)\ddot{q} + C(q,\dot{q})\dot{q} + g(q) = \tau\)，PD 控制 \(\tau = g(q) - K_p(q - q_d) - K_d\dot{q}\)。Lyapunov 函数 \(V = \frac{1}{2}\dot{q}^TM\dot{q} + \frac{1}{2}(q-q_d)^TK_p(q-q_d)\)，\(\dot{V} = -\dot{q}^TK_d\dot{q} \leq 0\)（仅负半定）。LaSalle 原理证明 \((q, \dot{q}) \to (q_d, 0)\)。</p>
+            <p><strong>能量耗散系统</strong>：所有含粘性阻尼的结构（建筑、桥梁、机翼）的振动衰减都需要 LaSalle 原理——因为阻尼力 \(-c\dot{x}\) 只在 \(\dot{x} \neq 0\) 时做功。</p>
+            <p><strong>Chetaev 应用</strong>：证明倒立摆上端平衡点的不稳定性。取 \(V = \theta\theta'\)，在适当区域内 \(\dot{V} > 0\)，由 Chetaev 定理得不稳定。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：对 \(x' = y\)，\(y' = -x - y^3\)，用 LaSalle 原理证明原点渐近稳定。 解答：\(V = \frac{1}{2}(x^2 + y^2)\)，\(\dot{V} = xy + y(-x-y^3) = -y^4 \leq 0\)。 \(\dot{V}\) 仅负半定（\(y=0\) 时为零）。 \(E = \{y = 0\}\)。在 \(E\) 中：\(y=0 \Rightarrow y'=0 \Rightarrow -x=0 \Rightarrow x=0\)。 \(M = \{(0,0)\}\)。LaSalle 原理 ⇒ 所有轨线趋向原点，渐近稳定。 易错点：LaSalle 原理需要正不变紧集 \(\Omega\)。 对于无界系统需先论证轨线有界（通常用 \(V\) 的水平集是紧的）。</p>
+            <h4>例题：LaSalle 不变性原理</h4>
+            <p>对 \(x' = y\)，\(y' = -x - y^3\)，用 LaSalle 原理证明原点渐近稳定。</p>
+            <p><strong>第 1 步</strong>：取 \(V = \frac{1}{2}(x^2 + y^2)\)（正定）。</p>
+            <p><strong>第 2 步</strong>：\(\dot{V} = xy + y(-x - y^3) = -y^4 \leq 0\)（仅负半定）。</p>
+            <p><strong>第 3 步</strong>：定义 \(E = \{(x,y): y = 0\}\)。在 \(E\) 中要求轨线始终满足 \(y(t) \equiv 0\)：</p>
+            <ul>
+              <li>\(y \equiv 0 \Rightarrow y' \equiv 0 \Rightarrow -x - 0 = 0 \Rightarrow x = 0\)</li>
+            </ul>
+            <p><strong>第 4 步</strong>：\(E\) 中最大正不变集 \(M = \{(0,0)\}\)。由 LaSalle 原理，所有轨线趋向原点 → <strong>渐近稳定</strong>。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ LaSalle 原理需要<strong>正不变紧集</strong> \(\Omega\)。对于无界系统，需先论证轨线有界（通常利用 \(V\) 的水平集 \(\{V \leq c\}\) 是紧的）。</li>
+              <li>❌ 混淆 \(E = \{\dot{V} = 0\}\) 和 \(M =\) \(E\) 中最大正不变集。轨线趋向的是 \(M\) 而非 \(E\)。例如 \(E\) 可能是一条直线，但 \(M\) 只是其中的原点。</li>
+              <li>❌ 在 LaSalle 分析中忘记<strong>将方程代入</strong>检查正不变性。仅令 \(y = 0\) 不够——还需检查 \(y = 0\) 是否在系统动力学下自洽。</li>
+            </ul>
           </div>
         </div>
       </div>

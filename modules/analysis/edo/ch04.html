@@ -394,35 +394,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>高阶标量方程可以改写为一阶方程组，多自由度物理系统（耦合弹簧、 多物种种群模型、电路网络）天然以方程组形式出现。矩阵-向量语言 \(\mathbf{X}' = A(t)\mathbf{X}\) 将线性代数与 ODE 统一起来， 而基解矩阵将「\(n\) 个线性无关解」打包为一个矩阵框架。</p>
+            <p>线性方程组是 ODE 理论的核心框架，原因有三：</p>
+            <ul>
+              <li><strong>高阶化为一阶</strong>：任何 \(n\) 阶标量方程 \(y^{(n)} + p_{n-1}y^{(n-1)} + \cdots + p_0 y = g\) 都可以令 \(x_i = y^{(i-1)}\) 改写为一阶系统 \(\mathbf{X}' = A\mathbf{X} + \mathbf{B}\)。</li>
+              <li><strong>多自由度系统</strong>：耦合弹簧、电路网络、多物种生态系统天然以方程组形式出现。</li>
+              <li><strong>矩阵语言的威力</strong>：将 \(n\) 个标量方程打包为 \(\mathbf{X}' = A(t)\mathbf{X}\)，可以直接利用线性代数的全套工具（特征值、对角化、Jordan 形）来分析解的结构。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>方程组 \(\mathbf{X}' = A(t)\mathbf{X}\) 的解空间仍是 \(n\) 维向量空间。 基解矩阵 \(\Phi(t)\) 的每一列是一个基本解，\(\Phi\) 本身满足矩阵 微分方程 \(\Phi' = A\Phi\)。这是用线性代数的矩阵语言重述 ODE 理论。</p>
+            <p>方程组的解空间理论与标量情况完全平行，只是用矩阵语言重述：</p>
+            <ul>
+              <li><strong>解空间</strong>：\(\mathbf{X}' = A(t)\mathbf{X}\) 的解集构成 \(\mathbb{R}^n\) 上的 \(n\) 维向量空间。</li>
+              <li><strong>基解矩阵</strong>：将 \(n\) 个线性无关的列向量解 \(\mathbf{X}_1, \ldots, \mathbf{X}_n\) 排成矩阵 \(\Phi = [\mathbf{X}_1 | \cdots | \mathbf{X}_n]\)，它满足矩阵 ODE \(\Phi' = A\Phi\)。</li>
+              <li><strong>Abel-Liouville 公式</strong>：\(\det\Phi(t) = \det\Phi(t_0) \exp\!\int_{t_0}^t \mathrm{tr}\,A(s)\,ds\)——与标量 Wronskian 的 Abel 公式完全类比。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>线性方程组</strong>：\(\mathbf{X}'(t) = A(t)\mathbf{X}(t)\)，\(A(t) \in \mathbb{R}^{n \times n}\)。 解空间维数为 \(n\)（类比标量情况）。 <strong>基解矩阵</strong>：\(\Phi(t) = [\mathbf{X}_1(t) | \cdots | \mathbf{X}_n(t)]\)， 其中 \(\mathbf{X}_1, \ldots, \mathbf{X}_n\) 为线性无关的解。 \(\Phi' = A\Phi\)，且 \(\det\Phi(t) \neq 0\) 恒成立（Abel-Liouville 公式： \(\det\Phi(t) = \det\Phi(t_0)\exp\int_{t_0}^t \text{tr}A(s)\,ds\)）。 <strong>通解</strong>：\(\mathbf{X}(t) = \Phi(t)\mathbf{c}\)，\(\mathbf{c} \in \mathbb{R}^n\)。 <strong>初值问题</strong>：\(\mathbf{X}(t_0) = \mathbf{X}_0\) ⇒ \(\mathbf{c} = \Phi(t_0)^{-1}\mathbf{X}_0\)。 \[\mathbf{X}(t) = \Phi(t)\Phi(t_0)^{-1}\mathbf{X}_0\]</p>
+            <h4>1. 线性方程组的形式</h4>
+            <p>齐次系统：\(\mathbf{X}'(t) = A(t)\mathbf{X}(t)\)，其中 \(A(t) \in \mathbb{R}^{n \times n}\)，\(\mathbf{X}(t) \in \mathbb{R}^n\)。</p>
+            <p>存在唯一性：若 \(A(t)\) 的各分量在区间 \(I\) 上连续，则 IVP \(\mathbf{X}(t_0) = \mathbf{X}_0\) 在 \(I\) 上有唯一解，且解全局存在（线性方程不爆破）。</p>
+
+            <h4>2. 基解矩阵</h4>
+            <p>设 \(\mathbf{X}_1, \ldots, \mathbf{X}_n\) 是 \(n\) 个线性无关的解，构造</p>
+            \[\Phi(t) = \begin{pmatrix} | & | & & | \\ \mathbf{X}_1 & \mathbf{X}_2 & \cdots & \mathbf{X}_n \\ | & | & & | \end{pmatrix}\]
+            <p>则 \(\Phi' = A\Phi\)，且 \(\det\Phi(t) \neq 0\) 对所有 \(t \in I\) 成立。通解为 \(\mathbf{X}(t) = \Phi(t)\mathbf{c}\)，\(\mathbf{c} \in \mathbb{R}^n\)。</p>
+
+            <h4>3. Abel-Liouville 公式</h4>
+            \[\det\Phi(t) = \det\Phi(t_0) \cdot \exp\left(\int_{t_0}^{t} \mathrm{tr}\,A(s)\,ds\right)\]
+            <p><strong>证明思路</strong>（\(n=2\) 情况）：设 \(\Phi = (X_{ij})\)，则 \(\det\Phi = X_{11}X_{22} - X_{12}X_{21}\)。对行列式求导，利用 \(\Phi' = A\Phi\) 展开，合并后得 \((\det\Phi)' = \mathrm{tr}(A) \cdot \det\Phi\)。</p>
+            <p><strong>推论</strong>：\(\det\Phi\) 要么<strong>恒非零</strong>，要么<strong>恒为零</strong>（指数函数无零点）。</p>
+
+            <h4>4. 初值问题的解</h4>
+            <p>\(\mathbf{X}(t_0) = \mathbf{X}_0 \Rightarrow \mathbf{c} = \Phi(t_0)^{-1}\mathbf{X}_0\)，故</p>
+            \[\mathbf{X}(t) = \Phi(t)\Phi(t_0)^{-1}\mathbf{X}_0\]
+            <p>矩阵 \(\Phi(t)\Phi(t_0)^{-1}\) 称为<strong>状态转移矩阵</strong>（state transition matrix），记为 \(\Psi(t, t_0)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 耦合弹簧系统 \(m_1 x_1'' + (k_1+k_2)x_1 - k_2 x_2 = 0\) 等可改写为一阶系统 - 控制论中状态空间模型 \(\dot{x} = Ax + Bu\) 的自由响应即为 \(\dot{x} = Ax\)</p>
+            <p><strong>耦合弹簧系统</strong>：两个质量块通过三根弹簧连接，\(m_1 x_1'' + (k_1+k_2)x_1 - k_2 x_2 = 0\) 等。改写为一阶系统后，基解矩阵的列描述了各个<strong>正则模态</strong>（normal mode），每个模态对应一个特征频率。</p>
+            <p><strong>控制论的状态空间模型</strong>：\(\dot{\mathbf{x}} = A\mathbf{x} + B\mathbf{u}\)，\(\mathbf{y} = C\mathbf{x}\)。自由响应（\(\mathbf{u} = 0\)）即为 \(\mathbf{x}(t) = \Phi(t)\mathbf{x}_0\)。状态转移矩阵 \(\Psi(t, t_0)\) 是分析系统可控性、可观性的基本工具。</p>
+            <p><strong>生态学的 Lotka-Volterra 模型</strong>：多物种竞争/共生系统在平衡点附近的线性化即为矩阵 ODE，基解矩阵描述了种群偏差随时间的演化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：将 \(y'' + 3y' + 2y = 0\) 改写为一阶系统并求基解矩阵。 解答：令 \(x_1 = y\)，\(x_2 = y'\)，则 \(\begin{pmatrix} x_1 \\ x_2 \end{pmatrix}' = \begin{pmatrix} 0 & 1 \\ -2 & -3 \end{pmatrix}\begin{pmatrix} x_1 \\ x_2 \end{pmatrix}\)。 特征值 \(\lambda^2 + 3\lambda + 2 = 0\)，\(\lambda_1 = -1\)，\(\lambda_2 = -2\)。 \(\Phi(t) = \begin{pmatrix} e^{-t} & e^{-2t} \\ -e^{-t} & -2e^{-2t} \end{pmatrix}\)。 易错点：改写为一阶系统时，伴侣矩阵最后一行的符号容易弄反。</p>
+            <h4>例题：高阶方程化为方程组</h4>
+            <p>将 \(y'' + 3y' + 2y = 0\) 改写为一阶系统并求基解矩阵。</p>
+            <p><strong>第 1 步</strong>：令 \(x_1 = y\)，\(x_2 = y'\)。则 \(x_1' = x_2\)，\(x_2' = -2x_1 - 3x_2\)。</p>
+            \[\mathbf{X}' = \begin{pmatrix} 0 & 1 \\ -2 & -3 \end{pmatrix}\mathbf{X}\]
+            <p><strong>第 2 步</strong>：特征方程 \(\lambda^2 + 3\lambda + 2 = 0\)，\(\lambda_1 = -1\)，\(\lambda_2 = -2\)。</p>
+            <p><strong>第 3 步</strong>：特征向量。\(\lambda_1 = -1\)：\(\mathbf{v}_1 = (1, -1)^T\)。\(\lambda_2 = -2\)：\(\mathbf{v}_2 = (1, -2)^T\)。</p>
+            <p><strong>基解矩阵</strong>：</p>
+            \[\Phi(t) = \begin{pmatrix} e^{-t} & e^{-2t} \\ -e^{-t} & -2e^{-2t} \end{pmatrix}\]
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 改写为一阶系统时，伴侣矩阵最后一行的符号弄反。标准形 \(y'' + 3y' + 2y = 0\) 对应 \(x_2' = -2x_1 - 3x_2\)（系数取负号）。</li>
+              <li>❌ 混淆基解矩阵与普通的解矩阵。基解矩阵要求 \(\det\Phi \neq 0\)，即列向量线性无关。</li>
+              <li>❌ 忘记特征向量是<strong>列</strong>向量，基解矩阵 \(\Phi\) 的每一<strong>列</strong>是一个解 \(\mathbf{v}_i e^{\lambda_i t}\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -449,35 +491,79 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>常系数系统 \(\mathbf{X}' = A\mathbf{X}\) 的解可以写成 \(\mathbf{X}(t) = e^{tA}\mathbf{X}_0\)， 完全类比标量情况 \(x' = ax\) 的解 \(x = e^{at}x_0\)。矩阵指数 \(e^{tA}\) 是理解常系数线性系统的钥匙，也是量子力学中时间演化算子、 李群理论中指数映射的基础。</p>
+            <p>常系数系统 \(\mathbf{X}' = A\mathbf{X}\) 的解可以写成一个极其简洁的形式：</p>
+            \[\mathbf{X}(t) = e^{tA}\mathbf{X}_0\]
+            <p>完全类比标量方程 \(x' = ax\) 的解 \(x = e^{at}x_0\)。矩阵指数 \(e^{tA}\) 是理解常系数线性系统的核心对象：</p>
+            <ul>
+              <li><strong>统一框架</strong>：无论 \(A\) 的特征值是实数、复数还是有重根，\(e^{tA}\) 都给出完整的解。</li>
+              <li><strong>物理学基石</strong>：量子力学的时间演化 \(U(t) = e^{-iHt/\hbar}\)、李群的指数映射 \(R(\theta) = e^{\theta\hat{n}}\) 都是矩阵指数的实例。</li>
+              <li><strong>数值方法</strong>：现代 ODE 数值方法中的指数积分子（exponential integrators）直接基于矩阵指数的高效计算。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>矩阵指数将线性代数（矩阵 \(A\) 的谱性质）与分析（指数函数的收敛性） 连接起来。它是从 Lie 代数到 Lie 群的桥梁：\(e^{tA}\) 定义了单参数群。</p>
+            <p>矩阵指数是连接三个数学领域的桥梁：</p>
+            <ul>
+              <li><strong>分析 → 代数</strong>：通过幂级数 \(e^A = \sum A^k/k!\) 将指数函数从标量推广到矩阵，收敛性由范数不等式 \(\|e^A\| \leq e^{\|A\|}\) 保证。</li>
+              <li><strong>代数 → 几何</strong>：\(t \mapsto e^{tA}\) 定义了矩阵空间中的<strong>单参数群</strong>（one-parameter group），即光滑的群=同态 \((\mathbb{R}, +) \to (GL_n, \cdot)\)。</li>
+              <li><strong>Lie 理论</strong>：矩阵指数是从 Lie 代数 \(\mathfrak{gl}_n\)（矩阵加法 + 括号积）到 Lie 群 \(GL_n\)（矩阵乘法）的<strong>指数映射</strong>。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：\(e^{tA} = \sum_{k=0}^{\infty} \frac{(tA)^k}{k!} = I + tA + \frac{t^2 A^2}{2!} + \cdots\) 绝对收敛性：\(\|e^{tA}\| \leq e^{|t|\|A\|}\)（任意矩阵范数）。 <strong>基本性质</strong>： 1. \(\frac{d}{dt}e^{tA} = Ae^{tA} = e^{tA}A\)（因此 \(e^{tA}\) 满足 \(\Phi' = A\Phi\)） 2. \(e^{0 \cdot A} = I\) 3. \(e^{(s+t)A} = e^{sA} e^{tA}\)（单参数群性质） 4. \((e^{tA})^{-1} = e^{-tA}\) 5. <strong>不可交换时</strong>：\(e^{A+B} \neq e^A e^B\) 一般不成立！ \(e^{A+B} = e^A e^B\) 当且仅当 \([A, B] = AB - BA = 0\)。 <strong>与基解矩阵的关系</strong>：\(\Phi(t) = e^{tA}\) 是满足 \(\Phi(0) = I\) 的基解矩阵。 初值问题的解：\(\mathbf{X}(t) = e^{(t-t_0)A}\mathbf{X}_0\)。</p>
+            <h4>1. 定义与收敛性</h4>
+            \[e^{tA} = \sum_{k=0}^{\infty} \frac{(tA)^k}{k!} = I + tA + \frac{t^2A^2}{2!} + \frac{t^3A^3}{3!} + \cdots\]
+            <p>收敛性：\(\|e^{tA}\| \leq \sum \frac{|t|^k \|A\|^k}{k!} = e^{|t|\|A\|}\)（对任意矩阵范数），故级数<strong>绝对收敛</strong>。</p>
+
+            <h4>2. 基本性质</h4>
+            <ul>
+              <li>\(\frac{d}{dt}e^{tA} = Ae^{tA} = e^{tA}A\)（逐项微分，\(A\) 与自身的幂可交换）。</li>
+              <li>\(e^{0 \cdot A} = I\)（级数在 \(t = 0\) 退化为只剩 \(I\)）。</li>
+              <li>\(e^{(s+t)A} = e^{sA} e^{tA}\)（<strong>单参数群性质</strong>，因为 \(sA\) 和 \(tA\) 可交换）。</li>
+              <li>\((e^{tA})^{-1} = e^{-tA}\)（上条取 \(s = -t\)）。</li>
+            </ul>
+
+            <h4>3. 不可交换的警告</h4>
+            <p>对一般矩阵 \(A, B\)：</p>
+            \[e^{A+B} \neq e^A e^B \quad (\text{除非 } AB = BA)\]
+            <p>反例：\(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)，\(B = \begin{pmatrix} 0 & 0 \\ 1 & 0 \end{pmatrix}\)，\(AB \neq BA\)，可以验证 \(e^{A+B} \neq e^A e^B\)。</p>
+            <p>修正公式（Baker-Campbell-Hausdorff）：\(e^A e^B = e^{A + B + \frac{1}{2}[A,B] + \cdots}\)。</p>
+
+            <h4>4. 与基解矩阵的关系</h4>
+            <p>\(\Phi(t) = e^{tA}\) 是满足 \(\Phi(0) = I\) 的<strong>标准基解矩阵</strong>（fundamental matrix normalized at \(t = 0\)）。初值问题的解为</p>
+            \[\mathbf{X}(t) = e^{(t - t_0)A}\mathbf{X}_0\]
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 量子力学中时间演化算子 \(U(t) = e^{-iHt/\hbar}\) - 李群理论中 \(SO(3)\) 的参数化：\(R(\theta) = e^{\theta \hat{n}}\)（旋转矩阵）</p>
+            <p><strong>量子力学</strong>：时间演化算子 \(U(t) = e^{-iHt/\hbar}\) 是 Hamiltonian \(H\) 的矩阵指数。Schrödinger 方程 \(i\hbar |\psi\rangle' = H|\psi\rangle\) 的解为 \(|\psi(t)\rangle = U(t)|\psi(0)\rangle\)。</p>
+            <p><strong>旋转群</strong>：三维旋转矩阵 \(R(\theta, \hat{n}) = e^{\theta[\hat{n}]_\times}\)，其中 \([\hat{n}]_\times\) 是反对称矩阵。这是机器人学、计算机图形学中表示旋转的核心工具。</p>
+            <p><strong>控制理论</strong>：离散化 \(\dot{x} = Ax + Bu\) 得到 \(x_{k+1} = e^{A\Delta t} x_k + \int_0^{\Delta t} e^{As}B\,ds \cdot u_k\)。矩阵指数的高效计算直接影响实时控制系统的性能。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \(e^{tA}\)，其中 \(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)。 解答：\(A^2 = 0\)（幂零矩阵），故级数终止： \(e^{tA} = I + tA = \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}\)。 验证：\(\frac{d}{dt}e^{tA} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} = A = Ae^{tA}\)。✓ 易错点：\(e^{A+B} = e^A e^B\) 仅在 \(AB = BA\) 时成立。 例如 \(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)， \(B = \begin{pmatrix} 0 & 0 \\ 1 & 0 \end{pmatrix}\)，\(AB \neq BA\)， \(e^{A+B} \neq e^A e^B\)。</p>
+            <h4>例题：幂零矩阵的矩阵指数</h4>
+            <p>计算 \(e^{tA}\)，其中 \(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)。</p>
+            <p><strong>第 1 步</strong>：计算 \(A\) 的幂。\(A^2 = \begin{pmatrix} 0 & 0 \\ 0 & 0 \end{pmatrix} = 0\)。</p>
+            <p><strong>第 2 步</strong>：级数截断。\(e^{tA} = I + tA + 0 + 0 + \cdots = \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}\)。</p>
+            <p><strong>验证</strong>：\(\frac{d}{dt}e^{tA} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} = A\)，而 \(Ae^{tA} = A\)。✓</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 对不可交换的矩阵使用 \(e^{A+B} = e^Ae^B\)。这是最常见的错误——必须先检查 \([A, B] = 0\)。</li>
+              <li>❌ 混淆 \(e^{tA}\) 的逐项微分与标量指数的微分。矩阵版本 \(\frac{d}{dt}e^{tA} = Ae^{tA}\) 之所以成立，关键是 \(A\) 与 \(A^k\) 可交换。</li>
+              <li>❌ 试图对每个元素分别取指数：\(e^A \neq (e^{a_{ij}})\)（元素逐个取指数不是矩阵指数！）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -504,35 +590,75 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>直接用定义（无穷级数）计算 \(e^{tA}\) 在实际中几乎不可行。 关键技巧是利用 \(A\) 的谱分解：对角化后指数函数逐分量作用， Jordan 块的情况则需要处理幂零部分。掌握这些计算方法是 求解常系数方程组的实用核心。</p>
+            <p>矩阵指数的定义（无穷级数）在实际计算中几乎不可行。需要有效的计算方法：</p>
+            <ul>
+              <li><strong>可对角化</strong>：若 \(A = PDP^{-1}\)，则 \(e^{tA} = Pe^{tD}P^{-1}\)，对角矩阵的指数只需对每个特征值取标量指数——问题化为求特征值和特征向量。</li>
+              <li><strong>不可对角化</strong>：需要 Jordan 标准形 \(A = PJP^{-1}\)，其中 Jordan 块的指数有优美的公式，涉及多项式乘以指数函数。</li>
+              <li><strong>实际意义</strong>：掌握这些计算方法是求解常系数方程组、分析系统稳定性和设计控制器的前提。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>如果 \(A = PDP^{-1}\)（可对角化），则 \(e^{tA} = Pe^{tD}P^{-1}\)， 对角矩阵的指数只需对每个特征值分别取 \(e^{\lambda_i t}\)。 不可对角化时利用 \(A = P(D+N)P^{-1}\)，\(D\) 对角、\(N\) 幂零， 且 \(DN = ND\)，故 \(e^{t(D+N)} = e^{tD}e^{tN}\)。</p>
+            <p>计算 \(e^{tA}\) 的核心思想是<strong>谱分解</strong>——将 \(A\) 分解为简单组分，然后对每个组分分别取指数：</p>
+            <ul>
+              <li><strong>对角化</strong>：\(A = P \cdot \mathrm{diag}(\lambda_1, \ldots, \lambda_n) \cdot P^{-1}\)。指数直接作用在对角元素上：\(e^{tD} = \mathrm{diag}(e^{\lambda_1 t}, \ldots, e^{\lambda_n t})\)。</li>
+              <li><strong>Jordan 分解</strong>：\(A = P(D + N)P^{-1}\)，\(D\) 为对角部分，\(N\) 为幂零部分，且 \(DN = ND\)。因此 \(e^{t(D+N)} = e^{tD} \cdot e^{tN}\)（可交换！），幂零部分的指数是有限多项式。</li>
+              <li><strong>Cayley-Hamilton 替代</strong>：利用 \(p(A) = 0\) 将 \(e^{tA}\) 表示为 \(A\) 的 \(\leq n-1\) 次多项式，系数由插值条件确定。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>可对角化情况</strong>：\(A = PDP^{-1}\)，\(D = \text{diag}(\lambda_1,\ldots,\lambda_n)\)。 \[e^{tA} = Pe^{tD}P^{-1} = P\,\text{diag}(e^{\lambda_1 t},\ldots,e^{\lambda_n t})\,P^{-1}\] <strong>Jordan 块</strong> \(J_k(\lambda) = \lambda I + N\)，其中 \(N\) 是 \(k \times k\) 幂零矩阵 （上三角全 1），\(N^k = 0\)。 \[e^{tJ_k(\lambda)} = e^{\lambda t} e^{tN} = e^{\lambda t}\begin{pmatrix} 1 & t & t^2/2! & \cdots & t^{k-1}/(k-1)! \\ 0 & 1 & t & \cdots & t^{k-2}/(k-2)! \\ \vdots & & \ddots & & \vdots \\ 0 & 0 & \cdots & 0 & 1 \end{pmatrix}\] <strong>Cayley-Hamilton 方法</strong>：若 \(A\) 的特征多项式为 \(p(\lambda) = \lambda^n + \cdots\)， 则 \(p(A) = 0\)。可将 \(e^{tA}\) 表示为 \(A\) 的多项式 \(e^{tA} = \alpha_0(t)I + \alpha_1(t)A + \cdots + \alpha_{n-1}(t)A^{n-1}\)， 系数由插值条件确定。</p>
+            <h4>1. 可对角化情况</h4>
+            <p>若 \(A = PDP^{-1}\)，\(D = \mathrm{diag}(\lambda_1, \ldots, \lambda_n)\)，则</p>
+            \[A^k = PD^kP^{-1} \implies e^{tA} = \sum \frac{t^k}{k!} PD^kP^{-1} = P\left(\sum \frac{t^k D^k}{k!}\right)P^{-1} = Pe^{tD}P^{-1}\]
+            \[e^{tD} = \mathrm{diag}(e^{\lambda_1 t}, e^{\lambda_2 t}, \ldots, e^{\lambda_n t})\]
+
+            <h4>2. Jordan 块的矩阵指数</h4>
+            <p>\(k \times k\) Jordan 块 \(J_k(\lambda) = \lambda I_k + N_k\)，其中 \(N_k\) 为上三角移位矩阵，\(N_k^k = 0\)。</p>
+            <p>由于 \(\lambda I\) 和 \(N\) 可交换，\(e^{tJ_k(\lambda)} = e^{\lambda t} \cdot e^{tN_k}\)，其中</p>
+            \[e^{tN_k} = I + tN + \frac{t^2}{2!}N^2 + \cdots + \frac{t^{k-1}}{(k-1)!}N^{k-1}\]
+            <p>写成矩阵形式：</p>
+            \[e^{tJ_k(\lambda)} = e^{\lambda t}\begin{pmatrix} 1 & t & \frac{t^2}{2!} & \cdots & \frac{t^{k-1}}{(k-1)!} \\ 0 & 1 & t & \cdots & \frac{t^{k-2}}{(k-2)!} \\ \vdots & & \ddots & \ddots & \vdots \\ 0 & & \cdots & 1 & t \\ 0 & & \cdots & 0 & 1 \end{pmatrix}\]
+
+            <h4>3. 一般 Jordan 标准形</h4>
+            <p>若 \(A = P \cdot \mathrm{diag}(J_{k_1}(\lambda_1), \ldots, J_{k_r}(\lambda_r)) \cdot P^{-1}\)，则</p>
+            \[e^{tA} = P \cdot \mathrm{diag}(e^{tJ_{k_1}(\lambda_1)}, \ldots, e^{tJ_{k_r}(\lambda_r)}) \cdot P^{-1}\]
+
+            <h4>4. Cayley-Hamilton 方法</h4>
+            <p>由 Cayley-Hamilton 定理 \(p(A) = 0\)，矩阵函数 \(f(A)\) 可用 \(\leq n-1\) 次多项式 \(q(A) = \alpha_0 I + \alpha_1 A + \cdots + \alpha_{n-1}A^{n-1}\) 表示。系数 \(\alpha_i(t)\) 由条件 \(f(\lambda_j) = q(\lambda_j)\)（及重根的导数条件）确定。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 耦合振动系统的正则模分析：对角化给出独立的振动模态 - 电路瞬态分析中的状态空间方法</p>
+            <p><strong>耦合振动的正则模分析</strong>：多自由度振动系统 \(M\ddot{x} + Kx = 0\) 的对角化给出独立的<strong>正则模态</strong>，每个模态以特定频率独立振动。建筑抗震设计中的<strong>模态分析</strong>正是基于这一理论。</p>
+            <p><strong>电路瞬态分析</strong>：状态空间方法中，电路的自然响应由 \(e^{tA}\) 的特征值决定——负实部特征值对应衰减，正实部对应不稳定，虚部对应振荡。</p>
+            <p><strong>数值计算</strong>：计算 \(e^{tA}\) 是数值线性代数中的经典问题。Moler &amp; Van Loan (2003) 的综述论文 "Nineteen Dubious Ways to Compute the Exponential of a Matrix" 总结了 19 种方法及其优缺点。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(e^{tA}\)，\(A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)。 解答：\(A = J_2(1) = I + N\)，\(N = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)。 \(e^{tA} = e^t e^{tN} = e^t \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix}\)。 易错点：处理 Jordan 块时忘记 \(e^{\lambda t}\) 的前因子。 \(e^{tJ} \neq e^{tN}\)，必须是 \(e^{\lambda t} \cdot e^{tN}\)。</p>
+            <h4>例题：Jordan 块的矩阵指数</h4>
+            <p>求 \(e^{tA}\)，其中 \(A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)。</p>
+            <p><strong>第 1 步</strong>：识别结构。\(A = J_2(1) = I + N\)，\(N = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)，\(N^2 = 0\)。</p>
+            <p><strong>第 2 步</strong>：计算。</p>
+            \[e^{tA} = e^t \cdot e^{tN} = e^t(I + tN) = e^t \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix}\]
+            <p><strong>验证</strong>：\(\frac{d}{dt}\begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix} = \begin{pmatrix} e^t & e^t + te^t \\ 0 & e^t \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix}\)。✓</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 处理 Jordan 块时忘记 \(e^{\lambda t}\) 的前因子。\(e^{tJ_k(\lambda)} = e^{\lambda t} \cdot e^{tN}\)，不是 \(e^{tN}\) 单独。</li>
+              <li>❌ 混淆特征值的代数重数和几何重数。只有几何重数 &lt; 代数重数时才需要 Jordan 块处理。</li>
+              <li>❌ Cayley-Hamilton 方法中忘记对重特征值使用导数条件。若 \(\lambda_0\) 是 \(m\) 重特征值，需要 \(q^{(j)}(\lambda_0) = f^{(j)}(\lambda_0)\)，\(j = 0, 1, \ldots, m-1\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -590,28 +716,84 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>实际系统几乎总有外部输入：控制信号 \(\mathbf{B}(t)\)、外力驱动。 非齐次系统 \(\mathbf{X}' = A\mathbf{X} + \mathbf{B}(t)\) 的通解 由齐次解与一个利用基解矩阵构造的特解叠加而成。常数变易法 将高阶标量方程的求解方法自然推广到系统情形。</p>
+            <p>实际系统几乎总有外部输入，齐次方程不够用：</p>
+            <ul>
+              <li><strong>控制系统</strong>：\(\dot{x} = Ax + Bu\)，控制信号 \(u(t)\) 就是非齐次项。系统的响应 = 自由响应 + 受控响应。</li>
+              <li><strong>机械系统</strong>：外力驱动的振动 \(M\ddot{x} + C\dot{x} + Kx = F(t)\)，如地震作用、发动机激励。</li>
+              <li><strong>电路网络</strong>：独立电源驱动多端口网络，状态方程自然是非齐次的。</li>
+            </ul>
+            <p>常数变易法将高阶标量方程的求解技巧自然推广到系统情形，给出统一的积分公式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>非齐次系统的求解本质上是<strong>线性叠加原理</strong>的体现：</p>
+            <ul>
+              <li><strong>通解结构</strong>：\(\mathbf{X} = \mathbf{X}_h + \mathbf{X}_p\)（齐次通解 + 特解），这是线性方程的基本范式。</li>
+              <li><strong>常数变易法思想</strong>：将齐次解中的常数 \(\mathbf{c}\) 替换为待定函数 \(\mathbf{u}(t)\)，利用方程确定 \(\mathbf{u}(t)\)——这是 Lagrange 方法的矩阵推广。</li>
+              <li><strong>卷积/Green 函数视角</strong>：Duhamel 公式 \(\mathbf{X}_p = \int e^{(t-s)A}\mathbf{B}(s)\,ds\) 是时不变线性系统的<strong>卷积响应</strong>，\(e^{tA}\) 扮演 Green 函数/脉冲响应矩阵的角色。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>非齐次系统</strong>：\(\mathbf{X}' = A(t)\mathbf{X} + \mathbf{B}(t)\)。 设齐次方程的基解矩阵为 \(\Phi(t)\)。令 \(\mathbf{X} = \Phi(t)\mathbf{u}(t)\) （常数变易法），代入： \(\Phi'\mathbf{u} + \Phi\mathbf{u}' = A\Phi\mathbf{u} + \mathbf{B}\) 因 \(\Phi' = A\Phi\)，消去得 \(\Phi\mathbf{u}' = \mathbf{B}\)， \[\mathbf{u}'(t) = \Phi(t)^{-1}\mathbf{B}(t),\quad \mathbf{u}(t) = \int_{t_0}^t \Phi(s)^{-1}\mathbf{B}(s)\,ds + \mathbf{c}\] 特解： \[\mathbf{X}_p(t) = \Phi(t)\int_{t_0}^t \Phi(s)^{-1}\mathbf{B}(s)\,ds\] <strong>常系数情况</strong>：\(\Phi(t) = e^{tA}\)，\(\Phi(s)^{-1} = e^{-sA}\)， \[\mathbf{X}_p(t) = \int_{t_0}^t e^{(t-s)A}\mathbf{B}(s)\,ds\] 这就是卷积形式的「Duhamel 公式」。</p>
+            <h4>1. 常数变易法推导</h4>
+            <p>非齐次系统 \(\mathbf{X}' = A(t)\mathbf{X} + \mathbf{B}(t)\)，\(\Phi(t)\) 为齐次方程的基解矩阵。</p>
+            <p>设 \(\mathbf{X} = \Phi(t)\mathbf{u}(t)\)（将常数 \(\mathbf{c}\) 变为函数），代入方程：</p>
+            \[\Phi'\mathbf{u} + \Phi\mathbf{u}' = A\Phi\mathbf{u} + \mathbf{B}\]
+            <p>由于 \(\Phi' = A\Phi\)，左边第一项与右边第一项抵消，得到</p>
+            \[\Phi(t)\mathbf{u}'(t) = \mathbf{B}(t) \implies \mathbf{u}'(t) = \Phi(t)^{-1}\mathbf{B}(t)\]
+            <p>积分得</p>
+            \[\mathbf{u}(t) = \int_{t_0}^{t} \Phi(s)^{-1}\mathbf{B}(s)\,ds + \mathbf{c}\]
+
+            <h4>2. 通解公式</h4>
+            \[\mathbf{X}(t) = \Phi(t)\mathbf{c} + \Phi(t)\int_{t_0}^{t} \Phi(s)^{-1}\mathbf{B}(s)\,ds\]
+            <p>第一项是齐次通解，第二项是满足 \(\mathbf{X}(t_0) = \mathbf{0}\) 的特解。</p>
+
+            <h4>3. Duhamel 公式（常系数）</h4>
+            <p>常系数情况 \(\Phi(t) = e^{tA}\)，\(\Phi(t)\Phi(s)^{-1} = e^{(t-s)A}\)，特解简化为</p>
+            \[\mathbf{X}_p(t) = \int_{t_0}^{t} e^{(t-s)A}\mathbf{B}(s)\,ds\]
+            <p>这是<strong>卷积</strong>形式：系统对输入 \(\mathbf{B}(s)\) 的响应 = 脉冲响应 \(e^{(t-s)A}\) 与输入的积分。IVP 的完整解：</p>
+            \[\mathbf{X}(t) = e^{(t-t_0)A}\mathbf{X}_0 + \int_{t_0}^{t} e^{(t-s)A}\mathbf{B}(s)\,ds\]
+
+            <h4>4. 变系数情况与 Peano-Baker 级数</h4>
+            <p>变系数系统没有简洁的闭式解。通解仍为 \(\mathbf{X}(t) = \Phi(t,t_0)\mathbf{X}_0 + \int_{t_0}^{t}\Phi(t,s)\mathbf{B}(s)\,ds\)，其中 \(\Phi(t,t_0)\) 是<strong>状态转移矩阵</strong>，需要通过 Peano-Baker 级数或数值方法求得。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 控制论中状态空间方程 \(\dot{x} = Ax + Bu\) 的解即为 Duhamel 公式 - 线性电网络的瞬态分析</p>
+            <p><strong>现代控制理论</strong>：状态空间方程 \(\dot{x} = Ax + Bu\)，\(y = Cx + Du\) 的解就是 Duhamel 公式。<strong>可控性</strong>的 Kalman 判据本质上是判断 Duhamel 积分能否到达所有状态。</p>
+            <p><strong>电路瞬态分析</strong>：多端口 RLC 网络的状态方程 \(\dot{x} = Ax + Bu_s(t)\)（\(u_s\) 为独立电源），Duhamel 公式给出完整的瞬态+稳态响应。SPICE 仿真中的瞬态分析就是数值求解这一公式。</p>
+            <p><strong>结构动力学</strong>：多自由度结构受地震激励 \(M\ddot{u} + C\dot{u} + Ku = -M\mathbf{1}\ddot{u}_g(t)\)，Duhamel 积分在模态空间中对每个模态分别使用——这就是<strong>模态叠加法</strong>。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(\mathbf{X}' = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}\mathbf{X} + \begin{pmatrix} 1 \\ t \end{pmatrix}\)，\(\mathbf{X}(0) = \mathbf{0}\) 的解。 解答：\(e^{tA} = \text{diag}(e^t, e^{2t})\)，\(e^{-sA} = \text{diag}(e^{-s}, e^{-2s})\)。 \(\mathbf{X}(t) = \int_0^t \begin{pmatrix} e^{t-s} \\ te^{2(t-s)} \end{pmatrix}\,ds\)... 更仔细地：\(\int_0^t e^{t-s}\,ds = e^t - 1\)， \(\int_0^t s e^{2(t-s)}\,ds = e^{2t}\int_0^t s e^{-2s}\,ds\)。 \(\int_0^t se^{-2s}\,ds = [-\frac{s}{2}e^{-2s}]_0^t + \frac{1}{2}\int_0^t e^{-2s}\,ds = -\frac{t}{2}e^{-2t} - \frac{1}{4}(e^{-2t}-1)\)。 \(\mathbf{X}(t) = \begin{pmatrix} e^t - 1 \\ \frac{1}{4}(e^{2t}-1) - \frac{t}{2} \end{pmatrix}\)。 易错点：Duhamel 积分中 \(e^{(t-s)A}\) 的指数是 \((t-s)\)，不是 \(t\) 也不是 \(s\)。</p>
+            <h4>例题：Duhamel 公式求解 IVP</h4>
+            <p>求 \(\mathbf{X}' = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}\mathbf{X} + \begin{pmatrix} 1 \\ t \end{pmatrix}\)，\(\mathbf{X}(0) = \mathbf{0}\)。</p>
+            <p><strong>第 1 步</strong>：\(A\) 为对角矩阵，\(e^{tA} = \begin{pmatrix} e^t & 0 \\ 0 & e^{2t} \end{pmatrix}\)，\(e^{-sA} = \begin{pmatrix} e^{-s} & 0 \\ 0 & e^{-2s} \end{pmatrix}\)。</p>
+            <p><strong>第 2 步</strong>：由 Duhamel 公式 \(\mathbf{X}(t) = \int_0^t e^{(t-s)A} \mathbf{B}(s)\,ds\)，逐分量计算：</p>
+            \[x_1(t) = \int_0^t e^{t-s} \cdot 1\,ds = e^t - 1\]
+            \[x_2(t) = \int_0^t e^{2(t-s)} \cdot s\,ds = e^{2t}\int_0^t s e^{-2s}\,ds\]
+            <p><strong>第 3 步</strong>：分部积分计算 \(\int_0^t se^{-2s}\,ds = \left[-\frac{s}{2}e^{-2s}\right]_0^t + \frac{1}{2}\int_0^t e^{-2s}\,ds = -\frac{t}{2}e^{-2t} - \frac{1}{4}(e^{-2t} - 1)\)。</p>
+            <p><strong>最终结果</strong>：</p>
+            \[\mathbf{X}(t) = \begin{pmatrix} e^t - 1 \\[4pt] \dfrac{1}{4}(e^{2t} - 1) - \dfrac{t}{2} \end{pmatrix}\]
+            <p><strong>验证</strong>：\(x_2'(t) = \frac{1}{2}e^{2t} - \frac{1}{2} = 2 \cdot \left[\frac{1}{4}(e^{2t}-1) - \frac{t}{2}\right] + t = 2x_2 + t\)。✓</p>
+
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ Duhamel 积分中 \(e^{(t-s)A}\) 的指数是 \((t-s)\)，不是 \(t\) 也不是 \(s\)。写成 \(e^{tA}e^{-sA}\) 只在常系数（\(A\) 与自身可交换）时成立。</li>
+              <li>❌ 变系数情况中 \(\Phi(t)\Phi(s)^{-1} \neq \Phi(t-s)\)。状态转移矩阵 \(\Phi(t,s)\) 不具有平移不变性。</li>
+              <li>❌ 忘记分部积分的细节。Duhamel 公式常涉及 \(\int s^n e^{\alpha s}\,ds\) 类型积分，需要仔细执行分部积分。</li>
+            </ul>
           </div>
         </div>
       </div>

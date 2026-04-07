@@ -394,35 +394,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>给定一阶 ODE \(y' = f(t,y)\) 和初始条件 \(y(t_0) = y_0\)，解是否存在？ 是否唯一？这不仅是纯数学问题——物理学家需要确信给定初始状态后 系统的未来是确定的（拉普拉斯决定论）。但 Peano 的例子 \(y' = y^{2/3}\) 显示：仅靠连续性不能保证唯一性。理解存在唯一性定理是严格使用 ODE 的前提。</p>
+            <p>给定一阶 ODE \(y' = f(t,y)\) 和初始条件 \(y(t_0) = y_0\)，最基本的问题是：</p>
+            <ul>
+              <li><strong>存在性</strong>：解是否存在？即方程是否有足够好的结构来产生解曲线？</li>
+              <li><strong>唯一性</strong>：如果解存在，从给定初始条件出发的解是否只有一条？物理上这对应拉普拉斯决定论——给定初态后系统未来是否唯一确定。</li>
+              <li><strong>反例的警示</strong>：Peano 的经典例子 \(y' = y^{2/3}\)，\(y(0)=0\) 同时有 \(y\equiv 0\) 和 \(y = (t/3)^3\) 两个解，说明仅靠 \(f\) 的连续性不能保证唯一性。</li>
+            </ul>
+            <p>因此需要找到恰当的条件（Lipschitz 条件）来同时保证存在性和唯一性——这是严格使用 ODE 的前提。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Lipschitz 条件是「连续」与「可微」之间的中间概念。它控制了 \(f\) 关于 \(y\) 的变化速率不超过线性增长，从而保证解之间不能「分叉」。这种 条件在逼近论和不动点理论中反复出现。</p>
+            <p>Lipschitz 条件处于「连续」与「可微」之间，是分析学中反复出现的正则性概念：</p>
+            <ul>
+              <li><strong>几何直觉</strong>：Lipschitz 条件要求 \(f\) 关于 \(y\) 的「斜率」有上界 \(L\)，即 \(f\) 的图像夹在斜率为 \(\pm L\) 的锥体之间。这防止了解曲线的分叉——两条解不能以超过指数速率分离。</li>
+              <li><strong>层级关系</strong>：可微 \(\Rightarrow\) Lipschitz \(\Rightarrow\) 连续，但反之均不成立。\(|y|\) 在 \(y=0\) 处 Lipschitz 但不可微；\(y^{2/3}\) 在 \(y=0\) 处连续但不 Lipschitz。</li>
+              <li><strong>函数分析视角</strong>：Lipschitz 条件保证将 IVP 改写为积分方程后，对应的积分算子是压缩映射，从而可以使用 Banach 不动点定理。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>初值问题(IVP)</strong>：求 \(y: I \to \mathbb{R}\) 满足 \[y'(t) = f(t, y(t)),\quad y(t_0) = y_0\] <strong>Lipschitz 条件</strong>：\(f(t,y)\) 关于 \(y\) 满足（局部）Lipschitz 条件， 若存在 \(L > 0\) 使得 \[|f(t, y_1) - f(t, y_2)| \leq L|y_1 - y_2|\] 在某个区域 \(|t - t_0| \leq a\)，\(|y - y_0| \leq b\) 上成立。 <strong>充分条件</strong>：若 \(\partial f/\partial y\) 存在且在紧区域上有界， 则 \(f\) 关于 \(y\) Lipschitz。证明：由均值定理， \(|f(t,y_1) - f(t,y_2)| = |f_y(t,\xi)||y_1 - y_2| \leq L|y_1 - y_2|\)。 <strong>等价积分方程</strong>：IVP 等价于 Volterra 积分方程 \[y(t) = y_0 + \int_{t_0}^{t} f(s, y(s))\,ds\]</p>
+            <h4>1. 初值问题 (IVP) 的精确表述</h4>
+            <p>给定 \(f: D \subseteq \mathbb{R}^2 \to \mathbb{R}\) 和点 \((t_0, y_0) \in D\)，求 \(y: I \to \mathbb{R}\)（\(I\) 为含 \(t_0\) 的区间）满足</p>
+            \[y'(t) = f(t, y(t)),\quad y(t_0) = y_0\]
+
+            <h4>2. Lipschitz 条件</h4>
+            <p>\(f(t,y)\) 关于 \(y\) 在区域 \(R = \{|t - t_0| \leq a,\; |y - y_0| \leq b\}\) 上满足<strong>局部 Lipschitz 条件</strong>，若存在常数 \(L > 0\) 使得</p>
+            \[|f(t, y_1) - f(t, y_2)| \leq L|y_1 - y_2|, \quad \forall (t, y_1), (t, y_2) \in R\]
+            <p>若对所有 \(y_1, y_2 \in \mathbb{R}\) 成立（不限于局部区域），则称<strong>全局 Lipschitz</strong>。</p>
+
+            <h4>3. Lipschitz 条件的判别</h4>
+            <p><strong>充分条件</strong>：若 \(\partial f/\partial y\) 在 \(R\) 上存在且连续，则 \(f\) 关于 \(y\) 局部 Lipschitz。</p>
+            <p><strong>证明</strong>：由均值定理，存在 \(\xi\) 介于 \(y_1, y_2\) 之间，使得</p>
+            \[|f(t,y_1) - f(t,y_2)| = \left|\frac{\partial f}{\partial y}(t,\xi)\right| \cdot |y_1 - y_2| \leq \sup_R \left|\frac{\partial f}{\partial y}\right| \cdot |y_1 - y_2|\]
+            <p>取 \(L = \sup_R |f_y|\) 即可。注意：此条件是充分非必要的——\(f(t,y) = |y|\) 在 \(y=0\) 不可微但 Lipschitz。</p>
+
+            <h4>4. 等价积分方程</h4>
+            <p>IVP 等价于 Volterra 积分方程</p>
+            \[y(t) = y_0 + \int_{t_0}^{t} f(s, y(s))\,ds\]
+            <p>这一等价性是后续 Picard 迭代和压缩映射证明的出发点。积分形式将微分问题转化为算子不动点问题：定义 \(T[y](t) = y_0 + \int_{t_0}^t f(s,y(s))\,ds\)，则解即为 \(T\) 的不动点。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 数值解法（Euler 法、Runge-Kutta）的收敛性证明需要 Lipschitz 条件 - 控制论中系统状态的唯一可预测性依赖于 Lipschitz 存在唯一性</p>
+            <p><strong>数值方法的收敛保证</strong>：Euler 法、Runge-Kutta 法等数值格式的收敛性和误差估计均依赖 Lipschitz 条件。没有 Lipschitz 常数 \(L\) 的控制，就无法证明数值解逼近真解。</p>
+            <p><strong>控制系统的因果律</strong>：自动控制理论中，状态方程 \(\dot{x} = f(t, x, u)\) 在 Lipschitz 条件下保证给定控制输入 \(u(t)\) 后系统状态唯一确定，这是反馈控制可行的前提。</p>
+            <p><strong>生物动力学</strong>：种群模型 \(y' = ry(1 - y/K)\) 中 \(f(y) = ry(1-y/K)\) 是多项式，自动满足局部 Lipschitz，保证了种群数量的唯一演化轨迹。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：验证 \(f(t,y) = t^2 + \sin y\) 满足关于 \(y\) 的 Lipschitz 条件。 解答：\(|f(t,y_1) - f(t,y_2)| = |\sin y_1 - \sin y_2| \leq |y_1 - y_2|\) （利用 \(|\sin|\) 的 Lipschitz 常数为 1）。故 \(L = 1\)。 易错点：将 \(f(t,y) = |y|\) 误判为不满足 Lipschitz。实际上 \(|y|\) 是全局 Lipschitz 的（\(L=1\)），虽然在 \(y=0\) 不可微。 Lipschitz 不要求可微。</p>
+            <h4>例题：验证 Lipschitz 条件</h4>
+            <p>验证 \(f(t,y) = t^2 + \sin y\) 满足关于 \(y\) 的全局 Lipschitz 条件。</p>
+            <p><strong>第 1 步</strong>：分离 \(t\) 和 \(y\) 的贡献。</p>
+            \[|f(t,y_1) - f(t,y_2)| = |(t^2 + \sin y_1) - (t^2 + \sin y_2)| = |\sin y_1 - \sin y_2|\]
+            <p><strong>第 2 步</strong>：利用 \(\sin\) 的 Lipschitz 性质。由均值定理，\(|\sin y_1 - \sin y_2| = |\cos \xi| \cdot |y_1 - y_2| \leq |y_1 - y_2|\)。</p>
+            <p><strong>结论</strong>：\(f\) 关于 \(y\) 全局 Lipschitz，\(L = 1\)。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 将 \(f(t,y) = |y|\) 误判为不满足 Lipschitz——实际上 \(||y_1| - |y_2|| \leq |y_1 - y_2|\)，所以 \(|y|\) 全局 Lipschitz（\(L=1\)），尽管在 \(y=0\) 不可微。<strong>Lipschitz 不要求可微</strong>。</li>
+              <li>❌ 混淆「局部」与「全局」Lipschitz。\(f(y) = y^2\) 在任何有界区域上局部 Lipschitz（\(L = 2\sup|y|\)），但不是全局 Lipschitz。存在唯一性定理只需局部 Lipschitz。</li>
+              <li>❌ 忘记检查 Lipschitz 条件是关于 \(y\)（而非 \(t\)）的。常见错误是对 \(f(t,y) = \sqrt{t}\cdot y\) 因 \(\sqrt{t}\) 在 \(t=0\) 不可微就否定 Lipschitz 性——实际上关于 \(y\) 的 Lipschitz 常数为 \(L = \sqrt{t}\)，在 \(t \geq 0\) 的有界区域上局部 Lipschitz。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -449,35 +491,83 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Cauchy-Lipschitz（也称 Picard-Lindelöf）定理是 ODE 理论的基石： 在 Lipschitz 条件下，初值问题有且仅有一个局部解。更重要的是， Picard 迭代给出了构造性证明——它不仅证明解存在，还提供了一种 逐步逼近解的算法，这是数值方法的理论源头。</p>
+            <p>Cauchy-Lipschitz（也称 Picard-Lindelöf）定理是 ODE 理论的绝对基石。它回答了最核心的问题：</p>
+            <ul>
+              <li><strong>存在性 + 唯一性一体</strong>：在 Lipschitz 条件下，初值问题有且仅有一个局部解。这不是两个独立定理的组合，而是通过同一个构造性证明同时获得的。</li>
+              <li><strong>构造性证明</strong>：Picard 迭代不仅证明解存在，还提供了一个逐步逼近的算法——每一步迭代都更接近真解。这使得理论与计算紧密联系。</li>
+              <li><strong>数值方法的理论源头</strong>：现代数值 ODE 方法（从 Euler 到 Runge-Kutta 到多步法）的收敛性分析，其思想根源都可以追溯到 Picard 迭代的框架。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>证明的核心工具是 Banach 不动点定理（压缩映射原理）。将 IVP 改写 为积分算子 \(T[y](t) = y_0 + \int_{t_0}^t f(s,y(s))\,ds\)， 在适当的完备度量空间上证明 \(T\) 是压缩映射。</p>
+            <p>证明的核心是将 ODE 问题转化为泛函分析中的<strong>不动点问题</strong>：</p>
+            <ul>
+              <li><strong>算子化</strong>：定义积分算子 \(T[y](t) = y_0 + \int_{t_0}^t f(s,y(s))\,ds\)，IVP 的解即为 \(T\) 的不动点 \(T[y] = y\)。</li>
+              <li><strong>空间选择</strong>：在 \(C([t_0 - \alpha, t_0 + \alpha])\) 上赋予加权上确界范数 \(\|y\|_L = \sup |y(t)|e^{-2L|t - t_0|}\)，使 \(T\) 成为严格压缩映射。</li>
+              <li><strong>Banach 不动点定理</strong>：完备度量空间上的压缩映射有唯一不动点，且迭代序列 \(T^n[y_0]\) 收敛到该不动点。这正是 Picard 迭代。</li>
+            </ul>
+            <p>这一框架的威力在于：同一个定理同时给出存在性、唯一性和逼近方法。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Cauchy-Lipschitz 定理</strong>：设 \(f\) 在 \(R = \{|t-t_0| \leq a, |y-y_0| \leq b\}\) 上连续且关于 \(y\) Lipschitz（常数 \(L\)），令 \(M = \max_R |f|\)， \(\alpha = \min(a, b/M)\)。则 IVP 在 \([t_0 - \alpha, t_0 + \alpha]\) 上 有唯一解。 <strong>Picard 迭代</strong>： \[y_0(t) = y_0, \quad y_{n+1}(t) = y_0 + \int_{t_0}^{t} f(s, y_n(s))\,ds\] 收敛性证明：令 \(e_n = \|y_{n+1} - y_n\|_\infty\)，利用 Lipschitz 条件： \[|y_{n+1}(t) - y_n(t)| \leq L\int_{t_0}^{t}|y_n(s) - y_{n-1}(s)|\,ds\] 归纳得 \(|y_{n+1} - y_n| \leq ML^n|t-t_0|^{n+1}/(n+1)!\)。 级数 \(\sum (y_{n+1}-y_n)\) 由 \(e^{L\alpha}\) 的 Taylor 级数控制， 故一致收敛。极限函数 \(y = \lim y_n\) 即为解。</p>
+            <h4>1. Cauchy-Lipschitz 定理的精确陈述</h4>
+            <p><strong>定理</strong>：设 \(f\) 在矩形区域 \(R = \{(t,y) : |t-t_0| \leq a,\; |y-y_0| \leq b\}\) 上连续，且关于 \(y\) 满足 Lipschitz 条件（常数 \(L\)）。令</p>
+            \[M = \max_{(t,y) \in R} |f(t,y)|, \qquad \alpha = \min\!\left(a,\; \frac{b}{M}\right)\]
+            <p>则 IVP 在 \([t_0 - \alpha,\; t_0 + \alpha]\) 上有<strong>唯一</strong>解。</p>
+            <p>注意 \(\alpha\) 的选取：\(b/M\) 保证解曲线不会离开矩形 \(R\)（因为 \(|y - y_0| \leq M|\Delta t| \leq M\alpha \leq b\)）。</p>
+
+            <h4>2. Picard 迭代的构造</h4>
+            <p>定义迭代序列：</p>
+            \[y_0(t) = y_0, \qquad y_{n+1}(t) = y_0 + \int_{t_0}^{t} f(s, y_n(s))\,ds\]
+            <p>每一步将前一步的近似解代入积分算子 \(T\)，得到新的近似解。</p>
+
+            <h4>3. 收敛性证明（核心步骤）</h4>
+            <p><strong>第 1 步</strong>：估计相邻迭代的差。令 \(\varphi_n(t) = |y_{n+1}(t) - y_n(t)|\)。</p>
+            <p>初始：\(\varphi_0(t) = |y_1(t) - y_0| = \left|\int_{t_0}^t f(s, y_0)\,ds\right| \leq M|t - t_0|\)。</p>
+            <p><strong>第 2 步</strong>：利用 Lipschitz 条件递推：</p>
+            \[\varphi_n(t) \leq L \int_{t_0}^{t} \varphi_{n-1}(s)\,ds\]
+            <p><strong>第 3 步</strong>：归纳得到</p>
+            \[\varphi_n(t) \leq \frac{ML^n |t - t_0|^{n+1}}{(n+1)!}\]
+            <p><strong>第 4 步</strong>：形式解 \(y(t) = y_0 + \sum_{n=0}^{\infty} (y_{n+1} - y_n)\)。级数由 \(\sum ML^n\alpha^{n+1}/(n+1)! = (M/L)(e^{L\alpha} - 1)\) 控制，故在 \([t_0-\alpha, t_0+\alpha]\) 上一致收敛。</p>
+            <p><strong>第 5 步</strong>：极限函数 \(y = \lim y_n\) 满足积分方程（对迭代式取极限，利用一致收敛交换极限与积分），即为 IVP 的解。</p>
+
+            <h4>4. 唯一性证明</h4>
+            <p>设 \(y, z\) 是两个解，令 \(w(t) = |y(t) - z(t)|\)，则</p>
+            \[w(t) \leq L\int_{t_0}^{t} w(s)\,ds\]
+            <p>由 Grönwall 不等式（或直接迭代），\(w(t) \leq 0\)，即 \(y \equiv z\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Picard 迭代是求解 ODE 的数值逐次逼近法的理论原型 - 在自动控制中，存在唯一性保证系统状态的可预测性（因果律）</p>
+            <p><strong>逐次逼近法</strong>：Picard 迭代是数值 ODE 求解的理论原型。虽然实际计算中很少直接使用（收敛慢），但它为 Euler 法、隐式格式等数值方法的收敛性分析提供了理论框架。</p>
+            <p><strong>自动控制中的因果律</strong>：控制系统 \(\dot{x} = f(x, u)\) 的 Lipschitz 条件保证了给定初态和控制输入后，系统轨迹唯一确定。这是状态反馈、观测器设计等控制方法可行的数学基础。</p>
+            <p><strong>生物化学网络</strong>：细胞信号通路的 ODE 模型中，蛋白质浓度非负且有界，因此右端函数自动满足局部 Lipschitz 条件，保证了模拟的数学合理性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：对 \(y' = y\)，\(y(0) = 1\) 做 Picard 迭代前 3 步。 解答：\(y_0(t) = 1\)。 \(y_1(t) = 1 + \int_0^t 1\,ds = 1 + t\)。 \(y_2(t) = 1 + \int_0^t (1+s)\,ds = 1 + t + t^2/2\)。 \(y_3(t) = 1 + \int_0^t (1+s+s^2/2)\,ds = 1 + t + t^2/2 + t^3/6\)。 \(y_n(t) \to e^t\)（\(e^t\) 的 Taylor 展开逐项生成）。 易错点：忽略存在区间的有限性。定理只保证局部解； 解可能在有限时间爆破（如 \(y' = y^2\)）。</p>
+            <h4>例题：Picard 迭代求解 \(y' = y\)，\(y(0) = 1\)</h4>
+            <p><strong>第 1 步</strong>：\(y_0(t) = 1\)（初始猜测为常数）。</p>
+            <p><strong>第 2 步</strong>：\(y_1(t) = 1 + \int_0^t 1\,ds = 1 + t\)。</p>
+            <p><strong>第 3 步</strong>：\(y_2(t) = 1 + \int_0^t (1+s)\,ds = 1 + t + \frac{t^2}{2}\)。</p>
+            <p><strong>第 4 步</strong>：\(y_3(t) = 1 + \int_0^t \left(1+s+\frac{s^2}{2}\right)ds = 1 + t + \frac{t^2}{2} + \frac{t^3}{6}\)。</p>
+            <p><strong>模式识别</strong>：\(y_n(t) = \sum_{k=0}^{n} \frac{t^k}{k!}\)，这是 \(e^t\) 的 Taylor 多项式。极限 \(y(t) = e^t\)。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 忽略存在区间的有限性。定理只保证解在 \([t_0 - \alpha, t_0 + \alpha]\) 上存在（局部解），不保证全局存在。例如 \(y' = y^2\)，\(y(0)=1\) 的解 \(y = 1/(1-t)\) 在 \(t=1\) 爆破。</li>
+              <li>❌ 将 \(y_0(t) = y_0\)（常数函数）与 \(y_0\)（初始值）混淆。迭代中 \(y_0(t)\) 是定义在整个区间上的常值函数。</li>
+              <li>❌ 误以为 Picard 迭代每步都需要计算复杂积分。对于简单的 \(f\)（如多项式），迭代格式简洁；但对一般 \(f\)，积分可能无法显式计算——此时定理的价值在于保证解的存在唯一性，而非提供求解算法。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -531,35 +621,85 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如果只假设 \(f\) 连续但不满足 Lipschitz 条件，解还存在吗？Peano 定理 给出肯定回答——连续性足以保证存在性（但不保证唯一性）。另一方面， 即使解唯一存在，也可能在有限时间内趋向无穷大（爆破）。 理解最大存在区间和爆破现象对于判断 ODE 模型的适用范围至关重要。</p>
+            <p>Cauchy-Lipschitz 定理要求 Lipschitz 条件。自然的问题是：</p>
+            <ul>
+              <li><strong>能否减弱条件？</strong> 如果只假设 \(f\) 连续（不要求 Lipschitz），解还存在吗？Peano 定理给出肯定回答：连续性足以保证<strong>存在性</strong>（但不能保证唯一性）。</li>
+              <li><strong>解的「寿命」</strong>：即使解存在且唯一，它也可能在有限时间内趋向无穷大——这就是<strong>爆破</strong>（blow-up）现象。理解最大存在区间和爆破条件，对判断 ODE 模型的适用范围至关重要。</li>
+              <li><strong>物理意义</strong>：爆破意味着模型在某一时刻之后失去物理意义（如温度趋于无穷），提示需要更精细的建模（如考虑更多物理效应）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Peano 定理的证明使用 Arzelà-Ascoli 定理（紧性论证），而非压缩映射。 这体现了分析学中「紧性 ⇒ 存在性」的范式。爆破现象则揭示了 非线性 ODE 中增长速率与存在区间之间的深层联系。</p>
+            <p>Peano 定理和 Cauchy-Lipschitz 定理的证明使用了截然不同的分析工具，体现了存在性证明的两大范式：</p>
+            <ul>
+              <li><strong>压缩映射（Cauchy-Lipschitz）</strong>：利用 Lipschitz 条件保证算子 \(T\) 是压缩映射，Banach 不动点定理同时给出存在性和唯一性。</li>
+              <li><strong>紧性论证（Peano）</strong>：只利用连续性构造逼近序列（Euler 折线），用 Arzelà-Ascoli 定理提取收敛子列。但紧性只给存在性，不给唯一性——子列可能收敛到不同的极限。</li>
+            </ul>
+            <p>爆破现象揭示了\(f\) 增长速率与解存在区间之间的对偶关系：\(f\) 增长越快（如 \(y^p\)，\(p > 1\)），解越容易在有限时间内爆破。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Peano 存在定理</strong>：\(f(t,y)\) 在区域 \(R\) 上连续 ⇒ IVP 至少有一个 局部解。 证明思路（Euler 折线法）： 1. 构造 Euler 折线 \(y_h\)（步长 \(h\)）：\(y_h(t_{k+1}) = y_h(t_k) + hf(t_k, y_h(t_k))\) 2. \(\{y_h\}\) 等度连续且一致有界（\(|f| \leq M\) 控制） 3. Arzelà-Ascoli ⇒ 存在收敛子列 \(y_{h_j} \to y\) 4. 取极限验证 \(y\) 满足积分方程 <strong>唯一性反例</strong>：\(y' = y^{2/3}\)，\(y(0) = 0\)。 \(y \equiv 0\) 和 \(y = (t/3)^3\) 都是解。\(f(y) = y^{2/3}\) 在 \(y=0\) 不 Lipschitz。 <strong>爆破</strong>：\(y' = y^2\)，\(y(0) = 1\) ⇒ \(y = 1/(1-t)\)，在 \(t=1\) 爆破。 <strong>最大存在区间</strong> \((t^-, t^+)\)：若 \(t^+ < \infty\)，则 \(\lim_{t \to t^+} |y(t)| = \infty\)。</p>
+            <h4>1. Peano 存在定理</h4>
+            <p><strong>定理</strong>：若 \(f(t,y)\) 在矩形 \(R = \{|t-t_0| \leq a,\; |y-y_0| \leq b\}\) 上连续，则 IVP 至少有一个局部解。</p>
+            <p><strong>证明思路（Euler 折线法）</strong>：</p>
+            <ul>
+              <li><strong>步骤 1</strong>：给定步长 \(h > 0\)，构造 Euler 折线 \(y_h(t)\)：设 \(t_k = t_0 + kh\)，
+                \[y_h(t_{k+1}) = y_h(t_k) + h f(t_k, y_h(t_k))\]
+                在 \([t_k, t_{k+1}]\) 上线性插值。</li>
+              <li><strong>步骤 2</strong>：\(\{y_h\}\) <strong>一致有界</strong>（\(|y_h(t) - y_0| \leq M|t - t_0| \leq b\)）且<strong>等度连续</strong>（\(|y_h(t) - y_h(s)| \leq M|t - s|\)）。</li>
+              <li><strong>步骤 3</strong>：由 Arzelà-Ascoli 定理，存在子列 \(y_{h_j} \to y\) 一致收敛。</li>
+              <li><strong>步骤 4</strong>：取极限验证 \(y\) 满足积分方程 \(y(t) = y_0 + \int_{t_0}^t f(s,y(s))\,ds\)。</li>
+            </ul>
+
+            <h4>2. 唯一性的反例</h4>
+            <p>考虑 \(y' = y^{2/3}\)，\(y(0) = 0\)。</p>
+            <p>解 1：\(y(t) \equiv 0\)（显然满足方程）。</p>
+            <p>解 2：对于任意 \(c \geq 0\)，</p>
+            \[y_c(t) = \begin{cases} 0, & t \leq c \\ \left(\frac{t - c}{3}\right)^3, & t > c \end{cases}\]
+            <p>都是解。原因：\(f(y) = y^{2/3}\) 在 \(y = 0\) 处不满足 Lipschitz 条件（\(|y^{2/3}|/|y| = |y|^{-1/3} \to \infty\)）。</p>
+
+            <h4>3. 爆破现象</h4>
+            <p>考虑 \(y' = y^2\)，\(y(0) = 1\)。分离变量得 \(y = \frac{1}{1-t}\)，在 \(t = 1\) 处 \(y \to +\infty\)。</p>
+            <p>更一般地，\(y' = y^p\)（\(p > 1\)）的解 \(y(t) = [(p-1)(T - t)]^{-1/(p-1)}\) 在有限时间 \(T = 1/[(p-1)y_0^{p-1}]\) 爆破。</p>
+
+            <h4>4. 最大存在区间</h4>
+            <p>IVP 的解可以延拓到一个<strong>最大存在区间</strong> \((t^-, t^+)\)。关于爆破有重要的<strong>延拓定理</strong>：</p>
+            <p>若 \(t^+ < \infty\)，则 \(\lim_{t \to t^+} |y(t)| = \infty\)（解必须「离开」任何紧集）。</p>
+            <p>逆否：若解在 \([t_0, T]\) 上保持有界，则解可以延拓到 \(T\) 之后。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 流体力学中 Navier-Stokes 方程的「爆破」问题是千禧年大奖问题之一 - 非线性光学中自聚焦方程的有限时间奇异性</p>
+            <p><strong>Navier-Stokes 方程的爆破问题</strong>：三维不可压 Navier-Stokes 方程是否存在有限时间爆破，是克雷数学研究所悬赏的千禧年大奖问题之一。这与 ODE 爆破理论有深刻的类比关系。</p>
+            <p><strong>非线性光学</strong>：自聚焦方程（非线性 Schrödinger 方程）中，光束强度可在有限时间内趋向无穷，对应激光的自聚焦崩塌现象。爆破时间的估计对设计高功率激光系统至关重要。</p>
+            <p><strong>金融数学</strong>：某些随机波动率模型中，波动率过程满足的 SDE 可能在 \(y = 0\) 处违反 Lipschitz 条件（如 CIR 模型 \(dY = \kappa(\theta - Y)dt + \sigma\sqrt{Y}\,dW\)），需要 Peano 定理保证路径的存在性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(y' = 1 + y^2\)，\(y(0) = 0\) 的解和爆破时间。 解答：分离变量 \(dy/(1+y^2) = dt\)，\(\arctan y = t + C\)。 \(y(0)=0 \Rightarrow C=0\)，故 \(y = \tan t\)。 爆破时间 \(t^+ = \pi/2\)，因为 \(\tan t \to +\infty\) 当 \(t \to \pi/2^-\)。 易错点：误以为连续 ODE 的解总是全局存在的。 非线性方程可以在有限时间爆破，需检查最大存在区间。</p>
+            <h4>例题：求解并分析爆破</h4>
+            <p>求 \(y' = 1 + y^2\)，\(y(0) = 0\) 的解和爆破时间。</p>
+            <p><strong>第 1 步</strong>：分离变量：\(\frac{dy}{1 + y^2} = dt\)。</p>
+            <p><strong>第 2 步</strong>：积分：\(\arctan y = t + C\)。</p>
+            <p><strong>第 3 步</strong>：代入初值 \(y(0) = 0\)：\(\arctan 0 = 0 + C\)，故 \(C = 0\)。</p>
+            <p><strong>第 4 步</strong>：\(y(t) = \tan t\)。当 \(t \to \pi/2^-\) 时 \(\tan t \to +\infty\)，爆破时间 \(t^+ = \pi/2\)。</p>
+            <p><strong>验证</strong>：\(f(t,y) = 1 + y^2\) 关于 \(y\) 局部 Lipschitz（\(f_y = 2y\) 在有界域上有界），所以 Cauchy-Lipschitz 保证局部唯一解。但 \(f\) 不是全局 Lipschitz 的，解无法全局延拓。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 误以为连续 ODE 的解总是全局存在。非线性方程可以在有限时间爆破——必须检查最大存在区间。</li>
+              <li>❌ 混淆 Peano 和 Cauchy-Lipschitz 的结论。Peano 只给<strong>存在性</strong>（至少一个解），Cauchy-Lipschitz 给<strong>存在+ 唯一性</strong>。</li>
+              <li>❌ 对 \(y' = y^{2/3}\) 的非唯一性反例，错误地认为 \(y = (t/3)^3\) 在 \(t < 0\) 也成立。实际上需要分段定义，且有无穷多个解（取不同的延迟参数 \(c\)）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -586,35 +726,87 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在实际应用中，初始条件和参数总有测量误差。解是否对这些扰动「稳定」？ Grönwall 不等式是回答这个问题的核心工具——它将积分不等式转化为 指数估计，从而定量控制解的偏差。这个不等式也是稳定性分析和 数值方法误差估计中最常用的技术之一。</p>
+            <p>在实际应用中，初始条件和参数总有测量误差。核心问题是：</p>
+            <ul>
+              <li><strong>稳定性</strong>：初始条件的微小扰动会导致解发生多大偏差？偏差会随时间放大还是衰减？</li>
+              <li><strong>可预测性</strong>：如果初值误差 \(\delta\) 导致解的偏差以 \(\delta e^{Lt}\) 增长，那么预测的「有效时间窗口」是多长？</li>
+              <li><strong>数值分析的基础</strong>：数值方法在每一步都会引入截断误差，这些局部误差如何累积成全局误差？ Grönwall 不等式正是回答这一问题的核心工具。</li>
+            </ul>
+            <p>Grönwall 不等式将积分不等式转化为指数估计，是 ODE 理论中使用频率最高的技术工具之一。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Grönwall 不等式是一种「积分不等式的放大器」：从 \(u(t) \leq a + \int_0^t b \cdot u(s)\,ds\) 推出 \(u(t) \leq a e^{bt}\)。 其思想是：积分不等式中的反馈效应（\(u\) 出现在右端）不会无限放大， 因为受指数函数控制。</p>
+            <p>Grönwall 不等式的本质是控制<strong>反馈放大效应</strong>：</p>
+            <ul>
+              <li><strong>积分不等式中的反馈</strong>：\(u(t) \leq a + \int_0^t b\cdot u(s)\,ds\) 意味着 \(u\) 的大小反过来影响自身的增长——这是正反馈循环。</li>
+              <li><strong>指数上界</strong>：Grönwall 告诉我们这种反馈效应不会「失控」，最坏情况下增长为指数级 \(u(t) \leq ae^{bt}\)。</li>
+              <li><strong>与 Lipschitz 条件的配合</strong>：Lipschitz 条件 \(|f(t,y_1) - f(t,y_2)| \leq L|y_1 - y_2|\) 将解的偏差方程转化为积分不等式，然后 Grönwall 给出指数估计。两者联合构成了 ODE 稳定性分析的基本工具链。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Grönwall 不等式</strong>（微分形式）：设 \(u(t) \geq 0\)，\(u'(t) \leq \beta(t)u(t) + \alpha(t)\)， 则 \[u(t) \leq u(t_0)e^{\int_{t_0}^t \beta(s)\,ds} + \int_{t_0}^t \alpha(s)e^{\int_s^t \beta(\tau)\,d\tau}\,ds\] 特别地，when \(\alpha = 0\)，\(\beta = L\)（常数）：\(u(t) \leq u(t_0)e^{L(t-t_0)}\)。 <strong>解的连续依赖性</strong>：设 \(y_1, y_2\) 分别是 \(y' = f(t,y)\) 在初值 \(y_{0,1}, y_{0,2}\) 下的解。 \(|y_1 - y_2|' \leq |f(t,y_1) - f(t,y_2)| \leq L|y_1 - y_2|\)，Grönwall 得： \[|y_1(t) - y_2(t)| \leq |y_{0,1} - y_{0,2}| \cdot e^{L|t - t_0|}\] 初值的小扰动导致解的偏差至多指数增长。 <strong>对参数的连续依赖</strong>：类似地，若 \(f\) 还依赖参数 \(\lambda\)，且关于 \(\lambda\) 的变化被 \(\epsilon\) 控制，则解的偏差由 \(\epsilon \cdot C \cdot e^{Lt}\) 控制。</p>
+            <h4>1. Grönwall 不等式（积分形式）</h4>
+            <p><strong>定理</strong>：设 \(u(t) \geq 0\) 连续，\(a \geq 0\)，\(b \geq 0\) 为常数，且</p>
+            \[u(t) \leq a + b\int_{t_0}^{t} u(s)\,ds, \quad t \geq t_0\]
+            <p>则 \(u(t) \leq a \cdot e^{b(t - t_0)}\)。</p>
+            <p><strong>证明</strong>：令 \(v(t) = \int_{t_0}^t u(s)\,ds\)，则 \(v' = u \leq a + bv\)。</p>
+            <p>考虑 \(w(t) = v(t)e^{-b(t-t_0)}\)，则 \(w' = (v' - bv)e^{-b(t-t_0)} \leq ae^{-b(t-t_0)}\)。</p>
+            <p>积分：\(w(t) \leq \int_{t_0}^t ae^{-b(s-t_0)}\,ds = \frac{a}{b}(1 - e^{-b(t-t_0)})\)。</p>
+            <p>故 \(v(t) \leq \frac{a}{b}(e^{b(t-t_0)} - 1)\)，代回得 \(u(t) \leq a + bv(t) \leq ae^{b(t-t_0)}\)。</p>
+
+            <h4>2. Grönwall 不等式（微分形式）</h4>
+            <p>更一般地，若 \(u'(t) \leq \beta(t) u(t) + \alpha(t)\)（\(u \geq 0\)），则</p>
+            \[u(t) \leq u(t_0) e^{\int_{t_0}^t \beta(s)\,ds} + \int_{t_0}^t \alpha(s) e^{\int_s^t \beta(\tau)\,d\tau}\,ds\]
+            <p>特别地，当 \(\alpha \equiv 0\)，\(\beta \equiv L\)（常数）时退化为 \(u(t) \leq u(t_0)e^{L(t-t_0)}\)。</p>
+
+            <h4>3. 解对初值的连续依赖性</h4>
+            <p>设 \(y_1, y_2\) 分别是 \(y' = f(t,y)\)（\(f\) 关于 \(y\) Lipschitz，常数 \(L\)）在初值 \(y_{0,1}, y_{0,2}\) 下的解。令 \(w(t) = |y_1(t) - y_2(t)|\)：</p>
+            \[w(t) \leq |y_{0,1} - y_{0,2}| + L\int_{t_0}^t w(s)\,ds\]
+            <p>由 Grönwall 不等式：</p>
+            \[|y_1(t) - y_2(t)| \leq |y_{0,1} - y_{0,2}| \cdot e^{L|t - t_0|}\]
+            <p><strong>物理解读</strong>：初值误差 \(\delta\) 导致的解偏差在时间 \(t\) 后至多放大为 \(\delta e^{Lt}\)。Lipschitz 常数 \(L\) 控制了放大的速率。</p>
+
+            <h4>4. 解对参数的连续依赖性</h4>
+            <p>若 \(f\) 还依赖参数 \(\lambda\)，设 \(y_\lambda, y_\mu\) 为参数取 \(\lambda, \mu\) 时的解，且 \(\sup|f(t,y,\lambda) - f(t,y,\mu)| \leq \epsilon\)，则</p>
+            \[|y_\lambda(t) - y_\mu(t)| \leq \frac{\epsilon}{L}(e^{L|t - t_0|} - 1)\]
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 数值方法中，Grönwall 不等式用于证明 Euler 法的全局误差为 \(O(h)\) - 天气预报中初值敏感性（蝴蝶效应）的数学表述</p>
+            <p><strong>Euler 法的全局误差分析</strong>：Euler 法每步截断误差为 \(O(h^2)\)，经 \(N = T/h\) 步累积后，Grönwall 不等式给出全局误差 \(O(h)\)——每步的小误差通过反馈效应被指数级「放大」，但总的效果仍然可控。</p>
+            <p><strong>天气预报与蝴蝶效应</strong>：大气动力学中 Lipschitz 常数 \(L\) 很大（强非线性耦合），因此 \(e^{Lt}\) 增长极快——初始测量误差在几天内被放大到与信号同阶。这正是 Lorenz 发现的「蝴蝶效应」的数学表述，也解释了天气预报超过 10 天后准确性急剧下降的原因。</p>
+            <p><strong>轨道力学</strong>：卫星轨道计算中，引力模型的参数不确定性通过 Grönwall 型估计传播，决定了轨道预测的有效时间范围和需要的修正频率。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(u(t) \geq 0\) 且 \(u(t) \leq 3 + 2\int_0^t u(s)\,ds\)，估计 \(u(1)\) 的上界。 解答：由 Grönwall 不等式（\(a=3\)，\(b=2\)），\(u(t) \leq 3e^{2t}\)。 故 \(u(1) \leq 3e^2 \approx 22.17\)。 易错点：在应用 Grönwall 时需要确保 \(u \geq 0\) 和系数 \(\beta \geq 0\) 的符号条件。若 \(\beta\) 可能为负，估计方向可能反转。</p>
+            <h4>例题：应用 Grönwall 不等式</h4>
+            <p>设 \(u(t) \geq 0\) 且 \(u(t) \leq 3 + 2\int_0^t u(s)\,ds\)，估计 \(u(1)\) 的上界。</p>
+            <p><strong>第 1 步</strong>：识别参数。对比标准形式 \(u \leq a + b\int u\)，得 \(a = 3\)，\(b = 2\)。</p>
+            <p><strong>第 2 步</strong>：应用 Grönwall 不等式：\(u(t) \leq 3e^{2t}\)。</p>
+            <p><strong>第 3 步</strong>：代入 \(t = 1\)：\(u(1) \leq 3e^2 \approx 22.17\)。</p>
+
+            <h4>例题 2：连续依赖性的定量估计</h4>
+            <p>设 \(y' = y\sin t\)（\(L = 1\)），初值分别为 \(y_0 = 1\) 和 \(\tilde{y}_0 = 1.01\)。估计 \(t = 5\) 时解的偏差上界。</p>
+            <p>\(|y(5) - \tilde{y}(5)| \leq 0.01 \cdot e^{1 \times 5} = 0.01 \cdot e^5 \approx 1.48\)。</p>
+            <p>初值仅差 \(1\%\)，但 5 个时间单位后偏差可能达到 \(O(1)\)。</p>
+
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 在应用 Grönwall 时忽略 \(u \geq 0\) 的前提。如果 \(u\) 可以取负值，不等式方向可能反转，需要改用绝对值或分情况讨论。</li>
+              <li>❌ 将 Grönwall 估计视为「等式」。\(ae^{bt}\) 是上界，实际解的偏差通常远小于此——Grönwall 给出的是最坏情况估计。</li>
+              <li>❌ 混淆连续依赖性（局部的、有限时间的稳定性）与渐近稳定性（\(t \to \infty\) 的行为）。Grönwall 估计中 \(e^{Lt}\) 趋向无穷，只说明偏差的上界在增长，不代表实际偏差一定增长。长时间行为需要稳定性理论（ch06）。</li>
+            </ul>
           </div>
         </div>
       </div>

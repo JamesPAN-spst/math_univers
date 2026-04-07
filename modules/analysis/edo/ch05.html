@@ -394,35 +394,76 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当方程不显含时间 \(t\)（自治系统 \(\mathbf{X}' = \mathbf{F}(\mathbf{X})\)）时， 解的行为可以在相空间中几何化地理解。平衡点是系统长期行为的 「锚点」——行星轨道、化学平衡、种群稳态都对应平衡点。 理解平衡点的类型（稳定/不稳定/鞍点）是分析非线性系统的第一步。</p>
+            <p>当方程不显含时间 \(t\)（自治系统 \(\mathbf{X}' = \mathbf{F}(\mathbf{X})\)）时，解的行为可以在<strong>相空间</strong>中几何化地理解：</p>
+            <ul>
+              <li><strong>平衡点是「锚点」</strong>：行星轨道、化学平衡、种群稳态都对应 \(\mathbf{F}(\mathbf{X}^*) = \mathbf{0}\) 的平衡点。理解平衡点的类型（稳定/不稳定/鞍点）是分析系统长期行为的第一步。</li>
+              <li><strong>几何直觉</strong>：向量场 \(\mathbf{F}(\mathbf{X})\) 在每一点给出「速度方向」，轨线就是跟随速度的流线——相图将微分方程从解析问题转化为几何问题。</li>
+              <li><strong>线性化的威力</strong>：通过 Jacobian 矩阵在平衡点附近将非线性问题局部化为线性代数问题，用特征值判断稳定性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>相空间的观点将动力系统从「时间的函数」转化为「空间中的流」。 平衡点的线性化通过 Jacobian 矩阵将非线性问题局部化为线性代数问题。</p>
+            <p>相空间的观点将动力系统从「时间的函数」转化为「空间中的流」：</p>
+            <ul>
+              <li><strong>流的语言</strong>：解映射 \(\phi_t: \mathbf{X}_0 \mapsto \mathbf{X}(t;\mathbf{X}_0)\) 是一个单参数流，满足 \(\phi_0 = \mathrm{id}\)，\(\phi_{t+s} = \phi_t \circ \phi_s\)（半群性质）。</li>
+              <li><strong>线性化 = 切空间近似</strong>：Jacobian \(D\mathbf{F}(\mathbf{X}^*)\) 是非线性映射 \(\mathbf{F}\) 在平衡点的<strong>最佳线性近似</strong>，把非线性问题化为矩阵特征值问题。</li>
+              <li><strong>(tr, det) 分类法</strong>：二维线性系统的所有定性行为由矩阵的迹和行列式决定——一个二维参数平面上的区域划分。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>自治系统</strong>：\(\mathbf{X}' = \mathbf{F}(\mathbf{X})\)，\(\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^n\)，不显含 \(t\)。 <strong>平衡点</strong>：\(\mathbf{X}^*\) 满足 \(\mathbf{F}(\mathbf{X}^*) = \mathbf{0}\)。 <strong>线性化</strong>：在 \(\mathbf{X}^*\) 附近令 \(\mathbf{u} = \mathbf{X} - \mathbf{X}^*\)，Taylor 展开： \[\mathbf{u}' = \mathbf{F}(\mathbf{X}^* + \mathbf{u}) \approx D\mathbf{F}(\mathbf{X}^*)\mathbf{u} = A\mathbf{u}\] 其中 \(A = D\mathbf{F}(\mathbf{X}^*) = \left(\frac{\partial F_i}{\partial x_j}\right)\) 是 Jacobian 矩阵。 <strong>分类</strong>（二维 \(A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}\) 的特征值 \(\lambda_{1,2}\)）： 由 \(\text{tr}(A) = \lambda_1 + \lambda_2\) 和 \(\det(A) = \lambda_1 \lambda_2\) 决定。 在 \((\text{tr}, \det)\) 平面上可划分各种平衡点类型。</p>
+            <h4>1. 自治系统与相空间</h4>
+            <p>自治系统 \(\mathbf{X}' = \mathbf{F}(\mathbf{X})\)，\(\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^n\)，不显含 \(t\)。关键性质：轨线不交叉（唯一性定理），解沿时间平移仍是解。</p>
+
+            <h4>2. 平衡点与线性化</h4>
+            <p><strong>平衡点</strong>：\(\mathbf{X}^*\) 满足 \(\mathbf{F}(\mathbf{X}^*) = \mathbf{0}\)。在 \(\mathbf{X}^*\) 附近令 \(\mathbf{u} = \mathbf{X} - \mathbf{X}^*\)，Taylor 展开：</p>
+            \[\mathbf{u}' = \mathbf{F}(\mathbf{X}^* + \mathbf{u}) = \underbrace{D\mathbf{F}(\mathbf{X}^*)}_{A}\mathbf{u} + O(|\mathbf{u}|^2) \approx A\mathbf{u}\]
+            <p>其中 \(A = D\mathbf{F}(\mathbf{X}^*) = \left(\frac{\partial F_i}{\partial x_j}\right)_{\mathbf{X}^*}\) 是 Jacobian 矩阵。</p>
+
+            <h4>3. 二维分类参数</h4>
+            <p>对 \(A\) 的特征值 \(\lambda_{1,2}\)，令 \(\tau = \mathrm{tr}(A) = \lambda_1 + \lambda_2\)，\(\Delta = \det(A) = \lambda_1\lambda_2\)，判别式 \(D = \tau^2 - 4\Delta\)。在 \((\tau, \Delta)\) 平面上：</p>
+            <ul>
+              <li>\(\Delta < 0\)：鞍点（一正一负特征值）</li>
+              <li>\(\Delta > 0,\ D \geq 0\)：结点（同号实特征值），\(\tau < 0\) 稳定，\(\tau > 0\) 不稳定</li>
+              <li>\(\Delta > 0,\ D < 0\)：焦点（共轭复特征值），\(\tau < 0\) 稳定，\(\tau > 0\) 不稳定</li>
+              <li>\(\tau = 0,\ \Delta > 0\)：中心（纯虚特征值）</li>
+            </ul>
+
+            <h4>4. 特征方向与相图绘制</h4>
+            <p>特征向量确定直线方向（结点/鞍点的流入/流出方向）。\(\mathrm{Re}(\lambda)\) 决定径向趋势，\(\mathrm{Im}(\lambda)\) 决定旋转。鞍点的<strong>稳定/不稳定流形</strong>是组织全局相图的骨架。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Lotka-Volterra 捕食者-猎物模型的共存平衡点分析 - 化学反应网络中的稳态浓度</p>
+            <p><strong>Lotka-Volterra 捕食模型</strong>：\(x' = x(a - by)\)，\(y' = y(cx - d)\)。共存平衡点 \((d/c, a/b)\) 处 Jacobian 特征值为纯虚数 → 中心。轨线是闭合的周期轨道，对应种群数量的永续振荡。</p>
+            <p><strong>化学反应网络</strong>：反应速率方程的稳态浓度 = 平衡点。<strong>CRN 理论</strong>（化学反应网络理论）通过缺陷理论和复平衡条件分析平衡点的存在性和稳定性。</p>
+            <p><strong>神经科学</strong>：FitzHugh-Nagumo 模型通过平衡点分析和零曲线相交解释神经元的兴奋/静息状态。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求系统 \(x' = x(1-y)\)，\(y' = y(x-1)\) 的平衡点和 Jacobian。 解答：\(\mathbf{F} = 0\)：\(x(1-y)=0\) 且 \(y(x-1)=0\)。 平衡点：\((0,0)\) 和 \((1,1)\)。 \(A = \begin{pmatrix} 1-y & -x \\ y & x-1 \end{pmatrix}\)。 在 \((1,1)\)：\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)， 特征值 \(\lambda = \pm i\)（中心）。这是 Lotka-Volterra 模型的特征。 易错点：线性化在中心情况下不能确定非线性系统的定性行为 （中心可能变为焦点），需要更精细的分析。</p>
+            <h4>例题：Lotka-Volterra 系统的平衡点分析</h4>
+            <p>求系统 \(x' = x(1 - y)\)，\(y' = y(x - 1)\) 的平衡点和线性化。</p>
+            <p><strong>第 1 步</strong>：求平衡点。\(x(1-y) = 0\) 且 \(y(x-1) = 0\)。解为 \((0,0)\) 和 \((1,1)\)。</p>
+            <p><strong>第 2 步</strong>：Jacobian \(A = \begin{pmatrix} 1-y & -x \\ y & x-1 \end{pmatrix}\)。</p>
+            <p><strong>第 3 步</strong>：在 \((0,0)\)：\(A = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}\)，特征值 \(\lambda = 1, -1\) → <strong>鞍点</strong>（不稳定）。</p>
+            <p><strong>第 4 步</strong>：在 \((1,1)\)：\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)，\(\tau = 0\)，\(\Delta = 1 > 0\)，特征值 \(\lambda = \pm i\) → <strong>中心</strong>。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 线性化在<strong>中心</strong>情况下不能确定非线性系统的定性行为。中心可能因非线性项变为焦点（稳定或不稳定），需要更精细的分析（如 Lyapunov 函数或首次积分）。</li>
+              <li>❌ 计算 Jacobian 时忘记在平衡点处代入坐标值。\(D\mathbf{F}\) 是关于 \((x,y)\) 的函数，必须在 \(\mathbf{X}^*\) 处取值。</li>
+              <li>❌ 混淆判别式 \(D = \tau^2 - 4\Delta\) 与行列式 \(\Delta = \det(A)\)。\(D < 0\) 表示复特征值（焦点/中心），\(\Delta < 0\) 表示鞍点。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -449,28 +490,80 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>二维线性系统 \(\mathbf{X}' = A\mathbf{X}\) 的所有可能行为可以通过 \(A\) 的特征值完全分类。这种分类产生了经典的相图库——鞍点、结点、 焦点、中心——它们不仅描述线性系统，也（通过 Hartman-Grobman 定理） 刻画非线性系统的局部行为。相图是直觉理解动力系统的最强工具。</p>
+            <p>二维线性系统 \(\mathbf{X}' = A\mathbf{X}\) 的所有可能行为可以通过 \(A\) 的特征值<strong>完全分类</strong>：</p>
+            <ul>
+              <li><strong>完备的相图库</strong>：鞍点、结点、焦点、中心——六种基本类型覆盖所有可能。掌握它们是读懂任何二维系统的基础。</li>
+              <li><strong>通向非线性</strong>：Hartman-Grobman 定理保证双曲平衡点附近的非线性相图与线性化拓扑等价——线性分类直接推广到非线性。</li>
+              <li><strong>工程设计</strong>：阻尼系统的过阻尼（结点）、临界阻尼（退化结点）、欠阻尼（焦点）选择取决于应用需求。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>分类的本质是将 \(2 \times 2\) 矩阵的四个参数 \((a,b,c,d)\) 压缩到两个不变量 \((\tau, \Delta)\)（迹和行列式）：</p>
+            <ul>
+              <li><strong>相似不变性</strong>：相似变换 \(P^{-1}AP\) 改变坐标但不改变特征值，因此 \(\tau\) 和 \(\Delta\) 是坐标无关的本质量。</li>
+              <li><strong>判别式的角色</strong>：\(D = \tau^2 - 4\Delta\) 区分实特征值（\(D \geq 0\)，结点/鞍点）和复特征值（\(D < 0\)，焦点/中心）。</li>
+              <li><strong>拓扑 vs 度量</strong>：分类只关心轨线的拓扑结构（趋向/远离/绕行），不关心具体的收敛速率或轨线形状。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>设 \(A\) 的特征值为 \(\lambda_1, \lambda_2\)，令 \(\tau = \text{tr}(A)\)，\(\Delta = \det(A)\)， 判别式 \(D = \tau^2 - 4\Delta\)。 <strong>分类</strong>： 1. <strong>鞍点</strong> (\(\Delta < 0\))：\(\lambda_1 > 0 > \lambda_2\)，不稳定 2. <strong>稳定结点</strong> (\(\Delta > 0\), \(\tau < 0\), \(D \geq 0\))：\(\lambda_1, \lambda_2 < 0\)， 轨线沿特征方向趋向原点 3. <strong>不稳定结点</strong> (\(\Delta > 0\), \(\tau > 0\), \(D \geq 0\))：\(\lambda_1, \lambda_2 > 0\) 4. <strong>稳定焦点</strong> (\(\Delta > 0\), \(\tau < 0\), \(D < 0\))：\(\lambda = \alpha \pm i\beta\), \(\alpha < 0\)， 轨线螺旋趋向原点 5. <strong>不稳定焦点</strong> (\(\tau > 0\), \(D < 0\))：螺旋远离原点 6. <strong>中心</strong> (\(\tau = 0\), \(\Delta > 0\))：纯虚特征值，封闭轨道 <strong>相图绘制</strong>：特征向量确定直线方向（结点/鞍点）， \(\text{Re}(\lambda)\) 的符号确定螺旋方向（焦点）， \(\text{Im}(\lambda)\) 确定旋转方向。</p>
+            <h4>1. 分类参数</h4>
+            <p>设 \(A\) 的特征值为 \(\lambda_1, \lambda_2\)，定义 \(\tau = \mathrm{tr}(A) = \lambda_1 + \lambda_2\)，\(\Delta = \det(A) = \lambda_1\lambda_2\)，\(D = \tau^2 - 4\Delta = (\lambda_1 - \lambda_2)^2\)。</p>
+
+            <h4>2. 六种基本类型</h4>
+            <ul>
+              <li><strong>鞍点</strong>（\(\Delta < 0\)）：\(\lambda_1 > 0 > \lambda_2\)，不稳定。轨线沿稳定方向流入、沿不稳定方向流出。</li>
+              <li><strong>稳定结点</strong>（\(\Delta > 0,\ \tau < 0,\ D \geq 0\)）：\(\lambda_1, \lambda_2 < 0\)，轨线沿特征方向趋向原点。\(D = 0\) 时为<strong>退化结点/星形结点</strong>。</li>
+              <li><strong>不稳定结点</strong>（\(\Delta > 0,\ \tau > 0,\ D \geq 0\)）：\(\lambda_1, \lambda_2 > 0\)，时间反转稳定结点。</li>
+              <li><strong>稳定焦点</strong>（\(\Delta > 0,\ \tau < 0,\ D < 0\)）：\(\lambda = \alpha \pm i\beta\)，\(\alpha < 0\)，轨线螺旋趋向原点。</li>
+              <li><strong>不稳定焦点</strong>（\(\Delta > 0,\ \tau > 0,\ D < 0\)）：螺旋远离原点。</li>
+              <li><strong>中心</strong>（\(\tau = 0,\ \Delta > 0\)）：纯虚特征值 \(\lambda = \pm i\beta\)，封闭轨道（椭圆），既不稳定也不渐近稳定。</li>
+            </ul>
+
+            <h4>3. 相图绘制要点</h4>
+            <p><strong>特征方向</strong>：实特征值对应的特征向量给出直线轨线方向——结点中「快轴」对应 \(|\lambda|\) 大的特征值，「慢轴」对应 \(|\lambda|\) 小的。接近/远离原点时轨线趋向慢轴。</p>
+            <p><strong>旋转方向</strong>：焦点/中心的旋转方向由 \(A\) 的非对角元素符号确定。可用 \((1,0)^\top\) 处的速度向量判断顺/逆时针。</p>
+
+            <h4>4. (\(\tau\), \(\Delta\)) 参数平面</h4>
+            <p>分界线：\(\Delta = 0\)（鞍点与结点的分界）、\(D = 0\) 即 \(\Delta = \tau^2/4\)（结点与焦点的分界）、\(\tau = 0\) 轴（焦点与中心的分界）。整个平面被分成有限个区域，每个区域对应一种定性类型。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 工程中的阻尼系统设计：过阻尼(结点)、临界阻尼(退化结点)、 欠阻尼(焦点)的选择取决于应用需求</p>
+            <p><strong>阻尼系统设计</strong>：弹簧-阻尼器系统 \(m\ddot{x} + c\dot{x} + kx = 0\) 化为二维系统后，阻尼比 \(\zeta = c/(2\sqrt{mk})\) 决定类型：</p>
+            <ul>
+              <li>\(\zeta > 1\)（过阻尼）→ 稳定结点：无振荡回归，用于门关闭器</li>
+              <li>\(\zeta = 1\)（临界阻尼）→ 退化结点：最快无振荡回归，用于仪表指针</li>
+              <li>\(0 < \zeta < 1\)（欠阻尼）→ 稳定焦点：衰减振荡，用于汽车悬架</li>
+            </ul>
+            <p><strong>宏观经济学</strong>：IS-LM 模型的动态版本中，利率与产出的调整轨迹对应不同的相图类型，决定经济收敛到均衡的路径。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：对 \(A = \begin{pmatrix} -1 & 2 \\ -2 & -1 \end{pmatrix}\) 画出相图类型。 解答：\(\tau = -2 < 0\)，\(\Delta = 1+4 = 5 > 0\)，\(D = 4-20 = -16 < 0\)。 特征值 \(\lambda = -1 \pm 2i\)。\(\text{Re}(\lambda) < 0\)，\(\text{Im}(\lambda) \neq 0\)。 类型：稳定焦点。轨线以衰减的螺旋趋向原点。 易错点：混淆判别式 \(D = \tau^2 - 4\Delta\) 与行列式 \(\Delta\)。 \(D < 0\) 表示复特征值（焦点/中心），\(\Delta < 0\) 表示鞍点。</p>
+            <h4>例题：判断相图类型</h4>
+            <p>对 \(A = \begin{pmatrix} -1 & 2 \\ -2 & -1 \end{pmatrix}\) 判断相图类型并确定旋转方向。</p>
+            <p><strong>第 1 步</strong>：计算参数。\(\tau = -1 + (-1) = -2 < 0\)，\(\Delta = (-1)(-1) - (2)(-2) = 1 + 4 = 5 > 0\)。</p>
+            <p><strong>第 2 步</strong>：判别式 \(D = \tau^2 - 4\Delta = 4 - 20 = -16 < 0\) → 复特征值。</p>
+            <p><strong>第 3 步</strong>：特征值 \(\lambda = -1 \pm 2i\)。\(\mathrm{Re}(\lambda) = -1 < 0\) → <strong>稳定焦点</strong>。</p>
+            <p><strong>第 4 步</strong>：旋转方向。在 \((1,0)^\top\) 处速度为 \(A\binom{1}{0} = \binom{-1}{-2}\)，\(y\) 分量为负 → <strong>顺时针</strong>旋转。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 混淆判别式 \(D = \tau^2 - 4\Delta\) 与行列式 \(\Delta = \det(A)\)。\(D < 0\) → 复特征值（焦点/中心），\(\Delta < 0\) → 鞍点。</li>
+              <li>❌ 忘记退化情况。\(D = 0\) 时需区分<strong>星形结点</strong>（\(A = \lambda I\)）和<strong>退化结点</strong>（Jordan 块）。\(\Delta = 0\) 时有零特征值，需单独分析。</li>
+              <li>❌ 判断旋转方向时仅看 \(\mathrm{Im}(\lambda)\) 的符号。旋转方向由矩阵本身决定，不能仅从 \(\pm i\beta\) 推断。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -565,35 +658,74 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Hartman-Grobman 定理是非线性动力系统理论的基石：它保证在 「双曲」平衡点（特征值实部非零）附近，非线性系统的相图与其 线性化系统拓扑等价。这意味着线性分析的结论可以推广到非线性 情形——但有一个重要例外：当特征值有零实部时（如中心）， 线性化不能确定非线性行为。</p>
+            <p>Hartman-Grobman 定理是非线性动力系统理论的<strong>基石</strong>——它回答了一个根本问题：线性化的结论何时能推广到非线性系统？</p>
+            <ul>
+              <li><strong>线性化的合法性</strong>：在「双曲」平衡点（特征值实部非零）附近，非线性系统的相图与线性化<strong>拓扑等价</strong>——线性分析的结论完全有效。</li>
+              <li><strong>重要例外</strong>：当特征值有零实部时（如中心），线性化<strong>不能</strong>确定非线性行为。中心可能因高阶项变为焦点——这是分析中最常见的陷阱。</li>
+              <li><strong>实用价值</strong>：工程和科学中大多数平衡点是双曲的（非双曲是「巧合」），因此 Hartman-Grobman 为线性化分析提供了坚实的理论保障。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Hartman-Grobman 定理建立的是「拓扑等价」而非「微分等价」： 存在保持轨线结构的同胚映射，但不一定光滑。这个区分很关键， 因为轨线的渐近方向和稳定性被保持，但曲率等量化信息可能改变。</p>
+            <p>Hartman-Grobman 定理建立的是<strong>拓扑等价</strong>而非微分等价：</p>
+            <ul>
+              <li><strong>同胚 vs 微分同胚</strong>：存在保持轨线结构的连续可逆映射 \(h\)，但 \(h\) 不一定光滑。轨线的拓扑走向被保持，但曲率、收敛速率等定量信息可能改变。</li>
+              <li><strong>结构稳定性</strong>：双曲平衡点是<strong>结构稳定</strong>的——对系统的小扰动不改变定性行为。非双曲平衡点（如中心）是结构不稳定的「分岔点」。</li>
+              <li><strong>不变流形理论</strong>：稳定流形 \(W^s\) 和不稳定流形 \(W^u\) 是平衡点附近的全局结构骨架，它们与线性化的特征子空间相切。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>双曲平衡点</strong>：\(\mathbf{X}^*\) 称为双曲的，若 Jacobian \(A = D\mathbf{F}(\mathbf{X}^*)\) 的所有特征值的实部非零，即 \(\text{Re}(\lambda_i) \neq 0\) 对所有 \(i\)。 <strong>Hartman-Grobman 定理</strong>：若 \(\mathbf{X}^*\) 是双曲平衡点，则存在 \(\mathbf{X}^*\) 的邻域 \(U\) 和原点的邻域 \(V\)，以及同胚 \(h: U \to V\)， 使得非线性流 \(\phi_t\) 与线性流 \(e^{tA}\) 满足 \[h \circ \phi_t = e^{tA} \circ h\] 即轨线的拓扑结构（稳定性类型、轨线走向）完全由线性化决定。 <strong>非双曲情况的反例</strong>：\(x' = -y + x(x^2+y^2)\)，\(y' = x + y(x^2+y^2)\)。 线性化 \(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\) 给出中心（纯虚特征值）， 但非线性系统的原点是不稳定焦点（轨线螺旋远离）。</p>
+            <h4>1. 双曲平衡点的定义</h4>
+            <p>平衡点 \(\mathbf{X}^*\) 称为<strong>双曲的</strong>，若 Jacobian \(A = D\mathbf{F}(\mathbf{X}^*)\) 的所有特征值的实部非零：\(\mathrm{Re}(\lambda_i) \neq 0\)，\(\forall i\)。</p>
+            <p>等价地：\(A\) 的特征值不在虚轴上。非双曲的情况包括：纯虚特征值（中心型）、零特征值（退化型）。</p>
+
+            <h4>2. Hartman-Grobman 定理</h4>
+            <p>若 \(\mathbf{X}^*\) 是双曲平衡点，则存在平衡点的邻域 \(U\) 和原点的邻域 \(V\)，以及<strong>同胚</strong> \(h: U \to V\)，使得非线性流 \(\phi_t\) 与线性流 \(e^{tA}\) 满足</p>
+            \[h \circ \phi_t = e^{tA} \circ h\]
+            <p>这意味着：非线性系统的轨线经过 \(h\) 映射后与线性系统的轨线完全对应。稳定性类型、轨线走向、流入/流出方向都被保持。</p>
+
+            <h4>3. 稳定流形定理</h4>
+            <p>在双曲平衡点附近，存在光滑的<strong>稳定流形</strong> \(W^s\) 和<strong>不稳定流形</strong> \(W^u\)，分别与线性化的稳定/不稳定特征子空间 \(E^s\)、\(E^u\) 在 \(\mathbf{X}^*\) 处相切：</p>
+            \[\dim W^s = \dim E^s,\quad \dim W^u = \dim E^u,\quad T_{\mathbf{X}^*}W^s = E^s\]
+
+            <h4>4. 非双曲情况的反例</h4>
+            <p>考虑 \(x' = -y + x(x^2+y^2)\)，\(y' = x + y(x^2+y^2)\)。</p>
+            <p>线性化 \(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)，特征值 \(\lambda = \pm i\) → 中心。</p>
+            <p>但极坐标中 \(r' = r^3 > 0\)（对 \(r > 0\)），轨线螺旋远离原点——非线性系统的原点是<strong>不稳定焦点</strong>，与线性化的「中心」定性行为截然不同。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 生态学中判断种群共存平衡点的稳定性类型 - 非线性控制系统的局部稳定性分析</p>
+            <p><strong>生态学</strong>：Lotka-Volterra 模型的共存平衡点特征值为纯虚数（中心），Hartman-Grobman 不适用。需要找到首次积分 \(V = cx - d\ln x + by - a\ln y\) 证明确实是中心。</p>
+            <p><strong>非线性控制</strong>：控制系统设计中，先在平衡点处线性化，设计线性控制器（如 LQR），再由 Hartman-Grobman 保证局部有效性。<strong>增益调度</strong>方法对多个工作点分别线性化并切换控制器。</p>
+            <p><strong>分岔理论</strong>：参数变化导致特征值穿越虚轴（非双曲 → 双曲或反之）时发生<strong>分岔</strong>：Hopf 分岔（共轭特征值穿越）产生极限环，鞍结分岔（零特征值）产生/消灭平衡点。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：判断系统 \(x' = -x + y^2\)，\(y' = -2y\) 在原点附近的定性行为。 解答：\(\mathbf{F}(0,0) = (0,0)\)，Jacobian \(A = \begin{pmatrix} -1 & 0 \\ 0 & -2 \end{pmatrix}\)。 特征值 \(\lambda_1 = -1\)，\(\lambda_2 = -2\)，均为负实数（双曲）。 线性化是稳定结点。由 Hartman-Grobman 定理，非线性系统在原点附近 也呈稳定结点行为。 易错点：特征值为纯虚时（\(\text{Re}(\lambda) = 0\)），Hartman-Grobman 不适用。此时中心可能变为焦点，必须用其他方法分析。</p>
+            <h4>例题：Hartman-Grobman 定理的应用</h4>
+            <p>判断系统 \(x' = -x + y^2\)，\(y' = -2y\) 在原点附近的定性行为。</p>
+            <p><strong>第 1 步</strong>：验证平衡点。\(\mathbf{F}(0,0) = (0,0)\) ✓。</p>
+            <p><strong>第 2 步</strong>：Jacobian \(A = \begin{pmatrix} -1 & 2y \\ 0 & -2 \end{pmatrix}\bigg|_{(0,0)} = \begin{pmatrix} -1 & 0 \\ 0 & -2 \end{pmatrix}\)。</p>
+            <p><strong>第 3 步</strong>：特征值 \(\lambda_1 = -1\)，\(\lambda_2 = -2\)，均为负实数。\(\mathrm{Re}(\lambda_i) \neq 0\) → <strong>双曲</strong>平衡点。</p>
+            <p><strong>第 4 步</strong>：线性化为稳定结点。由 Hartman-Grobman 定理，非线性系统在原点附近也呈<strong>稳定结点</strong>行为。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ 特征值为纯虚（\(\mathrm{Re}(\lambda) = 0\)）时仍使用 Hartman-Grobman。此时中心可能变为焦点，定理不适用，必须用 Lyapunov 函数或中心流形方法。</li>
+              <li>❌ 混淆「拓扑等价」和「定量一致」。Hartman-Grobman 保证定性行为相同，但不保证收敛速率或轨线形状的定量一致。</li>
+              <li>❌ 忘记检查双曲性条件。应用定理前必须验证<strong>所有</strong>特征值的实部非零，一个零实部就足以使定理失效。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -620,35 +752,79 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在二维自治系统中，轨线除了趋向平衡点外，还可能趋向周期轨道 （极限环）。Poincaré-Bendixson 定理刻画了这种行为：如果轨线留在 有界区域内且不趋向平衡点，就必须趋近周期轨道。这个定理是二维 独有的（三维起可以出现混沌），也是排除/确认极限环存在的基本工具。</p>
+            <p>在二维自治系统中，轨线除了趋向平衡点外，还可能趋向<strong>周期轨道（极限环）</strong>：</p>
+            <ul>
+              <li><strong>自持振荡</strong>：心脏起搏、昼夜节律、电子振荡器的稳定周期运动对应极限环——与中心的闭轨不同，极限环对扰动具有恢复力。</li>
+              <li><strong>二维的特殊性</strong>：Poincaré-Bendixson 定理表明二维系统的长期行为只有平衡点或周期轨道两种可能。三维起可出现<strong>混沌</strong>（Lorenz 系统），该定理不再成立。</li>
+              <li><strong>排除/确认工具</strong>：Bendixson 负判据和 Dulac 判别法提供了系统性地排除极限环的方法。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Poincaré-Bendixson 反映了二维的拓扑限制：Jordan 曲线定理使得 二维封闭曲线将平面分为内外两部分，轨线无法「穿越」自身， 长期行为只能是平衡点或周期轨道，没有其他可能。</p>
+            <p>Poincaré-Bendixson 定理反映了<strong>二维的拓扑限制</strong>：</p>
+            <ul>
+              <li><strong>Jordan 曲线定理</strong>：二维封闭曲线将平面分为内外两部分。轨线不能「穿越」自身（唯一性），因此被困在有界区域中的轨线只能收敛到平衡点或周期轨道。</li>
+              <li><strong>\(\omega\)-极限集</strong>：轨线 \(t \to +\infty\) 的聚点集 \(\omega(\mathbf{X}_0)\) 是相空间中的紧不变集。Poincaré-Bendixson 刻画了它的结构。</li>
+              <li><strong>散度与面积变化</strong>：Bendixson/Dulac 判据利用 Green 定理——若流在区域内总是「膨胀」或「压缩」面积，则不可能有封闭轨道。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Poincaré-Bendixson 定理</strong>：设 \(\omega(\mathbf{X}_0)\) 为轨线经过 \(\mathbf{X}_0\) 的 \(\omega\)-极限集。若 \(\omega(\mathbf{X}_0)\) 非空、有界、且不包含平衡点， 则 \(\omega(\mathbf{X}_0)\) 是一个周期轨道（极限环）。 <strong>实际应用框架</strong>：找一个正不变区域 \(D\)（轨线从 \(D\) 内不逃出）， 排除 \(D\) 内无平衡点 → 必有极限环。 <strong>Dulac 判别法</strong>（排除极限环）：若存在 \(B(x,y) \in C^1\) 使得 \[\frac{\partial(BF_1)}{\partial x} + \frac{\partial(BF_2)}{\partial y}\] 在单连通域 \(D\) 上不变号（且不恒为零），则 \(D\) 内无周期轨道。 理由：对任何封闭轨线 \(\gamma\)，Green 定理给出 \(\oint_\gamma B\mathbf{F} \cdot \mathbf{n}\,ds = \iint \text{div}(B\mathbf{F})\,dA \neq 0\)，矛盾。 <strong>Bendixson 负判据</strong>：\(B \equiv 1\) 的特例， 若 \(\text{div}\,\mathbf{F} = \partial F_1/\partial x + \partial F_2/\partial y\) 不变号则无极限环。</p>
+            <h4>1. Poincaré-Bendixson 定理</h4>
+            <p>设 \(\omega(\mathbf{X}_0)\) 为经过 \(\mathbf{X}_0\) 的正半轨线的 \(\omega\)-极限集。若 \(\omega(\mathbf{X}_0)\) 非空、有界、且<strong>不包含平衡点</strong>，则 \(\omega(\mathbf{X}_0)\) 是一个<strong>周期轨道</strong>（极限环）。</p>
+
+            <h4>2. 应用框架：证明极限环存在</h4>
+            <ul>
+              <li>找一个<strong>正不变环形区域</strong> \(D\)（轨线从 \(D\) 内出发不逃出）</li>
+              <li>验证 \(D\) 内<strong>无平衡点</strong></li>
+              <li>由 Poincaré-Bendixson 定理 → \(D\) 内必有极限环</li>
+            </ul>
+
+            <h4>3. Bendixson 负判据</h4>
+            <p>若在单连通域 \(D\) 上 \(\mathrm{div}\,\mathbf{F} = \frac{\partial F_1}{\partial x} + \frac{\partial F_2}{\partial y}\) <strong>不变号</strong>（恒正或恒负，且不恒为零），则 \(D\) 内无周期轨道。</p>
+            <p><strong>证明</strong>：若存在周期轨道 \(\gamma\) 围成区域 \(\Omega\)，由 Green 定理：</p>
+            \[\oint_\gamma \mathbf{F} \cdot \mathbf{n}\,ds = \iint_\Omega \mathrm{div}\,\mathbf{F}\,dA \neq 0\]
+            <p>但轨线沿 \(\gamma\) 运动时 \(\mathbf{F} \cdot \mathbf{n} = 0\)（速度与法向垂直），矛盾。</p>
+
+            <h4>4. Dulac 判别法（推广）</h4>
+            <p>若存在 \(B(x,y) \in C^1\) 使得 \(\frac{\partial(BF_1)}{\partial x} + \frac{\partial(BF_2)}{\partial y}\) 在单连通域 \(D\) 上不变号（且不恒为零），则 \(D\) 内无周期轨道。Bendixson 判据是 \(B \equiv 1\) 的特例。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Van der Pol 振荡器 \(x'' - \mu(1-x^2)x' + x = 0\) 的极限环存在性 - 生物节律模型（心脏起搏、昼夜节律）中的自持振荡</p>
+            <p><strong>Van der Pol 振荡器</strong>：\(x'' - \mu(1-x^2)x' + x = 0\)（\(\mu > 0\)）。化为系统后，可构造正不变环形区域并排除内部平衡点，由 Poincaré-Bendixson 定理证明存在<strong>唯一稳定极限环</strong>。这是电子振荡器和心脏起搏的经典模型。</p>
+            <p><strong>生物节律</strong>：Goodwin 振荡器（基因调控负反馈环路）和 Fitzhugh-Nagumo 模型（神经兴奋）中的自持振荡都对应极限环。</p>
+            <p><strong>化学振荡</strong>：Belousov-Zhabotinsky 反应（BZ 反应）的周期性颜色变化对应 Oregonator 模型中的极限环。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(x' = y + x(1-x^2-y^2)\)，\(y' = -x + y(1-x^2-y^2)\) 有极限环。 解答：极坐标 \(r^2 = x^2+y^2\)：\(rr' = xx'+yy'= r^2(1-r^2)\)， \(r' = r(1-r^2)\)。环形区域 \(\frac{1}{2} \leq r \leq 2\) 中： \(r = 1/2\) 时 \(r' = 1/2 \cdot 3/4 > 0\)（向外），\(r = 2\) 时 \(r' = 2(-3) < 0\)（向内）。 此区域正不变，无平衡点。Poincaré-Bendixson → 极限环 \(r = 1\)。 易错点：Poincaré-Bendixson 仅适用于 \(\mathbb{R}^2\)。 三维系统中有界轨线可以有混沌行为（如 Lorenz 系统）。</p>
+            <h4>例题：用 Poincaré-Bendixson 定理证明极限环存在</h4>
+            <p>证明系统 \(x' = y + x(1 - x^2 - y^2)\)，\(y' = -x + y(1 - x^2 - y^2)\) 有极限环。</p>
+            <p><strong>第 1 步</strong>：转极坐标。\(r^2 = x^2 + y^2\)，\(rr' = xx' + yy' = r^2(1 - r^2)\)，得 \(r' = r(1 - r^2)\)。</p>
+            <p><strong>第 2 步</strong>：构造正不变环形区域。取 \(D = \{1/2 \leq r \leq 2\}\)：</p>
+            <ul>
+              <li>内边界 \(r = 1/2\)：\(r' = \frac{1}{2}(1 - \frac{1}{4}) = \frac{3}{8} > 0\) → 向外</li>
+              <li>外边界 \(r = 2\)：\(r' = 2(1 - 4) = -6 < 0\) → 向内</li>
+            </ul>
+            <p><strong>第 3 步</strong>：环形区域 \(D\) 内无平衡点（原点不在 \(D\) 内）。</p>
+            <p><strong>结论</strong>：由 Poincaré-Bendixson 定理，\(D\) 内必有极限环。由 \(r' = 0 \Leftrightarrow r = 1\) 知极限环为 \(r = 1\)（单位圆）。</p>
+            <h4>常见易错点</h4>
+            <ul>
+              <li>❌ Poincaré-Bendixson <strong>仅适用于 \(\mathbb{R}^2\)</strong>。三维系统中有界轨线可有混沌行为（如 Lorenz 吸引子），该定理完全失效。</li>
+              <li>❌ 忽略「不包含平衡点」条件。若正不变区域内有平衡点，轨线可能趋向平衡点而非极限环。</li>
+              <li>❌ Bendixson 判据要求域是<strong>单连通</strong>的。环形区域不是单连通的，不能使用 Bendixson 判据排除其中的极限环。</li>
+            </ul>
           </div>
         </div>
       </div>
