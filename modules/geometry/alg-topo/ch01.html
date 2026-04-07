@@ -394,28 +394,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>代数拓扑的核心思想是将拓扑空间中的"形变"关系代数化。两条道路 "同伦"意味着一条可以连续形变为另一条——这比要求道路完全相同 弱得多，但足以区分空间的"洞"。例如在平面去掉原点后，绕原点 的圈不能连续缩成一点——这就是非平凡同伦类的直觉。</p>
+            <ul>
+              <li><strong>形变等价：</strong>代数拓扑的核心是将拓扑空间的"连续形变"代数化。两条道路"同伦"意味着一条可连续变形为另一条——不撕裂、不离开空间。</li>
+              <li><strong>检测洞：</strong>在 \(\mathbb{R}^2 \setminus \{0\}\) 中，绕原点的圈不能缩成一点——非平凡同伦类揭示了空间中的"洞"。</li>
+              <li><strong>比同胚更粗的分类：</strong>同伦等价只关注"形状"而不关注精确尺寸，给出一种更灵活的空间分类方式。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>同伦是拓扑学中"等价"的正确概念。同伦等价将拓扑空间分类到 比同胚更粗的等价类中（只关注"形状"、不关注精确尺寸）。</p>
+            <ul>
+              <li><strong>等价关系：</strong>同伦是映射空间上的等价关系，商掉它得到同伦类 \([f]\)。道路同伦还额外要求端点固定。</li>
+              <li><strong>范畴论视角：</strong>同伦等价类构成同伦范畴 \(\mathbf{hTop}\)——态射是映射的同伦类，同构是同伦等价。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>同伦</strong>：连续映射 \(f, g: X \to Y\) 同伦（\(f \simeq g\)）\(\iff\) 存在连续映射 \(H: X \times [0,1] \to Y\) 使 \(H(x,0) = f(x)\)，\(H(x,1) = g(x)\)。 <strong>道路同伦</strong>：道路 \(\gamma_0, \gamma_1: [0,1] \to X\) （\(\gamma_0(0) = \gamma_1(0) = a\)，\(\gamma_0(1) = \gamma_1(1) = b\)） 相对端点同伦 \(\iff\) 存在 \(H: [0,1]^2 \to X\)， \(H(s,0) = \gamma_0(s)\)，\(H(s,1) = \gamma_1(s)\)， \(H(0,t) = a\)，\(H(1,t) = b\)。 同伦类 \([\gamma]\) 在道路的连接运算下构成良定义的运算： \[[\gamma] \cdot [\delta] = [\gamma \cdot \delta]\] 其中 \((\gamma \cdot \delta)(s) = \begin{cases}\gamma(2s) & s \in [0,1/2]\\\delta(2s-1) & s \in [1/2,1]\end{cases}\)</p>
+            <h4>1. 映射同伦</h4>
+            <p>连续映射 \(f, g: X \to Y\) 同伦（\(f \simeq g\)）\(\iff\) 存在连续映射 \(H: X \times [0,1] \to Y\) 使 \(H(x,0) = f(x)\)，\(H(x,1) = g(x)\)。</p>
+
+            <h4>2. 道路同伦（相对端点）</h4>
+            <p>道路 \(\gamma_0, \gamma_1: [0,1] \to X\)（\(\gamma_0(0) = \gamma_1(0) = a\)，\(\gamma_0(1) = \gamma_1(1) = b\)）相对端点同伦 \(\iff\) 存在 \(H: [0,1]^2 \to X\)：</p>
+            \[H(s,0) = \gamma_0(s),\quad H(s,1) = \gamma_1(s),\quad H(0,t) = a,\quad H(1,t) = b\]
+
+            <h4>3. 道路连接运算</h4>
+            <p>同伦类在道路连接下构成良定义的运算 \([\gamma] \cdot [\delta] = [\gamma \cdot \delta]\)：</p>
+            \[(\gamma \cdot \delta)(s) = \begin{cases}\gamma(2s) & s \in [0,1/2] \\ \delta(2s-1) & s \in [1/2,1]\end{cases}\]
+
+            <h4>4. 同伦等价</h4>
+            <p>\(X \simeq Y\) \(\iff\) 存在 \(f: X \to Y\)、\(g: Y \to X\) 使 \(g \circ f \simeq \mathrm{id}_X\)、\(f \circ g \simeq \mathrm{id}_Y\)。形变收缩 \(A \hookrightarrow X\) 是特例。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>拓扑数据分析（TDA）：</strong>数据点云的同伦类型（通过 Rips/Čech 复形的同伦等价）用于检测数据的"形状"——连通分量、环状结构、空腔等拓扑特征。</p>
+            <p><strong>机器人运动规划：</strong>构型空间中两条路径是否同伦决定了机器人能否从一种运动方式连续变形到另一种，避障路径的同伦类计数是运动规划的核心问题。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(\mathbb{R}^2\) 中，两条从 \((0,0)\) 到 \((1,0)\) 的道路 \(\gamma_0(s) = (s, 0)\) 和 \(\gamma_1(s) = (s, s(1-s))\) 是否同伦？ 解答：是。\(H(s,t) = (s, ts(1-s))\) 是同伦： \(H(s,0) = (s,0) = \gamma_0(s)\)，\(H(s,1) = (s, s(1-s)) = \gamma_1(s)\)， \(H(0,t) = (0,0)\)，\(H(1,t) = (1,0)\)。 \(\mathbb{R}^2\) 是凸的，任何两条同端点道路都同伦。 易错点：\(\mathbb{R}^2 \setminus \{0\}\) 中不是所有同端点道路都同伦！ 绕原点和不绕原点的道路属不同同伦类。</p>
+            <h4>例题：\(\mathbb{R}^2\) 中的道路同伦</h4>
+            <p><strong>题目：</strong>在 \(\mathbb{R}^2\) 中，\(\gamma_0(s) = (s, 0)\) 和 \(\gamma_1(s) = (s, s(1-s))\)（同端点 \((0,0) \to (1,0)\)）是否同伦？</p>
+            <p><strong>第一步 — 构造同伦：</strong>\(H(s,t) = (s, ts(1-s))\)。</p>
+            <p><strong>第二步 — 验证：</strong>\(H(s,0) = (s,0) = \gamma_0(s)\)，\(H(s,1) = (s, s(1-s)) = \gamma_1(s)\)，\(H(0,t) = (0,0)\)，\(H(1,t) = (1,0)\)。✔</p>
+            <p><strong>结论：</strong>\(\mathbb{R}^2\) 是凸的，任何两条同端点道路都同伦（直线同伦 \(H(s,t) = (1-t)\gamma_0(s) + t\gamma_1(s)\)）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(\mathbb{R}^2 \setminus \{0\}\) 中所有同端点道路也都同伦。<br>✅ 去掉原点后，绕原点和不绕原点的道路属于不同同伦类——空间中有"洞"。</li>
+              <li>❌ 混淆"自由同伦"和"相对端点同伦"。<br>✅ 道路同伦要求 \(H(0,t) = a\)，\(H(1,t) = b\) 端点固定。自由同伦不固定端点，结果不同。</li>
+              <li>❌ 认为同伦等价意味着同胚。<br>✅ \(\mathbb{R}^2 \setminus \{0\} \simeq S^1\) 但不同胚。同伦等价比同胚弱得多。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -470,35 +508,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>将基点处所有回路（闭道路）的同伦类收集起来，配上道路连接运算， 得到一个群——基本群 \(\pi_1(X, x_0)\)。这是空间"一维洞"的代数 编码：\(\pi_1(S^1) = \mathbb{Z}\)（绕不同圈数），\(\pi_1(\mathbb{R}^2) = 0\) （无洞可缩），\(\pi_1(T^2) = \mathbb{Z}^2\)（两个独立方向的圈）。</p>
+            <ul>
+              <li><strong>一维洞的代数编码：</strong>基本群 \(\pi_1(X, x_0)\) 将基点处所有回路的同伦类收集起来——\(\pi_1(S^1) = \mathbb{Z}\)（绕不同圈数），\(\pi_1(\mathbb{R}^2) = 0\)（无洞可缩），\(\pi_1(T^2) = \mathbb{Z}^2\)（两个独立方向）。</li>
+              <li><strong>拓扑不变量：</strong>\(\pi_1\) 是同伦不变量，可以区分拓扑空间——如果 \(\pi_1(X) \not\cong \pi_1(Y)\)，则 \(X \not\simeq Y\)。</li>
+              <li><strong>函子性：</strong>连续映射 \(f: X \to Y\) 自动诱导群同态 \(f_*: \pi_1(X) \to \pi_1(Y)\)——这是范畴论的体现。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>基本群是从拓扑空间范畴（连续映射）到群范畴（同态）的函子。 连续映射 \(f: X \to Y\) 诱导群同态 \(f_*: \pi_1(X) \to \pi_1(Y)\)。</p>
+            <ul>
+              <li><strong>函子：</strong>基本群是从有基点拓扑空间范畴 \(\mathbf{Top}_*\) 到群范畴 \(\mathbf{Grp}\) 的函子。保持复合和恒等：\((g \circ f)_* = g_* \circ f_*\)，\(\mathrm{id}_* = \mathrm{id}\)。</li>
+              <li><strong>基点无关性：</strong>道路连通空间中，基点变更给出共轭同构——\(\pi_1(X, x_0) \cong \pi_1(X, x_1)\)。故常省略基点。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：\(\pi_1(X, x_0) = \{[\gamma] : \gamma \text{ 是基于 } x_0 \text{ 的回路}\}\)。 <strong>群结构</strong>： - 乘法：\([\gamma][\delta] = [\gamma \cdot \delta]\) - 单位元：\([c_{x_0}]\)（常值回路） - 逆元：\([\gamma]^{-1} = [\bar{\gamma}]\)，\(\bar{\gamma}(s) = \gamma(1-s)\) <strong>基点变更</strong>：若 \(X\) 道路连通，\(\pi_1(X, x_0) \cong \pi_1(X, x_1)\) （通过连接道路的共轭给出同构）。 <strong>函子性</strong>：\(f: (X, x_0) \to (Y, y_0)\) 连续， \(f_*: \pi_1(X, x_0) \to \pi_1(Y, y_0)\)，\(f_*([\gamma]) = [f \circ \gamma]\)。 \[f_*([\gamma][\delta]) = f_*([\gamma]) \cdot f_*([\delta])\] \((g \circ f)_* = g_* \circ f_*\)；\(\mathrm{id}_* = \mathrm{id}\)。</p>
+            <h4>1. 定义</h4>
+            <p>\(\pi_1(X, x_0) = \{[\gamma] : \gamma(0) = \gamma(1) = x_0\}\)——基于 \(x_0\) 的回路的同伦等价类的集合。</p>
+
+            <h4>2. 群结构</h4>
+            <p>乘法：\([\gamma][\delta] = [\gamma \cdot \delta]\)（先走 \(\gamma\)，再走 \(\delta\)）。单位元：\([c_{x_0}]\)（常值回路）。逆元：\([\gamma]^{-1} = [\bar\gamma]\)，\(\bar\gamma(s) = \gamma(1-s)\)。</p>
+
+            <h4>3. 函子性</h4>
+            <p>\(f: (X, x_0) \to (Y, y_0)\) 连续，定义 \(f_*([\gamma]) = [f \circ \gamma]\)：</p>
+            \[f_*([\gamma][\delta]) = f_*([\gamma]) \cdot f_*([\delta])\]
+
+            <h4>4. 基点变更</h4>
+            <p>\(X\) 道路连通，\(\alpha\) 从 \(x_0\) 到 \(x_1\) 的道路，则 \(\hat\alpha: \pi_1(X, x_0) \to \pi_1(X, x_1)\)，\(\hat\alpha([\gamma]) = [\bar\alpha \cdot \gamma \cdot \alpha]\) 是同构。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Brouwer 不动点定理可用 \(\pi_1\) 证明（\(n = 2\) 情况）</p>
+            <p><strong>Brouwer 不动点定理（\(n=2\)）：</strong>每个连续 \(f: D^2 \to D^2\) 有不动点——证明用 \(\pi_1(S^1) = \mathbb{Z}\) 和 \(\pi_1(D^2) = 0\) 的矛盾。</p>
+            <p><strong>代数基本定理：</strong>每个非常数复多项式有根——可以用 \(\pi_1(S^1) = \mathbb{Z}\) 和绕数论证来证明。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \(\pi_1(S^1, 1)\)。 解答（思路）：回路 \(\gamma: [0,1] \to S^1\) 的提升到 \(\mathbb{R}\)： \(\tilde{\gamma}(0) = 0\)，\(\tilde{\gamma}(1) = n \in \mathbb{Z}\)（绕圈数）。 \(n\) 不变于同伦，给出同构 \(\pi_1(S^1) \cong \mathbb{Z}\)。 生成元是"逆时针绕一圈"\([\omega_1]\)，\(\omega_1(s) = e^{2\pi is}\)。 易错点：\(\pi_1\) 中的"乘法"是同伦类的乘法，不是 \(S^1\) 中的点乘法。 \([\omega_n] = [\omega_1]^n\) 代表绕 \(n\) 圈。</p>
+            <h4>例题：计算 \(\pi_1(S^1, 1)\)</h4>
+            <p><strong>题目：</strong>求圆的基本群。</p>
+            <p><strong>第一步 — 覆叠空间：</strong>用 \(p: \mathbb{R} \to S^1\)，\(p(t) = e^{2\pi it}\)。</p>
+            <p><strong>第二步 — 提升与绕数：</strong>回路 \(\gamma\) 提升为 \(\tilde\gamma\)，\(\tilde\gamma(0) = 0\)，\(\tilde\gamma(1) = n \in \mathbb{Z}\)。\(n\) 在同伦下不变。</p>
+            <p><strong>第三步 — 同构：</strong>\(\pi_1(S^1) \cong \mathbb{Z}\)，生成元 \([\omega_1]\)（\(\omega_1(s) = e^{2\pi is}\)，逆时针绕一圈）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 \(\pi_1\) 中的"乘法"与 \(S^1\) 中的"点乘法"。<br>✅ \([\omega_n] = [\omega_1]^n\) 代表绕 \(n\) 圈，群运算是道路连接，不是圆上的点积。</li>
+              <li>❌ 认为 \(\pi_1(S^1 \vee S^1) = \mathbb{Z} \times \mathbb{Z}\)。<br>✅ \(\pi_1(S^1 \vee S^1) = \mathbb{Z} * \mathbb{Z} = F_2\)（自由群），非交换。\(\mathbb{Z}^2 = \pi_1(T^2)\)。</li>
+              <li>❌ 忘记 \(\pi_1\) 依赖基点（非交换群时共轭不等于相等）。<br>✅ 道路连通空间中不同基点的 \(\pi_1\) 同构，但同构不唯一——取决于连接道路的选择。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -525,35 +593,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如何从"局部"的基本群拼出"全局"的基本群？van Kampen 定理回答 了这个问题：如果空间 \(X = U_1 \cup U_2\)，\(U_1 \cap U_2\) 道路连通， 那么 \(\pi_1(X)\) 是 \(\pi_1(U_1)\) 和 \(\pi_1(U_2)\) 在 \(\pi_1(U_1 \cap U_2)\) 上 的自由积商——即"融合积 (amalgamated free product)"。</p>
+            <ul>
+              <li><strong>从局部到全局：</strong>如何从 \(X = U_1 \cup U_2\) 的"局部"基本群拼出"全局"基本群？van Kampen 定理给出了精确答案。</li>
+              <li><strong>计算工具：</strong>大多数基本群的计算都依赖 van Kampen——粘合空间、楔积、曲面的基本群都用它得到。</li>
+              <li><strong>群论操作：</strong>结果是自由积商（amalgamated free product），将拓扑问题转化为群论的具体运算。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>van Kampen 定理是 \(\pi_1\) 函子的一个"余极限性质"——它将 基本群的计算转化为群论中的自由积与商运算。</p>
+            <ul>
+              <li><strong>余极限性质：</strong>van Kampen 定理是 \(\pi_1\) 函子的余极限（pushout）——对应群范畴中的融合积。</li>
+              <li><strong>交集的角色：</strong>\(U_1 \cap U_2\) 的基本群决定了"粘合"时需要等同哪些元素——交集越大限制越多。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>van Kampen 定理</strong>：\(X = U_1 \cup U_2\)，\(U_1, U_2, U_1 \cap U_2\) 开且道路连通，\(x_0 \in U_1 \cap U_2\)。含入 \(i_k: U_1 \cap U_2 \hookrightarrow U_k\) 诱导 \((i_k)_*: \pi_1(U_1 \cap U_2) \to \pi_1(U_k)\)。 \[\pi_1(X) \cong \pi_1(U_1) *_{\pi_1(U_1 \cap U_2)} \pi_1(U_2)\] 即 \(\pi_1(X) = (\pi_1(U_1) * \pi_1(U_2)) / N\)， \(N = \langle (i_1)_*(g) \cdot (i_2)_*(g)^{-1} : g \in \pi_1(U_1 \cap U_2) \rangle\)。 <strong>特例</strong>：\(U_1 \cap U_2\) 单连通（\(\pi_1 = 0\)）时 \(\pi_1(X) = \pi_1(U_1) * \pi_1(U_2)\)（自由积）。</p>
+            <h4>1. van Kampen 定理</h4>
+            <p>\(X = U_1 \cup U_2\)，\(U_1, U_2, U_1 \cap U_2\) 开且道路连通，\(x_0 \in U_1 \cap U_2\)。含入 \(i_k: U_1 \cap U_2 \hookrightarrow U_k\) 诱导 \((i_k)_*\)：</p>
+            \[\pi_1(X) \cong \pi_1(U_1) *_{\pi_1(U_1 \cap U_2)} \pi_1(U_2)\]
+            <p>即 \(\pi_1(X) = (\pi_1(U_1) * \pi_1(U_2)) / N\)，\(N = \langle (i_1)_*(g) \cdot (i_2)_*(g)^{-1} : g \in \pi_1(U_1 \cap U_2) \rangle\)。</p>
+
+            <h4>2. 特例：交集单连通</h4>
+            <p>\(\pi_1(U_1 \cap U_2) = 0\) 时，\(\pi_1(X) = \pi_1(U_1) * \pi_1(U_2)\)（自由积，无需商）。</p>
+
+            <h4>3. 特例：一侧单连通</h4>
+            <p>\(\pi_1(U_1) = 0\) 时，\(\pi_1(X) = \pi_1(U_2) / N((i_2)_*(\pi_1(U_1 \cap U_2)))\)——"杀掉"交集中来的元素。这可用于计算 \(\pi_1(S^2) = 0\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 计算 knot group（结的余空间的基本群）——拓扑结理论的核心工具</p>
+            <p><strong>结不变量：</strong>Knot group（结的余空间 \(S^3 \setminus K\) 的基本群）用 van Kampen 定理通过 Wirtinger presentation 计算——是区分不同结的核心工具。</p>
+            <p><strong>曲面分类：</strong>闭曲面的基本群 \(\pi_1(\Sigma_g) = \langle a_1, b_1, \ldots, a_g, b_g \mid [a_1,b_1]\cdots[a_g,b_g] = 1 \rangle\) 由 van Kampen 配合 \(4g\) 边形粘合得到。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用 van Kampen 定理计算 \(\pi_1(S^1 \vee S^1)\)。 解答：\(S^1 \vee S^1\) = 两个圆在一点黏合（"花环"或"8"字形）。 取 \(U_1\) = 第一个圈加一小段第二个圈，\(U_2\) = 第二个圈加一小段第一个圈。 \(U_1 \simeq S^1\)，\(U_2 \simeq S^1\)，\(U_1 \cap U_2 \simeq \{*\}\)（可缩）。 \(\pi_1(U_1 \cap U_2) = 0\)。 \(\pi_1(S^1 \vee S^1) = \mathbb{Z} * \mathbb{Z}\)（自由群 \(F_2\)）。 易错点：\(\mathbb{Z} * \mathbb{Z} \neq \mathbb{Z} \times \mathbb{Z}\)！ 自由积中 \(ab \neq ba\)，是非交换群。\(\pi_1(T^2) = \mathbb{Z}^2\)， \(\pi_1(S^1 \vee S^1) = F_2\)。</p>
+            <h4>例题：\(\pi_1(S^1 \vee S^1)\)</h4>
+            <p><strong>题目：</strong>计算"8"字形空间的基本群。</p>
+            <p><strong>第一步 — 分解：</strong>取 \(U_1\) = 第一圈加小段第二圈，\(U_2\) = 第二圈加小段第一圈。\(U_1 \simeq S^1\)，\(U_2 \simeq S^1\)。</p>
+            <p><strong>第二步 — 交集：</strong>\(U_1 \cap U_2 \simeq \{*\}\)（可缩），\(\pi_1(U_1 \cap U_2) = 0\)。</p>
+            <p><strong>第三步 — 自由积：</strong>\(\pi_1(S^1 \vee S^1) = \mathbb{Z} * \mathbb{Z} = F_2\)（秩2自由群）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(\mathbb{Z} * \mathbb{Z} = \mathbb{Z} \times \mathbb{Z}\)。<br>✅ 自由积 \(\neq\) 直积！\(F_2\) 中 \(ab \neq ba\)，是非交换无限群。\(\mathbb{Z}^2 = \pi_1(T^2)\)。</li>
+              <li>❌ 对 \(\pi_1(S^2)\) 错误应用 van Kampen（忘记杀关系）。<br>✅ \(S^2 = U_1 \cup U_2\)（两半球），\(U_i \simeq \{*\}\)，\(U_1 \cap U_2 \simeq S^1\)。\(\pi_1(S^2) = 0 * 0 / \langle S^1 \text{的关系}\rangle = 0\)。</li>
+              <li>❌ 忘记 van Kampen 要求 \(U_1 \cap U_2\) 道路连通。<br>✅ 若交集不连通则定理不适用——需要更一般的版本（多片交集的 pushout）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -604,35 +700,61 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>基本群不仅是抽象的代数不变量——它有深刻的几何和拓扑应用。 代数基本定理可以用 \(\pi_1(S^1) = \mathbb{Z}\) 证明，Brouwer 不动点 定理也可以用基本群方法处理（2 维情况），Borsuk-Ulam 定理说明 \(S^2\) 到 \(\mathbb{R}^2\) 的映射必有对径点同值。</p>
+            <ul>
+              <li><strong>不可能性证明：</strong>基本群不仅是抽象不变量——它能证明"这件事不可能发生"。Brouwer 不动点定理、代数基本定理都用 \(\pi_1\) 论证。</li>
+              <li><strong>空间区分：</strong>\(\pi_1\) 区分了拓扑空间——\(\mathbb{R}P^2\)（\(\mathbb{Z}/2\)）、Klein 瓶（非交换群）、环面（\(\mathbb{Z}^2\)）都不同。</li>
+              <li><strong>维数区分：</strong>\(\pi_1\) 可以证明 \(\mathbb{R}^2 \ncong \mathbb{R}^3\)——去掉一点后基本群不同。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>基本群作为拓扑不变量，可以用来证明"不可能性"： 若 \(\pi_1(X) \not\cong \pi_1(Y)\) 则 \(X \not\simeq Y\)。</p>
+            <ul>
+              <li><strong>函子性论证：</strong>若 \(X \simeq Y\) 则 \(\pi_1(X) \cong \pi_1(Y)\)。逆否命题：\(\pi_1(X) \not\cong \pi_1(Y) \Rightarrow X \not\simeq Y\)——这是代数不变量区分空间的标准策略。</li>
+              <li><strong>收缩论证：</strong>若 \(r: X \to A\) 收缩（\(r \circ i = \mathrm{id}_A\)），则 \(r_* \circ i_* = \mathrm{id}\)——\(i_*\) 单射，\(r_*\) 满射。不可能存在的收缩 \(\Rightarrow\) 不可能存在的映射。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Brouwer 不动点定理（\(n=2\)）</strong>：每个连续 \(f: D^2 \to D^2\) 有不动点。 证明：反证法。若 \(f(x) \neq x\)，定义收缩 \(r: D^2 \to S^1\)（从 \(f(x)\) 向 \(x\) 方向的射线与 \(S^1\) 的交点）。 \(r|_{S^1} = \mathrm{id}_{S^1}\)，即 \(r \circ i = \mathrm{id}\) （\(i: S^1 \hookrightarrow D^2\)）。 \(r_* \circ i_*: \pi_1(S^1) \to \pi_1(D^2) \to \pi_1(S^1) = \mathrm{id}: \mathbb{Z} \to \mathbb{Z}\)。 但 \(\pi_1(D^2) = 0\)，所以 \(r_* \circ i_*\) 必须通过 \(0\)， 不可能是 \(\mathbb{Z}\) 上的恒等映射。矛盾！ <strong>应用</strong>：若 \(X \simeq Y\) 则 \(\pi_1(X) \cong \pi_1(Y)\)。 \(\pi_1(\mathbb{R}P^2) = \mathbb{Z}/2\mathbb{Z}\)， \(\pi_1(K) = \langle a, b | abab^{-1} \rangle\)（Klein 瓶）。</p>
+            <h4>1. Brouwer 不动点定理（\(n=2\)）</h4>
+            <p>每个连续 \(f: D^2 \to D^2\) 有不动点。反证：若 \(f(x) \neq x\)，定义收缩 \(r: D^2 \to S^1\)。则 \(r_* \circ i_*: \pi_1(S^1) \to \pi_1(D^2) \to \pi_1(S^1) = \mathrm{id}\)。但 \(\pi_1(D^2) = 0\)，\(\mathbb{Z} \to 0 \to \mathbb{Z}\) 不可能是恒等映射！矛盾。</p>
+
+            <h4>2. 经典基本群表</h4>
+            <p>\(\pi_1(\mathbb{R}P^2) = \mathbb{Z}/2\mathbb{Z}\)，\(\pi_1(K) = \langle a, b \mid abab^{-1} = 1 \rangle\)（Klein 瓶），\(\pi_1(\Sigma_g) = \langle a_i, b_i \mid \prod[a_i, b_i] = 1 \rangle\)（亏格 \(g\) 闭曲面）。</p>
+
+            <h4>3. 维数区分</h4>
+            <p>若 \(\mathbb{R}^m \cong \mathbb{R}^n\)，则 \(\mathbb{R}^m \setminus \{p\} \cong \mathbb{R}^n \setminus \{q\}\)，从而 \(S^{m-1} \simeq S^{n-1}\)。当 \(m=2, n=3\) 时 \(\pi_1(S^1) = \mathbb{Z} \neq 0 = \pi_1(S^2)\)，矛盾。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Brouwer 不动点定理在博弈论（Nash 均衡存在性）中是核心工具</p>
+            <p><strong>Nash 均衡：</strong>Brouwer 不动点定理是博弈论中 Nash 均衡存在性证明的核心数学工具。</p>
+            <p><strong>Borsuk-Ulam 定理：</strong>地球上任一时刻，存在一对对径点温度和气压都相同——\(f: S^2 \to \mathbb{R}^2\) 必有 \(f(x) = f(-x)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(\mathbb{R}^2\) 和 \(\mathbb{R}^3\) 不同胚。 解答：反证：若 \(f: \mathbb{R}^2 \to \mathbb{R}^3\) 是同胚。 去掉一点：\(f\) 限制为 \(\mathbb{R}^2 \setminus \{p\} \cong \mathbb{R}^3 \setminus \{f(p)\}\)。 \(\pi_1(\mathbb{R}^2 \setminus \{p\}) = \mathbb{Z}\)（\(\simeq S^1\)）， \(\pi_1(\mathbb{R}^3 \setminus \{q\}) = 0\)（\(\simeq S^2\)，单连通）。 \(\mathbb{Z} \neq 0\)，矛盾。 易错点：直接比较 \(\pi_1(\mathbb{R}^2) = \pi_1(\mathbb{R}^3) = 0\) 没有用（都是可缩空间）。必须去掉一点来制造区别。</p>
+            <h4>例题：\(\mathbb{R}^2 \ncong \mathbb{R}^3\)</h4>
+            <p><strong>题目：</strong>证明 \(\mathbb{R}^2\) 和 \(\mathbb{R}^3\) 不同胚。</p>
+            <p><strong>第一步 — 去点：</strong>假设 \(f: \mathbb{R}^2 \to \mathbb{R}^3\) 同胚，则 \(\mathbb{R}^2 \setminus \{p\} \cong \mathbb{R}^3 \setminus \{f(p)\}\)。</p>
+            <p><strong>第二步 — 同伦：</strong>\(\mathbb{R}^2 \setminus \{p\} \simeq S^1\)，\(\mathbb{R}^3 \setminus \{q\} \simeq S^2\)。</p>
+            <p><strong>第三步 — 矛盾：</strong>\(\pi_1(S^1) = \mathbb{Z} \neq 0 = \pi_1(S^2)\)，而同胚必须保持基本群。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 直接比较 \(\pi_1(\mathbb{R}^2) = \pi_1(\mathbb{R}^3) = 0\)——无法区分。<br>✅ 必须去掉一点来制造区别。可缩空间的 \(\pi_1\) 都是零。</li>
+              <li>❌ 混淆 Brouwer 定理的适用范围——对闭凸集成立，对非凸集不一定。<br>✅ \(f: D^n \to D^n\) 必有不动点，但 \(f: S^1 \to S^1\)（旋转）可以无不动点。</li>
+              <li>❌ 认为 \(\pi_1\) 能区分一切空间。<br>✅ \(\pi_1\) 无法区分 \(S^2\) 和 \(S^3\)（都单连通），需要更高维的不变量（\(\pi_2, H_n\) 等）。</li>
+            </ul>
           </div>
         </div>
       </div>

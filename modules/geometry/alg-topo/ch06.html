@@ -394,28 +394,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>同调代数是代数拓扑的"引擎"——正合序列、蛇引理、五引理等纯 代数工具在同调论中无处不在。蛇引理从短正合序列自动生成长正合 序列中的连接同态——这正是相对同调长正合序列、Mayer-Vietoris 序列中 \(\partial_*\) 的来源。</p>
+            <ul>
+              <li><strong>同调代数 = 代数拓扑的引擎</strong>：正合序列、蛇引理、五引理等纯代数工具在同调论中无处不在——从相对同调到 Mayer-Vietoris，所有"长正合序列"都由蛇引理驱动。</li>
+              <li><strong>连接同态的来源</strong>：蛇引理从链复形的短正合序列自动生成长正合序列中的连接同态 \(\partial_*\)——这正是 \(H_n(X,A) \xrightarrow{\partial_*} H_{n-1}(A)\) 的代数本质。</li>
+              <li><strong>贯穿整个课程</strong>：从单纯同调到奇异同调，再到上同调、K-理论, 层理论——蛇引理是所有长正合序列的统一来源。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>蛇引理是同调代数的核心引擎——它将短正合序列的"局部信息" 自动组装为长正合序列的"全局信息"。</p>
+            <ul>
+              <li><strong>局部→全局</strong>：蛇引理将短正合序列的"局部信息"（每个维度的 \(\ker\) 与 \(\mathrm{coker}\)）自动组装为长正合序列的"全局信息"。</li>
+              <li><strong>正合性 = 代数的守恒律</strong>：\(\mathrm{im}\,f = \ker g\) 意味着"前一步的输出恰好是下一步的可消去部分"——信息无丢失、无冗余。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>短正合序列</strong>：\(0 \to A \xrightarrow{f} B \xrightarrow{g} C \to 0\) （\(f\) 单射，\(g\) 满射，\(\mathrm{im}\,f = \ker g\)）。 <strong>链复形的短正合序列</strong>： \(0 \to A_* \xrightarrow{f} B_* \xrightarrow{g} C_* \to 0\)。 <strong>蛇引理</strong>：存在连接同态 \(\partial_*: H_n(C) \to H_{n-1}(A)\)， 使得下列序列正合： \[\cdots \to H_n(A) \xrightarrow{f_*} H_n(B) \xrightarrow{g_*} H_n(C) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\] <strong>构造 \(\partial_*\)</strong>（图追踪）：取 \([c] \in H_n(C)\)，\(c \in Z_n(C)\)。 \(g\) 满射 \(\Rightarrow\) \(\exists b \in B_n\)，\(g(b) = c\)。 \(g(\partial b) = \partial g(b) = \partial c = 0\)， \(\partial b \in \ker g = \mathrm{im}\,f\)，\(\partial b = f(a)\)。 \(f(\partial a) = \partial f(a) = \partial \partial b = 0\)，\(f\) 单射 \(\Rightarrow \partial a = 0\)。 定义 \(\partial_*[c] = [a] \in H_{n-1}(A)\)。</p>
+            <h4>1. 短正合序列的定义</h4>
+            <p>\(0 \to A \xrightarrow{f} B \xrightarrow{g} C \to 0\) 意味着：\(f\) 单射，\(g\) 满射，\(\mathrm{im}\,f = \ker g\)。等价地，\(C \cong B/f(A)\)。</p>
+
+            <h4>2. 链复形的短正合序列</h4>
+            <p>给定链复形的短正合序列 \(0 \to A_* \xrightarrow{f} B_* \xrightarrow{g} C_* \to 0\)，即每个维度 \(0 \to A_n \xrightarrow{f_n} B_n \xrightarrow{g_n} C_n \to 0\) 正合，且 \(f, g\) 是链映射（与边界算子交换）。</p>
+
+            <h4>3. 蛇引理与连接同态</h4>
+            <p>存在连接同态 \(\partial_*: H_n(C) \to H_{n-1}(A)\)，使得下列序列正合：</p>
+            \[\cdots \to H_n(A) \xrightarrow{f_*} H_n(B) \xrightarrow{g_*} H_n(C) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\]
+
+            <h4>4. \(\partial_*\) 的图追踪构造</h4>
+            <p>取 \([c] \in H_n(C)\)，代表元 \(c \in Z_n(C)\)。\(g\) 满射 \(\Rightarrow \exists\, b \in B_n\)，\(g(b) = c\)。由 \(g(\partial b) = \partial g(b) = \partial c = 0\) 知 \(\partial b \in \ker g = \mathrm{im}\,f\)，故 \(\partial b = f(a)\) 对某 \(a \in A_{n-1}\)。又 \(f(\partial a) = \partial f(a) = \partial^2 b = 0\)，\(f\) 单射 \(\Rightarrow \partial a = 0\)，即 \(a\) 是闭链。定义 \(\partial_*[c] = [a] \in H_{n-1}(A)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>相对同调与拓扑对的分析</strong>：蛇引理直接产生空间对 \((X, A)\) 的相对同调长正合序列 \(\cdots \to H_n(A) \to H_n(X) \to H_n(X,A) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\)。在代数几何中，层的短正合序列 \(0 \to \mathcal{F}' \to \mathcal{F} \to \mathcal{F}'' \to 0\) 同样通过蛇引理产生层上同调的长正合序列——这是计算 \(H^n(X, \mathcal{O})\) 的核心手段。</p>
+            <p><strong>同调代数在计算机科学中的应用</strong>：持续同调（persistent homology）中，滤过复形的嵌入 \(K_\delta \hookrightarrow K_\epsilon\) 诱导的长正合序列被用来追踪拓扑特征的"出生-死亡"。链复形的正合序列在形式验证和数据库理论中也有类比——正合性对应信息传递的无损性。</p>
+            <p><strong>信号处理与电路理论</strong>：Kirchhoff 电流/电压定律可以表述为图（graph）上的链复形: \(C_1 \xrightarrow{\partial} C_0\)。正合序列刻画了电路的平衡条件，\(\ker \partial\) 对应环路空间，\(\mathrm{im}\,\partial^*\) 对应电位差。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(0 \to \mathbb{Z} \xrightarrow{\times 2} \mathbb{Z} \to \mathbb{Z}/2 \to 0\)。 这是（常值）链复形的短正合序列。对应的长正合序列？ 解答：\(H_0\) = 各群本身（常值复形同调 \(= H_0 =\) 群本身）。 \(\cdots \to H_0(\mathbb{Z}) \xrightarrow{\times 2} H_0(\mathbb{Z}) \to H_0(\mathbb{Z}/2) \to 0\)。 即 \(\mathbb{Z} \xrightarrow{\times 2} \mathbb{Z} \to \mathbb{Z}/2 \to 0\)。 易错点：蛇引理中 \(\partial_*\) 的构造涉及"图追踪"—— 每步选取的 \(b\) 不同，但 \([a]\) 不变（良定义）。</p>
+            <h4>例题：短正合序列的长正合序列</h4>
+            <p>设 \(0 \to \mathbb{Z} \xrightarrow{\times 2} \mathbb{Z} \to \mathbb{Z}/2 \to 0\) 是（常值）链复形的短正合序列。求对应的长正合序列。</p>
+            <p><strong>第一步</strong>：识别常值链复形的同调——\(H_0 =\) 群本身，\(H_n = 0\)（\(n \geq 1\)）。</p>
+            <p><strong>第二步</strong>：写出长正合序列：\(\cdots \to 0 \to H_0(\mathbb{Z}) \xrightarrow{\times 2} H_0(\mathbb{Z}) \to H_0(\mathbb{Z}/2) \to 0\)。</p>
+            <p><strong>第三步</strong>：即 \(\mathbb{Z} \xrightarrow{\times 2} \mathbb{Z} \to \mathbb{Z}/2 \to 0\)，其中商映射的正合性可验证：\(\mathrm{im}(\times 2) = 2\mathbb{Z} = \ker(\mathbb{Z} \to \mathbb{Z}/2)\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(\partial_*\) 的构造依赖于 \(b\) 的选取 → ✅ 不同的 \(b\) 只改变 \(a\) 一个边界，\([a]\) 不变（良定义性由 \(\mathrm{im}\,f = \ker g\) 保证）。</li>
+              <li>❌ 混淆"正合序列"与"复形"：认为 \(\mathrm{im}\,f \subseteq \ker g\) 就是正合 → ✅ 正合要求严格等号 \(\mathrm{im}\,f = \ker g\)；仅含于关系只保证是"复形"（\(g \circ f = 0\)），不保证正合。</li>
+              <li>❌ 忘记蛇引理要求行正合（不仅仅是复形） → ✅ 蛇引理的前提是 \(0 \to A_* \to B_* \to C_* \to 0\) 在每个维度上都正合；若行只是复形，结论不成立。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -442,28 +480,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>五引理说：在两行正合、列映射大部分是同构的图中，中间列也必须 是同构。这是证明"两种同调理论同构"的标准工具。类似地， 短五引理判断短正合序列是否分裂。这些引理虽然纯代数，但在 代数拓扑中的应用极为频繁。</p>
+            <ul>
+              <li><strong>比较同调理论的标准工具</strong>：五引理说在两行正合、列映射大部分同构的交换图中，中间列也必须同构——这是证明"两种同调理论对某类空间同构"的核心手段。</li>
+              <li><strong>归纳论证的基石</strong>：在 CW 复形的骨架归纳中，五引理将低维已知的同构传递到高维——奇异同调与胞腔同调的等价性正是这样证明的。</li>
+              <li><strong>图追踪方法论</strong>：五引理的证明是"图追踪"（diagram chasing）的典范——元素在交换图中沿箭头追踪，由已知条件推出未知。同调代数的几乎所有基本引理（蛇引理、短五引理、九引理）都用同样的技术。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>图追踪 (diagram chasing) 是同调代数的基本方法论——所有基本 引理的证明都归结为在交换图中追踪元素。</p>
+            <ul>
+              <li><strong>图追踪 = 同调代数的基本方法论</strong>：所有基本引理的证明都归结为在交换图中追踪元素——证明单射追踪核中元素到零，证明满射对目标元素回溯原像。</li>
+              <li><strong>弱化条件</strong>：五引理的精确条件不要求全部同构——\(f_1\) 满射 + \(f_5\) 单射 + \(f_2, f_4\) 同构即可推出 \(f_3\) 同构。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>五引理</strong>：交换图 \[\begin{array}{ccccccccc} A_1 & \to & A_2 & \to & A_3 & \to & A_4 & \to & A_5 \\ \downarrow f_1 & & \downarrow f_2 & & \downarrow f_3 & & \downarrow f_4 & & \downarrow f_5 \\ B_1 & \to & B_2 & \to & B_3 & \to & B_4 & \to & B_5 \end{array}\] 两行正合。若 \(f_1, f_2, f_4, f_5\) 是同构，则 \(f_3\) 也是同构。 <strong>证明</strong>（\(f_3\) 单射）：设 \(f_3(a_3) = 0\)。 \(f_4(a_3 \to a_4) = 0\)，\(f_4\) 同构 \(\Rightarrow a_4 = 0\)， 正合性 \(\Rightarrow a_3 \in \mathrm{im}\)。追踪到 \(f_2\) 的满射性， 再利用 \(f_1\) 的满射性得 \(a_3 = 0\)。 （满射类似。） <strong>推论</strong>：若比较两个同调理论的长正合序列，且对 \(A, C\) 已知同构， 则对 \((X,A)\) 也同构——归纳论证。</p>
+            <h4>1. 五引理的陈述</h4>
+            <p>交换图两行正合：</p>
+            \[\begin{array}{ccccccccc} A_1 & \to & A_2 & \to & A_3 & \to & A_4 & \to & A_5 \\ \downarrow f_1 & & \downarrow f_2 & & \downarrow f_3 & & \downarrow f_4 & & \downarrow f_5 \\ B_1 & \to & B_2 & \to & B_3 & \to & B_4 & \to & B_5 \end{array}\]
+            <p>若 \(f_1\) 满射，\(f_2, f_4\) 同构，\(f_5\) 单射，则 \(f_3\) 同构。</p>
+
+            <h4>2. 证明 \(f_3\) 单射（图追踪）</h4>
+            <p>设 \(f_3(a_3) = 0\)。映射到 \(B_4\)：\(f_4(\alpha(a_3)) = \beta(f_3(a_3)) = 0\)，\(f_4\) 同构 \(\Rightarrow \alpha(a_3) = 0\)。由上行正合性 \(a_3 = \gamma(a_2)\) 对某 \(a_2 \in A_2\)。\(f_2(a_2)\) 在 \(B_2\) 中被 \(\beta'\) 映到 \(f_3(\gamma(a_2)) = f_3(a_3) = 0\)，正合性 \(\Rightarrow f_2(a_2) = \delta(b_1)\) 对某 \(b_1\)。\(f_1\) 满射 \(\Rightarrow b_1 = f_1(a_1)\)。追踪回 \(A_2\)：\(f_2(\gamma'(a_1)) = \delta(f_1(a_1)) = f_2(a_2)\)，\(f_2\) 同构 \(\Rightarrow a_2 = \gamma'(a_1)\)，\(a_3 = \gamma(a_2) = \gamma\gamma'(a_1) = 0\)（上行正合 \(\mathrm{im}\,\gamma' = \ker\gamma\)）。</p>
+
+            <h4>3. 证明 \(f_3\) 满射（对偶图追踪）</h4>
+            <p>取 \(b_3 \in B_3\)，映射到 \(B_4\)：\(\beta(b_3) = f_4(a_4)\)（\(f_4\) 满射）...对偶地沿交换图回溯，利用 \(f_5\) 单射约束误差项，最终得 \(b_3 \in \mathrm{im}\,f_3\)。</p>
+
+            <h4>4. 推论与变体</h4>
+            <p><strong>短五引理</strong>：短正合序列 \(0 \to A \to B \to C \to 0\) 的映射中，若两端同构则中间同构。<strong>四引理</strong>：只看中间四列可得半结论（单射或满射）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>同调理论的等价性证明</strong>：奇异同调与胞腔同调对 CW 复形的等价性通过五引理归纳证明：两种理论在点上一致（维数公理），在骨架对 \((X^n, X^{n-1})\) 上一致（都给出由胞腔计数的自由群），五引理将同构从 \(X^{n-1}\) 传递到 \(X^n\)。类似方法证明 de Rham 上同调与奇异上同调在光滑流形上的同构。</p>
+            <p><strong>谱序列与滤过</strong>：五引理在谱序列比较定理中频繁出现——比较两个谱序列的 \(E_2\) 页同构时，逐级用五引理推出极限项同构。在 Serre 谱序列中，这将纤维丛的同调与底空间、纤维的同调联系起来。</p>
+            <p><strong>代数 K-理论</strong>：K-群的分析中，长正合序列加上五引理是核心工具。例如证明 Quillen K-群与 Milnor K-群在低阶重合时，五引理承担了归纳传递的角色。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用五引理说明奇异同调与胞腔同调对 CW 复形同构。 解答（思路）：两种理论都有 \((X^n, X^{n-1})\) 的长正合序列。 对点空间同构已知（维数公理）。对 \((X^n, X^{n-1})\) 同构 （都是自由交换群，由 \(n\)-胞腔计数）。五引理归纳得一般同构。 易错点：五引理需要 \(f_1\) 满射和 \(f_5\) 单射（或两端是同构）， 条件略弱于"全部同构"。</p>
+            <h4>例题：用五引理说明奇异同调与胞腔同调对 CW 复形同构</h4>
+            <p><strong>第一步</strong>：对 CW 复形 \(X\)，两种理论都有空间对 \((X^n, X^{n-1})\) 的长正合序列。</p>
+            <p><strong>第二步</strong>：对点空间，两种理论由维数公理知同构。对 \((X^n, X^{n-1})\)，切除公理给出同构（都是自由交换群，由 \(n\)-胞腔的数目决定）。</p>
+            <p><strong>第三步</strong>：对 \(X^{n-1}\) 已知同构（归纳假设），写出两行长正合序列的交换图。由第二步知 \((X^n, X^{n-1})\) 处同构，再由五引理推出 \(X^n\) 处同构。</p>
+            <p><strong>第四步</strong>：取极限 \(X = \bigcup X^n\) 完成证明（需 CW 复形的紧致性论证）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为五引理只需 \(f_2, f_4\) 同构就足够 → ✅ 还需要 \(f_1\) 满射和 \(f_5\) 单射；缺少端点条件时结论不成立（可构造反例）。</li>
+              <li>❌ 将五引理用于非交换图 → ✅ 五引理的前提是所有方块交换；漏验交换性会导致推导链断裂。</li>
+              <li>❌ 混淆五引理与蛇引理的功能：认为五引理能"构造"连接同态 → ✅ 五引理只判断已有映射是否同构，不构造新映射；构造连接同态是蛇引理的工作。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -508,28 +585,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>改变系数（\(\mathbb{Z} \to \mathbb{Z}/p \to \mathbb{Q}\)）如何影响同调？ Tor 和 Ext 精确度量了信息损失。\(\mathrm{Tor}\) 出现在同调的系数变化中， \(\mathrm{Ext}\) 出现在上同调中。理解这两个函子就掌握了同调代数的"修正项"。</p>
+            <ul>
+              <li><strong>系数变换的信息损益</strong>：改变系数（\(\mathbb{Z} \to \mathbb{Z}/p \to \mathbb{Q}\)）如何影响同调？\(\mathbb{Q}\) 系数消除挠信息，\(\mathbb{Z}/p\) 系数凸显 \(p\)-挠——Tor 和 Ext 精确度量了这些信息的变化。</li>
+              <li><strong>万有系数定理的核心</strong>：\(\mathrm{Tor}\) 出现在同调的系数变化公式中，\(\mathrm{Ext}\) 出现在上同调中。没有这两个函子，就无法将整系数同调翻译为任意系数。</li>
+              <li><strong>导出函子 = 现代代数的核心范式</strong>：Tor 和 Ext 是第一批被系统研究的导出函子——它们的构造方法（投射/内射解析）后来成为层上同调、K-理论等所有"导出"理论的模板。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Tor = 张量积的"左导出函子"（修正张量积不保正合性的缺陷）。 Ext = Hom 的"右导出函子"（修正 Hom 不保正合性的缺陷）。</p>
+            <ul>
+              <li><strong>Tor = 张量积的左导出函子</strong>：\(\otimes\) 是右正合函子，Tor 修正其不保左正合性的缺陷——\(\mathrm{Tor}_n\) 度量 \(\otimes\) "偏离正合"的程度。</li>
+              <li><strong>Ext = Hom 的右导出函子</strong>：\(\mathrm{Hom}\) 是左正合函子，Ext 修正其不保右正合性的缺陷——\(\mathrm{Ext}^n\) 度量扩张的非平凡性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>\(\mathrm{Tor}_1(A, B)\) 的计算</strong>：取 \(A\) 的自由分解 \(0 \to F_1 \xrightarrow{d} F_0 \to A \to 0\)， \[\mathrm{Tor}_1(A, B) = \ker(d \otimes \mathrm{id}_B) / \mathrm{im}\] 对 \(A = \mathbb{Z}/n\)，分解 \(0 \to \mathbb{Z} \xrightarrow{\times n} \mathbb{Z} \to \mathbb{Z}/n \to 0\)。 \[\mathrm{Tor}_1(\mathbb{Z}/n, B) = \{b \in B : nb = 0\} = B[n]\] <strong>\(\mathrm{Ext}^1(A, B)\) 的计算</strong>： \[\mathrm{Ext}^1(\mathbb{Z}/n, B) = B / nB\] <strong>关键性质</strong>： - 自由模无 Tor：\(\mathrm{Tor}_1(\mathbb{Z}^r, B) = 0\) - 可除群无 Ext：\(\mathrm{Ext}^1(A, \mathbb{Q}) = 0\)（\(A\) 有限生成） - \(\mathrm{Tor}\) 对称：\(\mathrm{Tor}_1(A, B) \cong \mathrm{Tor}_1(B, A)\)</p>
+            <h4>1. \(\mathrm{Tor}_1(A, B)\) 的计算方法</h4>
+            <p>取 \(A\) 的自由（投射）解析 \(0 \to F_1 \xrightarrow{d} F_0 \to A \to 0\)，张量 \(B\):</p>
+            \[\mathrm{Tor}_1(A, B) = \ker(d \otimes \mathrm{id}_B: F_1 \otimes B \to F_0 \otimes B)\]
+            <p>对 \(A = \mathbb{Z}/n\)，解析 \(0 \to \mathbb{Z} \xrightarrow{\times n} \mathbb{Z} \to \mathbb{Z}/n \to 0\)，得 \(\mathrm{Tor}_1(\mathbb{Z}/n, B) = \{b \in B : nb = 0\} = B[n]\)（\(B\) 的 \(n\)-挠子群）。</p>
+
+            <h4>2. \(\mathrm{Ext}^1(A, B)\) 的计算方法</h4>
+            <p>同样的解析应用 \(\mathrm{Hom}(-, B)\):</p>
+            \[\mathrm{Ext}^1(\mathbb{Z}/n, B) = \mathrm{coker}(\times n: B \to B) = B / nB\]
+
+            <h4>3. 关键性质与公式</h4>
+            <p>自由模无 Tor：\(\mathrm{Tor}_1(\mathbb{Z}^r, B) = 0\)；可除群无 Ext：\(\mathrm{Ext}^1(A, \mathbb{Q}) = 0\)（\(A\) 有限生成）；Tor 对称：\(\mathrm{Tor}_1(A, B) \cong \mathrm{Tor}_1(B, A)\)；通用公式：\(\mathrm{Tor}_1(\mathbb{Z}/m, \mathbb{Z}/n) = \mathbb{Z}/\gcd(m,n)\)。</p>
+
+            <h4>4. 万有系数定理</h4>
+            <p>同调版：\(0 \to H_n(X;\mathbb{Z}) \otimes G \to H_n(X; G) \to \mathrm{Tor}_1(H_{n-1}(X;\mathbb{Z}), G) \to 0\)（分裂）。上同调版：\(0 \to \mathrm{Ext}^1(H_{n-1}(X;\mathbb{Z}), G) \to H^n(X; G) \to \mathrm{Hom}(H_n(X;\mathbb{Z}), G) \to 0\)（分裂）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>拓扑数据分析中的系数选择</strong>：持续同调计算通常使用 \(\mathbb{Z}/2\) 系数（避免定向问题，加速 Smith 标准形计算）。万有系数定理保证：\(\mathbb{Z}/2\) 系数的 Betti 数 ≥ 整系数 Betti 数，差额精确地由 Tor 项给出。在实际的 TDA 流水线中，选择系数 \(\mathbb{F}_p\) 可以捕捉不同频率的拓扑噪声。</p>
+            <p><strong>代数数论中的类群与 Ext</strong>：数域的理想类群可以用 Ext 函子表达 \(\mathrm{Ext}^1(\mathbb{Z}, \mathcal{O}_K^*)\)。Tor 在 Galois 上同调中作为"系数函子"出现——Tate 上同调群 \(\hat{H}^n(G, M)\) 的长正合序列中 Tor/Ext 承担连接角色。这是 Iwasawa 理论和 BSD 猜想的代数基础。</p>
+            <p><strong>同调代数在编程语言理论中的类比</strong>：类型论中的"扩张"（extension types）与 Ext 函子有深层对应：短正合序列 \(0 \to A \to B \to C \to 0\) 可看作 \(B\) 是 \(A\) 和 \(C\) 的"混合"，\(\mathrm{Ext}^1(C, A)\) 分类所有这样的混合方式。在依赖类型理论中，类似的"纤维化"结构被广泛使用。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \(\mathrm{Tor}_1(\mathbb{Z}/6, \mathbb{Z}/4)\)。 解答：\(\mathrm{Tor}_1(\mathbb{Z}/6, \mathbb{Z}/4) = \{x \in \mathbb{Z}/4 : 6x = 0\} = \{x \in \mathbb{Z}/4 : 2x = 0\}\)（因 \(6 \equiv 2 \pmod{4}\)） \(= \{0, 2\} = \mathbb{Z}/2\)。 易错点：\(\mathrm{Tor}_1(\mathbb{Z}/m, \mathbb{Z}/n) = \mathbb{Z}/\gcd(m,n)\) 是通用公式。</p>
+            <h4>例题：计算 \(\mathrm{Tor}_1(\mathbb{Z}/6, \mathbb{Z}/4)\)</h4>
+            <p><strong>第一步</strong>：取 \(\mathbb{Z}/6\) 的自由解析：\(0 \to \mathbb{Z} \xrightarrow{\times 6} \mathbb{Z} \to \mathbb{Z}/6 \to 0\)。</p>
+            <p><strong>第二步</strong>：张量 \(\mathbb{Z}/4\)：\(\mathbb{Z}/4 \xrightarrow{\times 6} \mathbb{Z}/4\)。由 \(6 \equiv 2 \pmod{4}\)，这等价于 \(\mathbb{Z}/4 \xrightarrow{\times 2} \mathbb{Z}/4\)。</p>
+            <p><strong>第三步</strong>：\(\mathrm{Tor}_1 = \ker(\times 2: \mathbb{Z}/4 \to \mathbb{Z}/4) = \{0, 2\} \cong \mathbb{Z}/2\)。</p>
+            <p><strong>验证</strong>：通用公式 \(\mathrm{Tor}_1(\mathbb{Z}/m, \mathbb{Z}/n) = \mathbb{Z}/\gcd(m,n) = \mathbb{Z}/\gcd(6,4) = \mathbb{Z}/2\) ✓。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 \(\mathrm{Tor}\) 和 \(\otimes\)：认为 \(\mathrm{Tor}_1(\mathbb{Z}/m, \mathbb{Z}/n) = \mathbb{Z}/m \otimes \mathbb{Z}/n\) → ✅ 两者碰巧都等于 \(\mathbb{Z}/\gcd(m,n)\)，但 Tor 度量的是"正合性缺陷"，\(\otimes\) 是零阶函子 \(\mathrm{Tor}_0\)。</li>
+              <li>❌ 忘记 Tor 的对称性：用不同模的解析得到不同结果 → ✅ \(\mathrm{Tor}_n(A, B) \cong \mathrm{Tor}_n(B, A)\)，解析任一侧均可（结果同构但非典范）。</li>
+              <li>❌ 在万有系数定理中遗漏 Tor 项：直接写 \(H_n(X; G) = H_n(X) \otimes G\) → ✅ 这只在 \(H_{n-1}(X)\) 无挠时成立；一般情况必须加 \(\mathrm{Tor}_1(H_{n-1}, G)\) 修正项。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -556,35 +673,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>将前面所有工具组合起来：正合序列、Mayer-Vietoris、万有系数、 Künneth、Poincaré 对偶——用于解决具体的拓扑问题。Euler 特征 的计算、Lefschetz 不动点定理、以及流形的分类都是同调理论的 综合应用。</p>
+            <ul>
+              <li><strong>工具箱的综合演练</strong>：正合序列、Mayer-Vietoris、万有系数、Künneth、Poincaré 对偶——前面章节的所有工具在此统一应用于具体拓扑问题。</li>
+              <li><strong>经典不动点定理</strong>：Lefschetz 不动点定理将 \(f\) 是否有不动点归结为同调层面的迹计算——Brouwer 不动点定理只是其特例。</li>
+              <li><strong>流形上的全局约束</strong>：Euler 特征 \(\chi(M)\) 和 Poincaré-Hopf 定理将向量场的零点行为与流形的全局拓扑不变量联系起来——"毛球定理"是经典的可视化解释。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>同调理论的综合大图：链复形 \(\to\) 同调群 \(\to\) 不变量（Betti 数、 挠、Euler 特征、环结构）\(\to\) 分类与不可能性证明。</p>
+            <ul>
+              <li><strong>同调理论的综合大图</strong>：链复形 → 同调群 → 不变量（Betti 数、挠、Euler 特征、环结构）→ 分类与不可能性证明。</li>
+              <li><strong>代数化的力量</strong>：将几何问题（不动点存在性、向量场存在性）翻译为代数问题（迹非零、Euler 特征非零），从而获得纯粹的存在性证明。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Euler 特征</strong>：\(\chi(X) = \sum_{n=0}^{\dim} (-1)^n \beta_n\)， 也等于 \(\sum (-1)^n c_n\)（\(c_n\) = \(n\)-胞腔数，CW 分解）。 \(\chi(S^n) = 1 + (-1)^n\)：\(\chi(S^{2k}) = 2\)，\(\chi(S^{2k+1}) = 0\)。 <strong>Lefschetz 不动点定理</strong>：\(f: X \to X\) 连续，\(X\) 紧多面体。 \(L(f) = \sum_{n} (-1)^n \mathrm{tr}(f_*: H_n(X;\mathbb{Q}) \to H_n(X;\mathbb{Q}))\)。 \[L(f) \neq 0 \Rightarrow f \text{ 有不动点}\] <strong>Brouwer 不动点 = 特例</strong>：\(f: D^n \to D^n\)。\(L(f) = 1 \neq 0\) （\(D^n\) 可缩，\(H_0 = \mathbb{Q}\)，\(f_*|_{H_0} = \mathrm{id}\)，\(L = 1\)）。 <strong>Poincaré-Hopf 定理</strong>（陈述）：闭流形上向量场零点指标之和 \(= \chi(M)\)。</p>
+            <h4>1. Euler 特征</h4>
+            <p>\(\chi(X) = \sum_{n=0}^{\dim} (-1)^n \beta_n\)，也等于 \(\sum (-1)^n c_n\)（\(c_n\) = CW 分解中 \(n\)-胞腔数目）。经典例子：\(\chi(S^n) = 1 + (-1)^n\)，故 \(\chi(S^{2k}) = 2\)，\(\chi(S^{2k+1}) = 0\)。</p>
+
+            <h4>2. Lefschetz 不动点定理</h4>
+            <p>\(f: X \to X\) 连续，\(X\) 紧多面体。定义 Lefschetz 数：</p>
+            \[L(f) = \sum_{n} (-1)^n \mathrm{tr}(f_*: H_n(X;\mathbb{Q}) \to H_n(X;\mathbb{Q}))\]
+            <p>\(L(f) \neq 0 \Rightarrow f\) 有不动点。特别地，\(L(\mathrm{id}) = \chi(X)\)。</p>
+
+            <h4>3. Brouwer 不动点定理 = Lefschetz 的特例</h4>
+            <p>\(f: D^n \to D^n\)。\(D^n\) 可缩，\(H_0 = \mathbb{Q}\)，高维同调为零。\(f_*|_{H_0} = \mathrm{id}\)，故 \(L(f) = 1 \neq 0\)，必有不动点。</p>
+
+            <h4>4. Poincaré-Hopf 定理</h4>
+            <p>闭定向流形 \(M\) 上光滑向量场零点的指标之和等于 Euler 特征：\(\sum_p \mathrm{ind}_p(v) = \chi(M)\)。推论：\(\chi(M) \neq 0 \Rightarrow M\) 上不存在处处非零向量场（毛球定理：\(\chi(S^{2n}) = 2 \neq 0\)）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Lefschetz 定理在动力系统中检测周期轨道 - \(\chi(M) \neq 0\) \(\Rightarrow\) \(M\) 上不存在处处不为零的向量场</p>
+            <p><strong>动力系统中的周期轨道检测</strong>：Lefschetz 不动点定理的推广——Lefschetz 迹公式在动力系统中用于检测周期轨道。对映射 \(f\) 的 \(n\) 次迭代 \(f^n\)，\(L(f^n) \neq 0\) 保证存在周期不超过 \(n\) 的周期点。在 Anosov 微分同胚的研究中，这给出了周期轨道数目的渐近增长率。</p>
+            <p><strong>机器人学与全局约束</strong>：Euler 特征与向量场的关系在机器人运动规划中有直接应用——\(\chi(M) \neq 0\) 意味着构型空间 \(M\) 上不存在全局连续的速度规划（处处非零向量场），必须有奇异点。这是球面上无法定义连续"梳理方向"的精确表述（毛球定理）。</p>
+            <p><strong>经济学中的不动点与均衡</strong>：Brouwer 不动点定理是 Nash 均衡存在性定理的数学基础——超额需求函数 \(f: \Delta^n \to \Delta^n\)（\(\Delta^n\) 为单纯形）的不动点对应竞争性均衡价格。Kakutani 不动点定理（Brouwer 的集值推广）直接用于 Arrow-Debreu 一般均衡模型。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f: S^2 \to S^2\)，\(\deg(f) = -1\)。\(f\) 有不动点吗？ 解答：\(L(f) = \mathrm{tr}(f_*|_{H_0}) + \mathrm{tr}(f_*|_{H_2}) = 1 + (-1) = 0\)。 Lefschetz 定理不保证不动点。实际上，对径映射 \(x \mapsto -x\) 在 \(S^2\) 上没有不动点，且 \(\deg = -1\)。 但 \(\deg(f) = 2\)：\(L(f) = 1 + 2 = 3 \neq 0\)，必有不动点。 易错点：\(L(f) = 0\) 不意味着没有不动点——只是定理不能判定。</p>
+            <h4>例题：判断 \(f: S^2 \to S^2\)，\(\deg(f) = -1\) 是否有不动点</h4>
+            <p><strong>第一步</strong>：计算 Lefschetz 数。\(H_0(S^2) = \mathbb{Q}\)，\(H_2(S^2) = \mathbb{Q}\)，其余为零。</p>
+            <p><strong>第二步</strong>：\(f_*|_{H_0} = \mathrm{id}\)（\(\mathrm{tr} = 1\)），\(f_*|_{H_2}\) 是乘以 \(\deg(f) = -1\)（\(\mathrm{tr} = -1\)）。</p>
+            <p><strong>第三步</strong>：\(L(f) = 1 + (-1)^2 \cdot (-1) = 1 - 1 = 0\)。Lefschetz 定理不保证不动点。</p>
+            <p><strong>第四步</strong>：实例验证——对径映射 \(x \mapsto -x\) 在 \(S^2\) 上无不动点，且 \(\deg = (-1)^3 = -1\) ✓。但若 \(\deg(f) = 2\)，\(L(f) = 1 + 2 = 3 \neq 0\)，必有不动点。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(L(f) = 0\) 意味着没有不动点 → ✅ \(L(f) = 0\) 只意味着定理无法判定；映射可能有不动点也可能没有。Lefschetz 定理给出的是充分条件，非充要条件。</li>
+              <li>❌ 在 Lefschetz 数计算中忘记交替符号 \((-1)^n\) → ✅ \(L(f) = \sum (-1)^n \mathrm{tr}(f_{*n})\)，遗漏符号会导致偶数维贡献的符号翻转。</li>
+              <li>❌ 将 Poincaré-Hopf 定理用于有边界的流形 → ✅ 定理要求闭流形（紧、无边界）；有边界时需修正为相对版本，且向量场在边界上须满足特定条件（如处处向外）。</li>
+            </ul>
           </div>
         </div>
       </div>

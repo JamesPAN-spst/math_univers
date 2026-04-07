@@ -394,35 +394,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>单纯同调依赖于三角剖分——但不是所有空间都能三角化！奇异同调 直接对任意拓扑空间定义：用"所有可能的连续映射 \(\sigma: \Delta^n \to X\)" （奇异单纯形）替代三角剖分中的单纯形。这给出了不依赖任何组合 结构的同调理论——代价是链群变成巨大的自由群，但同调群仍然可计算。</p>
+            <ul>
+              <li><strong>无需三角化：</strong>单纯同调依赖三角剖分，但不是所有空间都能三角化。奇异同调直接对任意拓扑空间定义——适用范围最广。</li>
+              <li><strong>探测思想：</strong>用"所有可能的连续映射 \(\sigma: \Delta^n \to X\)"（奇异单纯形）替代三角剖分中的单纯形——不依赖任何组合结构。</li>
+              <li><strong>统一性：</strong>奇异同调在可三角化空间上与单纯同调一致，同时定义在更一般的空间上——成为标准同调理论。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>奇异同调是"所有可能的探测"的代数化——用标准单纯形"探测" 空间中的所有连续像，再取闭链/边界的商。</p>
+            <ul>
+              <li><strong>探测的代数化：</strong>用标准单纯形 \(\Delta^n\) "探测"空间 \(X\) 中所有可能的连续像，再取 cycles/boundaries 的商。</li>
+              <li><strong>巨大链群 → 有限同调：</strong>\(S_n(X)\) 通常不可数生成，但商群 \(H_n\) 通常有限生成——代数简化了无穷复杂性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>奇异 \(n\)-单纯形</strong>：连续映射 \(\sigma: \Delta^n \to X\)。 <strong>奇异链群</strong>：\(S_n(X) = \bigoplus_\sigma \mathbb{Z} \cdot \sigma\) （所有奇异 \(n\)-单纯形自由生成）。 <strong>边缘算子</strong>：\(\partial_n(\sigma) = \sum_{i=0}^n (-1)^i \sigma \circ d_i\)， 其中 \(d_i: \Delta^{n-1} \to \Delta^n\) 是第 \(i\) 个面嵌入。 \(\partial^2 = 0\)（同一证明）。 <strong>奇异同调群</strong>： \[H_n^{\mathrm{sing}}(X; \mathbb{Z}) = \ker \partial_n / \mathrm{im}\,\partial_{n+1}\] <strong>与单纯同调的关系</strong>：对可三角化空间， \(H_n^{\mathrm{sing}}(X) \cong H_n^{\mathrm{simp}}(K)\)（任何三角剖分 \(K\)）。</p>
+            <h4>1. 奇异单纯形</h4>
+            <p>奇异 \(n\)-单纯形：任意连续映射 \(\sigma: \Delta^n \to X\)（不要求嵌入或单射）。</p>
+
+            <h4>2. 奇异链群与边缘算子</h4>
+            <p>\(S_n(X) = \bigoplus_\sigma \mathbb{Z} \cdot \sigma\)（所有奇异 \(n\)-单纯形自由生成）。边缘算子：</p>
+            \[\partial_n(\sigma) = \sum_{i=0}^n (-1)^i \,\sigma \circ d_i\]
+            <p>其中 \(d_i: \Delta^{n-1} \hookrightarrow \Delta^n\) 是第 \(i\) 个面嵌入。\(\partial^2 = 0\)（证明同单纯情形）。</p>
+
+            <h4>3. 奇异同调群</h4>
+            \[H_n^{\mathrm{sing}}(X; \mathbb{Z}) = \ker \partial_n / \mathrm{im}\,\partial_{n+1}\]
+
+            <h4>4. 与单纯同调的关系</h4>
+            <p>对可三角化空间 \(|K|\)：\(H_n^{\mathrm{sing}}(|K|) \cong H_n^{\mathrm{simp}}(K)\)。证明通过自然链映射 + 链同伦。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 奇异同调适用于任意拓扑空间（不需要三角剖分或 CW 结构）</p>
+            <p><strong>函数空间：</strong>奇异同调可定义在无穷维空间（如回路空间 \(\Omega X\)）上——这是单纯同调无法处理的，但在弦理论和量子场论中至关重要。</p>
+            <p><strong>代数几何：</strong>代数簇的奇异同调（over \(\mathbb{C}\)）是 Hodge 理论的基础——\(H^n(X; \mathbb{C})\) 分解为 Hodge 分量 \(H^{p,q}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \(H_0^{\mathrm{sing}}(\{*\})\)（单点空间）。 解答：\(S_0(\{*\}) = \mathbb{Z}\)（唯一的 0-单纯形 \(\sigma_0: \Delta^0 \to \{*\}\)）。 \(S_1(\{*\}) = \mathbb{Z}\)（唯一的 1-单纯形 \(\sigma_1\)）， \(\partial_1(\sigma_1) = \sigma_0 - \sigma_0 = 0\)。 \(H_0 = \ker \partial_0 / \mathrm{im}\,\partial_1 = \mathbb{Z}/0 = \mathbb{Z}\)。 易错点：虽然链群是巨大的（\(S_n(X)\) 通常不可数生成）， 同调群通常是有限生成的。</p>
+            <h4>例题：单点空间的奇异同调</h4>
+            <p><strong>题目：</strong>计算 \(H_n^{\mathrm{sing}}(\{*\})\)。</p>
+            <p><strong>第一步 — 链群：</strong>每个维度恰有一个奇异单纯形 \(\sigma_n: \Delta^n \to \{*\}\)，\(S_n = \mathbb{Z}\)。</p>
+            <p><strong>第二步 — 边缘：</strong>\(\partial_n(\sigma_n) = \sum (-1)^i \sigma_{n-1}\)。当 \(n\) 奇时 \(\partial_n = 0\)，\(n\) 偶时 \(\partial_n = \mathrm{id}\)（交替）。</p>
+            <p><strong>第三步 — 同调：</strong>\(H_0 = \mathbb{Z}\)，\(H_n = 0\)（\(n \geq 1\)）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为链群越大同调群越大。<br>✅ \(S_n(X)\) 可以不可数生成，但 \(H_n(X)\) 通常有限生成——大量的 cycles 互为边界。</li>
+              <li>❌ 混淆奇异单纯形与嵌入。<br>✅ 奇异单纯形 \(\sigma: \Delta^n \to X\) 可以是任何连续映射——可以不单射、不嵌入、甚至常值。</li>
+              <li>❌ 认为奇异同调只对"好"空间有意义。<br>✅ 奇异同调对任意拓扑空间定义，包括分形、无穷维空间等"病态"空间。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -476,28 +507,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>奇异同调满足一组简洁的公理（Eilenberg-Steenrod 公理），这些 公理唯一地刻画了"好"的同调理论。公理化方法的好处是：只要验证 某个构造满足公理，就自动继承所有同调的性质（长正合序列、Mayer- Vietoris 等），无需逐一证明。同伦不变性是最基本的公理之一。</p>
+            <ul>
+              <li><strong>公理化的强大：</strong>Eilenberg-Steenrod 公理唯一刻画了"好"的同调理论——只要验证公理，就自动继承全部性质（长正合序列、M-V 等）。</li>
+              <li><strong>不同构造的统一：</strong>单纯、奇异、胞腔、de Rham 等不同构造只要满足公理就给出相同结果——公理化成为判定等价的标准。</li>
+              <li><strong>同伦不变性：</strong>\(f \simeq g \Rightarrow f_* = g_*\) 是最基本的公理——保证同调是同伦类型的不变量。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>公理化将同调理论从具体构造中解放出来——不同构造（单纯、奇异、 胞腔、de Rham）只要满足公理就给出相同结果。</p>
+            <ul>
+              <li><strong>范畴论语言：</strong>同调是从拓扑空间范畴到分次交换群范畴的函子，公理约束了函子的行为。</li>
+              <li><strong>唯一性：</strong>在 CW 复形范畴上，满足 E-S 公理的同调理论本质唯一——不同构造只是同一函子的不同实现。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Eilenberg-Steenrod 公理</strong>（简化版）： 同调理论 \(h_*\) 是从拓扑空间对 \((X, A)\) 到交换群的函子序列， 配以连接同态 \(\partial: h_n(X,A) \to h_{n-1}(A)\)，满足： (1) <strong>同伦公理</strong>：\(f \simeq g \Rightarrow f_* = g_*\) (2) <strong>正合公理</strong>：长正合序列 \(\cdots \to h_n(A) \to h_n(X) \to h_n(X,A) \xrightarrow{\partial} h_{n-1}(A) \to \cdots\) (3) <strong>切除公理</strong>：\(U \subseteq \mathrm{int}(A)\)， \(h_n(X \setminus U, A \setminus U) \cong h_n(X, A)\) (4) <strong>维数公理</strong>：\(h_n(\{*\}) = 0\) 对 \(n \neq 0\) 奇异同调满足所有公理（验证需大量技术工作）。 \[f \simeq g \Rightarrow f_* = g_*: H_n(X) \to H_n(Y)\]</p>
+            <h4>1. Eilenberg-Steenrod 公理（四条）</h4>
+            <p>(1) <strong>同伦公理：</strong>\(f \simeq g \Rightarrow f_* = g_*\)。</p>
+            <p>(2) <strong>正合公理：</strong>长正合序列 \(\cdots \to h_n(A) \to h_n(X) \to h_n(X,A) \xrightarrow{\partial_*} h_{n-1}(A) \to \cdots\)</p>
+            <p>(3) <strong>切除公理：</strong>\(U \subseteq \mathrm{int}(A) \Rightarrow h_n(X \setminus U, A \setminus U) \cong h_n(X, A)\)。</p>
+            <p>(4) <strong>维数公理：</strong>\(h_n(\{*\}) = 0\) 对 \(n \neq 0\)。</p>
+
+            <h4>2. 同伦不变性推论</h4>
+            \[f \simeq g \;\Rightarrow\; f_* = g_*: H_n(X) \to H_n(Y)\]
+            <p>可缩空间 \(X \simeq \{*\}\) \(\Rightarrow\) \(H_n(X) = 0\)（\(n \geq 1\)），\(H_0(X) = \mathbb{Z}\)。</p>
+
+            <h4>3. 唯一性定理</h4>
+            <p>在 CW 复形范畴上，满足 E-S 公理且 \(h_0(\{*\}) = \mathbb{Z}\) 的同调理论同构于奇异同调。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>广义同调理论：</strong>放弃维数公理得到 K-理论（\(K_0(\{*\}) = \mathbb{Z}\), \(K_1(\{*\}) = 0\)）和配边理论——物理中的拓扑绝缘体分类依赖 K-理论。</p>
+            <p><strong>de Rham 理论：</strong>光滑流形上 de Rham 上同调满足 E-S 公理 → 自动与奇异上同调同构（de Rham 定理），无需直接证明。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用同伦不变性说明 \(H_n(\mathbb{R}^k) = H_n(\{*\})\)。 解答：\(\mathbb{R}^k\) 可缩到 \(\{0\}\)（同伦 \(H(x,t) = tx\)）。 同伦等价 \(\Rightarrow\) \(H_n(\mathbb{R}^k) \cong H_n(\{0\})\)。 \(H_0(\{*\}) = \mathbb{Z}\)，\(H_n(\{*\}) = 0\)（\(n \geq 1\)）。 所以 \(H_n(\mathbb{R}^k) = 0\) 对 \(n \geq 1\)。 易错点：可缩空间与点有相同的同调，但可缩空间不等于点（拓扑不同）。</p>
+            <h4>例题：\(\mathbb{R}^k\) 的同调</h4>
+            <p><strong>题目：</strong>用同伦不变性证明 \(H_n(\mathbb{R}^k) = H_n(\{*\})\)。</p>
+            <p><strong>第一步 — 同伦等价：</strong>\(\mathbb{R}^k\) 可缩到 \(\{0\}\)（同伦 \(H(x,t) = tx\)），故 \(\mathbb{R}^k \simeq \{*\}\)。</p>
+            <p><strong>第二步 — 公理：</strong>同伦公理 \(\Rightarrow H_n(\mathbb{R}^k) \cong H_n(\{*\})\)。维数公理 \(\Rightarrow H_n(\{*\}) = 0\)（\(n \geq 1\)）。</p>
+            <p><strong>第三步 — 结论：</strong>\(H_0(\mathbb{R}^k) = \mathbb{Z}\)，\(H_n(\mathbb{R}^k) = 0\)（\(n \geq 1\)）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"可缩"和"单点"——\(\mathbb{R}^k\) 可缩但不是单点空间。<br>✅ 同调等价不等于同胚：\(\mathbb{R}^k \not\cong \{*\}\) 但 \(H_*(\mathbb{R}^k) \cong H_*(\{*\})\)。</li>
+              <li>❌ 认为维数公理不可或缺。<br>✅ 放弃维数公理得到"广义同调理论"（K-理论、配边等），在现代拓扑中极其重要。</li>
+              <li>❌ 认为公理化方法只是形式化。<br>✅ 公理化使得跨构造的比较成为自动——比如 de Rham 上同调满足公理即可。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -524,28 +592,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>直接计算同调群通常困难。长正合序列和 Mayer-Vietoris 是最强大的 计算工具：前者将空间对 \((X, A)\) 的同调串成长序列，后者将 \(X = U \cup V\) 的同调与 \(U, V, U \cap V\) 的同调串联起来。 大多数同调群的计算都归结于反复应用这两个工具。</p>
+            <ul>
+              <li><strong>计算工具：</strong>直接计算同调群通常困难。长正合序列和 Mayer-Vietoris 是最强大的计算工具——大多数同调群的计算都归结于反复应用它们。</li>
+              <li><strong>分解策略：</strong>长正合序列将空间对 \((X,A)\) 的同调串联；Mayer-Vietoris 将 \(X = U \cup V\) 的同调与 \(U, V, U \cap V\) 的同调关联。</li>
+              <li><strong>递归计算 \(S^n\)：</strong>Mayer-Vietoris 直接给出 \(H_k(S^n) \cong H_{k-1}(S^{n-1})\)——递归得到球面同调。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>长正合序列是蛇引理 (snake lemma) 的拓扑实例——短正合序列 \(0 \to C_*(A) \to C_*(X) \to C_*(X,A) \to 0\) 在同调上产生长正合序列。</p>
+            <ul>
+              <li><strong>蛇引理的实例：</strong>短正合序列 \(0 \to C_*(A) \to C_*(X) \to C_*(X,A) \to 0\) 在同调上产生长正合序列——连接同态 \(\partial_*\) 来自蛇引理。</li>
+              <li><strong>Mayer-Vietoris = 拼接原理：</strong>从局部信息（\(U, V\)）重构全局信息（\(X\)）的代数机制。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>相对同调的长正合序列</strong>： \[\cdots \to H_n(A) \xrightarrow{i_*} H_n(X) \xrightarrow{j_*} H_n(X,A) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\] 连接同态 \(\partial_*\) 来自蛇引理。 <strong>Mayer-Vietoris 序列</strong>：\(X = U \cup V\)（\(U, V\) 开）， \[\cdots \to H_n(U \cap V) \xrightarrow{(\phi_*, \psi_*)} H_n(U) \oplus H_n(V) \xrightarrow{i_* - j_*} H_n(X) \xrightarrow{\partial_*} H_{n-1}(U \cap V) \to \cdots\] <strong>应用</strong>：计算 \(H_n(S^n)\)：令 \(U = S^n \setminus \{N\}\)，\(V = S^n \setminus \{S\}\)。 \(U \simeq V \simeq \mathbb{R}^n \simeq \{*\}\)，\(U \cap V \simeq S^{n-1}\)。 Mayer-Vietoris 给出 \(H_k(S^n) \cong H_{k-1}(S^{n-1})\)（\(k \geq 2\)）， 递归得 \(H_k(S^n) = \begin{cases}\mathbb{Z} & k=0,n \\ 0 & \text{else}\end{cases}\)。</p>
+            <h4>1. 相对同调的长正合序列</h4>
+            \[\cdots \to H_n(A) \xrightarrow{i_*} H_n(X) \xrightarrow{j_*} H_n(X,A) \xrightarrow{\partial_*} H_{n-1}(A) \to \cdots\]
+            <p>连接同态 \(\partial_*\) 的构造：取 \([c] \in H_n(X,A)\)，选代表 \(c \in C_n(X)\) 使 \(\partial c \in C_{n-1}(A)\)，则 \(\partial_*[c] = [\partial c]\)。</p>
+
+            <h4>2. Mayer-Vietoris 序列</h4>
+            <p>设 \(X = U \cup V\)（\(U, V\) 开）：</p>
+            \[\cdots \to H_n(U \cap V) \xrightarrow{(\phi_*, \psi_*)} H_n(U) \oplus H_n(V) \xrightarrow{i_* - j_*} H_n(X) \xrightarrow{\partial_*} H_{n-1}(U \cap V) \to \cdots\]
+
+            <h4>3. 球面同调的递归</h4>
+            <p>取 \(U = S^n \setminus \{N\}\)，\(V = S^n \setminus \{S\}\)，\(U \simeq V \simeq \{*\}\)，\(U \cap V \simeq S^{n-1}\)。M-V 给出 \(H_k(S^n) \cong H_{k-1}(S^{n-1})\)（\(k \geq 2\)），递归得经典结果。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>纽结不变量：</strong>Alexander 多项式通过 Seifert 曲面的同调长正合序列计算——是区分纽结的经典工具。</p>
+            <p><strong>流形分类：</strong>手术理论中 Mayer-Vietoris 追踪手术操作对同调的影响——这是高维流形分类的关键技术。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用 Mayer-Vietoris 序列计算 \(H_1(S^1)\)。 解答：\(S^1 = U \cup V\)，\(U = S^1 \setminus \{N\}\)，\(V = S^1 \setminus \{S\}\)。 \(U \simeq V \simeq \mathbb{R}\)，\(U \cap V \simeq \mathbb{R} \sqcup \mathbb{R}\)（两段弧）。 \(H_0(U \cap V) = \mathbb{Z}^2\)，\(H_0(U) \oplus H_0(V) = \mathbb{Z}^2\)。 \(\cdots \to H_1(U) \oplus H_1(V) \to H_1(S^1) \to H_0(U \cap V) \to H_0(U) \oplus H_0(V) \to \cdots\) \(= 0 \to H_1(S^1) \to \mathbb{Z}^2 \xrightarrow{(1,-1)} \mathbb{Z}^2\)。 \(\ker = \{(a,a)\} \cong \mathbb{Z}\)。\(H_1(S^1) = \mathbb{Z}\)。 易错点：要仔细追踪 Mayer-Vietoris 中各映射的具体形式。</p>
+            <h4>例题：用 Mayer-Vietoris 计算 \(H_1(S^1)\)</h4>
+            <p><strong>题目：</strong>\(S^1 = U \cup V\)，\(U = S^1 \setminus \{N\}\)，\(V = S^1 \setminus \{S\}\)。</p>
+            <p><strong>第一步 — 识别：</strong>\(U \simeq V \simeq \mathbb{R}\)（可缩），\(U \cap V \simeq \mathbb{R} \sqcup \mathbb{R}\)（两段弧）。</p>
+            <p><strong>第二步 — M-V 序列：</strong>\(0 \to H_1(S^1) \xrightarrow{\partial_*} H_0(U \cap V) \xrightarrow{} H_0(U) \oplus H_0(V)\)，即 \(0 \to H_1(S^1) \to \mathbb{Z}^2 \xrightarrow{(1,-1)} \mathbb{Z}^2\)。</p>
+            <p><strong>第三步 — 核：</strong>\(\ker = \{(a,a)\} \cong \mathbb{Z}\)，故 \(H_1(S^1) = \mathbb{Z}\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 不追踪 M-V 中各映射的具体形式就直接推结论。<br>✅ 必须明确 \(\phi_*, \psi_*\) 在生成元上的像才能计算核与余核。</li>
+              <li>❌ 忘记 M-V 要求 \(U, V\) 开（或满足切除条件）。<br>✅ 闭覆盖一般不适用 M-V——需要切除公理保证。</li>
+              <li>❌ 混淆连接同态 \(\partial_*\) 与边缘算子 \(\partial\)。<br>✅ \(\partial_*\) 是同调群之间的映射（降维 1），\(\partial\) 是链群之间的映射。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -572,35 +675,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>同调群是拓扑学中最实用的不变量——它可以证明许多经典定理。 Brouwer 不动点定理（任意维）、Borsuk-Ulam 定理、以及 流形不变域定理都能用同调优雅地证明。这些定理在分析、组合数学 和应用数学中有深远意义。</p>
+            <ul>
+              <li><strong>经典定理的统一证明：</strong>Brouwer 不动点定理、Borsuk-Ulam 定理、不变域定理都用同调优雅证明——代数不变量证明拓扑的"不可能性"。</li>
+              <li><strong>映射度：</strong>\(\deg(f): S^n \to S^n\) 是 \(f_*\) 在 \(H_n(S^n) = \mathbb{Z}\) 上的乘法因子——编码了映射的"绕圈"信息。</li>
+              <li><strong>跨学科应用：</strong>同调工具从纯拓扑扩展到分析（Leray-Schauder 度）、组合数学（火腿三明治定理）和经济学（Kakutani 不动点定理）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>同调的"功能"：通过代数不变量证明拓扑的"不可能性"。</p>
+            <ul>
+              <li><strong>代数化障碍：</strong>不动点的存在性等价于某个同调映射的非平凡性——"无不动点 → 收缩 → 同调矛盾"。</li>
+              <li><strong>映射度的代数性质：</strong>\(\deg(f \circ g) = \deg(f) \cdot \deg(g)\)，\(\deg(\mathrm{id}) = 1\)——映射度是乘法同态。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Brouwer 不动点定理（一般）</strong>：连续 \(f: D^n \to D^n\) 有不动点。 证明：类似 \(n=2\) 的情况。若无不动点，构造收缩 \(r: D^n \to S^{n-1}\)。 则 \(r \circ i = \mathrm{id}\)，\(r_* \circ i_* = \mathrm{id}\)。 但 \(H_{n-1}(D^n) = 0\)，\(H_{n-1}(S^{n-1}) = \mathbb{Z}\)。 \[\mathbb{Z} \xrightarrow{i_*} 0 \xrightarrow{r_*} \mathbb{Z}\] 不可能为 \(\mathrm{id}\)。矛盾。 <strong>映射度</strong>：\(f: S^n \to S^n\) 诱导 \(f_*: H_n(S^n) \to H_n(S^n)\)， 即 \(f_*: \mathbb{Z} \to \mathbb{Z}\)，\(f_*(1) = \deg(f)\)。 \(\deg(f)\) 是整数，\(\deg(f \circ g) = \deg(f) \cdot \deg(g)\)。 恒等 \(\deg = 1\)，对径 \(\deg = (-1)^{n+1}\)，常值 \(\deg = 0\)。</p>
+            <h4>1. Brouwer 不动点定理</h4>
+            <p>连续 \(f: D^n \to D^n\) 有不动点。反证：若无不动点，构造收缩 \(r: D^n \to S^{n-1}\)（\(r \circ i = \mathrm{id}\)）。则 \(r_* \circ i_* = \mathrm{id}\)，但 \(H_{n-1}(D^n) = 0 \to H_{n-1}(S^{n-1}) = \mathbb{Z}\) 无法为 \(\mathrm{id}\)。矛盾。</p>
+
+            <h4>2. 映射度</h4>
+            <p>\(f: S^n \to S^n\) 诱导 \(f_*: H_n(S^n) \to H_n(S^n)\)，即 \(\mathbb{Z} \to \mathbb{Z}\)，\(f_*(1) = \deg(f)\)。</p>
+            <p>性质：\(\deg(\mathrm{id}) = 1\)，\(\deg(\text{对径}) = (-1)^{n+1}\)，\(\deg(\text{常值}) = 0\)，\(\deg(f \circ g) = \deg(f) \cdot \deg(g)\)。</p>
+
+            <h4>3. Borsuk-Ulam 定理</h4>
+            <p>连续 \(f: S^n \to \mathbb{R}^n\) 必存在 \(x\) 使 \(f(x) = f(-x)\)。推论：火腿三明治定理（\(n\) 个对象可被一个超平面同时二等分）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Borsuk-Ulam 定理（\(f: S^n \to \mathbb{R}^n\) 必有 \(f(x) = f(-x)\)）可用映射度证明 - "火腿三明治定理"是 Borsuk-Ulam 的推论</p>
+            <p><strong>经济学中的一般均衡：</strong>Kakutani 不动点定理（Brouwer 的推广）是 Arrow-Debreu 一般均衡存在性证明的核心——保证了竞争市场均衡价格的存在。</p>
+            <p><strong>气象学的 Borsuk-Ulam：</strong>地球表面必存在对径点温度和气压完全相同——这是 \(f: S^2 \to \mathbb{R}^2\) 的直接推论。</p>
+            <p><strong>Leray-Schauder 度：</strong>将映射度推广到无穷维 Banach 空间，用于证明非线性偏微分方程解的存在性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f: S^1 \to S^1\)，\(f(z) = z^3\)。求 \(\deg(f)\)。 解答：\(f_*: H_1(S^1) \to H_1(S^1)\)，\(H_1(S^1) = \mathbb{Z}\)。 \(f\) 将生成元（绕一圈）映为绕三圈：\(f_*(1) = 3\)。 \(\deg(f) = 3\)。 （一般地，\(\deg(z^n) = n\)。） 易错点：\(\deg(f)\) 与 \(f\) 的方向有关。\(f(z) = \bar{z}\)（复共轭） 的 \(\deg = -1\)。</p>
+            <h4>例题：\(f(z) = z^3\) 的映射度</h4>
+            <p><strong>题目：</strong>\(f: S^1 \to S^1\)，\(f(z) = z^3\)。求 \(\deg(f)\)。</p>
+            <p><strong>第一步 — 同调：</strong>\(f_*: H_1(S^1) \to H_1(S^1)\)，\(H_1(S^1) = \mathbb{Z}\)。</p>
+            <p><strong>第二步 — 计算：</strong>\(f\) 将生成元（绕一圈）映为绕三圈：\(f_*(1) = 3\)。故 \(\deg(f) = 3\)。</p>
+            <p><strong>第三步 — 推广：</strong>一般地 \(\deg(z^n) = n\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为映射度与方向无关。<br>✅ \(\deg(\bar{z}) = -1\)（复共轭反转方向），\(\deg(z^{-1}) = -1\)。</li>
+              <li>❌ 混淆 Brouwer 定理的维度——\(D^n\) 到 \(D^n\) 才有不动点。<br>✅ \(f: S^n \to S^n\) 不一定有不动点（如对径映射当 \(n\) 偶时无不动点）。</li>
+              <li>❌ 认为映射度为零意味着映射是常值。<br>✅ 非常值映射也可以有 \(\deg = 0\)（如 \(S^2 \to S^2\) 折叠后再展开）。</li>
+            </ul>
           </div>
         </div>
       </div>
