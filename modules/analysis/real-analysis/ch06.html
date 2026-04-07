@@ -394,35 +394,81 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>数学和物理中经常需要对多变量函数进行积分——重积分 \(\iint f(x,y)\, dx\, dy\) 是微积分的基本运算。但在测度论框架下，如何严格定义两个测度空间 \((X, \mathcal{F}, \mu)\) 和 \((Y, \mathcal{G}, \nu)\) 的"乘积"？ 乘积 σ-代数和乘积测度的构造为多元积分和概率论中的联合分布 提供了严格基础。</p>
+            <ul>
+              <li><strong>多变量积分的需求</strong>——数学和物理中重积分 \(\iint f(x,y)\,dx\,dy\) 无处不在，但在测度论框架下，如何严格定义两个测度空间 \((X,\mathcal{F},\mu)\) 和 \((Y,\mathcal{G},\nu)\) 的"乘积"测度空间？</li>
+              <li><strong>概率论的基础</strong>——联合分布、独立性的精确定义都依赖于乘积 σ-代数上的测度；不严格构造会导致条件概率等高级概念出现悖论</li>
+              <li><strong>从有限到无限的延拓</strong>——矩形集 \(A \times B\) 上的测度值 \(\mu(A)\nu(B)\) 显然；困难在于如何把这一"局部"定义一致地延拓到全体乘积可测集</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>乘积测度的构造体现了"从矩形集出发"的思想——对矩形集 \(A \times B\) 定义 \((\mu \times \nu)(A \times B) = \mu(A)\nu(B)\)， 再由 Carathéodory 延拓定理扩展到全体可测集。</p>
+            <ul>
+              <li><strong>从矩形集到 σ-代数</strong>——可测矩形 \(\{A \times B : A \in \mathcal{F},\, B \in \mathcal{G}\}\) 构成半代数；取其生成的 σ-代数 \(\mathcal{F} \otimes \mathcal{G}\) 作为乘积 σ-代数</li>
+              <li><strong>Carathéodory 延拓范式</strong>——在半代数上定义预测度 \(\pi(A \times B) = \mu(A)\nu(B)\)，验证 σ-可加性，再由 Carathéodory 延拓定理得到 \(\mathcal{F} \otimes \mathcal{G}\) 上的完整测度</li>
+              <li><strong>σ-有限性的角色</strong>——σ-有限保证延拓的唯一性（Hahn 推广定理）；非 σ-有限时乘积测度可能不唯一</li>
+              <li><strong>截面可测性</strong>——乘积可测集的"x-切片"和"y-切片"自动可测，这是后续 Tonelli / Fubini 定理的出发点</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>乘积 σ-代数</strong>：\(\mathcal{F} \otimes \mathcal{G} = \sigma(\{A \times B : A \in \mathcal{F},\, B \in \mathcal{G}\})\)。 <strong>乘积测度的存在性</strong>：对 σ-有限测度空间 \((X, \mathcal{F}, \mu)\) 和 \((Y, \mathcal{G}, \nu)\)，存在唯一的测度 \(\mu \times \nu\) 在 \(\mathcal{F} \otimes \mathcal{G}\) 上，使得 \[(\mu \times \nu)(A \times B) = \mu(A) \cdot \nu(B)\] <strong>截面的可测性</strong>：若 \(E \in \mathcal{F} \otimes \mathcal{G}\)，则 \(x\)-截面 \(E_x = \{y : (x,y) \in E\} \in \mathcal{G}\)（a.e. \(x\)）， 且 \(x \mapsto \nu(E_x)\) 是 \(\mathcal{F}\)-可测函数。</p>
+            <h4>乘积 σ-代数</h4>
+            <p>\(\mathcal{F} \otimes \mathcal{G} = \sigma\bigl(\{A \times B : A \in \mathcal{F},\, B \in \mathcal{G}\}\bigr)\)。</p>
+
+            <h4>乘积测度的存在性与唯一性</h4>
+            <p>设 \((X,\mathcal{F},\mu)\) 和 \((Y,\mathcal{G},\nu)\) 均为 σ-有限测度空间。存在唯一的测度 \(\mu \times \nu\) 在 \(\mathcal{F} \otimes \mathcal{G}\) 上满足
+            \[(\mu \times \nu)(A \times B) = \mu(A) \cdot \nu(B), \quad A \in \mathcal{F},\; B \in \mathcal{G}.\]</p>
+            <p><em>证明要点</em>：</p>
+            <ol>
+              <li>矩形集族 \(\mathcal{R} = \{A \times B\}\) 构成<strong>半代数</strong>（对有限交封闭，补可分解为有限并）</li>
+              <li>定义 \(\pi(A \times B) = \mu(A)\nu(B)\)，利用 Fubini–Tonelli 先验结果（对简单函数）验证 \(\pi\) 在 \(\mathcal{R}\) 上 σ-可加</li>
+              <li>Carathéodory 延拓：\(\pi\) 延拓为 \(\sigma(\mathcal{R}) = \mathcal{F} \otimes \mathcal{G}\) 上的措 \(\mu \times \nu\)</li>
+              <li>σ-有限性 \(\Rightarrow\) 唯一性（Hahn 推广定理）</li>
+            </ol>
+
+            <h4>截面可测性定理</h4>
+            <p>若 \(E \in \mathcal{F} \otimes \mathcal{G}\)，则</p>
+            <ul>
+              <li>\(x\)-截面 \(E_x = \{y : (x,y) \in E\} \in \mathcal{G}\)（对 μ-a.e. \(x\)）</li>
+              <li>映射 \(x \mapsto \nu(E_x)\) 是 \(\mathcal{F}\)-可测的</li>
+              <li>\((\mu \times \nu)(E) = \int_X \nu(E_x)\,d\mu(x) = \int_Y \mu(E^y)\,d\nu(y)\)</li>
+            </ul>
+
+            <h4>与 Borel σ-代数的关系</h4>
+            <p>对第二可数拓扑空间 \(X, Y\)（如 \(\mathbb{R}^n\)），有
+            \[\mathcal{B}(X \times Y) = \mathcal{B}(X) \otimes \mathcal{B}(Y).\]
+            证明关键：\(X \times Y\) 的开集可写为可数个开矩形之并。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>概率论中，两个随机变量 \(X, Y\) 的联合分布就是 \(P_X \times P_Y\)（在独立时）定义在乘积 σ-代数上的测度。</p>
+            <p><strong>概率论：联合分布与独立性</strong>——两个随机变量 \(X, Y\) 的联合分布是乘积 σ-代数 \(\mathcal{B}(\mathbb{R}) \otimes \mathcal{B}(\mathbb{R})\) 上的测度；\(X, Y\) 独立当且仅当联合分布等于边缘分布的乘积测度 \(P_X \times P_Y\)。多维随机向量的分布论完全建立在乘积测度构造之上。</p>
+            <p><strong>统计力学：相空间构造</strong>——\(N\) 个粒子的相空间 \(\Omega = \prod_{i=1}^N (\mathbb{R}^3 \times \mathbb{R}^3)\) 上的 Liouville 测度是各粒子相空间 Lebesgue 测度的乘积。配分函数 \(Z = \int_\Omega e^{-\beta H}\,d\mu\) 的良定义依赖乘积测度的存在性与 σ-有限性。</p>
+            <p><strong>图像处理：多维数据测度化</strong>——灰度图可视为 \(\mathbb{R}^2\)（像素坐标）上的可测函数。对图像做区域统计（如直方图、矩特征）实质是在乘积 Lebesgue 测度 \(\lambda^2\) 下的积分；彩色图进一步扩展到 \(\mathbb{R}^2 \times \{R,G,B\}\) 的乘积空间。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \((\mathbb{R}^2, \mathcal{B}(\mathbb{R}^2), \lambda^2)\) 中， 证明 \(\mathcal{B}(\mathbb{R}^2) = \mathcal{B}(\mathbb{R}) \otimes \mathcal{B}(\mathbb{R})\)。 解答：\(\mathbb{R}^2\) 中开集是可数个开矩形之并， 开矩形 \((a,b) \times (c,d) \in \mathcal{B}(\mathbb{R}) \otimes \mathcal{B}(\mathbb{R})\)，故 \(\mathcal{B}(\mathbb{R}^2) \subseteq \mathcal{B} \otimes \mathcal{B}\)。 反向：投影映射连续故 Borel 可测，\(A \times B = \pi_1^{-1}(A) \cap \pi_2^{-1}(B) \in \mathcal{B}(\mathbb{R}^2)\)。 易错点：想当然认为乘积测度对非 σ-有限情形也存在且唯一。 σ-有限性是保证唯一性的关键条件。</p>
+            <h4>例题：\(\mathcal{B}(\mathbb{R}^2) = \mathcal{B}(\mathbb{R}) \otimes \mathcal{B}(\mathbb{R})\)</h4>
+            <p><strong>Step 1</strong>　证 \(\mathcal{B} \otimes \mathcal{B} \subseteq \mathcal{B}(\mathbb{R}^2)\)：投影映射 \(\pi_1, \pi_2\) 连续故 Borel 可测。对可测矩形 \(A \times B = \pi_1^{-1}(A) \cap \pi_2^{-1}(B) \in \mathcal{B}(\mathbb{R}^2)\)，故生成的 σ-代数 \(\mathcal{B} \otimes \mathcal{B} \subseteq \mathcal{B}(\mathbb{R}^2)\)。</p>
+            <p><strong>Step 2</strong>　证 \(\mathcal{B}(\mathbb{R}^2) \subseteq \mathcal{B} \otimes \mathcal{B}\)：\(\mathbb{R}^2\) 中任意开集 \(U\) 可写为可数个开矩形 \((a_n, b_n) \times (c_n, d_n)\) 之并。每个开矩形属于 \(\mathcal{B} \otimes \mathcal{B}\)，可数并仍属于 σ-代数，故 \(U \in \mathcal{B} \otimes \mathcal{B}\)。</p>
+            <p><strong>Step 3</strong>　结论：两个方向包含给出等式 \(\mathcal{B}(\mathbb{R}^2) = \mathcal{B}(\mathbb{R}) \otimes \mathcal{B}(\mathbb{R})\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为乘积测度对非 σ-有限空间也唯一 → ✅ σ-有限性是唯一性的必要条件；经典反例：不可数集上计数测度</li>
+              <li>❌ 将 \(\mathcal{F} \otimes \mathcal{G}\) 误解为 \(\mathcal{F} \times \mathcal{G}\)（笛卡尔积）→ ✅ \(\mathcal{F} \otimes \mathcal{G}\) 是可测矩形<strong>生成</strong>的 σ-代数，远大于 \(\{A \times B\}\) 本身</li>
+              <li>❌ 忽略完备化：\(\mathcal{B} \otimes \mathcal{B}\) 上的 \(\lambda \times \lambda\) 与 \(\lambda^2\)（Lebesgue 测度）的完备化不同 → ✅ \(\lambda^2\) 的完备 σ-代数严格大于 \(\mathcal{B} \otimes \mathcal{B}\)；存在 Lebesgue 可测但非 Borel 乘积可测的集合</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -449,21 +495,76 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>有了乘积测度，最重要的应用是交换重积分的顺序——把 \(\iint\) 变成先 \(\int dy\) 再 \(\int dx\)（或反过来）。对非负函数， Tonelli 定理保证可以无条件交换积分顺序。这一定理的条件 比 Fubini 更宽松（不需要可积），但限于非负函数。</p>
+            <ul>
+              <li><strong>交换积分顺序</strong>——有了乘积测度，最核心的运算是把 \(\iint f\,d(\mu \times \nu)\) 化为逐次积分 \(\int(\int f\,d\nu)\,d\mu\)；选择更方便的积分顺序可以极大简化计算</li>
+              <li><strong>非负情形的自由性</strong>——Tonelli 定理对非负可测函数<strong>无条件</strong>允许交换（结果允许为 \(+\infty\)），这比 Fubini 的条件宽松得多</li>
+              <li><strong>作为 Fubini 的入口</strong>——实际使用中，先用 Tonelli 对 \(|f|\) 检验可积性，再用 Fubini 对 \(f\) 本身交换积分顺序，Tonelli 是这一"两步法"的第一步</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>逐步逼近策略</strong>——Tonelli 的证明遵循测度论标准范式：特征函数 → 简单函数（线性组合）→ 一般非负可测函数（MCT 逼近），每一步都建立在前一步之上</li>
+              <li><strong>截面可测性是基石</strong>——交换积分顺序的合法性源于截面 \(f(x, \cdot)\) 的可测性和 \(x \mapsto \int f(x,y)\,d\nu\) 的可测性；这些由乘积 σ-代数的结构保证</li>
+              <li><strong>非负性消除符号问题</strong>——\(f \geq 0\) 意味着所有部分和与积分都是单调递增的，无需担心 \(+\infty - \infty\) 的不确定性，这是 Tonelli 不要求可积性的根本原因</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理 (Tonelli)</strong>：设 \(f: X \times Y \to [0, +\infty]\) 是 \(\mathcal{F} \otimes \mathcal{G}\)-可测函数，\(\mu, \nu\) 为 σ-有限测度。则： (1) \(y \mapsto f(x, y)\) 对 a.e. \(x\) 是 \(\mathcal{G}\)-可测的； (2) \(x \mapsto \int f(x, y)\, d\nu(y)\) 是 \(\mathcal{F}\)-可测的； (3) \[\int_{X \times Y} f\, d(\mu \times \nu) = \int_X \left(\int_Y f(x,y)\, d\nu(y)\right) d\mu(x) = \int_Y \left(\int_X f(x,y)\, d\mu(x)\right) d\nu(y)\] <strong>证明策略</strong>：先对特征函数验证（由截面可测性）， 再对简单函数（线性），再对一般非负函数（MCT）。</p>
+            <h4>定理陈述 (Tonelli)</h4>
+            <p>设 \(f: X \times Y \to [0, +\infty]\) 是 \(\mathcal{F} \otimes \mathcal{G}\)-可测的，\(\mu, \nu\) 为 σ-有限测度。则：</p>
+            <ol>
+              <li>\(y \mapsto f(x,y)\) 对 μ-a.e. \(x\) 是 \(\mathcal{G}\)-可测的</li>
+              <li>\(x \mapsto \int_Y f(x,y)\,d\nu(y)\) 是 \(\mathcal{F}\)-可测函数（值域 \([0, +\infty]\)）</li>
+              <li>
+                \[\int_{X \times Y} f\,d(\mu \times \nu) = \int_X \biggl(\int_Y f(x,y)\,d\nu(y)\biggr) d\mu(x) = \int_Y \biggl(\int_X f(x,y)\,d\mu(x)\biggr) d\nu(y)\]
+              </li>
+            </ol>
+
+            <h4>证明策略（三步逼近）</h4>
+            <p><strong>Step 1（特征函数）</strong>　\(f = \mathbf{1}_E\)，\(E \in \mathcal{F} \otimes \mathcal{G}\)。由截面可测性定理：\(\int \mathbf{1}_E\,d(\mu \times \nu) = (\mu \times \nu)(E) = \int_X \nu(E_x)\,d\mu(x)\)。</p>
+            <p><strong>Step 2（简单函数）</strong>　\(f = \sum a_i \mathbf{1}_{E_i}\)，由线性性直接从 Step 1 推出。</p>
+            <p><strong>Step 3（一般非负函数）</strong>　取简单函数递增序列 \(0 \leq s_n \uparrow f\)。对每个 \(s_n\) Step 2 成立，再由 MCT（单调收敛定理）两边取极限——MCT 保证积分与极限可交换。</p>
+
+            <h4>关键技术点</h4>
+            <ul>
+              <li>σ-有限性：保证乘积测度唯一，从而等式两端是同一个积分</li>
+              <li>结果允许 \(+\infty\)：三个积分可能同时为 \(+\infty\)，等式依然成立</li>
+              <li>仅要求可测，不要求可积——这是与 Fubini 的根本区别</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>概率论：期望的"Tonelli 公式"</strong>——对非负随机变量 \(X \geq 0\)，\(\mathbb{E}[X] = \int_0^\infty P(X > t)\,dt\)。证明核心是对 \(\mathbf{1}_{\{X(\omega) > t\}}\) 在 \(\Omega \times [0,\infty)\) 上使用 Tonelli 交换积分顺序。这一公式在保险精算（索赔尾部期望）、生存分析（平均寿命）中被广泛使用。</p>
+            <p><strong>级数与积分的交换</strong>——将级数 \(\sum_{n=1}^\infty f_n(x)\)（\(f_n \geq 0\)）视为关于计数测度的积分，Tonelli 定理直接给出 \(\int \sum f_n = \sum \int f_n\)。这是逐项积分定理的非负版本，在 Fourier 分析和级数论中是标准工具。</p>
+            <p><strong>可积性检验</strong>——Fubini 定理使用前，先用 Tonelli 对 \(|f|\) 交换积分顺序来验证 \(\int |f|\,d(\mu \times \nu) < \infty\)。在 PDE 弱解理论、概率论中的矩计算等场景，这一"Tonelli 先行、Fubini 跟进"的两步法是标准工作流程。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用 Tonelli 定理证明 \(\int_0^{\infty} \int_0^{\infty} e^{-xy} \sin x\, dx\, dy = \pi/2\)。 解答：\(f(x,y) = e^{-xy} |\sin x| \geq 0\)，但我们先对 \(|f|\) 用 Tonelli 验证可积性。 \(\int_0^{\infty} e^{-xy} dy = 1/x\)（\(x > 0\)）， 故外层为 \(\int_0^{\infty} |\sin x|/x\, dx = +\infty\)—— 这说明不能对 \(|f|\) 用 Fubini！ 但可以利用截断技巧：对 \(f_R(x,y) = e^{-xy}\sin x \cdot \mathbf{1}_{[0,R]}(x)\) 先积 \(y\)，再令 \(R \to \infty\)。 易错点：在变号函数上使用 Tonelli 定理——Tonelli 仅对 非负函数成立。</p>
+            <h4>例题：Tonelli 验证与截断技巧</h4>
+            <p>计算 \(\int_0^\infty \int_0^\infty e^{-xy} \sin x\, dx\, dy\)。</p>
+            <p><strong>Step 1</strong>　尝试用 Tonelli 对 \(|f| = e^{-xy}|\sin x|\) 检验可积性：\(\int_0^\infty e^{-xy}\,dy = 1/x\)（\(x > 0\)），故 \(\int_0^\infty |\sin x|/x\,dx = +\infty\)——\(|f|\) 在乘积测度下不可积，不能直接用 Fubini。</p>
+            <p><strong>Step 2</strong>　截断：令 \(I_R = \int_0^R \int_0^\infty e^{-xy}\sin x\,dy\,dx\)。对固定 \(R\)，\(e^{-xy}\sin x \cdot \mathbf{1}_{[0,R]}(x)\) 关于乘积 Lebesgue 测度可积（因为 \(\int_0^R |\sin x|/x\,dx < \infty\)），Fubini 适用。</p>
+            <p><strong>Step 3</strong>　交换后：\(I_R = \int_0^R \frac{\sin x}{x}\,dx\)。令 \(R \to \infty\)，得 \(\int_0^\infty \frac{\sin x}{x}\,dx = \pi/2\)（Dirichlet 积分）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对变号函数直接使用 Tonelli 定理 → ✅ Tonelli 仅适用于 \(f \geq 0\)；变号函数必须用 Fubini（需可积性）</li>
+              <li>❌ Tonelli 给出 \(+\infty\) 就认为积分"无意义" → ✅ Tonelli 的 \(+\infty\) 结果是合法的，它说明函数不可积，此时 Fubini 不适用，但 Tonelli 本身的等式仍成立</li>
+              <li>❌ 忘记 σ-有限性条件 → ✅ 若 \(\mu\) 或 \(\nu\) 非 σ-有限，乘积测度不唯一，Tonelli 定理可能失效；经典反例：\(\mathbb{R}\) 上计数测度 × Lebesgue 测度</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -490,28 +591,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Tonelli 定理限于非负函数，但实际中经常需要对变号函数交换 积分顺序。Fubini 定理解决了这一问题：只要函数关于乘积测度 可积（\(\int |f| < \infty\)），就可以安全地交换积分顺序。 Fubini 定理是多元分析、概率论和 PDE 中不可或缺的工具。</p>
+            <ul>
+              <li><strong>变号函数的需求</strong>——Tonelli 限于非负函数，但物理与概率中大量函数是变号的（如 \(\sin\)、Fourier 核、带正负权的密度差）；需要在更一般条件下交换积分顺序</li>
+              <li><strong>可积性是代价</strong>——Fubini 定理要求 \(f \in L^1(\mu \times \nu)\)（绝对可积），以此为代价换取对变号函数的积分交换权</li>
+              <li><strong>核心工具地位</strong>——在 PDE（弱解的对偶论证）、概率论（条件期望的存在性）、调和分析（卷积定理的证明）中，Fubini 是最常引用的定理之一</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>正负分解策略</strong>——将 \(f = f^+ - f^-\) 分解为正部和负部，对每个非负部分使用 Tonelli，再由线性性合并。可积性 \(\int |f| < \infty\) 保证正部和负部的积分都有限，避免 \(\infty - \infty\)</li>
+              <li><strong>"Tonelli 先行、Fubini 跟进"范式</strong>——实际使用中，先用 Tonelli 对 \(|f|\) 验证可积性（交换 \(|f|\) 的积分顺序计算总积分），若有限则 Fubini 适用。这一两步法是分析学的标准工作流</li>
+              <li><strong>a.e. 的必然出现</strong>——Fubini 只保证对 μ-a.e. \(x\)，截面 \(f(x, \cdot) \in L^1(\nu)\)；存在零测集上截面积分可能无定义。这体现了测度论"忽略零测集"的哲学</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理 (Fubini)</strong>：设 \(f \in L^1(X \times Y, \mu \times \nu)\)。则： (1) 对 a.e. \(x\)，\(f(x, \cdot) \in L^1(Y, \nu)\)； (2) \(x \mapsto \int_Y f(x,y)\, d\nu(y)\) 属于 \(L^1(X, \mu)\)； (3) \[\int_{X \times Y} f\, d(\mu \times \nu) = \int_X \left(\int_Y f(x,y)\, d\nu(y)\right) d\mu(x)\] 同理可先对 \(x\) 积分。 <strong>实际使用流程</strong>： Step 1. 用 Tonelli 对 \(|f|\) 检验可积性（交换 \(|f|\) 的积分顺序 计算 \(\int |f|\, d(\mu \times \nu)\)）。 Step 2. 若有限，则 \(f \in L^1\)，Fubini 适用。 <strong>注意</strong>：\(f\) 的可积性不能省略。反例：\(f(m,n) = (2^{-n} - 2^{-n-1}) \cdot (\delta_{m,n} - \delta_{m,n+1})\) 在 \(\mathbb{N} \times \mathbb{N}\) 上，先后积分顺序给出不同结果。</p>
+            <h4>定理陈述 (Fubini)</h4>
+            <p>设 \(f \in L^1(X \times Y, \mu \times \nu)\)（即 \(\int |f|\,d(\mu \times \nu) < \infty\)）。则：</p>
+            <ol>
+              <li>对 μ-a.e. \(x\)，\(f(x, \cdot) \in L^1(Y, \nu)\)</li>
+              <li>\(x \mapsto \int_Y f(x,y)\,d\nu(y)\) 属于 \(L^1(X, \mu)\)</li>
+              <li>\[\int_{X \times Y} f\,d(\mu \times \nu) = \int_X \biggl(\int_Y f(x,y)\,d\nu(y)\biggr) d\mu(x) = \int_Y \biggl(\int_X f(x,y)\,d\mu(x)\biggr) d\nu(y)\]</li>
+            </ol>
+
+            <h4>证明要点</h4>
+            <p><strong>Step 1</strong>　分解 \(f = f^+ - f^-\)，其中 \(f^+ = \max(f, 0) \geq 0\)，\(f^- = \max(-f, 0) \geq 0\)。</p>
+            <p><strong>Step 2</strong>　对 \(f^+\) 和 \(f^-\) 分别使用 Tonelli 定理（非负可测函数），得到逐次积分等式。</p>
+            <p><strong>Step 3</strong>　由 \(\int |f| = \int f^+ + \int f^- < \infty\)，逐次积分也有限。因此可以将两个等式相减：\(\int f = \int f^+ - \int f^- = \int(\int f^+\,d\nu - \int f^-\,d\nu)\,d\mu = \int(\int f\,d\nu)\,d\mu\)。</p>
+
+            <h4>实际使用流程</h4>
+            <ol>
+              <li><strong>Tonelli 检验</strong>：对 \(|f|\) 用 Tonelli 交换积分顺序，计算 \(\int |f|\,d(\mu \times \nu)\)</li>
+              <li>若结果 \(< \infty\)，则 \(f \in L^1\)，Fubini 适用</li>
+              <li>若结果 \(= \infty\)，则 Fubini 不适用——需要截断或其他技巧</li>
+            </ol>
+
+            <h4>经典反例</h4>
+            <p>在 \([0,1]^2\) 上，\(f(x,y) = \frac{x - y}{(x + y)^3}\)。先对 \(y\) 积再对 \(x\) 积得 \(1/2\)；先对 \(x\) 积再对 \(y\) 积得 \(-1/2\)。原因：\(\int\int |f| = +\infty\)，Fubini 条件不满足。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>卷积 \((f * g)(x) = \int f(x-y) g(y)\, dy\) 的良定义性 依赖 Fubini 定理：需验证 \(\int\int |f(x-y)g(y)|\, dy\, dx < \infty\)。</p>
+            <p><strong>卷积的良定义性</strong>——\((f * g)(x) = \int f(x-y)g(y)\,dy\) 的严格定义依赖 Fubini：需验证 \(\int\int |f(x-y)g(y)|\,dy\,dx < \infty\)（Young 不等式提供此估计）。Fourier 变换下卷积化为乘积 \(\widehat{f*g} = \hat{f}\hat{g}\) 的证明也直接使用 Fubini 交换积分顺序。</p>
+            <p><strong>PDE：Green 函数与基本解</strong>——椭圆方程 \(-\Delta u = f\) 的解可表为 \(u(x) = \int G(x,y)f(y)\,dy\)。验证 \(u\) 的正则性（如 \(u \in W^{2,p}\)）需要对 \(G(x,y)f(y)\) 在乘积空间上用 Fubini 交换积分与微分。</p>
+            <p><strong>概率论：期望的独立性分解</strong>——若 \(X, Y\) 独立，则 \(\mathbb{E}[g(X)h(Y)] = \mathbb{E}[g(X)] \cdot \mathbb{E}[h(Y)]\)。证明：联合分布为乘积测度 \(P_X \times P_Y\)，由 Fubini 将二重积分拆为两个一重积分的乘积。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：利用 Fubini 定理计算 \(\int_0^1 \int_0^1 \frac{x - y}{(x + y)^3}\, dx\, dy\)。 解答：先检验 \(\int_0^1 \int_0^1 |f|\, dx\, dy\)。 在 \((0,0)\) 附近 \(|f| \approx 1/r\)（令 \(x + y = r\)）， \(\int\int |f| = +\infty\)。故 Fubini 条件不满足！ 实际上先后积分得到相反结果： \(\int_0^1 (\int_0^1 \frac{x-y}{(x+y)^3} dy) dx = 1/2\)， 但 \(\int_0^1 (\int_0^1 \frac{x-y}{(x+y)^3} dx) dy = -1/2\)。 易错点：未验证 \(|f|\) 可积就直接交换积分顺序。 Fubini 定理的使用必须先用 Tonelli 对 \(|f|\) 做可积性检验。</p>
+            <h4>例题：Fubini 失败的经典案例</h4>
+            <p>计算 \(I = \int_0^1 \int_0^1 \frac{x - y}{(x + y)^3}\,dx\,dy\)。</p>
+            <p><strong>Step 1</strong>　检验可积性：在 \((0,0)\) 附近令 \(x + y = r\)，\(|f| \approx 1/r^2\)，\(\int\int |f| \sim \int_0 r \cdot r^{-2}\,dr = \int_0 1/r\,dr = +\infty\)。故 \(f \notin L^1([0,1]^2)\)。</p>
+            <p><strong>Step 2</strong>　先对 \(y\) 积分：\(\int_0^1 \frac{x-y}{(x+y)^3}\,dy = \frac{1}{(x+y)^2}\Big|_0^1 \cdot (\text{...}) = \frac{1}{2x^2} - \frac{1}{(1+x)^2}\)（需仔细计算），外层积分得 \(1/2\)。</p>
+            <p><strong>Step 3</strong>　先对 \(x\) 积分：由对称性 \(f(y,x) = -f(x,y)\)，得 \(-1/2\)。两个逐次积分结果<strong>不等</strong>，验证了 Fubini 条件不可省略。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 未验证 \(|f|\) 可积就交换积分顺序 → ✅ <strong>必须</strong>先用 Tonelli 对 \(|f|\) 做可积性检验；若 \(\int |f| = \infty\)，两边逐次积分可能给出不同值</li>
+              <li>❌ 认为连续函数在有界域上自动满足 Fubini → ✅ 有界域上连续函数<strong>若无界</strong>（如 \(1/(x+y)^3\)），积分可能发散；Fubini 条件是对积分（而非函数值）的要求</li>
+              <li>❌ 混淆"逐次积分都有限"与"\(f\) 可积" → ✅ 逐次积分有限不蕴含 \(f \in L^1\)；上述反例中两个逐次积分都有限但值不同，正因为 \(f \notin L^1\)</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -538,35 +688,88 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>卷积 \((f * g)(x) = \int f(x-y)g(y)\, dy\) 是分析学中最重要的 运算之一。它在物理学中表示系统的输入-输出关系，在概率论中 描述独立随机变量之和的分布，在信号处理中是滤波的数学表达。 乘积测度和 Fubini 定理为卷积的严格定义提供了基础。</p>
+            <ul>
+              <li><strong>无处不在的运算</strong>——卷积 \((f * g)(x) = \int f(x-y)g(y)\,dy\) 是分析学中最重要的二元运算之一，连接了乘积测度理论与单变量函数空间</li>
+              <li><strong>物理意义：输入-输出与叠加</strong>——线性时不变系统的输出 = 输入与脉冲响应的卷积；高斯模糊 = 图像与高斯核的卷积；这些都是卷积在工程中的直观体现</li>
+              <li><strong>代数结构</strong>——\(L^1(\mathbb{R})\) 在卷积下构成 Banach 代数，这一结构是抽象调和分析的起点；Fourier 变换将卷积化为点乘，揭示了频域与时域的对偶性</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>卷积将乘积空间上的积分"折叠"为单变量函数。在 Fourier 变换下， 卷积化为乘积（\(\widehat{f * g} = \hat{f} \cdot \hat{g}\)）， 这一对偶性是调和分析的核心。</p>
+            <ul>
+              <li><strong>乘积空间的"折叠"</strong>——卷积可视为线性映射 \(\Phi: L^1 \times L^1 \to L^1\)，其本质是在乘积空间 \(\mathbb{R} \times \mathbb{R}\) 上积分后沿对角线"折叠"到 \(\mathbb{R}\)</li>
+              <li><strong>Fourier 对偶性</strong>——\(\widehat{f * g} = \hat{f} \cdot \hat{g}\)（卷积定理）。卷积在时域中复杂，在频域中变为简单的逐点乘积——这一对偶性驱动了 FFT 算法和信号处理的整个框架</li>
+              <li><strong>正则化效应</strong>——与光滑函数（mollifier）卷积可以"磨光"不光滑函数：\(f * \varphi_\varepsilon \in C^\infty\)，即使 \(f\) 仅在 \(L^1\) 中。这是 PDE 正则化理论和分布论的基础工具</li>
+              <li><strong>群上的推广</strong>——在局部紧群 \(G\) 上，卷积 \((f * g)(x) = \int_G f(xy^{-1})g(y)\,d\mu_H(y)\)（Haar 测度下），推广了欧氏空间的卷积到非交换群</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：对 \(f, g \in L^1(\mathbb{R})\)， \[(f * g)(x) = \int_{\mathbb{R}} f(x - y) g(y)\, dy\] <strong>Young 不等式</strong>：若 \(f \in L^p\), \(g \in L^q\)，\(1/p + 1/q = 1 + 1/r\) （\(1 \leq p, q, r \leq \infty\)），则 \[\|f * g\|_r \leq \|f\|_p \cdot \|g\|_q\] 特别地 \(L^1 * L^1 \subseteq L^1\)（\(p = q = r = 1\)）。 <strong>卷积的性质</strong>： - 交换性：\(f * g = g * f\) - 结合性：\((f * g) * h = f * (g * h)\) - \(L^1(\mathbb{R})\) 在卷积下构成（无单位元的）Banach 代数 <strong>卷积与 Fourier 变换</strong>： \[\widehat{f * g}(\xi) = \hat{f}(\xi) \cdot \hat{g}(\xi)\]</p>
+            <h4>定义与基本性质</h4>
+            <p>对 \(f, g \in L^1(\mathbb{R})\)，
+            \[(f * g)(x) = \int_{\mathbb{R}} f(x - y)\, g(y)\,dy.\]</p>
+            <ul>
+              <li><strong>交换性</strong>：\(f * g = g * f\)（换元 \(t = x - y\)）</li>
+              <li><strong>结合性</strong>：\((f * g) * h = f * (g * h)\)（Fubini 定理交换积分顺序）</li>
+              <li>\(L^1(\mathbb{R})\) 在卷积下构成<strong>交换 Banach 代数</strong>（无单位元）</li>
+            </ul>
+
+            <h4>Young 卷积不等式</h4>
+            <p>若 \(f \in L^p\)，\(g \in L^q\)，\(1 \leq p, q, r \leq \infty\) 且 \(\frac{1}{p} + \frac{1}{q} = 1 + \frac{1}{r}\)，则
+            \[\|f * g\|_r \leq \|f\|_p \cdot \|g\|_q.\]</p>
+            <p>特例：</p>
+            <ul>
+              <li>\(p = q = r = 1\)：\(\|f * g\|_1 \leq \|f\|_1 \|g\|_1\)（\(L^1\) 是卷积代数）</li>
+              <li>\(p = 1, q = r = 2\)：\(\|f * g\|_2 \leq \|f\|_1 \|g\|_2\)（\(L^1\) 作用于 \(L^2\)）</li>
+              <li>\(p = 1, q = \infty, r = \infty\)：\(\|f * g\|_\infty \leq \|f\|_1 \|g\|_\infty\)</li>
+            </ul>
+
+            <h4>卷积定理 (Fourier)</h4>
+            <p>\[\widehat{f * g}(\xi) = \hat{f}(\xi) \cdot \hat{g}(\xi).\]
+            证明：将定义展开后用 Fubini 交换积分顺序（\(f, g \in L^1\) 保证乘积可积）。</p>
+
+            <h4>近似恒等元（Mollifier）</h4>
+            <p>设 \(\varphi \in C_c^\infty(\mathbb{R})\)，\(\varphi \geq 0\)，\(\int \varphi = 1\)。令 \(\varphi_\varepsilon(x) = \varepsilon^{-1}\varphi(x/\varepsilon)\)。则对 \(f \in L^p\)（\(1 \leq p < \infty\)）：
+            \[\|f * \varphi_\varepsilon - f\|_p \to 0, \quad \varepsilon \to 0.\]
+            且 \(f * \varphi_\varepsilon \in C^\infty\)——卷积的正则化效应。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>独立随机变量 \(X, Y\) 之和 \(X + Y\) 的密度为 \(f_X * f_Y\)；图像处理中的高斯模糊 = 输入图像与高斯核的卷积。</p>
+            <p><strong>概率论：独立随机变量之和</strong>——若 \(X, Y\) 独立且具有密度 \(f_X, f_Y\)，则 \(Z = X + Y\) 的密度为 \(f_Z = f_X * f_Y\)。中心极限定理的证明核心就是分析 \(n\) 次卷积 \(f^{*n}\) 的渐近行为。特征函数法等价于在 Fourier 域用乘积代替卷积。</p>
+            <p><strong>图像处理：可分离滤波器</strong>——二维高斯模糊核 \(G_\sigma(x,y) = g_\sigma(x)g_\sigma(y)\) 是可分离的。由 Fubini，二维卷积可分解为两次一维卷积（先沿 \(x\) 方向，再沿 \(y\) 方向），将复杂度从 \(O(N^2 K^2)\) 降为 \(O(N^2 K)\)，这是所有实时图像处理引擎的核心优化。</p>
+            <p><strong>PDE：正则化与磨光</strong>——给定 \(L^1_{\text{loc}}\) 函数 \(f\)，\(f * \varphi_\varepsilon \in C^\infty\) 且在 \(L^p\) 中逼近 \(f\)。这一技术在 Sobolev 空间理论（证明 \(C_c^\infty\) 在 \(W^{k,p}\) 中稠密）和分布论（定义分布的正则化）中不可或缺。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \((\mathbf{1}_{[0,1]} * \mathbf{1}_{[0,1]})(x)\)。 解答：\((f * g)(x) = \int_0^1 \mathbf{1}_{[0,1]}(x - y)\, dy = \lambda([0,1] \cap [x-1, x])\)。 当 \(0 \leq x \leq 1\)：\(= \lambda([0, x]) = x\)。 当 \(1 < x \leq 2\)：\(= \lambda([x-1, 1]) = 2 - x\)。 其余 \(= 0\)。结果是"帐篷函数"\(\max(1 - |x - 1|, 0)\)。 易错点：计算卷积时搞混 \(f(x-y)\) 和 \(f(y-x)\) 的积分区间。 画图辅助理解：固定 \(x\)，\(y \mapsto f(x-y)\) 是 \(f\) 关于原点 翻转后平移到 \(x\) 的结果。</p>
+            <h4>例题：计算 \(\mathbf{1}_{[0,1]} * \mathbf{1}_{[0,1]}\)</h4>
+            <p><strong>Step 1</strong>　由定义：\((f * g)(x) = \int_0^1 \mathbf{1}_{[0,1]}(x - y)\,dy = \lambda\bigl([0,1] \cap [x-1, x]\bigr)\)。</p>
+            <p><strong>Step 2</strong>　分情况讨论：</p>
+            <ul>
+              <li>\(x \leq 0\) 或 \(x \geq 2\)：交集为空，\(f * g = 0\)</li>
+              <li>\(0 < x \leq 1\)：交集 \([0, x]\)，\(f * g = x\)</li>
+              <li>\(1 < x < 2\)：交集 \([x-1, 1]\)，\(f * g = 2 - x\)</li>
+            </ul>
+            <p><strong>Step 3</strong>　结果：\((f*g)(x) = \max(1 - |x - 1|, 0)\)——"帐篷函数"（三角形脉冲）。</p>
+            <p><strong>几何理解</strong>：\(g\) 翻转后平移到 \(x\)，与 \(f\) 的重叠面积就是卷积值。\(x\) 增大时重叠先增后减，形成三角形。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 \(f(x-y)\) 和 \(f(y-x)\) 的积分区间 → ✅ 画图辅助：卷积是将 \(g\) 翻转（关于原点）再平移到 \(x\) 位置后与 \(f\) 叠加积分</li>
+              <li>❌ 忘记 Young 不等式中指数关系 \(1/p + 1/q = 1 + 1/r\) → ✅ 助记："\(p, q\) 投入，\(r\) 产出"，投入越"好"（\(p, q\) 越小），产出越"差"（\(r\) 越小即范数越弱）</li>
+              <li>❌ 认为 \(L^1\) 在卷积下有单位元 → ✅ \(L^1(\mathbb{R})\) <strong>没有</strong>单位元（Dirac \(\delta\) 不是 \(L^1\) 函数），但有<strong>近似单位元</strong>（mollifier 序列）；单位元的缺失是 \(L^1\) Banach 代数结构的重要特征</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -394,28 +394,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>有了测度和可测函数之后，下一步是定义积分。Lebesgue 的革命性思想 是：不像 Riemann 那样沿定义域划分，而是沿值域划分——先处理 最简单的阶梯函数（简单函数），再通过单调极限扩展到所有非负可测 函数。这种"自底向上"的构造保证了积分与极限运算的良好相容性。</p>
+            <ul>
+              <li><strong>从测度到积分的必然一步</strong>——有了 \(\sigma\)-代数与测度之后，需要一个与测度"兼容"的积分，使 \(\int \mathbf{1}_A\, d\mu = \mu(A)\) 自然成立。</li>
+              <li><strong>Riemann 积分的局限</strong>——沿定义域切分在处理高度不连续函数（如 Dirichlet 函数）时失败；Lebesgue 改为"沿值域分层"，先处理简单函数，再通过单调极限扩展。</li>
+              <li><strong>与极限的良好相容</strong>——"自底向上"的构造天然保证积分与单调极限可交换（MCT），这是后续收敛定理的基石。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Lebesgue 积分的核心思想是"按值域分层"：\(\int f\, d\mu\) 不是 将定义域切成小块，而是问"\(f\) 取值在 \([a, a+da)\) 的那些 \(x\) 构成多大的集合"。这一思路将"求面积"从几何操作升级为测度运算。</p>
+            <ul>
+              <li><strong>值域分层原理</strong>——\(\int f\, d\mu\) 不切定义域，而问"\(f\) 取值在 \([y, y+dy)\) 的点集有多大测度"，将求面积升级为测度运算。</li>
+              <li><strong>三步构造法</strong>——① 简单函数 \(\to\) ② 非负可测函数（取 \(\sup\)）\(\to\) ③ 一般可测函数（\(f = f^+ - f^-\)）。每一步只依赖前一步，层层推进。</li>
+              <li><strong>函子观点</strong>——积分是从可测函数空间到 \(\overline{\mathbb{R}}\) 的正线性泛函，保持单调性与极限交换；这正是 Daniell 积分与 Riesz 表示定理的抽象起点。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>简单函数积分</strong>：对 \(\varphi = \sum_{i=1}^n a_i \mathbf{1}_{A_i}\) （标准表示，\(A_i\) 两两不交），定义 \[\int \varphi\, d\mu = \sum_{i=1}^n a_i \, \mu(A_i)\] <strong>非负可测函数积分</strong>：对 \(f \geq 0\) 可测，定义 \[\int f\, d\mu = \sup\left\{\int \varphi\, d\mu : 0 \leq \varphi \leq f,\; \varphi \text{ 简单}\right\}\] <strong>一般可积函数</strong>：\(f = f^+ - f^-\)，其中 \(f^+ = \max(f, 0)\)， \(f^- = \max(-f, 0)\)。当 \(\int f^+\, d\mu\) 和 \(\int f^-\, d\mu\) 至少一个有限时，定义 \(\int f\, d\mu = \int f^+ d\mu - \int f^- d\mu\)。 \(f\) 可积（\(f \in L^1\)）\(\Leftrightarrow \int |f|\, d\mu < \infty\)。</p>
+            <h4>简单函数积分</h4>
+            <p>设 \(\varphi = \sum_{i=1}^n a_i \mathbf{1}_{A_i}\) 为标准表示（\(A_i\) 两两不交），定义</p>
+            \[\int \varphi\, d\mu = \sum_{i=1}^n a_i \, \mu(A_i)\]
+            <p>此定义与表示方式无关：将两种表示取公共细分即可验证。</p>
+
+            <h4>非负可测函数积分</h4>
+            <p>对 \(f \geq 0\) 可测，定义</p>
+            \[\int f\, d\mu = \sup\bigl\{\int \varphi\, d\mu : 0 \leq \varphi \leq f,\;\varphi\text{ 简单}\bigr\}\]
+            <p>关键逼近定理（简单函数逼近）保证存在简单函数单调递增序列 \(\varphi_n \nearrow f\)，从而 \(\int f = \lim \int \varphi_n\)。</p>
+
+            <h4>一般可测函数积分</h4>
+            <p>将 \(f\) 分解为正部与负部：\(f^+ = \max(f,0)\)，\(f^- = \max(-f,0)\)。当 \(\int f^+\) 和 \(\int f^-\) 至少一个有限时，定义</p>
+            \[\int f\, d\mu = \int f^+\, d\mu - \int f^-\, d\mu\]
+            <p>\(f\) 可积（\(f \in L^1\)）\(\Leftrightarrow \int |f|\, d\mu < \infty\)，即正部负部都可积。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>概率论中的期望</strong>——随机变量 \(X\) 的期望 \(E[X] = \int_\Omega X\, dP\) 就是关于概率测度的 Lebesgue 积分；简单函数积分对应离散随机变量的加权求和，非负函数积分推广到连续分布。</p>
+            <p><strong>物理中的质量与电荷</strong>——密度函数 \(\rho\) 对测度 \(\mu\) 的积分 \(\int_\Omega \rho\, d\mu\) 统一了连续与奇异分布（如点电荷 \(\delta\)），使物理建模无需区分"求和"与"积分"。</p>
+            <p><strong>信号处理中的能量</strong>——信号 \(f(t)\) 的能量 \(E = \int |f|^2\, dt\) 正是 Lebesgue 积分；简单函数逼近对应数字采样量化，非负积分保证了能量的良定义性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 Dirichlet 函数 \(f = \mathbf{1}_{\mathbb{Q} \cap [0,1]}\) 关于 Lebesgue 测度的积分。 解答：\(f\) 是简单函数，\(\int f\, d\lambda = 1 \cdot \lambda(\mathbb{Q} \cap [0,1]) = 1 \cdot 0 = 0\)。 注意：此函数不 Riemann 可积（上下 Darboux 和分别为 1 和 0）， 但 Lebesgue 可积且积分为 0。 易错点：忘记 Lebesgue 积分定义中取的是 \(\sup\) 而非 \(\lim\)。 积分等于所有小于 \(f\) 的简单函数积分的上确界。</p>
+            <h4>例题：Dirichlet 函数的 Lebesgue 积分</h4>
+            <p>计算 \(f = \mathbf{1}_{\mathbb{Q} \cap [0,1]}\) 关于 Lebesgue 测度的积分。</p>
+            <p><strong>解</strong>：\(f\) 本身是简单函数（取值 0 和 1），直接套定义：</p>
+            \[\int f\, d\lambda = 1 \cdot \lambda(\mathbb{Q} \cap [0,1]) + 0 \cdot \lambda([0,1]\setminus\mathbb{Q}) = 1 \cdot 0 = 0\]
+            <p>此函数不 Riemann 可积（上下 Darboux 和分别为 1 和 0），但 Lebesgue 可积且积分为 0——Lebesgue 积分的值域分层直接"看穿"了有理数集的零测本质。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为积分定义中取的是"极限"而非上确界——实际是 \(\sup\) 而非 \(\lim\)；单调极限只是实现上确界的一种方式。 ✅ 非负函数积分 \(= \sup\{\int \varphi : 0 \le \varphi \le f\}\)。</li>
+              <li>❌ 混淆"\(\int f^+\) 或 \(\int f^-\) 有限"与"\(f \in L^1\)"——前者只要求至少一个有限（积分可定义但可能 = \(\pm\infty\)），后者要求两个都有限。 ✅ \(L^1 \Leftrightarrow \int |f| < \infty\)。</li>
+              <li>❌ 忽视简单函数表示的唯一性问题——不同表示给出同一积分值需要用公共细分论证。 ✅ 先取公共细分 \(\{A_i \cap B_j\}\) 再验证。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -478,28 +519,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>积分作为分析学的核心运算，需要满足一系列代数和序结构性质。 线性性和单调性是最基本的——它们保证积分是"合理的"度量函数 "总量"的方式。Chebyshev 不等式则将积分与函数水平集的测度 联系起来，是概率论中不可或缺的工具。</p>
+            <ul>
+              <li><strong>积分必须是"合理的总量"</strong>——线性性保证积分可分配到各部分之和；单调性保证"更大的函数有更大的积分"，符合物理直觉。</li>
+              <li><strong>连接积分与测度</strong>——Chebyshev（Markov）不等式将积分值反过来控制水平集的测度大小，成为概率论尾估计的基石。</li>
+              <li><strong>a.e. 等价性</strong>——零测集上的改变不影响积分值，这为 \(L^p\) 空间中"等价类"概念铺平道路。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>正线性泛函</strong>——积分 \(I(f) = \int f\, d\mu\) 是可测函数空间上的正线性泛函：\(I(\alpha f + \beta g) = \alpha I(f) + \beta I(g)\)，\(f \ge 0 \Rightarrow I(f) \ge 0\)。</li>
+              <li><strong>格结构</strong>——单调性将积分嵌入可测函数的偏序格中；三角不等式 \(|I(f)| \le I(|f|)\) 是将积分提升为范数的关键。</li>
+              <li><strong>从点态到测度态</strong>——Chebyshev 不等式本质上是用积分（全局信息）控制水平集测度（局部信息），这是概率与分析衔接的桥梁。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>线性性</strong>：对可积函数 \(f, g\) 和常数 \(\alpha, \beta\)， \[\int (\alpha f + \beta g)\, d\mu = \alpha \int f\, d\mu + \beta \int g\, d\mu\] 先对简单函数验证（直接由定义），再由逼近传递到一般情形。 <strong>单调性</strong>：\(f \leq g\) a.e. \(\Rightarrow \int f\, d\mu \leq \int g\, d\mu\)。 <strong>三角不等式</strong>：\(\left|\int f\, d\mu\right| \leq \int |f|\, d\mu\)。 <strong>Chebyshev(Markov) 不等式</strong>：对 \(f \geq 0\), \(\alpha > 0\)， \[\mu(\{x : f(x) \geq \alpha\}) \leq \frac{1}{\alpha} \int f\, d\mu\] 证明：\(\alpha \cdot \mathbf{1}_{\{f \geq \alpha\}} \leq f\)， 积分两边即得。 <strong>a.e. 相等 ⇒ 积分相等</strong>：若 \(f = g\) a.e.，则 \(\int f\, d\mu = \int g\, d\mu\)。</p>
+            <h4>线性性</h4>
+            <p>对可积函数 \(f, g\) 和常数 \(\alpha, \beta\)：</p>
+            \[\int (\alpha f + \beta g)\, d\mu = \alpha \int f\, d\mu + \beta \int g\, d\mu\]
+            <p>先对简单函数验证（直接展开定义），再由单调逼近传递到一般非负可测函数，最后用 \(f = f^+ - f^-\) 推广到一般情形。</p>
+
+            <h4>单调性与三角不等式</h4>
+            <p>\(f \leq g\) a.e. \(\Rightarrow \int f\, d\mu \leq \int g\, d\mu\)。推论：</p>
+            \[\left|\int f\, d\mu\right| \leq \int |f|\, d\mu\]
+
+            <h4>Chebyshev（Markov）不等式</h4>
+            <p>对 \(f \geq 0\)，\(\alpha > 0\)：</p>
+            \[\mu\bigl(\{x : f(x) \geq \alpha\}\bigr) \leq \frac{1}{\alpha}\int f\, d\mu\]
+            <p>证明一行：\(\alpha \cdot \mathbf{1}_{\{f \geq \alpha\}} \leq f\)，两边积分即得。</p>
+
+            <h4>a.e. 相等不改变积分</h4>
+            <p>若 \(f = g\) a.e.，则 \(\{f \neq g\}\) 零测，\(\int |f - g| = 0\)，从而 \(\int f = \int g\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Chebyshev 不等式在概率论中化为 \(P(|X| \geq \alpha) \leq E[|X|]/\alpha\)，广泛用于估计随机变量的尾概率。</p>
+            <p><strong>概率论尾估计</strong>——Chebyshev 不等式化为 \(P(|X| \geq \alpha) \leq E[|X|]/\alpha\)；取 \(g = (X - \mu)^2\) 即得方差版 \(P(|X - \mu| \geq k\sigma) \leq 1/k^2\)，是统计推断和置信区间的基础。</p>
+            <p><strong>数值分析误差控制</strong>——线性性保证数值求积公式（如 Simpson 法则）可逐项分析误差；单调性保证正被积函数的求积结果为非负——这是积分方程数值解稳定性分析的核心。</p>
+            <p><strong>量子力学归一化</strong>——波函数 \(\psi\) 满足 \(\int |\psi|^2 = 1\)；积分的三角不等式保证了态叠加后概率幅的可控性，Chebyshev 不等式给出粒子在特定区域外被探测到的概率上界。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(f \in L^1([0,1])\) 且 \(\int_0^1 f\, d\lambda = 3\)。 证明 \(\lambda(\{x : f(x) \geq 1\}) > 0\)。 解答：\(f = f \cdot \mathbf{1}_{\{f \geq 1\}} + f \cdot \mathbf{1}_{\{f < 1\}}\)。 \(\int f \cdot \mathbf{1}_{\{f < 1\}} d\lambda < 1 \cdot \lambda([0,1]) = 1\)。 故 \(\int f \cdot \mathbf{1}_{\{f \geq 1\}} d\lambda > 2 > 0\)， 因此 \(\lambda(\{f \geq 1\}) > 0\)。 易错点：试图用 Chebyshev 不等式时方向搞反。 \(\mu(\{f \geq \alpha\}) \leq \int f / \alpha\) 给出的是上界， 不能直接用来得到下界。</p>
+            <h4>例题：用水平集方法证明测度正</h4>
+            <p>设 \(f \in L^1([0,1])\) 且 \(\int_0^1 f\, d\lambda = 3\)。证明 \(\lambda(\{x : f(x) \geq 1\}) > 0\)。</p>
+            <p><strong>解</strong>：分解 \(f = f \cdot \mathbf{1}_{\{f \geq 1\}} + f \cdot \mathbf{1}_{\{f < 1\}}\)。后者满足 \(\int f \cdot \mathbf{1}_{\{f < 1\}} < 1 \cdot \lambda([0,1]) = 1\)。因此 \(\int f \cdot \mathbf{1}_{\{f \geq 1\}} > 3 - 1 = 2 > 0\)，故 \(\lambda(\{f \geq 1\}) > 0\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 用 Chebyshev 不等式试图证明下界——该不等式给出的是测度的上界 \(\mu(\{f \ge \alpha\}) \le \int f / \alpha\)，不能直接反向使用。 ✅ 下界需用分解 + 互补估计的技巧。</li>
+              <li>❌ 认为 \(f = g\) a.e. 意味着处处相等——零测集上可以任意不同。 ✅ 积分只"看"a.e. 行为；\(L^1\) 中的元素本质是等价类。</li>
+              <li>❌ 对变号函数直接应用 Chebyshev——原始形式要求 \(f \ge 0\)。 ✅ 对一般 \(f\)，用 \(|f|\) 或 \(f^2\) 代入。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -526,28 +608,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>学生自然会问：既然已经有了 Riemann 积分，为什么还要引入更复杂的 Lebesgue 积分？关键在于 Riemann 积分对极限运算不够稳定： 逐点收敛的 Riemann 可积函数序列的极限可能不 Riemann 可积。 Lebesgue 积分的优势恰恰在于它与极限运算的完美相容性。</p>
+            <ul>
+              <li><strong>"为什么不用 Riemann？"</strong>——学生的自然疑问；回答的关键在于 Riemann 积分对极限运算不稳定：逐点收敛的 Riemann 可积函数列的极限可能不再 Riemann 可积。</li>
+              <li><strong>兼容性保障</strong>——Lebesgue 积分并非"推翻"Riemann，而是严格扩展：凡 Riemann 可积的函数也 Lebesgue 可积且值相同。这保证了经典结果不丢失。</li>
+              <li><strong>收敛定理的驱动力</strong>——Lebesgue 积分与极限交换的优越性（MCT、DCT）正是 Riemann 积分无法提供的，也是引入新积分理论的核心动机。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Riemann 积分"沿定义域切分"，Lebesgue 积分"沿值域切分"。 后者的抽象层次更高，代价是需要测度论基础，但收获是 强大的收敛定理（MCT, DCT）。</p>
+            <ul>
+              <li><strong>竖切 vs 横切</strong>——Riemann 沿定义域切分（竖条矩形），Lebesgue 沿值域切分（水平层）；后者的抽象层次更高，代价是需要测度论基础。</li>
+              <li><strong>振荡 vs 测度</strong>——Riemann 可积性等价于"振荡大的区间总长为零"（Darboux 条件）；Lebesgue 判别法将这一条件精确化为"不连续点集零测"。</li>
+              <li><strong>完备化视角</strong>——\(L^1\) 在 \(\|\cdot\|_1\) 范数下完备，而 Riemann 可积函数空间不是；Lebesgue 积分是 Riemann 积分的自然完备化。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Lebesgue 判别法</strong>：有界函数 \(f: [a,b] \to \mathbb{R}\) Riemann 可积 \(\Leftrightarrow\) \(f\) 的不连续点集 \(D_f\) 满足 \(\lambda(D_f) = 0\)。 证明思路（充分性）：设 \(\lambda(D_f) = 0\)。对划分 \(P\) 的 上下 Darboux 和 \(U(P, f) - L(P, f) = \sum (M_i - m_i) \Delta x_i\)。 在连续点附近 \(M_i - m_i\) 可任意小；不连续点集零测， 其对总振荡的贡献可以通过精细划分控制。 <strong>关系定理</strong>：\(f\) 在 \([a,b]\) 上 Riemann 可积 \(\Rightarrow\) \(f\) Lebesgue 可积，且 \[\int_a^b f(x)\, dx = \int_{[a,b]} f\, d\lambda\] <strong>反例</strong>：\(f = \mathbf{1}_{\mathbb{Q}}\)，\(D_f = \mathbb{R}\)， \(\lambda(D_f) > 0\)（实际上 \(= \infty\)），所以不 Riemann 可积。 但 \(f\) Lebesgue 可积。</p>
+            <h4>Lebesgue 判别定理</h4>
+            <p>有界函数 \(f: [a,b] \to \mathbb{R}\) Riemann 可积 \(\Leftrightarrow\) 不连续点集 \(D_f\) 满足 \(\lambda(D_f) = 0\)。</p>
+            <p>证明思路（充分性）：将上下 Darboux 和之差 \(U(P,f) - L(P,f) = \sum (M_i - m_i)\Delta x_i\) 分为"连续区间"和"不连续区间"两部分。连续点处 \(M_i - m_i\) 可任意小；不连续点集零测，对总振荡的贡献通过精细划分可控。</p>
+
+            <h4>兼容性定理</h4>
+            <p>\(f\) 在 \([a,b]\) 上 Riemann 可积 \(\Rightarrow\) \(f\) Lebesgue 可积，且</p>
+            \[\int_a^b f(x)\, dx = \int_{[a,b]} f\, d\lambda\]
+
+            <h4>经典反例</h4>
+            <p>Dirichlet 函数 \(f = \mathbf{1}_\mathbb{Q}\)：\(D_f = \mathbb{R}\)，\(\lambda(D_f) > 0\)，故不 Riemann 可积。但 \(f\) 是简单函数，Lebesgue 可积且 \(\int_{[0,1]} f\, d\lambda = 0\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>PDE 弱解理论</strong>——偏微分方程的弱解只需 Lebesgue 可积（不要求经典可微），使得 Navier-Stokes 等方程在 Riemann 框架下无法表述的解有了严格意义。</p>
+            <p><strong>傅里叶分析的 \(L^2\) 理论</strong>——Riemann 积分下傅里叶级数的收敛性极难处理，Lebesgue 积分 + \(L^2\) 完备性使 Parseval 等式和 Plancherel 定理得以成立，是信号处理的理论基础。</p>
+            <p><strong>概率论的测度论基础</strong>——Kolmogorov 公理化概率论中，期望 = Lebesgue 积分。连续型与离散型随机变量的统一处理只有在 Lebesgue 框架下才自然实现。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f_n(x) = n \cdot \mathbf{1}_{(0, 1/n)}(x)\) 在 \([0,1]\) 上。 每个 \(f_n\) 都 Riemann 可积，且 \(\int_0^1 f_n = 1\)。但 \(f_n(x) \to 0\) 对所有 \(x > 0\)（即 a.e.）。所以 \(\lim \int f_n = 1 \neq 0 = \int \lim f_n\)。 为什么极限和积分不能交换？ 解答：因为没有可积控制函数 \(g\) 使 \(|f_n| \leq g\)（DCT 的条件 不满足）。这恰好说明收敛定理的条件是必要的。 易错点：认为"逐点收敛就能交换极限和积分"。 必须有控制条件（如 DCT 的控制函数）才行。</p>
+            <h4>例题：积分与极限不可无条件交换</h4>
+            <p>设 \(f_n(x) = n \cdot \mathbf{1}_{(0,\, 1/n)}(x)\) 在 \([0,1]\) 上。每个 \(f_n\) Riemann 可积，\(\int_0^1 f_n = 1\)。但 \(f_n(x) \to 0\)（\(x > 0\)）。</p>
+            <p><strong>解</strong>：\(\lim \int f_n = 1 \neq 0 = \int \lim f_n\)。原因：不存在可积控制函数 \(g\) 使 \(|f_n| \le g\)（DCT 条件不满足），也不满足单调递增（MCT 条件不满足）。这是"质量集中到越来越小区域"的逃逸现象。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为逐点收敛就能交换极限与积分——必须有控制条件（DCT 的控制函数或 MCT 的单调性）。 ✅ 先验证收敛定理的前提再交换。</li>
+              <li>❌ 误以为 Lebesgue 与 Riemann 积分值可能不同——在两者都定义时值恒相同。 ✅ 兼容性是 Lebesgue 理论的设计基石。</li>
+              <li>❌ 把"不连续点零测"和"处处连续"混淆——有有限个不连续点的函数仍 Riemann 可积（零测集可远大于有限集）。 ✅ Lebesgue 判别法精确条件：\(\lambda(D_f) = 0\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -574,21 +691,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在微积分中我们学过反常积分 \(\int_0^{\infty} f(x)\, dx\)，它通过 截断后取极限定义。Lebesgue 积分处理无穷区间上的积分有不同的方式： 它直接对整个定义域定义积分，无需截断。两种积分在什么条件下一致？ 何时反常 Riemann 积分存在但 Lebesgue 积分不存在？</p>
+            <ul>
+              <li><strong>无穷区间上的积分</strong>——微积分中 \(\int_0^\infty f\, dx\) 通过截断后取极限定义（反常 Riemann 积分），而 Lebesgue 积分直接在整个 \([0,\infty)\) 上定义，无需截断。两者何时一致？</li>
+              <li><strong>条件收敛 vs 绝对收敛</strong>——反常 Riemann 积分允许条件收敛（如 \(\int_0^\infty \frac{\sin x}{x}\, dx\)），而 Lebesgue 积分只承认绝对收敛。这个"限制"反而保证了更强的稳定性。</li>
+              <li><strong>实际计算的桥梁</strong>——大量具体积分的计算仍用 Riemann 技巧（换元、分部），需要知道何时可将结果直接搬到 Lebesgue 框架中。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>"绝对可积"作为准入门槛</strong>——Lebesgue 积分要求 \(\int |f| < \infty\)（\(L^1\) 条件），这排除了条件收敛，代价是损失某些积分，收获是积分运算的完全稳定性（重排、Fubini 等不受限）。</li>
+              <li><strong>MCT 作为桥梁</strong>——对 \(f \ge 0\)，\(\int_{[0,\infty)} f\, d\lambda = \lim_{R \to \infty} \int_{[0,R]} f\, d\lambda\)（由单调收敛定理），因此非负情形下两种积分自动一致。</li>
+              <li><strong>分布理论的推广</strong>——当 \(f \notin L^1\) 时，仍可在 Schwartz 分布意义下定义"积分"（如 \(\sin x / x\) 的 Fourier 变换），超越了 Lebesgue 可积性的限制。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>反常 Riemann 积分</strong>：\(\int_0^{\infty} f = \lim_{R \to \infty} \int_0^R f(x)\, dx\)。 <strong>Lebesgue 积分</strong>：\(\int_{[0,\infty)} f\, d\lambda\)，要求 \(\int |f|\, d\lambda < \infty\)。 <strong>关系</strong>：若 \(f \geq 0\) 且反常 Riemann 积分收敛，则 Lebesgue 积分存在且两者相等。 但对变号函数，可能反常 Riemann 积分存在（条件收敛）而 Lebesgue 积分不存在。经典例子： \[\int_0^{\infty} \frac{\sin x}{x}\, dx = \frac{\pi}{2}\] 此反常 Riemann 积分存在，但 \(\int_0^{\infty} |\sin x / x|\, dx = +\infty\)， 故 \(\sin(x)/x \notin L^1([0,\infty))\)。 Lebesgue 积分要求绝对可积（\(L^1\)），不承认条件收敛， 这保证了积分运算更强的稳定性。</p>
+            <h4>反常 Riemann 积分的定义</h4>
+            \[\int_0^\infty f(x)\, dx \;:=\; \lim_{R \to \infty} \int_0^R f(x)\, dx\]
+            <p>若极限存在（有限），称反常积分收敛。</p>
+
+            <h4>与 Lebesgue 积分的关系</h4>
+            <p><strong>非负情形</strong>：\(f \ge 0\) 且反常 Riemann 积分收敛 \(\Rightarrow\) \(f \in L^1([0,\infty))\) 且两者相等。（MCT 保证。）</p>
+            <p><strong>绝对收敛情形</strong>：\(\int_0^\infty |f|\, dx < \infty\)（反常 Riemann 意义）\(\Rightarrow\) \(f \in L^1\) 且 Lebesgue 积分 = 反常 Riemann 积分。</p>
+            <p><strong>条件收敛反例</strong>：</p>
+            \[\int_0^\infty \frac{\sin x}{x}\, dx = \frac{\pi}{2} \quad\text{（反常 Riemann 收敛）}\]
+            <p>但 \(\int_0^\infty |\sin x / x|\, dx = +\infty\)，故 \(\sin x / x \notin L^1([0,\infty))\)。Lebesgue 积分不承认此积分。</p>
+
+            <h4>判别准则</h4>
+            <p>反常 Riemann 积分对 \(f\) 绝对收敛 \(\Leftrightarrow\) \(f \in L^1\)。此时 Lebesgue = Riemann（反常），且可自由使用 Fubini、换序等定理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>Fourier 变换的 \(L^1\) 理论</strong>——\(\hat{f}(\xi) = \int_\mathbb{R} f(x) e^{-2\pi i \xi x}\, dx\) 要求 \(f \in L^1(\mathbb{R})\)（绝对可积）。\(\sin x / x \notin L^1\) 说明其 Fourier 变换需要在 \(L^2\) 或分布意义下定义——这推动了 Plancherel 定理和 Schwartz 分布理论的发展。</p>
+            <p><strong>Laplace 变换与工程</strong>——控制论中 \(\mathcal{L}\{f\}(s) = \int_0^\infty f(t) e^{-st}\, dt\) 在 \(\text{Re}(s)\) 足够大时绝对收敛，此时可在 Lebesgue 框架下自由交换积分顺序（Fubini），保证了传递函数运算的严格性。</p>
+            <p><strong>量子场论中的正规化</strong>——Feynman 积分经常条件收敛但不绝对收敛；物理学家使用维度正规化等技巧使之绝对收敛后，才能在 Lebesgue 框架下严格处理——这正是条件收敛 vs 绝对收敛之区别的物理体现。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：判断 \(\int_1^{\infty} \frac{\cos x}{x^2}\, dx\) 是否 Lebesgue 可积。 解答：\(|\cos x / x^2| \leq 1/x^2\)，而 \(\int_1^{\infty} 1/x^2\, dx = 1 < \infty\)，由比较判别法，\(\cos x / x^2 \in L^1([1,\infty))\)。 易错点：混淆"反常 Riemann 积分收敛"与"Lebesgue 可积"。 \(\sin(x)/x\) 的反常积分收敛但不 Lebesgue 可积。 Lebesgue 可积 = 绝对可积。</p>
+            <h4>例题：判断 Lebesgue 可积性</h4>
+            <p>判断 \(\int_1^\infty \frac{\cos x}{x^2}\, dx\) 是否 Lebesgue 可积。</p>
+            <p><strong>解</strong>：\(|\cos x / x^2| \le 1/x^2\)，而 \(\int_1^\infty x^{-2}\, dx = 1 < \infty\)。由比较判别法，\(\cos x / x^2 \in L^1([1,\infty))\)，Lebesgue 可积。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"反常 Riemann 收敛"与"Lebesgue 可积"——\(\sin x / x\) 反常收敛但不 \(L^1\)。 ✅ Lebesgue 可积 = 绝对可积（\(\int |f| < \infty\)）。</li>
+              <li>❌ 对非负函数仍担心两种积分不一致——\(f \ge 0\) 时 MCT 保证两者自动一致。 ✅ 仅变号函数的条件收敛才可能产生差异。</li>
+              <li>❌ 认为 Lebesgue 积分"更小"——两种积分在都定义时值相同，Lebesgue 只是不接受条件收敛。 ✅ 绝对收敛时两者完全等价。</li>
+            </ul>
           </div>
         </div>
       </div>

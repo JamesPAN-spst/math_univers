@@ -394,28 +394,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如何在 \(\mathbb{R}\) 上构造一个推广"长度"的测度？直接定义所有 子集的测度是不可能的（Vitali 构造表明不存在平移不变的全集测度）。 Carathéodory 的天才方案是：先定义一个对所有集合"粗略估计大小" 的外测度，再筛选出满足"分割一致性"条件的集合作为可测集。</p>
+            <ul>
+              <li><strong>构造的起点：</strong>如何在 \(\mathbb{R}\) 上构造推广"长度"的测度？直接给所有子集定义测度做不到（Vitali）。Carathéodory 的方案：先定义对所有集合的粗略估计（外测度），再筛选出好的集合。</li>
+              <li><strong>从粗到精：</strong>外测度对所有集合有定义但只满足次可加性（不精确）。Carathéodory 条件筛选出满足可加性的集合——这些"好"集合构成 σ-代数，外测度在其上成为真正的测度。</li>
+              <li><strong>普适性：</strong>Carathéodory 方法不只构造 Lebesgue 测度——Hausdorff 测度、高维 Lebesgue 测度、乘积测度都可以用同一框架构造。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>从"所有集合的粗略估计"到"精确测度"的过程体现了分析学的 "先放松再约束"策略：外测度对所有集合有定义但只满足次可加性， Carathéodory 条件从中筛选出满足 σ-可加性的子族。</p>
+            <ul>
+              <li><strong>"先放松再约束"：</strong>外测度允许对所有集合赋值（放松），Carathéodory 条件从中筛选出"可加性好"的子族（约束）。这是分析学的经典策略。</li>
+              <li><strong>分割一致性：</strong>Carathéodory 条件 \(\mu^*(A) = \mu^*(A \cap E) + \mu^*(A \cap E^c)\) 的几何直觉——\(E\) 能将任意"试探集" \(A\) "干净地"一分为二，不丢失也不多算大小。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>外测度构造</strong>：对 \(E \subseteq \mathbb{R}\)，定义 \[\mu^*(E) = \inf\left\{\sum_{n=1}^{\infty} |I_n| : E \subseteq \bigcup_{n=1}^{\infty} I_n,\; I_n \text{ 为开区间}\right\}\] 外测度性质：\(\mu^*(\emptyset) = 0\)，单调性，次可加性 \(\mu^*(\bigcup E_n) \leq \sum \mu^*(E_n)\)。 <strong>Carathéodory 条件</strong>：\(E\) 是 Lebesgue 可测的，若对任意 \(A \subseteq \mathbb{R}\)， \[\mu^*(A) = \mu^*(A \cap E) + \mu^*(A \cap E^c)\] 直觉：\(E\) 能将任意集合 \(A\) "干净地"一分为二。 <strong>定理</strong>：满足 Carathéodory 条件的集合族构成 σ-代数， 且 \(\mu^*\) 限制在这个 σ-代数上是完备测度。</p>
+            <h4>1. Lebesgue 外测度的定义</h4>
+            <p>对 \(E \subseteq \mathbb{R}\)：</p>
+            \[\mu^*(E) = \inf\Bigl\{\sum_{n=1}^\infty |I_n| : E \subseteq \bigcup_{n=1}^\infty I_n,\; I_n\text{ 为开区间}\Bigr\}\]
+            <p>性质：\(\mu^*(\emptyset) = 0\)；单调性 \(A \subseteq B \Rightarrow \mu^*(A) \leq \mu^*(B)\)；次可加性 \(\mu^*(\bigcup E_n) \leq \sum \mu^*(E_n)\)。</p>
+
+            <h4>2. Carathéodory 可测性条件</h4>
+            <p>\(E\) 可测 ⟺ 对任意 \(A \subseteq \mathbb{R}\)：</p>
+            \[\mu^*(A) = \mu^*(A \cap E) + \mu^*(A \cap E^c)\]
+            <p>注意 \(\geq\) 由次可加性自动成立，关键是验证 \(\leq\)。</p>
+
+            <h4>3. 核心定理（Carathéodory）</h4>
+            <p>满足 Carathéodory 条件的集合族 \(\mathcal{M}\) 是 σ-代数，且 \(\mu^*|_{\mathcal{M}}\) 是完备测度。证明三步：(i) \(\mathcal{M}\) 对补封闭（条件关于 \(E/E^c\) 对称）；(ii) 对有限不交并封闭（归纳 + 分割）；(iii) 用逼近从有限推到可数。</p>
+
+            <h4>4. 零测集自动可测</h4>
+            <p>\(\mu^*(E) = 0\) ⟹ \(E \in \mathcal{M}\)：\(\mu^*(A \cap E) \leq \mu^*(E) = 0\)，故 \(\mu^*(A \cap E) + \mu^*(A \cap E^c) = \mu^*(A \cap E^c) \leq \mu^*(A)\)，等式成立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>Hausdorff 测度与分形维数：</strong>Carathéodory 框架用不同尺度的覆盖定义 Hausdorff 外测度 \(\mathcal{H}^s\)，由此定义分形维数 \(\dim_H E = \inf\{s : \mathcal{H}^s(E) = 0\}\)。海岸线长度、云团边界等自然界分形对象的"大小"依赖此构造。</p>
+            <p><strong>高维积分与 Fubini 定理：</strong>\(\mathbb{R}^n\) 上的 Lebesgue 测度通过 \(n\)-维矩体覆盖的外测度 + Carathéodory 条件构造。乘积测度的构造也遵循同一框架，保证 Fubini-Tonelli 定理成立。</p>
+            <p><strong>几何测度论中的整流性：</strong>Federer-Fleming 的整流理论用 Carathéodory 型构造定义 \(k\)-维电流（currents），将变分问题推广到非光滑集合——Plateau 问题的现代解法依赖于此。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明每个外测度为零的集合是 Lebesgue 可测的。 解答：设 \(\mu^*(E) = 0\)，对任意 \(A\)， \(\mu^*(A \cap E) \leq \mu^*(E) = 0\)， 故 \(\mu^*(A \cap E) + \mu^*(A \cap E^c) = \mu^*(A \cap E^c) \leq \mu^*(A)\)。 反向由次可加性 \(\mu^*(A) \leq \mu^*(A \cap E) + \mu^*(A \cap E^c)\)。 两边相等，Carathéodory 条件成立。 易错点：混淆"外测度为零"与"测度为零"。外测度对所有集合有定义， 只有通过 Carathéodory 条件筛选后才成为真正的测度。</p>
+            <h4>例题：证明零外测度集一定可测</h4>
+            <p><strong>第一步 — 设 \(\mu^*(E) = 0\)：</strong>对任意 \(A \subseteq \mathbb{R}\)，由单调性 \(\mu^*(A \cap E) \leq \mu^*(E) = 0\)。</p>
+            <p><strong>第二步 — 验证条件：</strong>\(\mu^*(A \cap E) + \mu^*(A \cap E^c) = 0 + \mu^*(A \cap E^c) = \mu^*(A \cap E^c)\)。</p>
+            <p><strong>第三步 — 用次可加性：</strong>\(\mu^*(A \cap E^c) \leq \mu^*(A)\)（单调性，\(A \cap E^c \subseteq A\)）。反向 \(\mu^*(A) \leq \mu^*(A \cap E) + \mu^*(A \cap E^c) = \mu^*(A \cap E^c)\)。故等式成立。 ✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为外测度是 σ-可加的。<br>✅ 外测度只满足次可加性 \(\mu^*(\bigcup E_n) \leq \sum \mu^*(E_n)\)。σ-可加性（等号）仅在 Carathéodory 可测集上成立。这正是引入可测性条件的原因。</li>
+              <li>❌ 认为 Carathéodory 条件只需对可测的 "试探集" \(A\) 验证。<br>✅ 条件要求对<strong>所有</strong> \(A \subseteq \mathbb{R}\) 成立（包括不可测集！）。这确保了筛选出的可测集族是"最大"的σ-代数。</li>
+              <li>❌ 混淆"外测度为零"与"测度为零"。<br>✅ 在 Carathéodory 定理之前，对非可测集只能谈外测度；"测度"仅对可测集有定义。零外测度集恰好被证明是可测的，此时外测度 = 测度 = 0。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -442,28 +482,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Lebesgue 测度构造完成后，需要验证它确实推广了我们熟悉的"长度"。 它的核心特征是什么？平移不变性确保"不同位置的相同形状有相同大小"； 正则性提供了用开集/紧集从外部/内部逼近的能力，这在实际计算中至关 重要。</p>
+            <ul>
+              <li><strong>验证直觉：</strong>构造完成后，要验证 Lebesgue 测度确实推广了"长度"——区间 \([a,b]\) 的测度是 \(b-a\)，平移不改变大小。</li>
+              <li><strong>正则性 = 可计算性：</strong>正则性允许用开集从外、紧集从内逼近任意可测集——实际计算和概率论中的弱收敛理论都依赖此性质。</li>
+              <li><strong>唯一性：</strong>Lebesgue 测度（到常数倍）是 \(\mathbb{R}\) 上唯一的平移不变完备 Borel 测度——它是 Haar 测度在 \((\mathbb{R},+)\) 上的实现。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>不变性视角：</strong>平移不变性 \(\lambda(E + x) = \lambda(E)\) 是 Lebesgue 测度的核心代数性质，由加法群 \((\mathbb{R},+)\) 的对称性决定。</li>
+              <li><strong>逼近视角：</strong>正则性将抽象的可测集"夹逼"在具体的开集和紧集之间——这是连接抽象测度论与具体分析的桥梁。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>平移不变性</strong>：对任意 Lebesgue 可测集 \(E\) 和 \(x \in \mathbb{R}\)， \(E + x = \{e + x : e \in E\}\) 也可测，且 \[\lambda(E + x) = \lambda(E)\] 这是因为外测度定义中的区间覆盖与平移相容。 <strong>外正则性</strong>：\(\lambda(E) = \inf\{\lambda(U) : U \supseteq E,\; U \text{ 开}\}\)。 证明：由外测度定义，\(E\) 可被开区间之并覆盖，其总长度 可任意逼近 \(\lambda(E)\)。 <strong>内正则性</strong>：\(\lambda(E) = \sup\{\lambda(K) : K \subseteq E,\; K \text{ 紧}\}\)。 <strong>特征定理</strong>：Lebesgue 测度是 \(\mathbb{R}\) 上唯一（到常数倍） 的平移不变 Borel 测度（Haar 测度在 \((\mathbb{R}, +)\) 上的唯一性）。</p>
+            <h4>1. 平移不变性</h4>
+            <p>对可测集 \(E\) 和 \(x \in \mathbb{R}\)：\(\lambda(E + x) = \lambda(E)\)。证明：外测度定义中区间覆盖 \(\{I_n\}\) 平移后 \(\{I_n + x\}\) 仍覆盖 \(E + x\)，长度不变。</p>
+
+            <h4>2. 外正则性与内正则性</h4>
+            <p><strong>外正则：</strong>\(\lambda(E) = \inf\{\lambda(U) : U \supseteq E,\, U\text{ 开}\}\)。由外测度定义直接得到——开区间之并是开集。</p>
+            <p><strong>内正则：</strong>\(\lambda(E) = \sup\{\lambda(K) : K \subseteq E,\, K\text{ 紧}\}\)。先用开集 \(U_n \supseteq E\) 逼近，取 \(K_n = [- n, n] \setminus (U_n \setminus E)\) 式的紧集逼近。</p>
+
+            <h4>3. 唯一性（Haar 测度）</h4>
+            <p>若 \(\mu\) 是 \(\mathbb{R}\) 上的平移不变 Borel 测度且 \(\mu([0,1]) < \infty\)，则 \(\mu = c \cdot \lambda\)（\(c = \mu([0,1])\)）。证明思路：由平移不变性确定所有有理端点区间的测度为 \(c\) 倍长度，再由 σ-可加性扩展到一般 Borel 集。</p>
+
+            <h4>4. 缩放性质</h4>
+            <p>\(\lambda(rE) = |r| \cdot \lambda(E)\)（\(r \in \mathbb{R}\)）。推广到 \(\mathbb{R}^n\)：线性变换 \(T\) 下 \(\lambda_n(T(E)) = |\det T| \cdot \lambda_n(E)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>正则性在概率论的弱收敛理论中不可或缺：Prokhorov 定理利用 内正则性将测度族的紧性问题转化为 tight 性质。</p>
+            <p><strong>概率论中的弱收敛：</strong>Prokhorov 定理利用内正则性（tightness）刻画概率测度族的相对紧性：\(\{\mu_n\}\) 是 tight 的 ⟺ 对任意 \(\varepsilon > 0\) 存在紧集 \(K\) 使 \(\mu_n(K^c) < \varepsilon\) 对所有 \(n\)。这是中心极限定理等极限定理证明的关键工具。</p>
+            <p><strong>调和分析中的卷积：</strong>平移不变性使卷积 \((f * g)(x) = \int f(x-t)g(t)\, dt\) 良定义——被积函数关于 \(t\) 的平移不改变积分。Young 不等式 \(\|f * g\|_r \leq \|f\|_p \|g\|_q\) 依赖于 Lebesgue 测度的平移不变性。</p>
+            <p><strong>物理学中的相空间体积：</strong>Liouville 定理说明 Hamilton 系统保持相空间体积（Lebesgue 测度）——辛群 \(\mathrm{Sp}(2n)\) 中的变换 \(\det = 1\)，故 \(\lambda_{2n}\) 不变。这是统计力学等概率假设的数学基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(\mathbb{Q} \cap [0,1]\) 的 Lebesgue 测度为 0。 解答：\(\mathbb{Q} \cap [0,1]\) 是可数集 \(\{q_1, q_2, \ldots\}\)。 对任意 \(\varepsilon > 0\)，覆盖 \(q_n\) 以长度 \(\varepsilon/2^n\) 的开区间。总长度 \(\leq \sum \varepsilon/2^n = \varepsilon\)。 令 \(\varepsilon \to 0\) 得 \(\lambda(\mathbb{Q} \cap [0,1]) = 0\)。 易错点：误以为"稠密集的测度一定正"。\(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密但测度为零。稠密性是拓扑概念，与测度无关。</p>
+            <h4>例题：证明 \(\mathbb{Q} \cap [0,1]\) 的 Lebesgue 测度为 0</h4>
+            <p><strong>第一步 — 枚举：</strong>\(\mathbb{Q} \cap [0,1] = \{q_1, q_2, \ldots\}\) 可数集。</p>
+            <p><strong>第二步 — 覆盖：</strong>对任意 \(\varepsilon > 0\)，用开区间 \((q_n - \varepsilon/2^{n+1}, q_n + \varepsilon/2^{n+1})\) 覆盖 \(q_n\)。</p>
+            <p><strong>第三步 — 估计：</strong>总长度 \(\leq \sum_{n=1}^\infty \varepsilon/2^n = \varepsilon\)。令 \(\varepsilon \to 0\) 得 \(\lambda(\mathbb{Q} \cap [0,1]) = 0\)。 ✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"稠密集的 Lebesgue 测度一定为正"。<br>✅ \(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密但 \(\lambda(\mathbb{Q}) = 0\)。稠密性是拓扑性质（涉及开集），与测度完全无关。反之也不成立：胖 Cantor 集测度为正但无处稠密。</li>
+              <li>❌ 认为 Lebesgue 测度对所有 \(\mathbb{R}\) 子集有定义。<br>✅ Lebesgue 测度定义在 Lebesgue σ-代数 \(\mathcal{L}\) 上，\(\mathcal{L} \subsetneq \mathcal{P}(\mathbb{R})\)。Vitali 集不在 \(\mathcal{L}\) 中。</li>
+              <li>❌ 混淆 Lebesgue 测度与 Borel 测度的定义域。<br>✅ Borel 测度定义在 \(\mathcal{B}(\mathbb{R})\) 上，Lebesgue 测度定义在 \(\mathcal{L} \supsetneq \mathcal{B}(\mathbb{R})\) 上。两者在 Borel 集上一致，但 Lebesgue 测度多了零测集的所有子集。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -517,28 +594,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>一个自然的问题：\(\mathbb{R}\) 的所有子集都可以被 Lebesgue 测量吗？ 1905年 Vitali 给出了否定回答：利用选择公理，他构造了一个不可测集。 这一结果深刻揭示了测度论的边界——平移不变性、σ-可加性和"所有集合 可测"三者不可兼得。</p>
+            <ul>
+              <li><strong>测度论的边界：</strong>\(\mathbb{R}\) 的所有子集都能被 Lebesgue 测量吗？Vitali (1905) 利用选择公理给出否定回答——不可测集必然存在。</li>
+              <li><strong>深刻的不可能性：</strong>平移不变性 + σ-可加性 + "所有集合可测"三者不可兼得。放弃 σ-可加性得到有限可加的 Banach 极限；放弃"所有可测"就是 Lebesgue 测度的选择。</li>
+              <li><strong>集合论与分析的交汇：</strong>不可测集的存在依赖于选择公理——在 Solovay 模型（ZF + DC + 无选择公理）中所有实数子集都可测。这是数理逻辑与实分析的深刻联系。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Vitali 构造利用了等价关系的商空间思想：将 \([0,1]\) 按 \(x \sim y \Leftrightarrow x - y \in \mathbb{Q}\) 分类， 用选择公理从每个等价类中取一个代表元。</p>
+            <ul>
+              <li><strong>等价关系 + 商空间：</strong>Vitali 构造的核心：\(x \sim y \iff x - y \in \mathbb{Q}\) 将 \([0,1]\) 划分为不可数个等价类，用选择公理取代表元集。</li>
+              <li><strong>反证法范式：</strong>假设代表元集可测 → 利用平移不变性 + σ-可加性推出矛盾（总测度既 \(\leq 3\) 又 \(= 0\) 或 \(= \infty\)）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Vitali 构造</strong>：定义 \([0,1]\) 上的等价关系 \(x \sim y \Leftrightarrow x - y \in \mathbb{Q}\)。 由选择公理，取选择集 \(V\)（每个等价类恰好一个代表元）。 <strong>证明 \(V\) 不可测</strong>（反证法）：枚举 \(\{r_n\} = \mathbb{Q} \cap [-1,1]\)， 则 \(V + r_n\) 两两不交（否则同一等价类有两个代表元），且 \[[0,1] \subseteq \bigcup_{n=1}^{\infty} (V + r_n) \subseteq [-1,2]\] 若 \(V\) 可测，由平移不变性 \(\lambda(V + r_n) = \lambda(V)\)， \[1 \leq \sum_{n=1}^{\infty} \lambda(V) \leq 3\] 若 \(\lambda(V) = 0\)，则 \(\sum = 0 < 1\)，矛盾； 若 \(\lambda(V) > 0\)，则 \(\sum = +\infty > 3\)，矛盾。 故 \(V\) 不可测。</p>
+            <h4>1. Vitali 等价关系</h4>
+            <p>在 \([0,1]\) 上定义 \(x \sim y \iff x - y \in \mathbb{Q}\)。这是 \((\mathbb{R},+)\) 关于子群 \(\mathbb{Q}\) 的陪集分解限制在 \([0,1]\) 上。等价类不可数多个（每类可数）。</p>
+
+            <h4>2. 选择集 \(V\)</h4>
+            <p>由选择公理，从每个等价类中恰取一个代表元，得 \(V \subseteq [0,1]\)。枚举 \(\{r_n\} = \mathbb{Q} \cap [-1,1]\)，则 \(V + r_n\) 两两不交（否则同类有两个代表元）。</p>
+
+            <h4>3. 反证法</h4>
+            <p>关键包含关系：\([0,1] \subseteq \bigcup_{n=1}^\infty (V + r_n) \subseteq [-1,2]\)。若 \(V\) 可测，由平移不变性 \(\lambda(V + r_n) = \lambda(V)\)：</p>
+            \[1 \leq \sum_{n=1}^\infty \lambda(V) \leq 3\]
+            <p>\(\lambda(V) = 0 \Rightarrow \sum = 0 < 1\)，矛盾。\(\lambda(V) > 0 \Rightarrow \sum = +\infty > 3\)，矛盾。故 \(V\) 不可测。 ∎</p>
+
+            <h4>4. Banach-Tarski 悖论</h4>
+            <p>在 \(\mathbb{R}^3\) 中，球可分解为有限块并重组为两个等大球。分解中的"块"是不可测集——Lebesgue 测度的可加性对它们不适用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>概率论的公理基础：</strong>Vitali 反例证明不能给所有事件赋概率——Kolmogorov 的概率公理体系显式指定了事件 σ-代数 \(\mathcal{F}\)，不要求 \(\mathcal{F} = \mathcal{P}(\Omega)\)。这不是人为限制，而是数学必然。</p>
+            <p><strong>集合论独立性与可构造性：</strong>Vitali 构造依赖选择公理 (AC)。在 Solovay 模型（ZF + DC，无 AC）中所有实数子集可测。这意味着不可测集的"存在"是公理选择的结果——为描述集合论和实分析的基础提供了深刻视角。</p>
+            <p><strong>遍历论中的不变测度：</strong>遍历理论研究保测变换下的不可分解性。Vitali 论证的核心"平移不变性 vs σ-可加性"的张力在遍历论中以"不变测度的存在/唯一性"形式再现——amenable 群上存在有限可加不变均值，但不一定有 σ-可加不变测度。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：Banach-Tarski 悖论（\(\mathbb{R}^3\) 版本）声称球可以 分解为有限块并重组为两个等大球。这与 Lebesgue 测度矛盾吗？ 解答：不矛盾，因为 Banach-Tarski 分解中的"块"是不可测集。 Lebesgue 测度只对可测集有可加性，不可测集的"分解-重组" 不受测度约束。 易错点：误以为"不可测集不存在"或"选择公理可以省略"。 事实上，在 ZF + 选择公理 (ZFC) 下不可测集必然存在； 但在某些不含完整选择公理的模型中，所有实数子集可以可测。</p>
+            <h4>例题：Banach-Tarski 与 Lebesgue 测度的兼容性</h4>
+            <p><strong>题目：</strong>Banach-Tarski 悖论声称球可拆为有限块重组为两个等大球。这与 Lebesgue 测度矛盾吗？</p>
+            <p><strong>解答：</strong>不矛盾。分解中的"块"是不可测集——Lebesgue 测度的 σ-可加性对不可测集不适用。体积"守恒"只对可测分割成立。</p>
+            <p><strong>关键：</strong>Banach-Tarski 在 \(\mathbb{R}^1\) 和 \(\mathbb{R}^2\) 中不成立（因为 \(\mathbb{R}\) 和 \(\mathbb{R}^2\) 的平移/旋转群是 amenable 的）。仅在 \(n \geq 3\) 时自由群 \(F_2 \hookrightarrow SO(3)\) 使悖论成立。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为不可测集的"存在"是可在 ZF 中证明的。<br>✅ 不可测集的存在依赖选择公理。在 ZF + DC（无完整 AC）的 Solovay 模型中所有实数子集可测。但 ZFC（含 AC）是标准框架。</li>
+              <li>❌ 认为 Vitali 证明中平移不变性可以省略。<br>✅ 平移不变性是矛盾的关键——正是 \(\lambda(V + r_n) = \lambda(V)\) 使得不可数个等大平移的不交并产生矛盾。</li>
+              <li>❌ 认为"存在不可测集"意味着 Lebesgue 测度有缺陷。<br>✅ 这不是缺陷而是必然：Lebesgue 测度在可测集上工作完美（σ-可加、平移不变、外/内正则）。不可测集在分析实践中几乎不出现（凡能"写出来"的集合都可测）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -565,35 +680,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>直觉告诉我们：集合越"大"（元素越多），其测度应该越大。但 Cantor 集打破了这个直觉——它是不可数的（与 \(\mathbb{R}\) 等势），却具有 零 Lebesgue 测度。这个反例是测度论中最重要的"病理对象"之一， 深刻说明了"测度零"与"基数小"是完全不同的概念。</p>
+            <ul>
+              <li><strong>打破直觉：</strong>直觉认为"元素越多 → 测度越大"。但 Cantor 集与 \(\mathbb{R}\) 等势（\(|C| = \mathfrak{c} = 2^{\aleph_0}\)），却有零 Lebesgue 测度。</li>
+              <li><strong>拓扑 vs 测度：</strong>Cantor 集展示了"拓扑大小"和"测度大小"可以完全独立——它是完全不连通、无处稠密的紧集，但不可数且（可以构造）正测度。</li>
+              <li><strong>分形几何的原型：</strong>Cantor 集是最简单的分形，其 Hausdorff 维数 \(\log 2/\log 3 \approx 0.631\) 介于 0 维（离散点）和 1 维（区间）之间。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Cantor 集的构造体现了"迭代移除"的分形思想。它揭示了 "拓扑大小"（不可数、完全不连通、无孤立点）和"测度大小" （零测度）可以完全独立。</p>
+            <ul>
+              <li><strong>迭代移除：</strong>Cantor 集的构造是"每步移除中间 1/3"的无穷迭代——这种自相似递归产生分形结构。</li>
+              <li><strong>三进制编码：</strong>\(C\) 中的点恰是三进制展开只含 \(0,2\) 的实数。这一编码将 \(C\) 与 \(\{0,1\}^{\mathbb{N}}\) 等同，直接揭示不可数性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>构造</strong>：从 \(C_0 = [0,1]\) 出发，递归移除每个区间的中间三分之一： \(C_1 = [0,1/3] \cup [2/3,1]\)，\(C_2 = [0,1/9] \cup [2/9,1/3] \cup [2/3,7/9] \cup [8/9,1]\)，…… \[C = \bigcap_{n=0}^{\infty} C_n\] <strong>测度计算</strong>：第 \(n\) 步移除的区间总长为 \(2^{n-1} \cdot 3^{-n}\)， 总移除长度： \[\sum_{n=1}^{\infty} \frac{2^{n-1}}{3^n} = \frac{1/3}{1 - 2/3} = 1\] 故 \(\lambda(C) = 1 - 1 = 0\)。 <strong>不可数性</strong>：\(C\) 中的点恰好是三进制展开中只含 \(0\) 和 \(2\) 的实数。映射 \(0.a_1 a_2 \cdots_{(3)} \mapsto 0.b_1 b_2 \cdots_{(2)}\) （其中 \(b_i = a_i/2\)）给出 \(C\) 到 \([0,1]\) 的满射， 故 \(|C| = 2^{\aleph_0}\)。</p>
+            <h4>1. 递归构造</h4>
+            <p>\(C_0 = [0,1]\)，\(C_1 = [0,1/3] \cup [2/3,1]\)，\(C_2 = [0,1/9] \cup [2/9,1/3] \cup \cdots\)。\(C = \bigcap_{n=0}^\infty C_n\)。</p>
+
+            <h4>2. 测度计算</h4>
+            <p>第 \(n\) 步移除 \(2^{n-1}\) 个长度为 \(3^{-n}\) 的区间。总移除长度：</p>
+            \[\sum_{n=1}^\infty \frac{2^{n-1}}{3^n} = \frac{1/3}{1 - 2/3} = 1\]
+            <p>故 \(\lambda(C) = 1 - 1 = 0\)。</p>
+
+            <h4>3. 不可数性（三进制论证）</h4>
+            <p>\(x \in C \iff x = \sum_{k=1}^\infty a_k 3^{-k}\)，\(a_k \in \{0, 2\}\)。映射 \(\phi: C \to [0,1]\)，\(\phi(x) = \sum a_k/2 \cdot 2^{-k}\) 是满射（将 \(\{0,2\}\) 编码为 \(\{0,1\}\)）。故 \(|C| = |[0,1]| = \mathfrak{c}\)。</p>
+
+            <h4>4. 胖 Cantor 集</h4>
+            <p>在第 \(n\) 步移除中间长度 \(\alpha_n < 3^{-n}\) 的区间，使总移除长度 \(\sum 2^{n-1}\alpha_n = \alpha < 1\)。剩余集 \(F\) 是紧的、无处稠密但 \(\lambda(F) = 1 - \alpha > 0\) 的正测度集。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Cantor 集是分形几何的原型，其 Hausdorff 维数为 \(\log 2 / \log 3 \approx 0.631\)；在动力系统中，许多奇异吸引子具有 Cantor 集式的结构。</p>
+            <p><strong>分形几何与 Hausdorff 维数：</strong>Cantor 集的 Hausdorff 维数 \(d = \log 2 / \log 3 \approx 0.631\)。这捕捉了"比点多、比线少"的直觉。海岸线（\(d \approx 1.2\)）、Sierpinski 三角形（\(d = \log 3/\log 2\)）等自然/数学分形都用 Hausdorff 维数刻画"粗糙度"。</p>
+            <p><strong>动力系统中的奇异吸引子：</strong>Smale 马蹄映射的不变集是一个 Cantor 集——迭代映射将相空间拉伸折叠，产生"Cantor 集式"的混沌结构。Lorenz 吸引子的横截面也具有 Cantor 集拓扑。</p>
+            <p><strong>数论中的丢番图逼近：</strong>Jarník-Besicovitch 定理：能被有理数以阶 \(\tau > 2\) 逼近的实数集（Liouville 数的推广）的 Hausdorff 维数为 \(2/\tau\)——这些"异常好逼近"的数构成 Cantor 集式的稀薄集。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：构造一个测度为正的"胖 Cantor 集"。 解答：在第 \(n\) 步移除中间长度为 \(\alpha \cdot 3^{-n}\)（\(\alpha < 1\)） 的区间而非 \(3^{-n}\)。例如取 \(\alpha = 1/4\)，总移除长度为 \(\sum 2^{n-1} \cdot (1/4) \cdot 3^{-n} \cdot 3^n / 3^n\) —— 更简单地，令每步移除中间长度 \(1/2^{2n}\)，使总移除量 \(< 1\)， 剩余集为正测度、无处稠密的闭集。 易错点：误以为"零测集一定是可数的"。 Cantor 集是不可数零测集的标准反例。</p>
+            <h4>例题：构造正测度的 Cantor 型集</h4>
+            <p><strong>第一步 — 选择移除量：</strong>令第 \(n\) 步的 \(2^{n-1}\) 个区间各移除长度 \(\alpha_n = 1/(2 \cdot 4^n)\)。每步总移除 \(2^{n-1}/(2 \cdot 4^n) = 1/4^n\)（仅对 \(n \geq 1\)）。</p>
+            <p><strong>第二步 — 计算总移除量：</strong>\(\sum_{n=1}^\infty 1/4^n = 1/3\)。</p>
+            <p><strong>第三步 — 剩余测度：</strong>\(\lambda(F) = 1 - 1/3 = 2/3 > 0\)。\(F\) 是紧的、无处稠密但正测度的集合。 ✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"零测集一定是可数的"。<br>✅ Cantor 集是不可数零测集的标准反例（\(|C| = \mathfrak{c}\) 但 \(\lambda(C) = 0\)）。"零测"与"可数"是不同概念。</li>
+              <li>❌ 认为"无处稠密集必须是零测集"。<br>✅ 胖 Cantor 集是无处稠密（不含任何开区间）但正测度的闭集。拓扑"稀薄"（无处稠密/第一范畴）与测度"稀薄"（零测）是独立的概念。</li>
+              <li>❌ 在 Hausdorff 维数计算中误用 Lebesgue 测度。<br>✅ Lebesgue 测度只能给出"0 或正"的二值信息，无法量化分形的"精细大小"。Hausdorff 测度 \(\mathcal{H}^d\) 在临界维数 \(d\) 处给出非平凡值（0 与 \(\infty\) 之间）。</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -394,28 +394,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在概率论和物理学中，经常遇到"可以取负值的测度"——例如带符号的 电荷分布，或两个概率测度之差。符号测度将测度的概念从非负推广到 可正可负。Hahn 分解和 Jordan 分解告诉我们：每个符号测度都可以 "分离"为正部和负部，本质上仍可回到非负测度的框架。</p>
+            <ul>
+              <li><strong>正负电荷的数学化</strong>——物理中电荷可正可负，电荷分布自然地是"可以取负值的测度"；类似地，概率论中两组分布之差、金融中的损益函数都需要符号测度来刻画</li>
+              <li><strong>从非负到一般</strong>——测度论的大部分理论建立在非负测度上；符号测度将框架推广到实值集函数，Hahn-Jordan 分解说明：这一推广并不失控，每个符号测度都可以"拆"回非负测度</li>
+              <li><strong>Radon-Nikodym 的前奏</strong>——Jordan 分解中的 \(\mu^+, \mu^-\) 是后续 Radon-Nikodym 定理和 Lebesgue 分解的基本构件；全变差 \(|\mu|\) 则为符号测度空间赋予了 Banach 空间结构</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Hahn 分解将空间一分为二（正集和负集），Jordan 分解将符号测度 写为两个非负测度之差 \(\mu = \mu^+ - \mu^-\)。这与实数分解为 正负部 \(x = x^+ - x^-\) 完全类比。</p>
+            <ul>
+              <li><strong>与实数正负分解的类比</strong>——实数 \(x = x^+ - x^-\)（\(x^+ = \max(x,0)\)，\(x^- = \max(-x,0)\)）；Jordan 分解 \(\mu = \mu^+ - \mu^-\) 是这一思想在集函数空间中的推广</li>
+              <li><strong>空间的二分法</strong>——Hahn 分解将全空间 \(X = P \sqcup N\) 拆为正集和负集，使得符号测度在各半空间上退化为普通非负测度。这是一种"降维"策略</li>
+              <li><strong>范数与 Banach 空间</strong>——全变差 \(\|\mu\| = |\mu|(X)\) 赋予有限符号测度空间 \(M(X, \mathcal{F})\) 一个完备范数，使之成为 Banach 空间。\(L^1(\nu)\) 通过 \(f \mapsto f\nu\) 等距嵌入 \(M\)</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>符号测度</strong>：\(\mu: \mathcal{F} \to [-\infty, +\infty]\) 满足 \(\mu(\emptyset) = 0\) 和 σ-可加性（\(\mu\) 不同时取 \(+\infty\) 和 \(-\infty\)）。 <strong>Hahn 分解定理</strong>：存在 \(P, N \in \mathcal{F}\)，\(P \cup N = X\)， \(P \cap N = \emptyset\)，使得 \(\mu(E) \geq 0\) \(\forall E \subseteq P\)， \(\mu(E) \leq 0\) \(\forall E \subseteq N\)。 <strong>Jordan 分解</strong>：\(\mu = \mu^+ - \mu^-\)，其中 \(\mu^+(E) = \mu(E \cap P)\)，\(\mu^-(E) = -\mu(E \cap N)\)， 且 \(\mu^+ \perp \mu^-\)（互相奇异）。 <strong>全变差测度</strong>：\(|\mu| = \mu^+ + \mu^-\)， \[|\mu|(E) = \sup\left\{\sum_{i=1}^n |\mu(E_i)| : E = \bigsqcup E_i\right\}\]</p>
+            <h4>符号测度的定义</h4>
+            <p>集函数 \(\mu: \mathcal{F} \to (-\infty, +\infty]\)（或 \([-\infty, +\infty)\)）满足：</p>
+            <ul>
+              <li>\(\mu(\emptyset) = 0\)</li>
+              <li>σ-可加性：\(\mu\bigl(\bigsqcup_{n=1}^\infty E_n\bigr) = \sum_{n=1}^\infty \mu(E_n)\)</li>
+              <li>\(\mu\) 不同时取 \(+\infty\) 和 \(-\infty\)（避免 \(\infty - \infty\)）</li>
+            </ul>
+
+            <h4>Hahn 分解定理</h4>
+            <p>存在 \(P, N \in \mathcal{F}\)，\(P \sqcup N = X\)，使得 \(\mu(E) \geq 0\) 对所有 \(E \subseteq P\)，\(\mu(E) \leq 0\) 对所有 \(E \subseteq N\)。</p>
+            <p><em>证明策略</em>：取 \(\sup\{\mu(A) : A \in \mathcal{F}\}\)，构造递增序列 \(A_n\) 使 \(\mu(A_n) \to \sup\)，令 \(P = \bigcup A_n\)。关键引理：正集中的每个可测子集仍为正集（需仔细处理可数可加性）。</p>
+
+            <h4>Jordan 分解</h4>
+            <p>由 Hahn 分解定义：
+            \[\mu^+(E) = \mu(E \cap P), \quad \mu^-(E) = -\mu(E \cap N)\]
+            则 \(\mu^+, \mu^- \geq 0\)，\(\mu = \mu^+ - \mu^-\)，且 \(\mu^+ \perp \mu^-\)（集中在不相交的集上）。</p>
+            <p>虽然 Hahn 分解 \((P, N)\) 不唯一（可差一个 μ-零测集），但 Jordan 分解 \((\mu^+, \mu^-)\) 是<strong>唯一</strong>的。</p>
+
+            <h4>全变差测度</h4>
+            <p>\[|\mu| = \mu^+ + \mu^-, \quad |\mu|(E) = \sup\biggl\{\sum_{i=1}^n |\mu(E_i)| : E = \bigsqcup_{i=1}^n E_i\biggr\}.\]
+            全变差范数 \(\|\mu\| = |\mu|(X)\) 使有限符号测度空间成为 Banach 空间。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>统计学：假设检验与似然比</strong>——在 Neyman-Pearson 框架中，检验统计量是两个概率测度之差 \(P_1 - P_0\)（符号测度）的 Hahn 分解。正集 \(P\) 对应拒绝域——在 \(P\) 上 \(P_1\) 比 \(P_0\) "更大"，故拒绝原假设。全变差 \(\|P_1 - P_0\| = 2\sup_A |P_1(A) - P_0(A)|\) 度量两个分布的最大可区分性。</p>
+            <p><strong>物理学：电荷与电势</strong>——空间中的电荷分布可用符号测度 \(\rho\) 表示（正电荷对应 \(\rho^+\)，负电荷对应 \(\rho^-\)）。全变差 \(|\rho|(X)\) 是总电荷量。Poisson 方程 \(-\Delta \phi = \rho\) 中的右端项即符号测度；Hahn 分解给出正负电荷区域的划分。</p>
+            <p><strong>信号处理：带通滤波器</strong>——频域中理想带通滤波器的传递函数 \(H(\omega)\) 可正可负（如 Hilbert 变换）。其对应的时域脉冲响应作为 tempered distribution 可通过符号测度逼近。全变差范数控制滤波器的稳定性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(\mu(E) = \int_E f\, d\lambda\)，\(f(x) = x\) 在 \([-1, 1]\) 上。 求 \(\mu\) 的 Hahn 分解和 Jordan 分解。 解答：\(P = [0, 1]\)（\(f \geq 0\)），\(N = [-1, 0)\)（\(f < 0\)）。 \(\mu^+(E) = \int_{E \cap [0,1]} x\, dx\)， \(\mu^-(E) = \int_{E \cap [-1,0)} (-x)\, dx\)。 \(|\mu|([-1,1]) = \int_0^1 x\, dx + \int_{-1}^0 (-x)\, dx = 1/2 + 1/2 = 1\)。 易错点：Hahn 分解不唯一（\(P, N\) 可以差一个零测集）， 但 Jordan 分解 \(\mu^+, \mu^-\) 是唯一的。</p>
+            <h4>例题：显式 Hahn-Jordan 分解</h4>
+            <p>设 \(\mu(E) = \int_E f\,d\lambda\)，\(f(x) = x\) 在 \([-1, 1]\) 上。求 \(\mu\) 的 Hahn 分解和 Jordan 分解。</p>
+            <p><strong>Step 1</strong>　确定正集：\(f(x) = x \geq 0\) 当 \(x \in [0, 1]\)，故取 \(P = [0, 1]\)。</p>
+            <p><strong>Step 2</strong>　确定负集：\(f(x) = x < 0\) 当 \(x \in [-1, 0)\)，故 \(N = [-1, 0)\)。</p>
+            <p><strong>Step 3</strong>　Jordan 分解：\(\mu^+(E) = \int_{E \cap [0,1]} x\,dx\)，\(\mu^-(E) = \int_{E \cap [-1,0)} (-x)\,dx\)。</p>
+            <p><strong>Step 4</strong>　全变差：\(|\mu|([-1,1]) = \int_0^1 x\,dx + \int_{-1}^0 (-x)\,dx = 1/2 + 1/2 = 1\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 Hahn 分解唯一 → ✅ Hahn 分解不唯一：\(P, N\) 可差一个 μ-零集（如 \(\{0\}\) 可归入 \(P\) 或 \(N\)）；但 Jordan 分解 \(\mu^+, \mu^-\) 是唯一的</li>
+              <li>❌ 将全变差 \(|\mu|(E)\) 误解为 \(|\mu(E)|\) → ✅ \(|\mu|(E) = \mu^+(E) + \mu^-(E) \geq |\mu(E)|\)，等号一般不成立；\(|\mu|\) 度量的是"总变动量"而非"净值的绝对值"</li>
+              <li>❌ 忽略符号测度不能同时取 \(\pm\infty\) 的约束 → ✅ 若 \(\mu^+(X) = +\infty\) 且 \(\mu^-(X) = +\infty\)，则 \(\mu(X) = \infty - \infty\) 无意义；定义要求排除这种情况</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -463,35 +512,81 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>什么时候一个测度 \(\mu\) 可以用另一个测度 \(\nu\) 的"密度函数" 表示为 \(d\mu = f\, d\nu\)？直觉上，如果 \(\nu\) 认为某个集合 "大小为零"，\(\mu\) 也应该认为它大小为零——这就是绝对连续性 \(\mu \ll \nu\)。Radon-Nikodym 定理给出了精确的回答： 绝对连续等价于密度函数的存在性。</p>
+            <ul>
+              <li><strong>密度函数的存在性</strong>——"什么时候一个测度 \(\mu\) 可用另一个测度 \(\nu\) 的密度函数表示为 \(d\mu = f\,d\nu\)？"这是测度论的核心问题之一</li>
+              <li><strong>绝对连续的直觉</strong>——若 \(\nu\) 认为某集合"大小为零"，\(\mu\) 也应如此（\(\nu(E) = 0 \Rightarrow \mu(E) = 0\)）。Radon-Nikodym 定理把这一定性关系转化为定量的密度函数</li>
+              <li><strong>贯穿现代分析</strong>——条件期望（概率论）、似然比（统计）、测度变换（随机分析 Girsanov 定理）、Sobolev 空间的对偶（PDE）——都以 RN 导数为基础工具</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Radon-Nikodym 定理是"求导"在测度论中的推广：\(f = d\mu/d\nu\) 类比实变函数的导数，将两个测度的关系编码为一个函数。</p>
+            <ul>
+              <li><strong>测度论中的"求导"</strong>——\(f = d\mu/d\nu\) 将两个测度之间的关系编码为一个函数，类比微积分中 \(F'(x) = dF/dx\)。链式法则 \(\frac{d\mu}{d\lambda} = \frac{d\mu}{d\nu}\frac{d\nu}{d\lambda}\) 进一步加强了这一类比</li>
+              <li><strong>Hilbert 空间方法</strong>——von Neumann 证法：在 \(L^2(\mu + \nu)\) 上定义泛函，用 Riesz 表示定理找到密度函数。这将测度论问题转化为 Hilbert 空间的几何问题</li>
+              <li><strong>σ-有限性是"可分块"的保证</strong>——σ-有限意味着全空间可分解为可数个有限测度子空间，在每个子空间上证明 RN 定理后再"拼合"。非 σ-有限时定理可能失效</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>绝对连续</strong>：\(\mu \ll \nu\) 若 \(\nu(E) = 0 \Rightarrow \mu(E) = 0\)。 <strong>Radon-Nikodym 定理</strong>：设 \(\mu, \nu\) 是 σ-有限测度， \(\mu \ll \nu\)。则存在 \(\nu\)-a.e. 唯一的非负可测函数 \(f\) 使得 \[\mu(E) = \int_E f\, d\nu, \quad \forall E \in \mathcal{F}\] \(f\) 称为 Radon-Nikodym 导数，记为 \(f = \frac{d\mu}{d\nu}\)。 <strong>链式法则</strong>：若 \(\mu \ll \nu \ll \lambda\)，则 \[\frac{d\mu}{d\lambda} = \frac{d\mu}{d\nu} \cdot \frac{d\nu}{d\lambda} \quad \lambda\text{-a.e.}\] <strong>σ-有限性必要</strong>：反例——计数测度 \(\mu\) 关于 Lebesgue 测度 \(\lambda\) 不满足 \(\mu \ll \lambda\)，但也说明 σ-有限性不能随意去除。</p>
+            <h4>绝对连续的定义</h4>
+            <p>\(\mu \ll \nu\) 若 \(\nu(E) = 0 \Rightarrow \mu(E) = 0\)。</p>
+            <p>对有限测度，等价于 ε-δ 刻画：\(\forall \varepsilon > 0\)，\(\exists \delta > 0\)，\(\nu(E) < \delta \Rightarrow |\mu(E)| < \varepsilon\)。</p>
+
+            <h4>Radon-Nikodym 定理</h4>
+            <p>设 \(\mu, \nu\) 为 σ-有限测度，\(\mu \ll \nu\)。则存在 ν-a.e. 唯一的非负可测函数 \(f\) 使
+            \[\mu(E) = \int_E f\,d\nu, \quad \forall E \in \mathcal{F}.\]
+            \(f\) 称为 <strong>Radon-Nikodym 导数</strong>，记 \(f = \frac{d\mu}{d\nu}\)。</p>
+
+            <h4>证明思路（von Neumann 方法）</h4>
+            <ol>
+              <li>令 \(\lambda = \mu + \nu\)。在 \(L^2(\lambda)\) 上定义有界线性泛函 \(\phi(g) = \int g\,d\nu\)</li>
+              <li>Riesz 表示定理：存在 \(h \in L^2(\lambda)\) 使 \(\int g\,d\nu = \int gh\,d\lambda\)，且 \(0 \leq h \leq 1\) λ-a.e.</li>
+              <li>令 \(A = \{h > 0\}\)。定义 \(f = (1 - h)/h\) 在 \(A\) 上，则 \(\mu(E) = \int_E f\,d\nu\)（需要仔细处理 \(\{h = 0\}\) 和 \(\{h = 1\}\) 的集合）</li>
+            </ol>
+
+            <h4>链式法则</h4>
+            <p>若 \(\mu \ll \nu \ll \lambda\)，则
+            \[\frac{d\mu}{d\lambda} = \frac{d\mu}{d\nu} \cdot \frac{d\nu}{d\lambda}, \quad \lambda\text{-a.e.}\]</p>
+
+            <h4>推广：符号测度的 RN 定理</h4>
+            <p>若 \(\mu\) 为符号测度，\(\nu\) 为 σ-有限测度，\(\mu \ll \nu\)，则存在 \(f \in L^1(\nu)\) 使 \(\mu(E) = \int_E f\,d\nu\)，且 \(|f| = d|\mu|/d\nu\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>概率论：条件期望 \(E[X|\mathcal{G}]\) 就是 \(\mu_X\) 关于 \(P|_\mathcal{G}\) 的 Radon-Nikodym 导数；贝叶斯公式中似然比 \(dP_1/dP_0\) 是两个概率测度的 Radon-Nikodym 导数。</p>
+            <p><strong>概率论：条件期望与鞅</strong>——条件期望 \(\mathbb{E}[X|\mathcal{G}]\) 就是测度 \(\mu(G) = \int_G X\,dP\) 关于 \(P|_\mathcal{G}\) 的 Radon-Nikodym 导数。鞅理论中，\(M_n = \mathbb{E}[X|\mathcal{F}_n]\) 是 RN 导数的序列。Doob 分解和可选停时定理都以此为基础。</p>
+            <p><strong>金融数学：风险中性定价</strong>——Black-Scholes 框架中，风险中性测度 \(Q\) 相对于物理测度 \(P\) 的 RN 导数 \(dQ/dP = \mathcal{E}(-\theta W)_T\)（Girsanov 定理）给出了市场风险价格。衍生品价格 = 在 \(Q\) 下对折现收益取期望，本质上是用 RN 导数做测度变换。</p>
+            <p><strong>统计推断：Neyman-Pearson 与信息论</strong>——似然比检验统计量 \(\Lambda = dP_1/dP_0\) 是两个模型下数据分布的 RN 导数。KL 散度 \(D_{\text{KL}}(P\|Q) = \int \log(dP/dQ)\,dP\) 也以 RN 导数为核心，度量两个分布的"信息距离"。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(\mu(E) = \int_E 2x\, dx\) 在 \(([0,1], \mathcal{B}, \lambda)\) 上。 求 \(d\mu/d\lambda\)。 解答：由定义 \(\mu(E) = \int_E 2x\, d\lambda\)， 故 \(f(x) = d\mu/d\lambda = 2x\)（直接读出）。 易错点：忘记 Radon-Nikodym 导数仅在 a.e. 意义下唯一。 可以在零测集上任意修改 \(f\) 的值。</p>
+            <h4>例题：直接读出 RN 导数</h4>
+            <p>设 \(\mu(E) = \int_E 2x\,dx\) 在 \(([0,1], \mathcal{B}, \lambda)\) 上。求 \(d\mu/d\lambda\)。</p>
+            <p><strong>Step 1</strong>　由定义，\(\mu(E) = \int_E 2x\,d\lambda\)，直接读出 \(f(x) = 2x\)。</p>
+            <p><strong>Step 2</strong>　验证：\(f \geq 0\) 在 \([0,1]\) 上，\(\int_0^1 2x\,dx = 1\)，故 \(\mu\) 是概率测度，\(f\) 是 \(\text{Beta}(2,1)\) 密度。</p>
+
+            <h4>例题：链式法则</h4>
+            <p>设 \(\mu(E) = \int_E 3x^2\,dx\)，\(\nu(E) = \int_E 2x\,dx\)。求 \(d\mu/d\nu\)。</p>
+            <p><strong>Step 1</strong>　\(d\mu/d\lambda = 3x^2\)，\(d\nu/d\lambda = 2x\)。</p>
+            <p><strong>Step 2</strong>　链式法则：\(d\mu/d\nu = (d\mu/d\lambda)/(d\nu/d\lambda) = 3x^2/(2x) = 3x/2\)（\(x > 0\)）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忘记 RN 导数仅在 a.e. 意义下唯一 → ✅ 可在零测集上任意修改 \(f\) 的值而不影响积分；唯一性是 ν-a.e. 的</li>
+              <li>❌ 省略 σ-有限性条件 → ✅ 经典反例：\(\mu =\) 计数测度，\(\nu = \lambda\)（Lebesgue 测度），\(\mu \ll \lambda\) 不成立（单点集 \(\lambda\)-零测但 \(\mu\)-非零），但即使构造绝对连续的例子，σ-有限性仍是证明存在性的关键</li>
+              <li>❌ 将 ε-δ 绝对连续与定义混淆 → ✅ ε-δ 版本（定量）对<strong>有限</strong>测度等价于定义（定性）；对 σ-有限但非有限测度，仅定性版本成立</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -543,28 +638,75 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>给定两个测度 \(\mu\) 和 \(\nu\)，\(\mu\) 不一定绝对连续于 \(\nu\)。 Lebesgue 分解定理说：\(\mu\) 总可以唯一地分解为关于 \(\nu\) 绝对连续的部分和奇异的部分。这一定理将任意测度对之间的关系 完美刻画，是测度论的收尾性定理之一。</p>
+            <ul>
+              <li><strong>不总是绝对连续</strong>——两个测度之间不一定存在绝对连续关系（如 Lebesgue 测度与 Dirac 测度），但 Lebesgue 分解定理告诉我们：任何测度都可以唯一地拆为"绝对连续部分 + 奇异部分"</li>
+              <li><strong>测度的完全刻画</strong>——Lebesgue 分解是测度论的"结构定理"，揭示了两个测度之间关系的完整图景：要么"随之变化"（绝对连续），要么"互不相干"（奇异），每个测度恰好是这两种极端情况的叠加</li>
+              <li><strong>概率分布分类的基础</strong>——随机变量的分布关于 Lebesgue 测度的 Lebesgue 分解自然给出三类分布：绝对连续分布（有密度）、离散分布、奇异连续分布（如 Cantor 分布）</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Lebesgue 分解是"正交分解"在测度空间中的类比： \(\mu_{ac}\) 对应投影到 \(\nu\) 方向，\(\mu_s\) 对应 垂直于 \(\nu\) 的分量。</p>
+            <ul>
+              <li><strong>正交分解类比</strong>——在 Hilbert 空间中，任何向量可正交分解为子空间上的投影和正交补上的分量。Lebesgue 分解是这一思想在测度空间中的对应：\(\mu_{ac}\) 是 \(\mu\) 在 \(\nu\) "方向"上的投影，\(\mu_s\) 是"正交"于 \(\nu\) 的分量</li>
+              <li><strong>Radon-Nikodym 的推论</strong>——Lebesgue 分解可从 RN 定理直接推导：令 \(\lambda = \mu + \nu\)，\(\mu \ll \lambda\)，写出 \(d\mu/d\lambda = f\)，\(d\nu/d\lambda = g\)，在 \(\{g > 0\}\) 上定义 \(\mu_{ac}\)，在 \(\{g = 0\}\) 上定义 \(\mu_s\)</li>
+              <li><strong>分解的唯一性</strong>——绝对连续和奇异是"互补"的关系：不能既绝对连续又奇异（除非为零测度），这保证了分解的唯一性</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理 (Lebesgue 分解)</strong>：设 \(\mu, \nu\) 为 σ-有限测度。则 存在唯一的分解 \[\mu = \mu_{ac} + \mu_s\] 其中 \(\mu_{ac} \ll \nu\)，\(\mu_s \perp \nu\)。 <strong>互相奇异</strong> \(\mu_s \perp \nu\)：存在 \(A\) 使 \(\mu_s(A^c) = 0\) 且 \(\nu(A) = 0\)。 <strong>证明思路</strong>：定义 \(\lambda = \mu + \nu\)。\(\mu \ll \lambda\) 且 \(\nu \ll \lambda\)，由 Radon-Nikodym， \(d\mu = f\, d\lambda\), \(d\nu = g\, d\lambda\)。 令 \(A = \{g > 0\}\)，\(B = \{g = 0\}\)。 \(\mu_{ac}(E) = \mu(E \cap A) = \int_{E \cap A} (f/g)\, d\nu\)， \(\mu_s(E) = \mu(E \cap B)\)，且 \(\nu(B) = 0\)。</p>
+            <h4>定理（Lebesgue 分解）</h4>
+            <p>设 \(\mu, \nu\) 为 σ-有限测度。则存在<strong>唯一</strong>的分解
+            \[\mu = \mu_{ac} + \mu_s\]
+            其中 \(\mu_{ac} \ll \nu\)（绝对连续），\(\mu_s \perp \nu\)（互相奇异）。</p>
+
+            <h4>互相奇异的定义</h4>
+            <p>\(\mu_s \perp \nu\)：存在 \(A \in \mathcal{F}\) 使得 \(\mu_s(A^c) = 0\) 且 \(\nu(A) = 0\)。即 \(\mu_s\) 和 \(\nu\) "住在"不相交的集合上。</p>
+
+            <h4>证明思路</h4>
+            <p><strong>Step 1</strong>　令 \(\lambda = \mu + \nu\)。\(\mu \ll \lambda\) 且 \(\nu \ll \lambda\)。</p>
+            <p><strong>Step 2</strong>　RN 定理给出 \(d\mu = f\,d\lambda\)，\(d\nu = g\,d\lambda\)（\(f, g \geq 0\)）。</p>
+            <p><strong>Step 3</strong>　令 \(A = \{g > 0\}\)，\(B = \{g = 0\}\)。则 \(\nu(B) = \int_B g\,d\lambda = 0\)。</p>
+            <p><strong>Step 4</strong>　定义 \(\mu_{ac}(E) = \mu(E \cap A)\)，\(\mu_s(E) = \mu(E \cap B)\)。</p>
+            <ul>
+              <li>\(\mu_{ac} \ll \nu\)：若 \(\nu(E) = 0\)，则 \(g = 0\) ν-a.e. on \(E\)，进而 \(g = 0\) λ-a.e. on \(E \cap A\)，但 \(A = \{g > 0\}\)，故 \(\lambda(E \cap A) = 0\)，故 \(\mu(E \cap A) = 0\)</li>
+              <li>\(\mu_s \perp \nu\)：\(\mu_s(B^c) = \mu(B^c \cap B) = 0\) 且 \(\nu(B) = 0\) ✓</li>
+            </ul>
+
+            <h4>与 RN 导数的关系</h4>
+            <p>\(\mu_{ac}\) 有 RN 导数 \(d\mu_{ac}/d\nu = f/g\)（在 \(A = \{g > 0\}\) 上定义）。\(\mu_s\) 没有关于 \(\nu\) 的密度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>概率论：分布的三元分类</strong>——任何随机变量 \(X\) 的分布 \(\mu_X\) 相对于 Lebesgue 测度 \(\lambda\) 可分解为 \(\mu_X = \mu_{ac} + \mu_d + \mu_{sc}\)（绝对连续 + 离散 + 奇异连续）。绝对连续部分有密度函数 \(f_X\)；离散部分集中在可数点集上（PMF）；奇异连续部分（如 Cantor 分布）连续但无密度——这一分类是概率论教材中"三类分布"的严格基础。</p>
+            <p><strong>信号处理：谱分解</strong>——平稳随机过程的谱测度 \(S\) 关于 Lebesgue 测度的 Lebesgue 分解区分了连续谱（宽带噪声）和离散谱（纯正弦分量）。谱分析算法（如 MUSIC、ESPRIT）本质上是在估计奇异部分 \(S_s\) 的支撑位置（频率检测）。</p>
+            <p><strong>图像处理：梯度的测度论</strong>——BV（有界变差）函数 \(u\) 的梯度 \(Du\) 是向量值符号测度。其 Lebesgue 分解 \(Du = \nabla u \cdot \lambda + D_s u\) 将梯度拆为"光滑部分"和"跳跃/Cantor 部分"。边缘检测对应于定位 \(D_s u\) 的支撑集（图像的边缘线）。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：将 \(\mu = \lambda + \delta_0\)（Lebesgue 测度 + Dirac 测度） 关于 \(\lambda\) 做 Lebesgue 分解。 解答：\(\mu_{ac} = \lambda\)（绝对连续于 \(\lambda\)）， \(\mu_s = \delta_0\)（\(\delta_0 \perp \lambda\)，因为 \(\delta_0\) 集中在 \(\{0\}\)，\(\lambda(\{0\}) = 0\)）。 易错点：将 "绝对连续" 和 "互相奇异" 搞混。 \(\mu \ll \nu\)："\(\nu\) 归零则 \(\mu\) 归零"。 \(\mu \perp \nu\)："\(\mu\) 和 \(\nu\) 住在不相交的集合上"。</p>
+            <h4>例题：Lebesgue + Dirac 的分解</h4>
+            <p>将 \(\mu = \lambda + \delta_0\)（\(\lambda\) = Lebesgue 测度，\(\delta_0\) = 原点 Dirac 测度）关于 \(\lambda\) 做 Lebesgue 分解。</p>
+            <p><strong>Step 1</strong>　\(\lambda \ll \lambda\)（自身绝对连续），故 \(\mu_{ac} = \lambda\)。</p>
+            <p><strong>Step 2</strong>　\(\delta_0 \perp \lambda\)：\(\delta_0\) 集中在 \(\{0\}\)，\(\lambda(\{0\}) = 0\)。故 \(\mu_s = \delta_0\)。</p>
+            <p><strong>Step 3</strong>　验证：\(\mu = \lambda + \delta_0 = \mu_{ac} + \mu_s\) ✓。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"绝对连续"和"互相奇异" → ✅ \(\mu \ll \nu\)："ν 归零则 μ 归零"（μ 到处跟随 ν）；\(\mu \perp \nu\)："μ 和 ν 住在不相交的集上"（互不相干）。二者是"极端"的两种关系</li>
+              <li>❌ 认为 Cantor 函数的 Stieltjes 测度 \(\mu_C\) 绝对连续于 \(\lambda\) → ✅ \(\mu_C \perp \lambda\)（\(\mu_C\) 集中在 Cantor 集 \(C\) 上，\(\lambda(C) = 0\)）。\(\mu_C\) 虽然连续（无原子），但与 \(\lambda\) 奇异——这是奇异连续测度的典范</li>
+              <li>❌ 忘记分解的唯一性 → ✅ 若 \(\mu = \mu_{ac}' + \mu_s'\) 也满足条件，则 \(\mu_{ac} - \mu_{ac}'\) 既绝对连续于 \(\nu\) 又奇异于 \(\nu\)，只能为零测度</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -591,35 +733,80 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>初等概率论中，条件概率 \(P(A|B) = P(A \cap B)/P(B)\) 在 \(P(B) > 0\) 时有定义。但若条件是一个连续随机变量的取值 （如 \(P(A | X = x)\)），分母 \(P(X = x) = 0\)，公式失效。 Radon-Nikodym 定理为条件概率提供了严格的定义： 条件期望就是一个 Radon-Nikodym 导数。</p>
+            <ul>
+              <li><strong>初等定义的崩塌</strong>——\(P(A|B) = P(A \cap B)/P(B)\) 在 \(P(B) > 0\) 时有效，但对连续随机变量 \(P(A|X = x)\)，分母 \(P(X = x) = 0\)，公式失效</li>
+              <li><strong>测度论的救赎</strong>——Radon-Nikodym 定理提供了条件概率和条件期望的严格定义：\(\mathbb{E}[X|\mathcal{G}] = d\mu/dP|_\mathcal{G}\)，无需分母为正</li>
+              <li><strong>贝叶斯统计的基石</strong>——后验分布 \(\pi(\theta|x) \propto f(x|\theta)\pi(\theta)\) 在连续参数空间中的严格化、MCMC 采样的收敛保证——都建立在测度论条件概率之上</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>条件期望 \(E[X | \mathcal{G}]\) 是测度论中的"投影"—— 将随机变量投影到子 σ-代数上，类似于 \(L^2\) 中的正交投影。 Radon-Nikodym 导数将这一抽象概念植根于具体的测度关系。</p>
+            <ul>
+              <li><strong>投影算子类比</strong>——条件期望 \(\mathbb{E}[X|\mathcal{G}]\) 是 \(L^2(\Omega, \mathcal{F}, P)\) 中的正交投影到子空间 \(L^2(\Omega, \mathcal{G}, P)\)。这使条件期望同时拥有测度论（RN 导数）和 Hilbert 空间（最优逼近）两种解读</li>
+              <li><strong>从函数到测度</strong>——将 \(\mathbb{E}[X|\mathcal{G}]\) 视为子 σ-代数 \(\mathcal{G}\) 上的测度变换：定义 \(\mu(G) = \int_G X\,dP\)，则 \(\mathbb{E}[X|\mathcal{G}] = d\mu/dP|_\mathcal{G}\)。条件概率 \(P(A|\mathcal{G}) = \mathbb{E}[\mathbf{1}_A|\mathcal{G}]\) 是特例</li>
+              <li><strong>信息的精炼</strong>——子 σ-代数 \(\mathcal{G} \subseteq \mathcal{F}\) 代表"部分信息"。条件期望将全信息下的随机变量"投影"到部分信息上，保留了能被 \(\mathcal{G}\) 观测的部分。这是鞅论中滤过（filtration）概念的基础</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>条件期望的测度论定义</strong>：\(E[X | \mathcal{G}]\) 是唯一的 \(\mathcal{G}\)-可测函数 \(Y\) 满足 \[\int_G Y\, dP = \int_G X\, dP, \quad \forall G \in \mathcal{G}\] 等价地，定义测度 \(\mu(G) = \int_G X\, dP\) 在 \(\mathcal{G}\) 上， 若 \(\mu \ll P|_\mathcal{G}\)，则 \(Y = d\mu / dP|_\mathcal{G}\)。 <strong>贝叶斯公式的 RN 表达</strong>：若 \(P_0, P_1\) 是两个概率测度， \(P_1 \ll P_0\)，令 \(L = dP_1/dP_0\)（似然比），则对事件 \(A\)： \[P_1(A) = E_{P_0}[L \cdot \mathbf{1}_A]\] 这推广了经典贝叶斯公式到一般测度空间。</p>
+            <h4>条件期望的测度论定义</h4>
+            <p>\(\mathbb{E}[X|\mathcal{G}]\) 是满足以下两个条件的（ν-a.e. 唯一）随机变量 \(Y\)：</p>
+            <ol>
+              <li>\(Y\) 是 \(\mathcal{G}\)-可测的</li>
+              <li>\(\int_G Y\,dP = \int_G X\,dP\)，对所有 \(G \in \mathcal{G}\)</li>
+            </ol>
+            <p>存在性：定义符号测度 \(\mu(G) = \int_G X\,dP\) 在 \((\Omega, \mathcal{G})\) 上，\(\mu \ll P|_\mathcal{G}\)（因为 \(P(G) = 0 \Rightarrow \mu(G) = 0\)）。RN 定理给出 \(Y = d\mu/dP|_\mathcal{G}\)。</p>
+
+            <h4>基本性质</h4>
+            <ul>
+              <li><strong>线性性</strong>：\(\mathbb{E}[aX + bY|\mathcal{G}] = a\mathbb{E}[X|\mathcal{G}] + b\mathbb{E}[Y|\mathcal{G}]\)</li>
+              <li><strong>塔性质</strong>：\(\mathcal{H} \subseteq \mathcal{G} \Rightarrow \mathbb{E}[\mathbb{E}[X|\mathcal{G}]|\mathcal{H}] = \mathbb{E}[X|\mathcal{H}]\)</li>
+              <li><strong>独立性</strong>：若 \(X\) 与 \(\mathcal{G}\) 独立，\(\mathbb{E}[X|\mathcal{G}] = \mathbb{E}[X]\)</li>
+              <li><strong>可测提取</strong>：若 \(Y\) 是 \(\mathcal{G}\)-可测的，\(\mathbb{E}[XY|\mathcal{G}] = Y\mathbb{E}[X|\mathcal{G}]\)</li>
+            </ul>
+
+            <h4>贝叶斯公式的 RN 表达</h4>
+            <p>设 \(P_0\)（先验）和 \(P_1\)（后验）为两个概率测度，\(P_1 \ll P_0\)。令 \(L = dP_1/dP_0\)（似然比）。则对事件 \(A\)：
+            \[P_1(A) = \mathbb{E}_{P_0}[L \cdot \mathbf{1}_A].\]
+            这是经典贝叶斯公式 \(P(\theta|x) = \frac{P(x|\theta)P(\theta)}{P(x)}\) 在一般测度空间上的推广。</p>
+
+            <h4>正则条件概率</h4>
+            <p>当 \(\mathcal{G} = \sigma(Y)\) 时，存在函数 \(P(A|Y = y)\)（关于 \(y\) 可测）使得 \(P(A|\mathcal{G})(\omega) = P(A|Y = Y(\omega))\) a.s.。在 Polish 空间上，这样的正则版本总是存在。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>统计推断：假设检验中的 Neyman-Pearson 引理以似然比 \(dP_1/dP_0\) 为检验统计量；机器学习中的重要性采样 基于密度比 \(dP/dQ\) 校正样本权重。</p>
+            <p><strong>贝叶斯统计：后验推断</strong>——给定先验 \(\pi(\theta)\) 和似然 \(f(x|\theta)\)，后验测度 \(\Pi(\cdot|x)\) 关于先验 \(\Pi_0\) 的 RN 导数为 \(d\Pi(\cdot|x)/d\Pi_0 = f(x|\theta)/m(x)\)，其中 \(m(x) = \int f(x|\theta)\,d\Pi_0\)。MCMC 采样器（Metropolis-Hastings、Gibbs）实际上是在模拟这个 RN 导数的比值。</p>
+            <p><strong>机器学习：重要性采样与密度比估计</strong>——训练数据分布 \(Q\) 与目标分布 \(P\) 不同时，期望校正为 \(\mathbb{E}_P[f(X)] = \mathbb{E}_Q[f(X) \cdot dP/dQ(X)]\)。密度比 \(dP/dQ\) 就是 RN 导数。域适应（domain adaptation）、off-policy 强化学习的重要性权重都基于此。</p>
+            <p><strong>金融工程：风险中性定价</strong>——衍生品定价核心公式 \(V_0 = e^{-rT}\mathbb{E}_Q[\text{payoff}]\) 中的 \(Q\) 是风险中性测度。由 Girsanov 定理，\(dQ/dP\) 编码了市场风险价格。条件期望 \(\mathbb{E}_Q[\text{payoff}|\mathcal{F}_t]\) 给出任意时刻的公允价格——这就是鞅定价理论。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(X \sim \text{Exp}(\lambda)\)，\(Y = \mathbf{1}_{\{X > 1\}}\)。 求 \(E[X | Y]\)。 解答：\(\sigma(Y) = \{\emptyset, \{X > 1\}, \{X \leq 1\}, \Omega\}\)， \(E[X | Y]\) 在 \(\{X > 1\}\) 上等于 \(E[X | X > 1] = 1 + 1/\lambda\) （无记忆性），在 \(\{X \leq 1\}\) 上等于 \(E[X | X \leq 1] = \frac{\int_0^1 x \lambda e^{-\lambda x} dx}{1 - e^{-\lambda}}\)。 易错点：试图对连续随机变量写 \(P(A | X = x)\) 时除以 \(P(X = x) = 0\)。正确做法是用条件密度或 RN 导数。</p>
+            <h4>例题：指数分布的条件期望</h4>
+            <p>设 \(X \sim \text{Exp}(\lambda)\)，\(Y = \mathbf{1}_{\{X > 1\}}\)。求 \(\mathbb{E}[X|Y]\)。</p>
+            <p><strong>Step 1</strong>　\(\sigma(Y) = \{\emptyset, \{X > 1\}, \{X \leq 1\}, \Omega\}\)——只有两个非平凡事件，故 \(\mathbb{E}[X|Y]\) 在 \(\{X > 1\}\) 和 \(\{X \leq 1\}\) 上各取常数。</p>
+            <p><strong>Step 2</strong>　在 \(\{X > 1\}\) 上：由无记忆性，\(\mathbb{E}[X|X > 1] = 1 + 1/\lambda\)。</p>
+            <p><strong>Step 3</strong>　在 \(\{X \leq 1\}\) 上：
+            \[\mathbb{E}[X|X \leq 1] = \frac{\int_0^1 x\lambda e^{-\lambda x}\,dx}{1 - e^{-\lambda}} = \frac{1/\lambda - (1 + 1/\lambda)e^{-\lambda}}{1 - e^{-\lambda}}.\]</p>
+            <p><strong>Step 4</strong>　故 \(\mathbb{E}[X|Y] = \mathbb{E}[X|X > 1] \cdot \mathbf{1}_{\{X > 1\}} + \mathbb{E}[X|X \leq 1] \cdot \mathbf{1}_{\{X \leq 1\}}\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对连续 \(X\) 写 \(P(A|X = x) = P(A \cap \{X=x\})/P(X=x)\)（除以零）→ ✅ 用条件密度 \(f_{Y|X}(y|x)\) 或正则条件概率的测度论定义</li>
+              <li>❌ 忘记塔性质中 σ-代数的包含方向 → ✅ \(\mathbb{E}[\mathbb{E}[X|\mathcal{G}]|\mathcal{H}] = \mathbb{E}[X|\mathcal{H}]\) 要求 \(\mathcal{H} \subseteq \mathcal{G}\)（先粗化再精化 = 直接粗化）；反向不成立</li>
+              <li>❌ 混淆 \(\mathbb{E}[X|Y]\)（随机变量）和 \(\mathbb{E}[X|Y=y]\)（实数）→ ✅ \(\mathbb{E}[X|Y]\) 是 \(\sigma(Y)\)-可测的随机变量；\(\mathbb{E}[X|Y=y] = g(y)\) 是确定性函数，二者通过 \(\mathbb{E}[X|Y](\omega) = g(Y(\omega))\) 关联</li>
+            </ul>
           </div>
         </div>
       </div>

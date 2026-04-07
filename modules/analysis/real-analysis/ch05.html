@@ -394,35 +394,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>我们希望在可积函数空间上定义"距离"，以便讨论函数的逼近和收敛。 对不同的指数 \(p\)，\(L^p\) 范数刻画了函数的不同"大小"特征。 但要使 \(\|f\|_p\) 真正成为范数，需要验证三角不等式——这就是 Minkowski 不等式。而 Hölder 不等式是证明 Minkowski 不等式的 关键工具，也是泛函分析中对偶理论的基石。</p>
+            <ul>
+              <li><strong>度量化函数"大小"</strong>——不同的 \(p\) 捕捉函数的不同特征：\(L^1\) 衡量总面积，\(L^2\) 衡量能量，\(L^\infty\) 衡量峰值。范数赋予函数空间几何结构。</li>
+              <li><strong>三角不等式是范数的灵魂</strong>——Minkowski 不等式 \(\|f+g\|_p \le \|f\|_p + \|g\|_p\) 验证了 \(\|\cdot\|_p\) 确实是范数，从而 \(L^p\) 成为赋范线性空间。</li>
+              <li><strong>对偶与泛函分析的基石</strong>——Hölder 不等式是 \((L^p)^* = L^q\) 对偶配对的起点，也是证明 Minkowski 不等式的关键工具。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(L^p\) 空间将函数视为无穷维向量空间中的"点"。范数赋予这个 空间度量结构，使得分析学的逼近方法（如 Fourier 级数收敛、 密度论证）得以展开。</p>
+            <ul>
+              <li><strong>凸性与 Young 不等式</strong>——\(ab \le a^p/p + b^q/q\) 源于 \(\log\) 函数的凸性（Jensen 不等式的特例）；这是所有 \(L^p\) 不等式的代数根源。</li>
+              <li><strong>共轭指数</strong>——\(1/p + 1/q = 1\) 将 \(L^p\) 与 \(L^q\) 配对，形成对偶结构。\(p = 2\) 时自对偶（Hilbert 空间），\(p = 1\) 对应 \(q = \infty\)。</li>
+              <li><strong>从有限维到无穷维</strong>——Hölder/Minkowski 是离散 Cauchy-Schwarz/三角不等式的连续推广；证明策略也从"展开求和"升级为"积分 + 测度控制"。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>\(L^p\) 范数</strong>：对 \(1 \leq p < \infty\)， \(\|f\|_p = \left(\int |f|^p\, d\mu\right)^{1/p}\)。 <strong>\(L^\infty\) 范数</strong>：\(\|f\|_\infty = \inf\{M : |f| \leq M \text{ a.e.}\}\)。 <strong>Hölder 不等式</strong>：设 \(1/p + 1/q = 1\)（\(1 < p < \infty\)），则 \[\int |fg|\, d\mu \leq \|f\|_p \cdot \|g\|_q\] 证明关键：Young 不等式 \(ab \leq a^p/p + b^q/q\)（\(a, b \geq 0\)）， 应用于 \(a = |f|/\|f\|_p\), \(b = |g|/\|g\|_q\)，积分两边得 \(\int |fg|/(\|f\|_p \|g\|_q) \leq 1/p + 1/q = 1\)。 <strong>Minkowski 不等式</strong>：\(\|f + g\|_p \leq \|f\|_p + \|g\|_p\)。 证明：\(|f+g|^p \leq |f+g|^{p-1}(|f| + |g|)\)，对右边用 Hölder： \[\|f+g\|_p^p \leq \|f+g\|_p^{p-1}(\|f\|_p + \|g\|_p)\] 除以 \(\|f+g\|_p^{p-1}\) 即得。</p>
+            <h4>\(L^p\) 范数定义</h4>
+            <p>对 \(1 \le p < \infty\)：\(\|f\|_p = \bigl(\int |f|^p\, d\mu\bigr)^{1/p}\)。\(\|f\|_\infty = \inf\{M : |f| \le M \text{ a.e.}\}\)。</p>
+
+            <h4>Hölder 不等式</h4>
+            <p>设 \(1/p + 1/q = 1\)（\(1 < p < \infty\)），则</p>
+            \[\int |fg|\, d\mu \;\le\; \|f\|_p \cdot \|g\|_q\]
+            <p>证明：Young 不等式 \(ab \le a^p/p + b^q/q\) 应用于 \(a = |f|/\|f\|_p\)，\(b = |g|/\|g\|_q\)，积分两边得 \(\int |fg|/(\|f\|_p\|g\|_q) \le 1\)。</p>
+
+            <h4>Minkowski 不等式</h4>
+            \[\|f + g\|_p \;\le\; \|f\|_p + \|g\|_p\]
+            <p>证明：\(|f+g|^p \le |f+g|^{p-1}(|f|+|g|)\)，对右边两项分别用 Hölder（指数 \(p\) 和 \(q = p/(p-1)\)）：</p>
+            \[\|f+g\|_p^p \;\le\; \|f+g\|_p^{p-1}\bigl(\|f\|_p + \|g\|_p\bigr)\]
+            <p>除以 \(\|f+g\|_p^{p-1}\) 即得。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>概率论中，Hölder 不等式的 \(p=q=2\) 特例即 Cauchy-Schwarz， 用于证明相关系数有界 \(|\rho(X,Y)| \leq 1\)。</p>
+            <p><strong>统计学 Cauchy-Schwarz</strong>——Hölder 的 \(p = q = 2\) 特例给出 \(|E[XY]| \le \sqrt{E[X^2]}\sqrt{E[Y^2]}\)，直接推出相关系数 \(|\rho| \le 1\)，是回归分析和假设检验的基础。</p>
+            <p><strong>信号处理功率谱</strong>——\(L^2\) 范数衡量信号能量，\(L^\infty\) 衡量峰值功率；Minkowski 不等式保证叠加信号的能量/功率满足三角不等式——这是滤波器设计的理论约束。</p>
+            <p><strong>PDE 先验估计</strong>——非线性 PDE 的能量方法中，Hölder/Minkowski 不等式用于将非线性项控制在合适的 \(L^p\) 范数下，是 Sobolev 嵌入定理和正则性理论的核心工具。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(f \in L^3([0,1])\), \(g \in L^{3/2}([0,1])\)。证明 \(fg \in L^1([0,1])\)。 解答：\(1/3 + 2/3 = 1\)，即 \(p = 3\), \(q = 3/2\)。 由 Hölder，\(\int |fg| \leq \|f\|_3 \|g\|_{3/2} < \infty\)。✓ 易错点：将 Hölder 不等式中的共轭指数搞错。 \(1/p + 1/q = 1\) 意味 \(q = p/(p-1)\)，不是 \(q = p\)。</p>
+            <h4>例题：用 Hölder 证明乘积可积</h4>
+            <p>设 \(f \in L^3([0,1])\)，\(g \in L^{3/2}([0,1])\)。证明 \(fg \in L^1([0,1])\)。</p>
+            <p><strong>解</strong>：\(1/3 + 2/3 = 1\)，即 \(p = 3\)，\(q = 3/2\)。由 Hölder：\(\int |fg| \le \|f\|_3 \|g\|_{3/2} < \infty\)。✓</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 共轭指数搞错——\(q = p/(p-1)\) 而非 \(q = p\)。 ✅ 先算 \(1/q = 1 - 1/p\) 再代入。</li>
+              <li>❌ 对 \(p = 1\) 忘记 \(q = \infty\)——Hölder 退化为 \(\int |fg| \le \|f\|_1 \|g\|_\infty\)。 ✅ 边界情况需单独验证。</li>
+              <li>❌ Minkowski 用于 \(p < 1\)——\(p < 1\) 时 \(\|\cdot\|_p\) 不满足三角不等式（不是范数）。 ✅ Minkowski 要求 \(p \ge 1\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -470,35 +501,62 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>一个范数空间不一定完备——Cauchy 列可能不收敛。但在分析学中， 完备性至关重要：它保证逼近过程有极限。Riesz-Fischer 定理证明 \(L^p\) 空间是完备的（即 Banach 空间），这使得 \(L^p\) 成为 泛函分析的基本框架。</p>
+            <ul>
+              <li><strong>逼近必须有极限</strong>——赋范空间不一定完备（Cauchy 列可能不收敛）；完备性保证逼近过程的终点留在空间内。</li>
+              <li><strong>泛函分析的入场券</strong>——Banach 空间的闭图象定理、开映射定理、一致有界原理都要求完备性；\(L^p\) 的 Banach 结构使这些强大工具可用。</li>
+              <li><strong>Fourier 级数收敛的保障</strong>——\(L^2\) 完备性 + 正交基 = Fourier 级数在均方意义下收敛；不完备则 Parseval 等式可能失效。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>完备性的证明策略：先从 Cauchy 列中抽取快速收敛的子列 （使 \(\|f_{n_{k+1}} - f_{n_k}\|_p < 2^{-k}\)），构造 级数 \(\sum (f_{n_{k+1}} - f_{n_k})\)，由绝对收敛推出 收敛，最后证明整个 Cauchy 列收敛。</p>
+            <ul>
+              <li><strong>快速收敛子列策略</strong>——从 Cauchy 列中抽取满足 \(\|f_{n_{k+1}} - f_{n_k}\|_p < 2^{-k}\) 的子列，使伸缩和 \(\sum (f_{n_{k+1}} - f_{n_k})\) 绝对收敛。</li>
+              <li><strong>MCT 保驾</strong>——令 \(g_N = \sum_{k=1}^N |f_{n_{k+1}} - f_{n_k}|\)，Minkowski 给出 \(\|g_N\|_p < 1\)；MCT 保证 \(g = \lim g_N \in L^p\)，从而伸缩级数 a.e. 绝对收敛。</li>
+              <li><strong>a.e. → 范数</strong>——构造出极限函数后，DCT 将 a.e. 收敛提升为 \(L^p\) 范数收敛；最后由 Cauchy 性推全列收敛。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理 (Riesz-Fischer)</strong>：\(L^p(\mu)\)（\(1 \leq p \leq \infty\)）是 Banach 空间。 <strong>证明框架</strong>（\(1 \leq p < \infty\)）：设 \(\{f_n\}\) 是 \(L^p\) 中 Cauchy 列。 取子列 \(\{f_{n_k}\}\) 使 \(\|f_{n_{k+1}} - f_{n_k}\|_p < 2^{-k}\)。 令 \(g_N = \sum_{k=1}^N |f_{n_{k+1}} - f_{n_k}|\)。 由 Minkowski，\(\|g_N\|_p \leq \sum_{k=1}^N 2^{-k} < 1\)。 \(g_N \uparrow g\) 点点，由 MCT，\(g \in L^p\)。 故级数 \(f_{n_1} + \sum_{k=1}^{\infty}(f_{n_{k+1}} - f_{n_k})\) 绝对收敛 a.e.，定义其极限为 \(f\)。 再证 \(\|f_{n_k} - f\|_p \to 0\)（由 DCT，控制函数 \((|f| + g)^p\)）。 最后由 Cauchy 列性质推出 \(\|f_n - f\|_p \to 0\)。</p>
+            <h4>定理</h4>
+            <p>\(L^p(\mu)\)（\(1 \le p \le \infty\)）是 Banach 空间（完备赋范线性空间）。</p>
+
+            <h4>证明框架（\(1 \le p < \infty\)）</h4>
+            <p><strong>Step 1.</strong> 设 \(\{f_n\}\) 为 Cauchy 列，取子列 \(\{f_{n_k}\}\) 使 \(\|f_{n_{k+1}} - f_{n_k}\|_p < 2^{-k}\)。</p>
+            <p><strong>Step 2.</strong> 令 \(g_N = \sum_{k=1}^N |f_{n_{k+1}} - f_{n_k}|\)。由 Minkowski：\(\|g_N\|_p \le \sum_{k=1}^N 2^{-k} < 1\)。\(g_N \uparrow g\)，MCT 给出 \(g \in L^p\)。</p>
+            <p><strong>Step 3.</strong> 伸缩级数 \(f_{n_1} + \sum_{k=1}^\infty (f_{n_{k+1}} - f_{n_k})\) a.e. 绝对收敛，定义极限 \(f\)。</p>
+            <p><strong>Step 4.</strong> \(|f_{n_k} - f|^p \le (2g)^p \in L^1\)，DCT 给出 \(\|f_{n_k} - f\|_p \to 0\)。</p>
+            <p><strong>Step 5.</strong> 由 Cauchy 性，\(\|f_n - f\|_p \le \|f_n - f_{n_k}\|_p + \|f_{n_k} - f\|_p \to 0\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\(L^2\) 的完备性保证 Fourier 级数在均方意义下收敛； \(L^p\) 的完备性保证 PDE 弱解的存在性论证合法。</p>
+            <p><strong>Fourier 级数均方收敛</strong>——\(L^2\) 完备 + 三角函数系完备 = 任何 \(f \in L^2\) 的 Fourier 级数在 \(\|\cdot\|_2\) 下收敛，Parseval 等式 \(\|f\|_2^2 = \sum |c_n|^2\) 成立。</p>
+            <p><strong>PDE 弱解存在</strong>——椭圆 PDE 的 Lax-Milgram 方法在 Sobolev 空间 \(H^1 \subset L^2\) 中构造弱解序列；\(L^p\) 完备性保证极限存在。</p>
+            <p><strong>概率论 \(L^p\) 鞅收敛</strong>——\(L^p\)-有界鞅在 \(L^p\) 中收敛（Doob 定理），其证明核心就是 \(L^p\) 的 Banach 空间结构。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(l^p\)（可数测度空间上的 \(L^p\)）也是 Banach 空间。 验证 \(\{e_n\}\)（标准基向量 \(e_n = (0,\ldots,0,1,0,\ldots)\)） 在 \(l^2\) 中不是 Cauchy 列。 解答：\(\|e_m - e_n\|_2 = \sqrt{2}\) 对所有 \(m \neq n\)， 不趋于 0，故不是 Cauchy 列。 易错点：混淆"\(L^p\) 中 Cauchy 列收敛"与"逐点收敛"。 \(L^p\) 收敛只保证 a.e. 子列逐点收敛，全列不一定逐点收敛。</p>
+            <h4>例题：标准基不是 Cauchy 列</h4>
+            <p>\(l^2\) 中标准基 \(e_n = (0, \ldots, 0, 1, 0, \ldots)\)。验证 \(\{e_n\}\) 不是 Cauchy 列。</p>
+            <p><strong>解</strong>：\(\|e_m - e_n\|_2 = \sqrt{2}\) 对所有 \(m \ne n\)，不趋于 0，故不是 Cauchy 列。（但 \(e_n \rightharpoonup 0\) 弱收敛。）</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 \(L^p\) 收敛与逐点收敛——\(L^p\) 收敛仅保证存在 a.e. 收敛的子列，全列不一定逐点收敛。 ✅ \(L^p\) 收敛 ⇒ 依测度收敛 ⇒ 子列 a.e. 收敛。</li>
+              <li>❌ 忘记等价类——\(L^p\) 中的"元素"是 a.e. 相等的函数等价类，不是单个函数。 ✅ \(\|f\|_p = 0 \Leftrightarrow f = 0\) a.e.。</li>
+              <li>❌ 对 \(L^\infty\) 套用同样的 MCT 证法——\(L^\infty\) 的证明更直接（Cauchy 列逐点一致收敛到有界函数）。 ✅ \(L^\infty\) 完备性另证。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -525,35 +583,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在所有 \(L^p\) 空间中，\(L^2\) 最特别——它有内积结构。内积使得我们 可以定义"正交性"，从而进行正交分解、投影、Fourier 展开。 \(L^2\) 是量子力学中状态空间的数学模型，也是 Fourier 分析和 统计学中的核心空间。</p>
+            <ul>
+              <li><strong>内积 = 几何</strong>——所有 \(L^p\) 中只有 \(L^2\) 有内积结构；内积赋予正交性、投影、角度等几何概念，使无穷维空间像欧氏空间一样"可操作"。</li>
+              <li><strong>Fourier 展开的基础</strong>——正交基 + Parseval 等式 = 任何 \(L^2\) 函数可展开为 Fourier 级数，这是信号处理和量子力学的数学根基。</li>
+              <li><strong>自对偶性</strong>——\(L^2\) 是 Hilbert 空间，由 Riesz 表示定理 \((L^2)^* \cong L^2\)，简化了泛函分析中的对偶讨论。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(L^2\) 的内积 \(\langle f, g \rangle = \int f \bar{g}\, d\mu\) 将 函数空间赋予了欧几里得几何的结构。正交补和投影定理将 有限维线性代数推广到无穷维。</p>
+            <ul>
+              <li><strong>平行四边形恒等式</strong>——\(\|f+g\|^2 + \|f-g\|^2 = 2\|f\|^2 + 2\|g\|^2\) 是范数来自内积的充要条件；\(L^p\)（\(p \ne 2\)）不满足，故不是 Hilbert 空间。</li>
+              <li><strong>投影定理</strong>——Hilbert 空间中，闭凸集上的最佳逼近唯一存在；闭子空间上的正交投影给出 \(\|f - Pf\| = \inf\{\|f - g\| : g \in V\}\)。</li>
+              <li><strong>抽象 Fourier 分析</strong>——Parseval 等式 \(\|f\|^2 = \sum |\langle f, e_n \rangle|^2\) 将函数"坐标化"为系数序列；\(L^2 \cong l^2\) 是无穷维欧氏空间的典范实现。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>内积</strong>：\(\langle f, g \rangle = \int f \bar{g}\, d\mu\)， 诱导范数 \(\|f\|_2 = \sqrt{\langle f, f \rangle}\)。 <strong>平行四边形恒等式</strong>： \[\|f + g\|_2^2 + \|f - g\|_2^2 = 2(\|f\|_2^2 + \|g\|_2^2)\] 此恒等式在 \(L^p\)（\(p \neq 2\)）中不成立——它刻画了 哪些 Banach 空间的范数来自内积。 <strong>Cauchy-Schwarz</strong>：\(|\langle f, g \rangle| \leq \|f\|_2 \|g\|_2\) （Hölder 不等式的 \(p = q = 2\) 特例）。 <strong>正交性</strong>：\(f \perp g \Leftrightarrow \langle f, g \rangle = 0\)。 <strong>Parseval 等式</strong>：若 \(\{e_n\}\) 是标准正交基，则 \[\|f\|_2^2 = \sum_n |\langle f, e_n \rangle|^2\]</p>
+            <h4>内积定义</h4>
+            \[\langle f, g \rangle = \int f\bar{g}\, d\mu, \qquad \|f\|_2 = \sqrt{\langle f, f \rangle}\]
+
+            <h4>平行四边形恒等式</h4>
+            \[\|f+g\|_2^2 + \|f-g\|_2^2 = 2(\|f\|_2^2 + \|g\|_2^2)\]
+            <p>此恒等式在 \(L^p\)（\(p \ne 2\)）中不成立——它刻画哪些 Banach 空间的范数来自内积。</p>
+
+            <h4>Cauchy-Schwarz</h4>
+            \[|\langle f, g \rangle| \le \|f\|_2 \|g\|_2\]
+            <p>（Hölder 的 \(p = q = 2\) 特例。）</p>
+
+            <h4>Parseval 等式</h4>
+            <p>若 \(\{e_n\}\) 是标准正交基（ONB），则对任意 \(f \in L^2\)：</p>
+            \[\|f\|_2^2 = \sum_n |\langle f, e_n \rangle|^2, \qquad f = \sum_n \langle f, e_n \rangle e_n \;\;(L^2\text{ 收敛})\]
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>量子力学中，\(L^2(\mathbb{R}^3)\) 是粒子状态空间， \(\langle \psi, \phi \rangle\) 是概率振幅（Born 规则）。</p>
+            <p><strong>量子力学态空间</strong>——\(L^2(\mathbb{R}^3)\) 是粒子状态空间；\(\langle \psi, \phi \rangle\) 是概率振幅（Born 规则），正交分解对应量子态的叠加与测量。</p>
+            <p><strong>信号处理 DFT/FFT</strong>——离散 Fourier 变换就是有限维 \(L^2\) 正交投影；Parseval 等式保证频域能量 = 时域能量，是 FFT 算法正确性的理论保证。</p>
+            <p><strong>统计学主成分分析</strong>——PCA 在 \(L^2\) 内积下寻找方差最大的正交方向；投影定理保证最佳低维逼近存在且唯一——这是降维技术的数学基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(L^2([0, 2\pi])\) 中验证 \(e_n(x) = e^{inx}/\sqrt{2\pi}\) 构成标准正交系。 解答：\(\langle e_m, e_n \rangle = \frac{1}{2\pi} \int_0^{2\pi} e^{i(m-n)x} dx\)。 \(m = n\) 时 \(= 1\)；\(m \neq n\) 时 \(= \frac{1}{2\pi} \cdot \frac{e^{i(m-n)2\pi} - 1}{i(m-n)} = 0\)。✓ 易错点：在实值 \(L^2\) 中忘记共轭。对复值情形， 内积定义为 \(\int f \bar{g}\)，不是 \(\int fg\)。</p>
+            <h4>例题：验证 Fourier 正交规范性</h4>
+            <p>在 \(L^2([0, 2\pi])\) 中验证 \(e_n(x) = e^{inx}/\sqrt{2\pi}\) 构成标准正交系。</p>
+            <p><strong>解</strong>：\(\langle e_m, e_n \rangle = \frac{1}{2\pi}\int_0^{2\pi} e^{i(m-n)x}\, dx\)。\(m = n\) 时 = 1；\(m \ne n\) 时 \(= \frac{1}{2\pi} \cdot \frac{e^{i(m-n)2\pi} - 1}{i(m-n)} = 0\)。✓</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 复值情况忘记共轭——内积定义为 \(\int f\bar{g}\)，不是 \(\int fg\)。 ✅ 第二个变量取共轭。</li>
+              <li>❌ 混淆 ONB 与 Hamel 基——正交基是 \(L^2\) 收敛意义下的，不是代数意义下的。 ✅ Parseval 等式中 \(f = \sum c_n e_n\) 是 \(L^2\) 极限。</li>
+              <li>❌ 认为所有 \(L^p\) 都有正交分解——只有 \(L^2\) 有内积和正交投影。 ✅ \(L^p\)（\(p \ne 2\)）中"投影"需用对偶配对代替。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -580,28 +670,64 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在无穷维空间中工作时，我们希望复杂函数可以被"简单"函数逼近。 \(L^p\) 空间中的稠密性定理告诉我们：简单函数、连续函数、甚至 光滑的紧支函数都可以在 \(L^p\) 范数下逼近任意 \(L^p\) 函数。 这保证了数值逼近方法的理论合法性。</p>
+            <ul>
+              <li><strong>复杂函数可被"简单"函数逼近</strong>——稠密性保证了数值逼近方法（有限元、样条插值、Fourier 截断）的理论合法性。</li>
+              <li><strong>可分性 = 可数标准正交基</strong>——\(L^p\)（\(1 \le p < \infty\)）可分意味着存在可数稠密子集，使 Fourier 分析、小波分析等可数表示系统可以完备展开。</li>
+              <li><strong>\(L^\infty\) 例外</strong>——\(L^\infty\) 不可分，这限制了它在逼近论和 Fourier 分析中的应用，也解释了为何大多数分析框架选择 \(1 \le p < \infty\)。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>稠密性链</strong>——\(C_c^\infty \subset C_c \subset \text{简单函数} \subset L^p\)，每一层在下一层中 \(L^p\)-稠密；证明的核心技术是简单函数逼近 + Lusin 定理 + 磨光卷积。</li>
+              <li><strong>可数 → 可分</strong>——有理系数的有理端点矩体上的阶梯函数构成可数稠密子集；可分性是选取可数正交基的前提。</li>
+              <li><strong>不可分的本质</strong>——\(L^\infty\) 中 \(\{\mathbf{1}_{[0,t]}\}_{t \in (0,1)}\) 给出不可数多个两两距离为 1 的元素，这直接阻止了可数稠密子集的存在。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>稠密性链</strong>（\(1 \leq p < \infty\)）： \[C_c^{\infty}(\mathbb{R}^n) \subset C_c(\mathbb{R}^n) \subset \text{简单函数} \subset L^p(\mathbb{R}^n)\] 每一层在下一层中稠密（\(L^p\) 范数下）。 <strong>简单函数在 \(L^p\) 中稠密</strong>：由简单函数逼近定理， \(\varphi_n \uparrow |f|\)，\(|\varphi_n|^p \leq |f|^p \in L^1\)， 由 DCT，\(\|\varphi_n - |f|\|_p \to 0\)。对一般 \(f\) 分正负部处理。 <strong>连续函数稠密</strong>：利用 Lebesgue 测度的正则性， 可测集 \(A\) 的特征函数可被连续函数逼近（Lusin 定理： 几乎处处等于连续函数）。 <strong>可分性</strong>：\(L^p(\mathbb{R}^n)\)（\(1 \leq p < \infty\)）可分， 因为有理系数阶梯函数是可数稠密子集。 但 \(L^\infty\) 不可分。</p>
+            <h4>稠密性层级</h4>
+            \[C_c^\infty(\mathbb{R}^n) \;\subset\; C_c(\mathbb{R}^n) \;\subset\; \text{简单函数} \;\subset\; L^p(\mathbb{R}^n)\]
+            <p>每层在后一层中 \(L^p\)-稠密（\(1 \le p < \infty\)）。</p>
+
+            <h4>简单函数稠密</h4>
+            <p>由简单函数逼近定理，\(\varphi_n \uparrow |f|\)，\(|\varphi_n|^p \le |f|^p \in L^1\)。DCT 给出 \(\|\varphi_n - |f|\|_p \to 0\)。对一般 \(f\)，分正负部处理。</p>
+
+            <h4>连续函数稠密（Lusin 定理）</h4>
+            <p>对可测集 \(A\) 的特征函数，由 Lebesgue 测度正则性可用紧集/开集逼近，再用 Urysohn 或 Tietze 构造连续逼近。磨光卷积 \(f * \varphi_\varepsilon\) 进一步将之提升到 \(C_c^\infty\)。</p>
+
+            <h4>可分性</h4>
+            <p>\(L^p(\mathbb{R}^n)\)（\(1 \le p < \infty\)）可分：有理系数 + 有理端点矩体的阶梯函数是可数稠密子集。\(L^\infty\) 不可分：\(\{\mathbf{1}_{[0,t]}\}_{t \in (0,1)}\) 给出不可数多个两两距离为 1 的函数。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Fourier 分析中，\(L^2\) 的可分性保证存在可数标准正交基 \(\{e^{inx}\}\)，使 Fourier 级数逼近有意义。</p>
+            <p><strong>Fourier 分析</strong>——\(L^2\) 可分 ⇒ 存在可数正交基 \(\{e^{inx}\}\)；Fourier 级数截断是有限维投影，稠密性保证逼近误差可任意小。</p>
+            <p><strong>有限元方法</strong>——PDE 的有限元解在分片多项式空间中；\(C_c^\infty\) 在 Sobolev 空间 \(\subset L^p\) 中稠密保证了有限元逼近的收敛性（Céa 引理）。</p>
+            <p><strong>机器学习万能逼近</strong>——神经网络在 \(L^p\) 中的万能逼近定理本质上利用了连续函数在 \(L^p\) 中稠密的事实——网络可以逼近任何可积目标函数。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(L^\infty([0,1])\) 不可分。 解答：对每个 \(t \in (0,1)\)，令 \(f_t = \mathbf{1}_{[0,t]}\)。 当 \(s \neq t\) 时 \(\|f_s - f_t\|_\infty = 1\)。 开球 \(B(f_t, 1/3)\) 两两不交，有不可数多个。 可分空间中不可能有不可数多个两两不交的开球。✓ 易错点：误以为所有 \(L^p\) 都可分。\(L^\infty\) 是例外。</p>
+            <h4>例题：证明 \(L^\infty([0,1])\) 不可分</h4>
+            <p>对每个 \(t \in (0,1)\)，令 \(f_t = \mathbf{1}_{[0,t]}\)。当 \(s \ne t\) 时 \(\|f_s - f_t\|_\infty = 1\)。开球 \(B(f_t, 1/3)\) 两两不交，有不可数多个。可分空间中不可能有不可数多个两两不交的开球。✓</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 误以为所有 \(L^p\) 都可分——\(L^\infty\) 是例外。 ✅ \(1 \le p < \infty\) 可分，\(p = \infty\) 不可分。</li>
+              <li>❌ 将 \(C_c^\infty\) 稠密推广到 \(L^\infty\)——\(C_c^\infty\) 在 \(L^\infty\) 范数下不稠密。 ✅ 稠密性链只对 \(p < \infty\) 成立。</li>
+              <li>❌ 混淆 Lusin 定理与 Egorov 定理——Lusin 说"可测函数在去掉小集后连续"，Egorov 说"a.e. 收敛在去掉小集后一致收敛"。 ✅ Lusin → 稠密性，Egorov → 收敛性。</li>
+            </ul>
           </div>
         </div>
       </div>

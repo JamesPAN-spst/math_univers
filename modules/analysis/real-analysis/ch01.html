@@ -394,35 +394,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>19世纪末，数学家们发现 Riemann 积分无法处理许多极限交换问题： 例如逐点收敛的函数序列，其极限函数可能不 Riemann 可积。Lebesgue 意识到，问题根源在于"哪些集合可以被赋予大小"。为此需要一套严格 的框架来指定"可测集"——这就是 σ-代数的概念。σ-代数为测度论、 概率论和现代分析提供了统一的集合论基础。</p>
+            <ul>
+              <li><strong>Riemann 积分的局限：</strong>19 世纪末，数学家发现逐点收敛的函数序列其极限可能不 Riemann 可积——Riemann 积分的"可积条件"过于狭窄。Lebesgue 意识到根源在于"哪些集合可以被赋予大小"。</li>
+              <li><strong>公理化"可测集"：</strong>直觉上"所有子集都可度量"的想法行不通（Vitali 反例）。σ-代数提供了一套公理框架，精确界定"可测集族"在补运算和可数并运算下的封闭性。</li>
+              <li><strong>统一基础：</strong>σ-代数是测度论、概率论、遍历理论和调和分析的公共语言——测度空间 \((X,\mathcal{F},\mu)\) 是所有这些理论的起点。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心抽象：将"可以度量大小的集合"公理化。σ-代数 \(\mathcal{F}\) 是对补运算和可数并运算封闭的集合族。这种封闭性确保我们可以对 可测集进行无穷次集合运算而不离开可测集的范畴。生成 σ-代数 \(\sigma(\mathcal{C})\) 则是"最经济地"将一族集合扩充为 σ-代数。</p>
+            <ul>
+              <li><strong>封闭性公理：</strong>σ-代数 \(\mathcal{F}\) 对补运算和可数并封闭——这确保对可测集做无穷次集合运算不会"逃出"可测集族。</li>
+              <li><strong>生成 σ-代数：</strong>\(\sigma(\mathcal{C})\) 是包含集合族 \(\mathcal{C}\) 的最小 σ-代数（所有包含 \(\mathcal{C}\) 的 σ-代数之交），体现"最经济扩充"思想。</li>
+              <li><strong>Borel σ-代数：</strong>\(\mathcal{B}(\mathbb{R}) = \sigma(\text{开集})\) 连接拓扑与测度——拓扑给出"开集/连续"，σ-代数给出"可测"。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：设 \(X\) 为非空集，\(\mathcal{F} \subseteq \mathcal{P}(X)\) 称为 σ-代数，若满足： (i) \(X \in \mathcal{F}\)； (ii) \(A \in \mathcal{F} \Rightarrow A^c \in \mathcal{F}\)； (iii) \(A_1, A_2, \ldots \in \mathcal{F} \Rightarrow \bigcup_{n=1}^{\infty} A_n \in \mathcal{F}\)。 由 (ii)(iii) 可导出对可数交也封闭： \[\bigcap_{n=1}^{\infty} A_n = \left(\bigcup_{n=1}^{\infty} A_n^c\right)^c \in \mathcal{F}\] <strong>Borel σ-代数</strong>：\(\mathcal{B}(\mathbb{R}) = \sigma(\{\text{开集}\})\)。 等价地，\(\mathcal{B}(\mathbb{R})\) 可由半开区间 \(\{(-\infty, a] : a \in \mathbb{R}\}\) 生成，因为每个开集是可数个开区间之并。 <strong>可测空间</strong> \((X, \mathcal{F})\)：集合配上 σ-代数。 <strong>测度空间</strong> \((X, \mathcal{F}, \mu)\)：可测空间配上测度 \(\mu\)。</p>
+            <h4>1. σ-代数的三条公理</h4>
+            <p>设 \(X\) 为非空集，\(\mathcal{F} \subseteq \mathcal{P}(X)\) 称为 σ-代数，若满足：</p>
+            <p>(i) \(X \in \mathcal{F}\)；(ii) \(A \in \mathcal{F} \Rightarrow A^c \in \mathcal{F}\)；(iii) \(A_1, A_2, \ldots \in \mathcal{F} \Rightarrow \bigcup_{n=1}^{\infty} A_n \in \mathcal{F}\)。</p>
+            <p>由 (ii)(iii) 推出对可数交也封闭：\(\bigcap_{n=1}^\infty A_n = \bigl(\bigcup_{n=1}^\infty A_n^c\bigr)^c \in \mathcal{F}\)。</p>
+
+            <h4>2. Borel σ-代数与等价生成</h4>
+            <p>\(\mathcal{B}(\mathbb{R}) = \sigma(\text{开集})\)。等价地可由以下任一族生成：</p>
+            <p>开区间 \(\{(a,b)\}\)、闭集、半开区间 \(\{(-\infty,a] : a \in \mathbb{R}\}\)，甚至 \(\{(-\infty,a] : a \in \mathbb{Q}\}\)。</p>
+            <p>关键：\((-\infty,a] = \bigcap_{n=1}^\infty (-\infty, a+1/n)\)（可数交），而每个开集是可数个开区间之并。</p>
+
+            <h4>3. 可测空间与测度空间</h4>
+            <p>\((X, \mathcal{F})\)：可测空间。\((X, \mathcal{F}, \mu)\)：可测空间配上测度 \(\mu: \mathcal{F} \to [0,+\infty]\)。典型例子：\((\mathbb{R}, \mathcal{B}(\mathbb{R}), m)\)（Lebesgue 测度空间）。</p>
+
+            <h4>4. σ-代数的交与生成</h4>
+            <p>任意一族 σ-代数的交仍是 σ-代数。由此 \(\sigma(\mathcal{C}) = \bigcap\{\mathcal{G} : \mathcal{G}\text{ 是 σ-代数}, \mathcal{C} \subseteq \mathcal{G}\}\) 是良定义的。若 \(\mathcal{C}_1 \subseteq \sigma(\mathcal{C}_2)\) 且 \(\mathcal{C}_2 \subseteq \sigma(\mathcal{C}_1)\)，则 \(\sigma(\mathcal{C}_1) = \sigma(\mathcal{C}_2)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>概率论中，样本空间 \(\Omega\) 上的事件 σ-代数 \(\mathcal{F}\) 精确刻画了"哪些事件可以被赋予概率"；金融数学中，σ-代数 \(\mathcal{F}_t\) 表示到时刻 \(t\) 为止可获得的信息。</p>
+            <p><strong>概率论中的事件代数：</strong>样本空间 \(\Omega\) 上的 σ-代数 \(\mathcal{F}\) 精确刻画了"哪些事件可以被赋予概率"。抛硬币模型中 \(\Omega = \{H,T\}^\infty\)，柱集生成的 σ-代数使我们可以讨论"无穷多次出现正面"这类事件的概率。</p>
+            <p><strong>金融数学中的信息流：</strong>σ-代数 \(\mathcal{F}_t\) 表示到时刻 \(t\) 为止市场可获得的全部信息。滤波 \(\{\mathcal{F}_t\}_{t \geq 0}\)（递增的 σ-代数族）是鞅论和随机微积分的基础——交易策略必须关于 \(\mathcal{F}_t\) 可测（不能"看到未来"）。</p>
+            <p><strong>信号处理中的可观测量：</strong>传感器系统中，σ-代数编码了"哪些事件可以被检测"。噪声信号 \(X(\omega)\) 关于某 σ-代数 \(\mathcal{G} \subseteq \mathcal{F}\) 可测意味着 \(X\) 仅依赖于 \(\mathcal{G}\) 所携带的信息——这与条件期望 \(E[X|\mathcal{G}]\) 直接相关。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(\{(-\infty, a] : a \in \mathbb{Q}\}\) 生成 \(\mathcal{B}(\mathbb{R})\)。 解答：对任意 \(a \in \mathbb{R}\)，取有理数列 \(q_n \downarrow a\)，则 \((-\infty, a] = \bigcap_{n=1}^{\infty} (-\infty, q_n]\)， 属于 \(\sigma(\{(-\infty, q] : q \in \mathbb{Q}\})\)。 因此 \(\{(-\infty, a] : a \in \mathbb{R}\}\) 中所有集合都在此 σ-代数中，故两个生成的 σ-代数相同。 易错点：误以为 σ-代数只需对有限并封闭。 反例：有限并封闭的集合族 \(\{\emptyset, \mathbb{R}\} \cup \{\text{有限集}\}\) 不对可数并封闭（如 \(\bigcup \{n\} = \mathbb{N}\) 不一定在其中）。σ-代数要求的是<strong>可数并</strong>封闭。</p>
+            <h4>例题：证明 \(\{(-\infty, a] : a \in \mathbb{Q}\}\) 生成 \(\mathcal{B}(\mathbb{R})\)</h4>
+            <p><strong>第一步 — 用有理数逼近实数：</strong>对任意 \(a \in \mathbb{R}\)，取有理数列 \(q_n \downarrow a\)，则 \((-\infty, a] = \bigcap_{n=1}^\infty (-\infty, q_n]\)。</p>
+            <p><strong>第二步 — 包含关系：</strong>\(\{(-\infty, a] : a \in \mathbb{R}\} \subseteq \sigma(\{(-\infty, q] : q \in \mathbb{Q}\})\)。反之 \(\{(-\infty, q] : q \in \mathbb{Q}\} \subseteq \{(-\infty, a] : a \in \mathbb{R}\}\)。</p>
+            <p><strong>第三步 — 结论：</strong>两族互含于对方生成的 σ-代数中，故 \(\sigma(\{(-\infty, q] : q \in \mathbb{Q}\}) = \sigma(\{(-\infty, a] : a \in \mathbb{R}\}) = \mathcal{B}(\mathbb{R})\)。 ✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 σ-代数只需对有限并封闭。<br>✅ 反例：\(\{\emptyset, \mathbb{R}\} \cup \{\text{有限集}\}\) 对有限并封闭但 \(\bigcup_{n=1}^\infty \{n\} = \mathbb{N}\) 不在其中。σ-代数要求<strong>可数并</strong>封闭。</li>
+              <li>❌ 认为两个 σ-代数的并 \(\mathcal{F}_1 \cup \mathcal{F}_2\) 仍是 σ-代数。<br>✅ 并一般不封闭。例：\(X = \{1,2,3\}\)，\(\mathcal{F}_1 = \{\emptyset, \{1\}, \{2,3\}, X\}\)，\(\mathcal{F}_2 = \{\emptyset, \{2\}, \{1,3\}, X\}\)，则 \(\{1\} \cup \{2\} = \{1,2\} \notin \mathcal{F}_1 \cup \mathcal{F}_2\)。</li>
+              <li>❌ 混淆 \(\sigma(\mathcal{C})\)（生成的 σ-代数）与 \(\mathcal{C}\) 本身。<br>✅ \(\sigma(\mathcal{C})\) 一般远大于 \(\mathcal{C}\)。例：\(\mathcal{C} = \{(a,b) : a < b\}\) 只有开区间，而 \(\sigma(\mathcal{C}) = \mathcal{B}(\mathbb{R})\) 包含所有 Borel 集（不可数多个）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -476,35 +510,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>有了可测空间后，下一步是给可测集赋予"大小"。直觉上，测度推广了 长度、面积、体积的概念。关键难点在于：如何确保对可数多个不相交 集合赋大小时满足"可加性"？Lebesgue 和 Carathéodory 的工作表明， σ-可加性（而非仅有限可加性）是保证极限运算合法的根本条件。</p>
+            <ul>
+              <li><strong>赋予集合"大小"：</strong>有了可测空间后，需要给可测集赋予量化的"大小"。测度推广了长度、面积、体积、概率的概念为统一的数学对象。</li>
+              <li><strong>σ-可加性是根本：</strong>仅有限可加性不足以保证极限运算的合法性——Banach-Tarski 悖论表明仅有限可加"测度"可能导致不合理结論。σ-可加性确保测度与可数极限运算相容。</li>
+              <li><strong>Lebesgue 积分的基石：</strong>测度的连续性性质（自下/自上连续）是三大收敛定理（MCT、Fatou、DCT）的技术支撑。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>测度是从集合族到 \([0, +\infty]\) 的σ-可加函数。σ-可加性是有限 可加性到无穷的推广，它确保测度与可数极限运算相容——这正是 Lebesgue 积分优于 Riemann 积分的根源。</p>
+            <ul>
+              <li><strong>集函数的公理化：</strong>测度是从 σ-代数到 \([0,+\infty]\) 的 σ-可加集函数，\(\mu(\emptyset)=0\)。所有基本性质（单调性、次可加性、连续性）都由这两条公理推出。</li>
+              <li><strong>从有限到可数的跨越：</strong>σ-可加性是有限可加性到无穷的核心跨越——它使测度与拓扑中的可数运算（lim, sup, inf）完美兼容。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：测度 \(\mu: \mathcal{F} \to [0, +\infty]\) 满足： (M1) \(\mu(\emptyset) = 0\)； (M2) σ-可加性：若 \(\{A_n\}\) 两两不交，则 \[\mu\left(\bigcup_{n=1}^{\infty} A_n\right) = \sum_{n=1}^{\infty} \mu(A_n)\] <strong>基本性质</strong>（由 σ-可加性推出）： - 单调性：\(A \subseteq B \Rightarrow \mu(A) \leq \mu(B)\) - 次可加性：\(\mu(\bigcup A_n) \leq \sum \mu(A_n)\) - 连续性（自下）：\(A_n \uparrow A \Rightarrow \mu(A_n) \to \mu(A)\) - 连续性（自上）：\(A_n \downarrow A\) 且 \(\mu(A_1) < \infty \Rightarrow \mu(A_n) \to \mu(A)\) 自下连续性证明：令 \(B_1 = A_1\), \(B_n = A_n \setminus A_{n-1}\)， 则 \(\{B_n\}\) 两两不交且 \(\bigcup B_n = A\)， \[\mu(A) = \sum_{n=1}^{\infty} \mu(B_n) = \lim_{N \to \infty} \sum_{n=1}^{N} \mu(B_n) = \lim_{N \to \infty} \mu(A_N)\]</p>
+            <h4>1. 测度的定义</h4>
+            <p>\(\mu: \mathcal{F} \to [0,+\infty]\) 满足：(M1) \(\mu(\emptyset) = 0\)；(M2) σ-可加性：若 \(\{A_n\}\) 两两不交，则</p>
+            \[\mu\Bigl(\bigcup_{n=1}^\infty A_n\Bigr) = \sum_{n=1}^\infty \mu(A_n)\]
+
+            <h4>2. 基本性质推导</h4>
+            <p><strong>单调性：</strong>\(A \subseteq B\)，写 \(B = A \cup (B \setminus A)\)，由可加性 \(\mu(B) = \mu(A) + \mu(B \setminus A) \geq \mu(A)\)。</p>
+            <p><strong>次可加性：</strong>\(\mu(\bigcup A_n) \leq \sum \mu(A_n)\)（不要求不交），用不交化 + σ-可加性 + 单调性证明。</p>
+
+            <h4>3. 测度的连续性</h4>
+            <p><strong>自下连续（无条件）：</strong>\(A_n \uparrow A\)。令 \(B_1 = A_1\)，\(B_n = A_n \setminus A_{n-1}\)，则 \(\{B_n\}\) 两两不交且 \(\bigcup B_n = A\)：</p>
+            \[\mu(A) = \sum_{n=1}^\infty \mu(B_n) = \lim_{N \to \infty} \sum_{n=1}^N \mu(B_n) = \lim_{N \to \infty} \mu(A_N)\]
+            <p><strong>自上连续（需有限性）：</strong>\(A_n \downarrow A\)，\(\mu(A_1) < \infty\) 时 \(\mu(A_n) \to \mu(A)\)。反例：计数测度，\(A_n = \{n, n+1, \ldots\}\)，\(\bigcap A_n = \emptyset\) 但 \(\mu(A_n) = \infty\)。</p>
+
+            <h4>4. 重要特例</h4>
+            <p>计数测度 \(\#(A) = |A|\)；Dirac 测度 \(\delta_x(A) = \mathbf{1}_A(x)\)；概率测度 \(P(X) = 1\)；σ-有限测度 \(X = \bigcup E_n\)，\(\mu(E_n) < \infty\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>计数测度 \(\mu(A) = |A|\) 用于将求和统一到积分框架中； Dirac 测度 \(\delta_x(A) = \mathbf{1}_A(x)\) 是集中在一点的 概率测度，在信号处理中模拟脉冲。</p>
+            <p><strong>求和与积分的统一：</strong>计数测度 \(\#\) 使求和统一到 Lebesgue 积分框架中——\(\int f\, d\# = \sum f(n)\)。这使得 \(L^p\) 空间理论同时涵盖 \(\ell^p\)（序列空间）和经典 \(L^p\)（函数空间）。</p>
+            <p><strong>信号处理中的 Dirac 测度：</strong>δ-函数 \(\delta_0\) 在分布意义下是集中在原点的测度，模拟理想化脉冲。\(\int f\, d\delta_0 = f(0)\) 是采样定理（Shannon）的数学基础。在离散信号处理中，Dirac 梳（\(\sum_n \delta_n\)）连接连续与离散 Fourier 变换。</p>
+            <p><strong>概率论中的随机变量分布：</strong>随机变量 \(X\) 的分布 \(\mu_X = P \circ X^{-1}\) 是像测度。连续型分布有密度 \(f\)（关于 Lebesgue 测度绝对连续），离散型用 Dirac 测度的加权和表示。测度的 σ-可加性保证了概率的规范性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(\mu\) 是 \((\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 上的 测度，\(A_n = (0, 1/n)\)。若 \(\mu((0,1)) = 1\)，求 \(\lim_{n \to \infty} \mu(A_n)\)。 解答：\(A_n \downarrow \emptyset\)，且 \(\mu(A_1) = \mu((0,1)) = 1 < \infty\)， 由测度自上连续性，\(\mu(A_n) \to \mu(\emptyset) = 0\)。 易错点：忘记自上连续性需要 \(\mu(A_1) < \infty\) 的条件。 反例：\(\mu = \) 计数测度，\(A_n = \{n, n+1, \ldots\}\)， \(\mu(A_n) = \infty\) 对所有 \(n\)，但 \(\mu(\bigcap A_n) = \mu(\emptyset) = 0\)。</p>
+            <h4>例题：递减集列的测度极限</h4>
+            <p><strong>题目：</strong>\(\mu\) 是 \((\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 上的测度，\(A_n = (0, 1/n)\)，\(\mu((0,1)) = 1\)。求 \(\lim \mu(A_n)\)。</p>
+            <p><strong>第一步 — 验证条件：</strong>\(A_n \downarrow \emptyset\)，且 \(\mu(A_1) = \mu((0,1)) = 1 < \infty\)，满足自上连续性条件。</p>
+            <p><strong>第二步 — 应用连续性：</strong>\(\mu(A_n) \to \mu(\bigcap A_n) = \mu(\emptyset) = 0\)。 ✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对递减集列直接用自上连续性而不检查 \(\mu(A_1) < \infty\)。<br>✅ 反例：计数测度，\(A_n = \{n, n+1,\ldots\}\)，\(\mu(A_n) = \infty\) 但 \(\mu(\bigcap A_n) = \mu(\emptyset) = 0\)。有限性假设不可省略。</li>
+              <li>❌ 混淆 σ-可加性与有限可加性，认为它们等价。<br>✅ 有限可加性 + 自下连续性 ⟺ σ-可加性。单独的有限可加性严格弱于 σ-可加（存在仅有限可加的"测度"不满足连续性）。</li>
+              <li>❌ 认为 \(\mu(A \cup B) = \mu(A) + \mu(B)\) 不需要不交条件。<br>✅ 正确公式：\(\mu(A \cup B) = \mu(A) + \mu(B) - \mu(A \cap B)\)（需 \(\mu(A \cap B) < \infty\)）。σ-可加性的前提是"两两不交"。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -531,28 +598,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>测度空间建立后，要在上面做"积分"，首先要确定哪些函数可以被积分。 可测函数是"与 σ-代数相容"的函数——它的原像将可测集映回可测集。 更深层的问题是：如何用最简单的函数（简单函数）来逐步逼近任意可测 函数？这个逼近定理是 Lebesgue 积分构造的关键一步。</p>
+            <ul>
+              <li><strong>积分的前提：</strong>要在测度空间上定义积分，首先要确定哪些函数可以被积分。可测函数是"与 σ-代数相容"的函数，其原像将可测集映回可测集。</li>
+              <li><strong>极限运算的封闭性：</strong>Riemann 可积函数在逐点极限下不封闭，而可测函数类对 sup、inf、limsup、liminf 等运算封闭——这是 Lebesgue 理论优势的核心体现。</li>
+              <li><strong>简单函数逼近：</strong>如何用最简单的函数（有限值简单函数）逐步逼近任意可测函数？这个逼近定理是 Lebesgue 积分构造的关键一步——先对简单函数定义积分，再通过单调极限过渡。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>可测函数将一个可测空间上的"信息结构"拉回到另一个可测空间。 简单函数逼近定理体现了"从有限到无穷"的分析学核心思想： 先对有限情形（简单函数）定义积分，再通过单调极限过渡到一般。</p>
+            <ul>
+              <li><strong>原像视角：</strong>可测函数将"目标空间的信息结构"拉回到"源空间的 σ-代数"。验证可测性只需检查 \(\{f > a\} \in \mathcal{F}\) 对所有 \(a\)。</li>
+              <li><strong>从有限到无穷：</strong>简单函数 = 有限个指示函数的线性组合。逼近定理 = "任何非负可测函数是简单函数的单调递增极限"——体现分析学"有限逼近无穷"的核心思想。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>可测函数定义</strong>：\(f: (X, \mathcal{F}) \to (\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 可测，若 \(\forall B \in \mathcal{B}(\mathbb{R})\)， \(f^{-1}(B) \in \mathcal{F}\)。等价地，只需验证 \(\{x : f(x) > a\} \in \mathcal{F}\) 对所有 \(a \in \mathbb{R}\)。 <strong>运算封闭性</strong>：若 \(f, g\) 可测，则 \(f + g\), \(fg\), \(\sup_n f_n\), \(\limsup_n f_n\) 均可测。证明关键： \[\{f + g > a\} = \bigcup_{r \in \mathbb{Q}} (\{f > r\} \cap \{g > a - r\})\] <strong>简单函数</strong>：\(\varphi = \sum_{i=1}^{n} a_i \mathbf{1}_{A_i}\)， 其中 \(A_i \in \mathcal{F}\)，\(a_i \in \mathbb{R}\)。 <strong>逼近定理</strong>：若 \(f \geq 0\) 可测，存在简单函数序列 \(0 \leq \varphi_1 \leq \varphi_2 \leq \cdots\) 使 \(\varphi_n(x) \uparrow f(x)\) \(\forall x\)。 构造：令 \(\varphi_n(x) = \begin{cases} k/2^n & \text{if } k/2^n \leq f(x) < (k+1)/2^n,\; k = 0,1,\ldots,n2^n - 1 \\ n & \text{if } f(x) \geq n \end{cases}\)</p>
+            <h4>1. 可测函数的定义与等价条件</h4>
+            <p>\(f: (X, \mathcal{F}) \to (\mathbb{R}, \mathcal{B}(\mathbb{R}))\) 可测 ⟺ \(\forall B \in \mathcal{B}(\mathbb{R})\)，\(f^{-1}(B) \in \mathcal{F}\)。等价条件：只需验证下列之一——\(\{f > a\}\)、\(\{f \geq a\}\)、\(\{f < a\}\)、\(\{f \leq a\}\) 对所有 \(a \in \mathbb{R}\) 属于 \(\mathcal{F}\)。</p>
+
+            <h4>2. 运算封闭性</h4>
+            <p>\(f, g\) 可测 ⟹ \(f+g\)、\(fg\)、\(f/g\)（\(g \neq 0\)）可测。关键技巧：</p>
+            \[\{f + g > a\} = \bigcup_{r \in \mathbb{Q}} (\{f > r\} \cap \{g > a - r\})\]
+            <p>可数并保持可测性。类似地 \(\sup_n f_n\)、\(\inf_n f_n\)、\(\limsup f_n\)、\(\liminf f_n\) 均可测——可测函数类在可数极限运算下封闭。</p>
+
+            <h4>3. 简单函数与逼近定理</h4>
+            <p>简单函数：\(\varphi = \sum_{i=1}^n a_i \mathbf{1}_{A_i}\)，\(A_i \in \mathcal{F}\)。</p>
+            <p><strong>逼近定理：</strong>若 \(f \geq 0\) 可测，存在简单函数列 \(0 \leq \varphi_1 \leq \varphi_2 \leq \cdots\) 使 \(\varphi_n(x) \uparrow f(x)\) 对所有 \(x\)。</p>
+            <p>标准构造：\(\varphi_n(x) = k/2^n\) 当 \(k/2^n \leq f(x) < (k+1)/2^n\)，\(k = 0,\ldots,n \cdot 2^n - 1\)；\(\varphi_n(x) = n\) 当 \(f(x) \geq n\)。</p>
+
+            <h4>4. 一般可测函数的分解</h4>
+            <p>任意可测函数 \(f = f^+ - f^-\)，其中 \(f^+ = \max(f,0)\)，\(f^- = \max(-f,0)\) 均为非负可测函数，可分别用简单函数逼近。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>数字图像的数学模型：</strong>灰度图像 \(f: [0,1]^2 \to [0,255]\) 是可测函数。阈值分割 \(\{f > 128\}\) 是原像操作——可测性保证分割区域有良定义的面积（Lebesgue 测度），可用于定量分析肿瘤面积等医学指标。</p>
+            <p><strong>量子力学中的可观测量：</strong>可观测量（自伴算子 \(A\)）的谱分解 \(A = \int \lambda\, dE_\lambda\) 依赖于谱测度 \(E\)。对 Borel 集 \(B\) 的可测性确保 \(E(B)\) 是良定义的投影算子——"测量结果落在 \(B\) 中"的事件具有概率 \(\|E(B)\psi\|^2\)。</p>
+            <p><strong>机器学习中的损失函数：</strong>损失函数 \(\ell(y, \hat{y})\) 关于参数可测是计算期望风险 \(R(\theta) = \int \ell\, dP\) 的前提。Lebesgue 积分框架允许使用非连续的损失（如 0-1 损失），而简单函数逼近对应着经验风险的有限样本近似。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(f(x) = x^2\) 在 \(([0,2], \mathcal{B}([0,2]))\) 上， 写出 \(\varphi_1\)（即 \(n=1\) 时的逼近简单函数）。 解答：\(n=1\) 时，划分值域为 \([0,1/2), [1/2,1), [1,3/2), [3/2,2), [2,\infty)\)。 但 \(n=1\) 意味着截断在 1，故 \(\varphi_1(x) = 0 \cdot \mathbf{1}_{[0, 1/\sqrt{2})} + \frac{1}{2} \cdot \mathbf{1}_{[1/\sqrt{2}, 1)} + 1 \cdot \mathbf{1}_{[1, 2]}\)。 易错点：混淆"可测函数"与"连续函数"。 Dirichlet 函数 \(\mathbf{1}_{\mathbb{Q}}\) 处处不连续但 Borel 可测（因为 \(\mathbb{Q} \in \mathcal{B}(\mathbb{R})\)）。</p>
+            <h4>例题：构造 \(f(x) = x^2\) 在 \([0,2]\) 上的逼近简单函数 \(\varphi_1\)</h4>
+            <p><strong>第一步 — 参数确定：</strong>\(n = 1\) 时，值域划分步长 \(1/2^1 = 1/2\)，截断在 \(n = 1\)。</p>
+            <p><strong>第二步 — 划分区间：</strong>\([0, 1/2)\) 对应 \(f(x) \in [0, 1/2)\)，即 \(x \in [0, 1/\sqrt{2})\)；\([1/2, 1)\) 对应 \(x \in [1/\sqrt{2}, 1)\)；\(f \geq 1\) 对应 \(x \in [1, 2]\)。</p>
+            <p><strong>第三步 — 写出结果：</strong>\(\varphi_1 = 0 \cdot \mathbf{1}_{[0, 1/\sqrt{2})} + \tfrac{1}{2} \cdot \mathbf{1}_{[1/\sqrt{2}, 1)} + 1 \cdot \mathbf{1}_{[1, 2]}\)。 ✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"可测函数"与"连续函数"。<br>✅ Dirichlet 函数 \(\mathbf{1}_{\mathbb{Q}}\) 处处不连续但 Borel 可测（\(\mathbb{Q} \in \mathcal{B}(\mathbb{R})\)）。可测性远弱于连续性。</li>
+              <li>❌ 认为可测函数的逐点极限不一定可测。<br>✅ 可测函数的逐点极限一定可测：\(\lim f_n = \liminf f_n = \sup_n \inf_{k \geq n} f_k\)，可数个 sup/inf 保持可测性。这是 Lebesgue 理论优于 Riemann 理论的核心。</li>
+              <li>❌ 简单函数逼近中忘记截断（认为 \(\varphi_n\) 在 \(f\) 很大时也精确逼近）。<br>✅ 标准构造在 \(f(x) \geq n\) 时令 \(\varphi_n = n\)（截断）。逼近精度仅在 \(f < n\) 的区域为 \(1/2^n\)。需要 \(n \to \infty\) 才能处理无界函数。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -606,35 +713,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在实际分析中，我们经常遇到"几乎处处"成立的性质——即一个性质 在零测集之外成立。但 Borel σ-代数中，零测集的子集不一定是 Borel 集！这意味着"几乎处处"的概念在 Borel 框架下不够 自洽。完备化过程解决这个问题：将所有零测集的子集纳入可测 集族，使"几乎处处"操作不会导致可测性问题。</p>
+            <ul>
+              <li><strong>"几乎处处"的自洽性：</strong>实分析中大量性质"几乎处处"成立。但在 Borel σ-代数中，零测集的子集不一定是 Borel 集——"a.e."概念可能导致可测性问题。完备化将所有零测子集纳入可测集族，消除这一缺陷。</li>
+              <li><strong>Lebesgue 测度 vs Borel 测度：</strong>Lebesgue σ-代数 \(\mathcal{L}\) 是 \(\mathcal{B}(\mathbb{R})\) 关于 Lebesgue 测度的完备化，严格包含 Borel σ-代数。理解两者的关系对正确使用"可测集"概念至关重要。</li>
+              <li><strong>概率论的需要：</strong>完备概率空间保证条件期望、随机过程的正则版本等构造的良定义性——独立性论证中经常需要处理零概率事件的子集。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>完备化是将测度空间"补全"的过程，使零测集的任意子集都可测 （且测度为零）。这与度量空间的完备化精神一致——补充"缺失" 的元素使结构更自洽。</p>
+            <ul>
+              <li><strong>完备化 = 补全缺失：</strong>类比度量空间的完备化（补充 Cauchy 列的极限），测度空间的完备化补充"零测集的所有子集"，使可测集族更自洽。</li>
+              <li><strong>"可忽略"的严格化：</strong>"几乎处处(a.e.)"= 性质在零测集之外成立。\(L^p\) 空间中的等价类 \([f] = \{g : f = g\text{ a.e.}\}\) 依赖于此概念。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>零测集</strong>：\(N \in \mathcal{F}\)，\(\mu(N) = 0\)。 <strong>完备测度空间</strong>：若 \(\mu(N) = 0\) 且 \(E \subseteq N\)，则 \(E \in \mathcal{F}\)（且 \(\mu(E) = 0\)）。 <strong>完备化构造</strong>：定义 \[\overline{\mathcal{F}} = \{A \cup E : A \in \mathcal{F},\; E \subseteq N \text{ for some } N \in \mathcal{F} \text{ with } \mu(N) = 0\}\] 并令 \(\overline{\mu}(A \cup E) = \mu(A)\)。 可验证 \(\overline{\mathcal{F}}\) 是 σ-代数，\(\overline{\mu}\) 是完备测度。 <strong>Lebesgue σ-代数</strong> \(\mathcal{L}\) 严格大于 Borel σ-代数 \(\mathcal{B}(\mathbb{R})\)。存在 Lebesgue 可测但非 Borel 的集合 （如 Cantor 集的子集）。 <strong>"几乎处处"(a.e.)</strong>：性质 \(P(x)\) 几乎处处成立，若 \(\mu(\{x : P(x) \text{ 不成立}\}) = 0\)。</p>
+            <h4>1. 零测集与完备测度</h4>
+            <p>零测集：\(N \in \mathcal{F}\)，\(\mu(N) = 0\)。完备测度空间：若 \(\mu(N) = 0\) 且 \(E \subseteq N\)，则 \(E \in \mathcal{F}\)（且 \(\mu(E) = 0\)）。</p>
+
+            <h4>2. 完备化构造</h4>
+            <p>定义扩充的 σ-代数：</p>
+            \[\overline{\mathcal{F}} = \{A \cup E : A \in \mathcal{F},\; E \subseteq N,\; N \in \mathcal{F},\; \mu(N) = 0\}\]
+            <p>令 \(\overline{\mu}(A \cup E) = \mu(A)\)。可验证：\(\overline{\mathcal{F}}\) 是 σ-代数，\(\overline{\mu}\) 在其上是完备测度，且 \(\overline{\mu}|_{\mathcal{F}} = \mu\)。</p>
+
+            <h4>3. Lebesgue σ-代数与 Borel σ-代数</h4>
+            <p>\(\mathcal{L} = \overline{\mathcal{B}(\mathbb{R})}\)（Borel σ-代数关于 Lebesgue 测度的完备化）。\(\mathcal{B}(\mathbb{R}) \subsetneq \mathcal{L}\)：Cantor 集 \(C\) 的子集都 Lebesgue 可测（零测子集），但其中存在非 Borel 集（基数论证：\(|\mathcal{P}(C)| = 2^{\mathfrak{c}} > \mathfrak{c} = |\mathcal{B}(\mathbb{R})|\)）。</p>
+
+            <h4>4. "几乎处处"的形式化</h4>
+            <p>性质 \(P(x)\) 几乎处处成立 ⟺ \(\mu(\{x : \lnot P(x)\}) = 0\)。关键事实：零测集的可数并仍为零测（次可加性 \(\mu(\bigcup N_n) \leq \sum \mu(N_n) = 0\)）——因此可以同时"忽略"可数多个零测例外。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>概率论中，随机变量的"几乎必然(a.s.)"性质依赖于完备概率 空间；在 \(L^p\) 空间中，函数等价类的定义依赖于将 a.e. 相等 的函数视为同一元素。</p>
+            <p><strong>\(L^p\) 空间的等价类：</strong>在 \(L^p\) 空间中，\(f\) 和 \(g\) 若 \(f = g\) a.e.，则视为同一元素。完备化保证了"修改零测集上的值不影响积分"这一直觉的严格性——\(\|f - g\|_p = 0 \iff f = g\) a.e.，从而 \(L^p\) 成为真正的赋范空间（而非半赋范）。</p>
+            <p><strong>概率论中的正则条件概率：</strong>条件概率 \(P(A|X)\) 在完备概率空间中有正则版本（regular conditional probability），对零概率事件的子集也有良定义的概率赋值。Kolmogorov 配套定理的证明也依赖于完备化。</p>
+            <p><strong>实变函数论中的 Lusin 定理：</strong>Lebesgue 可测函数在去掉任意小测度集后连续（Lusin 定理）。这里"Lebesgue 可测"而非"Borel 可测"是关键——完备化扩大了定理适用的函数类。Lusin 定理是调和分析中的基本工具。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：Cantor 集 \(C\) 是零测集，\(|C| = 2^{\aleph_0}\)（不可数）。 证明存在 \(C\) 的子集不是 Borel 集但是 Lebesgue 可测的。 解答：\(|\mathcal{B}(\mathbb{R})| = 2^{\aleph_0}\)（可数生成元 生成的 σ-代数基数为连续统），而 \(|\mathcal{P}(C)| = 2^{2^{\aleph_0}} > 2^{\aleph_0}\)。因此 \(C\) 的子集中存在非 Borel 集。 但由于 \(C\) 零测且 Lebesgue 测度完备，\(C\) 的所有子集都 Lebesgue 可测（测度为 0）。 易错点：误以为"Lebesgue 可测集 = Borel 集"。实际上 \(\mathcal{B}(\mathbb{R}) \subsetneq \mathcal{L}\)。</p>
+            <h4>例题：证明存在 Lebesgue 可测但非 Borel 的集合</h4>
+            <p><strong>第一步 — Cantor 集的性质：</strong>Cantor 集 \(C \subseteq [0,1]\) 是零测集（\(m(C) = 0\)）且不可数（\(|C| = 2^{\aleph_0} = \mathfrak{c}\)）。</p>
+            <p><strong>第二步 — 基数论证：</strong>\(|\mathcal{B}(\mathbb{R})| = \mathfrak{c}\)（可数生成元生成的 σ-代数），而 \(|\mathcal{P}(C)| = 2^{\mathfrak{c}} > \mathfrak{c}\)。</p>
+            <p><strong>第三步 — 结论：</strong>\(C\) 的子集中必存在非 Borel 集 \(E\)。但由完备化，\(E \subseteq C\)，\(m(C) = 0\) ⟹ \(E \in \mathcal{L}\)，\(m(E) = 0\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"Lebesgue 可测集 = Borel 集"。<br>✅ \(\mathcal{B}(\mathbb{R}) \subsetneq \mathcal{L}\)。Lebesgue σ-代数严格包含 Borel σ-代数——差集恰好是零测集的非 Borel 子集构成的。</li>
+              <li>❌ 认为"零测集一定是可数集"。<br>✅ Cantor 集是不可数零测集（\(|C| = \mathfrak{c}\) 但 \(m(C) = 0\)）。"零测"与"可数"是不同概念：可数集必零测，但零测集不必可数。</li>
+              <li>❌ 在非完备空间中对零测子集做操作而不检查可测性。<br>✅ 在 Borel σ-代数 \(\mathcal{B}(\mathbb{R})\) 中，零测集的子集不一定 Borel 可测。只有在完备化后的 \(\mathcal{L}\) 中才能安全地对零测子集赋测度。使用"a.e."性质时需明确工作在完备空间中。</li>
+            </ul>
           </div>
         </div>
       </div>
