@@ -394,35 +394,89 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在分析学中，我们习惯于用距离定义"开集"——然而距离并非讨论连续 性和收敛性的唯一方式。19世纪末 Hausdorff 等人发现，许多分析结 论只依赖于开集满足的几条简单性质，而非距离本身。将"开集"作为 基本概念公理化，使我们能在远超度量空间的范围内讨论连续性问题。 这一抽象是现代数学——尤其是代数几何和泛函分析——的基石。</p>
+            <ul>
+              <li><strong>从度量到拓扑的动因：</strong>在分析学中，连续性与收敛性的经典定义依赖于距离 \(d(x,y)\)。然而 19 世纪末 Hausdorff 等人发现，中间值定理、连续映像的紧致性等核心结论只用到开集的三条组合性质，而非距离本身。</li>
+              <li><strong>超越度量空间的需求：</strong>函数空间上的弱拓扑、代数几何中的 Zariski 拓扑、p-adic 数域上的拓扑等无法用自然度量定义，但仍满足开集公理。将"开集"公理化后，连续性框架可统一覆盖这些场景。</li>
+              <li><strong>现代数学的基石：</strong>拓扑空间是代数拓扑、微分流形、层论、方案论等领域的公共语言。掌握开集公理是进入这些方向的第一步。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心思想：放弃距离，保留开集。从度量空间中开集满足的三条性质 （空集和全集是开的、有限交仍开、任意并仍开）出发，将这三条性质 提升为公理，得到拓扑空间的定义。闭集自然定义为开集的补。</p>
+            <ul>
+              <li><strong>策略——保留结构，丢弃度量：</strong>在度量空间中，开集满足：(1) \(\emptyset\) 和 \(X\) 是开集；(2) 有限交仍是开集；(3) 任意并仍是开集。将这三条性质直接提升为公理，便得到拓扑的概念。</li>
+              <li><strong>闭集的对偶定义：</strong>闭集 = 开集的补。由 De Morgan 律，闭集在有限并和任意交下封闭——与开集的封闭性质形成完美对偶。</li>
+              <li><strong>从特殊到一般：</strong>度量空间 → 拓扑空间的推广，体现了"提取公理、扩大适用范围"的数学方法论。每个度量空间自然诱导一个拓扑，但拓扑空间远多于度量空间。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：设 \(X\) 为集合，\(\tau \subseteq \mathcal{P}(X)\) 满足： (T1) \(\emptyset, X \in \tau\)； (T2) 若 \(U_1, U_2 \in \tau\)，则 \(U_1 \cap U_2 \in \tau\)； (T3) 若 \(\{U_\alpha\}_{\alpha \in I} \subseteq \tau\)，则 \(\bigcup_{\alpha \in I} U_\alpha \in \tau\)。 则 \((X, \tau)\) 为<strong>拓扑空间</strong>，\(\tau\) 中的元素称为<strong>开集</strong>。 <strong>闭集</strong>：\(F \subseteq X\) 是闭集，当且仅当 \(X \setminus F \in \tau\)。 由 De Morgan 律：闭集对有限并和任意交封闭。 <strong>度量空间是特例</strong>：度量空间 \((X,d)\) 中，定义 \[U \in \tau_d \iff \forall x \in U,\; \exists \varepsilon > 0,\; B(x,\varepsilon) \subseteq U\] 可以验证 \(\tau_d\) 满足 (T1)-(T3)。这说明度量拓扑是一个合法的拓扑。</p>
+            <h4>1. 拓扑空间的定义</h4>
+            <p>设 \(X\) 为非空集合，\(\tau \subseteq \mathcal{P}(X)\) 称为 \(X\) 上的<strong>拓扑</strong>，若满足以下三条公理：</p>
+            <ul>
+              <li><strong>(T1)</strong> \(\emptyset \in \tau\)，\(X \in \tau\)（空集与全集是开集）。</li>
+              <li><strong>(T2)</strong> 若 \(U_1, U_2 \in \tau\)，则 \(U_1 \cap U_2 \in \tau\)（有限交封闭）。</li>
+              <li><strong>(T3)</strong> 若 \(\{U_\alpha\}_{\alpha \in I} \subseteq \tau\)，则 \(\bigcup_{\alpha \in I} U_\alpha \in \tau\)（任意并封闭）。</li>
+            </ul>
+            <p>此时 \((X, \tau)\) 称为<strong>拓扑空间</strong>，\(\tau\) 的元素称为<strong>开集</strong>。</p>
+
+            <h4>2. 闭集与 De Morgan 对偶</h4>
+            <p>\(F \subseteq X\) 为<strong>闭集</strong>当且仅当 \(X \setminus F \in \tau\)。由 De Morgan 律得到闭集的封闭性质：</p>
+            \[\text{有限并封闭：}\; F_1, F_2 \text{ 闭} \Rightarrow F_1 \cup F_2 \text{ 闭}\]
+            \[\text{任意交封闭：}\; \{F_\alpha\} \text{ 均闭} \Rightarrow \bigcap_\alpha F_\alpha \text{ 闭}\]
+            <p>注意交与并的角色互换——开集要求有限交、任意并；闭集要求有限并、任意交。</p>
+
+            <h4>3. 度量空间是拓扑空间的特例</h4>
+            <p>度量空间 \((X, d)\) 中，定义</p>
+            \[U \in \tau_d \;\Longleftrightarrow\; \forall x \in U,\; \exists \varepsilon > 0,\; B(x, \varepsilon) \subseteq U\]
+            <p>验证 \(\tau_d\) 满足三条公理：</p>
+            <ul>
+              <li><strong>(T1)：</strong>\(\emptyset\) 空成立（无点需验证）；对 \(X\) 中任何 \(x\) 取任意 \(\varepsilon > 0\) 即可。</li>
+              <li><strong>(T2)：</strong>\(x \in U_1 \cap U_2\) 时取 \(\varepsilon = \min(\varepsilon_1, \varepsilon_2) > 0\)。</li>
+              <li><strong>(T3)：</strong>\(x \in \bigcup U_\alpha\) 意味着 \(x\) 属于某个 \(U_{\alpha_0}\)，直接继承其 \(\varepsilon\)。</li>
+            </ul>
+
+            <h4>4. 重要的极端拓扑</h4>
+            <ul>
+              <li><strong>离散拓扑：</strong>\(\tau = \mathcal{P}(X)\)，每个子集都是开集，是 \(X\) 上最细的拓扑。</li>
+              <li><strong>平庸（密着）拓扑：</strong>\(\tau = \{\emptyset, X\}\)，仅有两个开集，是最粗的拓扑。</li>
+              <li><strong>余有限拓扑：</strong>开集 = 补为有限集的集合 ∪ \(\{\emptyset\}\)。当 \(X\) 无穷时非离散。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 函数空间上常需非度量化拓扑（如弱拓扑、弱*拓扑），这在泛函 分析和偏微分方程的变分方法中极为关键 - Zariski 拓扑是代数几何的基础，其开集远比度量拓扑"大"</p>
+            <p><strong>弱拓扑与泛函分析：</strong>Banach 空间的弱拓扑和对偶空间的弱*拓扑无法由范数度量直接诱导，却满足开集公理。Banach–Alaoglu 定理保证弱*拓扑下单位球紧致，这在偏微分方程的变分法和最优控制中是核心工具。</p>
+            <p><strong>Zariski 拓扑与代数几何：</strong>代数簇上以多项式零点集的补为开集，所得 Zariski 拓扑极度不同于欧氏拓扑——开集"极大"，空间通常不是 Hausdorff 的。但它完美适配代数结构，是方案论（scheme theory）的基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：验证余有限拓扑 \(\tau_{cf} = \{U \subseteq X : X \setminus U \text{ 有限}\} \cup \{\emptyset\}\) 在无穷集 \(X\) 上是拓扑。 解答：(T1) \(X \setminus X = \emptyset\) 有限，故 \(X \in \tau_{cf}\)； \(\emptyset \in \tau_{cf}\) 由定义。 (T2) 设 \(U_1, U_2 \in \tau_{cf} \setminus \{\emptyset\}\)， \(X \setminus (U_1 \cap U_2) = (X \setminus U_1) \cup (X \setminus U_2)\) 是两个有限集的并，仍有限。 (T3) \(X \setminus \bigcup U_\alpha = \bigcap (X \setminus U_\alpha)\)， 只要某个 \(U_{\alpha_0}\) 非空，交就 \(\subseteq X \setminus U_{\alpha_0}\) 是有限集的子集，故有限。 易错点：验证 (T2) 时忘记处理 \(U_1\) 或 \(U_2 = \emptyset\) 的情况。 \(\emptyset \cap U = \emptyset \in \tau_{cf}\)，需单独确认。</p>
+            <h4>例题：验证余有限拓扑是拓扑</h4>
+            <p><strong>题目：</strong>设 \(X\) 为无穷集，\(\tau_{cf} = \{U \subseteq X : X \setminus U \text{ 有限}\} \cup \{\emptyset\}\)。证明 \(\tau_{cf}\) 是 \(X\) 上的拓扑。</p>
+            <p><strong>第一步 — 验证 (T1)：</strong>\(X \setminus X = \emptyset\) 有限，故 \(X \in \tau_{cf}\)；\(\emptyset\) 由定义属于 \(\tau_{cf}\)。✔</p>
+            <p><strong>第二步 — 验证 (T2)（有限交）：</strong>设 \(U_1, U_2 \in \tau_{cf}\)。若其一为 \(\emptyset\)，则 \(U_1 \cap U_2 = \emptyset \in \tau_{cf}\)。否则：</p>
+            \[X \setminus (U_1 \cap U_2) = (X \setminus U_1) \cup (X \setminus U_2)\]
+            <p>两个有限集的并仍有限，故 \(U_1 \cap U_2 \in \tau_{cf}\)。✔</p>
+            <p><strong>第三步 — 验证 (T3)（任意并）：</strong>设 \(\{U_\alpha\} \subseteq \tau_{cf}\)。若全为 \(\emptyset\)，则并为 \(\emptyset\)。否则取某 \(U_{\alpha_0} \neq \emptyset\)：</p>
+            \[X \setminus \bigcup_\alpha U_\alpha = \bigcap_\alpha (X \setminus U_\alpha) \subseteq X \setminus U_{\alpha_0}\]
+            <p>有限集的子集仍有限。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 验证 (T2) 时忽略 \(U_1 = \emptyset\) 或 \(U_2 = \emptyset\) 的边界情况。<br>✅ 需先处理平凡情形：\(\emptyset \cap U = \emptyset \in \tau_{cf}\)。</li>
+              <li>❌ 认为余有限拓扑对任意交也封闭（将 (T2) 的有限交推广为无穷交）。<br>✅ (T2) 仅要求<strong>有限</strong>交封闭，不能推广到可数或不可数交。</li>
+              <li>❌ 混淆余有限拓扑与离散拓扑——当 \(X\) 无穷时，\(X \setminus \{x\}\) 无穷，故 \(\{x\} \notin \tau_{cf}\)。<br>✅ 余有限拓扑中单点集不是开集（\(X\) 无穷时），与离散拓扑不同。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -467,28 +521,78 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>拓扑空间中，我们需要刻画一个点与一个集合的"亲近程度"。闭包 回答的是"哪些点无限接近于集合"，内部回答"哪些点完全被集合包 围"，边界则是"分界线上的点"。这些概念是讨论收敛、稠密、无处 稠密等分析核心问题的基础，也是后续分离公理的语言基础。</p>
+            <ul>
+              <li><strong>点与集合的"距离感"：</strong>在拓扑空间中，我们需要精确刻画点与集合的亲近关系——闭包回答"哪些点无限靠近集合"，内部回答"哪些点完全被集合包围"，边界标出"分界线上的点"。</li>
+              <li><strong>分析与拓扑的桥梁：</strong>收敛、稠密、无处稠密、Baire 范畴等分析核心概念都建立在闭包和内部的语言之上。这些工具也是后续分离公理、紧致性讨论的前置基础。</li>
+              <li><strong>邻域系的统一视角：</strong>度量空间中 \(\varepsilon\)-球是邻域的原型；公理化后，邻域系可统一描述闭包、内部、收敛与连续性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>将度量空间中 \(\varepsilon\)-邻域的定义推广为邻域系的公理化： 一个点的邻域是包含该点某个开集的任何集合。由此闭包、内部可 用邻域统一描述。</p>
+            <ul>
+              <li><strong>用邻域刻画一切：</strong>点 \(x\) 的邻域是包含 \(x\) 的某个开集的超集。闭包、内部、导集、边界全都可用"邻域与集合的交是否非空"来统一表述。</li>
+              <li><strong>对偶性原则：</strong>内部与闭包之间存在 De Morgan 型对偶：\(\overline{X \setminus A} = X \setminus A^\circ\)。掌握一侧性质即可推出另一侧。</li>
+              <li><strong>"最大"与"最小"视角：</strong>\(A^\circ\) 是 \(A\) 内最大的开集；\(\overline{A}\) 是包含 \(A\) 的最小闭集。这种 sup/inf 思想在拓扑学中反复出现。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>设 \((X, \tau)\) 为拓扑空间，\(A \subseteq X\)。 <strong>内部</strong>：\(\mathrm{Int}(A) = A^\circ = \bigcup\{U \in \tau : U \subseteq A\}\)， 即 \(A\) 中最大的开集。 <strong>闭包</strong>：\(\overline{A} = \bigcap\{F : F \supseteq A,\; F \text{ 闭}\}\)， 即包含 \(A\) 的最小闭集。等价地： \[x \in \overline{A} \iff \forall U \in \tau,\; x \in U \Rightarrow U \cap A \neq \emptyset\] <strong>边界</strong>：\(\partial A = \overline{A} \setminus A^\circ\)。 <strong>导集</strong>：\(A' = \{x \in X : \forall U \ni x,\; U \text{ 开} \Rightarrow (U \setminus \{x\}) \cap A \neq \emptyset\}\)。 则 \(\overline{A} = A \cup A'\)。 <strong>邻域</strong>：\(V\) 是 \(x\) 的邻域 \(\iff \exists U \in \tau,\; x \in U \subseteq V\)。 基本关系：\(A\) 开 \(\iff A = A^\circ\)；\(A\) 闭 \(\iff A = \overline{A}\)； \(\overline{X \setminus A} = X \setminus A^\circ\)（对偶性）。</p>
+            <h4>1. 内部 (Interior)</h4>
+            <p>设 \((X, \tau)\) 为拓扑空间，\(A \subseteq X\)。\(A\) 的<strong>内部</strong>定义为</p>
+            \[A^\circ = \mathrm{Int}(A) = \bigcup\{U \in \tau : U \subseteq A\}\]
+            <p>即 \(A\) 中包含的所有开集之并——\(A\) 内<strong>最大的开集</strong>。性质：\(A\) 是开集 \(\iff A = A^\circ\)。</p>
+
+            <h4>2. 闭包 (Closure)</h4>
+            <p>\(A\) 的<strong>闭包</strong>定义为</p>
+            \[\overline{A} = \bigcap\{F : F \supseteq A,\; F \text{ 闭}\}\]
+            <p>即包含 \(A\) 的所有闭集之交——包含 \(A\) 的<strong>最小闭集</strong>。等价的邻域刻画：</p>
+            \[x \in \overline{A} \;\Longleftrightarrow\; \forall\, U \in \tau,\; x \in U \Rightarrow U \cap A \neq \emptyset\]
+            <p>性质：\(A\) 是闭集 \(\iff A = \overline{A}\)。</p>
+
+            <h4>3. 边界与导集</h4>
+            <ul>
+              <li><strong>边界：</strong>\(\partial A = \overline{A} \setminus A^\circ\)，即"既靠近 \(A\) 又靠近 \(A\) 的补"的点集。</li>
+              <li><strong>导集：</strong>\(A' = \{x \in X : \forall\, U \ni x \text{ 开},\; (U \setminus \{x\}) \cap A \neq \emptyset\}\)——\(x\) 的每个去心邻域都与 \(A\) 相交。</li>
+              <li><strong>闭包分解：</strong>\(\overline{A} = A \cup A'\)（闭包 = 原集合 ∪ 聚点集）。</li>
+            </ul>
+
+            <h4>4. 邻域与对偶关系</h4>
+            <p>\(V\) 是 \(x\) 的<strong>邻域</strong> \(\iff \exists\, U \in \tau,\; x \in U \subseteq V\)（不要求 \(V\) 本身开）。核心对偶公式：</p>
+            \[\overline{X \setminus A} = X \setminus A^\circ, \qquad (X \setminus A)^\circ = X \setminus \overline{A}\]
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>稠密子集与可分性：</strong>\(A\) 在 \(X\) 中<strong>稠密</strong>当且仅当 \(\overline{A} = X\)。例如 \(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密。可分空间（存在可数稠密子集）在分析和概率论中至关重要——Hilbert 空间的可分性保证可数正交基的存在。</p>
+            <p><strong>无处稠密与 Baire 范畴：</strong>若 \(\overline{A}\) 的内部为空，称 \(A\) 为<strong>无处稠密集</strong>。Baire 范畴定理说完备度量空间不是可数个无处稠密集的并——这是证明一致有界原理、开映射定理的关键。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(\mathbb{R}\)（标准拓扑）中求 \(A = (0,1) \cup \{2\}\) 的 闭包、内部和边界。 解答：\(\overline{A} = [0,1] \cup \{2\}\)（\(0,1\) 是 \((0,1)\) 的聚点， \(2\) 是孤立点，已在 \(A\) 中）。 \(A^\circ = (0,1)\)（\(\{2\}\) 不包含任何开区间）。 \(\partial A = \{0, 1, 2\}\)。 易错点：误认"\(\{2\}\) 是孤立点所以不在闭包中"。\(2 \in A\)， 故 \(2 \in \overline{A}\)（闭包总包含原集合）。</p>
+            <h4>例题：求闭包、内部与边界</h4>
+            <p><strong>题目：</strong>在 \(\mathbb{R}\)（标准拓扑）中，求 \(A = (0,1) \cup \{2\}\) 的闭包、内部和边界。</p>
+            <p><strong>第一步 — 求闭包：</strong>\(0\) 和 \(1\) 是 \((0,1)\) 的聚点（任何开邻域都与 \((0,1)\) 相交）；\(2\) 不是聚点但 \(2 \in A\)，故</p>
+            \[\overline{A} = [0, 1] \cup \{2\}\]
+            <p><strong>第二步 — 求内部：</strong>\((0,1)\) 本身是开集；\(\{2\}\) 不含任何开区间，故 \(A^\circ = (0,1)\)。</p>
+            <p><strong>第三步 — 求边界：</strong></p>
+            \[\partial A = \overline{A} \setminus A^\circ = \big([0,1] \cup \{2\}\big) \setminus (0,1) = \{0, 1, 2\}\]
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 误认"2 是孤立点所以不在闭包中"。<br>✅ 闭包总包含原集合：\(A \subseteq \overline{A}\)，所以 \(2 \in A \Rightarrow 2 \in \overline{A}\)。</li>
+              <li>❌ 计算闭包时只取聚点、忘记原集合本身。<br>✅ \(\overline{A} = A \cup A'\)，不是仅 \(A' = \{0, 1\}\)。</li>
+              <li>❌ 认为边界总是"一维曲线"的欧氏直觉。<br>✅ 一般拓扑中，边界可以是任意集合。例如 \(\partial \mathbb{Q} = \mathbb{R}\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -515,35 +619,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>一个拓扑可能包含大量开集，逐一列举不现实。然而，很多拓扑可以 由"少量"集合通过取并生成——正如向量空间可由基生成一样。拓扑基 (base) 提供了一种经济的方式来描述拓扑。子基则更进一步，允许从 有限交再取并来生成拓扑，这在构造积拓扑和弱拓扑时极为有用。</p>
+            <ul>
+              <li><strong>经济地描述拓扑：</strong>一个拓扑可能包含巨量开集（如 \(\mathbb{R}\) 的标准拓扑有 \(2^{\mathfrak{c}}\) 个开集），逐一列举不现实。但正如向量空间可由基生成，拓扑也可由"少量"集合通过取并生成。</li>
+              <li><strong>构造拓扑的标准手段：</strong>实际中，拓扑往往通过指定基来定义——例如开区间族 \(\{(a,b)\}\) 生成 \(\mathbb{R}\) 的标准拓扑，半开区间族 \(\{[a,b)\}\) 生成 Sorgenfrey 拓扑。</li>
+              <li><strong>子基的核心作用：</strong>子基允许从更少的数据出发，通过有限交再取并来构造拓扑。定义积拓扑、弱拓扑时，子基是不可或缺的工具。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>层次结构：子基 → 取有限交得到基 → 取任意并得到拓扑。 这是一种"自下而上"的构造思路，类似代数中由生成元生成群。</p>
+            <ul>
+              <li><strong>层次结构：</strong>子基 \(\xrightarrow{\text{有限交}}\) 基 \(\xrightarrow{\text{任意并}}\) 拓扑。这是"由生成元生成结构"的拓扑版本，类似代数中由生成元生成群。</li>
+              <li><strong>基的双重角色：</strong>基既可以"描述"已有拓扑（每个开集是基元素的并），也可以"构造"新拓扑（从满足 (B1)(B2) 的集族出发）。</li>
+              <li><strong>最小拓扑思想：</strong>由子基 \(\mathcal{S}\) 生成的拓扑是包含 \(\mathcal{S}\) 的所有拓扑的交——"最小的使 \(\mathcal{S}\) 中元素都开的拓扑"。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>基的定义</strong>：\(\mathcal{B} \subseteq \tau\) 是拓扑 \(\tau\) 的基， 若每个 \(U \in \tau\) 都可写为 \(\mathcal{B}\) 中元素的并。 <strong>基的判定</strong>：\(\mathcal{B} \subseteq \mathcal{P}(X)\) 是某个拓扑的基 当且仅当： (B1) \(\bigcup_{B \in \mathcal{B}} B = X\)； (B2) 若 \(x \in B_1 \cap B_2\)（\(B_1, B_2 \in \mathcal{B}\)）， 则 \(\exists B_3 \in \mathcal{B}\)，\(x \in B_3 \subseteq B_1 \cap B_2\)。 由 \(\mathcal{B}\) 生成的拓扑为 \[\tau_{\mathcal{B}} = \Big\{\bigcup_{\alpha} B_\alpha : B_\alpha \in \mathcal{B}\Big\}\] <strong>子基</strong>：\(\mathcal{S} \subseteq \mathcal{P}(X)\) 且 \(\bigcup \mathcal{S} = X\)。 由 \(\mathcal{S}\) 生成的拓扑是使 \(\mathcal{S} \subseteq \tau\) 的最小拓扑： 以 \(\mathcal{S}\) 的有限交构成基，再取任意并。</p>
+            <h4>1. 拓扑基的定义与判定</h4>
+            <p>\(\mathcal{B} \subseteq \tau\) 是拓扑 \(\tau\) 的<strong>基</strong>（base），若每个 \(U \in \tau\) 都可写成 \(\mathcal{B}\) 中元素的并。</p>
+            <p><strong>基的判定定理：</strong>\(\mathcal{B} \subseteq \mathcal{P}(X)\) 是某个拓扑的基，当且仅当：</p>
+            <ul>
+              <li><strong>(B1) 覆盖：</strong>\(\bigcup_{B \in \mathcal{B}} B = X\)。</li>
+              <li><strong>(B2) 交的细化：</strong>若 \(x \in B_1 \cap B_2\)（\(B_1, B_2 \in \mathcal{B}\)），则 \(\exists\, B_3 \in \mathcal{B}\) 使 \(x \in B_3 \subseteq B_1 \cap B_2\)。</li>
+            </ul>
+
+            <h4>2. 由基生成拓扑</h4>
+            <p>满足 (B1)(B2) 的 \(\mathcal{B}\) 生成的拓扑为</p>
+            \[\tau_{\mathcal{B}} = \Big\{\bigcup_{\alpha} B_\alpha : B_\alpha \in \mathcal{B}\Big\}\]
+            <p>等价刻画：\(U \in \tau_{\mathcal{B}} \iff \forall x \in U,\; \exists B \in \mathcal{B},\; x \in B \subseteq U\)。</p>
+
+            <h4>3. 子基与生成拓扑</h4>
+            <p>\(\mathcal{S} \subseteq \mathcal{P}(X)\) 且 \(\bigcup \mathcal{S} = X\) 称为<strong>子基</strong>。由 \(\mathcal{S}\) 生成拓扑的步骤：</p>
+            <ul>
+              <li>取 \(\mathcal{S}\) 中元素的所有<strong>有限交</strong>，得到集族 \(\mathcal{B}_{\mathcal{S}}\)。</li>
+              <li>\(\mathcal{B}_{\mathcal{S}}\) 自动满足 (B1)(B2)，构成拓扑基。</li>
+              <li>再取 \(\mathcal{B}_{\mathcal{S}}\) 的任意并，得到拓扑 \(\tau(\mathcal{S})\)。</li>
+            </ul>
+            <p>这是使 \(\mathcal{S} \subseteq \tau\) 的<strong>最小拓扑</strong>。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 积拓扑的标准子基是 \(\pi_\alpha^{-1}(U_\alpha)\) 形式的集合 - 弱拓扑（泛函分析）由一族函数的原像构成子基</p>
+            <p><strong>积拓扑的构造：</strong>积空间 \(\prod X_\alpha\) 的拓扑以 \(\{\pi_\alpha^{-1}(U_\alpha) : U_\alpha \in \tau_\alpha\}\) 为子基。有限交得到"有限个坐标受限"的柱集，再取并得积拓扑。这正是 Tychonoff 定理的舞台。</p>
+            <p><strong>弱拓扑与泛函分析：</strong>给定一族映射 \(\{f_i : X \to Y_i\}\)，以 \(\{f_i^{-1}(V) : V \in \tau_{Y_i}\}\) 为子基生成的拓扑就是<strong>初始拓扑</strong>（弱拓扑）。Banach 空间的弱拓扑与弱*拓扑均以此方式定义。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(\mathcal{B} = \{(a,b) : a < b,\; a,b \in \mathbb{R}\}\) 是 \(\mathbb{R}\) 标准拓扑的一个基。 解答：(B1) \(\mathbb{R} = \bigcup_{n} (-n, n)\)。 (B2) \((a_1,b_1) \cap (a_2,b_2) = (\max(a_1,a_2), \min(b_1,b_2))\)， 若非空则本身 \(\in \mathcal{B}\)。 生成的拓扑恰好是标准拓扑（每个标准开集是开区间的并）。 易错点：Sorgenfrey 直线的基是 \(\{[a,b) : a < b\}\)， \([a,b) \cap [c,d) = [\max(a,c), \min(b,d))\) 仍是该形式， 但其拓扑严格细于标准拓扑。不要混淆不同基生成的不同拓扑。</p>
+            <h4>例题：开区间族是 \(\mathbb{R}\) 标准拓扑的基</h4>
+            <p><strong>题目：</strong>证明 \(\mathcal{B} = \{(a, b) : a < b,\; a, b \in \mathbb{R}\}\) 是 \(\mathbb{R}\) 标准拓扑的基。</p>
+            <p><strong>第一步 — 验证 (B1)：</strong>\(\mathbb{R} = \bigcup_{n=1}^{\infty}(-n, n)\)，故 \(\mathcal{B}\) 覆盖 \(\mathbb{R}\)。✔</p>
+            <p><strong>第二步 — 验证 (B2)：</strong>设 \(x \in (a_1, b_1) \cap (a_2, b_2)\)。令 \(a = \max(a_1, a_2)\)，\(b = \min(b_1, b_2)\)，则</p>
+            \[(a_1, b_1) \cap (a_2, b_2) = (a, b) \in \mathcal{B}\]
+            <p>取 \(B_3 = (a, b)\) 即可——交本身就属于 \(\mathcal{B}\)。✔</p>
+            <p><strong>结论：</strong>每个标准开集都是开区间的并，故 \(\tau_{\mathcal{B}}\) 恰是标准拓扑。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"基"与"拓扑"——认为基的元素就是全部开集。<br>✅ 基元素通过取并产生更多开集。例如 \((0,1) \cup (2,3)\) 是开集但不在 \(\mathcal{B}\) 中。</li>
+              <li>❌ 将 Sorgenfrey 基 \(\{[a,b)\}\) 与标准基 \(\{(a,b)\}\) 混用，认为生成相同拓扑。<br>✅ Sorgenfrey 拓扑严格细于标准拓扑（\(\tau_{\text{Sorg}} \supsetneq \tau_{\text{std}}\)）。</li>
+              <li>❌ 验证 (B2) 时忘记考虑 \(B_1 \cap B_2 = \emptyset\) 的情况。<br>✅ 交为空时条件空成立（无 \(x\) 需验证），无额外处理。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -591,35 +737,78 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>并非所有拓扑空间都"好用"——有些太大、太病态。可数公理（第一 可数与第二可数）限制了拓扑的"尺寸"，使得序列方法有效、空间 可分。理解这些公理有助于区分"好"的空间与"病态"的空间，也是 度量化定理（Urysohn 度量化）的前提条件。</p>
+            <ul>
+              <li><strong>区分"好"空间与"病态"空间：</strong>并非所有拓扑空间都易于分析。可数公理限制了拓扑的"尺寸"，使序列方法有效、空间结构可控。</li>
+              <li><strong>序列与网的分野：</strong>在第一可数空间中，序列足以刻画闭包和连续性；失去第一可数后，必须使用更一般的网 (net) 或滤子 (filter)。明确可数公理的角色是掌握高级拓扑的关键。</li>
+              <li><strong>度量化的前提：</strong>第二可数公理是 Urysohn 度量化定理的必要条件之一（正则 + \(C_2\) ⟹ 可度量化），将抽象拓扑空间重新拉回度量世界。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心思想：用可数集合控制拓扑的复杂度。第一可数保证每点的邻 域系有可数基（序列足以刻画拓扑），第二可数保证全空间的拓扑 有可数基（空间"本质上不太大"）。</p>
+            <ul>
+              <li><strong>用可数性控制复杂度：</strong>\(C_1\) = 每点的邻域系可由可数子族逼近；\(C_2\) = 全空间的拓扑可由可数族生成。</li>
+              <li><strong>蕴含链条：</strong>\(C_2 \Rightarrow C_1\)（全局可数基在每点截取得局部可数基）；\(C_2 \Rightarrow\) 可分（基中各取一点即得稠密子集）。但反向均不成立。</li>
+              <li><strong>典型空间的分类：</strong>学习时需要一组"标本"——离散拓扑、平庸拓扑、余有限拓扑、Sorgenfrey 直线等——来检验各性质的独立性和蕴含关系。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>第一可数 (C₁)</strong>：\(\forall x \in X\)，存在 \(x\) 的可数邻域基 \(\{U_n\}_{n=1}^{\infty}\)，即对任意 \(x\) 的邻域 \(V\)，存在 \(n\) 使 \(U_n \subseteq V\)。 <strong>第二可数 (C₂)</strong>：\(\tau\) 有可数基 \(\mathcal{B}\)。 蕴含关系：\(C_2 \Rightarrow C_1\)（取 \(\{B \in \mathcal{B} : x \in B\}\) 即为 \(x\) 的可数邻域基），\(C_2 \Rightarrow\) 可分。 <strong>可分空间</strong>：\(X\) 含可数稠密子集。\(\mathbb{R}^n\) 可分（\(\mathbb{Q}^n\) 稠密）。 <strong>典型拓扑举例</strong>： - 离散拓扑：\(\tau = \mathcal{P}(X)\)，每个子集都开。\(X\) 可数时 \(C_2\)。 - 平庸拓扑：\(\tau = \{\emptyset, X\}\)，仅有两个开集。\(C_2\)。 - 余可数拓扑：类似余有限，开集的补是可数集或全空间。 - Sorgenfrey 直线：\(C_1\) 但不 \(C_2\)，可分但不 \(C_2\)。 \[C_2 \Rightarrow C_1,\quad C_2 \Rightarrow \text{可分},\quad \text{度量+可分} \Rightarrow C_2\]</p>
+            <h4>1. 第一可数公理 (C₁)</h4>
+            <p>空间 \((X, \tau)\) 满足 \(C_1\)，若</p>
+            \[\forall x \in X,\; \exists \{U_n\}_{n=1}^{\infty} \text{（可数邻域基）},\; \forall V \ni x \text{ 开},\; \exists n,\; U_n \subseteq V\]
+            <p>含义：\(x\) 的所有邻域都可由可数族从内部逼近。</p>
+            <ul>
+              <li>度量空间总满足 \(C_1\)：取 \(U_n = B(x, 1/n)\) 即可。</li>
+              <li>\(C_1\) 空间中：\(x \in \overline{A} \iff\) 存在 \(A\) 中序列收敛到 \(x\)。</li>
+            </ul>
+
+            <h4>2. 第二可数公理 (C₂)</h4>
+            <p>拓扑 \(\tau\) 有<strong>可数基</strong> \(\mathcal{B}\)。例如 \(\mathbb{R}^n\) 以有理端点开区间 \(\{(p,q) : p,q \in \mathbb{Q},\; p < q\}\) 为可数基。</p>
+
+            <h4>3. 蕴含关系与可分性</h4>
+            \[C_2 \;\Longrightarrow\; C_1, \qquad C_2 \;\Longrightarrow\; \text{可分}, \qquad \text{度量 + 可分} \;\Longrightarrow\; C_2\]
+            <p><strong>可分空间：</strong>存在可数稠密子集 \(D\)（\(\overline{D} = X\)）。\(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密 → \(\mathbb{R}\) 可分。</p>
+            <p>注意：可分 \(\not\Rightarrow C_2\)（Sorgenfrey 直线），\(C_1 \not\Rightarrow C_2\)（不可数离散空间）。</p>
+
+            <h4>4. 典型拓扑空间一览</h4>
+            <ul>
+              <li><strong>离散拓扑 \(\tau = \mathcal{P}(X)\)：</strong>每点邻域基 = \(\{\{x\}\}\)，故 \(C_1\)。\(X\) 可数时 \(C_2\)，不可数时非 \(C_2\)。</li>
+              <li><strong>平庸拓扑 \(\tau = \{\emptyset, X\}\)：</strong>\(C_2\)（基 = \(\{X\}\)），但极不分离。</li>
+              <li><strong>余可数拓扑：</strong>开集的补是可数集或全空间。余有限拓扑的自然推广。</li>
+              <li><strong>Sorgenfrey 直线：</strong>基 = \(\{[a,b)\}\)。\(C_1\)（取 \([x, x+1/n)\)），可分（\(\mathbb{Q}\) 稠密），但非 \(C_2\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 在泛函分析中，Hilbert 空间的可分性保证有可数正交基 - 第二可数是 Urysohn 度量化定理的必要条件之一</p>
+            <p><strong>Hilbert 空间与可分性：</strong>可分 Hilbert 空间具有可数正交基——这是傅里叶分析和量子力学中 \(L^2\) 理论的基础。可分性保证"空间不太大"，使得许多构造性论证成为可能。</p>
+            <p><strong>Urysohn 度量化定理：</strong>正则 + \(C_2\) 的拓扑空间可嵌入 \([0,1]^{\mathbb{N}}\)，从而可度量化。\(C_2\) 是连接抽象拓扑与度量世界的关键桥梁。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 Sorgenfrey 直线是第一可数但不是第二可数的。 解答：C₁：对每个 \(x\)，\(\{[x, x+1/n)\}_{n=1}^{\infty}\) 是 \(x\) 的 可数邻域基。 非 C₂：Sorgenfrey 直线上不可数集 \(\{[x, x+1) : x \in \mathbb{R}\}\) 中每个都含有基元素但互不包含；任何基至少包含不可数多个元素。 （更精确地说，\(\mathbb{R}\) 上每个 \([x, x+\varepsilon)\) 必须被基中元素 "从 \(x\) 开始覆盖"，不同 \(x\) 需要不同基元素。） 易错点：可分不蕴含第二可数（Sorgenfrey 直线是反例：\(\mathbb{Q}\) 稠密，故可分，但不是 C₂）。</p>
+            <h4>例题：Sorgenfrey 直线的可数公理</h4>
+            <p><strong>题目：</strong>证明 Sorgenfrey 直线满足 \(C_1\) 但不满足 \(C_2\)。</p>
+            <p><strong>第一步 — 证明 \(C_1\)：</strong>对每个 \(x \in \mathbb{R}\)，取 \(U_n = [x, x + 1/n)\)。对任意包含 \(x\) 的基开集 \([x, b)\)，取 \(n\) 充分大使 \(1/n < b - x\)，则 \(U_n \subseteq [x, b)\)。✔</p>
+            <p><strong>第二步 — 证明非 \(C_2\)：</strong>对每个 \(x \in \mathbb{R}\)，开集 \([x, x+1)\) 必须包含基中某个以 \(x\) 为左端点的元素。不同 \(x\) 需要不同基元素，而 \(\mathbb{R}\) 不可数，故任何基都不可数 → 不满足 \(C_2\)。✔</p>
+            <p><strong>附注：</strong>Sorgenfrey 直线可分（\(\mathbb{Q}\) 稠密）但非 \(C_2\)——说明<strong>可分 \(\not\Rightarrow C_2\)</strong>。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"可分一定蕴含第二可数"。<br>✅ 仅在度量空间中成立。Sorgenfrey 直线是可分但非 \(C_2\) 的典型反例。</li>
+              <li>❌ 证明非 \(C_2\) 时仅说"拓扑太大"，缺乏严格论证。<br>✅ 需说明每个 \(x\) 对应的左端点不同 → 所需基元素的基数 ≥ \(|\mathbb{R}|\)。</li>
+              <li>❌ 混淆 \(C_1\) 空间中"序列刻画拓扑"与一般空间——认为任何空间中序列都够用。<br>✅ 非 \(C_1\) 空间需要网 (net) 或滤子 (filter) 替代序列。</li>
+            </ul>
           </div>
         </div>
       </div>

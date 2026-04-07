@@ -394,35 +394,71 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>直觉上，一个空间是"连通"的意味着它是"一整块"——不能被切成两 个分开的部分。这个概念是中间值定理的拓扑本质，也是讨论空间 "整体性"的基础。精确化"不可分割"需要用开集语言：一个空间 连通当且仅当它不能写成两个非空不相交开集的并。</p>
+            <ul>
+              <li><strong>"一整块"的拓扑化：</strong>直觉上连通空间"不能被切成两个分开的部分"。精确化需要开集语言：不存在两个非空不相交开集覆盖全空间。</li>
+              <li><strong>中间值定理的本质：</strong>连续函数保持连通性 → \(f([a,b])\) 是区间 → 中间值定理。连通性是这一切的拓扑根基。</li>
+              <li><strong>代数拓扑的零阶信息：</strong>连通分量的个数 = \(\mathrm{rank}\, H_0(X)\)。连通性是最简单但最基本的拓扑不变量。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>连通性是拓扑不变量，被连续映射保持。它是代数拓扑中零阶 同调群 \(H_0\) 的"影子"（\(H_0(X) \cong \mathbb{Z}^k\)，\(k\) = 连通分量数）。</p>
+            <ul>
+              <li><strong>Clopen 条件：</strong>\(X\) 连通 \(\iff\) 既开又闭（clopen）的子集只有 \(\emptyset\) 和 \(X\)。</li>
+              <li><strong>二值函数条件：</strong>\(X\) 连通 \(\iff\) 不存在连续满射 \(f: X \to \{0, 1\}\)（离散拓扑）。</li>
+              <li><strong>拓扑不变量：</strong>连通性被连续映射保持——比同胚更弱的条件就够。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：\(X\) 连通 \(\iff\) 不存在非空开集 \(U, V\) 使 \(X = U \sqcup V\)（\(U \cap V = \emptyset\)）。 <strong>等价条件</strong>： (1) \(X\) 中既开又闭的集合只有 \(\emptyset\) 和 \(X\)（clopen 条件）。 (2) 不存在连续满射 \(f: X \to \{0, 1\}\)（离散拓扑）。 证明 (1)\(\iff\)原定义：若 \(A\) 是非空真 clopen 子集， 则 \(X = A \sqcup (X \setminus A)\)，两个非空开集。反之类似。 <strong>连通子集的性质</strong>： - 连通子集的闭包仍连通。 - 若 \(\{A_\alpha\}\) 都连通且 \(\bigcap A_\alpha \neq \emptyset\)， 则 \(\bigcup A_\alpha\) 连通。 <strong>R 的连通性</strong>：\(\mathbb{R}\) 连通。 证明：设 \(\mathbb{R} = U \sqcup V\)（非空开）。取 \(a \in U, b \in V\)，\(a < b\)。 令 \(c = \sup(U \cap [a,b])\)。若 \(c \in U\)，\(U\) 开 \(\Rightarrow\) \((c-\varepsilon, c+\varepsilon) \subseteq U\)，与 \(c = \sup\) 矛盾。 若 \(c \in V\)，\(V\) 开 \(\Rightarrow\) \((c-\varepsilon, c) \subseteq V\)， 与 \(c = \sup(U \cap [a,b])\) 矛盾（存在 \(U\) 中元素更接近 \(c\)）。 故 \(\mathbb{R}\) 不可分。</p>
+            <h4>1. 连通性的定义与等价条件</h4>
+            <p>\(X\) <strong>连通</strong> \(\iff\) 不存在非空开集 \(U, V\) 使 \(X = U \sqcup V\)（\(U \cap V = \emptyset\)）。</p>
+            <p>等价条件：(1) Clopen 子集仅 \(\emptyset, X\)；(2) 无连续满射 \(X \to \{0,1\}\)。</p>
+
+            <h4>2. 连通子集的性质</h4>
+            <ul>
+              <li>连通集的闭包仍连通：\(A\) 连通 ⟹ \(\overline{A}\) 连通。</li>
+              <li>有公共点的连通集族之并连通：\(\bigcap A_\alpha \neq \emptyset\) 且每个 \(A_\alpha\) 连通 ⟹ \(\bigcup A_\alpha\) 连通。</li>
+            </ul>
+
+            <h4>3. \(\mathbb{R}\) 的连通性</h4>
+            <p>设 \(\mathbb{R} = U \sqcup V\)（非空开），取 \(a \in U, b \in V\)，\(a < b\)。令 \(c = \sup(U \cap [a,b])\)。</p>
+            <ul>
+              <li>若 \(c \in U\)：\(U\) 开 ⟹ \((c-\varepsilon, c+\varepsilon) \subseteq U\)，与 \(c = \sup\) 矛盾。</li>
+              <li>若 \(c \in V\)：\(V\) 开 ⟹ \((c-\varepsilon, c) \subseteq V\)，但 \(\exists u \in U \cap (c-\varepsilon, c)\)，矛盾。</li>
+            </ul>
+            <p>故 \(\mathbb{R}\) 连通。推论：\(\mathbb{R}\) 的连通子集恰好是区间。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 中间值定理：\(f: [a,b] \to \mathbb{R}\) 连续，\(f(a) < 0 < f(b)\) \(\Rightarrow \exists c,\; f(c) = 0\)（连通性保持）</p>
+            <p><strong>中间值定理：</strong>\(f: [a,b] \to \mathbb{R}\) 连续，\(f(a) < 0 < f(b)\)。\([a,b]\) 连通 ⟹ \(f([a,b])\) 连通（= 区间）⟹ \(\exists c,\; f(c) = 0\)。这是二分法求根的理论基础。</p>
+            <p><strong>拓扑不变量区分空间：</strong>连通性可以区分 \(\mathbb{R}\) 与 \(\mathbb{R} \setminus \{0\}\)（移除一点后不连通 ⟹ 不同胚于 \(\mathbb{R}^2 \setminus \{0\}\)，后者仍连通）。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\mathbb{Q}\)（标准拓扑子空间）是否连通？ 解答：不连通。取任意无理数 \(\alpha\)， \(\mathbb{Q} = (\mathbb{Q} \cap (-\infty, \alpha)) \sqcup (\mathbb{Q} \cap (\alpha, +\infty))\)。 两个集合在子空间拓扑下都开且非空。 易错点：\(\mathbb{Q}\) "稠密"≠"连通"。稠密性和连通性是不同概念。</p>
+            <h4>例题：\(\mathbb{Q}\) 是否连通？</h4>
+            <p><strong>题目：</strong>\(\mathbb{Q}\)（标准拓扑子空间）是否连通？</p>
+            <p><strong>第一步 — 找分割：</strong>取任意无理数 \(\alpha\)（如 \(\sqrt{2}\)）。</p>
+            <p><strong>第二步 — 构造不相交开集：</strong>\(U = \mathbb{Q} \cap (-\infty, \alpha)\)，\(V = \mathbb{Q} \cap (\alpha, +\infty)\)。</p>
+            <p><strong>第三步 — 验证：</strong>\(U, V\) 在子空间拓扑下都开、非空、不相交、且 \(\mathbb{Q} = U \sqcup V\)。→ \(\mathbb{Q}\) 不连通。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"稠密" ⟹ "连通"。<br>✅ \(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密但自身完全不连通（是全不连通空间）。稠密性和连通性是不同的概念。</li>
+              <li>❌ 认为连通子集的子集仍连通。<br>✅ 连通性不遗传给任意子集。\((0,1) \cup (2,3) \subseteq \mathbb{R}\) 不连通。</li>
+              <li>❌ 混淆"连通"与"道路连通"。<br>✅ 道路连通 ⟹ 连通，反之不成立（拓扑学家的正弦曲线）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -467,28 +503,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>连通性的核心应用是中间值定理的拓扑推广：连续函数将连通集映为 连通集。在 \(\mathbb{R}\) 中，连通集就是区间，因此连续函数的像 是区间——这正是中间值定理。这个简单的观察是证明方程有解的 强大工具。</p>
+            <ul>
+              <li><strong>连通性的传递：</strong>连续函数将连通集映为连通集。在 \(\mathbb{R}\) 中连通集 = 区间，因此连续函数的值域是区间——这就是中间值定理。</li>
+              <li><strong>方程求解的存在性：</strong>IVT 是证明方程有解的强大工具：只需验证函数在两点取异号值，即可保证零点存在。</li>
+              <li><strong>拓扑不变量的应用：</strong>连通性被连续映射保持 → 可用来证明空间不同胚（如 \(\mathbb{R}\) 与 \(\mathbb{R}^2\)  不同胚，因为移除一点后连通性不同）。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>\(\mathbb{R}\) 的连通子集 = 区间：</strong>这是 IVT 的核心：连续像保连通 + \(\mathbb{R}\) 中连通 ⟺ 区间 → 中间值性质。</li>
+              <li><strong>拓扑 IVT 比分析 IVT 更强：</strong>拓扑版本不需要实数的序结构，适用于任何连通空间到 \(\mathbb{R}\) 的连续映射。</li>
+              <li><strong>与紧致性的配合：</strong>连通 + 紧致 → 连续像是紧致连通集 = 闭区间 → 取到最大最小值且覆盖所有中间值。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理：连续映射保连通性</strong>。 设 \(f: X \to Y\) 连续，\(X\) 连通。若 \(f(X) = A \sqcup B\)（\(A, B\) 在 \(f(X)\) 中开且不相交），则 \(X = f^{-1}(A) \sqcup f^{-1}(B)\)， \(f^{-1}(A), f^{-1}(B)\) 在 \(X\) 中开且不相交。 \(X\) 连通 \(\Rightarrow\) 其中之一为空 \(\Rightarrow\) \(A\) 或 \(B\) 为空。 故 \(f(X)\) 连通。 <strong>中间值定理（拓扑版）</strong>：\(f: X \to \mathbb{R}\) 连续，\(X\) 连通。 \(f(X)\) 是 \(\mathbb{R}\) 的连通子集 = 区间。 特别地，若 \(f(a) < c < f(b)\)，则 \(\exists x \in X\)，\(f(x) = c\)。 <strong>\(\mathbb{R}\) 中连通集的刻画</strong>：\(A \subseteq \mathbb{R}\) 连通 \(\iff\) \(A\) 是区间（含退化情况）。 证明充分性：设 \(a < c < b\)，\(a, b \in A\)。若 \(c \notin A\)， 则 \(A = (A \cap (-\infty, c)) \sqcup (A \cap (c, +\infty))\)， 两非空开集，矛盾。</p>
+            <h4>1. 连续映射保连通性</h4>
+            <p>设 \(f: X \to Y\) 连续，\(X\) 连通。若 \(f(X) = A \sqcup B\)（\(A, B\) 在 \(f(X)\) 中开且不相交），则：</p>
+            <ul>
+              <li>\(X = f^{-1}(A) \sqcup f^{-1}(B)\)，两者在 \(X\) 中开且不相交。</li>
+              <li>\(X\) 连通 ⟹ 其中之一为空 ⟹ \(A\) 或 \(B\) 为空 ⟹ \(f(X)\) 连通。</li>
+            </ul>
+
+            <h4>2. 中间值定理（拓扑版）</h4>
+            <p>\(f: X \to \mathbb{R}\) 连续，\(X\) 连通。\(f(X)\) 是 \(\mathbb{R}\) 的连通子集 = 区间。特别地：</p>
+            \[f(a) < c < f(b) \;\Longrightarrow\; \exists\, x \in X,\quad f(x) = c\]
+
+            <h4>3. \(\mathbb{R}\) 中连通集的刻画</h4>
+            <p>\(A \subseteq \mathbb{R}\) 连通 \(\iff A\) 是区间（含退化情况：空集、单点、各种开/闭/半开区间、射线、\(\mathbb{R}\)）。</p>
+            <p>充分性证明：设 \(a < c < b\) 且 \(a, b \in A\)。若 \(c \notin A\)，则 \(A = (A \cap (-\infty, c)) \sqcup (A \cap (c, +\infty))\) 是两个非空开子集，矛盾。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 证明奇数次实系数多项式至少有一个实根 - 物理中连续介质的中间值性质</p>
+            <p><strong>多项式方程求解：</strong>奇数次实系数多项式 \(p(x)\) 必有实根：\(p(x) \to +\infty\)（\(x \to +\infty\)），\(p(x) \to -\infty\)（\(x \to -\infty\)），由 IVT 得零点。</p>
+            <p><strong>不动点定理：</strong>\(f: [0,1] \to [0,1]\) 连续 ⟹ \(\exists x,\; f(x) = x\)。证明：\(g(x) = f(x) - x\) 在两端取异号，IVT 给出零点。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明方程 \(x^5 + x = 1\) 在 \((0,1)\) 中有解。 解答：\(f(x) = x^5 + x - 1\)，\(f(0) = -1 < 0\)，\(f(1) = 1 > 0\)。 \(f\) 连续（多项式），\([0,1]\) 连通。由中间值定理， \(\exists c \in (0,1)\)，\(f(c) = 0\)。 易错点：中间值定理保证存在性但不保证唯一性。 验证唯一需要单调性或其他分析工具。</p>
+            <h4>例题：\(x^5 + x = 1\) 在 \((0,1)\) 中有解</h4>
+            <p><strong>题目：</strong>证明方程 \(x^5 + x = 1\) 在 \((0,1)\) 中至少有一个解。</p>
+            <p><strong>第一步 — 定义函数：</strong>\(f(x) = x^5 + x - 1\)，\(f\) 是多项式，连续。</p>
+            <p><strong>第二步 — 计算端点值：</strong>\(f(0) = -1 < 0\)，\(f(1) = 1 > 0\)。</p>
+            <p><strong>第三步 — 应用 IVT：</strong>\([0,1]\) 连通，\(f\) 连续，\(0\) 介于 \(f(0)\) 和 \(f(1)\) 之间。由中间值定理，\(\exists c \in (0,1),\; f(c) = 0\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 用 IVT 得出"恰好一个解"。<br>✅ IVT 只保证<strong>存在性</strong>，不保证唯一性。唯一性需要单调性（如 \(f'(x) = 5x^4 + 1 > 0\)）。</li>
+              <li>❌ 在不连通的定义域上使用 IVT。<br>✅ IVT 要求定义域<strong>连通</strong>。在 \((0,1) \cup (2,3)\) 上不能直接使用。</li>
+              <li>❌ 认为连续满射保持不连通性。<br>✅ 连续映射保持连通性，但不保持不连通性。不连通空间的连续像可以连通。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -515,28 +591,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>连通性的定义看似抽象（用开集），一个更直观的概念是"道路连通"： 任何两点之间都可以用连续路径连接。道路连通蕴含连通，但反之 不成立——著名的反例是"拓扑学家的正弦曲线"。理解两者的区别 对于正确使用基本群等工具（要求道路连通）至关重要。</p>
+            <ul>
+              <li><strong>更直观的连通概念：</strong>"道路连通"要求任意两点之间都可用连续路径连接，比开集定义的连通性更具几何直觉。</li>
+              <li><strong>强于连通但不等价：</strong>道路连通 ⟹ 连通，反之不成立。拓扑学家的正弦曲线是经典反例——连通但非道路连通。</li>
+              <li><strong>基本群的前提：</strong>基本群 \(\pi_1(X, x_0)\) 的定义需要道路（回路）。要使基本群与基点选取无关，需要道路连通性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>道路连通是更强的"可达性"条件，直接关联到基本群的定义 （基本群需要道路来定义回路）。</p>
+            <ul>
+              <li><strong>道路 = 连续映射：</strong>从 \([0,1]\) 到 \(X\) 的连续映射。道路连通性将"可达性"转化为映射的存在性问题。</li>
+              <li><strong>连通 ⊋ 道路连通：</strong>差异源自"闭包保连通但不保道路连通"。拓扑学家正弦曲线的曲线部分道路连通，但其闭包（加上竖线段）不是。</li>
+              <li><strong>局部道路连通 + 连通 ⟹ 道路连通：</strong>在"好"的空间（如流形、CW 复形）中两者等价。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>道路连通</strong>：\(X\) 道路连通 \(\iff\) \(\forall x, y \in X\)， \(\exists \gamma: [0,1] \to X\) 连续，\(\gamma(0) = x\)，\(\gamma(1) = y\)。 <strong>道路连通 \(\Rightarrow\) 连通</strong>：若 \(X = U \sqcup V\)， 取 \(x \in U, y \in V\)。\(\gamma: [0,1] \to X\) 连续路径。 \([0,1]\) 连通 \(\Rightarrow \gamma([0,1])\) 连通 \(\Rightarrow\) \(\gamma([0,1]) \subseteq U\) 或 \(\gamma([0,1]) \subseteq V\)。 但 \(\gamma(0) = x \in U\)，\(\gamma(1) = y \in V\)，矛盾。 <strong>反之不成立——拓扑学家的正弦曲线</strong>： \(S = \{(x, \sin(1/x)) : x > 0\} \cup \{(0, y) : -1 \leq y \leq 1\}\)。 \(S\) 连通（\(S_0 = \{(x, \sin(1/x)) : x > 0\}\) 连通，\(S = \overline{S_0}\)， 连通集的闭包连通）。但 \(S\) 不道路连通：不存在从 \((0,0)\) 到 \((1/\pi, 0)\) 的连续路径（直觉：曲线在 \(x=0\) 附近"震荡无穷多次"）。</p>
+            <h4>1. 道路连通的定义</h4>
+            <p>\(X\) <strong>道路连通</strong> \(\iff \forall x, y \in X,\; \exists \gamma: [0,1] \to X\) 连续，\(\gamma(0) = x,\; \gamma(1) = y\)。</p>
+
+            <h4>2. 道路连通 ⟹ 连通</h4>
+            <p>设 \(X = U \sqcup V\)（非空开）。取 \(x \in U,\; y \in V\)，路径 \(\gamma: [0,1] \to X\)。\([0,1]\) 连通 ⟹ \(\gamma([0,1])\) 连通 ⟹ 整体落入 \(U\) 或 \(V\)。但 \(\gamma(0) \in U,\; \gamma(1) \in V\)，矛盾。</p>
+
+            <h4>3. 反例：拓扑学家的正弦曲线</h4>
+            <p>定义 \(S = \{(x, \sin(1/x)) : x > 0\} \cup \{0\} \times [-1, 1]\)。</p>
+            <ul>
+              <li><strong>连通：</strong>\(S_0 = \{(x, \sin(1/x)) : x > 0\}\) 道路连通（参数化连续路径）⟹ 连通。\(S = \overline{S_0}\)，闭包保连通。</li>
+              <li><strong>非道路连通：</strong>不存在从 \((0,0)\) 到 \((1/\pi, 0)\) 的连续路径。直觉：曲线在 \(x \to 0^+\) 时无穷次震荡，路径的连续性要求在有限时间内完成无穷多次振荡，这不可能。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>基本群的良定义性：</strong>在道路连通空间中，基本群 \(\pi_1(X, x_0)\) 与基点 \(x_0\) 的选取无关（同构意义下）。若空间仅连通但非道路连通，不同"部分"的基本群可能无法比较。</p>
+            <p><strong>机器人路径规划：</strong>构型空间的道路连通性保证从任一初始位姿到目标位姿存在连续运动轨迹。道路不连通意味着存在机器人无法到达的构型。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\mathbb{R}^n \setminus \{0\}\)（\(n \geq 2\)）是否道路连通？ 解答：是。对任意 \(x, y \in \mathbb{R}^n \setminus \{0\}\)（\(n \geq 2\)）， 若线段 \(tx + (1-t)y\) 不经过原点，直接连。 若经过原点（即 \(y = -\lambda x\)，\(\lambda > 0\)），取中间点 \(z\) 不在 \(x, y\) 的直线上（\(n \geq 2\) 保证可以）， 用两段折线 \(x \to z \to y\) 连接。 易错点：\(\mathbb{R} \setminus \{0\}\) 不道路连通（甚至不连通： \((-\infty, 0) \sqcup (0, +\infty)\)）。维度 \(n \geq 2\) 是关键。</p>
+            <h4>例题：\(\mathbb{R}^n \setminus \{0\}\) 的道路连通性</h4>
+            <p><strong>题目：</strong>\(\mathbb{R}^n \setminus \{0\}\) 在 \(n \geq 2\) 时道路连通，\(n = 1\) 时不连通。</p>
+            <p><strong>第一步 — \(n = 1\)：</strong>\(\mathbb{R} \setminus \{0\} = (-\infty, 0) \cup (0, +\infty)\)，两个不相交开集 → 不连通（甚至不连通）。</p>
+            <p><strong>第二步 — \(n \geq 2\)：</strong>对任意 \(x, y \neq 0\)。若线段 \(tx + (1-t)y\) 不经过原点 → 直接连。</p>
+            <p><strong>第三步 — 经过原点的情况：</strong>\(y = -\lambda x\)（\(\lambda > 0\)）。取 \(z\) 不在 \(x, y\) 所在的直线上（\(n \geq 2\) 保证存在），用折线 \(x \to z \to y\) 绕过原点。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(\mathbb{R} \setminus \{0\}\) 道路连通。<br>✅ \(n = 1\) 时移除一点断开空间。<strong>维度 \(n \geq 2\) 是关键</strong>。</li>
+              <li>❌ "连通 ⟹ 道路连通"在所有空间成立。<br>✅ 仅在局部道路连通空间中成立。拓扑学家正弦曲线是反例。</li>
+              <li>❌ 认为紧致空间一定道路连通。<br>✅ Cantor 集紧致但全不连通（甚至不连通）。紧致性与连通性相互独立。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -563,28 +677,71 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>即使空间不连通，我们也想理解它的"组成部分"。每个点属于唯一的 最大连通子集——连通分量。类似地有道路连通分量。局部连通性则 是保证连通分量是开集（而不仅仅闭集）的条件——这在基本群理论 和覆叠空间理论中是重要的技术假设。</p>
+            <ul>
+              <li><strong>不连通空间的结构分析：</strong>即使空间不连通，也可以分解为最大连通子集——连通分量。这给出空间的"组成部分"分类。</li>
+              <li><strong>局部连通性：</strong>连通分量总是闭集，但不一定是开集。局部连通性保证连通分量<strong>既开又闭</strong>，这在覆叠空间理论中是关键假设。</li>
+              <li><strong>全不连通空间：</strong>Cantor 集（每个连通分量是单点）在动力系统、分形理论中扮演核心角色。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>三层结构：</strong>连通分量 ⊇ 道路连通分量 ⊇ 单点。全不连通空间中三层退化为单点。</li>
+              <li><strong>局部 → 全局：</strong>局部道路连通 + 连通 ⟹ 道路连通。局部连通性是将连通性"局部化"后反推全局性质的桥梁。</li>
+              <li><strong>分量构成分划：</strong>连通分量将空间分划为不相交的闭集族。局部连通时是 clopen 分划（即不相交的开闭集族）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>连通分量</strong>：\(x\) 的连通分量 \(C(x) = \bigcup\{A : x \in A,\; A \text{ 连通}\}\)。 \(C(x)\) 是包含 \(x\) 的最大连通子集。 性质：\(C(x)\) 是闭集（连通集的闭包连通）。 \(\{C(x)\}_{x \in X}\) 构成 \(X\) 的分划。 <strong>道路连通分量</strong>：\(P(x) = \{y : \exists \gamma \text{ 从 } x \text{ 到 } y\}\)。 \(P(x) \subseteq C(x)\)，但不一定相等。 <strong>局部连通</strong>：\(\forall x\)，\(\forall U \ni x\) 开，\(\exists V\) 连通开， \(x \in V \subseteq U\)。 <strong>局部道路连通</strong>：类似，用道路连通开集。 关键定理： \[\text{局部连通} \Rightarrow \text{连通分量是开集（也是闭集）}\] \[\text{局部道路连通 + 连通} \Rightarrow \text{道路连通}\] <strong>全不连通</strong>：每个连通分量是单点集。 例：\(\mathbb{Q}\)，Cantor 集。</p>
+            <h4>1. 连通分量</h4>
+            <p>\(x\) 的<strong>连通分量</strong>：\(C(x) = \bigcup\{A : x \in A,\; A \text{ 连通}\}\)。这是包含 \(x\) 的最大连通子集。</p>
+            <ul>
+              <li>\(C(x)\) 是闭集（连通集的闭包连通，故最大连通集包含自身闭包）。</li>
+              <li>\(\{C(x)\}_{x \in X}\) 构成 \(X\) 的分划。</li>
+            </ul>
+
+            <h4>2. 道路连通分量</h4>
+            <p>\(P(x) = \{y \in X : \exists \text{ 从 } x \text{ 到 } y \text{ 的路径}\}\)。\(P(x) \subseteq C(x)\)，但不一定相等。</p>
+
+            <h4>3. 局部连通性</h4>
+            <p>\(X\) <strong>局部连通</strong> \(\iff \forall x,\; \forall U \ni x\) 开，\(\exists V\) 连通开使 \(x \in V \subseteq U\)。</p>
+            \[\text{局部连通} \;\Longrightarrow\; \text{连通分量是开集（也是闭集）}\]
+            \[\text{局部道路连通 + 连通} \;\Longrightarrow\; \text{道路连通}\]
+
+            <h4>4. 全不连通空间</h4>
+            <p>每个连通分量是单点集。例：\(\mathbb{Q}\)、Cantor 集 \(C\)。注意：全不连通 ≠ 离散（\(C\) 没有孤立点）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 覆叠空间理论要求底空间局部道路连通且半局部单连通 - Cantor 集（全不连通紧集）在动力系统和分形理论中扮演重要角色</p>
+            <p><strong>覆叠空间理论：</strong>要求底空间 \(X\) 局部道路连通且半局部单连通。局部道路连通保证覆叠空间的纤维（离散集）上的道路提升唯一。</p>
+            <p><strong>Cantor 集与动力系统：</strong>混沌系统的不变集（如 Smale 马蹄映射的不变集）常同胚于 Cantor 集。全不连通性反映了轨道的高度敏感依赖性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：Cantor 集 \(C\) 是全不连通的。简述原因。 解答：\(C\) 是从 \([0,1]\) 中反复去掉中间三分之一开区间得到的。 对任意 \(x \neq y \in C\)，\(|x-y| > 0\)，存在某一步被去掉的 区间 \((a,b) \subseteq [0,1] \setminus C\) 且 \(a < \min(x,y)\) 或 \(\max(x,y) < b\) 的情况使得 \(x, y\) 被分隔。 更精确：\(C\) 中不包含任何区间（其补在 \([0,1]\) 中稠密）， 所以 \(C\) 的任何含两个以上点的子集都不连通。 易错点：全不连通 ≠ 离散拓扑。\(C\) 全不连通但不离散 （\(C\) 无孤立点，每点都是聚点）。</p>
+            <h4>例题：Cantor 集是全不连通的</h4>
+            <p><strong>题目：</strong>证明 Cantor 集 \(C\) 是全不连通空间。</p>
+            <p><strong>第一步 — Cantor 集的构造：</strong>\(C\) 由 \([0,1]\) 反复去掉中间三分之一开区间得到。\(C = \bigcap_{n=0}^\infty C_n\)。</p>
+            <p><strong>第二步 — 分离论证：</strong>对任意 \(x \neq y \in C\)，\(|x - y| > 0\)。存在某一步去掉的开区间 \((a, b) \subseteq [0,1] \setminus C\) 将 \(x, y\) 分隔。</p>
+            <p><strong>第三步 — 构造 clopen 分割：</strong>\(U = C \cap (-\infty, (a+b)/2)\) 和 \(V = C \cap ((a+b)/2, +\infty)\) 在 \(C\) 中都是 clopen 的，\(x \in U,\; y \in V\)。故包含 \(x, y\) 的任何连通子集必须被割开。→ 连通分量是单点。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"全不连通 = 离散拓扑"。<br>✅ Cantor 集全不连通但<strong>没有孤立点</strong>（每个点都是聚点），故不离散。</li>
+              <li>❌ 认为连通分量一定是开集。<br>✅ 连通分量总是<strong>闭</strong>集，但只在局部连通空间中才是开集。\(\mathbb{Q}\) 的连通分量（单点集）不是开集。</li>
+              <li>❌ 混淆道路连通分量与连通分量。<br>✅ \(P(x) \subseteq C(x)\)，但可能严格包含。拓扑学家正弦曲线：\(C(x) = S\) 整体，但有两个道路连通分量。</li>
+            </ul>
           </div>
         </div>
       </div>

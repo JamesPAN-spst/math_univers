@@ -394,35 +394,71 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在 \(\mathbb{Q}\) 中，序列 \(1, 1.4, 1.41, 1.414, \ldots\) 的项越来越 接近，但极限 \(\sqrt{2}\) 不在 \(\mathbb{Q}\) 中。完备性正是弥补这个 "缺口"的性质：每个 Cauchy 列（项之间距离趋于零的列）都收敛。 完备性是分析学的基石——不动点定理、Baire 范畴定理、函数空间的 完备化都依赖于它。</p>
+            <ul>
+              <li><strong>有理数的"缺口"：</strong>在 \(\mathbb{Q}\) 中，序列 \(1, 1.4, 1.41, 1.414, \ldots\) 的项越来越接近，但极限 \(\sqrt{2} \notin \mathbb{Q}\)。完备性弥补这种缺口：每个 Cauchy 列都收敛。</li>
+              <li><strong>分析学的基石：</strong>不动点定理、Baire 范畴定理、函数空间的完备化、级数收敛理论都依赖于完备性。</li>
+              <li><strong>度量空间特有：</strong>一般拓扑空间无法定义 Cauchy 列——完备性是度量空间理论的核心特色。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>完备性将"内在的收敛趋势"（Cauchy 条件）与"实际收敛"等同起来。 这是度量空间理论中特有的概念（一般拓扑空间无法定义 Cauchy 列）。</p>
+            <ul>
+              <li><strong>内在 vs 外在收敛：</strong>Cauchy 条件仅使用空间内部信息（\(d(x_m, x_n)\)），不引用极限点本身。完备性 = "内在收敛趋势 \(\Leftrightarrow\) 实际收敛"。</li>
+              <li><strong>闭子集 ↔ 完备子集：</strong>完备空间的闭子集完备；完备子集在更大空间中是闭集。这建立了拓扑闭性与完备性的桥梁。</li>
+              <li><strong>检验工具：</strong>绝对收敛（\(\sum d(x_{n+1}, x_n) < \infty\)）⟹ Cauchy ⟹（完备时）收敛——类似级数的绝对收敛判别。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Cauchy 序列</strong>：\((x_n)\) 在度量空间 \((X, d)\) 中是 Cauchy 列 \(\iff\) \[\forall \varepsilon > 0,\; \exists N,\; \forall m, n \geq N,\; d(x_m, x_n) < \varepsilon\] <strong>完备空间</strong>：\((X, d)\) 完备 \(\iff\) 每个 Cauchy 列在 \(X\) 中收敛。 <strong>基本事实</strong>： - 收敛序列 \(\Rightarrow\) Cauchy 列（反之需完备性）。 - \(\mathbb{R}\) 完备（由确界原理证明）。 - \(\mathbb{R}^n\) 完备（分量逐个收敛）。 - 完备空间的闭子集完备；完备子空间在更大空间中是闭的。 - \(\mathbb{Q}\) 不完备：\(\sqrt{2}\) 的十进制逼近是 Cauchy 列但不收敛。</p>
+            <h4>1. Cauchy 序列</h4>
+            <p>\((x_n)\) 在度量空间 \((X, d)\) 中是 Cauchy 列：</p>
+            \[\forall \varepsilon > 0,\; \exists N \in \mathbb{N},\; \forall m, n \geq N:\; d(x_m, x_n) < \varepsilon\]
+
+            <h4>2. 完备空间的定义</h4>
+            <p>\((X, d)\) <strong>完备</strong> \(\iff\) 每个 Cauchy 列在 \(X\) 中收敛。收敛序列一定是 Cauchy 列（三角不等式），反方向恰恰需要完备性。</p>
+
+            <h4>3. 基本事实</h4>
+            <ul>
+              <li>\(\mathbb{R}\) 完备（由确界原理/单调有界定理证明）。\(\mathbb{R}^n\) 完备（分量逐个收敛）。</li>
+              <li>完备空间的<strong>闭子集</strong>完备；完备子集在更大空间中是<strong>闭</strong>的。</li>
+              <li>\(\mathbb{Q}\) 不完备：\(\sqrt{2}\) 的十进制逼近是 Cauchy 列但极限不在 \(\mathbb{Q}\) 中。</li>
+              <li>\((0,1)\) 不完备：\(x_n = 1/n\) 是 Cauchy 列但 \(0 \notin (0,1)\)。</li>
+            </ul>
+
+            <h4>4. Cantor 交集定理</h4>
+            <p>在完备度量空间中，嵌套闭集列 \(F_1 \supseteq F_2 \supseteq \cdots\)，若 \(\mathrm{diam}(F_n) \to 0\)，则 \(\bigcap F_n\) 恰好有一个点。这是 Baire 定理证明的关键工具。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Banach 空间（完备赋范空间）是泛函分析的基础框架 - 完备性保证迭代算法（如 Newton 法）的收敛</p>
+            <p><strong>Banach 空间：</strong>完备赋范空间（如 \(L^p\)、\(\ell^p\)、\(C(K)\)）是泛函分析的基础框架。Hilbert 空间是完备内积空间，量子力学的状态空间 \(L^2\) 就是 Hilbert 空间。</p>
+            <p><strong>迭代算法：</strong>Newton 法、Picard 迭代、梯度下降等算法生成的序列在完备空间中，Cauchy 条件保证收敛到极限。若空间不完备，算法可能"逼近一个不存在的点"。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \((C[0,1], d_\infty)\)（连续函数空间，\(d_\infty(f,g) = \sup|f-g|\)）完备。 解答：设 \((f_n)\) 为 Cauchy 列。对每个 \(x\)，\((f_n(x))\) 是 \(\mathbb{R}\) 中 Cauchy 列 \(\Rightarrow f_n(x) \to f(x)\)。 Cauchy 条件保证一致收敛：\(\forall \varepsilon,\; \exists N,\; \sup|f_m - f_n| < \varepsilon\)，令 \(m \to \infty\) 得 \(\sup|f - f_n| \leq \varepsilon\)。 一致极限保连续：\(f \in C[0,1]\)。故 \(f_n \to f\) 在 \(d_\infty\) 下。 易错点：逐点收敛不保证极限连续（需一致收敛）。 \(d_\infty\) 的完备性关键在于一致收敛。</p>
+            <h4>例题：\((C[0,1], d_\infty)\) 的完备性</h4>
+            <p><strong>题目：</strong>证明连续函数空间 \((C[0,1], d_\infty)\)（\(d_\infty(f,g) = \sup_{x \in [0,1]} |f(x) - g(x)|\)）是完备的。</p>
+            <p><strong>第一步 — 逐点极限：</strong>设 \((f_n)\) 为 Cauchy 列。对每个 \(x \in [0,1]\)，\((f_n(x))\) 是 \(\mathbb{R}\) 中的 Cauchy 列（\(|f_m(x) - f_n(x)| \leq d_\infty(f_m, f_n)\)），由 \(\mathbb{R}\) 完备性得 \(f_n(x) \to f(x)\)。</p>
+            <p><strong>第二步 — 一致收敛：</strong>Cauchy 条件给出 \(\forall \varepsilon, \exists N, \sup|f_m - f_n| < \varepsilon\)。令 \(m \to \infty\)，得 \(\sup|f - f_n| \leq \varepsilon\)。故收敛是一致的。</p>
+            <p><strong>第三步 — 极限连续：</strong>一致极限保连续，所以 \(f \in C[0,1]\)，即 \(f_n \xrightarrow{d_\infty} f \in C[0,1]\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆逐点收敛与一致收敛，认为逐点极限连续就完成了证明。<br>✅ 逐点极限不保证连续性（如 \(f_n(x) = x^n\) 逐点收敛到不连续函数）。必须证明<strong>一致收敛</strong>。</li>
+              <li>❌ 认为"去掉端点不影响完备性"，断言 \((C(0,1), d_\infty)\) 也完备。<br>✅ \((0,1)\) 上的连续函数可以无界，\(d_\infty\) 可能不是有限度量。需要指定有界连续函数 \(C_b(0,1)\) 才完备。</li>
+              <li>❌ 认为 Cauchy 列一定有界。<br>✅ 在度量空间中 Cauchy 列确实有界（正确！），但在<strong>不完备</strong>空间中不一定收敛。有界 ≠ 收敛。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -473,35 +509,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>方程 \(f(x) = x\)（不动点方程）在数学中无处不在：迭代算法、微分 方程的解、博弈的 Nash 均衡。Banach 不动点定理（压缩映射原理） 给出了最简洁的不动点存在唯一性条件：在完备度量空间中，压缩映射 有且只有一个不动点，且迭代总收敛到它。</p>
+            <ul>
+              <li><strong>不动点方程的普遍性：</strong>方程 \(f(x) = x\) 在迭代算法、微分方程、博弈论（Nash 均衡）中无处不在。</li>
+              <li><strong>最简洁的存在唯一性：</strong>Banach 不动点定理只需两个条件——空间完备 + 映射压缩——就给出不动点的存在性、唯一性和收敛速率。</li>
+              <li><strong>构造性证明：</strong>不同于 Brouwer 不动点定理（非构造性），Banach 定理给出显式迭代序列 \(x_{n+1} = f(x_n)\)，可直接用于数值计算。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>压缩映射原理的核心是"迭代缩小距离"：\(d(f(x), f(y)) \leq q \cdot d(x,y)\) （\(q < 1\)），几何级数式收敛保证极限存在（完备性）和唯一性。</p>
+            <ul>
+              <li><strong>几何级数收敛：</strong>\(d(x_{n+1}, x_n) \leq q^n d(x_1, x_0)\)——压缩常数 \(q < 1\) 保证几何级数式衰减，完备性保证极限存在。</li>
+              <li><strong>唯一性："压缩"杀死分叉</strong>：若有两个不动点 \(x^*, y^*\)，则 \(d(x^*, y^*) = d(f(x^*), f(y^*)) \leq q \cdot d(x^*, y^*)\)，\(q < 1\) 逼出 \(d = 0\)。</li>
+              <li><strong>误差估计：</strong>先验估计 \(d(x_n, x^*) \leq \frac{q^n}{1 - q} d(x_1, x_0)\)，后验估计 \(d(x_n, x^*) \leq \frac{q}{1 - q} d(x_n, x_{n-1})\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理 (Banach)</strong>：设 \((X, d)\) 完备，\(f: X \to X\) 满足 \(d(f(x), f(y)) \leq q \cdot d(x, y)\)（\(0 \leq q < 1\)）。 则 \(f\) 有唯一不动点 \(x^*\)，且 \(\forall x_0 \in X\)， \(x_n = f(x_{n-1}) \to x^*\)。 <strong>证明框架</strong>： 取任意 \(x_0\)，令 \(x_n = f^n(x_0)\)。 \(d(x_{n+1}, x_n) \leq q^n d(x_1, x_0)\)。 \[d(x_m, x_n) \leq \sum_{k=n}^{m-1} q^k d(x_1, x_0) \leq \frac{q^n}{1-q} d(x_1, x_0) \to 0\] 故 \((x_n)\) 是 Cauchy 列，完备性 \(\Rightarrow x_n \to x^*\)。 连续性：\(f(x^*) = f(\lim x_n) = \lim f(x_n) = \lim x_{n+1} = x^*\)。 唯一性：若 \(f(y^*) = y^*\)，\(d(x^*, y^*) = d(f(x^*), f(y^*)) \leq q \cdot d(x^*, y^*)\)， \((1-q)d(x^*, y^*) \leq 0\)，故 \(x^* = y^*\)。</p>
+            <h4>1. 定理陈述</h4>
+            <p>设 \((X, d)\) 完备，\(f: X \to X\) 满足 \(d(f(x), f(y)) \leq q \cdot d(x, y)\)（\(0 \leq q < 1\)）。则 \(f\) 有唯一不动点 \(x^*\)，且 \(\forall x_0 \in X\)，\(x_n = f^n(x_0) \to x^*\)。</p>
+
+            <h4>2. Cauchy 列论证</h4>
+            <p>取任意 \(x_0\)，令 \(x_n = f(x_{n-1})\)。由压缩性：</p>
+            \[d(x_{n+1}, x_n) \leq q \cdot d(x_n, x_{n-1}) \leq \cdots \leq q^n \cdot d(x_1, x_0)\]
+            <p>对 \(m > n\)，三角不等式给出：</p>
+            \[d(x_m, x_n) \leq \sum_{k=n}^{m-1} d(x_{k+1}, x_k) \leq \frac{q^n}{1 - q} d(x_1, x_0) \to 0\]
+            <p>故 \((x_n)\) 是 Cauchy 列，完备性 \(\Rightarrow x_n \to x^*\)。</p>
+
+            <h4>3. 不动点验证与唯一性</h4>
+            <p>连续性：\(f(x^*) = f(\lim x_n) = \lim f(x_n) = \lim x_{n+1} = x^*\)。唯一性：若 \(f(y^*) = y^*\)，则 \(d(x^*, y^*) = d(f(x^*), f(y^*)) \leq q \cdot d(x^*, y^*)\)，因 \(q < 1\) 得 \(d(x^*, y^*) = 0\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Picard-Lindelöf 定理：\(y' = f(t,y)\) 在 Lipschitz 条件下 有唯一局部解（通过将 ODE 转化为积分方程，在 \(C\) 空间中应用压缩映射） - 隐函数定理的一种证明方法</p>
+            <p><strong>Picard-Lindelöf 定理：</strong>\(y' = f(t, y)\) 在 Lipschitz 条件下有唯一局部解。将 ODE 转化为积分方程 \(y(t) = y_0 + \int_0^t f(s, y(s))\,ds\)，在 \(C([0,T])\) 上定义算子 \(\Phi\)，Lipschitz 条件保证 \(\Phi\) 在足够小的 \(T\) 上是压缩映射。</p>
+            <p><strong>隐函数定理：</strong>一种证明方法将 \(F(x, y) = 0\) 转化为不动点问题 \(y = g(x, y)\)，通过 Banach 定理得到局部解 \(y = \varphi(x)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f: [0,1] \to [0,1]\)，\(f(x) = (x + 1/x)/3\)... 不对， 修改：\(f: [0,1] \to [0,1]\)，\(f(x) = x/2 + 1/4\)。 证明 \(f\) 有唯一不动点并求之。 解答：\(|f(x) - f(y)| = |x-y|/2\)，\(q = 1/2 < 1\)。\([0,1]\) 完备。 Banach 定理保证唯一不动点。解 \(x = x/2 + 1/4\)：\(x/2 = 1/4\)，\(x^* = 1/2\)。 从 \(x_0 = 0\) 迭代：\(x_1 = 1/4, x_2 = 3/8, x_3 = 7/16 \to 1/2\)。 易错点：压缩常数 \(q\) 必须严格小于 \(1\)。 \(d(f(x),f(y)) \leq d(x,y)\)（\(q = 1\)，非扩张映射）不保证不动点存在。</p>
+            <h4>例题：简单压缩映射</h4>
+            <p><strong>题目：</strong>\(f: [0,1] \to [0,1]\)，\(f(x) = x/2 + 1/4\)。证明唯一不动点并求之。</p>
+            <p><strong>第一步 — 验证压缩性：</strong>\(|f(x) - f(y)| = |x - y|/2\)，压缩常数 \(q = 1/2 < 1\)。✔</p>
+            <p><strong>第二步 — 完备性：</strong>\([0,1]\) 是 \(\mathbb{R}\) 的闭子集，故完备。✔</p>
+            <p><strong>第三步 — 不动点：</strong>解 \(x = x/2 + 1/4\) 得 \(x^* = 1/2\)。从 \(x_0 = 0\) 迭代：\(x_1 = 1/4,\; x_2 = 3/8,\; x_3 = 7/16 \to 1/2\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 将 \(q = 1\)（非扩张映射）的情况也套用 Banach 定理。<br>✅ 压缩常数必须<strong>严格</strong>小于 1。例：\(f(x) = x + 1\) 在 \(\mathbb{R}\) 上满足 \(d(f(x), f(y)) = d(x, y)\) 但没有不动点。</li>
+              <li>❌ 忘记检验空间的完备性。<br>✅ \(f: (0,1) \to (0,1),\; f(x) = x/2\) 是压缩映射，但 \((0,1)\) 上不动点 \(0 \notin (0,1)\)，空间不完备导致定理失效。</li>
+              <li>❌ 认为"映射到自身 + 连续"就够了。<br>✅ Brouwer 定理（紧凸集上连续自映射有不动点）不保证唯一性，且不给出收敛序列。Banach 定理需要<strong>全局</strong>压缩条件。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -528,35 +595,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>"大多数连续函数处处不可微"——这种违反直觉的语句如何严格化？Baire 范畴定理提供了工具：在完备度量空间中，可数个"稠密开集"的交仍然 稠密——即"稠密"的集合"足够多"。反过来，可数个"无处稠密"集合 的并不能铺满整个空间。这是证明存在性的非构造性方法的典范。</p>
+            <ul>
+              <li><strong>严格化"大多数"：</strong>"大多数连续函数处处不可微"——Baire 范畴定理将这类违反直觉的陈述变为严格命题。</li>
+              <li><strong>稠密开集的稳定性：</strong>可数个稠密开集的交仍然稠密——这是完备空间的深刻性质，\(\mathbb{Q}\) 不具备。</li>
+              <li><strong>非构造性存在证明：</strong>Baire 定理是证明"某类对象存在"的经典非构造性方法：证明补集是第一纲集，则对象构成的集合是"大"的。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Baire 范畴引入"第一纲集"（meagre，可数个无处稠密集之并）与 "第二纲集"（非第一纲），为"大"/"小"提供了拓扑意义上的度量。</p>
+            <ul>
+              <li><strong>第一纲集 (meagre)：</strong>可数个无处稠密集的并。拓扑意义上的"小"集。</li>
+              <li><strong>第二纲集：</strong>非第一纲。Baire 定理说完备度量空间本身是第二纲集。</li>
+              <li><strong>类比 Lebesgue 测度：</strong>第一纲集类似零测集，但两个概念不等价。存在第一纲但满测的集合，也存在零测但第二纲的集合。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Baire 范畴定理</strong>：设 \((X, d)\) 为完备度量空间（或局部紧 Hausdorff 空间）。 若 \(\{G_n\}_{n=1}^{\infty}\) 是可数个稠密开集，则 \[\bigcap_{n=1}^{\infty} G_n \text{ 在 } X \text{ 中稠密}\] <strong>证明框架</strong>：设 \(B_0\) 为任意非空开球。 \(G_1\) 稠密 \(\Rightarrow G_1 \cap B_0 \neq \emptyset\)，取闭球 \(\overline{B_1} \subseteq G_1 \cap B_0\)，\(\mathrm{diam}(B_1) < 1\)。 递归：\(\overline{B_{n+1}} \subseteq G_{n+1} \cap B_n\)， \(\mathrm{diam}(B_n) < 1/n\)。 \(\{\overline{B_n}\}\) 是嵌套闭集列，直径趋于 \(0\)。 完备性（Cantor 交集定理）\(\Rightarrow \bigcap \overline{B_n} = \{x^*\}\)。 \(x^* \in \bigcap G_n \cap B_0\)。故 \(\bigcap G_n\) 与任何开球相交，即稠密。 <strong>推论</strong>：完备度量空间不是第一纲集（不能写成可数个无处稠密集之并）。</p>
+            <h4>1. 定理陈述</h4>
+            <p>设 \((X, d)\) 为完备度量空间（或局部紧 Hausdorff 空间）。若 \(\{G_n\}_{n=1}^\infty\) 是可数个稠密开集，则</p>
+            \[\bigcap_{n=1}^{\infty} G_n \;\text{在}\; X \;\text{中稠密}\]
+
+            <h4>2. 证明（嵌套闭球法）</h4>
+            <p>设 \(B_0\) 为任意非空开球。\(G_1\) 稠密 \(\Rightarrow G_1 \cap B_0 \neq \emptyset\)。取闭球 \(\overline{B_1} \subseteq G_1 \cap B_0\)，\(\mathrm{diam}(B_1) < 1\)。</p>
+            <p>递归：选 \(\overline{B_{n+1}} \subseteq G_{n+1} \cap B_n\)，\(\mathrm{diam}(B_n) < 1/n\)。</p>
+            <p>\(\{\overline{B_n}\}\) 是嵌套闭集列，直径趋于 0。由完备性（Cantor 交集定理）：\(\bigcap \overline{B_n} = \{x^*\}\)。</p>
+            <p>\(x^* \in \overline{B_n} \subseteq G_n\) 对所有 \(n\)，且 \(x^* \in B_0\)。故 \(\bigcap G_n\) 与任意开球相交，即稠密。✔</p>
+
+            <h4>3. 等价形式与推论</h4>
+            <ul>
+              <li><strong>等价形式：</strong>完备度量空间不是第一纲集——即不能写成可数个无处稠密集的并。</li>
+              <li><strong>推论：</strong>\(\mathbb{R}\) 不可数（若 \(\mathbb{R} = \{r_n\}\)，则 \(\mathbb{R} = \bigcup \{r_n\}\) 是第一纲集，矛盾）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 证明 \(C[0,1]\) 中"大多数"函数处处不可微（\(C^1\) 函数是第一纲集） - 一致有界原理（Banach-Steinhaus）的证明基于 Baire 定理</p>
+            <p><strong>处处不可微函数：</strong>\(C[0,1]\) 中处处可微函数的集合是第一纲集。这意味着"残差集"（residual set，第二纲的 \(G_\delta\) 集）中的函数处处不可微——"大多数"连续函数处处不可微。</p>
+            <p><strong>一致有界原理 (Banach-Steinhaus)：</strong>若 \(\{T_\alpha\}\) 是 Banach 空间上的有界线性算子族，逐点上界有限 \(\Rightarrow\) 一致有界。证明中将 \(\{x : \sup_\alpha \|T_\alpha x\| \leq n\}\) 写成闭集，用 Baire 定理保证至少一个有内点。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：利用 Baire 定理证明 \(\mathbb{R}\) 不可数。 解答：假设 \(\mathbb{R} = \{r_1, r_2, \ldots\}\) 可数。 \(\{r_n\}\) 是闭集，\(\mathbb{R} \setminus \{r_n\}\) 是稠密开集。 Baire 定理：\(\bigcap_n (\mathbb{R} \setminus \{r_n\}) = \mathbb{R} \setminus \{r_1, r_2, \ldots\} = \emptyset\) 应该稠密（非空），但 \(= \emptyset\)，矛盾。 易错点：Baire 定理要求完备性。\(\mathbb{Q}\) 可以写成可数个 单点集之并（第一纲集），不矛盾（\(\mathbb{Q}\) 不完备）。</p>
+            <h4>例题：利用 Baire 定理证明 \(\mathbb{R}\) 不可数</h4>
+            <p><strong>假设：</strong>\(\mathbb{R} = \{r_1, r_2, \ldots\}\) 可数。</p>
+            <p><strong>第一步：</strong>每个单点集 \(\{r_n\}\) 是闭集，其补 \(G_n = \mathbb{R} \setminus \{r_n\}\) 是稠密开集（去掉一个点不影响稠密性）。</p>
+            <p><strong>第二步：</strong>Baire 定理 \(\Rightarrow \bigcap_n G_n = \mathbb{R} \setminus \{r_1, r_2, \ldots\} = \emptyset\) 应稠密。</p>
+            <p><strong>第三步：</strong>但 \(\emptyset\) 不稠密——矛盾！故 \(\mathbb{R}\) 不可数。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对 \(\mathbb{Q}\) 套用 Baire 定理得出矛盾。<br>✅ \(\mathbb{Q}\) <strong>不完备</strong>，Baire 定理不适用。\(\mathbb{Q}\) 确实是第一纲集（在自身中可数个单点集的并）。</li>
+              <li>❌ 混淆"无处稠密"与"不稠密"。<br>✅ \(\mathbb{Z}\) 在 \(\mathbb{R}\) 中不稠密但<strong>无处稠密</strong>（其闭包 = 自身没有内点）。\(\mathbb{Q}\) 在 \(\mathbb{R}\) 中稠密，不是无处稠密的。</li>
+              <li>❌ 认为第一纲集 = 零测集。<br>✅ 两个概念独立。存在满测的第一纲集（如 Cantor 型构造），也存在零测的第二纲集。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -583,35 +684,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>不完备的度量空间总可以"补全"为完备空间——正如 \(\mathbb{Q}\) 补全 为 \(\mathbb{R}\)。完备化不仅是理论上的存在性结果，更是实数构造 （Cauchy 列方法）的普遍化。这个构造在泛函分析中广泛使用： 赋范空间的完备化给出 Banach 空间。</p>
+            <ul>
+              <li><strong>从 \(\mathbb{Q}\) 到 \(\mathbb{R}\)：</strong>实数的 Cauchy 构造本质就是 \(\mathbb{Q}\) 的完备化。完备化是这一经典构造的推广。</li>
+              <li><strong>不完备 → 完备：</strong>任何度量空间都可以等距嵌入到一个完备空间中，且嵌入像稠密。这保证了分析工具（Banach 定理、Baire 定理）总可以使用。</li>
+              <li><strong>泛函分析基础：</strong>赋范空间的完备化给出 Banach 空间；内积空间的完备化给出 Hilbert 空间。\(L^p\) 空间就是可积函数在 \(\|\cdot\|_p\) 下的完备化。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>完备化 = 等距嵌入到完备空间中使像稠密。唯一性由万有性质保证。 这类似于群的完备化（profinte completion）或域的完备化（\(p\)-adic 数）。</p>
+            <ul>
+              <li><strong>万有性质：</strong>完备化 \((\hat{X}, \iota)\) 由万有性质唯一确定——任何到完备空间的一致连续映射唯一地延拓过 \(\hat{X}\)。</li>
+              <li><strong>等价类构造：</strong>Cauchy 列 modulo 等价关系（尾部趋零）给出新空间的"点"。这与 Dedekind 分割、\(p\)-adic 数的构造思想一致。</li>
+              <li><strong>稠密嵌入：</strong>原空间通过常数列嵌入完备化，像是稠密子集。完备化 = "填补所有 Cauchy 列的极限"。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>构造</strong>：设 \((X, d)\) 为度量空间。 定义 Cauchy 列的等价关系：\((x_n) \sim (y_n) \iff d(x_n, y_n) \to 0\)。 令 \(\hat{X} = \{\text{Cauchy 列}\} / {\sim}\)。 度量：\(\hat{d}([(x_n)], [(y_n)]) = \lim_{n \to \infty} d(x_n, y_n)\)。 （极限存在：\(|d(x_m, y_m) - d(x_n, y_n)| \leq d(x_m, x_n) + d(y_m, y_n) \to 0\)。） <strong>性质</strong>： (1) \((\hat{X}, \hat{d})\) 完备。 (2) \(\iota: X \to \hat{X}\)，\(\iota(x) = [(x, x, x, \ldots)]\) 是等距嵌入。 (3) \(\iota(X)\) 在 \(\hat{X}\) 中稠密。 <strong>万有性质</strong>：若 \(f: X \to Y\) 一致连续，\(Y\) 完备， 则 \(f\) 唯一延拓为 \(\hat{f}: \hat{X} \to Y\) 一致连续。 \[\hat{\mathbb{Q}} = \mathbb{R}\]</p>
+            <h4>1. 等价关系与点的构造</h4>
+            <p>设 \((X, d)\) 为度量空间。Cauchy 列上的等价关系：</p>
+            \[(x_n) \sim (y_n) \;\iff\; \lim_{n \to \infty} d(x_n, y_n) = 0\]
+            <p>令 \(\hat{X} = \{\text{Cauchy 列}\} / {\sim}\)，典型元素 \([(x_n)]\)。</p>
+
+            <h4>2. 度量的定义</h4>
+            \[\hat{d}\big([(x_n)],\, [(y_n)]\big) = \lim_{n \to \infty} d(x_n, y_n)\]
+            <p>极限存在性：\(|d(x_m, y_m) - d(x_n, y_n)| \leq d(x_m, x_n) + d(y_m, y_n) \to 0\)（两个 Cauchy 列）。良定义性（与代表元无关）由等价关系定义保证。</p>
+
+            <h4>3. 三大性质</h4>
+            <ul>
+              <li><strong>完备性：</strong>\((\hat{X}, \hat{d})\) 是完备的（Cauchy 列的 Cauchy 列收敛到"对角线"取的列）。</li>
+              <li><strong>等距嵌入：</strong>\(\iota: X \to \hat{X}\)，\(\iota(x) = [(x, x, x, \ldots)]\)。下面 \(\hat{d}(\iota(x), \iota(y)) = d(x, y)\)。</li>
+              <li><strong>像稠密：</strong>\(\iota(X)\) 在 \(\hat{X}\) 中稠密。</li>
+            </ul>
+
+            <h4>4. 万有性质</h4>
+            <p>若 \(f: X \to Y\) 一致连续，\(Y\) 完备，则 \(f\) 唯一延拓为 \(\hat{f}: \hat{X} \to Y\)：\(\hat{f}([(x_n)]) = \lim f(x_n)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- \(\mathbb{R}\) 的 Cauchy 构造：\(\hat{\mathbb{Q}} = \mathbb{R}\) - \(L^p\) 空间是可积函数空间在 \(\|\cdot\|_p\) 下的完备化</p>
+            <p><strong>\(\mathbb{R}\) 的 Cauchy 构造：</strong>\(\hat{\mathbb{Q}} = \mathbb{R}\)。这是实数严格定义的两种经典方法之一（另一种是 Dedekind 分割）。每个实数对应一个有理数 Cauchy 列的等价类。</p>
+            <p><strong>\(L^p\) 空间：</strong>可测函数空间在 \(\|f\|_p = (\int |f|^p)^{1/p}\) 下的完备化（严格说是商空间的完备化）给出 \(L^p\)。Riesz-Fischer 定理即 \(L^p\) 的完备性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：描述 \(((0,1), |\cdot|)\) 的完备化。 解答：\((0,1)\) 与 \(\mathbb{R}\) 同胚但不等距。等距地看，\((0,1)\) 中的 Cauchy 列要么收敛到 \((0,1)\) 中的点，要么"收敛"到 \(0\) 或 \(1\)。 完备化 \(= [0,1]\)：添加两个端点。\(\iota: (0,1) \hookrightarrow [0,1]\) 是等距嵌入，像在 \([0,1]\) 中稠密。 易错点：完备化依赖于度量，不仅依赖于拓扑。 \((0,1)\) 在标准度量下完备化为 \([0,1]\)，但存在与 \(\mathbb{R}\) 等距的度量使完备化为 \(\mathbb{R}\)。</p>
+            <h4>例题：\((0,1)\) 的完备化</h4>
+            <p><strong>题目：</strong>描述 \(((0,1), |\cdot|)\) 在标准度量下的完备化。</p>
+            <p><strong>第一步 — 识别"缺失的极限"：</strong>\((0,1)\) 中的 Cauchy 列要么收敛到 \((0,1)\) 中的点，要么逼近端点 \(0\) 或 \(1\)。</p>
+            <p><strong>第二步 — 完备化空间：</strong>添加两个端点得 \([0,1]\)。嵌入 \(\iota: (0,1) \hookrightarrow [0,1]\) 是等距的，像在 \([0,1]\) 中稠密。\([0,1]\) 是 \(\mathbb{R}\) 的闭子集，故完备。✔</p>
+            <p><strong>结论：</strong>\(\widehat{(0,1)} \cong [0,1]\)（等距同构）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为完备化只依赖于拓扑（同胚类型）。<br>✅ 完备化依赖于<strong>度量</strong>。\((0,1)\) 同胚于 \(\mathbb{R}\)，但标准度量下完备化为 \([0,1]\)，而存在等距于 \(\mathbb{R}\) 的度量使完备化为 \(\mathbb{R}\)。</li>
+              <li>❌ 认为完备空间的完备化会产生更大的空间。<br>✅ 完备空间本身就是自己的完备化（\(\hat{X} = X\)），不添加新点。</li>
+              <li>❌ 忘记验证等价关系的良定义性。<br>✅ 需验证 \(\hat{d}\) 不依赖于 Cauchy 列代表元的选取：若 \((x_n) \sim (x'_n)\)，\((y_n) \sim (y'_n)\)，则 \(\lim d(x_n, y_n) = \lim d(x'_n, y'_n)\)。</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -406,35 +406,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>拓扑学的核心问题是理解"什么性质在连续变形下不变"。为此必须先 精确定义连续映射。与分析中 \(\varepsilon\)-\(\delta\) 定义不同，拓扑中 的连续性用开集的原像刻画，摆脱了对度量的依赖。这个定义的优雅 之处在于：它统一了分析中各种连续性概念，并且可以推广到任何拓扑空间。</p>
+            <ul>
+              <li><strong>拓扑学的核心任务：</strong>拓扑学研究"在连续变形下什么性质不变"。要讨论这个问题，必须先精确定义"连续映射"。</li>
+              <li><strong>摆脱度量依赖：</strong>分析中的 \(\varepsilon\)-\(\delta\) 定义绑定于距离函数。拓扑中改用"开集的原像仍是开集"来定义连续性，统一覆盖所有拓扑空间。</li>
+              <li><strong>统一各种连续性概念：</strong>逐点连续、一致连续、Lipschitz 连续等分析概念都在这一框架下化为同一对象的不同属性。连续映射是拓扑范畴 \(\mathbf{Top}\) 的态射。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>连续映射的本质是"保持拓扑结构"：它将目标空间的开集拉回为源空 间的开集。这是函子思想的雏形——连续映射是拓扑空间范畴的态射。</p>
+            <ul>
+              <li><strong>原像刻画：</strong>连续映射的本质是"将目标空间的开集拉回为源空间的开集"——只要求原像方向保结构，不要求像方向。</li>
+              <li><strong>范畴论视角：</strong>连续映射是 \(\mathbf{Top}\) 范畴的态射。复合保连续 → 范畴的合成律成立。恒等映射连续 → 恒等态射存在。</li>
+              <li><strong>多种等价语言：</strong>连续性可以用开集原像、闭集原像、邻域条件、闭包条件四种等价方式表述——选最方便的即可。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：\(f: (X, \tau_X) \to (Y, \tau_Y)\) 连续，当且仅当 \[\forall V \in \tau_Y,\; f^{-1}(V) \in \tau_X\] <strong>四种等价刻画</strong>（设 \(f: X \to Y\)）： (1) \(V\) 开 \(\Rightarrow f^{-1}(V)\) 开（开集原像定义） (2) \(F\) 闭 \(\Rightarrow f^{-1}(F)\) 闭（闭集原像） (3) \(\forall x \in X\)，\(f(x)\) 的每个邻域 \(V\)，\(f^{-1}(V)\) 是 \(x\) 的邻域（邻域定义） (4) \(\forall A \subseteq X\)，\(f(\overline{A}) \subseteq \overline{f(A)}\)（闭包条件） 证明 (1)\(\Rightarrow\)(2)：\(F\) 闭 \(\Rightarrow Y \setminus F\) 开 \(\Rightarrow f^{-1}(Y \setminus F) = X \setminus f^{-1}(F)\) 开 \(\Rightarrow f^{-1}(F)\) 闭。 <strong>复合保连续</strong>：若 \(f: X \to Y\), \(g: Y \to Z\) 连续，则 \(g \circ f\) 连续：\((g \circ f)^{-1}(W) = f^{-1}(g^{-1}(W))\)。</p>
+            <h4>1. 连续映射的定义</h4>
+            <p>\(f: (X, \tau_X) \to (Y, \tau_Y)\) <strong>连续</strong>，当且仅当</p>
+            \[\forall V \in \tau_Y,\quad f^{-1}(V) \in \tau_X\]
+            <p>即目标空间中<strong>每个开集的原像</strong>都是源空间的开集。</p>
+
+            <h4>2. 四种等价刻画</h4>
+            <p>设 \(f: X \to Y\)，以下条件等价：</p>
+            <ul>
+              <li><strong>(i) 开集原像：</strong>\(V \subseteq Y\) 开 \(\Rightarrow f^{-1}(V)\) 开。</li>
+              <li><strong>(ii) 闭集原像：</strong>\(F \subseteq Y\) 闭 \(\Rightarrow f^{-1}(F)\) 闭。</li>
+              <li><strong>(iii) 邻域条件：</strong>\(\forall x,\; V\) 是 \(f(x)\) 的邻域 \(\Rightarrow f^{-1}(V)\) 是 \(x\) 的邻域。</li>
+              <li><strong>(iv) 闭包条件：</strong>\(\forall A \subseteq X,\; f(\overline{A}) \subseteq \overline{f(A)}\)。</li>
+            </ul>
+            <p><strong>证明 (i)⇒(ii)：</strong>\(F\) 闭 → \(Y \setminus F\) 开 → \(f^{-1}(Y \setminus F) = X \setminus f^{-1}(F)\) 开 → \(f^{-1}(F)\) 闭。</p>
+
+            <h4>3. 复合保连续</h4>
+            <p>若 \(f: X \to Y\)，\(g: Y \to Z\) 连续，则 \(g \circ f: X \to Z\) 连续：</p>
+            \[(g \circ f)^{-1}(W) = f^{-1}(g^{-1}(W)) \in \tau_X\]
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 在泛函分析中，弱拓扑恰好是使所有线性泛函连续的最弱拓扑 - 连续映射是拓扑空间范畴 \(\mathbf{Top}\) 的态射</p>
+            <p><strong>弱拓扑的定义：</strong>在泛函分析中，给定一族线性泛函 \(\{f_\alpha\}\)，弱拓扑恰好是使所有 \(f_\alpha\) 连续的最弱拓扑（初始拓扑）。弱收敛 = 在弱拓扑下的收敛。</p>
+            <p><strong>拓扑空间范畴：</strong>连续映射构成范畴 \(\mathbf{Top}\) 的态射，使得函子（如基本群函子 \(\pi_1\)、同调函子 \(H_n\)）可以将拓扑问题转化为代数问题。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x^2\)。 用开集原像定义证明 \(f\) 在标准拓扑下连续。 解答：设 \((a,b)\) 为 \(\mathbb{R}\) 的开区间。 若 \(b \leq 0\)，则 \(f^{-1}((a,b)) = \emptyset\)，开。 若 \(a < 0 < b\)，\(f^{-1}((a,b)) = (-\sqrt{b}, \sqrt{b})\)，开。 若 \(0 \leq a < b\)，\(f^{-1}((a,b)) = (-\sqrt{b},-\sqrt{a}) \cup (\sqrt{a},\sqrt{b})\)，开。 任何开集是开区间的并，原像是开集的并，仍开。 易错点：只验证了开区间的原像，忘记说明"一般开集是开区间的并" 这一步——这正是使用基的好处。</p>
+            <h4>例题：用开集原像验证 \(f(x) = x^2\) 的连续性</h4>
+            <p><strong>题目：</strong>设 \(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x^2\)，用开集原像定义证明 \(f\) 在标准拓扑下连续。</p>
+            <p><strong>第一步 — 只需验证基元素：</strong>标准拓扑以开区间 \((a,b)\) 为基，故只需证 \(f^{-1}((a,b))\) 是开集。</p>
+            <p><strong>第二步 — 分情况讨论：</strong></p>
+            <ul>
+              <li>\(b \leq 0\)：\(f^{-1}((a,b)) = \emptyset\)，开。</li>
+              <li>\(a < 0 < b\)：\(f^{-1}((a,b)) = (-\sqrt{b}, \sqrt{b})\)，开。</li>
+              <li>\(0 \leq a < b\)：\(f^{-1}((a,b)) = (-\sqrt{b}, -\sqrt{a}) \cup (\sqrt{a}, \sqrt{b})\)，开。</li>
+            </ul>
+            <p><strong>第三步 — 推广到一般开集：</strong>任何开集是基元素的并，原像的并等于并的原像，仍是开集。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 只验证基元素的原像是开的，却忘记说明"一般开集是基元素的并"这一关键步骤。<br>✅ 需明确：\(f^{-1}(\bigcup V_\alpha) = \bigcup f^{-1}(V_\alpha)\)，故只需验证基即可。</li>
+              <li>❌ 混淆"原像是开集"与"像是开集"——后者是开映射的定义，不是连续性。<br>✅ \(f((-1,1)) = [0,1)\) 不是开集，但 \(f\) 仍然连续。</li>
+              <li>❌ 认为连续双射一定是同胚。<br>✅ 还需要逆映射也连续。经典反例：\(t \mapsto (\cos t, \sin t)\) 从 \([0, 2\pi)\) 到 \(S^1\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -480,35 +522,74 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>什么时候两个拓扑空间"本质上相同"？答案是同胚——一个连续的双射 且逆映射也连续。同胚是拓扑学的"同构"概念。被同胚保持的性质称 为拓扑不变量，是分类空间的关键工具。找到足够多的拓扑不变量来 区分空间、或证明两空间同胚，是拓扑学的核心任务。</p>
+            <ul>
+              <li><strong>何时两空间"本质相同"：</strong>同胚是拓扑学的同构概念——连续双射且逆映射也连续。同胚的空间拥有完全相同的拓扑性质。</li>
+              <li><strong>分类空间的核心工具：</strong>拓扑不变量（同胚保持的性质）用于区分不同的空间。找到足够强的不变量来分辨空间是拓扑学的核心任务。</li>
+              <li><strong>连续双射 ≠ 同胚：</strong>这是初学者最常见的陷阱。逆映射的连续性需要额外验证，不能自动获得。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>同胚 = 拓扑范畴中的同构。拓扑不变量 = 在同构下不变的属性。 这与群论中"群同构保持阶"的思想完全类似。</p>
+            <ul>
+              <li><strong>同构思想：</strong>同胚 = \(\mathbf{Top}\) 范畴中的同构。正如群同构保持群的阶和子群结构，同胚保持所有拓扑性质。</li>
+              <li><strong>不变量策略：</strong>要证明 \(X \not\cong Y\)，只需找到一个拓扑不变量在两空间上取值不同。这比直接证"不存在同胚"要简单得多。</li>
+              <li><strong>不变量的层次：</strong>紧致性、连通性等基本不变量容易计算；基本群 \(\pi_1\)、同调群 \(H_n\) 等代数不变量更精细但计算更复杂。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：\(f: X \to Y\) 是同胚（homeomorphism），若 \(f\) 是双射且 \(f, f^{-1}\) 均连续。记 \(X \cong Y\)。 <strong>注意</strong>：连续双射未必是同胚！需要 \(f^{-1}\) 也连续。 反例：\(f: [0, 2\pi) \to S^1\)，\(f(t) = (\cos t, \sin t)\)。 \(f\) 是连续双射，但 \(f^{-1}\) 在 \((1,0)\) 处不连续。 <strong>拓扑不变量</strong>（同胚保持的性质）： - 紧致性、连通性、道路连通性 - 第一/第二可数、可分性 - \(T_0, T_1, T_2\) 等分离性质 - 基本群 \(\pi_1(X, x_0)\)（同胚诱导群同构） - Euler 特征数 \(\chi\) \[X \cong Y \Rightarrow \text{所有拓扑不变量相同}\] 逆命题不成立（相同不变量不保证同胚）。</p>
+            <h4>1. 同胚的定义</h4>
+            <p>\(f: X \to Y\) 是<strong>同胚</strong>（homeomorphism），若 \(f\) 满足：</p>
+            <ul>
+              <li>\(f\) 是双射；</li>
+              <li>\(f\) 连续；</li>
+              <li>\(f^{-1}\) 连续。</li>
+            </ul>
+            <p>记 \(X \cong Y\)。等价地：\(f\) 是连续双射且开映射（或闭映射）。</p>
+
+            <h4>2. 连续双射未必是同胚</h4>
+            <p>经典反例：\(f: [0, 2\pi) \to S^1\)，\(f(t) = (\cos t, \sin t)\)。\(f\) 是连续双射，但 \(f^{-1}\) 在 \((1,0)\) 处不连续——因为 \([0, 2\pi)\) 不紧致，无法使用"紧致空间到 Hausdorff 空间的连续双射是同胚"定理。</p>
+
+            <h4>3. 常见拓扑不变量</h4>
+            <ul>
+              <li><strong>基本性质：</strong>紧致性、连通性、道路连通性、\(T_0/T_1/T_2\) 分离性、\(C_1/C_2\) 可数公理、可分性。</li>
+              <li><strong>代数不变量：</strong>基本群 \(\pi_1(X, x_0)\)（同胚诱导群同构）、同调群 \(H_n(X)\)。</li>
+              <li><strong>数值不变量：</strong>Euler 特征数 \(\chi\)、Betti 数 \(b_n\)。</li>
+            </ul>
+            \[X \cong Y \;\Longrightarrow\; \text{所有拓扑不变量相同}\]
+            <p>逆命题不成立——相同不变量不保证同胚。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 拓扑数据分析(TDA)利用拓扑不变量（Betti 数）识别数据形状 - 纽结理论中用不变量区分不同纽结</p>
+            <p><strong>拓扑数据分析 (TDA)：</strong>利用持续同调 (persistent homology) 计算数据集的 Betti 数等拓扑不变量，识别数据的"形状"特征（连通分量数、环、空腔），在生物信息学和材料科学中广泛应用。</p>
+            <p><strong>纽结理论：</strong>通过 Jones 多项式、Alexander 多项式等不变量区分不同的纽结类型。若两纽结的不变量不同，则它们不等价（不能通过连续变形互相转化）。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(\mathbb{R}\) 与 \((0,1)\) 同胚。 解答：取 \(f: (0,1) \to \mathbb{R}\)，\(f(x) = \tan(\pi x - \pi/2)\)。 \(f\) 是连续严格单调函数，像为 \(\mathbb{R}\)， \(f^{-1}(y) = \frac{1}{\pi}\arctan(y) + \frac{1}{2}\) 也连续。 故 \((0,1) \cong \mathbb{R}\)。 易错点：混淆"同胚 \(\cong\)"与"等距"。\((0,1)\) 和 \(\mathbb{R}\) 同胚但 不等距（\((0,1)\) 有界而 \(\mathbb{R}\) 无界——但有界性不是拓扑不变量！）。</p>
+            <h4>例题：证明 \(\mathbb{R} \cong (0,1)\)</h4>
+            <p><strong>题目：</strong>证明 \(\mathbb{R}\) 与 \((0,1)\) 同胚。</p>
+            <p><strong>第一步 — 构造映射：</strong>取 \(f: (0,1) \to \mathbb{R}\)，\(f(x) = \tan(\pi x - \pi/2)\)。</p>
+            <p><strong>第二步 — 验证双射：</strong>\(f\) 在 \((0,1)\) 上严格单调且值域为 \((-\infty, +\infty) = \mathbb{R}\)。✔</p>
+            <p><strong>第三步 — 验证连续性：</strong>\(f\) 是初等函数的复合，在 \((0,1)\) 上连续。\(f^{-1}(y) = \frac{1}{\pi}\arctan(y) + \frac{1}{2}\) 也连续。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆同胚与等距——认为 \((0,1)\) 有界而 \(\mathbb{R}\) 无界所以不能同胚。<br>✅ "有界性"不是拓扑不变量（它依赖于度量而非拓扑）。\((0,1) \cong \mathbb{R}\)。</li>
+              <li>❌ 认为 \([0,1] \cong (0,1)\)——两者都是 \(\mathbb{R}\) 的子空间。<br>✅ \([0,1]\) 紧致而 \((0,1)\) 非紧致，紧致性是拓扑不变量 → 不同胚。</li>
+              <li>❌ 认为 \(\mathbb{R} \cong \mathbb{R}^2\)——两者都是无穷维的。<br>✅ 去掉一点后 \(\mathbb{R} \setminus \{0\}\) 不连通而 \(\mathbb{R}^2 \setminus \{0\}\) 连通 → 不同胚。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -535,28 +616,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>连续映射保证"开集的原像是开集"，但正向的问题——"开集的像是否 是开集"——则需要额外条件。开映射和闭映射刻画了这种正向保结构 性。粘合引理则说明：如果一个映射在足够好的覆盖的每片上连续， 那么整体连续。这是构造连续映射的核心工具。</p>
+            <ul>
+              <li><strong>正向保结构的疑问：</strong>连续映射保证"开集的原像是开集"，但"开集的像是否开"需要额外条件。开映射和闭映射分别刻画了正向保几何结构的性质。</li>
+              <li><strong>同胚的等价判据：</strong>连续双射 + 开映射（或闭映射）= 同胚。区分连续性与开映射性是理解同胚的关键。</li>
+              <li><strong>构造连续映射的工具：</strong>粘合引理提供了"局部验证，全局成立"的框架——在覆盖的每片上证连续即可推出整体连续，是构造连续映射的核心手段。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>三种映射的独立性：</strong>连续 ≠ 开映射 ≠ 闭映射。这三者是映射的三种不同"保结构"属性，可以独立成立或失败。</li>
+              <li><strong>局部-全局原则：</strong>粘合引理是拓扑学中"局部性质决定全局性质"思想的典型体现。这一原则在层论 (sheaf theory) 中被进一步推广。</li>
+              <li><strong>覆盖的选择很关键：</strong>开覆盖版粘合引理无需有限性；闭覆盖版需要有限性。选错覆盖类型会导致错误结论。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>开映射</strong>：\(f: X \to Y\)，若 \(\forall U \in \tau_X\)，\(f(U) \in \tau_Y\)。 <strong>闭映射</strong>：\(f: X \to Y\)，若 \(\forall F\) 闭，\(f(F)\) 闭。 开映射 \(\neq\) 连续（如投影 \(\pi_1: \mathbb{R}^2 \to \mathbb{R}\) 是开映射且连续， 但许多开映射不连续）。 连续 \(\neq\) 开映射（\(f(x) = x^2\) 连续但非开映射：\(f((-1,1)) = [0,1)\)）。 <strong>同胚的等价刻画</strong>：\(f\) 是同胚 \(\iff\) \(f\) 是连续双射且开映射 \(\iff\) \(f\) 是连续双射且闭映射。 <strong>粘合引理（开覆盖版）</strong>：设 \(\{U_\alpha\}\) 是 \(X\) 的开覆盖， \(f: X \to Y\)。若 \(f|_{U_\alpha}: U_\alpha \to Y\) 对每个 \(\alpha\) 连续， 则 \(f\) 连续。 证明：设 \(V \subseteq Y\) 开，则 \(f^{-1}(V) \cap U_\alpha = (f|_{U_\alpha})^{-1}(V)\) 在 \(U_\alpha\) 中开， 故在 \(X\) 中开。\(f^{-1}(V) = \bigcup_\alpha (f^{-1}(V) \cap U_\alpha)\) 是开集的并，故开。 <strong>粘合引理（有限闭覆盖版）</strong>：类似结论对有限闭覆盖成立。</p>
+            <h4>1. 开映射与闭映射</h4>
+            <ul>
+              <li><strong>开映射：</strong>\(f: X \to Y\)，若 \(\forall U \in \tau_X\)，\(f(U) \in \tau_Y\)。</li>
+              <li><strong>闭映射：</strong>\(f: X \to Y\)，若 \(\forall F\) 闭于 \(X\)，\(f(F)\) 闭于 \(Y\)。</li>
+            </ul>
+            <p><strong>重要辨析：</strong></p>
+            <ul>
+              <li>投影 \(\pi_1: \mathbb{R}^2 \to \mathbb{R}\) 是开映射且连续，但<strong>不是</strong>闭映射。</li>
+              <li>\(f(x) = x^2\) 连续但非开映射：\(f((-1,1)) = [0,1)\) 不是开集。</li>
+            </ul>
+
+            <h4>2. 同胚的等价刻画</h4>
+            <p>\(f\) 是同胚 \(\iff\) \(f\) 是连续双射且开映射 \(\iff\) \(f\) 是连续双射且闭映射。</p>
+
+            <h4>3. 粘合引理</h4>
+            <p><strong>开覆盖版：</strong>设 \(\{U_\alpha\}\) 是 \(X\) 的开覆盖，\(f: X \to Y\)。若每个 \(f|_{U_\alpha}\) 连续，则 \(f\) 连续。</p>
+            <p><strong>证明：</strong>设 \(V \subseteq Y\) 开。\(f^{-1}(V) \cap U_\alpha = (f|_{U_\alpha})^{-1}(V)\) 在 \(U_\alpha\) 中开，故在 \(X\) 中开。</p>
+            \[f^{-1}(V) = \bigcup_\alpha \big(f^{-1}(V) \cap U_\alpha\big) \;\text{是开集的并，故开。}\]
+            <p><strong>有限闭覆盖版：</strong>设 \(\{F_1, \ldots, F_n\}\) 是 \(X\) 的有限闭覆盖，每个 \(f|_{F_i}\) 连续，则 \(f\) 连续。（有限性不可省略！）</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 粘合引理是定义分片函数（如样条）连续性的理论保证 - 商映射理论依赖开/闭映射的判定</p>
+            <p><strong>分片定义的连续函数：</strong>粘合引理是定义样条函数、分片线性函数连续性的理论保证。只需在每个"片"（开集或有限闭集）上验证连续性即可。</p>
+            <p><strong>商映射理论：</strong>商映射是满的、连续的、且满足"开饱和集的像为开集"的映射。开/闭映射性的判定是分析商空间拓扑的关键。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：定义 \(f: \mathbb{R} \to \mathbb{R}\)， \(f(x) = x\)（\(x \leq 0\)），\(f(x) = x+1\)（\(x > 0\)）。 \(f\) 是否连续？是否是开映射？ 解答：\(f\) 不连续（在 \(x=0\) 处有跳跃，\(f^{-1}((0.5, 1.5))\) 不是开集）。 \(f\) 在 \((-\infty, 0]\) 和 \((0, +\infty)\) 上分别连续，但 \(\{(-\infty, 0], (0,+\infty)\}\) 不是开覆盖（\((-\infty, 0]\) 不开）， 故粘合引理不适用。 易错点：试图对非开覆盖使用开覆盖版粘合引理；或对无限闭覆盖 使用有限闭覆盖版。</p>
+            <h4>例题：粘合引理的适用条件</h4>
+            <p><strong>题目：</strong>定义 \(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x\)（\(x \leq 0\)），\(f(x) = x + 1\)（\(x > 0\)）。\(f\) 是否连续？</p>
+            <p><strong>分析：</strong>\(f\) 在 \((-\infty, 0]\) 和 \((0, +\infty)\) 上分别连续。但 \(\{(-\infty, 0], (0, +\infty)\}\) 不是开覆盖（\((-\infty, 0]\) 不开），也不是有限闭覆盖（\((0, +\infty)\) 不闭）。粘合引理不适用。</p>
+            <p><strong>直接验证：</strong>\(f^{-1}((0.5, 1.5)) = \{0.5, 1.5\} \cup \{x > 0 : x + 1 \in (0.5, 1.5)\}\)——\(f\) 在 \(x = 0\) 处有跳跃 → <strong>不连续</strong>。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对非开覆盖使用开覆盖版粘合引理。<br>✅ 必须确认覆盖的每片都是开集，否则结论不成立。</li>
+              <li>❌ 对无穷闭覆盖使用闭覆盖版粘合引理。<br>✅ 闭覆盖版要求<strong>有限</strong>性。反例：\(\mathbb{R} = \bigcup_{x \in \mathbb{R}} \{x\}\) 是无穷闭覆盖。</li>
+              <li>❌ 混淆"连续"与"开映射"——认为连续映射一定把开集映为开集。<br>✅ \(f(x) = x^2\) 连续但 \(f((-1,1)) = [0,1)\) 不开。连续只管原像方向。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -611,35 +736,78 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>给定一族映射，如何选择"恰好合适"的拓扑使它们连续？初始拓扑 （最弱使映射连续的拓扑）和终止拓扑（最强使映射连续的拓扑）回 答了这个问题。子空间拓扑、积拓扑是初始拓扑的特例；商拓扑是终 止拓扑的特例。嵌入则是将子空间"等同地"放入更大空间的方式。</p>
+            <ul>
+              <li><strong>根据映射确定拓扑：</strong>给定一族映射，如何选择"恰好合适"的拓扑使它们连续？初始拓扑（最弱）和终止拓扑（最强）分别从两个方向给出最优解。</li>
+              <li><strong>统一构造的框架：</strong>子空间拓扑、积拓扑都是初始拓扑的特例；商拓扑是终止拓扑的特例。掌握这一框架就掌握了拓扑构造的核心。</li>
+              <li><strong>嵌入——空间的"子同胚"：</strong>嵌入是将子空间等同地放入更大空间的方式，是讨论子空间和度量化问题的基本工具。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>初始/终止拓扑体现了"万有性质"(universal property)思想： 通过要求特定的映射连续来唯一确定拓扑。这是范畴论中极限/余极 限概念的具体体现。</p>
+            <ul>
+              <li><strong>万有性质思想：</strong>初始/终止拓扑各通过一条"万有性质"唯一确定——分别要求经过该空间的映射自动满足连续性条件。这是范畴论中极限/余极限的具体体现。</li>
+              <li><strong>对偶构造：</strong>初始拓扑针对"从 \(X\) 出发的映射"，终止拓扑针对"到达 \(X\) 的映射"——两者形成完美对偶。</li>
+              <li><strong>子基生成法：</strong>初始拓扑的子基 = 各映射的原像集，回到 ch01 中子基生成拓扑的方法。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>初始拓扑</strong>：给定 \(f_\alpha: X \to (Y_\alpha, \tau_\alpha)\)， \(X\) 上使所有 \(f_\alpha\) 连续的最弱拓扑 \(\tau_i\) 的子基为 \[\mathcal{S} = \{f_\alpha^{-1}(V) : V \in \tau_\alpha,\; \alpha \in A\}\] 万有性质：\(g: Z \to X\) 连续 \(\iff \forall \alpha,\; f_\alpha \circ g\) 连续。 <strong>终止拓扑</strong>：给定 \(f_\alpha: (Y_\alpha, \tau_\alpha) \to X\)， \(X\) 上使所有 \(f_\alpha\) 连续的最强拓扑为 \[\tau_f = \{U \subseteq X : \forall \alpha,\; f_\alpha^{-1}(U) \in \tau_\alpha\}\] 万有性质：\(g: X \to Z\) 连续 \(\iff \forall \alpha,\; g \circ f_\alpha\) 连续。 <strong>嵌入 (Embedding)</strong>：\(f: X \to Y\) 是嵌入，若 \(f: X \to f(X)\) 是同胚 （其中 \(f(X)\) 带子空间拓扑）。即 \(f\) 是单射、连续、且 \(f^{-1}: f(X) \to X\) 连续。</p>
+            <h4>1. 初始拓扑</h4>
+            <p>给定映射族 \(\{f_\alpha: X \to (Y_\alpha, \tau_\alpha)\}\)，\(X\) 上使所有 \(f_\alpha\) 连续的<strong>最弱拓扑</strong> \(\tau_i\) 的子基为</p>
+            \[\mathcal{S} = \{f_\alpha^{-1}(V) : V \in \tau_\alpha,\; \alpha \in A\}\]
+            <p><strong>万有性质：</strong>\(g: Z \to X\) 连续 \(\iff \forall \alpha,\; f_\alpha \circ g\) 连续。</p>
+            <ul>
+              <li><strong>子空间拓扑</strong> = 关于包含映射 \(\iota: A \hookrightarrow X\) 的初始拓扑。</li>
+              <li><strong>积拓扑</strong> = 关于投射族 \(\{\pi_\alpha\}\) 的初始拓扑。</li>
+            </ul>
+
+            <h4>2. 终止拓扑</h4>
+            <p>给定 \(\{f_\alpha: (Y_\alpha, \tau_\alpha) \to X\}\)，\(X\) 上使所有 \(f_\alpha\) 连续的<strong>最强拓扑</strong>为</p>
+            \[\tau_f = \{U \subseteq X : \forall \alpha,\; f_\alpha^{-1}(U) \in \tau_\alpha\}\]
+            <p><strong>万有性质：</strong>\(g: X \to Z\) 连续 \(\iff \forall \alpha,\; g \circ f_\alpha\) 连续。</p>
+            <ul>
+              <li><strong>商拓扑</strong> = 关于商映射 \(q: X \to X/{\sim}\) 的终止拓扑。</li>
+            </ul>
+
+            <h4>3. 嵌入 (Embedding)</h4>
+            <p>\(f: X \to Y\) 是<strong>嵌入</strong>，若 \(f: X \to f(X)\) 是同胚（\(f(X)\) 带子空间拓扑）。等价地：\(f\) 单射、连续、且 \(f^{-1}: f(X) \to X\) 连续。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 弱拓扑是泛函分析中对偶空间上的初始拓扑 - Whitney 嵌入定理：任何 \(n\) 维流形可嵌入 \(\mathbb{R}^{2n+1}\)</p>
+            <p><strong>弱拓扑与对偶空间：</strong>Banach 空间 \(X\) 的弱拓扑是关于 \(\{f \in X^* : f \text{ 有界线性泛函}\}\) 的初始拓扑。弱*拓扑则是 \(X^*\) 上关于求值映射 \(\{\hat{x}\}_{x \in X}\) 的初始拓扑。</p>
+            <p><strong>Whitney 嵌入定理：</strong>任何 \(n\) 维紧致光滑流形都可嵌入 \(\mathbb{R}^{2n+1}\)。这意味着抽象流形总可以在欧氏空间中"实现"。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(X = \mathbb{R}\)，\(f: X \to \mathbb{R}\)，\(f(x) = x^2\)， \(g: X \to \mathbb{R}\)，\(g(x) = x^3\)。求 \(X\) 上关于 \(\{f, g\}\) 的初始拓扑中，\(\{0\}\) 是否为开集？ 解答：初始拓扑的子基为 \(\{f^{-1}(V), g^{-1}(V) : V \text{ 开}\}\)。 \(f^{-1}(\{0\}) = \{0\}\) 但 \(\{0\}\) 在 \(\mathbb{R}\) 中不开， 我们需要 \(f^{-1}(V)\) 形式。\(f^{-1}((-\varepsilon, \varepsilon)) = (-\sqrt{\varepsilon}, \sqrt{\varepsilon})\)。 \(g^{-1}((-\varepsilon, \varepsilon)) = (-\varepsilon^{1/3}, \varepsilon^{1/3})\)。 \(\{0\} = \bigcap_n (-1/n, 1/n)\) 不是有限交，故 \(\{0\}\) 不是开集。 易错点：混淆"子基元素"与"拓扑中的开集"——子基元素的有限交构成 基，但无限交不一定在拓扑中。</p>
+            <h4>例题：初始拓扑中哪些集合是开集？</h4>
+            <p><strong>题目：</strong>设 \(X = \mathbb{R}\)，\(f(x) = x^2\)，\(g(x) = x^3\)。求关于 \(\{f, g\}\) 的初始拓扑中 \(\{0\}\) 是否开集。</p>
+            <p><strong>第一步 — 确定子基：</strong>子基 = \(\{f^{-1}(V), g^{-1}(V) : V \text{ 在 } \mathbb{R} \text{ 中开}\}\)。</p>
+            <p><strong>第二步 — 分析 \(\{0\}\) 的邻域：</strong></p>
+            <ul>
+              <li>\(f^{-1}((-\varepsilon, \varepsilon)) = (-\sqrt{\varepsilon}, \sqrt{\varepsilon})\)</li>
+              <li>\(g^{-1}((-\varepsilon, \varepsilon)) = (-\varepsilon^{1/3}, \varepsilon^{1/3})\)</li>
+            </ul>
+            <p>这些集合都是 \(0\) 的开邻域，但 \(\{0\} = \bigcap_{n}(-1/n, 1/n)\) 是无穷交——不属于由子基有限交生成的基。</p>
+            <p><strong>结论：</strong>\(\{0\}\) <strong>不是</strong>初始拓扑中的开集。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆子基元素与拓扑中的开集——以为子基的无穷交也在拓扑中。<br>✅ 子基 → (有限交得基) → (任意并得拓扑)。无穷交一般不在拓扑中。</li>
+              <li>❌ 混淆初始/终止拓扑的方向——将商拓扑误认为初始拓扑。<br>✅ 初始拓扑：映射从 \(X\) 出发（子空间、积）。终止拓扑：映射到达 \(X\)（商空间）。</li>
+              <li>❌ 认为嵌入就是单射连续映射。<br>✅ 还需要 \(f^{-1}: f(X) \to X\) 连续。单射连续但 \(f^{-1}\) 不连续的例子：\(t \mapsto (\cos t, \sin t)\) 从 \([0, 2\pi)\) 到 \(S^1\)。</li>
+            </ul>
           </div>
         </div>
       </div>

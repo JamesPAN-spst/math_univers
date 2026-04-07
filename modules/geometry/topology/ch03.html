@@ -394,35 +394,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在一般拓扑空间中，"不同的点可能无法用开集区分"——这对分析直觉 来说非常奇怪。分离公理是对空间施加的递进式限制，使得空间越来越 接近我们熟悉的度量空间。其中最重要的是 Hausdorff 条件(T₂)，它 保证极限的唯一性——没有它，连序列收敛到唯一极限这种基本事实都 不成立。</p>
+            <ul>
+              <li><strong>一般空间的"病态"：</strong>在某些拓扑空间中，不同的点无法用开集区分——这在分析直觉中难以想象。分离公理是对空间施加的递进式限制，使空间逐步接近我们熟悉的度量空间。</li>
+              <li><strong>极限唯一性的保障：</strong>Hausdorff 条件 (\(T_2\)) 保证序列极限的唯一性。没有 \(T_2\)，一个序列可以同时收敛到每一个点——基本分析工具全面失效。</li>
+              <li><strong>逐级递进的框架：</strong>\(T_0 \to T_1 \to T_2\) 的每一级要求更强的"用开集分离"能力，理解层次有助于判断空间的性质强度。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>分离公理的层次：T₀ → T₁ → T₂ → T₃ → T₄，每一级要求更 强的"用开集分离点/集合"的能力。越高的分离性，空间越"好"。</p>
+            <ul>
+              <li><strong>分离公理的层次：</strong>\(T_0\) = 单侧可区分；\(T_1\) = 双侧可区分（单点闭）；\(T_2\) = 可用不相交开集分离。三者构成严格递增链。</li>
+              <li><strong>核心判据表：</strong>\(T_1 \iff\) 单点集闭；\(T_2 \iff\) 对角线 \(\Delta = \{(x,x)\}\) 在 \(X \times X\) 中闭。这些等价条件是实际验证分离性的利器。</li>
+              <li><strong>度量空间的基准：</strong>度量空间自动满足 \(T_2\)（取 \(\varepsilon = d(x,y)/2\)）。分离公理衡量空间偏离度量世界的程度。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>\(T_0\) (Kolmogorov)</strong>：\(\forall x \neq y\)，\(\exists U\) 开， \(x \in U, y \notin U\) 或 \(y \in U, x \notin U\)（至少一个方向）。 <strong>\(T_1\)</strong>：\(\forall x \neq y\)，\(\exists U\) 开，\(x \in U, y \notin U\) （两个方向都行）。等价条件：单点集 \(\{x\}\) 都是闭集。 <strong>\(T_2\) (Hausdorff)</strong>：\(\forall x \neq y\)，\(\exists U, V\) 开， \(x \in U, y \in V, U \cap V = \emptyset\)。 <strong>极限唯一性</strong>（\(T_2\) 的关键后果）：若 \(x_n \to a\) 且 \(x_n \to b\)， 取不相交开邻域 \(U \ni a\)，\(V \ni b\)。当 \(n\) 充分大时 \(x_n \in U\) 且 \(x_n \in V\)，矛盾。故 \(a = b\)。 蕴含关系： \[T_2 \Rightarrow T_1 \Rightarrow T_0\] 反之均不成立。</p>
+            <h4>1. \(T_0\) 空间 (Kolmogorov)</h4>
+            <p>\(\forall x \neq y\)，\(\exists U\) 开，使得 \(x \in U,\, y \notin U\) 或 \(y \in U,\, x \notin U\)（至少一个方向）。</p>
+
+            <h4>2. \(T_1\) 空间</h4>
+            <p>\(\forall x \neq y\)，\(\exists U\) 开使 \(x \in U,\, y \notin U\)（<strong>两个方向都</strong>成立）。</p>
+            <p><strong>等价条件：</strong>每个单点集 \(\{x\}\) 是闭集。（证明：\(y \neq x\) 时存在开集 \(U_y \ni y\) 不含 \(x\)，故 \(X \setminus \{x\} = \bigcup_{y \neq x} U_y\) 开。）</p>
+
+            <h4>3. \(T_2\) 空间 (Hausdorff)</h4>
+            <p>\(\forall x \neq y\)，存在<strong>不相交</strong>开集 \(U \ni x\)，\(V \ni y\)，\(U \cap V = \emptyset\)。</p>
+
+            <h4>4. 极限唯一性</h4>
+            <p>在 \(T_2\) 空间中，若 \(x_n \to a\) 且 \(x_n \to b\)，取 \(U \ni a,\, V \ni b,\, U \cap V = \emptyset\)。当 \(n\) 充分大时 \(x_n \in U \cap V = \emptyset\)，矛盾。故 \(a = b\)。</p>
+            \[T_2 \;\Longrightarrow\; T_1 \;\Longrightarrow\; T_0\]
+            <p>反之均<strong>不成立</strong>。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 代数几何中的 Zariski 拓扑是 \(T_1\)（闭点）但通常不是 \(T_2\) - Hausdorff 性在流形论中是基本假设之一</p>
+            <p><strong>代数几何中的 Zariski 拓扑：</strong>代数簇上的 Zariski 拓扑满足 \(T_1\)（闭点 = 极大理想对应的点），但通常<strong>不是</strong> \(T_2\)——任何两个非空开集都相交。这是代数几何与点集拓扑的重要差异。</p>
+            <p><strong>流形论的基本假设：</strong>拓扑流形的定义中明确要求 Hausdorff 性。去掉 \(T_2\) 会产生病态对象（如"二叉直线"），不适合微分几何。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明余有限拓扑在无穷集 \(X\) 上是 \(T_1\) 但不是 \(T_2\)。 解答：\(T_1\)：\(\{x\}\) 的补 \(X \setminus \{x\}\) 的补是 \(\{x\}\)（有限）， 所以 \(X \setminus \{x\}\) 是开集，即 \(\{x\}\) 闭。 非 \(T_2\)：设 \(U, V\) 非空开集，则 \(X \setminus U\) 和 \(X \setminus V\) 均有限。\(X \setminus (U \cap V) = (X \setminus U) \cup (X \setminus V)\) 有限。由于 \(X\) 无穷，\(U \cap V \neq \emptyset\)， 故不存在不相交的非空开集。 易错点：在有限集上余有限拓扑 = 离散拓扑，此时满足 \(T_2\)！ "\(T_1\) 但非 \(T_2\)"只在无穷集上成立。</p>
+            <h4>例题：余有限拓扑是 \(T_1\) 但非 \(T_2\)</h4>
+            <p><strong>题目：</strong>证明无穷集 \(X\) 上的余有限拓扑满足 \(T_1\) 但不满足 \(T_2\)。</p>
+            <p><strong>\(T_1\) 的证明：</strong>对任意 \(x\)，\(X \setminus \{x\}\) 的补 = \(\{x\}\) 有限，故 \(X \setminus \{x\}\) 是开集 → \(\{x\}\) 闭。✔</p>
+            <p><strong>非 \(T_2\) 的证明：</strong>设 \(U, V\) 为非空开集。则 \(X \setminus U\) 和 \(X \setminus V\) 均有限：</p>
+            \[X \setminus (U \cap V) = (X \setminus U) \cup (X \setminus V) \;\text{有限}\]
+            <p>由于 \(X\) 无穷，\(U \cap V \neq \emptyset\)。故<strong>任何两个非空开集都相交</strong> → 不存在不相交的开集分离两点。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忘记"无穷集"条件——有限集上余有限拓扑 = 离散拓扑，满足 \(T_2\)。<br>✅ "\(T_1\) 但非 \(T_2\)" 只在 \(X\) 无穷时成立。</li>
+              <li>❌ 混淆 \(T_1\) 和 \(T_2\)——认为"单点闭"就够了。<br>✅ \(T_1\) 只保证单点闭，\(T_2\) 还要求用<strong>不相交</strong>开集分离两点。</li>
+              <li>❌ 认为 \(T_2\) 不重要，因为"常见空间都满足"。<br>✅ Zariski 拓扑、平庸拓扑等重要空间不满足 \(T_2\)，\(T_2\) 的缺失会导致极限不唯一等严重后果。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -467,28 +501,70 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>\(T_2\) 可以用开集分离两个点，但能否分离一个点和一个闭集？能否 分离两个不相交的闭集？这些更强的要求分别定义了正则性(\(T_3\))和 正规性(\(T_4\))。正规空间尤为重要，因为它支撑了 Urysohn 引理和 Tietze 扩张定理等强大工具。</p>
+            <ul>
+              <li><strong>从点-点到点-集的分离：</strong>\(T_2\) 可以用开集分离两个点；但能否分离一个点和一个闭集？这定义了正则性 (\(T_3\))。</li>
+              <li><strong>集-集分离：</strong>能否用不相交开集分离两个不相交闭集？这定义了正规性 (\(T_4\))，是 Urysohn 引理和 Tietze 扩张定理的前提。</li>
+              <li><strong>度量空间的"模版"：</strong>度量空间自动满足 \(T_4\)（利用距离函数 \(d(x, F)\)），理解正规性就是理解度量空间为何如此"好用"。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>分离的对象从"点-点"升级为"点-集"和"集-集"。度量空间自动满足 所有分离公理，正是因为距离函数提供了天然的分离机制。</p>
+            <ul>
+              <li><strong>分离对象的升级：</strong>点-点分离 (\(T_2\)) → 点-闭集分离 (\(T_3\)) → 闭集-闭集分离 (\(T_4\))。每一级要求更强的分离能力。</li>
+              <li><strong>距离函数是天然分离器：</strong>度量空间满足所有分离公理，正是因为 \(d(\cdot, F) = \inf_{y \in F} d(\cdot, y)\) 是连续的"距离量尺"。</li>
+              <li><strong>正则性的等价刻画：</strong>空间正则 \(\iff\) 对每个 \(x \in U\)（\(U\) 开），存在开集 \(V\) 使 \(x \in V \subseteq \overline{V} \subseteq U\)——即开邻域可以"收缩"为闭包仍在原邻域内的更小邻域。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>正则空间 (\(T_3\))</strong>：\(T_1\) 且对任意 \(x \in X\) 和闭集 \(F \not\ni x\)，存在不相交开集 \(U \ni x\)，\(V \supseteq F\)。 等价条件：\(\forall x \in U\)（\(U\) 开），\(\exists V\) 开， \(x \in V \subseteq \overline{V} \subseteq U\)。 <strong>正规空间 (\(T_4\))</strong>：\(T_1\) 且对任意不相交闭集 \(F_1, F_2\)， 存在不相交开集 \(U_1 \supseteq F_1\)，\(U_2 \supseteq F_2\)。 \[T_4 \Rightarrow T_3 \Rightarrow T_2 \Rightarrow T_1 \Rightarrow T_0\] <strong>关键事实</strong>： - 度量空间 \(\Rightarrow T_4\)（利用距离函数 \(d(x, F) = \inf_{y \in F} d(x,y)\)） - 紧 Hausdorff 空间 \(\Rightarrow T_4\) - 正则 + Lindelöf \(\Rightarrow T_4\)</p>
+            <h4>1. 正则空间 (\(T_3\))</h4>
+            <p>\(X\) 是 \(T_1\) 的，且对任意 \(x \in X\) 和闭集 \(F \not\ni x\)，存在不相交开集 \(U \ni x\)，\(V \supseteq F\)。</p>
+            <p><strong>等价条件：</strong>\(\forall x \in U\)（\(U\) 开），\(\exists V\) 开使 \(x \in V \subseteq \overline{V} \subseteq U\)。</p>
+
+            <h4>2. 正规空间 (\(T_4\))</h4>
+            <p>\(X\) 是 \(T_1\) 的，且对任意不相交闭集 \(F_1, F_2\)，存在不相交开集 \(U_1 \supseteq F_1\)，\(U_2 \supseteq F_2\)。</p>
+
+            <h4>3. 蕴含链与关键事实</h4>
+            \[T_4 \;\Longrightarrow\; T_3 \;\Longrightarrow\; T_2 \;\Longrightarrow\; T_1 \;\Longrightarrow\; T_0\]
+            <ul>
+              <li><strong>度量空间 ⟹ \(T_4\)：</strong>利用 \(d(x, F_1) < d(x, F_2)\) 和 \(d(x, F_2) < d(x, F_1)\) 构造分离。</li>
+              <li><strong>紧 Hausdorff ⟹ \(T_4\)：</strong>紧致性将有限子覆盖与 \(T_2\) 结合。</li>
+              <li><strong>正则 + Lindelöf ⟹ \(T_4\)。</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>单位分解 (Partition of Unity)：</strong>在正规空间（特别是仿紧 Hausdorff 空间）上可构造从属于开覆盖的单位分解，这在微分几何中是积分和黎曼度量存在性证明的核心工具。</p>
+            <p><strong>算子理论中的闭集分离：</strong>正规性保证了 Urysohn 引理可用，从而可以构造截断函数、光滑化等分析工具，是泛函分析中 \(C(X)\) 理论的基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明度量空间 \((X, d)\) 是正规 (\(T_4\)) 的。 解答：设 \(F_1, F_2\) 为不相交闭集。定义 \(U_1 = \{x : d(x, F_1) < d(x, F_2)\}\)， \(U_2 = \{x : d(x, F_2) < d(x, F_1)\}\)。 \(U_1, U_2\) 开（\(d(\cdot, F)\) 连续），\(F_1 \subseteq U_1\) （\(x \in F_1 \Rightarrow d(x, F_1)=0 < d(x, F_2)\)， 因为 \(F_2\) 闭且 \(x \notin F_2\)）。类似 \(F_2 \subseteq U_2\)。 \(U_1 \cap U_2 = \emptyset\)。 易错点：必须用 \(F_1 \cap F_2 = \emptyset\) 且 \(F_2\) 闭来保证 \(x \in F_1 \Rightarrow d(x, F_2) > 0\)。</p>
+            <h4>例题：度量空间是 \(T_4\) 的</h4>
+            <p><strong>题目：</strong>证明度量空间 \((X, d)\) 是正规 (\(T_4\)) 的。</p>
+            <p><strong>第一步 — 构造分离开集：</strong>设 \(F_1, F_2\) 不相交闭集，令</p>
+            \[U_1 = \{x : d(x, F_1) < d(x, F_2)\}, \quad U_2 = \{x : d(x, F_2) < d(x, F_1)\}\]
+            <p><strong>第二步 — 验证开性：</strong>\(d(\cdot, F)\) 连续 → \(U_1, U_2\) 是连续函数的原像，故开。</p>
+            <p><strong>第三步 — 验证包含：</strong>\(x \in F_1 \Rightarrow d(x, F_1) = 0\)。由 \(F_2\) 闭且 \(x \notin F_2\) 知 \(d(x, F_2) > 0\) → \(x \in U_1\)。类似 \(F_2 \subseteq U_2\)。</p>
+            <p><strong>第四步 — 验证不相交：</strong>\(U_1 \cap U_2 = \emptyset\)（不能同时严格小于）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忘记验证 \(d(x, F_2) > 0\) 需要 \(F_2\) 闭 + \(x \notin F_2\)。<br>✅ 若 \(F_2\) 不闭，可能存在 \(x \in F_1\) 使 \(d(x, F_2) = 0\)（\(x \in \overline{F_2} \setminus F_2\)）。</li>
+              <li>❌ 认为 \(T_2 \Rightarrow T_3\)——这不成立。<br>✅ 存在 Hausdorff 但不正则的空间（需要复杂构造）。</li>
+              <li>❌ 认为正规性对子空间遗传。<br>✅ \(T_4\) 不遗传到任意子空间（但遗传到闭子空间）。Sorgenfrey 直线正规，但 Sorgenfrey 平面不正规。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -515,35 +591,70 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>正规空间能用开集分离闭集，但能否做到更精细——用连续函数分离？ Urysohn 引理给出了肯定答案：正规空间中两个不相交闭集之间总 存在连续函数"平滑过渡"。这是拓扑空间理论中最深刻的结果之一， 也是 Tietze 扩张定理（将闭子集上的连续函数延拓到整个空间）的基础。</p>
+            <ul>
+              <li><strong>从几何分离到分析分离：</strong>正规空间能用开集分离闭集，但能否用<strong>连续函数</strong>分离？Urysohn 引理给出肯定答案——在拓扑与实分析之间架起桥梁。</li>
+              <li><strong>函数延拓的保证：</strong>Tietze 扩张定理保证闭子集上的连续函数可以延拓到全空间，且值域不变。这是构造全局函数的核心工具。</li>
+              <li><strong>度量化的钥匙：</strong>Urysohn 引理是 Urysohn 度量化定理的关键一步——正规 + \(C_2\) 空间可嵌入可度量化空间。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Urysohn 引理将"几何分离"（开集）提升为"分析分离"（连续函数）， 在拓扑与实分析之间架起桥梁。</p>
+            <ul>
+              <li><strong>从集合到函数：</strong>Urysohn 引理将"几何分离"（不相交开集）提升为"分析分离"（连续函数 \(f: X \to [0,1]\)），威力大幅增强。</li>
+              <li><strong>二进有理数的精妙构造：</strong>证明的核心是对每个二进有理数 \(r \in [0,1]\) 构造嵌套开集 \(U_r\)，利用正规性逐步二分。这体现了抽象存在性证明的典型手法。</li>
+              <li><strong>Tietze = Urysohn 的迭代：</strong>Tietze 扩张定理的证明通过迭代应用 Urysohn 引理，逐步逼近目标函数。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Urysohn 引理</strong>：设 \(X\) 是 \(T_4\) 空间，\(F_0, F_1\) 为不相交闭集。 则存在连续函数 \(f: X \to [0,1]\) 使得 \(f|_{F_0} = 0\)，\(f|_{F_1} = 1\)。 <strong>证明思路</strong>：对每个二进有理数 \(r = p/2^n \in [0,1]\)， 构造开集 \(U_r\) 使 \(F_0 \subseteq U_r\)（\(r > 0\)），且 \(r < s \Rightarrow \overline{U_r} \subseteq U_s\)。 利用正规性递归构造：\(U_1 = X \setminus F_1\)， \(F_0 \subseteq U_0\)，\(\overline{U_0} \subseteq U_1\)。 继续二分：\(\overline{U_0} \subseteq U_{1/2} \subseteq \overline{U_{1/2}} \subseteq U_1\)。 定义 \(f(x) = \inf\{r : x \in U_r\}\)，则 \(f\) 连续且 \[f|_{F_0} = 0, \quad f|_{F_1} = 1\] <strong>Tietze 扩张定理</strong>（陈述）：\(X\) 为 \(T_4\) 空间，\(A \subseteq X\) 闭， \(f: A \to [a,b]\) 连续。则存在连续延拓 \(F: X \to [a,b]\)，\(F|_A = f\)。</p>
+            <h4>1. Urysohn 引理</h4>
+            <p><strong>定理：</strong>设 \(X\) 为 \(T_4\) 空间，\(F_0, F_1\) 为不相交闭集。则存在连续函数 \(f: X \to [0,1]\) 使</p>
+            \[f|_{F_0} \equiv 0, \quad f|_{F_1} \equiv 1\]
+
+            <h4>2. 证明思路（二进构造）</h4>
+            <p>对每个二进有理数 \(r = p/2^n \in [0,1]\)，构造开集 \(U_r\) 使：</p>
+            <ul>
+              <li>\(F_0 \subseteq U_r\)（当 \(r > 0\)）；</li>
+              <li>\(r < s \Rightarrow \overline{U_r} \subseteq U_s\)。</li>
+            </ul>
+            <p>起始：\(U_1 = X \setminus F_1\)。由正规性，存在 \(U_0\) 使 \(F_0 \subseteq U_0 \subseteq \overline{U_0} \subseteq U_1\)。继续二分：\(\overline{U_0} \subseteq U_{1/2} \subseteq \overline{U_{1/2}} \subseteq U_1\)……</p>
+            <p>定义 \(f(x) = \inf\{r : x \in U_r\}\)，则 \(f\) 连续且满足所求。</p>
+
+            <h4>3. Tietze 扩张定理</h4>
+            <p><strong>定理：</strong>\(X\) 为 \(T_4\) 空间，\(A \subseteq X\) 闭，\(g: A \to [a,b]\) 连续。则存在连续延拓 \(G: X \to [a,b]\)，\(G|_A = g\)。</p>
+            <p>值域保持不变（\(G\) 的像仍在 \([a,b]\) 内）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Tietze 定理在偏微分方程中保证边界条件可延拓为全局函数 - Urysohn 度量化定理：正则 + \(C_2\) \(\Rightarrow\) 可度量化</p>
+            <p><strong>PDE 中的边界延拓：</strong>Tietze 定理保证偏微分方程的边界条件可以延拓为全局函数，使得变分方法和弱解理论中的"测试函数"构造成为可能。</p>
+            <p><strong>Urysohn 度量化定理：</strong>正则 + \(C_2\) ⟹ 可度量化。证明核心：利用可数基和 Urysohn 引理构造可数族连续函数，将空间嵌入 \([0,1]^{\mathbb{N}}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：利用 Urysohn 引理，在 \(\mathbb{R}\) 上构造一个连续函数 \(f\) 满足 \(f(x) = 0\)（\(x \leq 0\)），\(f(x) = 1\)（\(x \geq 1\)）， \(0 \leq f \leq 1\)。 解答：\(\mathbb{R}\) 是度量空间故正规。\(F_0 = (-\infty, 0]\)， \(F_1 = [1, +\infty)\) 不相交闭集。Urysohn 引理保证 \(f\) 存在。 具体构造：\(f(x) = 0\)（\(x \leq 0\)），\(f(x) = x\)（\(0 \leq x \leq 1\)）， \(f(x) = 1\)（\(x \geq 1\)）。 易错点：Urysohn 引理只保证存在性，不给出唯一函数。满足条件 的函数有无穷多个。</p>
+            <h4>例题：用 Urysohn 引理构造过渡函数</h4>
+            <p><strong>题目：</strong>在 \(\mathbb{R}\) 上构造连续函数 \(f\) 满足 \(f|_{(-\infty, 0]} = 0\)，\(f|_{[1, +\infty)} = 1\)，\(f \in [0,1]\)。</p>
+            <p><strong>第一步 — 验证前提：</strong>\(\mathbb{R}\) 是度量空间，故正规。\(F_0 = (-\infty, 0]\) 和 \(F_1 = [1, +\infty)\) 是不相交闭集。Urysohn 引理保证 \(f\) 存在。</p>
+            <p><strong>第二步 — 具体构造：</strong>\(f(x) = 0\)（\(x \leq 0\)），\(f(x) = x\)（\(0 \leq x \leq 1\)），\(f(x) = 1\)（\(x \geq 1\)）满足所有条件。✔</p>
+            <p><strong>注意：</strong>Urysohn 引理只保证<strong>存在性</strong>，不给出唯一函数。满足条件的 \(f\) 有无穷多个（如 \(f(x) = x^2\) 在 \([0,1]\) 上也行）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 Urysohn 引理的前提是 \(T_2\) 或度量空间。<br>✅ 精确前提是 \(T_4\)（正规）。度量空间和紧 Hausdorff 空间都满足但不是唯一满足的。</li>
+              <li>❌ 认为 Tietze 定理适用于任意子集（不仅仅是闭子集）。<br>✅ 子集必须是<strong>闭</strong>的。开子集上的延拓不一定存在。</li>
+              <li>❌ 期望 Tietze 延拓保持更多结构（如 Lipschitz 连续性、可微性）。<br>✅ Tietze 只保证连续性和值域不变。更强的正则性需要额外工具（如 Whitney 延拓定理）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -586,28 +697,70 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>分离公理从 \(T_0\) 到 \(T_4\) 形成了严格的层次。理解这个层次的关 键在于知道"哪些蕴含是严格的"以及"度量空间在哪一层"。度量空间 自动满足所有分离公理，是"最好"的空间类型之一。Urysohn 度量化 定理反过来告诉我们：满足特定可数和分离条件的空间可以度量化。</p>
+            <ul>
+              <li><strong>层次的全景图：</strong>分离公理从 \(T_0\) 到 \(T_4\) 形成严格递增链。理解每一级的反例是掌握"空间有多好"的关键。</li>
+              <li><strong>度量空间的特殊地位：</strong>度量空间自动满足所有分离公理（\(T_4\)），是"最好"的空间类型之一。Urysohn 度量化定理给出度量化的充分条件。</li>
+              <li><strong>反例地图：</strong>构建从 \(T_0\) 到 \(T_4\) 每一级严格分离的反例空间，是学习一般拓扑不可或缺的训练。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <ul>
+              <li><strong>蕴含链与反例：</strong>每个 \(\Rightarrow\) 都严格（不可逆），需要具体反例来证明。反例的构造通常涉及非度量拓扑（Sierpiński 空间、余有限拓扑、Sorgenfrey 平面等）。</li>
+              <li><strong>度量化 = 分离 + 可数 + 正则：</strong>Urysohn 定理的条件（正则 + \(C_2\)）是拓扑空间成为度量空间的精确门槛。理解这一点有助于判断何时可以安全使用 \(\varepsilon\)-\(\delta\) 方法。</li>
+              <li><strong>遗传性的微妙：</strong>\(T_0, T_1, T_2, T_3\) 对子空间遗传，但 \(T_4\) 仅遗传到闭子空间——这是一个常考的陷阱。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>完整蕴含链</strong>： \[\text{度量} \Rightarrow T_4 \Rightarrow T_3 \Rightarrow T_2 \Rightarrow T_1 \Rightarrow T_0\] 每个 \(\Rightarrow\) 都不可逆（存在反例）。 <strong>度量空间满足所有分离公理</strong>：对 \(x \neq y\)，取 \(\varepsilon = d(x,y)/2 > 0\)，则 \(B(x,\varepsilon) \cap B(y,\varepsilon) = \emptyset\)（\(T_2\)）。 对闭集的分离利用连续函数 \(d(\cdot, F)\)。 <strong>Urysohn 度量化定理</strong>（陈述）：\(X\) 正则 (\(T_3\)) + \(C_2\) \(\Rightarrow\) \(X\) 可度量化。即存在度量 \(d\) 使 \(\tau_d = \tau\)。 <strong>反例总结</strong>： - \(T_0\) 但非 \(T_1\)：Sierpiński 空间 \(\{0,1\}\)，\(\tau = \{\emptyset, \{0\}, \{0,1\}\}\) - \(T_1\) 但非 \(T_2\)：无穷集上余有限拓扑 - \(T_2\) 但非 \(T_3\)：需要更复杂的构造 - \(T_3\) 但非 \(T_4\)：Sorgenfrey 平面 \(\mathbb{R}_\ell \times \mathbb{R}_\ell\)</p>
+            <h4>1. 完整蕴含链</h4>
+            \[\text{度量空间} \;\Longrightarrow\; T_4 \;\Longrightarrow\; T_3 \;\Longrightarrow\; T_2 \;\Longrightarrow\; T_1 \;\Longrightarrow\; T_0\]
+            <p>每个 \(\Rightarrow\) <strong>不可逆</strong>。</p>
+
+            <h4>2. 度量空间满足所有分离公理</h4>
+            <p>对 \(x \neq y\)，取 \(\varepsilon = d(x,y)/2 > 0\)，则 \(B(x,\varepsilon) \cap B(y,\varepsilon) = \emptyset\)（满足 \(T_2\) 等）。对闭集的分离利用连续函数 \(d(\cdot, F)\)。</p>
+
+            <h4>3. Urysohn 度量化定理</h4>
+            <p>\(X\) 满足 \(T_3\)（正则）+ \(C_2\)（第二可数）⟹ \(X\) 可度量化（存在度量 \(d\) 使 \(\tau_d = \tau\)）。</p>
+
+            <h4>4. 经典反例总结</h4>
+            <ul>
+              <li><strong>\(T_0\) 非 \(T_1\)：</strong>Sierpiński 空间 \(\{0,1\}, \tau = \{\emptyset, \{0\}, \{0,1\}\}\)。</li>
+              <li><strong>\(T_1\) 非 \(T_2\)：</strong>无穷集上余有限拓扑。</li>
+              <li><strong>\(T_2\) 非 \(T_3\)：</strong>需要更复杂的构造（如 \(K\)-拓扑）。</li>
+              <li><strong>\(T_3\) 非 \(T_4\)：</strong>Sorgenfrey 平面 \(\mathbb{R}_\ell \times \mathbb{R}_\ell\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 度量化定理是泛函分析中判断拓扑向量空间是否可度量化的工具 - 在计算机科学中，度量空间是最近邻搜索算法的基础</p>
+            <p><strong>泛函分析中的度量化判据：</strong>度量化定理帮助判断拓扑向量空间何时可度量化。例如可数范数族定义的 Fréchet 空间满足条件，可以使用度量工具（Cauchy 序列、Baire 范畴）。</p>
+            <p><strong>最近邻搜索与机器学习：</strong>度量空间是 KNN 算法、球树 (ball tree)、locality-sensitive hashing 等数据结构的数学基础。度量化保证距离公理成立。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：Sierpiński 空间 \(S = \{0,1\}\)，\(\tau = \{\emptyset, \{0\}, \{0,1\}\}\)。 判断它满足哪些分离公理。 解答：\(T_0\)：\(0 \neq 1\)，\(\{0\} \ni 0\) 但 \(1 \notin \{0\}\)。✓ 非 \(T_1\)：不存在开集 \(U\) 使 \(1 \in U, 0 \notin U\) （唯一含 \(1\) 的开集是 \(\{0,1\}\)）。 \(\{1\}\) 的补是 \(\{0\}\)，\(\{0\}\) 是开集， 所以 \(\{1\}\) 是闭的。但 \(\{0\}\) 的补是 \(\{1\}\)， \(\{1\}\) 不是开集，所以 \(\{0\}\) 不闭。故不是 \(T_1\)。 易错点：混淆 \(T_0\) 和 \(T_1\)——\(T_0\) 只要求"单方向"可区分。</p>
+            <h4>例题：Sierpiński 空间的分离级别</h4>
+            <p><strong>题目：</strong>\(S = \{0, 1\}\)，\(\tau = \{\emptyset, \{0\}, \{0,1\}\}\)。判断满足哪些分离公理。</p>
+            <p><strong>\(T_0\) ✔：</strong>\(0 \neq 1\)，\(\{0\} \ni 0\) 但 \(1 \notin \{0\}\)。</p>
+            <p><strong>非 \(T_1\) ✘：</strong>不存在开集 \(U\) 使 \(1 \in U,\, 0 \notin U\)（含 1 的唯一开集是 \(\{0,1\}\)）。进一步验证：\(\{1\}\) 的补 = \(\{0\}\) 是开集 → \(\{1\}\) 闭；但 \(\{0\}\) 的补 = \(\{1\}\) 不是开集 → \(\{0\}\) 不闭。单点未必闭 → 非 \(T_1\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 \(T_0\) 与 \(T_1\)——\(T_0\) 只要求单方向可区分。<br>✅ \(T_1\) 要求<strong>双向</strong>：对任意 \(x \neq y\)，既有 \(U \ni x,\, y \notin U\)，又有 \(V \ni y,\, x \notin V\)。</li>
+              <li>❌ 认为 Sorgenfrey 直线不正规。<br>✅ Sorgenfrey 直线<strong>是</strong>正规的；但其自身的乘积（Sorgenfrey 平面）不正规。</li>
+              <li>❌ 认为正规性对所有子空间遗传。<br>✅ \(T_4\) 仅对<strong>闭</strong>子空间遗传。开子空间可能失去正规性。</li>
+            </ul>
           </div>
         </div>
       </div>
