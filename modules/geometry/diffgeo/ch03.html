@@ -394,35 +394,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>向量场"有方向"，但物理中许多对象（如功、通量）是"吃掉方向给出 数值"的——它们不是向量而是余向量。余切空间 \(T_p^*M\) 是切空间的 对偶，\(k\)-形式则是反对称多重线性映射。微分形式是积分和 Stokes 定理的自然语言——在流形上，"被积对象"不是函数而是形式。</p>
+            <ul>
+              <li><strong>对偶视角：</strong>向量场"有方向"，但物理中功、通量等对象是"吃掉方向给出数值"的——它们不是向量而是余向量（covector）。</li>
+              <li><strong>积分的自然语言：</strong>在流形上，"被积对象"不是函数而是微分形式。\(k\)-形式在 \(k\) 维子流形上积分，这是 Stokes 定理的基础。</li>
+              <li><strong>坐标无关性：</strong>微分形式在坐标变换下自动携带 Jacobian 行列式——换元公式内禀于形式语言中。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>微分形式 = 余切丛的反对称截面。\(k\)-形式"吃"\(k\) 个切向量 输出标量，是流形上积分的正确推广。</p>
+            <ul>
+              <li><strong>余切丛截面：</strong>微分形式 = 余切丛 \(\Lambda^k T^*M\) 的光滑截面。\(k\)-形式在每点是 \(k\) 个切向量的反对称多重线性函数。</li>
+              <li><strong>外代数：</strong>\(\Omega^*(M) = \bigoplus_{k=0}^n \Omega^k(M)\) 配以外积 \(\wedge\) 构成分次代数。</li>
+              <li><strong>维数公式：</strong>\(\dim \Omega^k_p = \binom{n}{k}\)——在 \(n\) 维流形上，\(k\)-形式空间在每点是 \(\binom{n}{k}\) 维的。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>余切空间</strong>：\(T_p^*M = (T_pM)^* = \mathrm{Hom}(T_pM, \mathbb{R})\)。 坐标基 \(\{dx^1|_p, \ldots, dx^n|_p\}\) 对偶于 \(\{\partial/\partial x^i|_p\}\)： \(dx^i(\partial/\partial x^j) = \delta^i_j\)。 <strong>\(k\)-形式</strong>：\(\omega \in \Omega^k(M)\) 是光滑截面 \(\omega_p: \underbrace{T_pM \times \cdots \times T_pM}_{k} \to \mathbb{R}\)， 反对称多重线性。 局部表示： \[\omega = \sum_{i_1 < \cdots < i_k} \omega_{i_1 \cdots i_k}(x)\, dx^{i_1} \wedge \cdots \wedge dx^{i_k}\] <strong>特例</strong>： - \(0\)-形式 = 光滑函数 \(f \in C^\infty(M)\) - \(1\)-形式 \(\omega = \sum \omega_i dx^i\)（"余向量场"） - \(n\)-形式 = 体积形式（\(n = \dim M\)）</p>
+            <h4>1. 余切空间与对偶基</h4>
+            <p>\(T_p^*M = (T_pM)^* = \mathrm{Hom}(T_pM, \mathbb{R})\)。坐标基 \(\{dx^1|_p, \ldots, dx^n|_p\}\) 对偶于 \(\{\partial/\partial x^i|_p\}\)：</p>
+            \[dx^i\!\left(\frac{\partial}{\partial x^j}\right) = \delta^i_j\]
+
+            <h4>2. \(k\)-形式的局部表示</h4>
+            <p>\(\omega \in \Omega^k(M)\) 在每点是反对称多重线性映射 \(\omega_p: \underbrace{T_pM \times \cdots \times T_pM}_{k} \to \mathbb{R}\)。局部表示为：</p>
+            \[\omega = \sum_{i_1 < \cdots < i_k} \omega_{i_1 \cdots i_k}(x)\, dx^{i_1} \wedge \cdots \wedge dx^{i_k}\]
+
+            <h4>3. 特殊情况</h4>
+            <ul>
+              <li>\(0\)-形式 = 光滑函数 \(f \in C^\infty(M)\)；</li>
+              <li>\(1\)-形式 \(\omega = \sum \omega_i\, dx^i\)（余向量场）；</li>
+              <li>\(n\)-形式 = 体积形式（\(n = \dim M\)），局部 \(\omega = f(x)\, dx^1 \wedge \cdots \wedge dx^n\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 热力学中 \(\delta W = P\,dV\)，\(\delta Q = T\,dS\) 是 1-形式 - 电磁场张量 \(F = E_i dx^i \wedge dt + B_{ij} dx^i \wedge dx^j\) 是 2-形式</p>
+            <p><strong>热力学：</strong>\(\delta W = P\,dV\)，\(\delta Q = T\,dS\) 是 1-形式。热力学第一定律 \(dU = \delta Q - \delta W\) 是 1-形式的关系，\(\delta Q\) 不恰当（不是某函数的全微分）正是热力学第二定律的体现。</p>
+            <p><strong>电磁学：</strong>电磁场张量是 2-形式 \(F = E_i\, dx^i \wedge dt + \tfrac{1}{2}B_{ij}\, dx^i \wedge dx^j\)。Maxwell 方程统一为 \(dF = 0\)（无源方程）和 \(d{*F} = J\)（有源方程）。</p>
+            <p><strong>计算机图形学：</strong>离散微分形式是离散外微积分（DEC）的基础，用于网格上的流体模拟与几何处理。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\mathbb{R}^3\) 上 \(\omega = x\,dy \wedge dz + y\,dz \wedge dx + z\,dx \wedge dy\)。 求 \(\omega_{(1,0,0)}(\partial/\partial y, \partial/\partial z)\)。 解答：在 \((1,0,0)\) 处，\(\omega = 1 \cdot dy \wedge dz + 0 + 0 = dy \wedge dz\)。 \(dy \wedge dz(\partial/\partial y, \partial/\partial z) = dy(\partial/\partial y) \cdot dz(\partial/\partial z) - dy(\partial/\partial z) \cdot dz(\partial/\partial y) = 1 \cdot 1 - 0 \cdot 0 = 1\)。 易错点：反对称性——交换两个输入变号： \(\omega(Y, X) = -\omega(X, Y)\)。</p>
+            <h4>例题：2-形式的求值</h4>
+            <p><strong>题目：</strong>\(\mathbb{R}^3\) 上 \(\omega = x\,dy \wedge dz + y\,dz \wedge dx + z\,dx \wedge dy\)。求 \(\omega_{(1,0,0)}(\partial/\partial y,\; \partial/\partial z)\)。</p>
+            <p><strong>第一步 — 求值点代入：</strong>在 \((1,0,0)\) 处，\(\omega = 1 \cdot dy \wedge dz + 0 + 0 = dy \wedge dz\)。</p>
+            <p><strong>第二步 — 展开行列式：</strong>\(dy \wedge dz(\partial/\partial y,\; \partial/\partial z) = dy(\partial/\partial y) \cdot dz(\partial/\partial z) - dy(\partial/\partial z) \cdot dz(\partial/\partial y) = 1 \cdot 1 - 0 \cdot 0 = 1\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忽略反对称性，交换输入不变号。<br>✅ \(\omega(Y, X) = -\omega(X, Y)\)。交换两个输入向量，结果变号。</li>
+              <li>❌ 混淆 \(dx^i \wedge dx^j\) 和 \(dx^i \otimes dx^j\)。<br>✅ 外积 \(\wedge\) 是反对称化的张量积：\(dx^i \wedge dx^j = dx^i \otimes dx^j - dx^j \otimes dx^i\)。</li>
+              <li>❌ 忘记 \(dx^i \wedge dx^i = 0\)。<br>✅ 任何 1-形式与自身的外积为零（反对称性的直接推论）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -476,35 +509,73 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如何将两个微分形式"乘"在一起？如何对微分形式"求导"？外积 \(\wedge\) 是反对称的乘法运算，外微分 \(d\) 是将 \(k\)-形式映为 \((k+1)\)-形式 的"万能导数"。\(d^2 = 0\) 这个简洁的恒等式是 de Rham 上同调的 基础，也是 Maxwell 方程内禀形式的核心。</p>
+            <ul>
+              <li><strong>形式的乘法：</strong>外积 \(\wedge\) 将 \(k\)-形式和 \(l\)-形式合成 \((k+l)\)-形式——这是微分形式之间的自然"乘法"运算。</li>
+              <li><strong>万能导数：</strong>外微分 \(d: \Omega^k \to \Omega^{k+1}\) 统一了梯度、旋度、散度，是流形上坐标无关的"导数"。</li>
+              <li><strong>\(d^2 = 0\) 的深刻性：</strong>这个简洁恒等式产生链复形结构，是 de Rham 上同调的基础，也让 Maxwell 方程简化为 \(dF = 0\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>外代数 \(\Omega^*(M) = \bigoplus_k \Omega^k(M)\) 配合 \(\wedge\) 和 \(d\) 构成微分分次代数。\(d^2 = 0\) 产生链复形结构。</p>
+            <ul>
+              <li><strong>微分分次代数：</strong>\((\Omega^*(M), \wedge, d)\) 构成微分分次代数——\(\wedge\) 提供分次乘法，\(d\) 提供度数 +1 的导子。</li>
+              <li><strong>链复形：</strong>\(d^2 = 0\) 使 \(0 \to \Omega^0 \xrightarrow{d} \Omega^1 \xrightarrow{d} \Omega^2 \to \cdots\) 成为链复形，其上同调即为 de Rham 上同调。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>外积</strong>：\(\wedge: \Omega^k(M) \times \Omega^l(M) \to \Omega^{k+l}(M)\)， 反对称性 \(\alpha \wedge \beta = (-1)^{kl} \beta \wedge \alpha\)。 基元素：\(dx^{i_1} \wedge \cdots \wedge dx^{i_k}\)。 <strong>外微分</strong>：\(d: \Omega^k(M) \to \Omega^{k+1}(M)\)，唯一满足： (1) \(df\) 是 \(f\) 的全微分（\(k=0\) 时） (2) \(d(\alpha \wedge \beta) = d\alpha \wedge \beta + (-1)^k \alpha \wedge d\beta\) (3) \(d^2 = 0\) 坐标中：\(\omega = \sum \omega_I dx^I\)， \[d\omega = \sum_I \sum_j \frac{\partial \omega_I}{\partial x^j} dx^j \wedge dx^I\] <strong>\(d^2 = 0\) 的证明</strong>：对函数 \(f\)， \(d(df) = d\left(\sum \frac{\partial f}{\partial x^i} dx^i\right) = \sum_{j,i} \frac{\partial^2 f}{\partial x^j \partial x^i} dx^j \wedge dx^i = 0\) （\(\frac{\partial^2 f}{\partial x^j \partial x^i}\) 关于 \(i,j\) 对称， 但 \(dx^j \wedge dx^i\) 反对称）。一般情况由 Leibniz 法则归纳。</p>
+            <h4>1. 外积</h4>
+            <p>\(\wedge: \Omega^k(M) \times \Omega^l(M) \to \Omega^{k+l}(M)\)，核心性质：</p>
+            \[\alpha \wedge \beta = (-1)^{kl}\, \beta \wedge \alpha\]
+            <p>基元素：\(dx^{i_1} \wedge \cdots \wedge dx^{i_k}\)，且 \(dx^i \wedge dx^i = 0\)。</p>
+
+            <h4>2. 外微分</h4>
+            <p>\(d: \Omega^k(M) \to \Omega^{k+1}(M)\) 是唯一满足以下三条的映射：</p>
+            <ul>
+              <li>\(k=0\) 时 \(df\) 是 \(f\) 的全微分；</li>
+              <li>Leibniz 法则：\(d(\alpha \wedge \beta) = d\alpha \wedge \beta + (-1)^k \alpha \wedge d\beta\)；</li>
+              <li>\(d^2 = 0\)。</li>
+            </ul>
+            <p>坐标表达：\(\omega = \sum_I \omega_I\, dx^I\)，则</p>
+            \[d\omega = \sum_I \sum_j \frac{\partial \omega_I}{\partial x^j}\, dx^j \wedge dx^I\]
+
+            <h4>3. \(d^2 = 0\) 的证明</h4>
+            <p>对函数 \(f\)：\(d(df) = d\!\left(\sum_i \frac{\partial f}{\partial x^i} dx^i\right) = \sum_{j,i} \frac{\partial^2 f}{\partial x^j \partial x^i} dx^j \wedge dx^i = 0\)，因为 \(\frac{\partial^2 f}{\partial x^j \partial x^i}\) 关于 \(i,j\) 对称而 \(dx^j \wedge dx^i\) 反对称。一般情况由 Leibniz 法则归纳。</p>
+
+            <h4>4. 与经典向量分析的对应</h4>
+            <p>在 \(\mathbb{R}^3\) 上：\(d\) 作用于 0-形式 = grad；\(d\) 作用于 1-形式 = curl；\(d\) 作用于 2-形式 = div。\(d^2 = 0\) 对应 \(\nabla \times (\nabla f) = 0\) 和 \(\nabla \cdot (\nabla \times \mathbf{F}) = 0\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Maxwell 方程可写为 \(dF = 0\)，\(d{*F} = J\)（\(F\) 为电磁 2-形式）</p>
+            <p><strong>Maxwell 方程的内禀形式：</strong>电磁 2-形式 \(F\) 满足 \(dF = 0\)（Bianchi 恒等式，编码无磁荷和 Faraday 定律）和 \(d{*F} = J\)（编码 Gauss 定律和 Ampère 定律）。</p>
+            <p><strong>规范理论：</strong>Yang-Mills 理论中，曲率 2-形式 \(\mathcal{F} = d\mathcal{A} + \mathcal{A} \wedge \mathcal{A}\)；Bianchi 恒等式 \(D\mathcal{F} = 0\) 推广了 \(dF = 0\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\omega = x\,dy - y\,dx\)（\(\mathbb{R}^2\) 上 1-形式）。求 \(d\omega\)。 解答：\(d\omega = dx \wedge dy - dy \wedge dx = dx \wedge dy + dx \wedge dy = 2\,dx \wedge dy\)。 （因为 \(d(x\,dy) = dx \wedge dy\)，\(d(-y\,dx) = -dy \wedge dx = dx \wedge dy\)。） 易错点：\(d(-y\,dx) = -dy \wedge dx\)，然后利用反对称性 \(-dy \wedge dx = +dx \wedge dy\)。符号处理是常见出错点。</p>
+            <h4>例题：计算外微分</h4>
+            <p><strong>题目：</strong>\(\omega = x\,dy - y\,dx\)（\(\mathbb{R}^2\) 上 1-形式）。求 \(d\omega\)。</p>
+            <p><strong>第一步 — 逐项求微分：</strong>\(d(x\,dy) = dx \wedge dy\)，\(d(-y\,dx) = -dy \wedge dx\)。</p>
+            <p><strong>第二步 — 利用反对称性：</strong>\(-dy \wedge dx = +dx \wedge dy\)。</p>
+            <p><strong>第三步 — 合并：</strong>\(d\omega = dx \wedge dy + dx \wedge dy = 2\,dx \wedge dy\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忘记 \(d(-y\,dx)\) 中的 Leibniz 法则：直接写成 \(-d(y) \cdot dx\) 而丢掉 \(\wedge\)。<br>✅ \(d(-y\,dx) = d(-y) \wedge dx = -dy \wedge dx\)。必须用 \(\wedge\) 而非普通乘法。</li>
+              <li>❌ 反对称性符号出错，将 \(-dy \wedge dx\) 写成 \(-dx \wedge dy\)。<br>✅ 交换相邻的 1-形式变号：\(-dy \wedge dx = +dx \wedge dy\)。</li>
+              <li>❌ 对 \(d\omega\) 再求 \(d\) 期望得到非零结果。<br>✅ \(d^2 = 0\) 永远成立。\(d(2\,dx \wedge dy) = 0\)（这也是对自己计算的检验）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -531,35 +602,70 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如何将目标空间上的微分形式"拉回"到源空间？拉回 \(f^*\) 将 \(N\) 上的形式变为 \(M\) 上的形式，且与 \(d\) 交换。闭形式（\(d\omega = 0\)） 与恰当形式（\(\omega = d\eta\)）的关系是拓扑信息的载体： 闭但不恰当的形式检测出空间中的"洞"。</p>
+            <ul>
+              <li><strong>搬运形式：</strong>拉回 \(f^*\) 是将 \(N\) 上的微分形式"搬运"到 \(M\) 上的自然操作——使得微分形式成为逆变函子。</li>
+              <li><strong>拓扑信息载体：</strong>闭形式（\(d\omega = 0\)）与恰当形式（\(\omega = d\eta\)）之间的"差距"编码了流形的拓扑——闭但不恰当的形式检测出空间中的"洞"。</li>
+              <li><strong>换元公式：</strong>拉回将积分的换元公式内禀化：\(\int_M f^*\omega = \int_{f(M)} \omega\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>拉回 \(f^*\) 是微分形式层面的函子操作，保持外积和外微分。 \(\ker d / \mathrm{im}\, d\) 就是 de Rham 上同调——纯拓扑不变量。</p>
+            <ul>
+              <li><strong>函子性：</strong>拉回 \(f^*\) 是微分形式层面的逆变函子，保持外积和外微分：\(f^*(\alpha \wedge \beta) = f^*\alpha \wedge f^*\beta\)，\(f^* \circ d = d \circ f^*\)。</li>
+              <li><strong>上同调的起源：</strong>\(\ker d / \mathrm{im}\, d = H^k_{dR}(M)\) 就是 de Rham 上同调——纯拓扑不变量，由 de Rham 定理与奇异上同调同构。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>拉回</strong>：\(f: M \to N\) 光滑，\(\omega \in \Omega^k(N)\)。 \((f^*\omega)_p(v_1, \ldots, v_k) = \omega_{f(p)}(df_p(v_1), \ldots, df_p(v_k))\)。 性质： - \(f^*(\alpha \wedge \beta) = f^*\alpha \wedge f^*\beta\) - \(f^* \circ d = d \circ f^*\)（与外微分交换） - \((g \circ f)^* = f^* \circ g^*\) <strong>闭形式</strong>：\(\omega\) 闭 \(\iff d\omega = 0\)。 <strong>恰当形式</strong>：\(\omega\) 恰当 \(\iff \exists \eta,\; \omega = d\eta\)。 \(d^2 = 0 \Rightarrow\) 恰当 \(\Rightarrow\) 闭（\(d(d\eta) = 0\)）。 反之不一定成立（取决于拓扑）。 \[\text{恰当} \subseteq \text{闭}, \quad H^k_{dR}(M) = \frac{\ker(d: \Omega^k \to \Omega^{k+1})} {\mathrm{im}(d: \Omega^{k-1} \to \Omega^k)}\]</p>
+            <h4>1. 拉回的定义</h4>
+            <p>\(f: M \to N\) 光滑，\(\omega \in \Omega^k(N)\)。拉回定义为：</p>
+            \[(f^*\omega)_p(v_1, \ldots, v_k) = \omega_{f(p)}(df_p(v_1), \ldots, df_p(v_k))\]
+
+            <h4>2. 拉回的性质</h4>
+            <ul>
+              <li>保外积：\(f^*(\alpha \wedge \beta) = f^*\alpha \wedge f^*\beta\)；</li>
+              <li>与 \(d\) 交换：\(f^* \circ d = d \circ f^*\)；</li>
+              <li>函子性：\((g \circ f)^* = f^* \circ g^*\)（注意方向反转）。</li>
+            </ul>
+
+            <h4>3. 闭形式与恰当形式</h4>
+            <p><strong>闭形式</strong>：\(\omega\) 闭 \(\iff d\omega = 0\)。<strong>恰当形式</strong>：\(\omega\) 恰当 \(\iff \exists\, \eta,\; \omega = d\eta\)。</p>
+            <p>\(d^2 = 0\) 保证：恰当 \(\Rightarrow\) 闭。反之不一定成立——取决于拓扑。</p>
+            \[H^k_{dR}(M) = \frac{\ker(d: \Omega^k \to \Omega^{k+1})}{\mathrm{im}(d: \Omega^{k-1} \to \Omega^k)}\]
+
+            <h4>4. Poincaré 引理（预告）</h4>
+            <p>在星形域（可缩空间）上，\(H^k_{dR} = 0\)（\(k \geq 1\)），即闭 = 恰当。证明基于同伦算子 \(K\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- \(\omega = \frac{-y\,dx + x\,dy}{x^2+y^2}\) 在 \(\mathbb{R}^2 \setminus \{0\}\) 上闭但不恰当——检测出原点处的"洞"</p>
+            <p><strong>角形式与拓扑检测：</strong>\(\omega = \frac{-y\,dx + x\,dy}{x^2+y^2}\) 在 \(\mathbb{R}^2 \setminus \{0\}\) 上闭但不恰当——\(\oint_{S^1}\omega = 2\pi \neq 0\) 检测出原点处的"洞"。</p>
+            <p><strong>保守力场：</strong>力场 \(\mathbf{F}\) 保守（做功与路径无关）\(\iff\) 对应的 1-形式 \(\omega_F\) 恰当。在单连通域上，闭即恰当（Poincaré 引理），因此 \(\nabla \times \mathbf{F} = 0\) 即可。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\omega = \frac{-y\,dx + x\,dy}{x^2 + y^2}\) 在 \(\mathbb{R}^2 \setminus \{0\}\) 上。 验证 \(d\omega = 0\) 但 \(\omega\) 不恰当。 解答：\(d\omega\)：令 \(P = -y/(x^2+y^2)\)，\(Q = x/(x^2+y^2)\)。 \(\partial Q/\partial x = (y^2 - x^2)/(x^2+y^2)^2\)， \(\partial P/\partial y = -(x^2-y^2)/(x^2+y^2)^2 = (y^2-x^2)/(x^2+y^2)^2\)。 \(\partial Q/\partial x = \partial P/\partial y\)，故 \(d\omega = 0\)。 不恰当：\(\oint_{S^1} \omega = 2\pi \neq 0\)（沿单位圆积分）。 若 \(\omega = df\)，则 \(\oint df = 0\)，矛盾。 易错点：\(d\omega = 0\) 只是恰当的必要条件。空间有"洞"时可能不充分。</p>
+            <h4>例题：验证闭但不恰当</h4>
+            <p><strong>题目：</strong>\(\omega = \frac{-y\,dx + x\,dy}{x^2 + y^2}\) 在 \(\mathbb{R}^2 \setminus \{0\}\) 上。验证 \(d\omega = 0\) 但 \(\omega\) 不恰当。</p>
+            <p><strong>第一步 — 验证闭性：</strong>令 \(P = \frac{-y}{x^2+y^2}\)，\(Q = \frac{x}{x^2+y^2}\)。计算 \(\frac{\partial Q}{\partial x} = \frac{y^2 - x^2}{(x^2+y^2)^2}\)，\(\frac{\partial P}{\partial y} = \frac{y^2 - x^2}{(x^2+y^2)^2}\)。两者相等，故 \(d\omega = 0\)。</p>
+            <p><strong>第二步 — 证不恰当：</strong>\(\oint_{S^1} \omega = 2\pi \neq 0\)。若 \(\omega = df\)，则 \(\oint df = 0\)，矛盾。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(d\omega = 0\) 就意味着 \(\omega\) 恰当。<br>✅ 闭是恰当的必要条件，非充分条件。只有在可缩（星形）域上才有闭 = 恰当。</li>
+              <li>❌ 忘记 \(\omega\) 的定义域排除了原点。<br>✅ \(\omega\) 在 \(\mathbb{R}^2 \setminus \{0\}\) 上有定义，而该空间不可缩（有一个 1 维洞），Poincaré 引理不适用。</li>
+              <li>❌ 拉回时忘记链式法则。<br>✅ \(f^*(g\,dy) = (g \circ f)\, d(y \circ f)\)，需要对 \(y \circ f\) 展开。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -598,35 +704,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>de Rham 上同调群 \(H^k_{dR}(M)\) 用微分形式（分析工具）计算出 拓扑不变量——这是分析与拓扑之间最深刻的桥梁之一。\(H^k_{dR}\) 测量的是 \(k\) 维的"闭而不恰当"的形式空间，反映了流形中 \(k\) 维 "洞"的数量。Poincaré 引理保证在"无洞"的空间上 \(H^k = 0\)。</p>
+            <ul>
+              <li><strong>分析 ↔ 拓扑的桥梁：</strong>de Rham 上同调 \(H^k_{dR}(M)\) 用微分形式（分析工具）算出拓扑不变量——这是微分拓扑中最深刻的联系之一。</li>
+              <li><strong>测量"洞"：</strong>\(H^k_{dR}\) 测量 \(k\) 维"闭而不恰当"形式的空间，每个独立类对应流形中一个 \(k\) 维"洞"。</li>
+              <li><strong>Poincaré 引理：</strong>在"无洞"空间（可缩空间）上 \(H^k = 0\)（\(k \geq 1\)）——闭即恰当。这是所有局部到整体论证的起点。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>de Rham 上同调是链复形 \(0 \to \Omega^0 \xrightarrow{d} \Omega^1 \xrightarrow{d} \cdots\) 的上同调。de Rham 定理建立了它与奇异上同调的同构。</p>
+            <ul>
+              <li><strong>链复形上同调：</strong>de Rham 上同调是链复形 \(0 \to \Omega^0 \xrightarrow{d} \Omega^1 \xrightarrow{d} \cdots\) 的上同调群。</li>
+              <li><strong>de Rham 定理：</strong>\(H^k_{dR}(M) \cong H^k(M; \mathbb{R})\)（奇异上同调），建立分析与代数拓扑的同构——微积分可以计算拓扑。</li>
+              <li><strong>同伦不变性：</strong>同伦等价的空间有相同的 de Rham 上同调。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>de Rham 上同调</strong>： \[H^k_{dR}(M) = \frac{\{\omega \in \Omega^k(M) : d\omega = 0\}} {\{d\eta : \eta \in \Omega^{k-1}(M)\}}\] <strong>Poincaré 引理</strong>：若 \(M\) 可缩（如星形域），则 \(H^k_{dR}(M) = 0\)（\(k \geq 1\)），\(H^0_{dR}(M) = \mathbb{R}\)。 证明思路：构造同伦算子 \(K: \Omega^k \to \Omega^{k-1}\)， 使 \(Kd + dK = \mathrm{id}\)（\(k \geq 1\)）。 若 \(d\omega = 0\)，则 \(\omega = dK\omega\)，即 \(\omega\) 恰当。 <strong>经典计算</strong>： - \(H^0_{dR}(M) \cong \mathbb{R}^c\)（\(c\) = 连通分量数） - \(H^1_{dR}(S^1) = \mathbb{R}\)（\(d\theta\) 闭不恰当） - \(H^k_{dR}(S^n) = \begin{cases}\mathbb{R} & k=0,n \\ 0 & \text{otherwise}\end{cases}\) <strong>de Rham 定理</strong>（陈述）：\(H^k_{dR}(M) \cong H^k(M; \mathbb{R})\) （奇异上同调），这是分析与拓扑的统一。</p>
+            <h4>1. de Rham 上同调的定义</h4>
+            \[H^k_{dR}(M) = \frac{\{\omega \in \Omega^k(M) : d\omega = 0\}}{\{d\eta : \eta \in \Omega^{k-1}(M)\}}\]
+            <p>元素 \([\omega]\) 称为上同调类。\([\omega] = [\omega']\) \(\iff \omega - \omega' = d\eta\)。</p>
+
+            <h4>2. Poincaré 引理的证明思路</h4>
+            <p>若 \(M\) 可缩（如星形域），构造同伦算子 \(K: \Omega^k \to \Omega^{k-1}\)，使得 \(Kd + dK = \mathrm{id}\)（\(k \geq 1\)）。若 \(d\omega = 0\)，则 \(\omega = (Kd + dK)\omega = dK\omega\)，即 \(\omega\) 恰当。</p>
+
+            <h4>3. 经典计算</h4>
+            <ul>
+              <li>\(H^0_{dR}(M) \cong \mathbb{R}^c\)（\(c\) = 连通分量数）；</li>
+              <li>\(H^1_{dR}(S^1) = \mathbb{R}\)（\(d\theta\) 是闭不恰当的生成元）；</li>
+              <li>\(H^k_{dR}(S^n) = \begin{cases}\mathbb{R} & k=0,n \\ 0 & \text{otherwise}\end{cases}\)；</li>
+              <li>\(H^k_{dR}(\mathbb{R}^n) = 0\)（\(k \geq 1\)）——Poincaré 引理的直接推论。</li>
+            </ul>
+
+            <h4>4. de Rham 定理（陈述）</h4>
+            <p>\(H^k_{dR}(M) \cong H^k(M; \mathbb{R})\)（奇异上同调）。同构由积分 \(\omega \mapsto \left(\sigma \mapsto \int_\sigma \omega\right)\) 给出，将微分形式配对到奇异链上。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 物理中的规范势：电磁势 \(A\) 在无洞区域上全局存在（\(F = dA\)）， 但在有洞区域可能只是局部存在（Aharonov-Bohm 效应）</p>
+            <p><strong>Aharonov-Bohm 效应：</strong>电磁势 \(A\) 在无洞区域全局存在（\(F = dA\)）。但在有洞区域（如螺线管外部 \(\cong \mathbb{R}^3 \setminus \text{线}\)），\(A\) 可能只是局部存在——电子绕洞一圈获得的相位 \(\oint A\) 不为零，产生可观测效应。</p>
+            <p><strong>拓扑数据分析（TDA）：</strong>持续同调用离散版 de Rham 上同调检测数据中不同尺度的"洞"，广泛应用于材料科学和生物数据分析。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \(H^1_{dR}(\mathbb{R}^2 \setminus \{0\})\)。 解答：\(\omega = \frac{-y\,dx + x\,dy}{x^2+y^2}\) 闭不恰当（\(\oint_{S^1} \omega = 2\pi\)）。 任何闭 1-形式 \(\eta\) 可写为 \(\eta = c\omega + df\)（\(c \in \mathbb{R}\)，\(f\) 光滑）。 故 \(H^1_{dR}(\mathbb{R}^2 \setminus \{0\}) = \mathbb{R}\)， 由 \([\omega]\) 生成。 易错点：\(\mathbb{R}^2 \setminus \{0\}\) 与 \(S^1\) 同伦等价， 所以 de Rham 上同调相同（同伦不变性）。</p>
+            <h4>例题：计算 de Rham 上同调</h4>
+            <p><strong>题目：</strong>计算 \(H^1_{dR}(\mathbb{R}^2 \setminus \{0\})\)。</p>
+            <p><strong>第一步 — 找生成元：</strong>\(\omega = \frac{-y\,dx + x\,dy}{x^2+y^2}\) 闭不恰当（\(\oint_{S^1} \omega = 2\pi\)）。</p>
+            <p><strong>第二步 — 证一维性：</strong>任何闭 1-形式 \(\eta\) 可写为 \(\eta = c\omega + df\)（\(c \in \mathbb{R}\)，\(f\) 光滑）。</p>
+            <p><strong>第三步 — 结论：</strong>\(H^1_{dR}(\mathbb{R}^2 \setminus \{0\}) = \mathbb{R}\)，由 \([\omega]\) 生成。</p>
+            <p><strong>关键论证：</strong>\(\mathbb{R}^2 \setminus \{0\} \simeq S^1\)（同伦等价），故 \(H^1\) 相同。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 \(H^k_{dR}\) 与 \(\Omega^k\)：认为上同调群是所有闭形式的空间。<br>✅ \(H^k_{dR}\) 是商空间，两个闭形式差一个恰当形式时属于同一个类。</li>
+              <li>❌ 忘记同伦不变性：对 \(\mathbb{R}^2 \setminus \{0\}\) 直接计算而不利用 \(\simeq S^1\)。<br>✅ 同伦等价的空间 de Rham 上同调相同。先找最简单的同伦等价代表。</li>
+              <li>❌ 认为 \(H^0_{dR}(M) = \mathbb{R}\) 对所有流形成立。<br>✅ \(H^0_{dR}(M) = \mathbb{R}^c\)，其中 \(c\) 是连通分量数。非连通流形的 \(H^0\) 维数 \(> 1\)。</li>
+            </ul>
           </div>
         </div>
       </div>

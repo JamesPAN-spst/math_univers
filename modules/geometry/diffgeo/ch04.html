@@ -394,35 +394,64 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>要在流形上积分，首先需要确定"正方向"——这就是定向。在曲面上， 定向决定了法向量的方向；在高维流形上，定向决定了顶阶形式的符号。 带边流形（如半空间 \(\{x^n \geq 0\}\)）是 Stokes 定理的自然舞台： \(\partial M\) 是 \(M\) 的边界，继承一个诱导定向。</p>
+            <ul>
+              <li><strong>积分的前提：</strong>在流形上积分顶阶形式，首先需要确定"正方向"——这就是定向。没有定向，积分无法定义符号。</li>
+              <li><strong>边界与 Stokes：</strong>带边流形（如半空间 \(\{x^n \geq 0\}\)）是广义 Stokes 定理的自然舞台。边界 \(\partial M\) 继承诱导定向，使得 \(\int_M d\omega = \int_{\partial M} \omega\) 有明确意义。</li>
+              <li><strong>不可定向的奇异性：</strong>莫比乌斯带、Klein 瓶等不可定向流形上无法选取全局一致的法向量——需要用密度替代体积形式来积分。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>定向 = 顶阶形式的全局一致符号选取。不可定向流形（莫比乌斯带、 Klein 瓶）上顶阶形式改变符号，积分需修正（或用密度替代）。</p>
+            <ul>
+              <li><strong>体积形式：</strong>定向 = 处处不为零的 \(n\)-形式（体积形式）的全局一致符号选取。</li>
+              <li><strong>转移函数判据：</strong>等价地，\(M\) 可定向 \(\iff\) 存在图册使所有转移函数的 Jacobian 行列式为正。</li>
+              <li><strong>带边 = 半空间模型：</strong>每点的邻域同胚于 \(\mathbb{R}^n\) 或 \(\mathbb{H}^n = \{x^n \geq 0\}\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定向</strong>：\(n\) 维流形 \(M\) 可定向 \(\iff\) 存在处处不为零的 \(n\)-形式 \(\omega \in \Omega^n(M)\)（体积形式）。 等价地：存在图册使所有转移函数的 Jacobian 行列式为正。 <strong>带边流形</strong>：\(M\) 的每点邻域同胚于 \(\mathbb{R}^n\) 或 \(\mathbb{H}^n = \{x \in \mathbb{R}^n : x^n \geq 0\}\)。 边界 \(\partial M = \{p : p \text{ 对应 } x^n = 0\}\)， \(\partial M\) 是 \((n-1)\) 维无边流形。 <strong>诱导定向</strong>：\(M\) 定向时，\(\partial M\) 继承"外法向量优先"的定向规则。 \[(\text{外法向}, e_1, \ldots, e_{n-1}) \text{ 正定向于 } M \iff (e_1, \ldots, e_{n-1}) \text{ 正定向于 } \partial M\]</p>
+            <h4>1. 定向的定义</h4>
+            <p>\(n\) 维流形 \(M\) 可定向 \(\iff\) 存在处处不为零的 \(n\)-形式 \(\omega \in \Omega^n(M)\)。两个体积形式 \(\omega, \omega'\) 给出相同定向 \(\iff \omega' = f\omega\)，\(f > 0\)。</p>
+
+            <h4>2. 带边流形</h4>
+            <p>\(M\) 是带边 \(n\)-流形：每点的邻域同胚于 \(\mathbb{R}^n\) 或 \(\mathbb{H}^n = \{x \in \mathbb{R}^n : x^n \geq 0\}\)。边界 \(\partial M = \{p : p \text{ 对应 } x^n = 0\}\) 是 \((n-1)\) 维无边流形。</p>
+
+            <h4>3. 诱导定向</h4>
+            <p>若 \(M\) 已定向，\(\partial M\) 继承"外法向量优先"的定向规则：</p>
+            \[(\nu_{\text{外}}, e_1, \ldots, e_{n-1}) \text{ 正定向于 } M \iff (e_1, \ldots, e_{n-1}) \text{ 正定向于 } \partial M\]
+            <p>直觉：在 \(\mathbb{H}^n\) 中，外法向 \(-\partial/\partial x^n\) 指向 \(x^n < 0\)（"向外"），\(\partial M\) 上的定向由剩余坐标决定。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 莫比乌斯带不可定向——上面的蚂蚁走一圈后左右翻转</p>
+            <p><strong>莫比乌斯带：</strong>不可定向——上面的"蚂蚁"走一圈后左右翻转。物理上，这意味着无法一致地定义内外侧，只有一面。</p>
+            <p><strong>时空定向：</strong>广义相对论中，时空 \((M^4, g)\) 的可定向性保证了体积形式 \(\epsilon_{abcd}\) 的存在，这是表述 Levi-Civita 张量和 Hodge 对偶 \(*\) 的前提。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(D^2 = \{(x,y) : x^2+y^2 \leq 1\}\) 是带边流形。 \(\partial D^2 = S^1\)。确定诱导定向。 解答：\(D^2\) 取标准定向（\(dx \wedge dy\)）。 外法向量为 \(\vec{n} = (x, y)/|(x,y)|\)（向外）。 \((\vec{n}, \vec{e})\) 正定向 \(\iff\) \(\vec{e}\) 逆时针。 所以 \(\partial D^2 = S^1\) 的诱导定向是逆时针方向。 易错点：Stokes 定理要求 \(\partial M\) 使用诱导定向。 方向搞反会导致积分差一个负号。</p>
+            <h4>例题：确定诱导定向</h4>
+            <p><strong>题目：</strong>\(D^2 = \{(x,y) : x^2+y^2 \leq 1\}\) 取标准定向（\(dx \wedge dy\)）。确定 \(\partial D^2 = S^1\) 的诱导定向。</p>
+            <p><strong>第一步 — 确定外法向：</strong>在 \(S^1\) 上，外法向量为 \(\vec{n} = (x, y)/|(x,y)|\)（径向向外）。</p>
+            <p><strong>第二步 — 应用规则：</strong>\((\vec{n}, \vec{e})\) 正定向于 \(D^2\)（即 \(\vec{n} \times \vec{e}\) 与 \(dx \wedge dy\) 同向）\(\iff\) \(\vec{e}\) 逆时针。</p>
+            <p><strong>第三步 — 结论：</strong>\(\partial D^2 = S^1\) 的诱导定向是逆时针方向。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ Stokes 定理中使用错误定向，导致积分差一个负号。<br>✅ \(\partial M\) 必须使用诱导定向（外法向优先）。顺时针 vs 逆时针直接影响符号。</li>
+              <li>❌ 认为所有流形都可定向。<br>✅ 莫比乌斯带、Klein 瓶、\(\mathbb{RP}^2\) 等都不可定向。但 \(\mathbb{RP}^n\)（\(n\) 奇数）可定向。</li>
+              <li>❌ 混淆 \(\partial \mathbb{H}^n\) 的外法向方向。<br>✅ 在 \(\mathbb{H}^n = \{x^n \geq 0\}\) 中，外法向为 \(-\partial/\partial x^n\)（向 \(x^n\) 减小方向），注意负号。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -470,35 +499,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在流形上，积分的"被积对象"不是函数而是顶阶微分形式。这是因为 坐标变换时 Jacobian 行列式恰好给出微分形式在拉回下的变换因子， 保证积分的坐标无关性。体积形式提供了流形上的"测度"。</p>
+            <ul>
+              <li><strong>坐标无关的积分：</strong>在流形上，积分的"被积对象"不是函数而是顶阶微分形式——坐标变换时 Jacobian 行列式内禀于形式的变换律中。</li>
+              <li><strong>体积与测度：</strong>体积形式 \(dV_g = \sqrt{\det g}\, dx^1 \wedge \cdots \wedge dx^n\) 提供流形上的自然"测度"，推广了欧氏空间的 Lebesgue 测度。</li>
+              <li><strong>物理量的积分：</strong>曲面面积、曲线长度、通量、功等物理量都是微分形式积分的特例。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>积分的坐标无关性来自微分形式的变换律： \(\int_{\varphi(U)} \omega = \int_U \varphi^*\omega\)（拉回公式）。</p>
+            <ul>
+              <li><strong>拉回公式：</strong>积分的坐标无关性来自 \(\int_{\varphi(U)} \omega = \int_U \varphi^*\omega\)——拉回自动携带 Jacobian。</li>
+              <li><strong>单位分解：</strong>对一般流形上的积分，用单位分解 \(\{\rho_\alpha\}\) 将全局积分拆成局部坐标卡上的积分之和。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>\(n\)-形式在 \(n\) 维定向流形上的积分</strong>： 设 \((U, \varphi)\) 是坐标卡，\(\omega = f(x)\, dx^1 \wedge \cdots \wedge dx^n\)。 \[\int_U \omega = \int_{\varphi(U)} f(x)\, dx^1 \cdots dx^n\] （右边是 \(\mathbb{R}^n\) 中的 Lebesgue 积分）。 <strong>坐标变换律</strong>：若 \(\psi = \varphi \circ \phi^{-1}\) 是转移函数， \[\int f \circ \psi \cdot |\det J_\psi|\, dy = \int f\, dx\] 定向保证 \(\det J_\psi > 0\)，故可去绝对值。 <strong>配分函数</strong>：对一般 \(\omega \in \Omega^n(M)\)，取从属于坐标覆盖的 单位分解 \(\{\rho_\alpha\}\)，\(\int_M \omega = \sum_\alpha \int_{U_\alpha} \rho_\alpha \omega\)。 <strong>体积形式</strong>：\(dV_g = \sqrt{\det(g_{ij})}\, dx^1 \wedge \cdots \wedge dx^n\) （黎曼流形上）。</p>
+            <h4>1. \(n\)-形式在坐标卡中的积分</h4>
+            <p>设 \((U, \varphi)\) 是坐标卡，\(\omega = f(x)\, dx^1 \wedge \cdots \wedge dx^n\)：</p>
+            \[\int_U \omega = \int_{\varphi(U)} f(x)\, dx^1 \cdots dx^n\]
+            <p>（右边是 \(\mathbb{R}^n\) 中的 Lebesgue 积分。）</p>
+
+            <h4>2. 坐标变换律</h4>
+            <p>若 \(\psi = \varphi \circ \phi^{-1}\) 是转移函数：\(\int f \circ \psi \cdot |\det J_\psi|\, dy = \int f\, dx\)。定向保证 \(\det J_\psi > 0\)，可去绝对值——这是积分与定向紧密关联的原因。</p>
+
+            <h4>3. 单位分解与全局积分</h4>
+            <p>取从属于坐标覆盖 \(\{U_\alpha\}\) 的单位分解 \(\{\rho_\alpha\}\)：</p>
+            \[\int_M \omega = \sum_\alpha \int_{U_\alpha} \rho_\alpha\, \omega\]
+
+            <h4>4. 黎曼体积形式</h4>
+            <p>\(dV_g = \sqrt{\det(g_{ij})}\, dx^1 \wedge \cdots \wedge dx^n\)。函数 \(f\) 在黎曼流形上的积分：\(\int_M f\, dV_g\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 曲面面积 \(A = \int_S dA\)，曲线长度 \(L = \int_\gamma ds\) 都是形式积分的特例</p>
+            <p><strong>面积与长度：</strong>曲面面积 \(A = \int_S dA\)，曲线长度 \(L = \int_\gamma ds\) 都是形式积分的特例。黎曼度量 \(g\) 决定了 \(dA\) 和 \(ds\) 的具体形式。</p>
+            <p><strong>概率与统计力学：</strong>概率密度函数 \(\rho\) 在流形上的积分 \(\int_M \rho\, dV_g = 1\) 定义了流形上的概率分布，广泛用于信息几何和统计力学。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：计算 \(\int_{S^1} d\theta\)（\(S^1\) 逆时针定向，\(\theta\) 为角度坐标）。 解答：\(d\theta = \frac{-y\,dx + x\,dy}{x^2+y^2}|_{S^1}\)。 参数化：\(x = \cos t\)，\(y = \sin t\)，\(t \in [0, 2\pi]\)。 \(d\theta|_{S^1} = dt\)。\(\int_0^{2\pi} dt = 2\pi\)。 易错点：\(\theta\) 不是 \(S^1\) 上的全局光滑函数（在某点不连续）， 所以 \(d\theta\) 闭但不恰当。</p>
+            <h4>例题：\(S^1\) 上的积分</h4>
+            <p><strong>题目：</strong>计算 \(\int_{S^1} d\theta\)（\(S^1\) 逆时针定向，\(\theta\) 为角度坐标）。</p>
+            <p><strong>第一步 — 参数化：</strong>\(x = \cos t\)，\(y = \sin t\)，\(t \in [0, 2\pi]\)。</p>
+            <p><strong>第二步 — 拉回：</strong>\(d\theta|_{S^1} = \frac{-y\,dx + x\,dy}{x^2+y^2}\big|_{S^1} = dt\)。</p>
+            <p><strong>第三步 — 积分：</strong>\(\int_0^{2\pi} dt = 2\pi\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(\theta\) 是 \(S^1\) 上的全局光滑函数，因此 \(d\theta\) 恰当。<br>✅ \(\theta\) 在某点不连续（多值），所以 \(d\theta\) 闭但不恰当。\(\int_{S^1} d\theta = 2\pi \neq 0\) 正是不恰当的证据。</li>
+              <li>❌ 翻转定向后积分值不变。<br>✅ 翻转定向使积分变号：\(\int_{-M} \omega = -\int_M \omega\)。</li>
+              <li>❌ 在不可定向流形上直接积分 \(n\)-形式。<br>✅ 不可定向流形上应积分密度（\(|dx^1 \wedge \cdots \wedge dx^n|\)）而非微分形式。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -525,35 +586,71 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Green 定理、Gauss 散度定理、经典 Stokes 旋度定理看似不同， 实则都是同一个定理的特例——广义 Stokes 定理：\(\int_M d\omega = \int_{\partial M} \omega\)。 这是微分几何中最优美的公式之一，将体上的"微分"与边界上的 "积分"联系起来。</p>
+            <ul>
+              <li><strong>大一统：</strong>Green 定理、Gauss 散度定理、经典 Stokes 旋度定理看似不同，实则都是同一个定理的特例——广义 Stokes 定理 \(\int_M d\omega = \int_{\partial M} \omega\)。</li>
+              <li><strong>体 ↔ 边界：</strong>这是微分几何中最优美的公式之一，将体上的"微分"与边界上的"积分"联系起来——外微分 \(d\) 是边界算子 \(\partial\) 的"伴随"。</li>
+              <li><strong>物理守恒律：</strong>守恒律（电荷守恒、质量守恒等）在数学上都是 Stokes 定理的推论。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Stokes 定理是 \(d\) 与 \(\int\) 的对偶：外微分是边界算子的 "伴随"。这在同调/上同调理论中有深远意义。</p>
+            <ul>
+              <li><strong>\(d\) 与 \(\partial\) 的对偶：</strong>Stokes 定理 \(\langle d\omega, M \rangle = \langle \omega, \partial M \rangle\) 是 \(d\) 与边界算子 \(\partial\) 之间的对偶关系。</li>
+              <li><strong>同调/上同调意义：</strong>这在 (co)homology 理论中有深远意义——de Rham 定理的核心即在于此对偶。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>广义 Stokes 定理</strong>：设 \(M\) 是 \(n\) 维紧致定向带边流形， \(\omega \in \Omega^{n-1}(M)\)。则 \[\int_M d\omega = \int_{\partial M} \omega\] <strong>证明思路</strong>（\(\mathbb{R}^n\) 中紧支撑情况）： 设 \(\omega = f\, dx^1 \wedge \cdots \wedge \widehat{dx^i} \wedge \cdots \wedge dx^n\)。 \(d\omega = (-1)^{i-1} \frac{\partial f}{\partial x^i} dx^1 \wedge \cdots \wedge dx^n\)。 对第 \(i\) 个变量用 Fubini 定理： \(\int \frac{\partial f}{\partial x^i} dx^i = f|_{\text{边界}}\)。 逐坐标方向验证，用单位分解拼合。 <strong>经典特例</strong>： - <strong>Green</strong>（\(n=2\)，\(M \subseteq \mathbb{R}^2\)）：\(\oint_{\partial M} P\,dx + Q\,dy = \iint_M (Q_x - P_y)\,dx\,dy\) - <strong>散度定理</strong>（\(n=3\)，\(\omega = F_1 dy \wedge dz + \cdots\)）：\(\oint_{\partial M} \vec{F} \cdot d\vec{S} = \iiint_M \nabla \cdot \vec{F}\,dV\) - <strong>经典 Stokes</strong>（\(n=2\)，\(M\) 是 \(\mathbb{R}^3\) 中的曲面）：\(\oint_{\partial M} \vec{F} \cdot d\vec{r} = \iint_M (\nabla \times \vec{F}) \cdot d\vec{S}\)</p>
+            <h4>1. 广义 Stokes 定理</h4>
+            <p>设 \(M\) 是 \(n\) 维紧致定向带边流形，\(\omega \in \Omega^{n-1}(M)\)：</p>
+            \[\int_M d\omega = \int_{\partial M} \omega\]
+
+            <h4>2. 证明思路</h4>
+            <p>对 \(\mathbb{H}^n\) 中紧支撑的 \((n-1)\)-形式 \(\omega = f\, dx^1 \wedge \cdots \wedge \widehat{dx^i} \wedge \cdots \wedge dx^n\)：</p>
+            <ul>
+              <li>\(d\omega = (-1)^{i-1} \frac{\partial f}{\partial x^i} dx^1 \wedge \cdots \wedge dx^n\)。</li>
+              <li>对第 \(i\) 个变量用 Fubini 定理：\(\int \frac{\partial f}{\partial x^i} dx^i = f|_{\text{边界}}\)。</li>
+              <li>逐坐标方向验证后，用单位分解拼合到一般流形。</li>
+            </ul>
+
+            <h4>3. 经典特例</h4>
+            <ul>
+              <li><strong>Green 定理</strong>（\(n=2\)）：\(\oint_{\partial M} P\,dx + Q\,dy = \iint_M (Q_x - P_y)\,dx\,dy\)。</li>
+              <li><strong>散度定理</strong>（\(n=3\)）：\(\oiint_{\partial M} \vec{F} \cdot d\vec{S} = \iiint_M \nabla \cdot \vec{F}\,dV\)。</li>
+              <li><strong>经典 Stokes</strong>（\(M\) 是曲面）：\(\oint_{\partial M} \vec{F} \cdot d\vec{r} = \iint_M (\nabla \times \vec{F}) \cdot d\vec{S}\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 电磁学中 Gauss 定律：\(\oint \vec{E} \cdot d\vec{S} = Q/\varepsilon_0\) - 流体力学中 Kelvin 环量定理</p>
+            <p><strong>Gauss 定律：</strong>电磁学中 \(\oiint \vec{E} \cdot d\vec{S} = Q/\varepsilon_0\) 是散度定理 + Maxwell 方程 \(\nabla \cdot \vec{E} = \rho/\varepsilon_0\) 的直接推论。</p>
+            <p><strong>Kelvin 环量定理：</strong>理想流体中，沿随流体运动的闭合曲线的环量（\(\oint \vec{v} \cdot d\vec{r}\)）守恒——这是 Stokes 定理在流体力学中的应用。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用 Stokes 定理计算 \(\oint_C y\,dx + x\,dy\)， \(C\) 是 \(x^2 + y^2 = 1\) 逆时针。 解答：\(\omega = y\,dx + x\,dy\)。\(d\omega = dy \wedge dx + dx \wedge dy = 0\)。 所以 \(\oint_C \omega = \int_{D^2} d\omega = 0\)。 易错点：若 \(\omega = -y\,dx + x\,dy\)，则 \(d\omega = 2\,dx \wedge dy\)， \(\oint = 2 \cdot \text{面积} = 2\pi\)。注意正负号。</p>
+            <h4>例题：用 Stokes 定理计算线积分</h4>
+            <p><strong>题目：</strong>计算 \(\oint_C y\,dx + x\,dy\)，\(C\) 是 \(x^2 + y^2 = 1\) 逆时针。</p>
+            <p><strong>第一步 — 求外微分：</strong>\(\omega = y\,dx + x\,dy\)。\(d\omega = dy \wedge dx + dx \wedge dy = -dx \wedge dy + dx \wedge dy = 0\)。</p>
+            <p><strong>第二步 — 应用 Stokes：</strong>\(\oint_C \omega = \int_{D^2} d\omega = \int_{D^2} 0 = 0\)。✔</p>
+            <p><strong>对比：</strong>若 \(\omega = -y\,dx + x\,dy\)，则 \(d\omega = 2\,dx \wedge dy\)，\(\oint = 2 \cdot \pi(1)^2 = 2\pi\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 忘记 Stokes 定理要求紧致定向带边流形。<br>✅ 若 \(M\) 不紧致（积分可能发散）或不可定向（积分无法定义），定理不适用。</li>
+              <li>❌ 在 \(\partial M = \varnothing\) 时忘记右侧为零。<br>✅ 紧致无边流形上 \(\int_M d\omega = 0\)——闭流形上恰当形式的积分为零。</li>
+              <li>❌ 将 \(dy \wedge dx\) 当作 \(dx \wedge dy\)。<br>✅ \(dy \wedge dx = -dx \wedge dy\)。反对称性是符号正确的关键。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -580,35 +677,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Maxwell 方程组是电磁学的基石，传统上用向量微积分（散度、旋度） 表述。用微分形式语言重写后，四个 Maxwell 方程简化为两个： \(dF = 0\) 和 \(d{*F} = J\)。这不仅更优美，而且能推广到弯曲时空 ——这是广义相对论中电磁场理论的基础。</p>
+            <ul>
+              <li><strong>Maxwell 方程的几何化：</strong>四个 Maxwell 方程用微分形式重写后简化为两个：\(dF = 0\) 和 \(d{*F} = J\)——更优美、更深刻、更易推广。</li>
+              <li><strong>弯曲时空：</strong>形式语言自动适用于弯曲时空——这是广义相对论中电磁场理论的基础，而向量微积分形式无法直接推广。</li>
+              <li><strong>电荷守恒的自动性：</strong>\(d^2 = 0\) 自动给出 \(dJ = 0\)（电荷守恒），无需额外假设。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>微分形式语言消除了坐标依赖，揭示了物理定律的几何本质。 散度定理的流形推广是 Stokes 定理的直接应用。</p>
+            <ul>
+              <li><strong>坐标无关性：</strong>微分形式消除坐标依赖，揭示物理定律的几何本质。</li>
+              <li><strong>Hodge 对偶：</strong>\(*\) 算子将 \(k\)-形式映为 \((n-k)\)-形式，是散度定理和 Maxwell 方程的关键桥梁。</li>
+              <li><strong>Stokes 的推论：</strong>散度定理的流形版是 Stokes 定理的直接特例。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>散度定理（流形版）</strong>：\((M^n, g)\) 紧致黎曼流形带边。 向量场 \(X\) 的散度 \(\mathrm{div}(X) = *d(*X^\flat)\)（或用联络 \(\mathrm{div}(X) = \nabla_i X^i\)），则 \[\int_M \mathrm{div}(X)\, dV_g = \int_{\partial M} g(X, \nu)\, dA\] 其中 \(\nu\) 是外法向量。这是 Stokes 定理对 \((n-1)\)-形式的特例。 <strong>Maxwell 方程的形式语言</strong>： 电磁场 2-形式 \(F = E_i dx^i \wedge dt + B_{ij} dx^i \wedge dx^j\)。 \[dF = 0 \quad (\text{Faraday + 无磁单极})\] \[d{*F} = J \quad (\text{Ampère + Gauss})\] \(J\) 是电流 3-形式。\(d^2 = 0\) 自动给出电荷守恒 \(dJ = 0\)。</p>
+            <h4>1. 散度定理（流形版）</h4>
+            <p>\((M^n, g)\) 紧致黎曼流形带边。向量场 \(X\) 的散度 \(\mathrm{div}(X) = *d(*X^\flat)\)（或 \(\nabla_i X^i\)）：</p>
+            \[\int_M \mathrm{div}(X)\, dV_g = \int_{\partial M} g(X, \nu)\, dA\]
+            <p>其中 \(\nu\) 是外法向量。这是 Stokes 定理对 \((n-1)\)-形式 \(\iota_X\, dV_g\) 的特例。</p>
+
+            <h4>2. Maxwell 方程的形式语言</h4>
+            <p>电磁场 2-形式：\(F = E_i\, dx^i \wedge dt + \tfrac{1}{2}B_{ij}\, dx^i \wedge dx^j\)。</p>
+            \[dF = 0 \quad (\text{Faraday 感应律 + 无磁单极})\]
+            \[d{*F} = J \quad (\text{Ampère 定律 + Gauss 定律})\]
+            <p>\(J\) 是电流 3-形式。</p>
+
+            <h4>3. 电荷守恒</h4>
+            <p>\(d^2{*F} = 0 \Rightarrow dJ = 0\)（电荷守恒 \(\partial_\mu J^\mu = 0\)），这是 \(d^2 = 0\) 的自动推论。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 广义相对论中的弯曲时空用同样的形式语言描述电磁场 - Yang-Mills 方程推广了 \(dF = 0\)，\(d_A {*F} = J\) 到非阿贝尔规范群</p>
+            <p><strong>广义相对论：</strong>弯曲时空 \((M^4, g)\) 上，同样的方程 \(dF = 0\)，\(d{*F} = J\) 无需修改——微分形式自动适配曲率，无需引入 Christoffel 符号。</p>
+            <p><strong>Yang-Mills 理论：</strong>非阿贝尔规范理论推广了 Maxwell 方程：\(D_A F = 0\)（Bianchi 恒等式），\(D_A {*F} = J\)，其中 \(D_A = d + [A, \cdot]\) 是规范协变导数。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(\mathbb{R}^3\) 中验证散度定理： \(\vec{F} = (x,y,z)\)，\(M = \{x^2+y^2+z^2 \leq 1\}\)。 解答：\(\nabla \cdot \vec{F} = 3\)。 \(\iiint_M 3\,dV = 3 \cdot \frac{4\pi}{3} = 4\pi\)。 \(\oiint_{\partial M} \vec{F} \cdot d\vec{S} = \oiint_{S^2} (x,y,z) \cdot (x,y,z)\,dA = \oiint 1\,dA = 4\pi\)。一致。 易错点：\(\vec{F} \cdot \vec{n}\) 在球面上恰好等于 \(1\)（因为 \((x,y,z)\) 在 \(S^2\) 上是单位外法向），简化了计算。</p>
+            <h4>例题：验证散度定理</h4>
+            <p><strong>题目：</strong>\(\vec{F} = (x,y,z)\)，\(M = \{x^2+y^2+z^2 \leq 1\}\)。验证散度定理。</p>
+            <p><strong>第一步 — 体积分：</strong>\(\nabla \cdot \vec{F} = 3\)。\(\iiint_M 3\,dV = 3 \cdot \frac{4\pi}{3} = 4\pi\)。</p>
+            <p><strong>第二步 — 面积分：</strong>在 \(S^2\) 上，\(\vec{n} = (x,y,z)\)（单位外法向）。\(\vec{F} \cdot \vec{n} = x^2+y^2+z^2 = 1\)。</p>
+            <p><strong>第三步 — 对比：</strong>\(\oiint_{S^2} 1\,dA = 4\pi\)。两侧一致。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 在 Maxwell 方程中混淆 \(F\) 和 \(*F\)。<br>✅ \(dF = 0\) 是无源方程（Bianchi），\(d{*F} = J\) 是有源方程。\(F\) 和 \(*F\) 角色不同。</li>
+              <li>❌ 忘记散度定理要求 \(M\) 紧致带边。<br>✅ 若 \(M\) 无边（\(\partial M = \varnothing\)），则 \(\int_M \mathrm{div}(X)\,dV = 0\)。若 \(M\) 不紧致，需要 \(X\) 在无穷远处衰减。</li>
+              <li>❌ 认为 \(d^2 = 0\) 是"偶然"。<br>✅ \(d^2 = 0\) 是外微分的基本性质，它在物理中直接给出守恒律——这是最深刻的几何约束之一。</li>
+            </ul>
           </div>
         </div>
       </div>

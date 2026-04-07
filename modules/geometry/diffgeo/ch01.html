@@ -394,35 +394,70 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>球面、环面等几何对象局部看起来像欧几里得空间，但整体结构完全 不同。流形概念正是将"局部像 \(\mathbb{R}^n\)"的直觉严格化：通过 坐标卡将弯曲空间的局部贴成平面，再通过转移函数保证不同坐标系 的兼容性。这是微分几何、广义相对论和现代物理的语言基础。</p>
+            <ul>
+              <li><strong>弯曲空间的刻画：</strong>球面、环面局部看起来像 \(\mathbb{R}^n\)，但整体结构完全不同。流形概念将"局部像欧式空间"严格化。</li>
+              <li><strong>坐标系的粘合：</strong>单个坐标系无法覆盖弯曲空间（地球不能用一张地图完美展示），需要多个坐标卡 + 转移函数描述坐标系之间的兼容性。</li>
+              <li><strong>内在几何的语言：</strong>流形不需要嵌入到环境空间中定义——这是广义相对论、现代物理和微分几何的基础语言。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心抽象："内在几何"。流形不需要嵌入到环境空间中定义—— 坐标卡提供了局部的欧式坐标，转移函数编码了坐标系之间的关系。</p>
+            <ul>
+              <li><strong>局部 → 全局：</strong>流形 = 局部欧式空间的"粘合"。每个坐标卡给出局部坐标，转移函数编码不同坐标系如何衔接。</li>
+              <li><strong>Hausdorff + 第二可数：</strong>这两个拓扑条件排除病态空间（如"带两个原点的直线"和不可分空间），保证分析工具可用。</li>
+              <li><strong>内在 vs 外在：</strong>坐标卡定义不涉及环境空间——流形是"内在"定义的，与嵌入方式无关。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>拓扑流形</strong>：\(M\) 是 \(n\) 维拓扑流形 \(\iff\) (1) \(M\) 是 Hausdorff 的； (2) \(M\) 是第二可数的； (3) \(M\) 局部欧几里得：\(\forall p \in M\)，\(\exists\) 开邻域 \(U\) 同胚于 \(\mathbb{R}^n\) 的开集。 <strong>坐标卡 (Chart)</strong>：\((U, \varphi)\)，\(U \subseteq M\) 开， \(\varphi: U \to \varphi(U) \subseteq \mathbb{R}^n\) 同胚。 <strong>图册 (Atlas)</strong>：\(\mathcal{A} = \{(U_\alpha, \varphi_\alpha)\}\) 使 \(\bigcup U_\alpha = M\)。 <strong>转移函数</strong>：对重叠区域 \(U_\alpha \cap U_\beta \neq \emptyset\)， \[\varphi_\beta \circ \varphi_\alpha^{-1}: \varphi_\alpha(U_\alpha \cap U_\beta) \to \varphi_\beta(U_\alpha \cap U_\beta)\] 是 \(\mathbb{R}^n\) 开集之间的同胚。</p>
+            <h4>1. 拓扑流形的定义</h4>
+            <p>\(M\) 是 \(n\) 维拓扑流形 \(\iff\)：</p>
+            <ul>
+              <li>(1) \(M\) 是 Hausdorff 空间；</li>
+              <li>(2) \(M\) 是第二可数空间（有可数拓扑基）；</li>
+              <li>(3) \(M\) 局部欧几里得：\(\forall p \in M\)，存在开邻域 \(U\) 同胚于 \(\mathbb{R}^n\) 的开集。</li>
+            </ul>
+
+            <h4>2. 坐标卡与图册</h4>
+            <p><strong>坐标卡 (Chart)：</strong>\((U, \varphi)\)，\(U \subseteq M\) 开，\(\varphi: U \to \varphi(U) \subseteq \mathbb{R}^n\) 同胚。点 \(p \in U\) 的<strong>局部坐标</strong>是 \(\varphi(p) = (x^1, \ldots, x^n)\)。</p>
+            <p><strong>图册 (Atlas)：</strong>\(\mathcal{A} = \{(U_\alpha, \varphi_\alpha)\}\)，要求 \(\bigcup U_\alpha = M\)（覆盖整个流形）。</p>
+
+            <h4>3. 转移函数</h4>
+            <p>对重叠区域 \(U_\alpha \cap U_\beta \neq \emptyset\)，转移函数为：</p>
+            \[\varphi_\beta \circ \varphi_\alpha^{-1}: \varphi_\alpha(U_\alpha \cap U_\beta) \to \varphi_\beta(U_\alpha \cap U_\beta)\]
+            <p>这是 \(\mathbb{R}^n\) 开集之间的同胚。转移函数的正则性（连续、\(C^k\)、\(C^\infty\)）决定了流形的类别。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 广义相对论中的时空是 4 维流形 - 机器人学中的构型空间（如旋转群 \(SO(3)\)）是流形</p>
+            <p><strong>广义相对论：</strong>时空是 4 维（伪）Riemann 流形 \((M^4, g)\)。不同坐标系（如 Schwarzschild 坐标、Kruskal 坐标）对应不同坐标卡，物理定律通过坐标无关的张量方程表达。</p>
+            <p><strong>机器人学：</strong>机器人的构型空间（如旋转群 \(SO(3)\)）是流形。关节角参数化是坐标卡，万向节锁（gimbal lock）本质上是单个坐标卡无法覆盖 \(SO(3)\) 的反映。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^2\) 是 2 维拓扑流形。给出一个图册。 解答：球极投影：\(U_N = S^2 \setminus \{N\}\)（\(N\) = 北极）， \(\varphi_N(x,y,z) = (x/(1-z), y/(1-z))\)。 \(U_S = S^2 \setminus \{S\}\)（\(S\) = 南极）， \(\varphi_S(x,y,z) = (x/(1+z), y/(1+z))\)。 \(\{(U_N, \varphi_N), (U_S, \varphi_S)\}\) 覆盖 \(S^2\)。 转移函数 \(\varphi_S \circ \varphi_N^{-1}(u,v) = (u,v)/(u^2+v^2)\) （反演映射），在 \(\mathbb{R}^2 \setminus \{0\}\) 上光滑。 易错点：\(S^2\) 不能用单个坐标卡覆盖（紧且非 \(\mathbb{R}^2\)）， 至少需要两个。</p>
+            <h4>例题：\(S^2\) 的球极投影图册</h4>
+            <p><strong>题目：</strong>证明 \(S^2\) 是 2 维拓扑流形并给出图册。</p>
+            <p><strong>第一步 — 构造坐标卡：</strong>北极投影：\(U_N = S^2 \setminus \{N\}\)，\(\varphi_N(x,y,z) = \bigl(\frac{x}{1-z}, \frac{y}{1-z}\bigr)\)。南极投影：\(U_S = S^2 \setminus \{S\}\)，\(\varphi_S(x,y,z) = \bigl(\frac{x}{1+z}, \frac{y}{1+z}\bigr)\)。</p>
+            <p><strong>第二步 — 验证覆盖：</strong>\(U_N \cup U_S = S^2\)（去北极和去南极的并是全球面）。✔</p>
+            <p><strong>第三步 — 转移函数：</strong>\(\varphi_S \circ \varphi_N^{-1}(u,v) = \frac{(u,v)}{u^2 + v^2}\)（反演映射），在 \(\mathbb{R}^2 \setminus \{0\}\) 上光滑。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(S^2\) 可用单个坐标卡覆盖。<br>✅ 紧致流形若同胚于 \(\mathbb{R}^n\) 的开集则非紧致。\(S^2\) 紧致，故至少需要<strong>两个</strong>坐标卡。</li>
+              <li>❌ 忘记验证 Hausdorff 和第二可数条件。<br>✅ \(S^2 \subseteq \mathbb{R}^3\) 继承子空间拓扑，自动满足这两个条件。</li>
+              <li>❌ 混淆坐标卡 \(\varphi\) 的方向（从流形到 \(\mathbb{R}^n\)）。<br>✅ 坐标卡 \(\varphi: U \to \mathbb{R}^n\) 是同胚，\(\varphi^{-1}\) 称为参数化。两个方向不要搞反。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -473,35 +508,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>拓扑流形只能讨论连续性，不能做微积分。要在流形上定义导数，需要 转移函数足够"光滑"。光滑流形要求所有转移函数是 \(C^\infty\) 的， 由此可以定义流形之间的光滑映射——这是微分几何的起点。</p>
+            <ul>
+              <li><strong>从连续到可微：</strong>拓扑流形只能讨论连续性，无法做微积分。要在流形上定义导数、积分，需要更强的结构。</li>
+              <li><strong>光滑结构：</strong>要求转移函数 \(C^\infty\)，将微积分从 \(\mathbb{R}^n\) "传送"到流形上。光滑流形是微分几何的起点。</li>
+              <li><strong>微分同胚 vs 同胚：</strong>存在同胚但不微分同胚的流形（如 Milnor 的 exotic \(S^7\)），说明光滑结构不由拓扑结构唯一决定。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>光滑结构 = 极大光滑图册。通过要求转移函数光滑，将微积分从 \(\mathbb{R}^n\) "传送"到流形上。</p>
+            <ul>
+              <li><strong>极大图册：</strong>光滑结构 = 包含所有兼容坐标卡的极大光滑图册。任何光滑图册唯一确定一个极大图册。</li>
+              <li><strong>范畴视角：</strong>光滑流形构成范畴 \(\mathbf{Man}^\infty\)，态射是光滑映射，同构是微分同胚。</li>
+              <li><strong>"光滑"的传递性：</strong>通过坐标卡将流形上的光滑性翻译为 \(\mathbb{R}^n\) 上的标准 \(C^\infty\) 条件。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>光滑兼容</strong>：两个坐标卡 \((U, \varphi), (V, \psi)\) 光滑兼容 \(\iff\) \(\psi \circ \varphi^{-1}\) 和 \(\varphi \circ \psi^{-1}\) 都是 \(C^\infty\) 映射。 <strong>光滑图册</strong>：图册中任意两个坐标卡光滑兼容。 <strong>光滑流形</strong>：\((M, \mathcal{A})\)，\(\mathcal{A}\) 是极大光滑图册。 <strong>光滑映射</strong>：\(f: M \to N\) 光滑 \(\iff\) 对所有坐标卡 \((U, \varphi)\) on \(M\)、\((V, \psi)\) on \(N\)，复合 \[\psi \circ f \circ \varphi^{-1}: \varphi(U \cap f^{-1}(V)) \to \mathbb{R}^n\] 是 \(C^\infty\) 映射。 <strong>微分同胚 (Diffeomorphism)</strong>：\(f: M \to N\)，\(f\) 光滑双射且 \(f^{-1}\) 也光滑。是光滑流形范畴的同构。</p>
+            <h4>1. 光滑兼容性</h4>
+            <p>两个坐标卡 \((U, \varphi), (V, \psi)\) <strong>光滑兼容</strong> \(\iff\) 转移函数 \(\psi \circ \varphi^{-1}\) 和 \(\varphi \circ \psi^{-1}\) 都是 \(C^\infty\) 映射（在 \(\mathbb{R}^n\) 开集之间）。</p>
+
+            <h4>2. 光滑流形</h4>
+            <p><strong>光滑图册：</strong>图册中任意两个坐标卡光滑兼容。<strong>极大光滑图册：</strong>包含所有与之兼容的坐标卡。\((M, \mathcal{A})\)（\(\mathcal{A}\) 为极大光滑图册）就是光滑流形。</p>
+
+            <h4>3. 光滑映射与微分同胚</h4>
+            <p>\(f: M \to N\) <strong>光滑</strong>：对所有坐标卡 \((U, \varphi)\) on \(M\)、\((V, \psi)\) on \(N\)，坐标表示</p>
+            \[\psi \circ f \circ \varphi^{-1}: \varphi(U \cap f^{-1}(V)) \to \mathbb{R}^n\]
+            <p>是 \(C^\infty\) 映射。</p>
+            <p><strong>微分同胚：</strong>\(f: M \to N\) 光滑双射且 \(f^{-1}\) 也光滑。这是光滑流形范畴的同构。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 物理中的规范变换是流形上的光滑映射 - 计算机图形学中曲面建模使用光滑流形参数化</p>
+            <p><strong>规范场论：</strong>物理中的规范变换是纤维丛上的光滑自同构。规范不变性要求物理量在光滑变换下保持不变——光滑映射的概念是规范理论的数学基础。</p>
+            <p><strong>计算机图形学：</strong>曲面建模中使用光滑流形参数化（如 NURBS 曲面）。不同参数域的"拼接"就是转移函数的光滑兼容性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x^3\)。 \(f\) 是光滑双射，\(f\) 是微分同胚吗？ 解答：\(f\) 是 \(C^\infty\) 双射。但 \(f^{-1}(y) = y^{1/3}\)， 在 \(y = 0\) 处 \((f^{-1})'(0)\) 不存在。 故 \(f^{-1}\) 不光滑，\(f\) 不是微分同胚。 易错点：光滑双射 ≠ 微分同胚。必须验证逆映射也光滑。 根本原因：\(f'(0) = 0\)，\(f\) 在 \(0\) 处不是局部微分同胚。</p>
+            <h4>例题：\(f(x) = x^3\) 是微分同胚吗？</h4>
+            <p><strong>题目：</strong>\(f: \mathbb{R} \to \mathbb{R}\)，\(f(x) = x^3\)。\(f\) 是光滑双射，但它是微分同胚吗？</p>
+            <p><strong>第一步 — 光滑性：</strong>\(f\) 是多项式，显然 \(C^\infty\)。\(f\) 是严格单调递增，故双射。✔</p>
+            <p><strong>第二步 — 逆映射：</strong>\(f^{-1}(y) = y^{1/3}\)。在 \(y = 0\) 处 \((f^{-1})'(0)\) 不存在（导数趋向 \(\infty\)）。故 \(f^{-1}\) 不光滑。✘</p>
+            <p><strong>结论：</strong>\(f\) 不是微分同胚。根本原因是 \(f'(0) = 0\)，\(f\) 在 \(0\) 处不是局部微分同胚。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为"光滑双射 = 微分同胚"。<br>✅ 必须验证<strong>逆映射也光滑</strong>。\(f'(p) = 0\) 的点处逆映射不可微。</li>
+              <li>❌ 混淆"同胚"与"微分同胚"。<br>✅ \(x^3: \mathbb{R} \to \mathbb{R}\) 是同胚但不是微分同胚。两个概念在流形范畴中有本质区别。</li>
+              <li>❌ 认为光滑结构由拓扑唯一决定。<br>✅ Milnor (1956) 证明 \(S^7\) 有 28 种不同的光滑结构（exotic spheres）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -528,35 +593,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>流形上一点处的"方向"是什么？在 \(\mathbb{R}^n\) 中方向就是向量， 但弯曲流形上没有全局的向量加法。切空间 \(T_pM\) 将"经过 \(p\) 的 曲线的速度向量"抽象为一个向量空间，为流形上的微积分提供了 基础。切映射则是光滑映射在切空间层面的"线性化"。</p>
+            <ul>
+              <li><strong>流形上的"方向"：</strong>在 \(\mathbb{R}^n\) 中方向就是向量，但弯曲流形上没有全局向量加法。切空间 \(T_pM\) 在每点"铺一块平面"来定义方向。</li>
+              <li><strong>微积分的基础：</strong>切空间是定义向量场、微分形式、联络的前提。没有切空间就无法在流形上做微积分。</li>
+              <li><strong>线性化：</strong>切映射 \(df_p\) 是光滑映射在切空间层面的"最佳线性逼近"——类比多元函数的 Jacobian。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>切空间 = 方向导数的空间。两种等价定义（曲线定义和推导定义） 分别强调几何直觉和代数操作。</p>
+            <ul>
+              <li><strong>两种等价定义：</strong>曲线定义（几何直觉：速度向量）和推导定义（代数操作：方向导数算子）。</li>
+              <li><strong>函子性：</strong>\(M \mapsto T_pM\)，\(f \mapsto df_p\) 构成函子。链式法则 \(d(g \circ f)_p = dg_{f(p)} \circ df_p\) 就是函子保复合。</li>
+              <li><strong>维数不变：</strong>\(\dim T_pM = \dim M\)，无论点 \(p\) 在哪里。切空间提供了流形维数的内在定义。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>曲线定义</strong>：\(T_pM = \{\text{过 } p \text{ 的光滑曲线}\} / {\sim}\)， \(\gamma_1 \sim \gamma_2 \iff (\varphi \circ \gamma_1)'(0) = (\varphi \circ \gamma_2)'(0)\) （在某坐标卡下速度相同）。 <strong>推导定义</strong>：\(v \in T_pM\) 是 \(C_p^\infty(M) \to \mathbb{R}\) 上的线性映射， 满足 Leibniz 法则 \(v(fg) = f(p)v(g) + g(p)v(f)\)。 坐标基：\((U, x^1, \ldots, x^n)\) 下， \(\left.\frac{\partial}{\partial x^i}\right|_p\) 构成 \(T_pM\) 的基。 \(\dim T_pM = \dim M = n\)。 <strong>切映射 (Differential)</strong>：\(f: M \to N\) 光滑。 \[df_p: T_pM \to T_{f(p)}N, \quad df_p(v)(g) = v(g \circ f)\] 坐标中 \(df_p\) 的矩阵就是 Jacobian 矩阵 \(J_f\)。 <strong>链式法则</strong>：\(d(g \circ f)_p = dg_{f(p)} \circ df_p\)。</p>
+            <h4>1. 曲线定义</h4>
+            <p>\(T_pM = \{\text{过 } p \text{ 的光滑曲线}\}/{\sim}\)，其中 \(\gamma_1 \sim \gamma_2 \iff (\varphi \circ \gamma_1)'(0) = (\varphi \circ \gamma_2)'(0)\)（在某坐标卡下速度相同）。</p>
+
+            <h4>2. 推导（导子）定义</h4>
+            <p>\(v \in T_pM\) 是线性映射 \(v: C_p^\infty(M) \to \mathbb{R}\)，满足 <strong>Leibniz 法则</strong>：</p>
+            \[v(fg) = f(p)\,v(g) + g(p)\,v(f)\]
+            <p>坐标卡 \((U, x^1, \ldots, x^n)\) 下，\(\bigl\{\frac{\partial}{\partial x^i}\big|_p\bigr\}_{i=1}^n\) 构成 \(T_pM\) 的基。\(\dim T_pM = n\)。</p>
+
+            <h4>3. 切映射（微分）</h4>
+            <p>设 \(f: M \to N\) 光滑。\(df_p: T_pM \to T_{f(p)}N\) 定义为：</p>
+            \[df_p(v)(g) = v(g \circ f), \quad \forall g \in C^\infty_{f(p)}(N)\]
+            <p>在坐标中，\(df_p\) 的矩阵就是 <strong>Jacobian 矩阵</strong> \(J_f = \bigl(\frac{\partial f^j}{\partial x^i}\bigr)\)。</p>
+            <p><strong>链式法则：</strong>\(d(g \circ f)_p = dg_{f(p)} \circ df_p\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 机器学习中流形假设：高维数据位于低维流形上，切空间用于局部线性化 - 物理中粒子的速度是时空流形上世界线的切向量</p>
+            <p><strong>流形学习：</strong>机器学习中的"流形假设"认为高维数据位于低维流形上。切空间用于局部线性化——PCA 的推广（局部 PCA / tangent space alignment）在每点用切空间近似数据流形。</p>
+            <p><strong>物理：</strong>粒子在时空流形上的世界线 \(\gamma(t)\) 的切向量 \(\gamma'(t) \in T_{\gamma(t)}M\) 就是四速度。切映射将一个参考系的物理量变换到另一个参考系。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f: \mathbb{R}^2 \to \mathbb{R}^2\)，\(f(x,y) = (x^2-y^2, 2xy)\)。 求 \(df_{(1,1)}\)。 解答：Jacobian 矩阵 \(J_f = \begin{pmatrix} 2x & -2y \\ 2y & 2x \end{pmatrix}\)。 在 \((1,1)\)：\(df_{(1,1)} = \begin{pmatrix} 2 & -2 \\ 2 & 2 \end{pmatrix}\)。 \(df_{(1,1)}(\partial/\partial x) = 2 \partial/\partial u + 2 \partial/\partial v\)。 易错点：切映射是线性映射（在切空间之间），不是流形之间的映射。 不要混淆 \(df_p\) 和 \(f\) 本身。</p>
+            <h4>例题：计算切映射</h4>
+            <p><strong>题目：</strong>\(f: \mathbb{R}^2 \to \mathbb{R}^2\)，\(f(x,y) = (x^2 - y^2, 2xy)\)。求 \(df_{(1,1)}\)。</p>
+            <p><strong>第一步 — Jacobian 矩阵：</strong></p>
+            \[J_f = \begin{pmatrix} 2x & -2y \\ 2y & 2x \end{pmatrix}\]
+            <p><strong>第二步 — 代入点 \((1,1)\)：</strong></p>
+            \[df_{(1,1)} = \begin{pmatrix} 2 & -2 \\ 2 & 2 \end{pmatrix}\]
+            <p><strong>第三步 — 作用于基向量：</strong>\(df_{(1,1)}\bigl(\frac{\partial}{\partial x}\bigr) = 2\frac{\partial}{\partial u} + 2\frac{\partial}{\partial v}\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆切映射 \(df_p\)（线性映射）和原映射 \(f\)（流形之间的映射）。<br>✅ \(df_p: T_pM \to T_{f(p)}N\) 是切空间之间的<strong>线性</strong>映射，\(f\) 是流形之间的光滑映射。</li>
+              <li>❌ 认为 \(T_p S^2\) 的维数是 3（因为 \(S^2 \subseteq \mathbb{R}^3\)）。<br>✅ \(\dim T_p S^2 = \dim S^2 = 2\)。切空间维数等于<strong>流形</strong>维数，不是环境空间维数。</li>
+              <li>❌ 推导定义中忘记 Leibniz 法则，将任意线性泛函当作切向量。<br>✅ Leibniz 法则是关键约束条件。例如：求值映射 \(\mathrm{ev}_p(f) = f(p)\) 是线性的但不满足 Leibniz 法则，不是切向量。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -601,35 +700,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>光滑映射的切映射 \(df_p\) 可能是单射（浸入）、满射（淹没）或两者 都不是。浸入和淹没是微分几何中构造子流形的基本工具。正则值定理 （原像定理）说：如果 \(c\) 是 \(f\) 的正则值（\(df_p\) 在原像上处处满射）， 那么 \(f^{-1}(c)\) 自动获得光滑流形结构。这是隐函数定理的流形版本。</p>
+            <ul>
+              <li><strong>构造子流形：</strong>如何证明 \(S^n\)、\(O(n)\)、\(SL(n)\) 是光滑流形？正则值定理提供了最高效的方法——只需检查一个方程的 Jacobian。</li>
+              <li><strong>切映射的"秩"分类：</strong>浸入（\(df_p\) 单射）和淹没（\(df_p\) 满射）是光滑映射按切映射秩分类的两种极端情况。</li>
+              <li><strong>隐函数定理的推广：</strong>正则值定理是隐函数定理的坐标无关版本——方程 \(f(x) = c\) 在正则值处的解集自动成为子流形。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>浸入 = 切映射处处单射（"无折叠"的映射），淹没 = 切映射处处满射 （"无褶皱"的映射）。正则值定理是隐函数定理的坐标无关表述。</p>
+            <ul>
+              <li><strong>浸入 = "无折叠"：</strong>\(df_p\) 单射意味着切空间被完整嵌入，流形"不折叠"地映入目标。</li>
+              <li><strong>淹没 = "无褶皱"：</strong>\(df_p\) 满射意味着映射覆盖目标的所有方向。纤维 \(f^{-1}(c)\) 光滑。</li>
+              <li><strong>嵌入 = 浸入 + 拓扑嵌入：</strong>浸入可能有自交（如 \(\infty\) 形曲线），嵌入则排除自交。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>浸入 (Immersion)</strong>：\(f: M \to N\) 在 \(p\) 处浸入 \(\iff df_p\) 单射。 \(f\) 是浸入 \(\iff\) 处处浸入。必要条件：\(\dim M \leq \dim N\)。 <strong>淹没 (Submersion)</strong>：\(f: M \to N\) 在 \(p\) 处淹没 \(\iff df_p\) 满射。 必要条件：\(\dim M \geq \dim N\)。 <strong>嵌入 (Embedding)</strong>：浸入 + 拓扑嵌入（到像的同胚）。 <strong>正则值定理</strong>：设 \(f: M^m \to N^n\) 光滑（\(m \geq n\)）， \(c \in N\) 是正则值（\(\forall p \in f^{-1}(c)\)，\(df_p\) 满射）。 则 \(f^{-1}(c)\) 是 \(M\) 的 \((m-n)\) 维光滑子流形。 <strong>证明思路</strong>：隐函数定理保证在每个 \(p \in f^{-1}(c)\) 附近， \(f^{-1}(c)\) 可局部参数化为 \(n\) 个方程在 \(m\) 维空间中的解集。 \[\dim f^{-1}(c) = m - n = \dim M - \dim N\]</p>
+            <h4>1. 浸入与淹没</h4>
+            <ul>
+              <li><strong>浸入 (Immersion)：</strong>\(f: M^m \to N^n\) 在 \(p\) 处浸入 \(\iff df_p\) 单射。全局浸入要求处处单射。必要条件：\(m \leq n\)。</li>
+              <li><strong>淹没 (Submersion)：</strong>\(f\) 在 \(p\) 处淹没 \(\iff df_p\) 满射。必要条件：\(m \geq n\)。</li>
+              <li><strong>嵌入 (Embedding)：</strong>浸入 + 到像的拓扑嵌入（即 \(f: M \to f(M)\) 是同胚）。</li>
+            </ul>
+
+            <h4>2. 正则值定理</h4>
+            <p>设 \(f: M^m \to N^n\) 光滑（\(m \geq n\)），\(c \in N\) 是<strong>正则值</strong>（\(\forall p \in f^{-1}(c)\)，\(df_p\) 满射）。则：</p>
+            \[f^{-1}(c) \;\text{是}\; M \;\text{的}\; (m - n) \;\text{维光滑子流形}\]
+
+            <h4>3. 证明思路</h4>
+            <p>在每个 \(p \in f^{-1}(c)\) 附近，隐函数定理保证方程 \(f(x) = c\) 的解集可局部参数化——\(n\) 个方程在 \(m\) 维空间中消除 \(n\) 个自由度，留下 \(m - n\) 维参数。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- \(S^n = f^{-1}(1)\)，\(f(x) = \|x\|^2\)，\(df_x = 2x \neq 0\) 对 \(x \in S^n\)， 故 \(1\) 是正则值，\(S^n\) 是 \(n\) 维光滑流形 - 约束优化中，约束面 \(g(x) = c\) 在正则值处是流形</p>
+            <p><strong>球面 \(S^n\) 的流形结构：</strong>取 \(f: \mathbb{R}^{n+1} \to \mathbb{R}\)，\(f(x) = \|x\|^2 = \sum x_i^2\)。\(df_x = 2x \neq 0\) 对所有 \(x \in f^{-1}(1)\)，故 \(1\) 是正则值。正则值定理 \(\Rightarrow S^n = f^{-1}(1)\) 是 \(n\) 维光滑子流形。</p>
+            <p><strong>约束优化：</strong>Lagrange 乘数法要求约束 \(g(x) = c\) 的 \(c\) 是正则值（\(\nabla g \neq 0\)）。这保证约束面是光滑流形，切空间 \(\ker dg_p\) is well-defined，Lagrange 条件 \(\nabla f = \lambda \nabla g\) 有几何意义。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f: \mathbb{R}^3 \to \mathbb{R}\)，\(f(x,y,z) = x^2 + y^2 - z^2\)。 \(f^{-1}(1)\) 是几维流形？ 解答：\(\nabla f = (2x, 2y, -2z)\)。在 \(f^{-1}(1)\) 上， \(\nabla f = 0 \Rightarrow x = y = z = 0\)，但 \(f(0,0,0) = 0 \neq 1\)。 故 \(1\) 是正则值，\(f^{-1}(1)\) 是 \(3-1 = 2\) 维光滑子流形（单叶双曲面）。 易错点：\(f^{-1}(0)\) 不一定是流形！\(\nabla f(0,0,0) = 0\) 且 \(f(0,0,0) = 0\)，所以 \(0\) 不是正则值。 \(f^{-1}(0)\) 在原点有奇点（锥点）。</p>
+            <h4>例题：单叶双曲面</h4>
+            <p><strong>题目：</strong>\(f: \mathbb{R}^3 \to \mathbb{R}\)，\(f(x,y,z) = x^2 + y^2 - z^2\)。\(f^{-1}(1)\) 是几维流形？</p>
+            <p><strong>第一步 — 计算梯度：</strong>\(\nabla f = (2x, 2y, -2z)\)。\(\nabla f = 0 \Rightarrow x = y = z = 0\)。</p>
+            <p><strong>第二步 — 检验正则性：</strong>\(f(0,0,0) = 0 \neq 1\)，故 \(f^{-1}(1)\) 上 \(\nabla f \neq 0\) 处处成立。\(1\) 是正则值。✔</p>
+            <p><strong>第三步 — 维数：</strong>\(\dim f^{-1}(1) = 3 - 1 = 2\)。\(f^{-1}(1)\) 是 2 维光滑子流形（单叶双曲面）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对所有水平集 \(f^{-1}(c)\) 套用正则值定理。<br>✅ 必须逐个检验！\(f^{-1}(0)\) 在原点有奇点（锥点）——\(0\) 不是正则值，\(f^{-1}(0)\) 不是流形。</li>
+              <li>❌ 混淆"浸入"和"嵌入"。<br>✅ \(\gamma: \mathbb{R} \to \mathbb{R}^2\) 画 \(\infty\) 形是浸入但不是嵌入（有自交点）。嵌入 = 浸入 + 单射 + 拓扑嵌入。</li>
+              <li>❌ 忘记维数约束。<br>✅ 浸入要求 \(m \leq n\)；淹没要求 \(m \geq n\)。\(f: \mathbb{R} \to \mathbb{R}^2\) 不可能是淹没。</li>
+            </ul>
           </div>
         </div>
       </div>
