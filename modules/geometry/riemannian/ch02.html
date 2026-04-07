@@ -178,35 +178,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在微分几何模块中已初步介绍了 Levi-Civita 联络——无挠 + 度量兼容 唯一确定的联络。在黎曼几何中，它是一切计算的起点：测地线、曲率、 Jacobi 场都基于它。这里从黎曼几何的视角重新审视 Christoffel 符号 和协变导数的计算技巧。</p>
+            <ul>
+              <li><strong>联络是计算的起点：</strong>Levi-Civita 联络由无挠 + 度量兼容唯一确定，是黎曼几何中一切计算（测地线、曲率、Jacobi 场）的基础。</li>
+              <li><strong>平行搬运的规范：</strong>联络规定了如何在流形上"平行搬运"向量——不同联络给出不同的搬运方式，Levi-Civita 联络是度量内在决定的最自然选择。</li>
+              <li><strong>法坐标的威力：</strong>在法坐标中 \(\Gamma^k_{ij}(p) = 0\)，极大简化了局部计算。但 \(\partial\Gamma \neq 0\)——这正是曲率的来源。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Levi-Civita 联络是黎曼度量"内在确定"的微分结构—— 度量不仅量化距离，还规定了"平行搬运"的方式。</p>
+            <ul>
+              <li><strong>度量决定联络：</strong>Levi-Civita 联络是黎曼度量"内在确定"的微分结构。度量不仅量化距离，还唯一规定了平行搬运的方式。</li>
+              <li><strong>Koszul 公式：</strong>由无挠和度量兼容两个条件，代数地推导出联络关于度量的显式表达，证明了存在唯一性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Koszul 公式</strong>（决定 \(\nabla\)）： \[2g(\nabla_X Y, Z) = Xg(Y,Z) + Yg(X,Z) - Zg(X,Y) + g([X,Y],Z) - g([X,Z],Y) - g([Y,Z],X)\] <strong>Christoffel 符号</strong>： \[\Gamma^k_{ij} = \frac{1}{2}g^{kl}\left(\frac{\partial g_{il}}{\partial x^j} + \frac{\partial g_{jl}}{\partial x^i} - \frac{\partial g_{ij}}{\partial x^l}\right)\] <strong>协变导数</strong>：沿 \(\gamma\) 的向量场 \(V\)， \[\frac{DV^k}{dt} = \frac{dV^k}{dt} + \Gamma^k_{ij}\dot{\gamma}^i V^j\] <strong>法坐标 (Normal Coordinates)</strong>：在 \(p\) 处选标准正交基 \(\{e_i\}\)， \(\exp_p: T_pM \to M\)。法坐标中 \(g_{ij}(0) = \delta_{ij}\)， \(\Gamma^k_{ij}(0) = 0\)（但 \(\partial \Gamma \neq 0\)——这就是曲率）。</p>
+            <h4>1. Koszul 公式</h4>
+            <p>由无挠性 \(\nabla_X Y - \nabla_Y X = [X,Y]\) 和度量兼容性 \(Xg(Y,Z) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)\) 推出：</p>
+            \[2g(\nabla_X Y, Z) = Xg(Y,Z) + Yg(X,Z) - Zg(X,Y) + g([X,Y],Z) - g([X,Z],Y) - g([Y,Z],X)\]
+
+            <h4>2. Christoffel 符号</h4>
+            <p>取 \(X = \partial_i, Y = \partial_j, Z = \partial_l\)（坐标向量场，\([\partial_i, \partial_j] = 0\)），得：</p>
+            \[\Gamma^k_{ij} = \frac{1}{2}g^{kl}\left(\frac{\partial g_{il}}{\partial x^j} + \frac{\partial g_{jl}}{\partial x^i} - \frac{\partial g_{ij}}{\partial x^l}\right)\]
+
+            <h4>3. 协变导数</h4>
+            <p>沿曲线 \(\gamma\) 的向量场 \(V\) 的协变导数：\(\frac{DV^k}{dt} = \frac{dV^k}{dt} + \Gamma^k_{ij}\dot{\gamma}^i V^j\)。平行搬运条件：\(DV/dt = 0\)。</p>
+
+            <h4>4. 法坐标</h4>
+            <p>在 \(p\) 处选标准正交基 \(\{e_i\}\)，通过 \(\exp_p\) 定义法坐标。此坐标中 \(g_{ij}(0) = \delta_{ij}\)，\(\Gamma^k_{ij}(0) = 0\)，但 \(\partial_l\Gamma^k_{ij}(0)\) 与曲率张量直接相关。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 法坐标简化了张量方程的局部验证（在一点处 \(\Gamma = 0\)）</p>
+            <p><strong>广义相对论中的自由落体：</strong>在弯曲时空中，自由粒子沿 Levi-Civita 联络的测地线运动。Christoffel 符号 \(\Gamma^\mu_{\alpha\beta}\) 扮演"引力场"的角色——Einstein 等效原理说在法坐标（局部惯性系）中 \(\Gamma = 0\)，即自由落体中感受不到引力。</p>
+            <p><strong>流形上的机器学习：</strong>黎曼 SGD（随机梯度下降）使用 Levi-Civita 联络做平行搬运来更新参数——在双曲空间或 Stiefel 流形上的优化中，梯度需要沿测地线搬运回切空间。</p>
+            <p><strong>张量方程的化简：</strong>法坐标在一点处消去所有 \(\Gamma\)，使复杂的张量恒等式验证变得清晰——例如 Bianchi 恒等式在法坐标中几乎直接可见。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：双曲平面 \(\mathbb{H}^2\)：\(ds^2 = (dx^2 + dy^2)/y^2\)（上半平面模型）。 求 \(\Gamma^y_{xx}\)。 解答：\(g_{xx} = g_{yy} = 1/y^2\)，\(g_{xy} = 0\)。 \(\Gamma^y_{xx} = \frac{1}{2}g^{yy}\left(\partial_x g_{xy} + \partial_x g_{xy} - \partial_y g_{xx}\right)\) \(= \frac{1}{2} y^2 \left(0 + 0 - (-2/y^3)\right) = \frac{1}{2} y^2 \cdot \frac{2}{y^3} = \frac{1}{y}\)。 易错点：\(\partial_y g_{xx} = \partial_y(1/y^2) = -2/y^3\)，不是 \(-2y\)。</p>
+            <h4>例题：双曲平面的 Christoffel 符号</h4>
+            <p><strong>题目：</strong>双曲平面 \(\mathbb{H}^2\)：\(ds^2 = (dx^2 + dy^2)/y^2\)（上半平面模型）。求 \(\Gamma^y_{xx}\)。</p>
+            <p><strong>第一步 — 度量分量：</strong>\(g_{xx} = g_{yy} = 1/y^2\)，\(g_{xy} = 0\)，\(g^{yy} = y^2\)。</p>
+            <p><strong>第二步 — 代入公式：</strong>\(\Gamma^y_{xx} = \frac{1}{2}g^{yy}(\partial_x g_{xy} + \partial_x g_{xy} - \partial_y g_{xx}) = \frac{1}{2}y^2(0 + 0 - (-2/y^3)) = \frac{1}{2}y^2 \cdot \frac{2}{y^3} = \frac{1}{y}\)。</p>
+            <p><strong>结论：</strong>\(\Gamma^y_{xx} = 1/y\)。双曲平面的 Christoffel 符号反映了度量随 \(y\) 的变化——接近 \(y = 0\) 边界时"距离膨胀"。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 计算 \(\partial_y g_{xx}\) 时误用 \(\partial_y(1/y^2) = -2y\)。<br>✅ 正确结果是 \(\partial_y(y^{-2}) = -2y^{-3} = -2/y^3\)。幂函数求导：\(\partial_y(y^n) = ny^{n-1}\)。</li>
+              <li>❌ 将 Christoffel 符号当作张量：认为在所有坐标中 \(\Gamma = 0\) 等价于空间平坦。<br>✅ \(\Gamma\) 不是张量，可以通过坐标变换在一点处消去（法坐标），但曲率（\(\partial\Gamma\) 的组合）不能消去。</li>
+              <li>❌ 混淆度量兼容性和无挠性：认为只要 \(\nabla g = 0\) 就能唯一确定联络。<br>✅ 度量兼容的联络有无穷多个（加上不同的挠率张量）。唯一性需要无挠性 + 度量兼容性两个条件。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -249,35 +281,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>测地线是黎曼流形上的"最短路径"（更准确地：临界路径）。它推广 了欧式空间中的直线和球面上的大圆。测地线方程是二阶 ODE， 指数映射 \(\exp_p\) 将切空间射入流形——法坐标正是由指数映射定义的。</p>
+            <ul>
+              <li><strong>最短路径推广：</strong>测地线是黎曼流形上"直线"的推广——欧式空间中的直线、球面上的大圆都是测地线的特例。</li>
+              <li><strong>二阶 ODE 的几何意义：</strong>测地线方程 \(\nabla_{\gamma'}\gamma' = 0\) 是"协变加速度为零"，物理对应——自由粒子在弯曲空间中沿测地线运动。</li>
+              <li><strong>指数映射搭建桥梁：</strong>\(\exp_p\) 将切空间的线性结构"映射"到流形的弯曲结构，是法坐标、割迹、单射半径等概念的基础。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>测地线 = "加速度为零"的曲线（\(\nabla_{\gamma'}\gamma' = 0\)）。 指数映射是切空间到流形的"最自然"的映射。</p>
+            <ul>
+              <li><strong>变分视角：</strong>测地线 = 能量泛函或长度泛函的临界点。变分法将几何问题转化为 ODE。</li>
+              <li><strong>指数映射的微分：</strong>\(d(\exp_p)_0 = \mathrm{id}_{T_pM}\)——在原点处指数映射是恒等映射，因此局部是微分同胚。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>测地线方程</strong>：\(\gamma: I \to M\) 是测地线 \(\iff\) \[\nabla_{\gamma'}\gamma' = 0 \iff \ddot{\gamma}^k + \Gamma^k_{ij}\dot{\gamma}^i\dot{\gamma}^j = 0\] 二阶 ODE 系统。初始条件 \(\gamma(0) = p\)，\(\gamma'(0) = v \in T_pM\) 唯一确定测地线。 <strong>指数映射</strong>：\(\exp_p: T_pM \supset U \to M\)， \(\exp_p(v) = \gamma_v(1)\)（\(\gamma_v\) 是初始速度 \(v\) 的测地线）。 \(d(\exp_p)_0 = \mathrm{id}_{T_pM}\)（局部微分同胚）。 <strong>测地线的性质</strong>： (1) 保速率：\(|\gamma'(t)|\) 恒定（度量兼容） (2) 等参数：\(\gamma\) 可以用弧长参数化 (3) 局部最短：足够短的测地段是两端点间的最短路径 <strong>Gauss 引理</strong>：\(\exp_p\) 将射线映为径向测地线，且径向方向 正交于测地球面。</p>
+            <h4>1. 测地线方程</h4>
+            <p>\(\gamma: I \to M\) 是测地线 \(\iff\) 协变加速度为零：</p>
+            \[\nabla_{\gamma'}\gamma' = 0 \iff \ddot{\gamma}^k + \Gamma^k_{ij}\dot{\gamma}^i\dot{\gamma}^j = 0\]
+            <p>这是关于 \(\gamma^k(t)\) 的二阶 ODE 系统。初值 \(\gamma(0) = p\)，\(\gamma'(0) = v\) 唯一确定解（存在唯一性定理）。</p>
+
+            <h4>2. 指数映射</h4>
+            <p>定义 \(\exp_p: T_pM \supset U \to M\)，\(\exp_p(v) = \gamma_v(1)\)。性质：\(d(\exp_p)_0 = \mathrm{id}\)（局部微分同胚）。缩放性：\(\exp_p(tv) = \gamma_v(t)\)。</p>
+
+            <h4>3. 测地线的基本性质</h4>
+            <p>(1) 保速率：\(|\gamma'(t)|_g\) 沿测地线恒定（度量兼容性的直接推论）。(2) 局部最短：足够短的测地段是两端点间的最短路径。(3) 重参数化：等速参数化的测地线满足测地线方程。</p>
+
+            <h4>4. Gauss 引理</h4>
+            <p>\(\exp_p\) 将径向方向映为径向测地线，且径向方向始终正交于测地球面 \(\partial B_r(p)\)。等价地：\(g(\partial/\partial r, V) = 0\)（\(V\) 切于测地球面）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 卫星轨道（弯曲时空中的测地线）是广义相对论中自由粒子的轨迹</p>
+            <p><strong>广义相对论中的自由粒子轨迹：</strong>卫星轨道、光线弯曲都是弯曲时空中的测地线。水星近日点进动 \(\Delta\varphi \approx 43''/\text{century}\) 是 Schwarzschild 测地线偏离牛顿轨道的直接结果。</p>
+            <p><strong>流形上的插值与平均：</strong>计算机图形学中，在 SO(3)（旋转群）上两个姿态之间的测地线给出 SLERP（球面线性插值）。黎曼 Fréchet 均值 \(\bar{x} = \arg\min_x \sum d(x, x_i)^2\) 用指数映射迭代求解。</p>
+            <p><strong>惯性导航系统：</strong>惯性导航通过积分加速度来推算位置。在地球曲面上，"无加速运动"对应测地线——大圆航线。指数映射将局部加速度转化为全局位置更新。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^2\)（单位球面）上从 \((\pi/2, 0)\)（赤道上点）出发， 初速 \(v = \partial/\partial\theta\) 的测地线是什么？ 解答：测地线方程（\(\ddot{\theta} + \Gamma^\theta_{\varphi\varphi}\dot{\varphi}^2 = 0\) 等）。 初始 \(\dot{\varphi} = 0\)，故 \(\ddot{\theta} = 0\)，\(\theta(t) = \pi/2 + t\)， \(\varphi(t) = 0\)。这是通过该点的经线（大圆）。 易错点：球面上所有测地线都是大圆——但不是所有曲线在球面上 最短（只有长度 \(\leq \pi R\) 的测地段是最短的）。</p>
+            <h4>例题：球面上的测地线</h4>
+            <p><strong>题目：</strong>\(S^2\) 上从 \((\pi/2, 0)\)（赤道上点）出发，初速 \(v = \partial_\theta\) 的测地线是什么？</p>
+            <p><strong>第一步 — 建立方程：</strong>测地线方程 \(\ddot{\theta} + \Gamma^\theta_{\varphi\varphi}\dot{\varphi}^2 = 0\)，\(\ddot{\varphi} + 2\Gamma^\varphi_{\theta\varphi}\dot{\theta}\dot{\varphi} = 0\)。</p>
+            <p><strong>第二步 — 代入初值：</strong>\(\dot{\varphi}(0) = 0\)，故 \(\ddot{\theta}(0) = 0\)，\(\ddot{\varphi}(0) = 0\)。由唯一性，\(\varphi(t) \equiv 0\)。</p>
+            <p><strong>第三步 — 求解：</strong>\(\theta(t) = \pi/2 + t\)，这是经线 \(\varphi = 0\) 上的大圆弧。</p>
+            <p><strong>结论：</strong>球面上所有测地线都是大圆。但只有长度 \(\leq \pi\) 的测地段是最短路径——超过半个大圆后，走另一半更短。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为测地线一定是最短路径。<br>✅ 测地线是长度泛函的临界点，不一定是极小值。球面上超过半圆的大圆弧是测地线但非最短。</li>
+              <li>❌ 忘记测地线保速率：对测地线做非等速重参数化后仍称其为测地线。<br>✅ 测地线方程隐含等速条件。非等速曲线满足 \(\nabla_{\gamma'}\gamma' = f\gamma'\)（预测地线），不是测地线。</li>
+              <li>❌ 混淆指数映射的定义域：认为 \(\exp_p\) 总定义在整个 \(T_pM\) 上。<br>✅ 一般只在 \(0\) 的某邻域 \(U \subseteq T_pM\) 上有定义。\(\exp_p\) 定义在全 \(T_pM\) 上 \(\iff\) 流形测地完备（Hopf-Rinow）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -304,35 +369,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>为什么测地线是"最短路径"？这通过变分法证明：测地线是长度泛函 \(L(\gamma)\) 或能量泛函 \(E(\gamma)\) 的临界点。能量泛函在技术上更 方便（它是 \(L^2\) 而非 \(L^1\)，更容易求变分），其临界点方程正是 测地线方程。</p>
+            <ul>
+              <li><strong>变分法的几何体现：</strong>测地线是长度泛函 \(L\) 或能量泛函 \(E\) 的临界点——变分法将"最短路径"问题转化为微分方程。</li>
+              <li><strong>能量更方便：</strong>\(E(\gamma) = \frac{1}{2}\int |\gamma'|^2\, dt\) 是二次泛函（\(L^2\) 范数），比 \(L = \int |\gamma'|\, dt\)（\(L^1\) 范数）更容易求变分。</li>
+              <li><strong>第二变分与稳定性：</strong>\(E\) 的第二变分涉及 Jacobi 场和曲率张量——这是研究测地线是否"真正最短"的数学框架。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>测地线 = 能量泛函的 "Euler-Lagrange 方程"的解。 \(E\) 的第二变分涉及 Jacobi 场和曲率——这是曲率如何影响测地线 稳定性的数学框架。</p>
+            <ul>
+              <li><strong>Euler-Lagrange 方程：</strong>测地线方程是能量泛函 \(E\) 的 Euler-Lagrange 方程，对应 Lagrangian \(\mathcal{L} = \frac{1}{2}g_{ij}\dot{\gamma}^i\dot{\gamma}^j\)。</li>
+              <li><strong>二次型结构：</strong>\(E\) 的第二变分是关于变分场 \(V\) 的二次型，其核空间恰好是 Jacobi 场——曲率何时使第二变分不定，决定了测地线的稳定性。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>能量泛函</strong>：\(E(\gamma) = \frac{1}{2}\int_a^b g(\gamma', \gamma')\,dt\)。 长度泛函：\(L(\gamma) = \int_a^b |\gamma'|\,dt\)。 \(E\) 的临界点（在固定端点的变分下）满足： \[\nabla_{\gamma'}\gamma' = 0 \quad (\text{测地线方程})\] <strong>第一变分</strong>：\(\gamma_s(t)\) 是 \(\gamma = \gamma_0\) 的变分， \(V(t) = \partial_s \gamma_s|_{s=0}\)（变分场）。 \[\frac{d}{ds}\Big|_{s=0} E(\gamma_s) = -\int_a^b g(\nabla_{\gamma'}\gamma', V)\,dt + g(\gamma', V)\Big|_a^b\] 固定端点 \(V(a) = V(b) = 0\)，\(E'(0) = 0 \iff \nabla_{\gamma'}\gamma' = 0\)。 <strong>\(E\) vs \(L\)</strong>：由 Cauchy-Schwarz，\(L(\gamma)^2 \leq 2(b-a)E(\gamma)\)， 等号在等速参数化时成立。\(E\) 的极值点自动等速，因此也是 \(L\) 的极值点。</p>
+            <h4>1. 能量泛函与长度泛函</h4>
+            <p>\(E(\gamma) = \frac{1}{2}\int_a^b g(\gamma', \gamma')\, dt\)，\(L(\gamma) = \int_a^b |\gamma'|_g\, dt\)。由 Cauchy-Schwarz：\(L^2 \leq 2(b-a)E\)，等号当且仅当 \(|\gamma'|\) 为常数。</p>
+
+            <h4>2. 第一变分</h4>
+            <p>\(\gamma_s(t)\) 为固定端点的变分，\(V(t) = \partial_s\gamma_s|_{s=0}\)：</p>
+            \[\frac{d}{ds}\Big|_{s=0} E(\gamma_s) = -\int_a^b g(\nabla_{\gamma'}\gamma', V)\, dt + g(\gamma', V)\Big|_a^b\]
+            <p>固定端点 \(V(a) = V(b) = 0\) 时，\(E'(0) = 0\) 对所有 \(V\) 成立 \(\iff\) \(\nabla_{\gamma'}\gamma' = 0\)（测地线方程）。</p>
+
+            <h4>3. 第二变分</h4>
+            <p>若 \(\gamma\) 是测地线，\(V\) 是正则 Jacobi 场方向的变分场：</p>
+            \[E''(0) = \int_a^b \left[g\!\left(\frac{DV}{dt}, \frac{DV}{dt}\right) - g(R(\gamma', V)\gamma', V)\right] dt\]
+            <p>此二次型的符号由曲率决定：正曲率使第二项为正（趋于不稳定），负曲率使之为负（更稳定）。</p>
+
+            <h4>4. E 与 L 的关系</h4>
+            <p>最小化 \(E\) 的曲线自动等速，因此也最小化 \(L\)。实践中用 \(E\) 代替 \(L\) 做变分更方便：不需处理 \(|\gamma'|\) 在分母中带来的奇异性。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 计算机图形学中的测地线插值（流形上的"直线"插值）</p>
+            <p><strong>计算机图形学中的测地线插值：</strong>在曲面网格上两点之间求测地线（最短路径）用于纹理映射、形变传播。离散测地线算法（如 MMP、Chen-Han）在三角网格上精确展开测地线。</p>
+            <p><strong>有限元方法中的变分原理：</strong>能量泛函的变分结构直接对应有限元弱形式——热传导方程 \(\partial_t u = \Delta_g u\) 的弱解就是能量泛函的梯度流，可在黎曼流形上的三角网格上数值求解。</p>
+            <p><strong>物理中的最小作用量：</strong>经典力学中 Hamilton 原理说粒子运动轨迹使作用量 \(S = \int L\, dt\) 取极值。在弯曲时空中，这归结为测地线方程——自由落体的 Lagrangian 恰好是 \(\frac{1}{2}g_{\mu\nu}\dot{x}^\mu\dot{x}^\nu\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(\mathbb{R}^n\) 中，选 \(\gamma_0(t) = (1-t)p + tq\)（直线）， 变分 \(\gamma_s(t) = \gamma_0(t) + sV(t)\)，\(V(0) = V(1) = 0\)。 验证 \(E'(0) = 0\)。 解答：\(\gamma_0'(t) = q - p\)，\(\nabla_{\gamma_0'}\gamma_0' = 0\) （因 \(\mathbb{R}^n\) 平坦，常速直线是测地线）。 \(E'(0) = -\int_0^1 g(0, V)\,dt = 0\)。✓ 易错点：\(L\) 的变分在非等速参数化时更复杂（含 \(|\gamma'|\) 在分母）， 所以通常用 \(E\) 而非 \(L\)。</p>
+            <h4>例题：欧式空间中的第一变分</h4>
+            <p><strong>题目：</strong>在 \(\mathbb{R}^n\) 中，\(\gamma_0(t) = (1-t)p + tq\)（直线），变分 \(\gamma_s(t) = \gamma_0(t) + sV(t)\)，\(V(0) = V(1) = 0\)。验证 \(E'(0) = 0\)。</p>
+            <p><strong>第一步 — 计算加速度：</strong>\(\gamma_0'(t) = q - p\) 为常向量，\(\nabla_{\gamma_0'}\gamma_0' = 0\)（\(\mathbb{R}^n\) 平坦，常速直线是测地线）。</p>
+            <p><strong>第二步 — 代入公式：</strong>\(E'(0) = -\int_0^1 g(0, V)\, dt = 0\)。✔</p>
+            <p><strong>结论：</strong>\(\mathbb{R}^n\) 中直线段是能量泛函的临界点。由于 \(\mathbb{R}^n\) 曲率为零，第二变分 \(E''(0) = \int |V'|^2\, dt > 0\)——直线段是严格极小值。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对 \(L\) 直接做变分时忘记 \(|\gamma'|\) 在分母中：\(\delta L\) 含 \(1/|\gamma'|\) 项，非等速曲线的公式更复杂。<br>✅ 实践中总是用 \(E\) 做变分。\(E\) 的临界点自动等速，同时也是 \(L\) 的临界点。</li>
+              <li>❌ 认为能量泛函的临界点一定是长度极小值。<br>✅ 临界点 = 测地线，但不一定最短。球面上绕远路的大圆弧是测地线（临界点）但非最短路径。第二变分符号决定极小/鞍点。</li>
+              <li>❌ 混淆 \(E\) 和 \(L\) 的极值关系：以为最小化 \(L\) 等价于最小化 \(E\)。<br>✅ 最小化 \(E\) 的曲线自动等速且最小化 \(L\)。但最小化 \(L\) 的曲线不一定等速——需重参数化。这是 \(E\) 更方便的原因。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -359,35 +458,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>测地线何时可以无限延伸？黎曼流形何时"完备"？Hopf-Rinow 定理 给出了几个等价条件——测地完备性等价于度量完备性（Cauchy 列 收敛），也等价于闭有界集紧致。对完备流形，任意两点之间存在 最短测地线——这是黎曼几何中最基本的存在性定理之一。</p>
+            <ul>
+              <li><strong>根本存在性问题：</strong>测地线何时可以无限延伸？任意两点之间是否存在最短路径？Hopf-Rinow 定理回答了这些黎曼几何中最基本的存在性问题。</li>
+              <li><strong>三种完备性等价：</strong>测地完备性（所有测地线可延伸到 \(\mathbb{R}\)）\(\iff\) 度量完备性（Cauchy 列收敛）\(\iff\) 闭有界集紧致——连接微分几何、分析和拓扑三个层面。</li>
+              <li><strong>不完备 = 奇点：</strong>广义相对论中测地不完备性暗示"奇点"的存在——Penrose-Hawking 奇点定理正是利用了此概念。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Hopf-Rinow 定理连接了微分几何（测地线延伸）、度量空间理论 （完备性）和拓扑（紧致性）三个不同层面的完备性概念。</p>
+            <ul>
+              <li><strong>完备性的统一框架：</strong>Hopf-Rinow 定理将看似不同的概念（ODE 延伸、Cauchy 完备、有界集紧致）统一为等价条件。</li>
+              <li><strong>紧致 vs. 完备：</strong>紧致流形一定完备（有界闭子集 = 自身），但完备不蕴含紧致（如 \(\mathbb{R}^n\)）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Hopf-Rinow 定理</strong>：\((M, g)\) 连通黎曼流形。以下等价： (1) \((M, d_g)\) 作为度量空间完备（Cauchy 列收敛） (2) \(M\) 的闭有界子集是紧致的 (3) \(\exists\, p \in M\)，\(\exp_p\) 定义在整个 \(T_pM\) 上 (4) \(\forall\, p \in M\)，\(\exp_p\) 定义在整个 \(T_pM\) 上 （测地完备：所有测地线可延伸到 \(\mathbb{R}\)） 若以上成立，则 \(\forall\, p, q \in M\)，存在最短测地线 \(\gamma: [0,1] \to M\)，\(\gamma(0) = p\)，\(\gamma(1) = q\)，\(L(\gamma) = d(p,q)\)。 <strong>注意</strong>：(1)-(4) 不蕴含 \(M\) 紧致（如 \(\mathbb{R}^n\) 完备但非紧致）。 但 (2) 说"有界 \(\Rightarrow\) 紧致"——对非紧致流形是因为有界集 本身不是整个 \(M\)。</p>
+            <h4>1. Hopf-Rinow 定理</h4>
+            <p>\((M, g)\) 连通黎曼流形。以下条件等价：</p>
+            <p>(1) \((M, d_g)\) 作为度量空间完备（Cauchy 列收敛）<br>(2) \(M\) 的闭有界子集紧致<br>(3) \(\exists\, p \in M\)，\(\exp_p\) 定义在整个 \(T_pM\) 上<br>(4) \(\forall\, p \in M\)，\(\exp_p\) 定义在整个 \(T_pM\) 上（测地完备）</p>
+
+            <h4>2. 最短测地线的存在</h4>
+            <p>若以上条件成立，则 \(\forall\, p, q \in M\)，存在最短测地线 \(\gamma\) 连接 \(p\) 和 \(q\)，满足 \(L(\gamma) = d_g(p,q)\)。</p>
+
+            <h4>3. 证明思路</h4>
+            <p>(3)\(\Rightarrow\)最短测地线存在：对 \(q \in M\)，设 \(r = d(p,q)\)。在测地球面 \(\partial B_\varepsilon(p)\) 上取使 \(d(\cdot, q)\) 最小的点 \(m\)，沿径向测地线延伸到 \(r\)，利用三角不等式证明终点即 \(q\)。(4)\(\Rightarrow\)(1)：测地完备 \(\Rightarrow\) Cauchy 列 \(\{x_n\}\) 有界，取最短测地线构造极限点。</p>
+
+            <h4>4. 反例：不完备流形</h4>
+            <p>\(M = (0,1)\)（开区间，标准度量）：测地线 \(\gamma(t) = a + vt\) 在有限时间离开 \(M\)，不完备。\(M = \mathbb{R}^2 \setminus \{0\}\)：虽然不完备（Cauchy 列可趋向原点），但任意两点间仍存在连接曲线（正定性保证 infimum 有限）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 广义相对论中测地不完备性暗示"奇点"的存在（Penrose 奇点定理）</p>
+            <p><strong>广义相对论中的奇点定理：</strong>Penrose 奇点定理证明：在合理的能量条件下，黑洞内部时空必然测地不完备——存在有限仿射参数内终止的测地线（"奇点"）。Hawking 定理对宇宙大爆炸做了类似推导。</p>
+            <p><strong>完备流形上的分析：</strong>完备黎曼流形上 Laplacian 本质自伴（Strichartz 定理），热核存在且唯一，Sobolev 不等式成立——大量分析工具依赖完备性假设。</p>
+            <p><strong>度量几何中的 Gromov-Hausdorff 收敛：</strong>完备黎曼流形的序列在 Gromov-Hausdorff 距离下的收敛理论（预紧性定理）是现代黎曼几何的核心工具，完备性保证极限空间的良好性质。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(M = (0, 1)\)（开区间，标准度量）是否测地完备？ 解答：否。测地线 \(\gamma(t) = a + vt\) 可能在有限时间离开 \((0,1)\)。 例如 \(\gamma(0) = 1/2\)，\(\gamma'(0) = 1\)：\(\gamma(t) = 1/2 + t\)， \(t = 1/2\) 时 \(\gamma = 1 \notin (0,1)\)。 也是度量不完备的：\(\{1-1/n\}\) 是 Cauchy 列但不收敛于 \((0,1)\) 中的点。 易错点：\([0,1]\) 不是流形（有边界），\((0,1)\) 是流形但不完备。 \(\mathbb{R}\) 是完备的。</p>
+            <h4>例题：开区间的不完备性</h4>
+            <p><strong>题目：</strong>\(M = (0, 1)\)（标准度量）是否测地完备？</p>
+            <p><strong>第一步 — 测地线分析：</strong>测地线 \(\gamma(t) = a + vt\)。取 \(a = 1/2\)，\(v = 1\)：\(\gamma(t) = 1/2 + t\)，在 \(t = 1/2\) 时 \(\gamma = 1 \notin (0,1)\)。</p>
+            <p><strong>第二步 — Cauchy 列：</strong>\(\{1 - 1/n\}\) 是 Cauchy 列但不收敛于 \((0,1)\) 中的点。✔ 度量不完备。</p>
+            <p><strong>结论：</strong>\((0,1)\) 测地不完备且度量不完备，验证了 Hopf-Rinow 定理的等价性。闭区间 \([0,1]\) 有边界不是流形，\(\mathbb{R}\) 是完备的。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆完备性与紧致性：认为完备流形一定紧致。<br>✅ \(\mathbb{R}^n\) 完备但非紧致。紧致 \(\Rightarrow\) 完备（有界闭子集 = 自身，紧致），但反向不成立。</li>
+              <li>❌ 认为 Hopf-Rinow 保证最短测地线唯一：两点间存在最短测地线但不一定唯一。<br>✅ \(S^n\) 上对径点有无穷条最短测地线（所有经过两极的大圆弧）。</li>
+              <li>❌ 将 Hopf-Rinow 推广到伪黎曼流形（Lorentz 流形）。<br>✅ Hopf-Rinow 定理仅对黎曼流形（正定度量）成立。Lorentz 流形中测地完备不等价于度量完备，需要不同的理论框架。</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -178,35 +178,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如果流形的截面曲率有上界或下界，测地线的行为如何与常曲率空间 比较？Rauch 比较定理说：曲率越大，相邻测地线聚焦越快—— Jacobi 场的长度被常曲率空间中的 Jacobi 场所控制。这是 所有比较几何定理的出发点。</p>
+            <ul>
+              <li><strong>从曲率界到几何估计：</strong>精确计算 Jacobi 场几乎不可能（需要沿测地线积分曲率），但如果知道截面曲率的上/下界，就可以用模型空间（常曲率）的 Jacobi 场给出精确的大小控制。</li>
+              <li><strong>比较几何的发源点：</strong>Rauch 比较是所有后续比较定理（Toponogov、Bishop-Gromov、Laplacian 比较）的技术起点——它在"无穷小"层面建立了曲率与距离的关系。</li>
+              <li><strong>微分球定理的关键：</strong>Rauch 原始动机是证明 \(1/4\)-pinching 球定理：截面曲率满足 \(1/4 < K \leq 1\) 的单连通紧致流形同胚于 \(S^n\)。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>比较几何的核心思想：用简单模型空间（常曲率）作为参照， 通过曲率界控制几何量（距离、体积、角度等）。</p>
+            <ul>
+              <li><strong>Sturm 比较思想：</strong>Jacobi 方程 \(J'' + KJ = 0\) 类比 Sturm-Liouville 方程。曲率扮演"弹性系数"——越大则振荡越快（聚焦更快），越小则增长越快（发散更快）。</li>
+              <li><strong>模型空间参照：</strong>用 \(M_\kappa^n\)（常曲率 \(\kappa\) 空间）中已知的 Jacobi 场 \(\mathrm{sn}_\kappa(t)\) 作为上/下界参照。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Rauch 比较定理</strong>：\(\gamma: [0, L] \to M\) 测地线，\(\tilde{\gamma}: [0, L] \to \tilde{M}\) 对应方向的测地线（\(\tilde{M}\) 是常曲率 \(\kappa\) 空间）。 \(J, \tilde{J}\) 分别是 Jacobi 场，\(J(0) = \tilde{J}(0) = 0\)， \(|J'(0)| = |\tilde{J}'(0)|\)。 若 \(K_M \leq \kappa\)（\(M\) 的截面曲率 \(\leq\) 模型曲率）， 则（在无共轭点范围内）： \[|J(t)| \geq |\tilde{J}(t)|, \quad \forall t \in [0, L]\] （\(M\) 中测地线比模型中发散得更快。） 若 \(K_M \geq \kappa\)：不等号反向，\(|J(t)| \leq |\tilde{J}(t)|\) （\(M\) 中测地线聚焦更快）。 <strong>证明要点</strong>：比较 \(f(t) = |J(t)|^2\) 和 \(\tilde{f}(t) = |\tilde{J}(t)|^2\) 的 微分不等式（Sturm 比较定理）。</p>
+            <h4>1. 模型 Jacobi 场</h4>
+            <p>常曲率 \(\kappa\) 空间中，\(J(0) = 0\), \(|J'(0)| = 1\) 的正交 Jacobi 场：</p>
+            \[\mathrm{sn}_\kappa(t) = \begin{cases} \sin(\sqrt{\kappa}\, t)/\sqrt{\kappa} & \kappa > 0 \\ t & \kappa = 0 \\ \sinh(\sqrt{|\kappa|}\, t)/\sqrt{|\kappa|} & \kappa < 0 \end{cases}\]
+
+            <h4>2. Rauch 比较定理</h4>
+            <p>\(\gamma\) 上截面曲率 \(K \leq \kappa\)（上界），\(J(0) = 0\)。在第一共轭点之前：</p>
+            \[|J(t)| \geq \mathrm{sn}_\kappa(t)\, |J'(0)|\]
+            <p>反之 \(K \geq \kappa\)（下界）：\(|J(t)| \leq \mathrm{sn}_\kappa(t)\, |J'(0)|\)。</p>
+
+            <h4>3. 证明核心</h4>
+            <p>令 \(f(t) = |J(t)|/\mathrm{sn}_\kappa(t)\)。利用 Jacobi 方程和 \(K \leq \kappa\) 的假设，证 \(f'(t) \geq 0\)（\(f\) 单调递增）。关键不等式来自 Sturm 比较引理。\(f(0^+) = |J'(0)|/1 = |J'(0)|\)，所以 \(f(t) \geq |J'(0)|\)。</p>
+
+            <h4>4. 共轭点估计</h4>
+            <p>\(K \leq \kappa\)：\(M\) 中第一共轭点不早于模型空间（\(\geq \pi/\sqrt{\kappa}\) 当 \(\kappa > 0\)）。\(K \geq \kappa > 0\)：第一共轭点不晚于 \(\pi/\sqrt{\kappa}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Rauch 是 Toponogov 和 Bishop-Gromov 比较定理的基础</p>
+            <p><strong>微分球定理：</strong>Rauch 原始应用：\(1/4 < \delta \leq K \leq 1\) 的单连通紧致流形同胚于 \(S^n\)。Rauch 比较控制了 \(\exp_p\) 的失真程度，证明流形"足够像球面"可以构造同胚。Brendle-Schoen (2009) 用 Ricci 流将 pinching 常数降到 \(1/4\) 并得到微分同胚。</p>
+            <p><strong>Jacobi 场与体积估计：</strong>Rauch 比较直接给出面积元/体积元的控制 \(\det(J_1, \ldots, J_{n-1}) \lessgtr \mathrm{sn}_\kappa^{n-1}\)，这是推导 Bishop 体积比较的中间步骤。</p>
+            <p><strong>距离函数的 Hessian 估计：</strong>\(\mathrm{Hess}\, d(p, \cdot)\) 与 Jacobi 场直接相关。Rauch 比较给出 \(\mathrm{Hess}\, d\) 的上下界（Laplacian 比较定理的基础），广泛用于 PDE 和几何分析中。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\((M^2, g)\)，\(K \leq 0\)。从 \(p\) 出发的两条测地线初始夹角 \(\alpha\)。 距离 \(p\) 为 \(t\) 处两条测地线的距离 \(d(t)\) 与 \(\mathbb{R}^2\) 相比如何？ 解答：\(\mathbb{R}^2\) 中 \(\tilde{d}(t) \approx t\alpha\)（小 \(t\) 时）。 \(K \leq 0 = \kappa\)，Rauch 比较：\(|J(t)| \geq |\tilde{J}(t)|\)。 所以 \(d(t) \geq t\alpha\)——负曲率空间中测地线发散更快。 易错点：这是"小范围"行为。全局上负曲率空间的测地线可能再次靠近 （如果流形紧致且基本群非平凡）。</p>
+            <h4>例题：负曲率空间中测地线发散</h4>
+            <p><strong>题目：</strong>\((M^2, g)\)，\(K \leq 0\)。从 \(p\) 出发的两条测地线初始夹角 \(\alpha\)，比较距离 \(t\) 处间距与 \(\mathbb{R}^2\) 情形。</p>
+            <p><strong>第一步 — 模型空间：</strong>\(\kappa = 0\)，\(\mathrm{sn}_0(t) = t\)。\(\mathbb{R}^2\) 中两测地线在距离 \(t\) 处间距 \(\approx t\alpha\)（小角近似）。</p>
+            <p><strong>第二步 — Rauch 比较：</strong>\(K \leq 0 = \kappa\) ⟹ \(|J(t)| \geq t\, |J'(0)|\)。</p>
+            <p><strong>第三步 — 结论：</strong>\(d(t) \geq t\alpha\)——负曲率空间中相邻测地线发散速度不低于欧氏空间。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆曲率上界/下界对应的不等号方向。<br>✅ 记忆口诀："曲率越大 → 聚焦越快 → Jacobi 场越小"。\(K \geq \kappa\) ⟹ \(|J| \leq \mathrm{sn}_\kappa\)；\(K \leq \kappa\) ⟹ \(|J| \geq \mathrm{sn}_\kappa\)。</li>
+              <li>❌ 忘记"在第一共轭点之前"的限制。<br>✅ Rauch 比较仅在 \(\gamma\) 和模型测地线都没有共轭点的区间上成立。超过共轭点后 Jacobi 场可能再次归零，不等式失效。</li>
+              <li>❌ 将截面曲率界直接当作 Ricci 曲率界使用。<br>✅ Rauch 需要截面曲率的双边界（每个 2-平面），不仅是 Ricci（平均值）。Bishop-Gromov 才是用 Ricci 下界的版本。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -254,35 +287,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Rauch 比较作用在"无穷小"层面（Jacobi 场），Toponogov 比较定理 则是"全局"版本——它比较的是测地三角形的边长和角度。曲率 下界 \(K \geq \kappa\) 意味着三角形"更胖"（角度更大），曲率上界 意味着三角形"更瘦"。这是整体几何学的强大工具。</p>
+            <ul>
+              <li><strong>从无穷小到全局：</strong>Rauch 比较在 Jacobi 场（无穷小层面）工作，Toponogov 将其推广到有限尺度的测地三角形——比较边长和角度的全局定理。</li>
+              <li><strong>Alexandrov 几何的定义基石：</strong>Toponogov 不等式被完全用度量语言表述（无需微分结构），成为 Alexandrov 空间中"曲率界"的定义。这使得比较几何从光滑流形推广到度量空间。</li>
+              <li><strong>强大的应用工具：</strong>Soul 定理、Gromov 紧致性定理、Cheeger-Gromoll 分裂定理等都以 Toponogov 比较为主要技术手段。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Toponogov = Rauch 的全局化。它通过比较三角形将曲率信息 转化为距离估计——这是 Alexandrov 几何的起点。</p>
+            <ul>
+              <li><strong>三角形比较：</strong>构造模型空间中"对应三角形"（边长相同），比较角度。\(K \geq \kappa\) → 三角形"更胖"（角更小或等于模型），\(K \leq \kappa\) → "更瘦"。</li>
+              <li><strong>铰链版本：</strong>给定两边和夹角，比较第三边。这是实际应用中更常使用的形式。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Toponogov 比较定理</strong>（三角形版本）： \((M, g)\) 完备，\(K \geq \kappa\)。\(\Delta pqr\) 为 \(M\) 中的测地三角形。 \(\tilde{\Delta}\tilde{p}\tilde{q}\tilde{r}\) 为常曲率 \(\kappa\) 空间中 对应边长相同的三角形。 \[\angle_p \leq \tilde{\angle}_{\tilde{p}}, \quad \angle_q \leq \tilde{\angle}_{\tilde{q}}, \quad \angle_r \leq \tilde{\angle}_{\tilde{r}}\] （\(K \geq \kappa\) 时角度比模型空间小或相等。） <strong>铰链版本</strong>：给定两边 \(a, b\) 和夹角 \(\alpha\)。 \(K \geq \kappa\)：\(c \leq \tilde{c}\)（第三边更短或相等）。 \(K \leq \kappa\)：\(c \geq \tilde{c}\)。 <strong>推论</strong>：\(K \geq 0\) 时，与 \(\mathbb{R}^n\)（\(\kappa = 0\)）比较： 三角形地不等式取"胖"方向。</p>
+            <h4>1. 三角形版本</h4>
+            <p>\((M, g)\) 完备，\(K \geq \kappa\)。\(\Delta pqr\) 为 \(M\) 中测地三角形，\(\tilde{\Delta}\tilde{p}\tilde{q}\tilde{r}\) 为 \(M_\kappa^n\) 中边长相同的三角形。则：</p>
+            \[\angle_p \leq \tilde{\angle}_{\tilde{p}}, \quad \angle_q \leq \tilde{\angle}_{\tilde{q}}, \quad \angle_r \leq \tilde{\angle}_{\tilde{r}}\]
+
+            <h4>2. 铰链版本</h4>
+            <p>给定两边 \(a, b\) 和夹角 \(\alpha\)。\(K \geq \kappa\)：第三边 \(c \leq \tilde{c}\)（第三边更短）；\(K \leq \kappa\)：\(c \geq \tilde{c}\)（第三边更长）。</p>
+
+            <h4>3. 证明方法</h4>
+            <p>从 Rauch 比较出发，通过分段逼近将局部 Jacobi 场估计推广到有限尺度。完备性保证了最短测地线的存在（Hopf-Rinow）。关键步骤：在 \(K \geq \kappa\) 下，距离函数的凸性/凹性性质。</p>
+
+            <h4>4. \(K \geq 0\) 特例</h4>
+            <p>与 \(\mathbb{R}^n\) 比较：\(c^2 \leq a^2 + b^2 - 2ab\cos\alpha\)（余弦律反向不等式）。等号当且仅当三角形被包含在一个平坦全测地子流形中。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Alexandrov 空间（度量空间中的曲率界）用 Toponogov 的不等式作为定义</p>
+            <p><strong>Alexandrov 空间与度量几何：</strong>Toponogov 不等式用纯度量语言重新表述为 CAT(\(\kappa\)) 条件（upper bound）或 CBB(\(\kappa\)) 条件（lower bound），定义了 Alexandrov 空间的曲率界。这使得比较几何对奇异空间（如orbifold、Gromov-Hausdorff 极限）也适用。</p>
+            <p><strong>Soul 定理与非紧流形结构：</strong>Cheeger-Gromoll Soul 定理：完备非紧 \(K \geq 0\) 流形微分同胚于其 soul（紧致全测地子流形）的法丛。证明的关键技术是 Toponogov 比较控制测地线的行为。</p>
+            <p><strong>分裂定理：</strong>Cheeger-Gromoll 分裂定理：完备 \(\mathrm{Ric} \geq 0\) 流形含一条直线（两个方向无穷延伸的测地线）则等距分裂 \(M \cong N \times \mathbb{R}\)。Toponogov 比较提供了 Busemann 函数凸性的基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^2(1)\)（\(K = 1\)）上等边测地三角形，边长 \(a = \pi/3\)。 求每个角 \(\alpha\)。 解答：球面余弦律：\(\cos a = \cos^2 a + \sin^2 a \cos \alpha\)， \(\cos(\pi/3) = \cos^2(\pi/3) + \sin^2(\pi/3)\cos\alpha\)， \(1/2 = 1/4 + (3/4)\cos\alpha\)，\(\cos\alpha = 1/3\)， \(\alpha = \arccos(1/3) \approx 70.5°\)。 \(\mathbb{R}^2\) 中等边三角形每角 \(60°\)。\(70.5° > 60°\)（更胖），符合 \(K > 0\)。 易错点：球面余弦律不同于欧式余弦律——别直接用欧式公式。</p>
+            <h4>例题：球面三角形角度</h4>
+            <p><strong>题目：</strong>\(S^2(1)\)（\(K = 1\)）上等边测地三角形，边长 \(a = \pi/3\)，求每个角 \(\alpha\)。</p>
+            <p><strong>第一步 — 球面余弦律：</strong>\(\cos a = \cos^2 a + \sin^2 a \cos\alpha\)。</p>
+            <p><strong>第二步 — 代入：</strong>\(\cos(\pi/3) = \cos^2(\pi/3) + \sin^2(\pi/3)\cos\alpha\) ⟹ \(1/2 = 1/4 + (3/4)\cos\alpha\)。</p>
+            <p><strong>第三步 — 求解：</strong>\(\cos\alpha = 1/3\)，\(\alpha = \arccos(1/3) \approx 70.5°\)。比较 \(\mathbb{R}^2\) 中等边三角形 \(60°\)，确认 \(70.5° > 60°\)——正曲率三角形"更胖"。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 在球面上使用欧氏余弦律 \(c^2 = a^2 + b^2 - 2ab\cos\gamma\)。<br>✅ 球面余弦律：\(\cos c = \cos a\cos b + \sin a\sin b\cos\gamma\)。双曲余弦律类似但用 \(\cosh\)。</li>
+              <li>❌ 混淆 \(K \geq \kappa\) 和 \(K \leq \kappa\) 时角度/边长的比较方向。<br>✅ 记忆："\(K \geq \kappa\) → 聚焦更快 → 三角形第三边更短 → 对角更小"。铰链版本的不等号方向与角度版本一致。</li>
+              <li>❌ 认为 Toponogov 对任意曲面片成立。<br>✅ 需要完备性（保证最短测地线存在），且 \(\kappa > 0\) 时三角形周长需满足约束 \(< 2\pi/\sqrt{\kappa}\)（否则模型三角形不存在）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -330,35 +394,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Ricci 曲率下界如何影响测地球的体积？Bishop-Gromov 定理说： 如果 \(\mathrm{Ric} \geq (n-1)\kappa\)，则测地球 \(B(p,r)\) 的体积 不超过常曲率 \(\kappa\) 空间中同半径球的体积——且体积比 \(\mathrm{Vol}(B(p,r))/V_\kappa(r)\) 关于 \(r\) 单调递减。这是 Gromov 预紧性定理和几何分析中大量结果的基础。</p>
+            <ul>
+              <li><strong>Ricci 曲率的体积效应：</strong>Rauch/Toponogov 需要截面曲率界，但许多应用（如 Einstein 方程、Ricci 流）中只有 Ricci 曲率界。Bishop-Gromov 定理仅需 Ricci 下界即可控制测地球的体积增长。</li>
+              <li><strong>收敛理论的基础：</strong>Gromov 预紧性定理（Ricci 下界 + 直径上界 → 度量空间收敛）直接依赖于 Bishop-Gromov 体积比较的加倍不等式。这是黎曼几何收敛理论的技术核心。</li>
+              <li><strong>体积比单调性：</strong>不仅给出体积上界，还证明体积比 \(\mathrm{Vol}(B(p,r))/V_\kappa(r)\) 关于 \(r\) 单调递减——这个精细的单调性在几何分析中极为关键。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Ricci 曲率 \(\geq (n-1)\kappa\) 控制体积增长率——比较几何从 "线性"（Jacobi 场/距离）推广到"体积"层面。</p>
+            <ul>
+              <li><strong>Jacobi 场到体积：</strong>体积元 = Jacobi 场行列式乘角度元。Rauch 比较控制每个 Jacobi 场，但体积只需控制行列式——这正是 Ricci 曲率（= Jacobi 场增长率的迹）的角色。</li>
+              <li><strong>加倍性质：</strong>单调性直接蕴含加倍不等式 \(\mathrm{Vol}(B(p,2r)) \leq C\, \mathrm{Vol}(B(p,r))\)——这是度量测度空间分析的基础公理之一。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Bishop 不等式</strong>：\(\mathrm{Ric} \geq (n-1)\kappa\)， \[\mathrm{Vol}(B(p,r)) \leq V_\kappa^n(r)\] \(V_\kappa^n(r)\) 是 \(n\) 维常曲率 \(\kappa\) 空间中半径 \(r\) 球的体积。 <strong>Gromov 体积比较（单调性）</strong>： \[\frac{\mathrm{Vol}(B(p, r))}{V_\kappa^n(r)} \text{ 关于 } r \text{ 单调递减}\] 且 \(\lim_{r \to 0} = 1\)。 <strong>推论</strong>： - <strong>加倍不等式</strong>：\(\mathrm{Vol}(B(p, 2r)) \leq C \cdot \mathrm{Vol}(B(p, r))\)（\(C\) 依赖于 \(n, \kappa\)） - <strong>有限基本群</strong>（\(\kappa > 0\)）：\(\mathrm{Vol}(M)\) 有限 \(\Rightarrow\) \(M\) 紧致 <strong>\(\kappa = 0\) 特例</strong>：\(\mathrm{Ric} \geq 0\)， \(\mathrm{Vol}(B(p,r)) \leq \omega_n r^n\)（\(\omega_n\) = \(\mathbb{R}^n\) 中单位球体积）。</p>
+            <h4>1. Bishop 不等式</h4>
+            <p>\(\mathrm{Ric} \geq (n-1)\kappa\)，则测地球体积有上界：</p>
+            \[\mathrm{Vol}(B(p, r)) \leq V_\kappa^n(r)\]
+            <p>其中 \(V_\kappa^n(r) = n\omega_n \int_0^r \mathrm{sn}_\kappa(t)^{n-1}\, dt\) 是 \(M_\kappa^n\) 中半径 \(r\) 球的体积。</p>
+
+            <h4>2. Gromov 体积比单调性</h4>
+            \[\frac{\mathrm{Vol}(B(p, r))}{V_\kappa^n(r)} \text{ 关于 } r \text{ 单调递减，} \quad \lim_{r\to 0^+} = 1\]
+
+            <h4>3. 证明核心</h4>
+            <p>法坐标中体积元 \(\theta(r, \xi) = \det(J_1, \ldots, J_{n-1})\)。Ricci 曲率下界通过 Jacobi 方程给出 \((\theta'/\theta)' \leq -\mathrm{Ric}(\gamma', \gamma')/(n-1)\)。与模型空间对比 \(\tilde{\theta} = \mathrm{sn}_\kappa^{n-1}\)，得 \(\theta/\tilde{\theta}\) 单调递减。对角度积分得体积比单调性。</p>
+
+            <h4>4. 重要推论</h4>
+            <p>加倍不等式：\(\mathrm{Vol}(B(p, 2r)) \leq 2^n C(n,\kappa)\, \mathrm{Vol}(B(p, r))\)。</p>
+            <p>\(\kappa = 0\) 特例：\(\mathrm{Ric} \geq 0\) ⟹ \(\mathrm{Vol}(B(p,r)) \leq \omega_n r^n\)（多项式增长）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Gromov 预紧性定理（Ricci 下界 + 直径上界 \(\Rightarrow\) 度量空间的紧致序列有收敛子列）</p>
+            <p><strong>Gromov 预紧性定理：</strong>具有 \(\mathrm{Ric} \geq (n-1)\kappa\) 和 \(\mathrm{diam} \leq D\) 的 \(n\) 维黎曼流形序列，在 Gromov-Hausdorff 意义下有收敛子列。证明的关键：Bishop-Gromov 给出均匀的覆盖数估计（\(\varepsilon\)-网的有限性）。这开启了黎曼流形的"极限理论"。</p>
+            <p><strong>Cheeger-Colding 理论：</strong>在 Gromov 预紧性的基础上，Cheeger-Colding 研究了 Ricci 曲率下界流形的极限空间结构——证明极限空间在"几乎处处"点是欧氏的（正则-奇异分解）。Bishop-Gromov 体积比较是此理论的核心技术。</p>
+            <p><strong>Perelman 的 Ricci 流：</strong>Perelman 在 Ricci 流的单调性公式中使用了 Bishop-Gromov 型体积比较思想。\(\mathcal{W}\)-熵的单调性和非塌缩估计（\(\kappa\)-noncollapsing）都与体积比较密切相关。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^3(1)\)（\(\mathrm{Ric} = 2\)，即 \(\kappa = 1\)）。 \(V_1^3(r)\) = \(S^3(1)\) 中半径 \(r\) 球的体积。 求 \(\mathrm{Vol}(S^3(1))\) 并验证 Bishop-Gromov。 解答：\(\mathrm{Vol}(S^3(1)) = 2\pi^2\)。 \(V_1^3(\pi) = \mathrm{Vol}(S^3(1)) = 2\pi^2\)（半径 \(\pi\) 覆盖整个球面）。 \(\mathrm{Vol}(B(p, r)) / V_1^3(r) = 1\)（常数，因为 \(S^3\) 本身是模型空间）。 单调递减退化为常数——等号情形。 易错点：Bishop-Gromov 中 \(V_\kappa^n(r)\) 是模型空间的体积，不是欧式体积。</p>
+            <h4>例题：球面体积比较的等号</h4>
+            <p><strong>题目：</strong>\(S^3(1)\)（\(\mathrm{Ric} = 2\)，\(\kappa = 1\)），验证 Bishop-Gromov 的体积比为常数。</p>
+            <p><strong>第一步 — 模型空间：</strong>\(S^3(1)\) 本身就是 \(\kappa = 1\) 的模型空间，所以 \(\mathrm{Vol}(B(p,r)) = V_1^3(r)\)。</p>
+            <p><strong>第二步 — 体积比：</strong>\(\mathrm{Vol}(B(p,r))/V_1^3(r) = 1\)（常数），确认单调递减退化为常数——等号情形。</p>
+            <p><strong>第三步 — 验证总体积：</strong>\(\mathrm{Vol}(S^3(1)) = 2\pi^2\)。\(V_1^3(\pi) = 2\pi^2\)（半径 \(\pi\) 覆盖整个球面）。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 将 \(V_\kappa^n(r)\) 当作欧氏体积 \(\omega_n r^n\)。<br>✅ \(V_\kappa^n(r)\) 是常曲率 \(\kappa\) 空间中的体积。\(\kappa > 0\) 时 \(V_\kappa < \omega_n r^n\)；\(\kappa < 0\) 时 \(V_\kappa > \omega_n r^n\)。只有 \(\kappa = 0\) 时才与欧氏一致。</li>
+              <li>❌ 认为 Bishop-Gromov 给出体积下界。<br>✅ 它只给出上界（\(\mathrm{Vol} \leq V_\kappa\)）。体积下界需要额外条件（如非塌缩 noncollapsing 假设或截面曲率双边界）。</li>
+              <li>❌ 认为体积比单调性在 \(r \to \infty\) 时体积比趋于零。<br>✅ 单调递减且 \(\geq 0\)，所以有极限 \(\geq 0\)。\(\kappa > 0\) 时流形紧致，\(r\) 有上界。\(\kappa \leq 0\) 时极限 \(> 0\) 等价于"最大体积增长"（如 \(\mathbb{R}^n\)）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -385,35 +482,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>正截面曲率对流形拓扑的约束极为强烈。Synge 定理说：偶数维 紧致正曲率流形是单连通的！这是纯粹的曲率-拓扑联系： 通过第二变分论证闭测地线可以"缩短"来得到矛盾。</p>
+            <ul>
+              <li><strong>纯曲率的拓扑结论：</strong>Synge 定理给出了最纯粹的"曲率→拓扑"结果之一：偶数维紧致定向正曲率流形必须单连通。无需任何额外假设（完备性由紧致自动满足）。</li>
+              <li><strong>维度的奇偶性：</strong>奇偶数维正曲率流形有完全不同的拓扑约束。偶维→单连通；奇维→可定向。这种维度依赖性来自正交群 \(SO(n-1)\) 在奇偶维下的不同代数性质。</li>
+              <li><strong>正曲率流形的分类问题：</strong>哪些流形容许正截面曲率度量？已知实例极少（\(S^n, \mathbb{C}P^n, \mathbb{H}P^n, Ca P^2\) 及若干齐性空间）。Synge 是排除候选流形的重要障碍。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Synge 的关键观察：正曲率使"平行移动绕一圈"后产生旋转， 这个旋转可以用来"缩短"闭测地线。</p>
+            <ul>
+              <li><strong>第二变分+代数论证：</strong>取最短非可缩闭测地线，沿其平行移动正交场。偶维时正交补空间是奇维→ \(SO\) 作用保证周期性平行场存在→用它做变分使能量减小→矛盾。</li>
+              <li><strong>和乐群的约束：</strong>另一种视角：正曲率迫使和乐群"旋转"得快，使得闭测地线上的平行移动不能保持所有方向——但奇维正交变换有不动方向。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Synge 定理</strong>：\(M^n\) 紧致定向，\(K > 0\)。 (1) \(n\) 偶数 \(\Rightarrow\) \(M\) 单连通 (2) \(n\) 奇数 \(\Rightarrow\) \(M\) 可定向 <strong>证明思路（\(n\) 偶数）</strong>：若 \(\pi_1(M) \neq 0\)，取最短非可缩 闭测地线 \(\gamma\)。沿 \(\gamma\) 平行移动一个正交向量场 \(E(t)\)。 \(n\) 偶数 \(\Rightarrow\) \(\gamma\) 正交补空间是奇数维 \(\Rightarrow\) 平行移动后 \(E\) 被保定向的正交变换作用——奇数维正交变换 有不动方向 \(\Rightarrow\) 存在 \(E(0) = E(L)\)（周期性）。 用 \(E\) 做第二变分：\(E''(0) = -\int K(\gamma', E)|\gamma'|^2 dt < 0\) （\(K > 0\)，\(E\) 平行 \(\Rightarrow\) 没有 \(D^2E\) 项）。 \(\gamma\) 不是能量最小——矛盾。 <strong>推论</strong>：\(S^{2n}\) 上 \(K > 0\) \(\Rightarrow\) 单连通（\(S^{2n}\) 本身当然单连通）。 偶数维紧致正曲率流形 \(\cong S^n\) 或 \(\cong \mathbb{C}P^{n/2}\)（\(1/4\)-pinching 条件下）。</p>
+            <h4>1. 定理陈述</h4>
+            <p>\(M^n\) 紧致定向，\(K > 0\)。则：</p>
+            <p>(1) \(n\) 偶数 ⟹ \(M\) 单连通（\(\pi_1 = 0\)）。</p>
+            <p>(2) \(n\) 奇数 ⟹ \(M\) 可定向。</p>
+
+            <h4>2. 证明（偶维情形）</h4>
+            <p>反证：设 \(\pi_1(M) \neq 0\)，取非平凡自由同伦类中最短闭测地线 \(\gamma : [0, L] \to M\)。</p>
+            <p>沿 \(\gamma\) 平行移动 \(\gamma'\) 的正交补 \((\gamma')^\perp\)：和乐算子 \(P \in SO(n-1)\)（定向 + 闭曲线）。\(n\) 偶数 ⟹ \(n-1\) 奇数 ⟹ \(\det P = 1\)、\(P \in SO(\text{奇数})\) ⟹ \(P\) 有特征值 1 的不动向量 \(w\)。</p>
+            <p>令 \(E(t)\) 是沿 \(\gamma\) 平行移动的单位正交场，\(E(0) = E(L) = w\)（周期性）。变分场 \(V(t) = \sin(\pi t/L)\, E(t)\)：</p>
+            \[E''(0) = -\int_0^L K(\gamma', E)\, \sin^2(\pi t/L)\, dt < 0\]
+            <p>因此 \(\gamma\) 不是能量极小——矛盾于"最短"假设。</p>
+
+            <h4>3. 奇维情形</h4>
+            <p>类似论证：若 \(M\) 不可定向，取最短翻转定向的闭曲线。平行移动算子 \(P \in O(n-1)\) 且 \(\det P = -1\)（翻转定向）。\(n-1\) 偶数 ⟹ \(P\) 有特征值 \(-1\)... 但论证给出的变分仍使能量减小。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Synge 排除了 \(K > 0\) 的偶维紧致流形有非平凡基本群的可能性</p>
+            <p><strong>正曲率流形的分类障碍：</strong>Synge 立即排除了许多偶维流形容许正曲率度量：例如 \(T^{2n}\)（\(\pi_1 = \mathbb{Z}^{2n}\) 非平凡）、\(\Sigma_g \times \Sigma_h\)（亏格 \(> 0\)）等。这大幅缩小了正曲率流形分类的候选范围。</p>
+            <p><strong>微分球定理的前奏：</strong>Synge 保证偶维 \(K > 0\) 流形单连通；结合 Bonnet-Myers（紧致 + \(|\pi_1| <\infty\)），以及 Rauch-Toponogov 比较，最终推导出 \(1/4\)-pinching 球定理：\(1/4 < K \leq 1\) 的单连通紧致流形同胚于 \(S^n\)。</p>
+            <p><strong>Frankel 定理：</strong>Synge 思想的推广——Frankel 定理：\(K > 0\) 的紧致流形中两个全测地子流形维度之和 \(\geq n\) 则必相交。证明同样用正曲率下平行场的第二变分论证。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\mathbb{C}P^2\) 是 4 维紧致正曲率流形。\(\pi_1(\mathbb{C}P^2) = ?\) 解答：Synge 定理：\(\dim = 4\)（偶数），\(K > 0\)（Fubini-Study 度量， \(K \in [1/4, 1]\)）。 \(\Rightarrow\) \(\mathbb{C}P^2\) 单连通，\(\pi_1 = 0\)。✓ 易错点：\(\mathbb{R}P^3\)（3 维，\(K > 0\)）的 \(\pi_1 = \mathbb{Z}/2\)—— 奇数维不保证单连通。Synge 仅给出"可定向"。</p>
+            <h4>例题：\(\mathbb{C}P^2\) 的基本群</h4>
+            <p><strong>题目：</strong>\(\mathbb{C}P^2\) 是 4 维紧致正曲率（Fubini-Study 度量），求 \(\pi_1\)。</p>
+            <p><strong>第一步 — 条件验证：</strong>\(\dim = 4\)（偶数），\(K \in [1/4, 1] > 0\)（Fubini-Study），紧致定向。</p>
+            <p><strong>第二步 — Synge 定理：</strong>偶维 + 紧致 + 定向 + \(K > 0\) ⟹ 单连通。</p>
+            <p><strong>第三步 — 结论：</strong>\(\pi_1(\mathbb{C}P^2) = 0\)。✔（直接验证：\(\mathbb{C}P^2 = S^5/S^1\)，长正合序列也给出 \(\pi_1 = 0\)。）</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 对奇维流形应用"单连通"结论。\(\mathbb{R}P^3\)（3 维，\(K = 1\)）有 \(\pi_1 = \mathbb{Z}_2\)。<br>✅ Synge 奇维版本只给出"可定向"。\(\mathbb{R}P^3\) 可定向，不矛盾。单连通仅在偶维保证。</li>
+              <li>❌ 认为 Synge 定理对 Ricci 曲率下界也成立。<br>✅ Synge 需要截面曲率 \(K > 0\)（严格），不仅是 Ricci。存在 \(\mathrm{Ric} > 0\) 但 \(K\) 可负的流形——Synge 不适用。</li>
+              <li>❌ 忘记"定向"条件在偶维情形中的作用。<br>✅ 定向保证平行移动算子 \(P \in SO(n-1)\)（而非 \(O(n-1)\)）。不可定向的偶维 \(K > 0\) 流形不满足 Synge 的单连通结论（万有覆叠是双覆叠，仍单连通）。</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -178,35 +178,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>曲率是黎曼几何的核心概念——它量化空间的"弯曲程度"。Riemann 曲率张量 \(R\) 是一个 \((1,3)\) 类型张量，完全编码了空间的内在曲率信息。 它衡量的是平行移动的路径依赖性：沿一个封闭小回路平行移动向量， 回来后向量旋转了——旋转量正比于曲率。</p>
+            <ul>
+              <li><strong>弯曲的完整度量：</strong>Riemann 曲率张量 \(R\) 完全编码了黎曼流形的内在弯曲信息——平坦空间 \(\iff\) \(R \equiv 0\)。</li>
+              <li><strong>平行搬运的路径依赖性：</strong>沿封闭小回路平行搬运向量，回来后向量发生旋转——旋转量正比于曲率，这是曲率最直观的几何意义。</li>
+              <li><strong>所有曲率的源头：</strong>截面曲率、Ricci 曲率、标量曲率都由 \(R\) 导出。\(R\) 的对称性将 \(n^4\) 个分量压缩到 \(n^2(n^2-1)/12\) 个独立分量。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(R(X,Y)Z\) 测量 \(\nabla_X\) 和 \(\nabla_Y\) 的"不可交换程度"—— 是联络的"二阶障碍"。</p>
+            <ul>
+              <li><strong>不可交换性的度量：</strong>\(R(X,Y)Z = \nabla_X\nabla_Y Z - \nabla_Y\nabla_X Z - \nabla_{[X,Y]}Z\) 测量协变微分的"不可交换程度"。</li>
+              <li><strong>联络的二阶障碍：</strong>一阶障碍（挠率）被 Levi-Civita 条件消除，曲率是剩余的二阶障碍——无法通过坐标变换消去。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>： \[R(X,Y)Z = \nabla_X\nabla_Y Z - \nabla_Y\nabla_X Z - \nabla_{[X,Y]}Z\] 坐标中：\(R^l{}_{kij} = \partial_i\Gamma^l_{jk} - \partial_j\Gamma^l_{ik} + \Gamma^l_{im}\Gamma^m_{jk} - \Gamma^l_{jm}\Gamma^m_{ik}\)。 <strong>对称性</strong>（Levi-Civita 联络）： (1) \(R_{ijkl} = -R_{jikl} = -R_{ijlk}\) (2) \(R_{ijkl} = R_{klij}\)（对称对） (3) 第一 Bianchi：\(R_{ijkl} + R_{iklj} + R_{iljk} = 0\) (4) 第二 Bianchi：\(\nabla_m R_{ijkl} + \nabla_i R_{jmkl} + \nabla_j R_{mikl} = 0\) 独立分量数：\(n^2(n^2-1)/12\)（\(n=2\) 时 \(1\) 个，\(n=3\) 时 \(6\) 个，\(n=4\) 时 \(20\) 个）。 \[n = 2: \quad R_{1212} \text{ 完全确定 } R\]</p>
+            <h4>1. 定义与坐标表达</h4>
+            <p>Riemann 曲率张量定义为：</p>
+            \[R(X,Y)Z = \nabla_X\nabla_Y Z - \nabla_Y\nabla_X Z - \nabla_{[X,Y]}Z\]
+            <p>坐标中：\(R^l{}_{kij} = \partial_i\Gamma^l_{jk} - \partial_j\Gamma^l_{ik} + \Gamma^l_{im}\Gamma^m_{jk} - \Gamma^l_{jm}\Gamma^m_{ik}\)。</p>
+
+            <h4>2. 对称性</h4>
+            <p>(1) 反对称性：\(R_{ijkl} = -R_{jikl} = -R_{ijlk}\)<br>(2) 对称对交换：\(R_{ijkl} = R_{klij}\)<br>(3) 第一 Bianchi 恒等式：\(R_{ijkl} + R_{iklj} + R_{iljk} = 0\)<br>(4) 第二 Bianchi 恒等式：\(\nabla_m R_{ijkl} + \nabla_i R_{jmkl} + \nabla_j R_{mikl} = 0\)</p>
+
+            <h4>3. 独立分量数</h4>
+            <p>对称性将 \(n^4\) 个分量约化为 \(n^2(n^2-1)/12\) 个独立分量。\(n=2\) 时仅 1 个（Gauss 曲率），\(n=3\) 时 6 个，\(n=4\) 时 20 个（恰好是 Einstein 方程的自由度数）。</p>
+
+            <h4>4. 分解理论</h4>
+            <p>Riemann 张量在 \(n \geq 3\) 时分解为三个不可约部分：Weyl 张量 \(W\)（共形不变，无迹部分）+ Ricci 部分 + 标量部分。\(n = 3\) 时 Weyl \(\equiv 0\)，曲率完全由 Ricci 决定。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Einstein 场方程中曲率张量描述引力场</p>
+            <p><strong>Einstein 场方程与引力：</strong>Einstein 方程 \(G_{\mu\nu} + \Lambda g_{\mu\nu} = 8\pi G\, T_{\mu\nu}\) 中 Einstein 张量 \(G = \mathrm{Ric} - \frac{1}{2}Sg\) 直接来自 Riemann 张量的迹。真空中 \(T = 0\)，Ricci 为零但 Weyl 张量可以非零——这描述了引力波和潮汐力。</p>
+            <p><strong>Weyl 张量与引力波：</strong>在 4 维时空中，Weyl 张量的 10 个独立分量完全描述了引力辐射（Petrov 分类）。LIGO 探测到的引力波直接对应 Weyl 张量的时变分量。</p>
+            <p><strong>黎曼曲率在数据科学中的角色：</strong>流形学习中，数据空间的内在曲率影响降维效果。高曲率区域需要更精细的局部近似，曲率估计用于自适应采样和网格细化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^2(R)\)（半径 \(R\)）的曲率张量。 解答：常曲率空间 \(K = 1/R^2\)。 \(R_{ijkl} = K(g_{ik}g_{jl} - g_{il}g_{jk})\)。 \(R_{\theta\varphi\theta\varphi} = K \cdot (g_{\theta\theta}g_{\varphi\varphi} - g_{\theta\varphi}^2) = \frac{1}{R^2} \cdot R^4\sin^2\theta = R^2\sin^2\theta\)。 易错点：指标升降很重要。\(R^\theta{}_{\varphi\theta\varphi} = g^{\theta\theta}R_{\theta\varphi\theta\varphi} = \frac{1}{R^2} \cdot R^2\sin^2\theta = \sin^2\theta\)。</p>
+            <h4>例题：球面的曲率张量</h4>
+            <p><strong>题目：</strong>计算 \(S^2(R)\)（半径 \(R\)）的 Riemann 曲率张量分量 \(R_{\theta\varphi\theta\varphi}\)。</p>
+            <p><strong>第一步 — 利用常曲率公式：</strong>\(K = 1/R^2\)，常曲率空间的 Riemann 张量：\(R_{ijkl} = K(g_{ik}g_{jl} - g_{il}g_{jk})\)。</p>
+            <p><strong>第二步 — 代入：</strong>\(R_{\theta\varphi\theta\varphi} = K(g_{\theta\theta}g_{\varphi\varphi} - g_{\theta\varphi}^2) = \frac{1}{R^2} \cdot R^4\sin^2\theta = R^2\sin^2\theta\)。</p>
+            <p><strong>第三步 — 升指标验证：</strong>\(R^\theta{}_{\varphi\theta\varphi} = g^{\theta\theta}R_{\theta\varphi\theta\varphi} = \frac{1}{R^2} \cdot R^2\sin^2\theta = \sin^2\theta\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 指标升降时忘记乘逆度量：直接将 \(R_{\theta\varphi\theta\varphi}\) 当作 \(R^\theta{}_{\varphi\theta\varphi}\)。<br>✅ 升指标需要 \(g^{\theta\theta} = 1/R^2\)，两者差一个 \(1/R^2\) 因子。</li>
+              <li>❌ 混淆 Riemann 张量的指标顺序约定：不同教科书可能使用不同的符号约定。<br>✅ \(R(X,Y)Z\) 的坐标表达要注意第一对指标对应 \(X,Y\) 还是 \(Z\)。请始终核对所用参考书的约定。</li>
+              <li>❌ 认为 \(R = 0\) 可以在法坐标中直接看出（因为 \(\Gamma(p) = 0\)）。<br>✅ \(\Gamma(p) = 0\) 但 \(\partial\Gamma(p) \neq 0\)。曲率由 \(\Gamma\) 的导数组合构成，不能从 \(\Gamma\) 在一点为零推出 \(R = 0\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -256,35 +288,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Riemann 曲率张量有很多分量，不易直观理解。截面曲率 \(K(\Pi)\) 取一个 2 维平面 \(\Pi \subseteq T_pM\) 测量"该方向的弯曲"——它 推广了 Gauss 曲率。Ricci 曲率是截面曲率的迹（平均），标量曲率 再取迹。Einstein 方程直接涉及 Ricci 曲率。</p>
+            <ul>
+              <li><strong>化繁为简：</strong>Riemann 张量分量太多，截面曲率 \(K(\Pi)\) 在一个 2 维平面上度量弯曲——直观且在低维完全决定 \(R\)。</li>
+              <li><strong>Ricci 曲率——体积比较的关键：</strong>Ricci 曲率是截面曲率的迹（平均），控制测地球的体积增长率。Ricci 下界是 Bonnet-Myers、Bishop-Gromov 等整体定理的假设。</li>
+              <li><strong>Einstein 方程的核心量：</strong>广义相对论的场方程直接涉及 Ricci 曲率和标量曲率，而非完整的 Riemann 张量。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Riemann \(\to\) 截面曲率（2 维信息）\(\to\) Ricci（迹）\(\to\) 标量曲率（双迹）。 信息逐步减少，但在低维中截面曲率完全决定 Riemann。</p>
+            <ul>
+              <li><strong>递进缩略：</strong>Riemann \(\to\) 截面曲率（2 维方向信息）\(\to\) Ricci（取迹，\(n-1\) 个方向的平均）\(\to\) 标量曲率（再取迹），信息逐步减少。</li>
+              <li><strong>低维等价：</strong>\(n = 2\) 时截面曲率 = Gauss 曲率完全决定 \(R\)；\(n = 3\) 时 Ricci 完全决定 \(R\)（Weyl \(\equiv 0\)）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>截面曲率</strong>：\(\Pi = \mathrm{span}(u,v) \subseteq T_pM\)（2 维平面）， \[K(\Pi) = \frac{R(u,v,v,u)}{g(u,u)g(v,v) - g(u,v)^2}\] \(K\) 与 \(u,v\) 的选取无关（只依赖平面 \(\Pi\)）。 \(n = 2\) 时 \(K = \) Gauss 曲率。 常截面曲率 \(K\) 的空间：\(S^n(1/\sqrt{K})\), \(\mathbb{R}^n\), \(\mathbb{H}^n\) （\(K > 0, = 0, < 0\)）。 <strong>Ricci 曲率</strong>：\(\mathrm{Ric}(u,v) = \sum_{i=1}^n R(e_i, u, v, e_i)\)（\(\{e_i\}\) 正交基）。 即 \(\mathrm{Ric}_{ij} = R^k{}_{ikj}\)（\(R\) 的迹）。 \(\mathrm{Ric}(v,v)/|v|^2\) = 经过 \(v\) 方向的截面曲率的平均。 <strong>标量曲率</strong>：\(S = g^{ij}\mathrm{Ric}_{ij} = \sum_i \mathrm{Ric}(e_i, e_i)\)。 \[S = \sum_{i \neq j} K(\Pi_{ij})\]</p>
+            <h4>1. 截面曲率</h4>
+            <p>对 \(T_pM\) 中的 2 维平面 \(\Pi = \mathrm{span}(u,v)\)：</p>
+            \[K(\Pi) = \frac{R(u,v,v,u)}{g(u,u)g(v,v) - g(u,v)^2}\]
+            <p>\(K\) 与 \(u,v\) 的选取无关（只依赖平面 \(\Pi\)）。\(n = 2\) 时 \(K =\) Gauss 曲率，常截面曲率空间：\(S^n, \mathbb{R}^n, \mathbb{H}^n\)。</p>
+
+            <h4>2. Ricci 曲率</h4>
+            <p>\(\mathrm{Ric}(u,v) = \sum_{i=1}^n R(e_i, u, v, e_i)\)（\(\{e_i\}\) 正交基），即 \(\mathrm{Ric}_{ij} = R^k{}_{ikj}\)。几何意义：\(\mathrm{Ric}(v,v)/|v|^2\) 是经过 \(v\) 方向的 \(n-1\) 个截面曲率之和。</p>
+
+            <h4>3. 标量曲率</h4>
+            <p>\(S = g^{ij}\mathrm{Ric}_{ij} = \sum_{i \neq j} K(\Pi_{ij})\)——所有独立截面曲率之和（\(\times 2\)，取决于约定）。标量曲率是最粗略的曲率信息，但仍控制小测地球的体积：\(\mathrm{Vol}(B_r(p)) / \mathrm{Vol}(B_r^{\mathbb{R}^n}) = 1 - \frac{S(p)}{6(n+2)}r^2 + O(r^4)\)。</p>
+
+            <h4>4. Einstein 流形</h4>
+            <p>\(\mathrm{Ric} = \lambda g\)（Ricci 曲率与度量成比例）。球面 \(S^n(R)\) 是 Einstein 流形：\(\mathrm{Ric} = (n-1)/R^2 \cdot g\)。Einstein 流形是 Ricci 流的不动点（modulo 缩放）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- Ricci 曲率 \(\geq (n-1)K > 0\) \(\Rightarrow\) 流形直径有上界（Bonnet-Myers） - Ricci 流 \(\partial_t g = -2\mathrm{Ric}\) 是 Perelman 证明几何化猜想的工具</p>
+            <p><strong>Bonnet-Myers 定理与拓扑约束：</strong>Ricci 曲率下界 \(\mathrm{Ric} \geq (n-1)K > 0\) 蕴含直径 \(\leq \pi/\sqrt{K}\) 和基本群有限——正 Ricci 曲率强烈约束流形的整体拓扑。</p>
+            <p><strong>Ricci 流与 Poincaré 猜想：</strong>Hamilton 引入 Ricci 流 \(\partial_t g = -2\mathrm{Ric}\)，Perelman 用其证明了三维 Poincaré 猜想——这是 Ricci 曲率在现代数学中最深刻的应用之一。</p>
+            <p><strong>最优传输中的 Ricci 曲率：</strong>Sturm-Lott-Villani 理论将 Ricci 曲率下界推广到度量测度空间：\(\mathrm{Ric} \geq K\) 等价于熵在 Wasserstein 空间的 \(K\)-凸性，为非光滑空间上的几何分析奠基。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^n(R)\) 的 Ricci 曲率和标量曲率。 解答：截面曲率 \(K = 1/R^2\)（常数，所有平面）。 \(\mathrm{Ric}(v,v) = (n-1)K|v|^2 = (n-1)/R^2 \cdot |v|^2\)。 \(\mathrm{Ric}_{ij} = (n-1)/R^2 \cdot g_{ij}\)（Einstein 流形）。 \(S = n(n-1)/R^2\)。 易错点：\(\mathrm{Ric}\) 是 \((n-1)\) 个截面曲率之和（不是平均值）， 标量曲率是 \(\binom{n}{2}\) 个截面曲率之和乘以 2（或其他约定——注意系数约定）。</p>
+            <h4>例题：球面的 Ricci 曲率与标量曲率</h4>
+            <p><strong>题目：</strong>计算 \(S^n(R)\) 的 Ricci 曲率和标量曲率。</p>
+            <p><strong>第一步 — 截面曲率：</strong>\(K = 1/R^2\)（常数，所有二维平面）。</p>
+            <p><strong>第二步 — Ricci 曲率：</strong>\(\mathrm{Ric}(v,v) = (n-1)K|v|^2 = (n-1)/R^2 \cdot |v|^2\)，即 \(\mathrm{Ric}_{ij} = (n-1)/R^2 \cdot g_{ij}\)。</p>
+            <p><strong>第三步 — 标量曲率：</strong>\(S = g^{ij}\mathrm{Ric}_{ij} = (n-1)/R^2 \cdot n = n(n-1)/R^2\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆 Ricci "求和"与"平均"：认为 \(\mathrm{Ric}(v,v)/|v|^2\) 是截面曲率的平均。<br>✅ \(\mathrm{Ric}(v,v)/|v|^2\) 是 \(n-1\) 个截面曲率之和（不除以 \(n-1\)）。球面上 \(\mathrm{Ric}(v,v)/|v|^2 = (n-1)/R^2\)。</li>
+              <li>❌ 认为 Ricci 平坦（\(\mathrm{Ric} = 0\)）等价于平坦（\(R = 0\)）。<br>✅ Ricci 平坦不蕴含平坦。\(n \geq 4\) 时存在 Ricci 平坦但 Weyl 不为零的空间（如 Schwarzschild 真空解、Calabi-Yau 流形）。</li>
+              <li>❌ 标量曲率的系数约定不一致：不同教科书对 \(S\) 的定义可能差常数因子。<br>✅ 常见约定：\(S = g^{ij}R_{ij}\)（我们使用的）。有些书定义 \(S = \frac{1}{2}g^{ij}R_{ij}\)，使 Einstein 方程更对称。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -330,35 +394,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Gauss-Bonnet 定理是微分几何中最深刻的定理之一：它将曲面的 Gauss 曲率（局部几何/分析量）积分后等于 Euler 特征（全局拓扑 不变量）。"几何完全决定拓扑"——这是局部-整体原理的巅峰体现。 高维推广是 Chern-Gauss-Bonnet 定理。</p>
+            <ul>
+              <li><strong>局部-整体的巅峰：</strong>Gauss-Bonnet 定理将 Gauss 曲率（局部微分量）的积分等于 Euler 特征（全局拓扑不变量）——"几何决定拓扑"的最纯粹体现。</li>
+              <li><strong>指标定理的原型：</strong>Gauss-Bonnet 是 Atiyah-Singer 指标定理在二维的特例，也是 Chern-Gauss-Bonnet 定理在偶数维的推广基础。</li>
+              <li><strong>拓扑障碍：</strong>定理给出强约束——环面不能有处处正的 Gauss 曲率（否则 \(\int K > 0 \neq 0 = 2\pi\chi(T^2)\)）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Gauss-Bonnet = 曲率（分析/几何）与 Euler 特征（拓扑）的桥梁。 这是指标定理的原型。</p>
+            <ul>
+              <li><strong>分析-拓扑桥梁：</strong>Gauss-Bonnet = 曲率积分（分析/几何量）= Euler 特征（拓扑不变量）。度量可以改变，但 \(\int K\, dA\) 只依赖拓扑。</li>
+              <li><strong>陈类的特例：</strong>高维推广中，Euler 特征 = 最高阶 Pfaffian（曲率形式的某些多项式的积分），是 Chern-Weil 理论的一部分。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Gauss 曲率</strong>：2 维黎曼曲面 \((M^2, g)\)，\(K = R_{1212} / \det(g_{ij})\)。 \(K\) 是 2 维 Riemann 张量的唯一独立分量。 <strong>Gauss-Bonnet 定理（闭曲面）</strong>：\(M\) 闭定向 2 维黎曼流形， \[\int_M K\, dA = 2\pi \chi(M)\] <strong>带边界版本</strong>：\(M\) 紧致带边界，\(\partial M\) 分段光滑， \[\int_M K\, dA + \int_{\partial M} \kappa_g\, ds + \sum_i \alpha_i = 2\pi \chi(M)\] \(\kappa_g\) = 边界测地曲率，\(\alpha_i\) = 角点的外角。 <strong>推论</strong>： - \(\chi(S^2) = 2\)：\(\int K\, dA = 4\pi\)（\(K = 1/R^2\) 对球面） - \(\chi(T^2) = 0\)：\(\int K\, dA = 0\)（环面的总曲率为零）</p>
+            <h4>1. Gauss 曲率</h4>
+            <p>2 维黎曼曲面 \((M^2, g)\)：\(K = R_{1212}/\det(g_{ij})\)，是 Riemann 张量的唯一独立分量。</p>
+
+            <h4>2. Gauss-Bonnet 定理（闭曲面）</h4>
+            <p>\(M\) 为闭定向 2 维黎曼流形：</p>
+            \[\int_M K\, dA = 2\pi\chi(M)\]
+
+            <h4>3. 带边界版本</h4>
+            <p>\(M\) 紧致带边界 \(\partial M\)（分段光滑）：</p>
+            \[\int_M K\, dA + \int_{\partial M} \kappa_g\, ds + \sum_i \alpha_i = 2\pi\chi(M)\]
+            <p>其中 \(\kappa_g\) 为边界的测地曲率，\(\alpha_i\) 为角点的外角。测地三角形：\(\sum_i \alpha_i = \pi - (\text{内角和})\)，所以三角形内角和偏差 \(= \int_\Delta K\, dA\)。</p>
+
+            <h4>4. 经典推论</h4>
+            <p>\(\chi(S^2) = 2\)：\(\int K\, dA = 4\pi\)。\(\chi(T^2) = 0\)：\(\int K\, dA = 0\)（正负曲率完全抵消）。亏格 \(g\) 的闭曲面：\(\chi = 2 - 2g\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 大地测量学：三角形内角和偏差 \(= \int_\Delta K\, dA\) - Chern-Gauss-Bonnet 在高维推广为指标定理（Atiyah-Singer）的特例</p>
+            <p><strong>大地测量学中的角超：</strong>三角形内角和偏差 \(\Delta = \int_\Delta K\, dA\) 称为"球面角超"。在地球表面，大地三角形的角超精确地反映了地球曲率——高精度测量中这是必须修正的量。</p>
+            <p><strong>Chern-Gauss-Bonnet 与指标定理：</strong>偶数维闭流形 \(M^{2n}\) 上的 Chern-Gauss-Bonnet 定理 \(\int_M \mathrm{Pf}(\Omega) = (2\pi)^n\chi(M)\) 是 Gauss-Bonnet 的高维推广。它是 Atiyah-Singer 指标定理的特例，将分析（椭圆算子的指标）与拓扑（特征类）联系起来。</p>
+            <p><strong>离散微分几何与网格处理：</strong>离散 Gauss-Bonnet（Descartes 定理）\(\sum_v (2\pi - \sum \theta_i) = 2\pi\chi\)（顶点处角缺之和）在三角网格上的计算机图形学中广泛应用——用于曲率估计、网格简化和参数化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(S^2(R)\) 的 Gauss-Bonnet 验证。 解答：\(K = 1/R^2\)（常数），\(\mathrm{Area}(S^2(R)) = 4\pi R^2\)。 \(\int K\, dA = (1/R^2)(4\pi R^2) = 4\pi\)。 \(2\pi\chi(S^2) = 2\pi \cdot 2 = 4\pi\)。✓ 易错点：\(\chi(T^2) = 0\)，所以环面上正曲率和负曲率区域的贡献完全抵消。 环面不可能有处处正的 Gauss 曲率（否则 \(\int K > 0 \neq 0\)）。</p>
+            <h4>例题：球面的 Gauss-Bonnet 验证</h4>
+            <p><strong>题目：</strong>验证 \(S^2(R)\) 满足 Gauss-Bonnet 定理。</p>
+            <p><strong>第一步 — 曲率与面积：</strong>\(K = 1/R^2\)（常数），\(\mathrm{Area}(S^2(R)) = 4\pi R^2\)。</p>
+            <p><strong>第二步 — 积分：</strong>\(\int K\, dA = (1/R^2)(4\pi R^2) = 4\pi\)。</p>
+            <p><strong>第三步 — 验证：</strong>\(2\pi\chi(S^2) = 2\pi \cdot 2 = 4\pi\)。✔</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 Gauss-Bonnet 定理要求曲率为常数。<br>✅ 定理对任意光滑度量成立。可以把球面"揉皱"改变局部曲率，但 \(\int K\, dA\) 保持不变——因为 \(\chi\) 是拓扑不变量。</li>
+              <li>❌ 认为环面可以有处处正的 Gauss 曲率。<br>✅ \(\chi(T^2) = 0\) 蕴含 \(\int K\, dA = 0\)。若 \(K > 0\) 处处成立，则 \(\int K > 0 \neq 0\)，矛盾。环面在 \(\mathbb{R}^3\) 中嵌入时内圈 \(K < 0\)，外圈 \(K > 0\)。</li>
+              <li>❌ 带边界版本中忘记测地曲率项或角点项。<br>✅ 完整公式需要三个项：\(\int_M K\, dA + \int_{\partial M}\kappa_g\, ds + \sum \alpha_i = 2\pi\chi\)。测地三角形（\(\kappa_g = 0\) 的边）中只剩角点贡献。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -385,35 +482,68 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>截面曲率恒为常数 \(K\) 的黎曼流形——空间形式——是几何中最对称 的空间。\(K > 0\) 是球面，\(K = 0\) 是欧氏空间，\(K < 0\) 是双曲空间。 它们的分类是一个经典问题：完备单连通的常曲率空间只有这三种 （唯一性定理），一般常曲率空间是它们被离散群作用的商。</p>
+            <ul>
+              <li><strong>最大对称空间：</strong>截面曲率恒为常数 \(K\) 的黎曼流形（空间形式）拥有最大的等距群维数 \(n(n+1)/2\)。它们是几何中最"完美"的空间，是所有比较定理的参照标准。</li>
+              <li><strong>完整分类：</strong>完备单连通的常曲率空间仅三种：球面(\(K>0\))、欧氏空间(\(K=0\))、双曲空间(\(K<0\))。一般空间形式是它们被离散等距群的商——分类空间形式等价于分类离散自由作用子群。</li>
+              <li><strong>物理宇宙模型：</strong>FLRW 宇宙学中空间截面恰好是这三种之一——宇宙的几何形状由空间形式决定。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>常曲率 = 最大对称。Schur 定理：如果截面曲率在每点各方向相同 且 \(\dim \geq 3\)，则 \(K\) 全局为常数。</p>
+            <ul>
+              <li><strong>Schur 定理：</strong>\(\dim M \geq 3\) 时，若截面曲率在每点对所有 2-平面相同 \(K_p(\Pi) = K(p)\)，则 \(K\) 全局为常数。关键是第二 Bianchi 恒等式迫使 \(dK = 0\)。</li>
+              <li><strong>商空间观点：</strong>空间形式 \(M = \tilde{M}/\Gamma\)。\(\Gamma\) 是覆盖变换群 \(\cong \pi_1(M)\)。分类空间形式 = 分类离散自由等距作用子群。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>模型空间</strong>： - \(K > 0\)：\(S^n(1/\sqrt{K})\)（半径 \(1/\sqrt{K}\) 的球面） - \(K = 0\)：\(\mathbb{R}^n\) - \(K < 0\)：\(\mathbb{H}^n\)（双曲空间） <strong>唯一性定理</strong>：完备单连通 \(n\) 维常曲率 \(K\) 黎曼流形与模型空间等距（\(n \geq 2\)）。 <strong>空间形式</strong>：\(M = \tilde{M} / \Gamma\)，\(\tilde{M}\) 为模型空间， \(\Gamma\) 是 \(\mathrm{Isom}(\tilde{M})\) 的离散自由作用子群。 - \(K > 0\)：球面空间形式（如 \(\mathbb{R}P^n = S^n / \mathbb{Z}_2\)，透镜空间） - \(K = 0\)：Bieberbach 群的商（如 \(T^n = \mathbb{R}^n / \mathbb{Z}^n\)） - \(K < 0\)：双曲流形 <strong>Schur 定理</strong>：\(\dim M \geq 3\)，如果截面曲率在每点 \(K_p(\Pi)\) 对所有 \(\Pi\) 相同（\(= K(p)\)），则 \(K(p) = \) 常数。 （证明用第二 Bianchi 恒等式。）</p>
+            <h4>1. 三种模型空间</h4>
+            <p>\(K > 0\)：\(S^n(1/\sqrt{K})\)（半径 \(1/\sqrt{K}\) 的球面）；\(K = 0\)：\(\mathbb{R}^n\)（欧氏空间）；\(K < 0\)：\(\mathbb{H}^n(1/\sqrt{|K|})\)（双曲空间）。</p>
+
+            <h4>2. 唯一性定理</h4>
+            <p>完备单连通 \(n\) 维 (\(n \geq 2\)) 常截面曲率 \(K\) 的黎曼流形与对应模型空间等距。证明的核心：常曲率条件使黎曼张量满足 \(R_{ijkl} = K(g_{ik}g_{jl} - g_{il}g_{jk})\)，由此在法坐标中可直接积分比较。</p>
+
+            <h4>3. 空间形式分类</h4>
+            <p>\(M = \tilde{M}/\Gamma\)，\(\Gamma \leq \mathrm{Isom}(\tilde{M})\) 离散无不动点。</p>
+            <p>\(K > 0\)：球面空间形式。分类 \(\Gamma \leq O(n+1)\) 自由作用子群：\(\mathbb{R}P^n = S^n/\mathbb{Z}_2\)，透镜空间 \(L(p;q)\)。</p>
+            <p>\(K = 0\)：平坦流形。\(\Gamma\) 是 Bieberbach 群（有限指数平移子群），例如 \(T^n = \mathbb{R}^n/\mathbb{Z}^n\)，Klein 瓶。</p>
+            <p>\(K < 0\)：双曲流形。Mostow 刚性定理（\(n \geq 3\)）：双曲结构由基本群唯一确定。</p>
+
+            <h4>4. Schur 定理证明纲要</h4>
+            <p>设 \(K_p(\Pi) = K(p)\) 不依赖 \(\Pi\)。则 \(R_{ijkl} = K(p)(g_{ik}g_{jl} - g_{il}g_{jk})\)。对此取散度并应用第二 Bianchi 恒等式 \(\nabla_{[e}R_{ab]cd} = 0\)，得 \((n-2)\partial_i K = 0\)。当 \(n \geq 3\) 时，\(dK = 0\)，即 \(K\) 为常数。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>- 宇宙学中三种标准空间模型（正曲率/平坦/双曲）对应宇宙的三种几何</p>
+            <p><strong>宇宙学的三种空间模型：</strong>FLRW 度量 \(ds^2 = -dt^2 + a(t)^2 d\Sigma_K^2\)，空间截面 \(\Sigma_K\) 恰为三种常曲率空间之一。CMB 观测约束曲率参数 \(\Omega_K \approx 0\)，说明宇宙空间部分接近平坦——但仍可能是大尺度上的低正曲率空间形式。</p>
+            <p><strong>晶体学与Bieberbach定理：</strong>三维平坦空间形式分类对应 17 种壁纸群（2 维）和 230 种空间群（3 维）。Bieberbach 定理保证平坦流形的基本群有有限指数的平移子群——这是晶体对称性分类的数学基础。</p>
+            <p><strong>双曲三维流形与拓扑：</strong>Thurston 几何化猜想（Perelman 证明）：每个紧致三维流形可以沿球面和环面分解为具有八种几何结构之一的片段——双曲结构是最丰富、最"通用"的。双曲结构与纽结补空间的体积不变量密切相关。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(M = \mathbb{R}^2 / \mathbb{Z}^2\)（平坦环面），截面曲率 \(K = ?\) 解答：\(\tilde{M} = \mathbb{R}^2\) 是 \(K = 0\) 的模型空间。 \(\Gamma = \mathbb{Z}^2\) 通过平移作用，等距变换不改变曲率。 \(K = 0\)（平坦环面）。 易错点：环面可以嵌入 \(\mathbb{R}^3\)（显式参数化），但嵌入度量 的 Gauss 曲率有正有负区域——那不是内在的平坦度量。</p>
+            <h4>例题：平坦环面的截面曲率</h4>
+            <p><strong>题目：</strong>\(M = \mathbb{R}^2/\mathbb{Z}^2\)（平坦环面），求截面曲率。</p>
+            <p><strong>第一步 — 覆盖空间：</strong>\(\tilde{M} = \mathbb{R}^2\) 是 \(K = 0\) 的模型空间（欧氏平面）。</p>
+            <p><strong>第二步 — 等距商：</strong>\(\Gamma = \mathbb{Z}^2\) 通过平移 \((x,y) \mapsto (x+m, y+n)\) 作用，平移是等距变换。</p>
+            <p><strong>第三步 — 曲率不变：</strong>等距变换保持曲率，所以 \(K_{T^2} = K_{\mathbb{R}^2} = 0\)。平坦环面具有零截面曲率。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆嵌入度量与内在平坦度量。环面嵌入 \(\mathbb{R}^3\) 时 Gauss 曲率有正有负。<br>✅ 嵌入度量 ≠ 平坦度量。平坦环面 \(\mathbb{R}^2/\mathbb{Z}^2\) 不能等距嵌入 \(\mathbb{R}^3\)（Nash 嵌入维度更高），常见的甜甜圈嵌入改变了度量。</li>
+              <li>❌ 在 2 维情况下应用 Schur 定理，认为逐点各向同性蕴含常曲率。<br>✅ Schur 定理要求 \(n \geq 3\)。二维曲面截面曲率只有一个方向（= Gauss 曲率），自动"各向同性"，但不意味着 \(K\) 为常数。</li>
+              <li>❌ 认为所有常曲率流形都是单连通模型空间本身。<br>✅ 空间形式 \(M = \tilde{M}/\Gamma\) 可以有非平凡基本群 \(\pi_1(M) \cong \Gamma\)。例如 \(\mathbb{R}P^3\)，\(T^n\)，透镜空间都是常曲率但非单连通。</li>
+            </ul>
           </div>
         </div>
       </div>
