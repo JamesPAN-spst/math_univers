@@ -479,6 +479,15 @@
             <p>例题：用 Fejér 定理证明 Weierstrass 逼近定理（三角多项式版）。 解答：\(\sigma_N f = K_N * f = \sum_{|n| \leq N}(1 - |n|/(N+1)) c_n e^{inx}\) 是三角多项式。\(\sigma_N f \to f\) 一致。 故连续周期函数可被三角多项式一致逼近。✓ 易错点：\(D_N\) 核不是正的——它会导致"过冲"（Gibbs 现象约 9%）。 Fejér 核 \(\geq 0\)，避免了此问题。</p>
           </div>
         </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>信号处理</strong>：Fejér 求和相当于对 Fourier 系数施加三角窗（Bartlett 窗），有效抑制频谱泄漏。实际 DSP 中的 Hann、Hamming 窗本质是 Fejér 核的推广——选择不同的系数衰减方式以优化旁瓣衰减。</p>
+            <p><strong>数值分析</strong>：近似恒等式（approximate identity）是 Fejér 核思想的推广——用非负、归一化、集中于原点的核做卷积来逼近函数，这是 mollifier 方法和核密度估计的理论基础。</p>
+            <p><strong>偏微分方程</strong>：热核 \(K_t(x) = (4\pi t)^{-1/2} e^{-x^2/(4t)}\) 是一族近似恒等式；热方程的解 \(u(x,t) = K_t * f\) 随 \(t \to 0^+\) 收敛到初值 \(f\)，正是 Fejér 型定理的连续版本。</p>
+          </div>
+        </div>
       </div>
 
       <figure class="kp-figure" data-figure="harmonic-ch01-kp2">
@@ -510,6 +519,16 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>Fourier 系数 \(\hat{f}(n)\) 编码了函数的频率信息。函数越光滑， 系数衰减越快——\(C^k\) 函数的系数衰减如 \(O(1/n^k)\)。Riemann- Lebesgue 引理保证 \(L^1\) 函数的系数趋于零。这些定量关系是 信号处理和数值分析中频率截断方法的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思路是将函数的"光滑性"翻译为 Fourier 系数的"衰减速度"——微分在频域变为乘以 \(in\)，因此 \(k\) 阶可微性赋予系数 \(O(|n|^{-k})\) 的衰减。</p>
+            <p>这一对应的抽象框架由 <strong>Riemann-Lebesgue 引理</strong>奠基：\(L^1\) 函数的 Fourier 系数趋于零——这是最低限度的要求。更高光滑性（\(C^k\)、解析）对应更快衰减（多项式、指数），形成完整的层次链：<strong>\(L^1 \supset C^0 \supset C^k \supset C^\infty \supset \text{解析}\)</strong>，与之对应的系数衰减依次加速。</p>
+            <p>对偶方向同样成立：Fourier 系数衰减快的函数一定更光滑。这实质上是"不确定性原理"的一种表述——函数不可能在时域和频域同时"紧凑"。</p>
+            <p>卷积定理 \(\widehat{f*g}(n) = 2\pi\hat{f}(n)\hat{g}(n)\) 将卷积运算化归为逐频率相乘，是滤波器设计和数值快速计算的代数基础。</p>
           </div>
         </div>
 
@@ -558,6 +577,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>Fourier 分析不只是工具——它与数论有深层联系。Weyl 的等度分布 定理用 Fourier 系数刻画序列的"均匀性"：序列 \(\{n\alpha\}\) 在 \([0,1)\) 中等度分布当且仅当 \(\alpha\) 为无理数。Fourier 方法 在加法数论（如 Goldbach 猜想的部分结果）中也发挥关键作用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>等度分布（equidistribution）的核心抽象是 <strong>Weyl 准则</strong>：用指数和 \(\frac{1}{N}\sum e^{2\pi ikx_n}\) 的渐近行为来刻画序列的"均匀性"——本质上是检验序列在每个"Fourier 频率"上是否趋于零。</p>
+            <p>从函数分析角度看，等度分布意味着经验测度 \(\mu_N = \frac{1}{N}\sum \delta_{x_n}\) 弱\(^*\)收敛到 Lebesgue 测度。Weyl 准则正是弱\(^*\)收敛的 Fourier 判据——因为指数函数 \(\{e^{2\pi ikx}\}\) 构成 \(C([0,1])\) 中充分丰富的"测试族"。</p>
+            <p>这一框架将数论问题（无理数的分数部分分布）与调和分析（指数和估计）连接起来，是解析数论的典型方法论：<strong>用 Fourier 分析控制算术结构</strong>。</p>
           </div>
         </div>
 

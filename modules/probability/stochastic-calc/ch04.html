@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
@@ -261,6 +261,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>线性 SDE 的求解策略与 ODE 完全类比：引入<strong>积分因子</strong>将方程化为可直接积分的形式。对 OU 过程 \(dX = -\theta X\,dt + \sigma\,dB\)，积分因子 \(e^{\theta t}\) 使得 \(d(e^{\theta t}X_t) = \sigma e^{\theta t}\,dB_t\)，右端可直接 Itô 积分。</p>
+            <p>OU 过程的核心性质源于漂移项 \(-\theta X\) 的<strong>回复力效应</strong>：偏离均值越远，拉回的力量越大。这与 GBM 的指数增长行为形成对比——GBM 乘性噪声导致对数正态分布，而 OU 加性噪声导致正态平稳分布。</p>
+            <p>关键分类：<strong>GBM（乘性噪声，正值，无均值回复）vs OU（加性噪声，可负，均值回复）</strong>。金融中股价用 GBM，利率/波动率用 OU 型模型。选择取决于建模对象的经济性质。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -359,6 +368,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>大多数 SDE 没有解析解，需要数值模拟。Euler-Maruyama 是最基本的 离散化方法，类似于 ODE 的 Euler 方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>SDE 数值方法的核心思想是将连续随机路径离散化：在时间网格 \(0 = t_0 < t_1 < \cdots < t_N = T\) 上，用一步递推公式逼近真解。与 ODE Euler 方法的区别在于：随机项的增量是 \(\sqrt{\Delta t}\,Z_n\) 而非 \(\Delta t\)，这直接源于 Brown 运动增量的尺度 \(\Delta B \sim \sqrt{\Delta t}\)。</p>
+            <p>收敛有两种度量：<strong>强收敛</strong>（路径级，\(E[\sup|X-X^N|]\)）和<strong>弱收敛</strong>（分布级，\(|E[f(X_T)] - E[f(X_T^N)]|\)）。Monte Carlo 定价只需弱收敛，但路径依赖期权和对冲需要强收敛。</p>
+            <p>精度提升的方向：Milstein 方法通过 Itô-Taylor 展开多保留一项 \(\sigma\sigma'\) 修正，将强收敛从 \(O(\sqrt{\Delta t})\) 提升到 \(O(\Delta t)\)。<strong>阶数提升的代价是需要计算扩散系数的导数</strong>。</p>
           </div>
         </div>
 

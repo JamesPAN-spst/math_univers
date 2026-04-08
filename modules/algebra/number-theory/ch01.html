@@ -394,14 +394,26 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>整数的整除关系是数论的基石。从古希腊开始，数学家就在研究“一个 整数能否被另一个整除”这个基本问题。带余除法是进行整除运算的核心 工具，它确保任何两个整数都能唯一地写成 \(a = bq + r\) 的形式。</p>
+            <p>整数的整除关系是数论的基石。从古希腊开始，数学家就在研究「一个整数能否被另一个整除」这个基本问题，带余除法则确保任何两个整数都能唯一地写成 \(a = bq + r\) 的形式。</p>
+            <ul>
+              <li>时钟上 17 点显示为下午 5 点—— \(17 = 12 \times 1 + 5\)，余数 5 正是被 12 除后的「剩余」；</li>
+              <li>判断構数能否被 3 整除：\(123 \to 1+2+3=6\)，\(3 \mid 6\) ● \(3 \mid 123\)，这是整除判别法的直观应用；</li>
+              <li>计算机内存以 4KB 对齐，地址 \(a\) 的偏移量 \(a \bmod 4096\) 决定了它在页内的位置。</li>
+            </ul>
+            <p>带余除法的存在性与唯一性使得整数的‌整除结构‌能被精确地算法化，它是欧几里得算法和一切同余理论的出发点。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>整除关系是 \(\mathbb{Z}\) 上的偏序，带余除法是欧几里得整环的定义性质。</p>
+            <p>整除关系 \(a \mid b\) 定义了 \(\mathbb{Z}\) 上一个自然的偏序结构：它具有自反性、反对称性（在正整数上）和传递性。这一偏序将因子构成的格（lattice）组织起来，其中 \(\gcd\) 对应交、\(\text{lcm}\) 对应并。</p>
+            <ul>
+              <li>整除关系不是全序——例如 \(3\) 与 \(5\) 不可比较;</li>
+              <li>带余除法保证余数 \(r\) 满足 \(0 \le r < b\)，这种严格递减性是欧几里得算法终止的根本原因;</li>
+              <li>拥有带余除法的整环称为欧几里得整环（Euclidean domain），\(\mathbb{Z}\) 是其最基本的例子。</li>
+            </ul>
+            <p>在更抽象的层面，带余除法使得 \(\mathbb{Z}\) 自动成为主理想整环（PID），进而成为唯一分解整环（UFD）。这条链 Euclidean \(\Rightarrow\) PID \(\Rightarrow\) UFD 是代数数论中反复出现的核心结构。</p>
           </div>
         </div>
 
@@ -415,7 +427,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>带余除法是计算机中模运算的理论基础；哈希函数中的模运算直接 来源于此。</p>
+            <p><strong>计算机科学</strong>：哈希函数 \(h(k) = k \bmod m\) 直接使用带余除法将任意键映射到 \([0, m)\) 的桶索引，是哈希表、布隆过滤器等数据结构的理论基础。</p>
+            <p><strong>日历与天文</strong>：儒略日系统用带余除法 \(\text{JD} \bmod 7\) 确定星期几，闰年判定也依赖 \(y \bmod 4, y \bmod 100, y \bmod 400\) 的余数条件。</p>
+            <p><strong>数字信号处理</strong>：循环卷积中的下标运算 \((i+k) \bmod N\) 本质上是带余除法，将线性索引折叠到长度为 \(N\) 的循环缓冲区中。</p>
           </div>
         </div>
 
@@ -449,14 +463,26 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>两个整数的最大公约数 \(\gcd(a,b)\) 是整除理论的核心概念。欧几里得 算法（辗转相除法）提供了计算 \(\gcd\) 的高效方法，是已知最古老的 算法之一，其复杂度为 \(O(\log(\min(a,b)))\)。</p>
+            <p>两个整数的最大公约数 \(\gcd(a,b)\) 是整除理论的核心概念。欧几里得算法（辗转相除法）提供了计算 \(\gcd\) 的高效方法，是已知最古老的算法之一。</p>
+            <ul>
+              <li>音乐中两个音符的频率比 \(f_1/f_2\) 约分初需 \(\gcd(f_1,f_2)\)，约分后才能判断是否为简单整数比（谐音关系）；</li>
+              <li>LED 屏幕规格 \(1920 \times 1080\) 的最简比例为 \(\frac{1920}{\gcd(1920,1080)} : \frac{1080}{\gcd(1920,1080)} = 16:9\)；</li>
+              <li>工厂将 252 件和 105 件两种零件分为等量套装，每套最多 \(\gcd(252,105)=21\) 件。</li>
+            </ul>
+            <p>\(\gcd\) 的计算以带余除法为引擎递归缩小问题规模，其 \(O(\log \min(a,b))\) 的复杂度使得即使对数百位的大整数也能高效处理。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>算法的核心思想: \(\gcd(a,b) = \gcd(b, a \bmod b)\)， 将大问题递归地转化为更小的问题——这是分治法的原型。</p>
+            <p>欧几里得算法的核心等式 \(\gcd(a,b) = \gcd(b, a \bmod b)\) 体现了「不变量递降」的思想：在保持公因子集不变的同时，操作数严格递减。这个策略远超数论本身——它是分治法与递归设计的原型。</p>
+            <ul>
+              <li>从度量的角度看，每一步至少将较大操作数折半，因此总步数为 \(O(\log(\min(a,b)))\);</li>
+              <li>Lamé 定理给出精确上界：步数不超过较小输入十进制位数的 5 倍;</li>
+              <li>同一思想推广到多项式环 \(F[x]\) 上，产生多项式 GCD 算法，是符号计算的基石。</li>
+            </ul>
+            <p>将 GCD 视为「生成理想中的最小正元素」，我们得到代数观点：\(\gcd(a,b)\) 是理想 \((a,b)\) 的生成元。这一视角将算法问题升级为结构性命题。</p>
           </div>
         </div>
 
@@ -470,7 +496,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>密码学中 RSA 密钥生成需要 \(\gcd\) 计算；编程中分数约分依赖于此。</p>
+            <p><strong>密码学</strong>：RSA 密钥生成中需验证 \(\gcd(e, \varphi(N))=1\) 以确保公钥指数可逆，欧几里得算法以 \(O(\log N)\) 复杂度完成此检查。</p>
+            <p><strong>编程与数值计算</strong>：分数约分 \(\frac{a}{b} \to \frac{a/d}{b/d}\)（其中 \(d=\gcd(a,b)\)）依赖高效 GCD 计算，所有有理数算术库的核心操作均需此步骤。</p>
+            <p><strong>信号处理</strong>：多速率系统中，采样率转换比 \(L/M\) 须约分为互素形式 \(\gcd(L,M)=1\) 后分别做内插与抽取，避免采样频率冲突。</p>
           </div>
         </div>
 
@@ -528,14 +556,26 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Bézout 等式 \(\gcd(a,b) = ax + by\) 揭示了最大公约数可以用 \(a, b\) 的线性组合表示这个深刻事实。扩展欧几里得算法不仅计算 \(\gcd\)， 还找出了具体的系数 \(x, y\)，这在求解同余方程和构造模逆元时至关重要。</p>
+            <p>Bézout 等式 \(\gcd(a,b) = ax + by\) 揭示了最大公约数可以用 \(a, b\) 的线性组合表示这个深刻事实。扩展欧几里得算法不仅计算 \(\gcd\)，还找出了具体的系数 \(x, y\)。</p>
+            <ul>
+              <li>RSA 私钥计算: 由 \(ex + \varphi(N)y = 1\) 直接读出 \(d = x \bmod \varphi(N)\)；</li>
+              <li>Reed-Solomon 纠错码的解码步骤中，在有限域上求多项式的 Bézout 系数来恢复错误位置；</li>
+              <li>在组合博弈论中，证明「互素面值硬币可表示足够大的金额」依赖 Bézout 等式。</li>
+            </ul>
+            <p>Bézout 等式从「\(\mathbb{Z}\) 中的任何理想都是主理想」这一代数事实出发，是整数环 PID 性质的算法体现。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Bézout 等式的代数本质: 理想 \((a, b) = (\gcd(a,b))\)， 即由 \(a, b\) 生成的理想是主理想——这反映了 \(\mathbb{Z}\) 是 PID。</p>
+            <p>Bézout 等式 \(\gcd(a,b)=ax+by\) 的代数本质是：\(\mathbb{Z}\) 中由任意两个元素生成的理想 \((a,b)\) 等于主理想 \((\gcd(a,b))\)。这正是 \(\mathbb{Z}\) 作为主理想整环（PID）的直接体现。</p>
+            <ul>
+              <li>Bézout 系数 \((x,y)\) 不唯一——通解为 \((x_0 + kb/d,\; y_0 - ka/d)\)，\(k \in \mathbb{Z}\);</li>
+              <li>扩展欧几里得算法在辗转相除的同时回溯计算 \(x,y\)，时间复杂度与普通欧几里得相同;</li>
+              <li>Bézout 等式在一般整环中不一定成立——例如 \(\mathbb{Z}[\sqrt{-5}]\) 中 \((2,1+\sqrt{-5})\) 不是主理想。</li>
+            </ul>
+            <p>Bézout 等式的最重要推论是 Euclid 引理 \(p \mid ab \Rightarrow p \mid a \text{ 或 } p \mid b\)，它直接导出算术基本定理的唯一性。扩展欧几里得算法则是计算模逆元的标准工具。</p>
           </div>
         </div>
 
@@ -549,7 +589,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>求模逆元: 若 \(\gcd(a,n)=1\)，由 \(ax + ny = 1\) 得 \(ax \equiv 1 \pmod{n}\)。这是 RSA 密钥生成的核心步骤。</p>
+            <p><strong>密码学</strong>：RSA 私钥计算 \(d = e^{-1} \bmod \varphi(N)\) 的唯一高效手段就是扩展欧几里得算法，由 Bézout 系数直接给出逆元。</p>
+            <p><strong>编码理论</strong>：Reed-Solomon 纠错码的解码过程需要在有限域 \(\mathrm{GF}(p)\) 上求多项式的 Bézout 系数，扩展欧几里得算法是该步骤的标准实现。</p>
+            <p><strong>格密码</strong>：LLL 格基约化算法中，Gram-Schmidt 正交化的整数近似步骤反复使用扩展欧几里得来维护整数坐标。</p>
           </div>
         </div>
 
@@ -583,14 +625,26 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>素数是整数的「原子」——算术基本定理说每个大于 1 的整数都可以 唯一地分解为素数之积。这是欧几里得的伟大发现之一，也是现代密码学 （如 RSA）的数学基础：分解容易而分解很难。</p>
+            <p>素数是整数的「原子」——算术基本定理说每个大于 1 的整数都可以唯一地分解为素数之积，这是欧几里得的伟大发现之一。</p>
+            <ul>
+              <li>RSA 密码的安全性基于「将两个大素数乘起来容易，将乘积分解回去极难」这一不对称性；</li>
+              <li>素数计数函数 \(\pi(x) \sim x/\ln x\) 描述了素数在自然数中的密度，引导密码参数选择；</li>
+              <li>Eratosthenes 筛法以 \(O(n \log \log n)\) 复杂度列出所有不超过 \(n\) 的素数，是素数表的经典生成算法。</li>
+            </ul>
+            <p>素数的唯一分解性使得整数的乘法结构完全透明——任何关于整除、GCD、LCM 的问题都可以转化为素因子指数的比较。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>素数是环论中「不可约元​」的原型。唯一分解说明 \(\mathbb{Z}\) 是 UFD（唯一分解整环）。</p>
+            <p>素数在 \(\mathbb{Z}\) 中同时扮演两个角色：不可约元（无法分解为更小因子的乘积）和素元（\(p \mid ab \Rightarrow p\mid a\) 或 \(p\mid b\)）。在 \(\mathbb{Z}\) 中二者等价，但在一般整环中不一定——这一区别催生了 UFD 和非 UFD 的丰富理论。</p>
+            <ul>
+              <li>算术基本定理的存在性由归纳法保证，唯一性则依赖于素元性质（Euclid 引理）;</li>
+              <li>素数定理 \(\pi(x)\sim x/\ln x\) 描述了素数的渐近密度，揭示其分布的对数稀疏性;</li>
+              <li>唯一分解使得乘法问题可转化为指数的加法——例如 \(\gcd\) 和 \(\text{lcm}\) 可由素因数指数的逐位 \(\min\) 和 \(\max\) 表达。</li>
+            </ul>
+            <p>将 \(\mathbb{Z}\) 的唯一分解推广到更一般的环是代数数论的核心动机之一：当唯一分解失败时（如 \(\mathbb{Z}[\sqrt{-5}]\)），代之以理想的唯一分解——这就是 Dedekind 整环的思想。</p>
           </div>
         </div>
 
@@ -604,7 +658,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>RSA 密码体系基于大数分解的困难性；Eratosthenes 筛法为查找 素数的确定性算法。</p>
+            <p><strong>公钥密码</strong>：RSA 的安全性完全基于大整数素因数分解的计算困难性——算术基本定理保证分解存在且唯一，但目前没有多项式时间算法可以完成如此分解。</p>
+            <p><strong>随机化算法</strong>：Miller-Rabin 素性检验利用费马小定理的逆否命题快速筛查合数，是生成大素数的工业标准方法（如 OpenSSL）。</p>
+            <p><strong>通信工程</strong>：跳频扩频 (FHSS) 系统用素数长度序列生成伪随机跳频图案，因为素数阶循环群的均匀分布性保证频率覆盖的完备性。</p>
           </div>
         </div>
 

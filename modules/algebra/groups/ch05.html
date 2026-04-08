@@ -394,35 +394,75 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>群的元素不仅能与彼此运算，还能「作用」于其他集合——如旋转群作用 于平面中的点，置换群作用于集合元素。群作用是群论最强大的工具： 它将群的抽象结构与具体的组合、几何问题联系起来。轨道-稳定子定理 是群作用的核心结果。</p>
+            <p>群的元素能做比「自身运算」更丰富的事——它们可以作为变换，对外部集合产生作用。这一想法早在 19 世纪 Galois 研究方程根的置换时就已萌芽：将代数结构「投射」到具体对象上，使抽象的群瞬间获得几何与组合的内涵。轨道-稳定子定理（Orbit-Stabilizer Theorem）正是此联系的核心桥梁。</p>
+            <ul>
+              <li><strong>旋转对称</strong>：正三角形的二面体群 \(D_3\) 作用于顶点集 \(\{1,2,3\}\)，旋转和反射揭示对称结构——轨道只有一条、稳定子是过顶点的反射子群。</li>
+              <li><strong>置换与计数</strong>：对称群 \(S_n\) 自然作用于 \(\{1,\dots,n\}\)，Burnside 引理由此而来，解决"本质不同的染色"问题。</li>
+              <li><strong>群的自我认知</strong>：群 \(G\) 通过左乘、共轭等方式作用于自身或其子集，由此推出 Cayley 定理和类方程等深刻结论。</li>
+            </ul>
+            <p>群作用的威力在于：同一个群在不同集合上的作用揭示其不同侧面——组合侧面（轨道计数）、代数侧面（稳定子结构）与几何侧面（不变量）。掌握这一工具后，群论从封闭的代数体系走向与几何、拓扑、组合的深层对话。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>群作用将群的抽象元素“实体化”为集合上的变换。 轨道分解是集合按对称性的「粗粒化」。</p>
+            <p>群作用的核心抽象是将群元素「实体化」为集合上的双射变换。形式上，映射 \(G \times X \to X\) 把每个 \(g \in G\) 对应到 \(X\) 的一个置换 \(\sigma_g\)，且 \(g \mapsto \sigma_g\) 是群同态 \(G \to \mathrm{Sym}(X)\)。这正是 Cayley 定理的推广形式。</p>
+            <p>一旦有了群作用，集合 \(X\) 就被切割为互不相交的轨道：同一轨道内的元素可以通过群元素相互转化，不同轨道的元素则彼此不可达。这种分解是等价关系 \(x \sim y \Leftrightarrow \exists\, g,\; g \cdot x = y\) 的商集。</p>
+            <ul>
+              <li>每个元素 \(x\) 拥有一个<strong>稳定子</strong> \(G_x \leq G\)，它刻画了 \(x\) 被「固定」的程度。</li>
+              <li>轨道的大小与稳定子的阶通过指标关系 \(|\text{Orb}(x)| = [G:G_x]\) 精确联系。</li>
+            </ul>
+            <p>因此，群作用把两类信息——群的子群结构和集合的组合几何——编织在一起。从 Lagrange 定理到 Burnside 引理，从 Sylow 理论到分类定理，群作用都是不可或缺的统一语言。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>: 群作用 \(G \times X \to X\)，\((g, x) \mapsto g \cdot x\)，满足: - \(e \cdot x = x\) - \((gh) \cdot x = g \cdot (h \cdot x)\) <strong>轨道</strong>: \(\mathrm{Orb}(x) = \{g \cdot x : g \in G\}\)。 <strong>稳定子</strong>: \(\mathrm{Stab}(x) = G_x = \{g \in G : g \cdot x = x\}\)， \(G_x \leq G\)。 <strong>轨道-稳定子定理</strong>: \[|\mathrm{Orb}(x)| = [G : G_x] = |G| / |G_x|\] 证明: 建立双射 \(gG_x \leftrightarrow g \cdot x\)。 \(g_1 \cdot x = g_2 \cdot x \Leftrightarrow g_2^{-1}g_1 \in G_x \Leftrightarrow g_1 G_x = g_2 G_x\)。 <strong>轨道分解</strong>: \(X = \bigsqcup_{\text{orbits}} \mathrm{Orb}(x_i)\)， 故 \(|X| = \sum_i [G : G_{x_i}]\)。</p>
+            <h4>群作用的公理定义</h4>
+            <p>群 \(G\) 在集合 \(X\) 上的（左）作用是映射 \(G \times X \to X\)，\((g,x) \mapsto g \cdot x\)，满足：</p>
+            \[e \cdot x = x, \qquad (gh) \cdot x = g \cdot (h \cdot x)\]
+            <p>直觉：第一条说「什么都不做」确实什么都不变；第二条说「先做 \(h\) 再做 \(g\)」等于「做 \(gh\)」——群运算与变换的复合一致。等价地，\(\rho: G \to \mathrm{Sym}(X)\)，\(g \mapsto (x \mapsto g \cdot x)\) 是群同态。</p>
+
+            <h4>轨道与稳定子</h4>
+            <p>轨道 \(\mathrm{Orb}(x) = \{g \cdot x : g \in G\}\)，即从 \(x\) 出发群所能到达的全部点。稳定子 \(G_x = \{g \in G : g \cdot x = x\}\)，它是 \(G\) 的子群（封闭性：若 \(g,h \in G_x\) 则 \((gh) \cdot x = g \cdot (h \cdot x) = g \cdot x = x\)）。</p>
+            <p>直觉：轨道衡量「活动范围」，稳定子衡量「固定能力」。二者此消彼长——轨道越大，稳定子越小。</p>
+
+            <h4>轨道-稳定子定理</h4>
+            \[|\mathrm{Orb}(x)| = [G : G_x] = \frac{|G|}{|G_x|}\]
+            <p>证明的关键是构造双射 \(\varphi: G/G_x \to \mathrm{Orb}(x)\)，\(gG_x \mapsto g\cdot x\)。良定义性：\(g_1 G_x = g_2 G_x \Leftrightarrow g_2^{-1}g_1 \in G_x \Leftrightarrow g_1 \cdot x = g_2 \cdot x\)。直觉：轨道中的点与左陪集一一对应——「到达方式」按稳定子分组，每组恰好到达同一个点。</p>
+
+            <h4>轨道分解定理</h4>
+            <p>不同轨道互不相交，且覆盖整个 \(X\)：</p>
+            \[X = \bigsqcup_{i} \mathrm{Orb}(x_i), \qquad |X| = \sum_{i} [G : G_{x_i}]\]
+            <p>直觉：群作用在 \(X\) 上定义了等价关系，轨道就是等价类。这一分解是后续类方程和 Burnside 引理的出发点。</p>
+
+            <h4>传递作用与忠实作用</h4>
+            <p>若只有一个轨道（\(\mathrm{Orb}(x)=X\)），称作用<strong>传递</strong>；若同态 \(\rho\) 的核为 \(\{e\}\)，称作用<strong>忠实</strong>；若所有稳定子平凡，称作用<strong>自由</strong>。自由蕴含忠实，反之不然。</p>
+            <p>直觉：传递意味着「任意两点之间有对称变换连接」；忠实意味着「不同群元素作用效果不同」。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>分子的空间构型由旋转群作用下的轨道结构确定； Rubik 魔方的状态空间是群作用的典型实例。</p>
+            <p><strong>化学分子对称性</strong>：分子的点群（如甲烷的 \(T_d\) 群）作用于原子位置集合。轨道对应化学等价的原子——NMR 谱中同一轨道的原子产生相同化学位移，轨道-稳定子定理预测等价原子的个数。</p>
+            <p><strong>组合数学与图论</strong>：自同构群 \(\mathrm{Aut}(\Gamma)\) 作用于图 \(\Gamma\) 的顶点集。两个顶点在同一轨道当且仅当它们「结构等价」（有图自同构可互换）。这用于判定图的对称等级，简化最优化搜索空间。</p>
+            <p><strong>密码学中的群作用</strong>：椭圆曲线上的群 \(E(\mathbb{F}_q)\) 通过标量乘法作用于曲线点集。离散对数问题的困难性正源于「已知轨道中的两点、难以确定连接它们的群元素」，这构成了 ECDH 和 ECDSA 协议的安全基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(D_3\) 作用于正三角形的顶点集 \(\{1,2,3\}\)。 求顶点 1 的轨道和稳定子。 解答: \(\mathrm{Orb}(1) = \{1,2,3\}\)（任何顶点可转到任何其他顶点）。 \(G_1 = \{e, s_1\}\) 其中 \(s_1\) 是关于顶点 1 的反射。 验证: \(|\mathrm{Orb}(1)| = 3 = |D_3|/|G_1| = 6/2\)。✓ 易错点: 混淆轨道与稳定子的角色——轨道是集合 \(X\) 的子集， 稳定子是群 \(G\) 的子群。</p>
+            <p><strong>例题 1</strong>：\(D_3\) 作用于正三角形顶点集 \(\{1,2,3\}\)。求顶点 1 的轨道与稳定子。</p>
+            <p><strong>解</strong>：\(D_3 = \{e, r, r^2, s_1, s_2, s_3\}\)（3 次旋转 + 3 次反射），\(|D_3|=6\)。旋转 \(r\) 将 \(1\to2\to3\to1\)，故 \(\mathrm{Orb}(1)=\{1,2,3\}\)（传递作用）。稳定子 \(G_1 = \{g \in D_3 : g\cdot1=1\} = \{e, s_1\}\)（\(s_1\) 是过顶点 1 的反射轴）。验证：\(|\mathrm{Orb}(1)| = 3 = 6/2 = |D_3|/|G_1|\)。✓</p>
+            <p><strong>例题 2</strong>：设 \(|G|=20\)，\(G\) 作用于集合 \(X\)，\(x \in X\) 且 \(|\mathrm{Orb}(x)|=5\)。求 \(|G_x|\)，并列出 \(X\) 中可能出现的轨道长度。</p>
+            <p><strong>解</strong>：\(|G_x| = |G|/|\mathrm{Orb}(x)| = 20/5 = 4\)。轨道长度必须整除 \(|G|=20\)，可能值为 \(1, 2, 4, 5, 10, 20\)。若 \(|X|=12\)，则合法的轨道长度分解例如 \(5+5+2 = 12\) 或 \(10+2 = 12\) 或 \(4+4+4 = 12\)。</p>
+            <p><strong>常见错误 1</strong>：将轨道和稳定子的「宿主」搞反——轨道是集合 \(X\) 的子集，稳定子是群 \(G\) 的子群。口诀：「轨道在下面（\(X\)），稳定子在上面（\(G\)）」。</p>
+            <p><strong>常见错误 2</strong>：认为 \(|\mathrm{Orb}(x)| \cdot |G_x| = |X|\)。正确公式是 \(|\mathrm{Orb}(x)| \cdot |G_x| = |G|\)，右边是群的阶而非集合的大小。</p>
+            <p><strong>常见错误 3</strong>：忘记验证稳定子确实是子群。需要检查：\(e \in G_x\)；若 \(g, h \in G_x\) 则 \(gh \in G_x\)；若 \(g \in G_x\) 则 \(g^{-1} \in G_x\)。</p>
           </div>
         </div>
       </div>
@@ -474,35 +514,76 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当群 \(G\) 通过共轭作用于自身时，轨道就是共轭类。类方程将群的 阶分解为中心元素与非平凡共轭类的贡献，这是研究 \(p\)-群的关键工具， 直接推出 \(p\)-群的中心非平凡这一深刻结果。</p>
+            <p>群不仅能作用于外部集合，还能作用于「自身」——通过共轭映射 \(g \cdot x = gxg^{-1}\)。这一内部作用将群的元素按「相似程度」整理成共轭类，类方程（class equation）则把群的阶分解为中心贡献与各共轭类的大小之和。这看似简单的等式蕴含着 \(p\)-群理论中最深刻的结论之一。</p>
+            <ul>
+              <li><strong>对称群中的共轭</strong>：在 \(S_n\) 中，两个置换共轭当且仅当它们有相同的轮换类型——共轭类完全由轮换分拆决定，这使得 \(S_n\) 的表示论有了组合学的骨架。</li>
+              <li><strong>\(p\)-群的意外规律</strong>：若 \(|G|=p^n\)，类方程的模 \(p\) 分析直接推出中心 \(Z(G)\) 非平凡，从而 \(p^2\) 阶群必交换——一个纯粹的数论约束决定了代数结构。</li>
+              <li><strong>通往 Sylow 的桥梁</strong>：类方程是 Sylow 定理证明的关键步骤之一。通过分析共轭类大小的整除性，可以推断特定阶子群的存在与个数。</li>
+            </ul>
+            <p>类方程将群的「全局规模」分解为「局部对称性」的贡献，它是群论中由数论约束推导代数结论的典范模式。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>类方程是轨道分解公式应用于共轭作用的特殊情形。 它把群的规模信息转化为模算条件。</p>
+            <p>共轭作用是群作用理论在群内部的投影。群 \(G\) 通过 \(g \cdot x = gxg^{-1}\) 作用于自身，此时轨道 \(\mathrm{Orb}(x)\) 恰好是 \(x\) 的共轭类 \(\mathrm{Cl}(x)\)，而稳定子 \(G_x\) 恰好是 \(x\) 的中心化子 \(C_G(x) = \{g \in G : gx = xg\}\)。</p>
+            <p>一个元素的共轭类大小刻画了它「与其他元素的不可交换程度」。中心元素（与所有元素交换）的共轭类是单点集——这些"孤立轨道"汇聚成中心 \(Z(G)\)。</p>
+            <ul>
+              <li>类方程的本质是轨道分解：把单点轨道（中心元素）和非平凡轨道分开计数。</li>
+              <li>非平凡共轭类的大小必须整除 \(|G|\) 且大于 1，这一整除性约束是数论推理的入口。</li>
+            </ul>
+            <p>从这一抽象视角看，类方程不仅是计数工具，更是连接群论与数论的桥梁——群的阶的算术性质直接决定了群的代数结构。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>\(G\) 通过共轭作用于自身: \(g \cdot x = gxg^{-1}\)。 不动点: \(g \cdot x = x \Leftrightarrow gx = xg\)，即不动点集 = \(Z(G)\)。 轨道 = 共轭类 \(\mathrm{Cl}(x)\)。 <strong>类方程</strong>: \[|G| = |Z(G)| + \sum_{i} [G : C_G(g_i)]\] 其中求和遍历所有大小 \(>1\) 的共轭类的代表元 \(g_i\)。 <strong>\(p\)-群的中心非平凡</strong>: 设 \(|G| = p^n\)，\(p\) 素数。 类方程中每个 \([G:C_G(g_i)]\) 整除 \(p^n\) 且 \(>1\)， 故 \([G:C_G(g_i)]\) 是 \(p\) 的倍数。由此 \(|Z(G)| = |G| - \sum [G:C_G(g_i)] \equiv 0 \pmod{p}\)， 且 \(|Z(G)| \geq 1\)（含 \(e\)），故 \(|Z(G)| \geq p\)。</p>
+            <h4>共轭作用的定义</h4>
+            <p>\(G\) 通过共轭作用于自身：\(g \cdot x = gxg^{-1}\)。验证：\(e \cdot x = x\)，\((gh) \cdot x = g(hxh^{-1})g^{-1} = g \cdot (h \cdot x)\)。</p>
+            <p>直觉：共轭是「换一个视角看同一件事」——\(gxg^{-1}\) 是 \(x\) 在 \(g\) 变换下的「坐标变换」。</p>
+
+            <h4>共轭类与中心化子</h4>
+            <p>轨道 \(\mathrm{Orb}(x) = \{gxg^{-1}: g \in G\} = \mathrm{Cl}(x)\) 是共轭类。稳定子 \(G_x = \{g : gxg^{-1}=x\} = C_G(x)\) 是中心化子。由轨道-稳定子定理：</p>
+            \[|\mathrm{Cl}(x)| = [G : C_G(x)] = \frac{|G|}{|C_G(x)|}\]
+            <p>直觉：一个元素与越多元素交换（中心化子越大），它的共轭类就越小——「越对称的元素越孤独」。</p>
+
+            <h4>类方程</h4>
+            <p>将轨道分解 \(G = Z(G) \sqcup \bigsqcup_{i} \mathrm{Cl}(g_i)\) 取大小：</p>
+            \[|G| = |Z(G)| + \sum_{i} [G : C_G(g_i)]\]
+            <p>其中求和遍历所有大小 \(>1\) 的共轭类的代表元。直觉：群的阶 = 中心元素数 + 各非平凡共轭类的大小之和。</p>
+
+            <h4>\(p\)-群的中心非平凡</h4>
+            <p>设 \(|G| = p^n\)。类方程中每个 \([G:C_G(g_i)]\) 整除 \(p^n\) 且 \(>1\)，故 \(p \mid [G:C_G(g_i)]\)。于是：</p>
+            \[|Z(G)| = |G| - \sum_i [G:C_G(g_i)] \equiv 0 \pmod{p}\]
+            <p>又 \(|Z(G)| \geq 1\)（\(e \in Z(G)\)），故 \(|Z(G)| \geq p\)。直觉：\(p\)-群的阶「太整齐」，使得中心不可能只有单位元——这是数论对代数的刚性约束。</p>
+
+            <h4>\(p^2\) 阶群必为交换群</h4>
+            <p>若 \(|G|=p^2\)，则 \(|Z(G)| \in \{p, p^2\}\)。若 \(|Z(G)|=p\)，则 \(|G/Z(G)|=p\)，商群循环。但 \(G/Z(G)\) 循环蕴含 \(G\) 交换（任取 \(g = a^i z_1\)，\(h = a^j z_2\)，\(gh=hg\)），与 \(Z(G) \neq G\) 矛盾。故 \(|Z(G)|=p^2\)，即 \(G\) 交换。</p>
+            <p>直觉：\(p^2\) 阶群「没有空间」容纳非平凡的商循环结构，被迫全部交换。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\(p\)-群中心非平凡的结论直接用于 Sylow 定理的证明； 也推出 \(|G| = p^2\) 的群必为交换群。</p>
+            <p><strong>Sylow 定理的证明基础</strong>：类方程是证明 Sylow 第一定理（\(p^k \mid |G|\) 时 \(p^k\) 阶子群存在）的核心工具。通过对中心的 \(p\)-子群归纳，再用 \(G/Z(G)\) 的归纳假设完成论证。类方程保证了归纳基础——\(p\)-群的中心总有 \(p\) 阶元素。</p>
+            <p><strong>物理学中的粒子分类</strong>：基本粒子按对称群的共轭类（不可约表示）分类。在 \(\mathrm{SU}(3)\) 味对称性下，夸克组成的强子恰好对应群表示的权重图——类方程的思想在这里以表示论的形式重现。</p>
+            <p><strong>图论与网络分析</strong>：图的自同构群 \(\mathrm{Aut}(\Gamma)\) 共轭作用于顶点集。同一共轭类中的顶点具有相同的结构角色（度、介数中心性等），这用于社交网络中角色等价性的检测和网络压缩。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 证明阶为 \(p^2\) 的群是交换群。 解答: 由类方程，\(|Z(G)| \geq p\)。 若 \(|Z(G)| = p^2\)，则 \(G = Z(G)\) 交换。 若 \(|Z(G)| = p\)，则 \(G/Z(G)\) 阶为 \(p\)，是循环群。 但 \(G/Z(G)\) 循环 \(\Rightarrow\) \(G\) 交换（标准结论）， 与 \(|Z(G)| = p < p^2 = |G|\) 矛盾。故 \(|Z(G)| = p^2\)。 易错点: 忘记「\(G/Z(G)\) 循环 \(\Rightarrow\) \(G\) 交换」这个关键 引理。它的证明：若 \(G/Z(G) = \langle \bar{a} \rangle\)， 则任意 \(g = a^i z\)（\(z \in Z(G)\)），从而 \(gh = hg\)。</p>
+            <p><strong>例题 1</strong>：写出 \(S_3\) 的类方程。</p>
+            <p><strong>解</strong>：\(S_3\) 的轮换类型及对应元素：恒等 \(\{e\}\)（类型 \((1,1,1)\)，1 个）；对换 \(\{(12),(13),(23)\}\)（类型 \((2,1)\)，3 个）；3-轮换 \(\{(123),(132)\}\)（类型 \((3)\)，2 个）。中心 \(Z(S_3)=\{e\}\)，\(|Z(S_3)|=1\)。类方程：\(6 = 1 + 3 + 2\)。验证：\(|C_{S_3}((12))| = 6/3 = 2 = \{e, (12)\}\)，\(|C_{S_3}((123))| = 6/2 = 3 = \{e,(123),(132)\}\)。✓</p>
+            <p><strong>例题 2</strong>：设 \(|G|=125=5^3\)。证明 \(G\) 有非平凡的正规子群。</p>
+            <p><strong>解</strong>：由 \(p\)-群中心非平凡，\(|Z(G)| \geq 5\)。\(Z(G) \trianglelefteq G\)（中心总是正规子群）且 \(Z(G) \neq \{e\}\)。若 \(Z(G) \neq G\)，则 \(Z(G)\) 就是非平凡正规子群。若 \(Z(G)=G\)，则 \(G\) 交换，取任意 \(g \neq e\)，\(\langle g \rangle \trianglelefteq G\)（交换群的任何子群都正规）。无论哪种情况，\(G\) 都有非平凡正规子群，故 \(G\) 不是单群。</p>
+            <p><strong>常见错误 1</strong>：在类方程中把中心元素也写进求和项。正确做法是将大小为 1 的共轭类（即中心元素）单独提出，只对 \(|\mathrm{Cl}(g_i)|>1\) 的类求和。</p>
+            <p><strong>常见错误 2</strong>：将 \(p\)-群中心非平凡的结论推广到一般群。\(|Z(G)| \geq p\) 仅对 \(p\)-群成立；一般群的中心可以是平凡的（如 \(Z(S_3) = \{e\}\)）。</p>
+            <p><strong>常见错误 3</strong>：在证明「\(G/Z(G)\) 循环 \(\Rightarrow\) \(G\) 交换」时遗漏关键步骤。需明确写出：设 \(G/Z(G) = \langle \bar{a}\rangle\)，则 \(\forall g \in G\)，\(g = a^i z\)（\(z \in Z(G)\)），从而 \(g_1 g_2 = a^{i_1}z_1 \cdot a^{i_2}z_2 = a^{i_1+i_2}z_1 z_2 = g_2 g_1\)。</p>
           </div>
         </div>
       </div>
@@ -529,35 +610,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>用 \(n\) 种颜色涂染一条有 \(k\) 个珠子的项链，旋转后相同的方案算一种， 有多少种本质不同的染色？Burnside 引理用不动点计数解决这类 「在对称性下的计数」问题，广泛应用于组合学。</p>
+            <p>想象你要设计一条由 5 颗珠子组成的项链，每颗珠子有红、蓝两种颜色可选。如果不考虑旋转，共有 \(2^5=32\) 种染色方案；但项链可以旋转，旋转后本质相同的方案应合并计数——真正不同的有多少种？这个看似简单的组合问题，用朴素枚举极其繁琐，而 Burnside 引理提供了一个优雅的「不动点平均」公式，一步到位。</p>
+            <ul>
+              <li><strong>项链与手镯计数</strong>：珠宝设计中，旋转群（旋转）或二面体群（旋转+翻转）下的本质不同染色方案，可用 Burnside 引理系统计算。</li>
+              <li><strong>化学异构体</strong>：苯环 \(\text{C}_6\text{H}_6\) 上取代基的不同排布在旋转对称下有多少种非等价构型？中学化学中的「邻/间/对」分类，本质上就是 Burnside 计数。</li>
+              <li><strong>音乐与密码</strong>：十二音体系中，旋转等价的音列（移调）有多少类？循环码中等价码字的个数同样由此公式决定。</li>
+            </ul>
+            <p>Burnside 引理将「对称性下本质不同的配置数」化归为「每个对称变换的不动点数之平均」，把困难的轨道计数问题转化为可逐一检验的不动点统计，是组合数学中最常用的群论工具。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Burnside 引理将「轨道个数」转化为「平均不动点数」， 把难以直接计算的“本质不同的配置”转为可管理的求和。</p>
+            <p>Burnside 引理（也称 Cauchy-Frobenius 定理）的核心思想是双重计数（double counting）：对集合 \(\{(g,x) \in G \times X : g \cdot x = x\}\) 分别按 \(g\) 和按 \(x\) 求和，得到同一个总数的两种表达，由此推出轨道个数的公式。</p>
+            <p>从信息论的角度看，Burnside 引理计算的是「消除对称性冗余后的信息量」。未考虑对称性时有 \(|X|\) 种配置，考虑之后只剩 \(|X/G|\) 种——引理精确给出了对称性压缩的比率。</p>
+            <ul>
+              <li>不动点 \(\mathrm{Fix}(g) = \{x \in X : g \cdot x = x\}\) 衡量变换 \(g\) 的「刚度」——它保持不变的配置越多，说明 \(g\) 的对称约束越弱。</li>
+              <li>恒等元 \(e\) 固定一切（\(|\mathrm{Fix}(e)|=|X|\)），而作用最剧烈的元素不动点最少。</li>
+            </ul>
+            <p>Burnside 引理的推广——Pólya 计数定理——引入「循环指标多项式」，可以不仅数出轨道个数，还能按不变量分类（如按颜色分布的生成函数），但其基础思想仍是 Burnside 的不动点平均。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Burnside 引理</strong>（也称 Cauchy-Frobenius）: 设 \(G\) 作用于有限集 \(X\)，则轨道个数为 \[|X/G| = \frac{1}{|G|} \sum_{g \in G} |\mathrm{Fix}(g)|\] 其中 \(\mathrm{Fix}(g) = \{x \in X : g \cdot x = x\}\)。 证明: 统计集合 \(\{(g,x) : g \cdot x = x\}\) 的大小。 按 \(g\) 求和: \(\sum_g |\mathrm{Fix}(g)|\)。 按 \(x\) 求和: \(\sum_x |G_x| = \sum_x |G|/|\mathrm{Orb}(x)|\)。 后者 \(= |G| \cdot\)(\u6bcf个轨道贡献 1) \(= |G| \cdot |X/G|\)。 两边相等即得引理。</p>
+            <h4>Burnside 引理的陈述</h4>
+            <p>设有限群 \(G\) 作用于有限集 \(X\)，则轨道个数（即 \(X\) 在 \(G\)-作用下的等价类数）为：</p>
+            \[|X/G| = \frac{1}{|G|}\sum_{g \in G}|\mathrm{Fix}(g)|\]
+            <p>直觉：轨道个数 = 所有群元素的不动点数的平均值。每个群元素「投票」，最终取平均。</p>
+
+            <h4>双重计数证明</h4>
+            <p>设 \(S = \{(g,x) \in G \times X : g \cdot x = x\}\)。按 \(g\) 求和：\(|S| = \sum_{g \in G} |\mathrm{Fix}(g)|\)。按 \(x\) 求和：\(|S| = \sum_{x \in X} |G_x|\)。</p>
+            <p>对后者，由轨道-稳定子定理 \(|G_x| = |G|/|\mathrm{Orb}(x)|\)，故：</p>
+            \[\sum_{x \in X} |G_x| = |G| \sum_{x \in X} \frac{1}{|\mathrm{Orb}(x)|} = |G| \cdot |X/G|\]
+            <p>最后一步：同一轨道 \(\mathcal{O}\) 中每个 \(x\) 贡献 \(1/|\mathcal{O}|\)，共 \(|\mathcal{O}|\) 个点，合计贡献 1。两式相等即得引理。</p>
+
+            <h4>不动点的计算方法</h4>
+            <p>实际计算时，关键在于逐一确定每个 \(g \in G\) 的 \(|\mathrm{Fix}(g)|\)。对轮换分解为 \(c\) 个独立循环的 \(g\)，若用 \(k\) 种颜色涂 \(n\) 个位置，则 \(|\mathrm{Fix}(g)| = k^c\)（每个循环内颜色必须一致）。</p>
+            <p>直觉：\(g\) 把位置分成循环，每个循环内的对象必须相同才能被固定，故自由度等于循环数。</p>
+
+            <h4>从 Burnside 到 Pólya</h4>
+            <p>Pólya 计数定理将 Burnside 推广为生成函数版本。设循环指标 \(Z_G(x_1,\dots,x_n) = \frac{1}{|G|}\sum_{g} x_1^{c_1(g)} \cdots x_n^{c_n(g)}\)，代入 \(x_i = \sum_j w_j^i\) 即得按权分类的计数。Burnside 引理是 \(Z_G\) 在 \(x_i = k\) 时的特殊值。</p>
+            <p>直觉：Pólya 不仅告诉你「有多少种」，还告诉你「每种长什么样」，但核心仍是不动点统计。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>化学中分子式相同但空间结构不同的异构体计数； 编码理论中循环码的等价类计数。</p>
+            <p><strong>化学异构体计数</strong>：苯环的 6 个碳位置上可连接不同取代基。二面体群 \(D_6\)（12 个对称操作：6 旋转 + 6 反射）下，用 Burnside 引理可精确计算二取代苯的 3 种异构体（邻、间、对），三取代苯的 3 种异构体。这一方法对更复杂的分子（如萘、蒽）同样适用。</p>
+            <p><strong>编码理论中的等价码字</strong>：循环码中，码字 \(c\) 与其循环移位 \(\sigma^i(c)\) 被视为等价。循环群 \(C_n\) 作用于码字集合，Burnside 引理给出等价类数，即本质不同的码字个数。这用于设计纠错码的最优字典。</p>
+            <p><strong>艺术与建筑中的图案设计</strong>：瓷砖拼贴、壁纸图案和伊斯兰几何纹样都涉及平面对称群下的等价计数。17 种壁纸群中的每一种都对应一类 Burnside 计数问题——建筑师和设计师在使用群论选择「本质不同」的重复图案。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 用 2 种颜色涂染正方形的 4 个顶点，旋转下本质不同的 染色方案有多少种？ 解答: 旋转群 \(C_4 = \{e, r, r^2, r^3\}\)，\(|C_4| = 4\)。 \(|\mathrm{Fix}(e)| = 2^4 = 16\)，\(|\mathrm{Fix}(r)| = 2\)（全同色）， \(|\mathrm{Fix}(r^2)| = 2^2 = 4\)，\(|\mathrm{Fix}(r^3)| = 2\)。 \(|X/G| = (16+2+4+2)/4 = 6\)。 易错点: 忘记包含恒等变换 \(e\) 的贡献，或错误计算某个 轮转的不动点数。</p>
+            <p><strong>例题 1</strong>：用 2 种颜色涂染正方形的 4 个顶点，在旋转群 \(C_4 = \{e, r, r^2, r^3\}\) 下有多少种本质不同的方案？</p>
+            <p><strong>解</strong>：逐一计算不动点：\(|\mathrm{Fix}(e)| = 2^4 = 16\)（恒等元固定一切）；\(|\mathrm{Fix}(r)| = 2\)（4 顶点一个循环 → 颜色全同，\(2^1=2\)）；\(|\mathrm{Fix}(r^2)| = 4\)（两个 2-循环 \(\{1,3\},\{2,4\}\) → \(2^2=4\)）；\(|\mathrm{Fix}(r^3)| = 2\)（同 \(r\)）。Burnside：\(|X/C_4| = (16+2+4+2)/4 = 24/4 = 6\)。</p>
+            <p><strong>例题 2</strong>：用 2 种颜色涂正三角形的 3 个顶点，在旋转群 \(C_3\) 下有多少种不等价染色？若改用二面体群 \(D_3\)（含反射）呢？</p>
+            <p><strong>解</strong>：\(C_3 = \{e,r,r^2\}\)：\(|\mathrm{Fix}(e)|=2^3=8\)；\(|\mathrm{Fix}(r)|=|\mathrm{Fix}(r^2)|=2\)（全同色）。方案数 \(=(8+2+2)/3=4\)。改用 \(D_3\)（加入 3 次反射 \(s_1,s_2,s_3\)，各有 1 个不动点 + 1 个 2-循环，\(|\mathrm{Fix}(s_i)|=2^2=4\)）：\((8+2+2+4+4+4)/6=24/6=4\)。巧合的是两个群给出了相同结果，但一般情况下 \(|D_n|\) 增大会减少方案数。</p>
+            <p><strong>常见错误 1</strong>：忘记恒等元 \(e\) 的贡献。\(e\) 固定所有 \(|X|\) 个配置，它的 \(|\mathrm{Fix}(e)|\) 通常是最大的项，遗漏会导致答案偏小。</p>
+            <p><strong>常见错误 2</strong>：分母用 \(|X|\) 而非 \(|G|\)。正确公式是除以群的阶 \(|G|\)，不是集合的大小 \(|X|\)。</p>
+            <p><strong>常见错误 3</strong>：错误计算旋转的循环分解。例如正方形 \(r^2\)（180°旋转）将 \(\{1,3\}\) 和 \(\{2,4\}\) 各组成 2-循环，\(|\mathrm{Fix}(r^2)|=k^2\) 而非 \(k^4\) 或 \(k^1\)。务必画出旋转后的位置映射再数循环。</p>
           </div>
         </div>
       </div>
@@ -606,35 +724,75 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>群作用的视角统一了许多看似不相关的结果。Cayley 定理是 \(G\) 通过 左乘作用于自身的特例；类方程是共轭作用的轨道分解；Lagrange 定理可由轨道-稳定子定理推出。这个​视角体现了群作用的统一力量。</p>
+            <p>前三节分别引入了群作用的基本定义、共轭作用（类方程）和 Burnside 计数。但群作用远不止这些特例——Cayley 定理、作用于陪集集合、以及「最小素因子指标子群正规」等经典结论，全部统一在群作用的框架之下。这一综合视角是群论的「万能翻译器」：一个群作用问题，往往可以翻译为子群信息、同态信息或正规性信息。</p>
+            <ul>
+              <li><strong>Cayley 定理的群作用证明</strong>：群 \(G\) 通过左乘作用于自身，得到忠实同态 \(G \hookrightarrow S_{|G|}\)——每个群都是某个对称群的子群。证明只需一行，但威力巨大。</li>
+              <li><strong>陪集作用与正规性检测</strong>：群 \(G\) 左乘作用于陪集集 \(G/H\)，由此产生同态 \(\varphi: G \to S_{[G:H]}\)。\(\ker\varphi\) 是包含在 \(H\) 中的最大正规子群，这是「阶 + 指标 → 正规性」分析的关键技术。</li>
+              <li><strong>指标 = 最小素因子 → 正规</strong>：若 \([G:H]\) 等于 \(|G|\) 的最小素因子 \(p\)，则 \(H \trianglelefteq G\)。这个优雅的结论在 Sylow 分析和有限群分类中反复出现。</li>
+            </ul>
+            <p>本节将这些看似独立的定理串联起来，展示群作用如何提供一种统一而高效的推理范式——从同一个映射 \(G \times X \to X\) 出发，选择不同的 \(X\) 就能收获不同的定理。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>不同类型的群作用（左乘、共轭、作用于陪集集）统一在群作用的 抽象框架下，每种作用提供不同的结构信息。</p>
+            <p>群作用的综合应用建立在一个核心观察上：选择不同的被作用集合 \(X\)，就能从同一个群 \(G\) 中提取不同的信息。群作用 → 同态 \(\rho: G \to \mathrm{Sym}(X)\) → 核 \(\ker\rho\) → 正规子群和商群信息。这条逻辑链条是后续 Sylow 定理和群分类的技术基础。</p>
+            <p>左正则作用（\(X = G\)）给出 Cayley 定理；共轭作用（\(X = G\)，\(g \cdot x = gxg^{-1}\)）给出类方程；陪集作用（\(X = G/H\)）给出正规子群的判定工具。三种作用的共同模式是：</p>
+            <ul>
+              <li>作用的<strong>忠实性</strong>（核的大小）决定了 \(G\) 被嵌入 \(\mathrm{Sym}(X)\) 的「分辨率」。</li>
+              <li>作用的<strong>传递性</strong>（轨道数量）决定了等价类结构。</li>
+              <li>同态核 \(\ker\rho\) 是 \(G\) 的正规子群，其阶受 \(|G|\)、\(|X|\) 和 \(|H|\) 的整除关系约束。</li>
+            </ul>
+            <p>掌握了「选 \(X\) → 找同态 → 分析核」这一三步策略，即可将许多看似不同的群论问题纳入统一的分析框架。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Cayley 定理作为群作用</strong>: \(G\) 左乘作用于 \(X = G\)： \(g \cdot x = gx\)。轨道只有一个（\(X\) 本身）， \(G_x = \{e\}\)（忠实作用）。 由此 \(G \hookrightarrow S_G\)。 <strong>\(G\) 作用于陪集集</strong>: \(G\) 左乘作用于 \(G/H\)： \(g \cdot aH = gaH\)。左乘作用给出同态 \(\varphi: G \to S_{[G:H]}\)，\(\ker\varphi \subseteq H\)。 应用: 若 \([G:H] = n\)，则 \(G/\ker\varphi\) 嵌入 \(S_n\)， 由此 \(|G/\ker\varphi|\) 整除 \(n!\)。 特别地，若 \([G:H] = p\)（\(G\) 的最小素因子）， 则 \(\ker\varphi = H\)，即 \(H \trianglelefteq G\)。 \[[G:H] = p_{\min}(|G|) \Rightarrow H \trianglelefteq G\]</p>
+            <h4>Cayley 定理（左正则作用）</h4>
+            <p>令 \(X = G\)，定义 \(g \cdot x = gx\)（左乘）。则同态 \(\rho: G \to S_G\)，\(g \mapsto \lambda_g\)（\(\lambda_g(x) = gx\)）。若 \(\lambda_g = \mathrm{id}\) 则 \(gx = x\;\forall x\)，故 \(g = e\)，即 \(\ker\rho = \{e\}\)，\(\rho\) 是单射。</p>
+            \[G \hookrightarrow S_{|G|}\]
+            <p>直觉：每个群 \(G\) 都可以「忠实地」嵌入到足够大的对称群中——群的抽象运算完全可以用排列来实现。</p>
+
+            <h4>陪集作用与核</h4>
+            <p>\(G\) 左乘作用于陪集集 \(G/H\)：\(g \cdot aH = (ga)H\)。这给出同态 \(\varphi: G \to S_{[G:H]}\)。</p>
+            <p>核的刻画：\(\ker\varphi = \bigcap_{a \in G} aHa^{-1}\)，它是包含在 \(H\) 中的最大正规子群（称为 \(H\) 的<strong>正规核</strong> \(\mathrm{Core}_G(H)\)）。</p>
+            \[|G/\ker\varphi| \;\Big|\; [G:H]!\]
+            <p>直觉：\(G\) 在 \([G:H]\) 个陪集上「排列」，排列群的大小限制了 \(G/\ker\varphi\) 的大小——集合越小，群的信息损失越大，核就越大。</p>
+
+            <h4>指标为最小素因子时子群正规</h4>
+            <p>设 \(p = p_{\min}(|G|)\)，\([G:H] = p\)。由陪集作用，\(G/\ker\varphi\) 嵌入 \(S_p\)，故 \(|G/\ker\varphi| \mid p!\)。又 \(|G/\ker\varphi| \mid |G|\)，故 \(|G/\ker\varphi| \mid \gcd(|G|, p!)\)。</p>
+            <p>因为 \(p\) 是 \(|G|\) 的最小素因子，\(|G|\) 与 \((p-1)!\) 互素，故 \(\gcd(|G|, p!) = p\)。于是 \(|G/\ker\varphi| \mid p\)，即 \(|G/\ker\varphi| \in \{1, p\}\)。但 \(\ker\varphi \subseteq H\) 且 \([G:H] = p\)，故 \(|G/\ker\varphi| \geq p\)，从而 \(|G/\ker\varphi| = p\)，\(\ker\varphi = H\)。</p>
+            \[[G:H] = p_{\min}(|G|) \implies H \trianglelefteq G\]
+            <p>直觉：指标等于最小素因子时，「排列空间」太小，核被迫等于整个 \(H\)，子群不得不正规。</p>
+
+            <h4>忠实作用的应用：小群的嵌入</h4>
+            <p>由 Cayley 定理，\(|G| = n\) 的群嵌入 \(S_n\)。但如果 \(G\) 有指标较小的子群 \(H\)，陪集作用给出更紧凑的嵌入 \(G/\mathrm{Core}_G(H) \hookrightarrow S_{[G:H]}\)。例如 \(|G|=12\) 且 \(G\) 有指标 3 的子群 \(\Rightarrow G/N \hookrightarrow S_3\)，\(|N| \in \{2,4\}\)。</p>
+            <p>直觉：越大的子群（越小的指标）给出越精细的正规子群信息——这是 Sylow 分析的核心策略。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>“最小素因子指数的子群正规”用于 Sylow 分析中快速判断正规性。</p>
+            <p><strong>有限群分类预备</strong>：对于小阶群的完全分类（如 \(|G| \leq 60\)），系统地使用陪集作用是关键工具。对每个可能的子群 \(H\)，分析 \(\varphi: G \to S_{[G:H]}\) 的核，逐步排除不可能的群结构——这是「Sylow 分析 + 群作用」二元组的典型工作流程。</p>
+            <p><strong>拓扑学中的覆盖空间</strong>：拓扑空间 \(X\) 的基本群 \(\pi_1(X)\) 作用于万有覆盖空间 \(\tilde{X}\) 的纤维上。覆盖空间与 \(\pi_1(X)\) 的子群一一对应（Galois 对应），正规覆盖对应正规子群——这正是陪集作用在拓扑语言中的再现。</p>
+            <p><strong>数论中的 Galois 群</strong>：域扩张 \(L/K\) 的 Galois 群 \(\mathrm{Gal}(L/K)\) 自然作用于 \(L\) 的元素上。中间域与子群的 Galois 对应，正规扩张与正规子群的关系，都是群作用语言在代数数论中的核心翻译。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 设 \(|G| = 30\)，\(H \leq G\)，\(|H| = 15\)。证明 \(H \trianglelefteq G\)。 解答: \([G:H] = 2\)，2 是最小素因子（也是 \(|G|\) 的素因子）。 指数为 2 的子群必定正规。更一般地，指数等于最小 素因子时子群正规。 易错点: 以为“指数为任意素数的子群都正规”。 必须是 \(|G|\) 的<strong>最小</strong>素因子才行。</p>
+            <p><strong>例题 1</strong>：设 \(|G|=30\)，\(H \leq G\)，\(|H|=15\)。证明 \(H \trianglelefteq G\)。</p>
+            <p><strong>解</strong>：\([G:H] = 30/15 = 2\)。\(2\) 是 \(|G|=30\) 的最小素因子。由「指标等于最小素因子 \(\Rightarrow\) 正规」，\(H \trianglelefteq G\)。更直接地：\([G:H]=2\) 意味着只有两个陪集 \(H\) 和 \(G \setminus H\)，左右陪集自动相等。</p>
+            <p><strong>例题 2</strong>：设 \(|G|=12\)，\(H \leq G\)，\(|H|=3\)。\(G\) 作用于 \(G/H\) 给出 \(\varphi: G \to S_4\)。确定 \(|\ker\varphi|\) 的可能值。</p>
+            <p><strong>解</strong>：\(\ker\varphi \subseteq H\)，故 \(|\ker\varphi| \mid 3\)，可能为 1 或 3。\(G/\ker\varphi \hookrightarrow S_4\)，\(|G/\ker\varphi| \mid 24\)；又 \(|G/\ker\varphi| \mid 12\)。若 \(|\ker\varphi|=1\) 则 \(G\hookrightarrow S_4\)（阶 12 嵌入 \(S_4\)，可能：如 \(A_4\)）。若 \(|\ker\varphi|=3\) 则 \(H \trianglelefteq G\) 且 \(|G/H|=4 \hookrightarrow S_4\)。两种情况都允许存在，具体取决于 \(G\) 的结构。</p>
+            <p><strong>常见错误 1</strong>：认为「指标为任意素数的子群都正规」。必须是 \(|G|\) 的<strong>最小</strong>素因子。例如 \(|G|=12\)，\([G:H]=3\)，但 \(2 < 3\) 是更小的素因子，所以不能直接断言 \(H\) 正规。</p>
+            <p><strong>常见错误 2</strong>：混淆 Cayley 定理中的左乘作用和共轭作用。Cayley 用左乘 \(g \cdot x = gx\)（忠实、传递），共轭 \(g \cdot x = gxg^{-1}\) 用于类方程（通常不忠实，不传递）。</p>
+            <p><strong>常见错误 3</strong>：在陪集作用的核分析中遗忘约束条件。\(\ker\varphi\) 的阶必须同时满足：(1) 整除 \(|H|\)；(2) \(|G/\ker\varphi|\) 整除 \([G:H]!\)；(3) \(|G/\ker\varphi|\) 整除 \(|G|\)。忘记任一条件都会导致错误的可能值。</p>
           </div>
         </div>
       </div>

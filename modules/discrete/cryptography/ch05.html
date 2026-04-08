@@ -394,6 +394,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>迭代构造的核心抽象是<strong>域扩展</strong>（Domain Extension）：给定一个固定输入长度的"压缩函数" \(f:\{0,1\}^n \times \{0,1\}^b \to \{0,1\}^n\)，如何安全地将其提升为接受任意长度输入的散列函数 \(H:\{0,1\}^* \to \{0,1\}^n\)？</p>
+            <p>Merkle-Damgård 的策略是<strong>串行链式处理</strong>：每个消息块与前一步的输出一起喂入压缩函数，安全性从 \(f\) 的抗碰撞性直接归约到 \(H\) 的抗碰撞性。但这种串行结构导致了长度扩展漏洞——攻击者可从 \(H(m)\) 的值继续"追加"计算。</p>
+            <p>海绵构造采用了不同范式：使用一个<strong>大状态置换</strong>（如 Keccak 的 1600 位状态），将其分为公开的"速率"部分 \(r\) 和隐藏的"容量"部分 \(c\)。容量 \(c\) 从不直接暴露，天然阻断了长度扩展。<strong>MD 归约到压缩函数安全性，Sponge 归约到置换的随机性</strong>——两种截然不同的安全模型。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -494,6 +503,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>散列函数在密码协议中的应用远超简单的摘要计算。HMAC 用散列函数 构造安全 MAC；密钥派生函数(KDF)从主密钥生成多个子密钥； 承诺方案(Commitment)实现「先抛硬币再揭晓」的公平协议。 散列函数是密码协议中的万能胶水。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>散列函数在密码协议中扮演的角色可统一为<strong>随机预言（Random Oracle）</strong>的近似实现：一个将任意输入映射到均匀随机输出的理想化黑盒。不同应用利用了随机预言的不同性质——MAC 利用不可伪造性，KDF 利用输出的伪随机性，承诺方案利用隐藏性。</p>
+            <p>HMAC 的双层结构解决了直接用 \(H(k\|m)\) 构造 MAC 的安全缺陷。内层 \(H((k \oplus \text{ipad})\|m)\) 先将密钥与消息绑定，外层 \(H((k \oplus \text{opad})\|\cdot)\) 再"封装"一次，<strong>阻断了长度扩展攻击路径</strong>。安全性可在仅假设压缩函数是 PRF 的条件下严格证明。</p>
+            <p>承诺方案要求两个看似矛盾的性质：<strong>隐藏性</strong>（承诺不泄露消息）和<strong>绑定性</strong>（不能事后更改消息）。散列函数的原像抗性保证隐藏性，碰撞抗性保证绑定性——恰好利用了散列函数的两个核心安全属性。</p>
           </div>
         </div>
 

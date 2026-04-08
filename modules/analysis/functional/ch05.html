@@ -530,10 +530,29 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Hahn-Banach 的推论建立了"对偶视角"的合法性：每个非零向量都能被某个连续线性泛函"看见"（范数达到性），而不同的向量一定能被某个泛函区分（分离点性质）。</p>
+            <p>这些推论的核心思想是"用线性泛函替代直接的几何操作"。几何上需要测量向量的"大小"或判断它是否属于某个子空间，可以转而考察所有连续线性泛函对它的作用值。</p>
+            <p>有限维中上述一切是显然的（线性代数的对偶理论），但在无穷维中异常深刻——对偶空间的结构可能与原空间完全不同（如 \(l^1\) 的对偶是 \(l^\infty\)），但仍能充分"检测"原空间。</p>
+            <p>范数公式 \(\|x\| = \sup\{|f(x)| : \|f\| \leq 1\}\) 将几何量（范数）转化为代数量（泛函求值的上确界），是连接几何和代数的桥梁。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
             <p><strong>推论 1 (范数达到性)</strong>：\(\forall x \in X\), \(\exists f \in X^*\) 使 \(f(x) = \|x\|\), \(\|f\| = 1\)。 证明：在 \(Y = \text{span}\{x\}\) 上定义 \(g(\alpha x) = \alpha \|x\|\)， \(\|g\| = 1\)，由 Hahn-Banach 延拓。 <strong>推论 2 (对偶分离点)</strong>：若 \(f(x) = f(y)\) 对所有 \(f \in X^*\)，则 \(x = y\)。 即 \(X^*\) 分离 \(X\) 中的点。 <strong>推论 3 (范数公式)</strong>： \[\|x\| = \sup\{|f(x)| : f \in X^*,\; \|f\| \leq 1\}\] <strong>推论 4 (子空间闭包)</strong>：\(x \in \overline{Y}\)（\(Y\) 为子空间） \(\Leftrightarrow\) 对所有 \(f \in X^*\)，\(f|_Y = 0 \Rightarrow f(x) = 0\)。 证明：若 \(x \notin \overline{Y}\)，在 \(\overline{Y} \oplus \text{span}\{x\}\) 上定义 \(f = 0\) on \(\overline{Y}\), \(f(x) = 1\)，延拓即得。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>优化理论</strong>：对偶范数公式是 Lagrange 对偶性的泛函分析版本——原问题的最优值通过对偶变量表达，线性规划的强对偶性是有限维特例。</p>
+            <p><strong>逼近论</strong>：对偶分离推论用于证明稠密性结果的现代版本：若泛函在子集上为零则在整个空间上为零，这是 Weierstrass 逼近定理和 Müntz 定理的统一证明框架。</p>
+            <p><strong>PDE</strong>：弱解的存在性证明中，Hahn-Banach 的延拓保证了定义在子空间上的"解泛函"可以延拓到全空间，为 Lax-Milgram 定理提供理论支撑。</p>
           </div>
         </div>
 
@@ -568,6 +587,16 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>Hahn-Banach 定理和对偶理论不仅是抽象工具，还直接联系到 凸优化中的 Lagrange 对偶和最优化条件。从函数空间的角度看， "原问题"和"对偶问题"之间的间隙由分离定理控制——强对偶性 等价于超平面分离的某种"完美"实现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>对偶理论的核心思路是将"空间中的集合与点"的关系转化为"泛函空间中的对应物"，通过极集（polar set）建立两者之间的精确对应。</p>
+            <p>双极定理 \((A^\circ)^\circ = \overline{\text{conv}}(A \cup \{0\})\) 是这一对应的精确表述：一个集合经过"两次对偶化"后回到它的弱闭凸包。这意味着弱闭凸集完全由对偶空间中的线性泛函决定。</p>
+            <p>Goldstine 定理承接对偶理论：即使 \(X\) 不自反，\(X\) 在 \(X^{**}\) 中也在弱*拓扑下"稠密"——自反性恰好测量这种稠密何时成为全等。</p>
+            <p>这种"对偶化"方法的力量在于：对偶对 \((X, X^*)\) 具有天然的拓扑-代数耦合结构，使问题可以在最方便的一侧求解。</p>
           </div>
         </div>
 

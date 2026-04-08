@@ -464,6 +464,14 @@
             <p><strong>第 2 步</strong>：验证 \(y_2\) 是解。\(y_2'' - 3y_2' + 2y_2 = 4e^{2x} - 6e^{2x} + 2e^{2x} = 0\)。✓</p>
             <p><strong>第 3 步</strong>：验证线性无关。\(y_1/y_2 = e^{-x}\) 非常数函数，故线性无关。✓</p>
             <p><strong>结论</strong>：通解 \(y = c_1 e^x + c_2 e^{2x}\)。</p>
+
+            <h4>例题 2：非齐次初值问题</h4>
+            <p>求 \(y'' - 3y' + 2y = 4e^{3x}\)，\(y(0) = 1\)，\(y'(0) = 0\) 的解。</p>
+            <p><strong>第 1 步</strong>：齐次通解 \(y_h = c_1 e^x + c_2 e^{2x}\)（由例题 1 已知）。</p>
+            <p><strong>第 2 步</strong>：\(\alpha = 3\) 不是特征根，设 \(y_p = Ae^{3x}\)。代入得 \(9A - 9A + 2A = 4\)，\(A = 2\)。</p>
+            <p><strong>第 3 步</strong>：通解 \(y = c_1 e^x + c_2 e^{2x} + 2e^{3x}\)。由 \(y(0) = c_1 + c_2 + 2 = 1\)，\(y'(0) = c_1 + 2c_2 + 6 = 0\)，解得 \(c_1 = 2\)，\(c_2 = -3\)。</p>
+            <p><strong>答案</strong>：\(y = 2e^x - 3e^{2x} + 2e^{3x}\)。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 找到 \(n\) 个解就以为是基本解组。\(y_1 = e^x\) 和 \(y_2 = 3e^x\) 都是解，但 \(y_2 = 3y_1\)，线性相关，不构成基。</li>
@@ -589,6 +597,14 @@
             \[y_2 = y_1 \int \frac{e^{-\int(-2/x)\,dx}}{y_1^2}\,dx = x \int \frac{e^{2\ln x}}{x^2}\,dx = x \int \frac{x^2}{x^2}\,dx = x \int dx = x^2\]
             <p><strong>第 3 步</strong>：验证 \(y_2 = x^2\)：\(x^2(2) - 2x(2x) + 2(x^2) = 2x^2 - 4x^2 + 2x^2 = 0\)。✓</p>
             <p><strong>结论</strong>：通解 \(y = c_1 x + c_2 x^2\)。</p>
+
+            <h4>例题 2：利用 Abel 公式估计 Wronskian</h4>
+            <p>已知 \(y'' + \sin(x)\,y' + e^x y = 0\) 的两个解满足 \(W(0) = 3\)。求 \(W(\pi)\)。</p>
+            <p><strong>第 1 步</strong>：标准形中 \(p(x) = \sin x\)。</p>
+            <p><strong>第 2 步</strong>：Abel 公式 \(W(x) = W(0)\exp\!\left(-\int_0^x \sin s\,ds\right) = 3\exp(\cos x - 1)\)。</p>
+            <p><strong>第 3 步</strong>：\(W(\pi) = 3\exp(\cos\pi - 1) = 3e^{-2}\)。</p>
+            <p><strong>注意</strong>：无需显式解，Abel 公式仅从系数 \(p(x)\) 即可确定 Wronskian 的演化。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 对<strong>一般函数</strong>误用 Wronskian 判据。\(W \neq 0 \Rightarrow\) 线性无关对任何函数成立，但 \(W = 0 \Rightarrow\) 线性相关<strong>仅对 ODE 的解</strong>成立。反例：\(y_1 = x^2\)，\(y_2 = x|x|\)，\(W(0) = 0\) 但线性无关（它们不是同一个 ODE 的解）。</li>
@@ -660,6 +676,7 @@
             \[e^{\lambda x},\; xe^{\lambda x},\; x^2 e^{\lambda x},\; \ldots,\; x^{k-1}e^{\lambda x}\]
             <p><strong>为什么 \(x e^{\lambda x}\) 是解？</strong> 考虑 \((D - \lambda)^2\)。令 \(y = e^{\lambda x} v(x)\)，则 \((D - \lambda)[e^{\lambda x}v] = e^{\lambda x}v'\)，再作用一次 \((D - \lambda)[e^{\lambda x}v'] = e^{\lambda x}v''\)。所以 \((D-\lambda)^2 y = 0 \Leftrightarrow v'' = 0 \Leftrightarrow v = c_1 + c_2 x\)。</p>
 
+            <h4>3. 共轭复根与振荡解</h4>
             <p><strong>情形 3：共轭复根</strong> \(\lambda = \alpha \pm i\beta\)（\(\beta \neq 0\)）。</p>
             <p>由 Euler 公式 \(e^{i\theta} = \cos\theta + i\sin\theta\)：</p>
             \[e^{(\alpha + i\beta)x} = e^{\alpha x}(\cos\beta x + i\sin\beta x)\]
@@ -667,7 +684,7 @@
             \[e^{\alpha x}(c_1\cos\beta x + c_2\sin\beta x)\]
             <p>若 \(\alpha \pm i\beta\) 是 \(k\) 重复根，则还需乘上 \(1, x, \ldots, x^{k-1}\)。</p>
 
-            <h4>3. 汇总：\(n\) 阶方程的基本解组构造</h4>
+            <h4>4. 汇总：\(n\) 阶方程的基本解组构造</h4>
             <p>将特征多项式在 \(\mathbb{C}\) 上因式分解，每个根按以上规则贡献基本解，共 \(n\) 个线性无关解。</p>
           </div>
         </div>
@@ -694,6 +711,14 @@
             <p><strong>第 2 步</strong>：识别因式分解 \((\lambda - 1)^3 = 0\)。三重根 \(\lambda = 1\)。</p>
             <p><strong>第 3 步</strong>：基本解组 \(\{e^x,\; xe^x,\; x^2 e^x\}\)。</p>
             <p><strong>通解</strong>：\(y = (c_1 + c_2 x + c_3 x^2)e^x\)。</p>
+
+            <h4>例题 2：复根方程</h4>
+            <p>求 \(y'' + 2y' + 5y = 0\) 的通解。</p>
+            <p><strong>第 1 步</strong>：特征方程 \(\lambda^2 + 2\lambda + 5 = 0\)，\(\Delta = 4 - 20 = -16\)。</p>
+            <p><strong>第 2 步</strong>：\(\lambda = (-2 \pm 4i)/2 = -1 \pm 2i\)。\(\alpha = -1\)，\(\beta = 2\)。</p>
+            <p><strong>通解</strong>：\(y = e^{-x}(c_1\cos 2x + c_2\sin 2x)\)。</p>
+            <p><strong>物理含义</strong>：\(e^{-x}\) 为衰减包络，三角函数描述频率 2 的振荡——典型的欠阻尼响应。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 重根时忘记乘 \(x\) 的幂次。三重根 \(\lambda = 1\) 给出 \(e^x, xe^x, x^2e^x\)，而不是三个相同的 \(e^x\)。</li>
@@ -739,10 +764,12 @@
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>非齐次方程的求解有两条路径，各有适用范围和代数内核：</p>
             <ul>
               <li><strong>待定系数法的代数本质</strong>：由于 \(D(e^{\alpha x}) = \alpha e^{\alpha x}\)，指数-多项式-三角函数构成的函数类对微分算子 \(p(D)\) 封闭。因此可以在有限维子空间中「猜」特解的形式，将问题化为代数方程组。</li>
               <li><strong>常数变易法的泛函分析视角</strong>：将齐次通解中的常数 \(c_i\) 替换为待定函数 \(u_i(x)\)，通过额外约束条件使系统变为可解的代数系统。本质上是利用 Wronskian 矩阵的可逆性。</li>
             </ul>
+            <p>两种方法互为补充：待定系数法在常系数+特殊右端时效率最高，常数变易法则对任意连续右端 \(g(x)\) 普遍适用。</p>
           </div>
         </div>
 
@@ -767,6 +794,9 @@
 
             <h4>3. 共振项的处理</h4>
             <p>对 \(g(x) = e^{\alpha x}[P\cos\beta x + Q\sin\beta x]\)，将 \(\alpha + i\beta\) 视为「复频率」。若 \(\alpha + i\beta\) 是特征根的 \(s\) 重根，则特解中需乘 \(x^s\)。</p>
+
+            <h4>4. 叠加原理与右端分解</h4>
+            <p>若右端 \(g(x) = g_1(x) + g_2(x) + \cdots\)，由线性性可分别对每个 \(g_i\) 求特解 \(y_{p,i}\)，再相加得 \(y_p = \sum y_{p,i}\)。例如 \(g = 3e^{2x} + 5\cos x\) 可分解为两个独立子问题，各自用待定系数法求解后求和。这是线性叠加原理在非齐次方程中的直接应用。</p>
           </div>
         </div>
 
@@ -790,6 +820,14 @@
             \[y_p'' - y_p = A(2 + x)e^x - Axe^x = 2Ae^x = e^x\]
             <p>\(A = 1/2\)。</p>
             <p><strong>通解</strong>：\(y = c_1 e^x + c_2 e^{-x} + \frac{1}{2}xe^x\)。</p>
+
+            <h4>例题 2：常数变易法</h4>
+            <p>求 \(y'' + y = \sec x\) 的特解。</p>
+            <p><strong>第 1 步</strong>：齐次解 \(y_1 = \cos x\)，\(y_2 = \sin x\)，\(W = 1\)。</p>
+            <p><strong>第 2 步</strong>：\(u_1' = -y_2 g / W = -\sin x \sec x = -\tan x\)，\(u_2' = y_1 g / W = \cos x \sec x = 1\)。</p>
+            <p><strong>第 3 步</strong>：\(u_1 = \ln|\cos x|\)，\(u_2 = x\)。</p>
+            <p><strong>特解</strong>：\(y_p = \cos x \ln|\cos x| + x\sin x\)。此例中 \(\sec x\) 不是指数-多项式类，待定系数法不适用，必须用常数变易法。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 使用待定系数法时忘记检查 \(e^{\alpha x}\) 是否已是齐次解。若 \(\alpha\) 是 \(s\) 重特征根，必须乘 \(x^s\)——否则代入后右端恒为零，无法确定系数。</li>

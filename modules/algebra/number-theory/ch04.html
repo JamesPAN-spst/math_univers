@@ -394,7 +394,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>二次同余 \(x^2 \equiv a \pmod{p}\) 是否有解？这个问题自然地引出了“二次 剩余”的概念。Euler 判别法给出了简洁的判定条件：\(a^{(p-1)/2}\) 的值决定了 \(a\) 是否为二次剩余。这是理解二次互反律的第一步。</p>
+            <p>二次同余 \(x^2 \equiv a \pmod{p}\) 是否有解？这个问题自然地引出了「二次剩余」的概念。</p>
+            <ul>
+              <li>模 7 的 QR 集 \(= \{1,2,4\}\)：\(1^2=1, 2^2=4, 3^2=2\)，所有平方仅覆盖一半非零元素；</li>
+              <li>Euler 判别法：\(a^{(p-1)/2} \equiv 1\) 则 \(a\) 为 QR，\(\equiv -1\) 则为 NR——无需穷举所有平方；</li>
+              <li>椭圆曲线上的点压缩：判断 \(y^2 \equiv f(x) \pmod{p}\) 是否有解就是二次剩余问题。</li>
+            </ul>
+            <p>QR/NR 的分类把乘法群一分为二，这种结构是理解二次互反律的第一步。</p>
           </div>
         </div>
 
@@ -415,7 +421,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>判断二次剩余性在椅圆曲线密码学中用于点压缩。</p>
+            <p><strong>椭圆曲线密码</strong>：判断 \(y^2 \equiv x^3+ax+b \pmod{p}\) 是否有解决定了曲线点的存在性，点压缩方案将点 \((x,y)\) 存储为 \((x, \text{QR标志})\)，体积减半。</p>
+            <p><strong>音频处理</strong>：二次剩余序列在设计循环差集 (cyclic difference set) 时提供低自相关序列，广泛应用于声学散射体设计与雷达波形。</p>
+            <p><strong>随机性检验</strong>：数值序列的二次剩余统计是 NIST SP 800-22 随机性测试套件的标准指标之一，用于评估伪随机发生器的质量。</p>
           </div>
         </div>
 
@@ -474,7 +482,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>为了系统地研究二次剩余，我们引入 Legendre 符号 \((a/p)\) 将“是/否 为二次剩余”编码为 \(+1/-1/0\)。它的乘法性使得复杂问题可以分解为 简单情况的组合。</p>
+            <p>为了系统研究二次剩余，我们引入 Legendre 符号 \((a/p)\) 将「是/否为二次剩余」编码为 \(+1/-1/0\)。</p>
+            <ul>
+              <li>\((3/7) = -1\)：因为 \(3^3 = 27 \equiv 6 \equiv -1 \pmod{7}\)，3 是模 7 的 NR；</li>
+              <li>乘法性 \((ab/p) = (a/p)(b/p)\) 将复杂问题分解为素因子的简单情形；</li>
+              <li>\((-1/p)\) 和 \((2/p)\) 的显式公式提供了起始值，配合互反律可递归计算任意 Legendre 符号。</li>
+            </ul>
+            <p>Legendre 符号作为 \((\mathbb{Z}/p\mathbb{Z})^* \to \{\pm 1\}\) 的群同态，把二次剩余问题纳入了群论框架。</p>
           </div>
         </div>
 
@@ -489,6 +503,15 @@
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
             <p><strong>定义</strong>: \(p\) 奇素数， \((a/p) = \begin{cases} 0 & p \mid a \\ 1 & a \text{ 是 QR mod } p \\ -1 & a \text{ 是 NR mod } p \end{cases}\) <strong>性质</strong>: 1) \((a/p) \equiv a^{(p-1)/2} \pmod{p}\)（Euler 判别法） 2) <strong>乘法性</strong>: \((ab/p) = (a/p)(b/p)\) 3) \(a \equiv b \pmod{p} \Rightarrow (a/p) = (b/p)\) 4) <strong>\(-1\) 的剩余性</strong>: \((-1/p) = (-1)^{(p-1)/2}\)， 即 \(-1\) 是 QR \(\Leftrightarrow p \equiv 1 \pmod{4}\)。 5) <strong>2 的剩余性</strong>: \((2/p) = (-1)^{(p^2-1)/8}\)， 即 2 是 QR \(\Leftrightarrow p \equiv \pm 1 \pmod{8}\)。 \[(-1/p) = (-1)^{(p-1)/2}, \quad (2/p) = (-1)^{(p^2-1)/8}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>密码学</strong>：椭圆曲线密码 (ECC) 的构造中，需要判断 \(y^2 \equiv x^3 + ax + b \pmod{p}\) 是否有解。Legendre 符号提供快速判定，直接影响曲线点的计数和安全参数选择。</p>
+            <p><strong>算法设计</strong>：Tonelli-Shanks 平方根算法以 Euler 判别法为前置检测——先用 \(a^{(p-1)/2}\) 确认 \(a\) 是 QR，再提取模 \(p\) 平方根。该算法广泛用于有限域运算库。</p>
+            <p><strong>编码理论</strong>：二次剩余码 (Quadratic Residue Code) 用 QR 集合定义生成多项式，其自对偶性来源于 Legendre 符号的乘法性，在纠错码设计中具有特殊的代数优势。</p>
           </div>
         </div>
 
@@ -522,7 +545,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>二次互反律是「数论的宝石」（Gauss）。它揭示了两个不同素数 \(p, q\) 之间的二次剩余性的对称关系: \((p/q)\) 和 \((q/p)\) 之间有 精确的关联。配合 \((-1/p)\) 和 \((2/p)\) 的公式，可以计算任意 Legendre 符号。</p>
+            <p>二次互反律是「数论的宝石」（Gauss）。它揭示了两个不同素数 \(p, q\) 之间二次剩余性的对称关系。</p>
+            <ul>
+              <li>\((3/7)(7/3) = (-1)^{1 \times 3} = -1\)：因为 \(p=3, q=7\) 都 \(\equiv 3 \pmod{4}\)，互反律有负号；</li>
+              <li>计算 \((31/97)\)：直接穷举需检查 48 个平方，而互反律递归只需几步；</li>
+              <li>Gauss 为这个定理给出了 8 种证明，其推广（Artin 互反律）是现代数论的核心主题。</li>
+            </ul>
+            <p>配合 \((-1/p)\) 和 \((2/p)\) 的显式公式，互反律使得任意 Legendre 符号都可以以类似欧几里得算法的方式递归计算。</p>
           </div>
         </div>
 
@@ -543,7 +572,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>互反律是代数数论的起点，其推广（Artin 互反律、朗兰兹互反律） 是现代数论的核心主题。</p>
+            <p><strong>代数数论</strong>：二次互反律是类域论和 Artin 互反律的原型，其推广是 Langlands 纲领的核心主题之一。</p>
+            <p><strong>算法设计</strong>：互反律使得 Legendre 符号可以类似欧几里得算法递归计算，复杂度 \(O(\log^2 p)\)，这在大素数场景下是唯一可行的方法。</p>
+            <p><strong>素数分布</strong>：二次剩余的分布规律与 Dirichlet \(L\)-函数相关，互反律保证了 \(L(1,\chi)\neq 0\)，从而推导出等差数列中素数的无穷性（Dirichlet 定理）。</p>
           </div>
         </div>
 
@@ -577,7 +608,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Legendre 符号要求分母为素数，Jacobi 符号将其推广到任意奇数分母， 使得互反律可以在不分解分母的情况下递归计算，极大地提高了实用性。</p>
+            <p>Legendre 符号要求分母为素数，Jacobi 符号将其推广到任意奇数分母，使得互反律可在不分解分母的情况下递归计算。</p>
+            <ul>
+              <li>\((2/15) = (2/3)(2/5) = (-1)(-1) = 1\)，但 \(x^2 \equiv 2 \pmod{15}\) 实际无解——Jacobi 符号 \(=1\) 不保证可解性；</li>
+              <li>Solovay-Strassen 素性测试用 Jacobi 符号与 Euler 判别法对比来检测合数；</li>
+              <li>二次筛等分解算法用 Jacobi 符号快速筛选光滑关系而无需分解模数。</li>
+            </ul>
+            <p>这种推广牺牲了「直接判定 QR」的能力，却换来了算法上的巨大便利——这是一个精妙的权衡。</p>
           </div>
         </div>
 
@@ -598,7 +635,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Jacobi 符号的快速计算算法用于 Solovay-Strassen 素性测试。</p>
+            <p><strong>素性检验</strong>：Solovay-Strassen 算法比较 \(a^{(n-1)/2} \bmod n\) 与 Jacobi 符号 \((a/n)\)，不一致则 \(n\) 必合，这是早期概率素性测试的代表。</p>
+            <p><strong>整数分解</strong>：二次筛 (quadratic sieve) 和数域筛 (NFS) 用 Jacobi 符号快速判断候选光滑数是否为 QR，加速筛选步骤。</p>
+            <p><strong>编码理论</strong>：Jacobi 和在二次剩余码的最小距离分析中起关键作用，其乘法性简化了对合数模上 QR 集合的结构分析。</p>
           </div>
         </div>
 

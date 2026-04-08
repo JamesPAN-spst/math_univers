@@ -452,6 +452,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>ElGamal 的抽象思路是将加密建立在群上的<strong>单向函数</strong>之上：给定生成元 \(g\) 和指数 \(x\)，计算 \(g^x\) 容易，但从 \(g^x\) 恢复 \(x\)（离散对数问题，DLP）被认为是困难的。公钥密码的本质就是利用这种"正向容易、逆向困难"的不对称性。</p>
+            <p>与 RSA 依赖大整数分解不同，ElGamal 的安全性归约到<strong>DDH 假设</strong>（Decisional Diffie-Hellman）：给定 \((g, g^a, g^b)\)，无法区分 \(g^{ab}\) 与随机群元素。DDH 是比 DLP 更强（更容易被打破）的假设，但在素数阶子群中被广泛信任。</p>
+            <p>ElGamal 的关键创新是<strong>概率加密</strong>——每次加密引入随机数 \(r\)，使相同明文产生不同密文。这直接满足 IND-CPA（选择明文下的不可区分性），而确定性加密（如教科书 RSA）无法做到。代价是密文扩展为明文的两倍。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -497,6 +506,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>RSA 在实际使用中需要小心实现——教科书 RSA 有多种攻击方式。 密钥长度选择、填充方案（OAEP）、实现层面的侧信道攻击（计时攻击） 都关乎RSA 的实际安全性。同时，量子计算机的 Shor 算法对 RSA 构成根本性威胁，推动了后量子密码学的发展。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>RSA 安全性分析的核心抽象框架是<strong>安全级别的层次化</strong>：从数学难题（分解问题）到方案安全性（IND-CPA/CCA），中间可能存在"间隙攻击"——方案的实现或参数选择可能绕过底层难题的保护。</p>
+            <p>教科书 RSA 是确定性加密，天然不满足 IND-CPA。更关键的是，RSA 的<strong>乘法同态性</strong> \(E(m_1) \cdot E(m_2) = E(m_1 m_2)\) 使得攻击者可以构造从未见过的明文的密文。OAEP 填充通过引入随机性和冗余结构打破了这种代数关系。</p>
+            <p>从更高层面看，RSA 的安全性还受到<strong>计算模型</strong>的约束：经典计算机下最优分解算法是数域筛法 \(L_n[1/3]\)（亚指数），但量子计算机上 Shor 算法将分解降至多项式时间 \(O((\log n)^3)\)。这迫使整个公钥密码体系向格基密码（LWE/RLWE）迁移。</p>
           </div>
         </div>
 

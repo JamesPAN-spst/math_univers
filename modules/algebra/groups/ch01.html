@@ -394,35 +394,83 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在代数学的发展中，人们发现方程的对称变换、几何图形的旋转与反射、 矩阵乘法等看似迥异的数学对象服从相同的运算规律。19世纪 Galois 和 Cayley 提出了群的概念，将这些规律统一为四条公理。掌握群公理 是进入抽象代数、对称理论和现代物理的第一步。</p>
+            <p>数学中许多看似无关的对象——方程的对称变换、几何图形的旋转与反射、可逆矩阵的乘法——却服从惊人相似的运算法则。19 世纪，Galois 在研究多项式方程根的置换时、Cayley 在归纳矩阵运算的共性时，不约而同地触及了同一核心问题：能否找到一套最精简的公理，统一描述所有「可逆操作的组合」？</p>
+            <ul>
+              <li><strong>方程求解</strong>：五次方程无根式解——Galois 通过根的置换群揭示了这一深层障碍。</li>
+              <li><strong>几何对称</strong>：正三角形的旋转与反射恰好有 6 种，它们的复合也是一种对称——这正是二面体群 \(D_3\)。</li>
+              <li><strong>线性代数</strong>：可逆矩阵的乘法满足结合律、存在单位阵和逆矩阵，自然构成一般线性群 \(GL_n\)。</li>
+            </ul>
+            <p>这三类场景的共性可提炼为四条公理：封闭性、结合律、单位元存在性和逆元存在性。「群」就是满足这四条公理的代数结构，它是抽象代数的出发点，也是通向对称理论和现代物理的大门。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>群的核心抽象是「可逆操作的组合」。将具体变换（旋转、翻转、置换） 提升为满足封闭性、结合律、单位元、逆元四条公理的运算，使我们能 在不同领域识别相同的代数结构。交换群进一步要求运算顺序无关。</p>
+            <p>群的核心抽象策略是「忽略操作的具体内容，只保留组合方式的性质」。无论是旋转角度的叠加、置换的复合还是矩阵的乘法，我们只关心：两个操作合在一起是否仍然是同类操作？组合顺序能否自由添加括号？是否存在一个「什么都不做」的操作？每个操作是否都能被撤销？</p>
+            <p>这四个问题对应的就是群的四条公理。一旦某个集合配上某种运算满足这四条，我们就称它为群。公理化的好处在于：</p>
+            <ul>
+              <li>在一个群中证明的定理自动适用于所有满足相同公理的系统；</li>
+              <li>判断两个系统是否「本质相同」（同构）有了精确标准；</li>
+              <li>可以系统地分类所有可能的对称结构。</li>
+            </ul>
+            <p>当群的运算额外满足交换律 \(ab = ba\) 时，称为阿贝尔群（交换群），这类群的理论远比一般群更完整。区分交换与非交换是群论分析的第一步。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>群 \((G, \cdot)\) 满足四条公理： (G1) 封闭性：\(\forall a,b \in G,\; a \cdot b \in G\) (G2) 结合律：\((a \cdot b) \cdot c = a \cdot (b \cdot c)\) (G3) 单位元：\(\exists e \in G,\; ea = ae = a\) (G4) 逆元：\(\forall a \in G,\; \exists a^{-1},\; aa^{-1} = a^{-1}a = e\) <strong>单位元唯一</strong>：若 \(e, e'\) 均为单位元，则 \(e = ee' = e'\)。 <strong>逆元唯一</strong>：若 \(b, c\) 均为 \(a\) 的逆元， 则 \(b = b(ac) = (ba)c = c\)。 <strong>消去律</strong>：\(ab = ac \Rightarrow a^{-1}(ab) = a^{-1}(ac) \Rightarrow b = c\)。 当运算还满足 \(ab = ba\) 时，称 \((G, \cdot)\) 为阿贝尔群。</p>
+            <h4>群的四条公理</h4>
+            <p>群 \((G, \cdot)\) 是一个集合 \(G\) 配上一个二元运算 \(\cdot\)，满足：</p>
+            <p>(G1) <strong>封闭性</strong>：\(\forall a,b \in G,\; a \cdot b \in G\)。</p>
+            <p>(G2) <strong>结合律</strong>：\(\forall a,b,c \in G,\; (a \cdot b) \cdot c = a \cdot (b \cdot c)\)。</p>
+            <p>(G3) <strong>单位元</strong>：\(\exists e \in G,\; \forall a \in G,\; ea = ae = a\)。</p>
+            <p>(G4) <strong>逆元</strong>：\(\forall a \in G,\; \exists a^{-1} \in G,\; aa^{-1} = a^{-1}a = e\)。</p>
+            <p>直觉上，封闭性说「操作合在一起不会跑出系统」，结合律说「连续三步操作的分组方式不影响结果」，而单位元和逆元保证每个操作都可撤销。</p>
+
+            <h4>单位元的唯一性</h4>
+            <p>若 \(e, e'\) 均为单位元，则</p>
+            \[e = e \cdot e' = e'\]
+            <p>第一个等号用了 \(e'\) 是单位元，第二个等号用了 \(e\) 是单位元。唯一性保证了我们谈论「那个单位元」时不会产生歧义。</p>
+
+            <h4>逆元的唯一性</h4>
+            <p>若 \(b\) 和 \(c\) 均为 \(a\) 的逆元，则</p>
+            \[b = b(ac) = (ba)c = c\]
+            <p>证明的关键是利用结合律将两种逆元「夹击」化简。从此我们可以放心使用记号 \(a^{-1}\) 来唯一指代 \(a\) 的逆元。</p>
+
+            <h4>消去律</h4>
+            <p>若 \(ab = ac\)，则在等式两端左乘 \(a^{-1}\)：</p>
+            \[a^{-1}(ab) = a^{-1}(ac) \implies b = c\]
+            <p>群之所以拥有消去律，正是因为逆元的存在。在半群（没有逆元公理）中，消去律不一定成立。</p>
+
+            <h4>阿贝尔群</h4>
+            <p>当运算额外满足 \(\forall a,b \in G,\; ab = ba\) 时，称 \((G, \cdot)\) 为阿贝尔群（交换群）。例如 \((\mathbb{Z}, +)\) 是阿贝尔群，而对称群 \(S_n\)（\(n \ge 3\)）不是——两个置换的复合顺序一般会改变结果。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>密码学中 Diffie-Hellman 密钥交换利用群运算的单向性； 化学中分子对称群用于判定红外/拉曼活性谱线。</p>
+            <p><strong>密码学</strong>：Diffie-Hellman 密钥交换协议在循环群 \((\mathbb{Z}/p\mathbb{Z})^*\) 上运作，利用群中离散对数问题的计算困难性来保证通信安全。群公理确保了加密操作可逆，从而接收方能正确解密。</p>
+            <p><strong>化学光谱学</strong>：分子的对称操作（旋转、反射、反演）构成一个群，称为点群。通过群论中的不可约表示，可以判定哪些振动模式在红外光谱或拉曼光谱中是活跃的，从而指导谱线的解读与分子结构的鉴定。</p>
+            <p><strong>纠错编码</strong>：在数字通信中，线性码的码字集合在逐位异或运算下构成阿贝尔群 \((\mathbb{Z}/2\mathbb{Z})^n\)。群结构保证了任意两个码字的「差」仍是码字，这是检测和纠正传输错误的基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：验证 \(\{1, -1, i, -i\}\) 关于复数乘法构成群。 解答：封闭性——穷举 \(4 \times 4 = 16\) 种乘积均在集合中。 结合律继承自 \(\mathbb{C}\)。单位元为 \(1\)。 逆元：\(1^{-1}=1,\;(-1)^{-1}=-1,\;i^{-1}=-i,\;(-i)^{-1}=i\)。 故构成 4 阶交换群。 易错点：验证封闭性时仅抽查几个乘积就断言成立。 正确做法：使用子群判定法或列出完整乘法表。</p>
+            <p><strong>例题 1</strong>：验证 \(\{1, -1, i, -i\}\) 关于复数乘法构成群。</p>
+            <p><em>解答</em>：封闭性——穷举 \(4 \times 4 = 16\) 种乘积，结果均在集合中（例如 \(i \cdot (-i) = 1\)，\((-1) \cdot i = -i\)）。结合律继承自 \(\mathbb{C}\)。单位元为 \(1\)。逆元：\(1^{-1}=1\)，\((-1)^{-1}=-1\)，\(i^{-1}=-i\)，\((-i)^{-1}=i\)。四条公理全部满足，故构成 4 阶交换群，同构于 \(\mathbb{Z}/4\mathbb{Z}\)。</p>
+            <p><strong>例题 2</strong>：集合 \(S = \{0, 1, 2, 3, 4, 5\}\)，运算为模 6 加法。证明 \((S, \oplus)\) 是群，并指出单位元与 \(\overline{4}\) 的逆元。</p>
+            <p><em>解答</em>：封闭性——两数相加取模 6 仍在 \(S\) 中。结合律——加法天然满足。单位元 \(e = 0\)（\(a \oplus 0 = a\)）。每个 \(a\) 的逆元是 \(6 - a\)：例如 \(\overline{4}\) 的逆元是 \(\overline{2}\)，因为 \(4 + 2 = 6 \equiv 0\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>封闭性验证不完整</strong>：仅抽查几组运算就断言封闭。正确做法是证明运算的一般结果属于集合，或列出完整运算表。</li>
+              <li><strong>忘记验证结合律</strong>：新定义的运算不一定满足结合律。例如 \(a \star b = a + b + ab\) 需要显式计算 \((a \star b) \star c\) 与 \(a \star (b \star c)\) 来确认。</li>
+              <li><strong>混淆"有单位元"与"有逆元"</strong>：集合 \((\mathbb{N}, +)\) 有单位元 \(0\)，但正整数没有加法逆元，因此不构成群。两条公理缺一不可。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -477,35 +525,73 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>一个群有多大？一个元素经过多少次运算会「回到」单位元？ 这两个自然的问题引出群的阶和元素阶的概念。循环群是最简单的类型 ——由单个元素生成，其分类定理表明结构完全由阶决定：要么同构于 \(\mathbb{Z}\)，要么同构于 \(\mathbb{Z}/n\mathbb{Z}\)。</p>
+            <p>确认某个集合构成群之后，下一个自然问题是：这个群有多大？每个元素要重复运算多少次才能「回到起点」？这些数量信息不是细枝末节——它们从根本上决定了群的内部结构。最优美的情形是：整个群可以由单个元素反复运算得到，此时结构被完全锁定。</p>
+            <ul>
+              <li><strong>时钟算术</strong>：小时指针每转 12 格回到原位，\(\{0,1,\ldots,11\}\) 在模 12 加法下是 12 阶循环群 \(\mathbb{Z}/12\mathbb{Z}\)。</li>
+              <li><strong>旋转对称</strong>：正 \(n\) 边形绕中心旋转 \(360°/n\) 共 \(n\) 步后恢复原状，旋转部分是循环群 \(\mathbb{Z}/n\mathbb{Z}\)。</li>
+              <li><strong>数论</strong>：费马小定理 \(a^{p-1} \equiv 1 \pmod{p}\) 正是在说乘法群 \((\mathbb{Z}/p\mathbb{Z})^*\) 中每个元素的阶整除 \(p-1\)。</li>
+            </ul>
+            <p>群的阶、元素阶和循环群的概念为后续的子群理论（Lagrange 定理）与群分类提供了最基本的数量工具。循环群的分类定理表明：每个循环群要么同构于 \(\mathbb{Z}\)，要么同构于 \(\mathbb{Z}/n\mathbb{Z}\)——结构完全由阶决定。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>将「重复操作」抽象为幂运算 \(g^n\)，将「操作的周期」抽象为阶 \(\mathrm{ord}(g)\)。循环群的分类体现了代数学的核心方法： 通过同构对结构进行完全分类。</p>
+            <p>「重复操作」是一个极其日常的概念——转动钥匙若干圈、连续平移若干步——但将它提升为幂运算 \(g^n\) 后，就获得了数学上可精确操控的对象。群元素的阶 \(\mathrm{ord}(g)\) 衡量这种重复操作的「最小周期」，是群结构中最基础的数量指标。</p>
+            <p>循环群的抽象更进一步：如果整个群可以由单个元素的幂产生，那么群的结构完全退化为「整数的加法模某个数」。这体现了代数学的核心方法论——通过同构将复杂对象归约为已知的标准模型。分类的关键判据只有一个：阶是有限还是无限。</p>
+            <p>这种归约思路是贯穿群论的主线：先理解最简单的构件（循环群），再研究一般群如何用简单构件拼装。后续的子群分解、正规子群与商群、直积分解都沿着这条路径展开。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>群的阶 \(|G|\) 为元素个数。元素 \(g\) 的阶 \(\mathrm{ord}(g)\) 是 满足 \(g^k = e\) 的最小正整数 \(k\)（不存在则为 \(\infty\)）。 <strong>循环群</strong>：\(\langle g \rangle = \{g^n : n \in \mathbb{Z}\}\)。 <strong>分类定理</strong>：设 \(G = \langle g \rangle\)，定义满同态 \(\varphi: \mathbb{Z} \to G,\; \varphi(k) = g^k\)。 若 \(\ker\varphi = \{0\}\)，则 \(G \cong \mathbb{Z}\)； 若 \(\ker\varphi = n\mathbb{Z}\)，由第一同构定理 \[G \cong \mathbb{Z}/n\mathbb{Z}\] <strong>阶的性质</strong>：\(g^k = e \Leftrightarrow \mathrm{ord}(g) \mid k\)。 若 \(|G| = n\)，则 \(\mathrm{ord}(g) \mid n\)。 \(\mathbb{Z}/n\mathbb{Z}\) 中 \(\overline{a}\) 的阶为 \(n / \gcd(a, n)\)，生成元个数为 \(\varphi(n)\)。</p>
+            <h4>群的阶与元素阶</h4>
+            <p>群 \(G\) 的阶 \(|G|\) 定义为其元素个数。元素 \(g \in G\) 的阶 \(\mathrm{ord}(g)\) 是使 \(g^k = e\) 成立的最小正整数 \(k\)；若不存在这样的 \(k\)，则阶为 \(\infty\)。</p>
+            <p>直觉上，\(\mathrm{ord}(g)\) 衡量了 \(g\) 的「循环周期」——反复施行操作 \(g\) 要多少步才能首次回到起点。</p>
+
+            <h4>阶整除判定</h4>
+            <p>一个核心判据：\(g^k = e\) 当且仅当 \(\mathrm{ord}(g) \mid k\)。</p>
+            <p>证明思路：设 \(\mathrm{ord}(g) = d\)，由带余除法 \(k = qd + r\)（\(0 \le r < d\)），则 \(g^r = g^{k-qd} = (g^k)(g^d)^{-q} = e\)。因为 \(d\) 是使 \(g^d = e\) 的最小正整数，必有 \(r = 0\)。这告诉我们：想判断 \(g^k\) 是否为单位元，只需检查 \(k\) 是否是阶的倍数。</p>
+
+            <h4>循环群的定义与分类</h4>
+            <p>由 \(g\) 生成的子群 \(\langle g \rangle = \{g^n : n \in \mathbb{Z}\}\) 称为循环子群。若 \(G = \langle g \rangle\)，则 \(G\) 是循环群。分类定理：</p>
+            \[\text{若 } |G| = \infty, \text{ 则 } G \cong \mathbb{Z};\quad \text{若 } |G| = n, \text{ 则 } G \cong \mathbb{Z}/n\mathbb{Z}.\]
+            <p>证明要点：定义满同态 \(\varphi: \mathbb{Z} \to G,\; k \mapsto g^k\)，其核 \(\ker\varphi\) 为 \(\{0\}\) 或 \(n\mathbb{Z}\)，由第一同构定理即得结论。</p>
+
+            <h4>循环群中元素阶的公式</h4>
+            <p>在 \(\mathbb{Z}/n\mathbb{Z}\) 中，\(\overline{a}\) 的阶有简洁的公式：</p>
+            \[\mathrm{ord}(\overline{a}) = \frac{n}{\gcd(a, n)}\]
+            <p>这说明 \(\overline{a}\) 是生成元当且仅当 \(\gcd(a, n) = 1\)。因此 \(\mathbb{Z}/n\mathbb{Z}\) 的生成元个数恰为欧拉函数 \(\varphi(n)\)。</p>
+
+            <h4>Lagrange 定理的预示</h4>
+            <p>若 \(G\) 是有限群，则 \(\mathrm{ord}(g) \mid |G|\)。这是 Lagrange 定理 \(|H| \mid |G|\) 对子群 \(H = \langle g \rangle\) 的特例，将在后续章节完整证明。它告诉我们：有限群中任何元素的阶都不超过群的阶。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>循环群 \(\mathbb{Z}/12\mathbb{Z}\) 在时钟运算（模 12 加法）和 音乐理论（12 平均律音程的循环结构）中自然出现。</p>
+            <p><strong>公钥密码学</strong>：RSA 算法利用 \((\mathbb{Z}/n\mathbb{Z})^*\) 的乘法群结构，其中 \(n = pq\) 为两大素数之积。加密指数 \(e\) 与解密指数 \(d\) 满足 \(ed \equiv 1 \pmod{\varphi(n)}\)，正是元素阶与欧拉函数的直接应用。</p>
+            <p><strong>音乐理论</strong>：十二平均律将八度音程等分为 12 个半音，音程的叠加对应循环群 \(\mathbb{Z}/12\mathbb{Z}\) 中的加法。移调操作就是在这个循环群上的平移，音程的「回归」对应元素阶为 12 的生成元。</p>
+            <p><strong>数字信号处理</strong>：离散傅里叶变换（DFT）本质上在 \(n\) 阶循环群上展开信号。\(n\) 次单位根 \(\omega = e^{2\pi i/n}\) 生成乘法循环群 \(\langle\omega\rangle \cong \mathbb{Z}/n\mathbb{Z}\)，快速傅里叶变换（FFT）的分治策略正依赖于循环群的子群结构。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(\mathbb{Z}/12\mathbb{Z}\) 中求 \(\overline{4}\) 的阶。 解答：\(\mathrm{ord}(\overline{4}) = 12/\gcd(4,12) = 12/4 = 3\)。 验证：\(4 \times 3 = 12 \equiv 0 \pmod{12}\)。✓ 易错点：混淆「\(g^k=e\)」与「\(\mathrm{ord}(g)=k\)」。 阶是满足 \(g^k=e\) 的<strong>最小</strong>正整数。如 \(\overline{4}\) 满足 \(4 \times 6 \equiv 0\)，但 \(\mathrm{ord}(\overline{4})=3\neq 6\)。</p>
+            <p><strong>例题 1</strong>：在 \(\mathbb{Z}/12\mathbb{Z}\) 中求 \(\overline{4}\) 的阶和 \(\langle\overline{4}\rangle\) 的元素。</p>
+            <p><em>解答</em>：\(\mathrm{ord}(\overline{4}) = 12/\gcd(4,12) = 12/4 = 3\)。验证：\(4 \times 3 = 12 \equiv 0 \pmod{12}\)，且 \(4 \times 1 = 4 \not\equiv 0\)，\(4 \times 2 = 8 \not\equiv 0\)。因此 \(\langle\overline{4}\rangle = \{\overline{0}, \overline{4}, \overline{8}\}\)，是 \(\mathbb{Z}/12\mathbb{Z}\) 的 3 阶子群。</p>
+            <p><strong>例题 2</strong>：确定 \(\mathbb{Z}/10\mathbb{Z}\) 的所有生成元。</p>
+            <p><em>解答</em>：\(\overline{a}\) 是生成元当且仅当 \(\gcd(a, 10) = 1\)。在 \(\{1,2,\ldots,9\}\) 中，满足条件的是 \(a \in \{1, 3, 7, 9\}\)，共 \(\varphi(10) = 4\) 个。验证：\(\overline{3}\) 的阶为 \(10/\gcd(3,10) = 10/1 = 10\)，确实生成整个群。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>将「\(g^k = e\) 的某个 \(k\)」当作阶</strong>：阶是满足 \(g^k = e\) 的<em>最小</em>正整数。例如 \(\overline{4}\) 在 \(\mathbb{Z}/12\mathbb{Z}\) 中满足 \(4 \times 6 \equiv 0\)，但 \(\mathrm{ord}(\overline{4}) = 3 \neq 6\)。</li>
+              <li><strong>公式方向搞反</strong>：正确的阶公式是 \(n/\gcd(a,n)\)，不是 \(\gcd(a,n)\)。后者给出的是子群的指标，不是阶。</li>
+              <li><strong>以为所有非零元素都是生成元</strong>：只有与 \(n\) 互素的元素才生成整个 \(\mathbb{Z}/n\mathbb{Z}\)。例如 \(\overline{2}\) 在 \(\mathbb{Z}/10\mathbb{Z}\) 中只生成 5 阶子群。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -532,35 +618,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>对称群 \(S_n\) 是「所有可能的重排」构成的群，在组合学和 Galois 理论中不可或缺。二面体群 \(D_n\) 描述正 \(n\) 边形的刚性运动。 这两类群提供了最重要的非交换群例子，也是检验群论定理的试金石。</p>
+            <p>循环群结构简单——由单个元素生成、运算可交换。但数学中更常遇到的是不可交换的对称性：先旋转再反射与先反射再旋转的结果通常不同。为了处理这类现象，我们需要研究两个最重要的非交换群族。</p>
+            <ul>
+              <li><strong>排列组合</strong>：\(n\) 个对象的全部重排构成对称群 \(S_n\)，它是 Galois 理论的核心工具——多项式方程的可解性取决于其根的置换群的结构。</li>
+              <li><strong>几何对称</strong>：正 \(n\) 边形的旋转与翻转构成二面体群 \(D_n\)，拥有 \(2n\) 个元素。晶体学中的十七种壁纸群都可用二面体群类群来理解。</li>
+              <li><strong>物理粒子</strong>：粒子物理中的 CPT 对称（电荷-宇称-时间反转）涉及有限对称群的结构，其中偶/奇置换的区分（交错群 \(A_n\)）直接对应费米子与玻色子的统计行为。</li>
+            </ul>
+            <p>对称群和二面体群提供了最丰富的非交换群范例，群论中几乎所有新概念都会首先在这两类群上检验。掌握它们的结构是理解一般有限群的必经之路。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>置换是双射 \(\sigma: \{1,\ldots,n\} \to \{1,\ldots,n\}\)。 轮换分解将任意置换表示为不相交轮换之积——这是一种「标准形」 思维，将复杂对象化归为简单构件的组合。</p>
+            <p>对称群的抽象起点是将「重排」视为双射 \(\sigma: \{1,\ldots,n\} \to \{1,\ldots,n\}\)，两个重排的复合就是群运算。这样一来，\(S_n\) 就是所有双射组成的集合，配上函数复合。</p>
+            <p>轮换分解是理解置换的关键工具：任何置换都可唯一地写成不相交轮换的乘积。这是一种「标准形」思维——将复杂的全局重排分解为若干个彼此独立的循环移动，每个轮换只涉及几个元素的旋转。不相交轮换之间互不干扰，这使得阶的计算变成最小公倍数运算。</p>
+            <p>二面体群的抽象则采用「生成元与关系」的视角：只需两个操作——旋转 \(r\) 和反射 \(s\)——加上它们之间的关系 \(r^n = s^2 = e\)、\(srs^{-1} = r^{-1}\) 就完全确定了 \(D_n\) 的结构。这是群表示（presentation）思想的雏形，后续在自由群与商群中会系统展开。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>对称群</strong> \(S_n\)：\(\{1,\ldots,n\}\) 上全部双射，运算为复合， \(|S_n| = n!\)。 <strong>轮换分解</strong>：每个 \(\sigma \in S_n\) 可唯一写为不相交轮换之积。 <strong>奇偶性</strong>：置换表为对换之积时，所需对换数的奇偶性固定： \[\mathrm{sgn}(\sigma) = (-1)^{n - c}\] 其中 \(c\) 为轮换个数（含不动点作为 1-轮换）。 交错群 \(A_n = \ker(\mathrm{sgn})\)，\(|A_n| = n!/2\)。 <strong>二面体群</strong> \(D_n\)：正 \(n\) 边形的对称群，\(|D_n| = 2n\)， 由旋转 \(r\)（\(\mathrm{ord}(r)=n\)）和反射 \(s\)（\(\mathrm{ord}(s)=2\)） 生成，满足关系 \(srs^{-1} = r^{-1}\)（即 \(sr = r^{-1}s\)）。</p>
+            <h4>对称群的定义与阶</h4>
+            <p>对称群 \(S_n\) 是集合 \(\{1, 2, \ldots, n\}\) 上全部双射的集合，运算为函数复合。由组合计数：</p>
+            \[|S_n| = n!\]
+            <p>直觉上，第一个位置有 \(n\) 种选择，第二个位置有 \(n-1\) 种，以此类推。\(S_n\) 在 \(n \ge 3\) 时是非交换群。</p>
+
+            <h4>轮换分解与置换的阶</h4>
+            <p>每个 \(\sigma \in S_n\) 可以唯一写为不相交轮换的乘积（不计顺序）。若轮换长度为 \(\ell_1, \ell_2, \ldots, \ell_t\)，则置换的阶为：</p>
+            \[\mathrm{ord}(\sigma) = \mathrm{lcm}(\ell_1, \ell_2, \ldots, \ell_t)\]
+            <p>这是因为不相交轮换可交换，且各自独立地回到恒等。整个置换回到恒等需要等所有轮换同时完成一个完整周期。</p>
+
+            <h4>奇偶性与符号同态</h4>
+            <p>每个 \(k\)-轮换可分解为 \(k-1\) 个对换之积。虽然分解方式不唯一，但所需对换数的奇偶性始终相同。置换的符号定义为：</p>
+            \[\mathrm{sgn}(\sigma) = (-1)^{n - c}\]
+            <p>其中 \(c\) 是轮换分解中的轮换个数（包含 1-轮换即不动点）。\(\mathrm{sgn}: S_n \to \{+1, -1\}\) 是群同态，其核 \(A_n = \ker(\mathrm{sgn})\) 称为交错群，\(|A_n| = n!/2\)。</p>
+
+            <h4>二面体群的结构</h4>
+            <p>正 \(n\) 边形的对称群 \(D_n\) 由旋转 \(r\)（顺时针 \(360°/n\)）和一个反射 \(s\) 生成：</p>
+            \[D_n = \langle r, s \mid r^n = s^2 = e,\; srs^{-1} = r^{-1} \rangle, \quad |D_n| = 2n\]
+            <p>关系 \(srs^{-1} = r^{-1}\)（等价于 \(sr = r^{-1}s\)）表达了「先反射再旋转等同于反向旋转后再反射」。\(D_n\) 包含 \(n\) 个旋转 \(\{e, r, r^2, \ldots, r^{n-1}\}\) 和 \(n\) 个反射 \(\{s, rs, r^2 s, \ldots, r^{n-1}s\}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\(S_n\) 出现在 Galois 理论中—— \(n\) 次一般多项式的 Galois 群 为 \(S_n\)；\(D_n\) 用于晶体学中平面对称性的分类。</p>
+            <p><strong>Galois 理论</strong>：\(n\) 次一般多项式的 Galois 群为 \(S_n\)。当 \(n \ge 5\) 时，由于 \(A_n\) 是单群，\(S_n\) 不可解，这正是 Abel-Ruffini 定理——五次及以上一般方程无根式解——的群论实质。</p>
+            <p><strong>晶体学</strong>：二面体群 \(D_n\) 刻画了平面内正多边形的对称性，是 17 种壁纸群分类的基本构件。矿物学家用这些群来预测晶体的外形、X 射线衍射图样以及物理性质的各向异性。</p>
+            <p><strong>组合优化</strong>：排列问题中的排序算法可用 \(S_n\) 的语言描述。将一个序列排序等价于将对应置换分解为相邻对换之积，冒泡排序需要的交换次数即为逆序数，恰等于 \(\sigma\) 写成相邻对换乘积时的最短长度。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(S_4\) 中求 \(\sigma = (1\;2\;3)(1\;4)\) 的不相交轮换 分解和阶。 解答：从右向左复合（先 \((1\;4)\) 后 \((1\;2\;3)\)）： \(1 \to 4 \to 4\)，\(4 \to 1 \to 2\)，\(2 \to 2 \to 3\)， \(3 \to 3 \to 1\)。故 \(\sigma = (1\;4\;2\;3)\)， \(\mathrm{ord}(\sigma) = 4\)。 易错点：复合顺序搞反。\((1\;2\;3)(1\;4)\) 约定从右向左作用， 若从左向右计算会得到完全不同的结果。</p>
+            <p><strong>例题 1</strong>：在 \(S_4\) 中将 \(\sigma = (1\;2\;3)(1\;4)\) 化为不相交轮换并求阶。</p>
+            <p><em>解答</em>：约定从右向左复合（先施 \((1\;4)\) 后施 \((1\;2\;3)\)）。逐元素追踪：\(1 \to 4 \to 4\)，\(4 \to 1 \to 2\)，\(2 \to 2 \to 3\)，\(3 \to 3 \to 1\)。不相交轮换分解为 \(\sigma = (1\;4\;2\;3)\)，阶为 \(\mathrm{lcm}(4) = 4\)。</p>
+            <p><strong>例题 2</strong>：求二面体群 \(D_4\) 中满足 \(x^2 = e\) 的元素个数。</p>
+            <p><em>解答</em>：\(D_4 = \{e, r, r^2, r^3, s, rs, r^2 s, r^3 s\}\)。旋转中：\(e^2 = e\) ✓，\(r^2 \ne e\)，\((r^2)^2 = r^4 = e\) ✓，\((r^3)^2 = r^6 = r^2 \ne e\)。所有 4 个反射满足 \(x^2 = e\)（反射阶为 2）。因此共有 \(1 + 1 + 4 = 6\) 个元素满足 \(x^2 = e\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>复合方向搞反</strong>：\((1\;2\;3)(1\;4)\) 在从右向左约定下，先施 \((1\;4)\)。从左向右计算会得到完全不同的结果 \((1\;3)(2\;4)\)。做题前务必确认约定。</li>
+              <li><strong>轮换阶用乘积而非最小公倍数</strong>：类型 \((3,2)\) 的置换阶是 \(\mathrm{lcm}(3,2) = 6\)，不是 \(3 \times 2 = 6\)（此处碰巧相等）或 \(3 + 2 = 5\)（永远错误）。当轮换长度不互素时差别明显，如 \(\mathrm{lcm}(4,2) = 4 \ne 8\)。</li>
+              <li><strong>忘记不动点也是 1-轮换</strong>：计算 \(\mathrm{sgn}(\sigma)\) 时，轮换个数 \(c\) 应包含不动点。例如 \(\sigma = (1\;3) \in S_4\)，轮换分解为 \((1\;3)(2)(4)\)，\(c = 3\)，\(\mathrm{sgn} = (-1)^{4-3} = -1\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -605,28 +728,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>矩阵群是群论最重要的来源之一。一般线性群 \(GL_n(K)\) 是所有 可逆 \(n \times n\) 矩阵构成的群，在表示论中扮演核心角色。 直积 \(G \times H\) 是从已知群构造新群的基本方法，对应于两个 独立对称性系统的组合。</p>
+            <p>前面我们见过了有限群的三大家族——循环群、对称群、二面体群。但数学和物理中同样频繁出现的是「连续的」或「无限的」对称群：可逆矩阵在乘法下天然构成群，而两个独立对称系统的并行组合又产生新群。我们需要一套系统的方法来处理这些来源。</p>
+            <ul>
+              <li><strong>线性变换</strong>：\(n\) 维空间中的可逆线性变换与可逆矩阵一一对应，构成一般线性群 \(GL_n(K)\)。表示论的任务正是用 \(GL_n\) 中的矩阵来「翻译」抽象群的结构。</li>
+              <li><strong>独立系统的组合</strong>：两个独立物理系统各有对称群 \(G\) 和 \(H\)，合并后的对称群自然是直积 \(G \times H\)。例如两个独立旋转的陀螺共有 \(SO(3) \times SO(3)\) 的对称性。</li>
+              <li><strong>数论分解</strong>：中国剩余定理给出 \(\mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)（当 \(\gcd(m,n)=1\)），直积在此联系了群论与初等数论。</li>
+            </ul>
+            <p>一般线性群是群论中最丰富的例子库，而直积是从小群构造大群的最基本方法。理解它们为后续的子群分解和结构定理建立了必要基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>一般线性群的抽象策略是把线性变换的「可逆性」翻译为行列式的非零条件 \(\det(A) \ne 0\)。这把集合论层面的可逆映射判定化归为一个数值判据，使得代数操作成为可能。同时，行列式本身是一个群同态 \(\det: GL_n(K) \to K^*\)，它的核——特殊线性群 \(SL_n(K)\)——是一个重要的正规子群。</p>
+            <p>直积的抽象则更为朴素：给定两个群 \(G\) 和 \(H\)，在笛卡尔积 \(G \times H\) 上分量逐个运算。两个分量彼此独立——这是「直积」名称的来源。关键的判别问题是：一个给定的群能否分解为两个非平凡子群的直积？答案取决于子群的交集与正规性条件。</p>
+            <p>直积和矩阵群还引出了群同态的系统性角色：投影 \(G \times H \to G\)、行列式 \(GL_n \to K^*\)、包含映射 \(SL_n \hookrightarrow GL_n\) 都是同态，同构定理将在后续章节成为分析这些关系的核心工具。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>一般线性群</strong> \(GL_n(K) = \{A \in M_n(K) : \det(A) \neq 0\}\)， 运算为矩阵乘法。 封闭性：\(\det(AB) = \det(A)\det(B) \neq 0\)。 结合律继承自矩阵乘法。单位元 \(I_n\)。逆元即逆矩阵。 <strong>特殊线性群</strong>：\(SL_n(K) = \ker(\det) \trianglelefteq GL_n(K)\)， 其中 \(\det: GL_n(K) \to K^*\) 是群同态。 <strong>直积</strong>：\(G \times H = \{(g,h) : g \in G, h \in H\}\)， 运算 \((g_1,h_1)(g_2,h_2) = (g_1 g_2, h_1 h_2)\)。 \(|G \times H| = |G| \cdot |H|\)。 关键同构：\(\mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z} \cong \mathbb{Z}/mn\mathbb{Z}\) 当且仅当 \(\gcd(m,n)=1\)。</p>
+            <h4>一般线性群的定义</h4>
+            <p>设 \(K\) 为一个域。一般线性群的定义为：</p>
+            \[GL_n(K) = \{A \in M_n(K) : \det(A) \neq 0\}\]
+            <p>运算为矩阵乘法。封闭性来自 \(\det(AB) = \det(A)\det(B) \neq 0\)，结合律继承自矩阵乘法，单位元为 \(I_n\)，逆元即逆矩阵。行列式的乘法性质是验证群公理的关键工具。</p>
+
+            <h4>特殊线性群与行列式同态</h4>
+            <p>映射 \(\det: GL_n(K) \to K^*\) 是满的群同态（\(K^*\) 为 \(K\) 的乘法群）。其核：</p>
+            \[SL_n(K) = \ker(\det) = \{A \in GL_n(K) : \det(A) = 1\}\]
+            <p>是 \(GL_n(K)\) 的正规子群。由第一同构定理，\(GL_n(K)/SL_n(K) \cong K^*\)。直觉上，\(SL_n\) 保留了所有几何变换中「保持体积」的那些。</p>
+
+            <h4>直积的定义</h4>
+            <p>给定群 \(G\) 和 \(H\)，直积为：</p>
+            \[G \times H = \{(g,h) : g \in G,\; h \in H\}, \quad (g_1,h_1)(g_2,h_2) = (g_1 g_2,\; h_1 h_2)\]
+            <p>两个分量独立运算，因此 \(|G \times H| = |G| \cdot |H|\)，且直积中元素 \((g,h)\) 的阶为 \(\mathrm{lcm}(\mathrm{ord}(g), \mathrm{ord}(h))\)。</p>
+
+            <h4>循环群直积的同构判据</h4>
+            <p>一个核心同构：</p>
+            \[\mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z} \cong \mathbb{Z}/mn\mathbb{Z} \quad \Longleftrightarrow \quad \gcd(m,n) = 1\]
+            <p>当 \(\gcd(m,n) = 1\) 时，\((\overline{1},\overline{1})\) 在直积中的阶为 \(\mathrm{lcm}(m,n) = mn\)，因此生成整个群。当 \(\gcd(m,n) > 1\) 时，直积中没有 \(mn\) 阶元素，不同构于循环群。例如 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)（Klein 四元群）不同构于 \(\mathbb{Z}/4\mathbb{Z}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\(GL_n(\mathbb{R})\) 在计算机图形学中描述 3D 仿射变换； 直积描述独立子系统的组合对称性。</p>
+            <p><strong>计算机图形学</strong>：三维场景中的旋转、缩放、平移等变换通过 \(4 \times 4\) 齐次矩阵表示，整体构成 \(GL_4(\mathbb{R})\) 的子群。GPU 在每帧渲染时执行数百万次矩阵乘法，群结构保证了变换的可逆性（撤销操作）和可组合性（变换链）。</p>
+            <p><strong>量子计算</strong>：量子门是酉矩阵，构成特殊酉群 \(SU(2^n)\)。多量子比特系统的状态空间是单比特空间的张量积，对独立操作的门集合对应于直积结构 \(SU(2) \times SU(2) \times \cdots\)。</p>
+            <p><strong>中国剩余定理与模运算</strong>：同构 \(\mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)（\(\gcd(m,n)=1\)）将大模数运算拆为两个小模数并行计算，广泛用于 RSA 加速解密和大整数算术的并行化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z} \not\cong \mathbb{Z}/4\mathbb{Z}\)。 解答：\(\mathbb{Z}/4\mathbb{Z}\) 含 4 阶元素 \(\overline{1}\)， 而 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\) 中每个非零元素阶为 2（\((a,b)+(a,b)=(0,0)\)），无 4 阶元素。 同构保持元素阶，故不同构。 易错点：误以为「阶相同的群一定同构」。 反例：上述两个 4 阶群结构不同（Klein 四元群 vs 循环群）。</p>
+            <p><strong>例题 1</strong>：证明 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z} \not\cong \mathbb{Z}/4\mathbb{Z}\)。</p>
+            <p><em>解答</em>：\(\mathbb{Z}/4\mathbb{Z}\) 含 4 阶元素 \(\overline{1}\)。而在 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\) 中，任意非零元素 \((a,b)\) 满足 \((a,b) + (a,b) = (0,0)\)，即所有非零元素阶为 2，不存在 4 阶元素。由于群同构保持元素阶，两群不同构。</p>
+            <p><strong>例题 2</strong>：设 \(A = \begin{pmatrix} 1 & 2 \\ 0 & 1 \end{pmatrix} \in GL_2(\mathbb{R})\)，求 \(A\) 在 \(GL_2(\mathbb{R})\) 中的阶。</p>
+            <p><em>解答</em>：由归纳法 \(A^n = \begin{pmatrix} 1 & 2n \\ 0 & 1 \end{pmatrix}\)。\(A^n = I_2\) 要求 \(2n = 0\)，即 \(n = 0\)。因此不存在正整数 \(n\) 使 \(A^n = I_2\)，\(\mathrm{ord}(A) = \infty\)。这说明 \(GL_2(\mathbb{R})\) 中存在无限阶元素。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>以为「阶相同⇒同构」</strong>：\(\mathbb{Z}/4\mathbb{Z}\) 和 \(\mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\) 都是 4 阶群，但结构不同。判断同构需要比较元素阶的分布，而不是只看群的阶。</li>
+              <li><strong>直积中阶的计算用乘积而非 lcm</strong>：\(\mathrm{ord}(a,b) = \mathrm{lcm}(\mathrm{ord}(a), \mathrm{ord}(b))\)，不是 \(\mathrm{ord}(a) \cdot \mathrm{ord}(b)\)。例如 \(\mathrm{ord}(\overline{1}, \overline{1})\) 在 \(\mathbb{Z}/4\mathbb{Z} \times \mathbb{Z}/6\mathbb{Z}\) 中为 \(\mathrm{lcm}(4,6) = 12\)，不是 24。</li>
+              <li><strong>忘记验证可逆性</strong>：\(M_n(K)\) 中的矩阵不全属于 \(GL_n(K)\)。奇异矩阵（\(\det = 0\)）没有逆矩阵，不是 \(GL_n\) 的元素。验证某矩阵集合构成群时必须确认所有元素行列式非零。</li>
+            </ul>
           </div>
         </div>
       </div>

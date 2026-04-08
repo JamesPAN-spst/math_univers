@@ -258,6 +258,16 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 关键概念抽象</div>
+          <div class="step-body">
+            <p>自然梯度的核心洞察是：参数空间中的"方向"和"距离"取决于我们选择的度量。欧几里得梯度在 \(\|d\theta\|_2\) 意义下做最陡下降，但参数空间的欧氏距离缺乏统计含义——同样的参数扰动在不同参数化下对分布的改变截然不同。</p>
+            <p>Fisher 信息矩阵 \(F(\theta)\) 提供了参数空间上的自然度量。它度量的是参数微小变化引起的 KL 散度 \(D_{\mathrm{KL}}(p_\theta \| p_{\theta+d\theta}) \approx \frac{1}{2} d\theta^T F d\theta\)。在这个度量下做最陡下降，得到的方向 \(F^{-1}\nabla\ell\) 在任何重参数化下保持不变——这就是"自然"的含义。</p>
+            <p>自然梯度将优化与信息几何联系在一起。统计模型的参数空间是一个黎曼流形，Fisher 矩阵是其度量张量。自然梯度就是这个流形上的黎曼梯度，沿着"分布空间中最陡"的方向前进，而非"参数空间中最陡"的方向。</p>
+            <p>从实践角度看，Adam 等自适应优化器可视为自然梯度的对角近似：用 \(\mathrm{diag}(\mathbb{E}[g^2])\) 替代完整的 Fisher 矩阵，以 \(O(d)\) 代价获得部分参数化不变性。这解释了为何自适应方法在深度学习中普遍优于 vanilla SGD。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">

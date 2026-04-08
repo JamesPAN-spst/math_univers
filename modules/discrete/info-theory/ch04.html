@@ -392,6 +392,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>高斯源在均方失真下扮演着特殊角色：在所有方差为 \(\sigma^2\) 的连续源中，高斯源的率失真函数 \(R(D)\) <strong>最大</strong>——即高斯源是「最难压缩的」。这与最大熵原理一脉相承：固定方差时高斯分布的微分熵最大。</p>
+            <p>率失真函数 \(R(D) = \frac{1}{2}\log_2(\sigma^2/D)\) 揭示了一个整洁的对数关系：<strong>码率每增加 1 bit，失真减半</strong>（即信噪比改善 6 dB）。这个「6 dB/bit 法则」是数字信号处理中量化精度设计的理论基石。</p>
+            <p>最优 test channel 的结构也很优美：重构 \(\hat{X}\) 是原信号的线性缩放，残余噪声 \(X - \hat{X}\) 服从高斯分布且与 \(\hat{X}\) 独立。这意味着最优有损压缩策略等价于<strong>最优线性估计</strong>——一个「高斯世界中线性即最优」的典型实例。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -492,6 +501,66 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>率失真理论不仅是理论框架，还直接指导了量化器设计、视频编码中的 码率控制算法、以及机器学习中的信息瓶颈方法。理解 \(R(D)\) 的 实际含义有助于评估和改进压缩系统。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>率失真理论为有损压缩系统提供了根本的性能基准：任何压缩器在码率 \(R\) 下的最小可达失真不低于 \(D(R)\)。将 \(R(D)\) 曲线视为「操作图」——曲线以下区域不可达，曲线以上区域都可达，实际编码器的操作点距曲线的垂直距离就是「编码冗余」。</p>
+            <p>从标量量化到矢量量化的推广遵循同一逻辑：联合编码 \(n\) 个样本可以利用样本间的统计相关性，随着 \(n \to \infty\) 性能逼近 \(R(D)\)。这正是 Shannon 率失真编码定理的操作含义。</p>
+            <p>在多维情形中，Shannon 的<strong>注水原理</strong>（water-filling）给出了最优比特分配策略：将更多比特分给方差大的分量，忽略方差过小的分量。这与 PCA 降维的取舍有相同的信息论本质——只保留对总失真贡献最显著的维度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>1. 均匀量化器</h4>
+            <p>将幅度范围 \([-A, A]\) 等分为 \(2^b\) 级，步长 \(\Delta = 2A/2^b\)。</p>
+            <p>\[\text{MSE}_{\text{uniform}} = \frac{\Delta^2}{12} = \frac{A^2}{3 \cdot 4^b}\]</p>
+            <p>直觉：每增加 1 bit 量化精度，MSE 降为原来的 \(1/4\)（6 dB 改善）。对均匀源这恰好与 \(R(D)\) 吻合，但对非均匀源会造成分辨率浪费。</p>
+            <h4>2. Lloyd-Max 最优标量量化</h4>
+            <p>交替优化代表点和分区边界：</p>
+            <p>(a) 固定代表点 \(\hat{x}_i\) → 最优边界取相邻代表点中点；(b) 固定边界 → 最优代表点取区内条件期望。</p>
+            <p>收敛后对高斯源比均匀量化降低约 1.5 dB MSE。本质上是一维 K-means 聚类。</p>
+            <h4>3. 矢量量化（VQ）</h4>
+            <p>将 \(n\) 个样本联合编码，码本大小 \(2^{nR}\)。Shannon 理论保证当 \(n \to \infty\) 时 VQ 可逼近 \(R(D)\)。</p>
+            <p>实践中使用 LBG 算法（Lloyd 在 \(\mathbb{R}^n\) 上的推广），但受维度灾难限制：码本大小随维度指数增长，通常 \(n \leq 16\)。</p>
+            <h4>4. 变换编码与注水原则</h4>
+            <p>对相关源 \(X \sim \mathcal{N}(0, \Sigma)\)，先用 KLT（等效于 PCA）去相关化为独立分量，再逐分量量化。</p>
+            <p>\[\text{注水分配：} D_i = \min(\theta, \sigma_i^2), \quad R_i = \frac{1}{2}\log_2^+\frac{\sigma_i^2}{\theta}\]</p>
+            <p>其中 \(\theta\) 由总码率约束决定。方差低于水平面 \(\theta\) 的分量不分配比特——这就是注水的直觉。JPEG 中 DCT + 标量量化正是变换编码的实用近似。</p>
+            <h4>5. 率失真曲线的操作解读</h4>
+            <p>\(R(D)\) 曲线是压缩系统的 benchmark：实际编码器的操作点（码率, 失真）落在曲线上方。</p>
+            <p>与 \(R(D)\) 的间距反映编码器的效率。现代编解码器（H.265/VVC, AV1）在自然图像上的操作点距高斯 \(R(D)\) 仅 1-2 dB——七十年来编码技术的进步不断缩小这一间距。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>视频编码</strong>：H.265/HEVC 的码率控制算法基于率失真优化（RDO）——对每个编码单元选择使 \(J = D + \lambda R\) 最小的模式。Lagrange 乘子 \(\lambda\) 恰好对应 \(R(D)\) 曲线在操作点的斜率，这直接源于率失真理论。</p>
+            <p><strong>语音编码</strong>：语音信号近似高斯，码率从 64 kbps（PCM）到 2.4 kbps（MELP）。率失真理论预测窄带语音达到电话级质量（MOS 4.0）大约需 8 kbps——这与实际 AMR 编码器的操作点高度吻合。</p>
+            <p><strong>机器学习</strong>：信息瓶颈方法 \(\min I(X;T) - \beta\, I(T;Y)\) 可理解为率失真问题的推广：\(I(X;T)\) 扮演「率」，\(I(T;Y)\) 的损失扮演「失真」。深度网络隐层在信息平面上的轨迹反映了模型在率-失真曲线上的移动。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <h4>例题 1：CD 音频量化精度</h4>
+            <p>CD 采用 16 bit PCM 量化音频，信号 \(\sigma^2 = 1\)。理论最小 MSE？</p>
+            <p><strong>解法</strong>：\(R = 16\) bit/sample。由 \(R(D)\) 得 \(D = \sigma^2 \cdot 2^{-2R} = 2^{-32} \approx 2.3 \times 10^{-10}\)。对应 SNR \(\approx 96\) dB。实际均匀量化 MSE \(\approx 1.6 \times 10^{-10}\)，接近理论值，因为高精度下量化误差近似均匀且音频近似高斯。</p>
+            <h4>例题 2：JPEG 率失真评估</h4>
+            <p>640×480 灰度图像（8 bit），原始 2,457,600 bit。目标压缩至 0.8 bit/pixel（压缩比 10:1），估计 PSNR。</p>
+            <p><strong>解法</strong>：假设 \(\sigma^2 \approx 50^2 = 2500\)，\(R = 0.8\) bit/pixel。\(D = 2500 \cdot 2^{-1.6} \approx 824\)。\(\text{PSNR} = 10\log_{10}(255^2/824) \approx 29.96\) dB。实际 JPEG 在相同码率下约 28-30 dB，与理论吻合。</p>
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「\(R(D)=0\) 表示完美重构」— 实际上 \(R(D)=0\) 意味着允许最大失真 \(D = \sigma^2\)（不传任何信息，直接输出均值），不是 \(D=0\)。</li>
+              <li>❌ 「均匀量化对所有源都最优」— 仅对均匀分布最优。高斯源下 Lloyd-Max 比均匀量化降低约 1.5 dB。</li>
+              <li>✅ \(R(D)\) 给出最低码率下界，实际系统总是在其上方运行。差距通过更好的量化策略 + 熵编码来缩小。</li>
+            </ul>
           </div>
         </div>
       </div>

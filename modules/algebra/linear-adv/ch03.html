@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
@@ -394,28 +394,78 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当矩阵不可对角化时，特征空间不够“大”。广义特征空间 \(\ker(A - \lambda I)^k\) 取代普通特征空间，总能给出完整的直和分解。 这是 Jordan 标准形的出发点。</p>
+            <p>对角化是"理想情况"，但大多数矩阵并不可对角化。问题的根源在于：特征空间的维数（几何重数）可能小于特征值的代数重数，导致特征向量不足以构成基底。广义特征空间通过逐级放宽条件——从 \((A-\lambda I)v = 0\) 到 \((A-\lambda I)^k v = 0\)——补回缺失的维数，使得整个空间总能分解为各广义特征空间的直和。</p>
+            <ul>
+              <li><strong>振动力学</strong>：多自由度耦合振动系统的转移矩阵常有重特征值且不可对角化，广义特征空间分解揭示了"共振模态"与"阻尼衰减模态"的嵌套结构。</li>
+              <li><strong>马尔可夫链</strong>：转移矩阵 \(P\) 的特征值 1 对应平稳分布，而重特征值产生的广义特征空间描述了链趋近平稳的多项式修正速率。</li>
+              <li><strong>微分方程</strong>：\(X' = AX\) 的解空间结构直接对应广义特征空间分解——每个广义特征空间提供一族形如 \(t^j e^{\lambda t}\) 的基本解。</li>
+            </ul>
+            <p>因此，广义特征空间不仅是 Jordan 标准形的理论基石，更是理解不可对角化线性系统行为的必备工具。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>广义特征空间的思想: 不仅看 \((A-\lambda I)v = 0\) 的解，还看 \((A-\lambda I)^k v = 0\) 的解，捕捉更多结构信息。</p>
+            <p>设 \(T: V \to V\) 是有限维向量空间上的线性算子，\(\lambda\) 是 \(T\) 的特征值。定义广义特征空间 \(V_\lambda = \ker(T - \lambda I)^{n_\lambda}\)，其中 \(n_\lambda\) 是 \(\lambda\) 在最小多项式中的幂次。等价地，\(V_\lambda = \bigcup_{k=1}^\infty \ker(T - \lambda I)^k\) 是一个升链的极限。</p>
+            <p>核心结构定理是主分解定理（Primary Decomposition）：若 \(\chi_T(x) = \prod_{i=1}^r (x - \lambda_i)^{a_i}\)，则 \(V = V_{\lambda_1} \oplus V_{\lambda_2} \oplus \cdots \oplus V_{\lambda_r}\)，其中 \(\dim V_{\lambda_i} = a_i\)。这一分解在 \(T\) 下不变，即 \(T(V_{\lambda_i}) \subseteq V_{\lambda_i}\)。</p>
+            <p>从 \(K[x]\)-模的视角看，主分解正是初等因子分解的体现：\(V_T \cong \bigoplus K[x]/(x - \lambda_i)^{a_i}\) 作为 \(K[x]\)-模。每个直和项是初等循环模，其上 \(T - \lambda_i I\) 是幂零的——这正是后续 Jordan 块结构的来源。</p>
+            <p>需要注意的是，主分解定理不要求代数闭性，只要求特征多项式完全分裂。在非代数闭域上，若 \(\chi_T\) 含不可约因子 \(p(x)^k\)，对应的分解成分为 \(\ker p(T)^k\)，其内部结构需要有理标准形描述。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>广义特征空间</strong>: \(V_\lambda^{(k)} = \ker(A - \lambda I)^k\)。 链: \(V_\lambda^{(1)} \subseteq V_\lambda^{(2)} \subseteq \cdots\)。 终止: 存在 \(k\) 使 \(V_\lambda^{(k)} = V_\lambda^{(k+1)} = \cdots\)。 记 \(V_\lambda = V_\lambda^{(\infty)}\)。 <strong>直和分解</strong>（代数闭域上）: \[V = V_{\lambda_1} \oplus V_{\lambda_2} \oplus \cdots \oplus V_{\lambda_r}\] \(\dim V_{\lambda_i}\) = \(\lambda_i\) 的代数重数。 普通特征空间 \(\ker(A-\lambda I) \subseteq V_\lambda\)， \(\dim \ker(A-\lambda I)\) = 几何重数。</p>
+            <h4>1. 广义特征空间的升链</h4>
+            <p>对特征值 \(\lambda\)，定义序列：</p>
+            \[\{0\} \subseteq \ker(A - \lambda I) \subseteq \ker(A - \lambda I)^2 \subseteq \cdots \subseteq \ker(A - \lambda I)^k \subseteq \cdots\]
+            <p>由有限维性，此链必终止：存在最小的 \(m\) 使得 \(\ker(A - \lambda I)^m = \ker(A - \lambda I)^{m+1}\)，此后不再增长。该 \(m\) 恰等于 \(\lambda\) 在最小多项式 \(m_A\) 中的幂次，也等于最大 Jordan 块的阶数。</p>
+
+            <h4>2. 主分解定理的证明思路</h4>
+            <p>设 \(\chi_A = \prod p_i^{a_i}\)，令 \(q_i = \chi_A / p_i^{a_i}\)。由 \(\gcd(q_1, \ldots, q_r) = 1\)，存在多项式 \(u_i\) 使 \(\sum u_i q_i = 1\)（Bézout 恒等式的推广）。于是 \(v = \sum u_i(A)q_i(A)v\)，其中 \(u_i(A)q_i(A)v \in V_{\lambda_i}\)。这给出 \(V = \sum V_{\lambda_i}\)。由核的互素性可证为直和。</p>
+
+            <h4>3. 维数计数</h4>
+            <p>由 Cayley-Hamilton 定理 \(\chi_A(A) = 0\)，故 \(\ker(A - \lambda_i I)^{a_i} = V_{\lambda_i}\) 的维数至少为 \(a_i\)。结合 \(\sum \dim V_{\lambda_i} = n = \sum a_i\)，得 \(\dim V_{\lambda_i} = a_i\)。</p>
+
+            <h4>4. 幂零限制算子</h4>
+            <p>\(T\) 限制在 \(V_\lambda\) 上后，\(N_\lambda = (T - \lambda I)|_{V_\lambda}\) 是幂零算子（\(N_\lambda^{a_\lambda} = 0\)）。研究 \(V_\lambda\) 的精细结构就归结为幂零算子的分类——这正是 Jordan 块理论的内容。</p>
+
+            <h4>5. 维数链与 Jordan 块数</h4>
+            <p>设 \(d_k = \dim \ker N_\lambda^k\)，则 \(d_1 \le d_2 \le \cdots \le d_m = a_\lambda\)。差分 \(\Delta_k = d_k - d_{k-1}\) 递减，且 \(\Delta_k\) 等于大小 \(\ge k\) 的 Jordan 块个数。特别地，\(d_1 = \) 几何重数 = Jordan 块总数，\(m = \) 最大 Jordan 块大小。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>控制理论（可控性分解）</strong>：线性系统 \(\dot{x} = Ax + Bu\) 中，系统矩阵 \(A\) 的广义特征空间分解将状态空间分为独立的"模态子空间"。每个子空间对应一组特征值，其可控性可独立判定。不可对角化情形下，广义特征向量构成的控制链决定了需要多少步输入才能激活深层模态。</p>
+            <p><strong>数值分析（矩阵函数计算）</strong>：计算矩阵函数 \(f(A)\)（如 \(e^A\)、\(\log A\)、\(\sqrt{A}\)）时，广义特征空间分解使问题化为在每个分量上独立计算 \(f\)。在 \(V_\lambda\) 上，\(f(A) = \sum_{j=0}^{m-1} \frac{f^{(j)}(\lambda)}{j!}(A - \lambda I)^j\)，这正是 Hermite 插值公式在矩阵函数上的体现。</p>
+            <p><strong>量子力学（简并微扰论）</strong>：当哈密顿量 \(H_0\) 有简并能级时，微扰 \(H' = \epsilon V\) 在简并子空间（广义特征空间）内的矩阵元决定了能级分裂的方式。一阶修正要求在广义特征空间内对角化微扰算子，这直接利用了主分解的不变性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(A = \begin{pmatrix}2&1&0\\0&2&1\\0&0&2\end{pmatrix}\)。 求广义特征空间链。 解答: \(\lambda = 2\)。 \((A-2I)^1 = \begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix}\)，\(\ker = \mathrm{span}\{e_1\}\)，维数 1。 \((A-2I)^2\): 维数 2。\((A-2I)^3 = 0\): 维数 3。 \(V_2 = \mathbb{R}^3\)（整个空间）。 易错点: 将广义特征空间与普通特征空间混淆。 普通特征空间 \(\ker(A-2I)\) 只有 1 维，但广义特征空间有 3 维。</p>
+            <p><strong>例 1</strong>：\(A = \begin{pmatrix}2&1&0\\0&2&1\\0&0&2\end{pmatrix}\)，求广义特征空间链及 Jordan 块结构。</p>
+            <p><em>第一步（特征值）</em>：\(\chi_A = (x-2)^3\)，唯一特征值 \(\lambda = 2\)，代数重数 3。</p>
+            <p><em>第二步（核链）</em>：\(N = A - 2I = \begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix}\)。\(\ker N = \operatorname{span}\{e_1\}\)，\(d_1 = 1\)。\(\ker N^2 = \operatorname{span}\{e_1, e_2\}\)，\(d_2 = 2\)。\(N^3 = 0\)，\(d_3 = 3\)。</p>
+            <p><em>第三步（块结构）</em>：差分 \(\Delta_1 = 1, \Delta_2 = 1, \Delta_3 = 1\)，均递减（实际相等）。大小 \(\ge 1\) 的块：1 个；大小 \(\ge 2\) 的块：1 个；大小 \(\ge 3\) 的块：1 个。故恰有 1 个 \(3 \times 3\) Jordan 块 \(J_3(2)\)。</p>
+            <p><em>结论</em>：\(V_2 = \mathbb{R}^3\)（整个空间），Jordan 形为 \(J_3(2)\)。</p>
+
+            <p><strong>例 2</strong>：\(B = \begin{pmatrix}1&1&0&0\\0&1&0&0\\0&0&1&1\\0&0&0&1\end{pmatrix}\)，分析广义特征空间。</p>
+            <p><em>第一步</em>：\(\chi_B = (x-1)^4\)，\(\lambda = 1\)，代数重数 4。</p>
+            <p><em>第二步</em>：\(N = B - I\)。\(\ker N = \operatorname{span}\{e_1, e_3\}\)，\(d_1 = 2\)。\(N^2 = 0\)，\(d_2 = 4\)。</p>
+            <p><em>第三步</em>：\(\Delta_1 = 2, \Delta_2 = 2\)。大小 \(\ge 1\) 的块：2 个；大小 \(\ge 2\) 的块：2 个。故恰有 2 个 \(J_2(1)\) 块。</p>
+            <p><em>结论</em>：Jordan 形为 \(J_2(1) \oplus J_2(1)\)。几何重数 = 2（两个 Jordan 块）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆普通特征空间与广义特征空间——\(\ker(A - \lambda I)\) 只是升链的第一级，\(\dim \ker(A-\lambda I) = \) 几何重数（Jordan 块个数），而 \(\dim V_\lambda = \) 代数重数（总维度）。</li>
+              <li>❌ 以为核链总是每步增 1——例 2 中 \(d_1 = 2, d_2 = 4\)，每步增 2，这对应两个并列的 Jordan 块。增量的模式编码了 Jordan 块的分布。</li>
+              <li>✅ 正确思路：先算核链维数 \(d_1, d_2, \ldots\)，用差分 \(\Delta_k = d_k - d_{k-1}\) 确定 Jordan 块结构——\(\Delta_k\) 是大小 \(\ge k\) 的块数。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -442,35 +492,79 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当矩阵不可对角化时，Jordan 标准形是最接近对角阵的「次优」形式。 每个矩阵在代数闭域上可以化为若干 Jordan 块的直和，这提供了 矩阵结构的完全分类。</p>
+            <p>当矩阵不可对角化时，对角阵不再是终点——但"退而求其次"的最优形式是什么？Jordan 标准形回答了这个问题：在代数闭域上，每个矩阵都相似于若干 Jordan 块的直和，这是最接近对角阵的标准形式。Jordan 块中对角线上是特征值、紧贴对角线上方是 1，除此之外全是 0——它精确编码了矩阵"偏离可对角化"的程度。</p>
+            <ul>
+              <li><strong>动力系统</strong>：线性系统 \(\dot{x} = Ax\) 的相图拓扑类型完全由 \(A\) 的 Jordan 形确定——不同 Jordan 结构产生本质不同的轨道（螺旋、结点、退化结点等）。</li>
+              <li><strong>矩阵分析</strong>：收敛性问题"\(A^n \to 0\)？"等价于所有 Jordan 块的特征值模 \(< 1\)；幂级数 \(\sum A^n/n!\) 的收敛结构也由 Jordan 形决定。</li>
+              <li><strong>代数分类</strong>：Jordan 标准形给出了相似等价类的完全不变量——两个矩阵相似 \(\Leftrightarrow\) 它们有相同的 Jordan 形（不计块顺序）。</li>
+            </ul>
+            <p>因此 Jordan 标准形是线性代数中最深刻的结构定理之一，它将矩阵的分类问题归结为 Jordan 块的组合问题。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Jordan 形是「对角 + 尺幺扰动」的模型，尾部的 1 描述了 特征空间不完全的程度。</p>
+            <p>Jordan 块 \(J_k(\lambda)\) 是 \(k \times k\) 矩阵，对角线为 \(\lambda\)，超对角线为 1，其余为 0。等价地，\(J_k(\lambda) = \lambda I_k + N_k\)，其中 \(N_k\) 是幂指标恰好为 \(k\) 的幂零矩阵。这一分解揭示了 Jordan 块的本质："可缩放部分"\(\lambda I\) 加上"不可对角化的幂零扰动"\(N_k\)。</p>
+            <p>Jordan 标准形定理断言，在代数闭域 \(K\) 上，任意 \(A \in M_n(K)\) 相似于唯一（不计块顺序）的 Jordan 矩阵 \(J = \bigoplus J_{k_i}(\lambda_i)\)。块的分布由不变量决定：特征值 \(\lambda\) 对应的 Jordan 块大小组成一个整数分拆 \(k_1 + k_2 + \cdots = a_\lambda\)，该分拆由维数链 \(\dim \ker(A - \lambda I)^j\) 完全确定。</p>
+            <p>从 \(K[x]\)-模理论看，Jordan 标准形对应有限生成挠模在 PID（\(K[x]\)）上的初等因子分解。每个 Jordan 块 \(J_k(\lambda)\) 对应循环模 \(K[x]/(x - \lambda)^k\)。Jordan 形的唯一性则是结构定理唯一性的直接推论。</p>
+            <p>在非代数闭域（如 \(\mathbb{R}\)）上，复特征值成共轭对出现，对应的实标准形使用 \(2 \times 2\) 旋转块代替复 Jordan 块。这是实 Jordan 形与复 Jordan 形的区别，但基本理念一致。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Jordan 块</strong>: \(J_k(\lambda) = \lambda I_k + N_k\)，其中 \(N_k\) 是 \(k \times k\) 上三角幂零矩阵（超对角线全 1）。 \[J_k(\lambda) = \begin{pmatrix} \lambda & 1 & & \\ & \lambda & \ddots & \\ & & \ddots & 1 \\ & & & \lambda \end{pmatrix}\] <strong>Jordan 标准形定理</strong>: 设 \(K\) 代数闭，则任意 \(A \in M_n(K)\) 相似于唯一的（不计块顺序）Jordan 算子: \(J = \mathrm{diag}(J_{k_1}(\lambda_1), \ldots, J_{k_s}(\lambda_s))\)。</p>
+            <h4>1. Jordan 块的定义</h4>
+            <p>\(k \times k\) Jordan 块：</p>
+            \[J_k(\lambda) = \begin{pmatrix} \lambda & 1 & & \\ & \lambda & \ddots & \\ & & \ddots & 1 \\ & & & \lambda \end{pmatrix} = \lambda I_k + N_k\]
+            <p>其中 \(N_k\) 的 \((i, i+1)\) 元素为 1，其余为 0。关键性质：\(N_k^k = 0\) 但 \(N_k^{k-1} \ne 0\)，即幂零指标恰为 \(k\)。</p>
+
+            <h4>2. Jordan 标准形定理</h4>
+            <p>设 \(K\) 代数闭，\(A \in M_n(K)\)，则存在可逆矩阵 \(P\) 使 \(P^{-1}AP = J\)，其中 \(J = \operatorname{diag}(J_{k_1}(\lambda_1), \ldots, J_{k_s}(\lambda_s))\)。该 Jordan 形在块的排列顺序下唯一。</p>
+
+            <h4>3. 存在性证明思路</h4>
+            <p>由主分解定理，\(V = \bigoplus V_{\lambda_i}\)，问题化为每个广义特征空间 \(V_\lambda\) 上幂零算子 \(N = (A - \lambda I)|_{V_\lambda}\) 的分类。幂零算子的结构定理（通过循环分解或维数链论证）给出 \(V_\lambda = \bigoplus C_j\)，每个 \(C_j\) 是 \(N\) 的循环子空间，对应一个 Jordan 块。</p>
+
+            <h4>4. 从维数链读取 Jordan 结构</h4>
+            <p>设 \(d_j = \dim \ker(A - \lambda I)^j\)。则差分 \(\Delta_j = d_j - d_{j-1}\) 递减，且大小恰为 \(k\) 的 Jordan 块个数 = \(\Delta_k - \Delta_{k+1}\)。等价地：大小 \(\ge k\) 的块数 = \(\Delta_k\)。</p>
+
+            <h4>5. Jordan 形的幂与指数</h4>
+            <p>\(J_k(\lambda)^n\) 的 \((i,j)\) 元素为 \(\binom{n}{j-i}\lambda^{n-(j-i)}\)（\(j \ge i\)）。矩阵指数 \(e^{tJ_k(\lambda)} = e^{\lambda t}\sum_{m=0}^{k-1}\frac{t^m}{m!}N_k^m\)，各元素为 \(e^{\lambda t}\) 乘以 \(t\) 的多项式。</p>
+
+            <h4>6. 唯一性</h4>
+            <p>Jordan 形的唯一性由维数链的唯一性保证：相似矩阵有相同的 \(\dim \ker(A - \lambda I)^j\) 序列，因此 Jordan 块分布一致。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Jordan 形确定了 \(A^n\) 和 \(e^{tA}\) 的关键结构。</p>
+            <p><strong>控制系统（稳定性判据）</strong>：线性时不变系统 \(\dot{x} = Ax\) 的渐近稳定性由 Jordan 形完全决定：所有特征值实部为负即稳定。边界情况（虚轴上特征值）需检查 Jordan 块大小——\(1 \times 1\) 块意味着临界稳定，\(k \ge 2\) 则多项式增长 \(t^{k-1}\) 导致不稳定。</p>
+            <p><strong>数值线性代数（矩阵条件数）</strong>：Jordan 块的"缺陷"（defect = \(n - \) 线性无关特征向量数）量化了矩阵对微扰的敏感性。Jordan 块大小 \(k\) 的特征值在 \(\epsilon\) 扰动下可偏移 \(O(\epsilon^{1/k})\)——块越大，特征值越不稳定。这是矩阵伪谱理论的基础。</p>
+            <p><strong>组合数学（递推关系求解）</strong>：高阶常系数线性递推 \(a_{n+k} = c_1 a_{n+k-1} + \cdots + c_k a_n\) 等价于 \(X_{n+1} = AX_n\)。通解 \(X_n = A^n X_0 = PJ^nP^{-1}X_0\)，每个 Jordan 块贡献 \(n^j \lambda^n\) 型项——特征根的重数（Jordan 块大小）决定了多项式前因子的阶数。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(\chi_A = (x-1)^2(x-3)\)，\(m_A = (x-1)^2(x-3)\)。 求 Jordan 形。 解答: \(\lambda=1\): 代数重 2，\(m_A\) 中 \((x-1)^2\) 说明最大 Jordan 块大小为 2。故 \(J_2(1)\)。\(\lambda=3\): 代数重 1，\(J_1(3)\)。 Jordan 形 \(= \mathrm{diag}(J_2(1), J_1(3)) = \begin{pmatrix}1&1&0\\0&1&0\\0&0&3\end{pmatrix}\)。 易错点: 当 \(\chi_A = (x-1)^3\) 时，Jordan 形可能为 \(J_3(1)\)、\(J_2(1) \oplus J_1(1)\)、或 \(J_1(1)^3\)（对角）。 需要 \(m_A\) 信息来确定。</p>
+            <p><strong>例 1</strong>：已知 \(\chi_A = (x-1)^2(x-3)\)，\(m_A = (x-1)^2(x-3)\)。求 Jordan 标准形。</p>
+            <p><em>第一步（特征值分析）</em>：\(\lambda_1 = 1\)（代数重数 2），\(\lambda_2 = 3\)（代数重数 1）。</p>
+            <p><em>第二步（Jordan 块）</em>：\(m_A\) 中 \((x-1)^2\) 表明 \(\lambda = 1\) 的最大 Jordan 块大小为 2。代数重数 2 = 块大小 2，故恰有 1 个 \(J_2(1)\)。\(\lambda = 3\) 的代数重数 1，只能有 \(J_1(3)\)。</p>
+            <p><em>结论</em>：\(J = J_2(1) \oplus J_1(3) = \begin{pmatrix}1&1&0\\0&1&0\\0&0&3\end{pmatrix}\)。</p>
+
+            <p><strong>例 2</strong>：已知 \(\chi_A = (x-2)^4\)，\(\dim\ker(A-2I) = 2\)，\(\dim\ker(A-2I)^2 = 4\)。求 Jordan 形。</p>
+            <p><em>第一步</em>：\(d_1 = 2, d_2 = 4\)。差分：\(\Delta_1 = 2, \Delta_2 = 2\)。</p>
+            <p><em>第二步</em>：大小 \(\ge 1\) 的块：2 个。大小 \(\ge 2\) 的块：2 个。大小 \(\ge 3\) 的块：0。所以恰有 2 个 \(J_2(2)\)。</p>
+            <p><em>验证</em>：最大块大小 = 2，故 \(m_A = (x-2)^2\)。\(\dim\ker(A-2I) = 2 = \) Jordan 块个数。一致。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 仅由 \(\chi_A\) 确定 Jordan 形——例如 \(\chi = (x-1)^3\) 可对应 \(J_3(1)\)、\(J_2(1) \oplus J_1(1)\)、或 \(3J_1(1)\)，需要额外信息（\(m_A\) 或维数链）来区分。</li>
+              <li>❌ 忘记 Jordan 形的唯一性是"不计块顺序"的——\(J_2(1) \oplus J_1(3)\) 和 \(J_1(3) \oplus J_2(1)\) 是同一个 Jordan 形。</li>
+              <li>✅ 正确策略：从 \(\chi_A\) 获得特征值和代数重数，再用 \(m_A\)（或维数链 \(d_1, d_2, \ldots\)）确定每个特征值对应的 Jordan 块分拆。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -523,28 +617,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>知道 Jordan 形后，如何找到使 \(A\) 变为 Jordan 形的<strong>基</strong>？链基法通过 构造 \((A-\lambda I)\) 的核链来系统地找到 Jordan 基。这是将 Jordan 标准形从理论转化为计算的关键步骤。</p>
+            <p>知道矩阵的 Jordan 形只是第一步——它告诉我们"长什么样"，却不告诉我们"用哪组基来看"。Jordan 基的求法解决的正是后一个问题：找到一组具体的基底 \(\{v_1, \ldots, v_n\}\)，使得矩阵在此基下的表示恰好是 Jordan 标准形。没有 Jordan 基，Jordan 形就只是抽象的分类标签，无法用于具体计算。</p>
+            <ul>
+              <li><strong>常微分方程</strong>：解 \(X' = AX\) 时，\(e^{tA} = Pe^{tJ}P^{-1}\) 中的 \(P\) 列向量恰好是 Jordan 基——找不到 \(P\) 就无法写出通解的显式表达。</li>
+              <li><strong>矩阵幂计算</strong>：\(A^n = PJ^nP^{-1}\) 对递推关系求解、Markov 链长期行为分析等至关重要，需要显式的 Jordan 基。</li>
+              <li><strong>理论证明</strong>：许多代数证明需要在 Jordan 基下工作，如证明算子多项式的性质、矩阵函数的连续性等。</li>
+            </ul>
+            <p>Jordan 基的求法（链基法）将问题系统化为一套可操作的算法步骤，使得 Jordan 标准形理论从"存在性定理"变为"可计算的工具"。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>链基法本质是构造 \((A-\lambda I)\) 的幂零链: \(v, (A-\lambda I)v, \ldots, (A-\lambda I)^{k-1}v\)。</p>
+            <p>Jordan 基的核心构造工具是"Jordan 链"。对特征值 \(\lambda\) 和 \(k\) 阶 Jordan 块，选择一个"链顶"向量 \(v \in \ker(A - \lambda I)^k \setminus \ker(A - \lambda I)^{k-1}\)，然后依次作用 \((A - \lambda I)\) 生成链：\(v, (A-\lambda I)v, \ldots, (A-\lambda I)^{k-1}v\)。最后一个向量 \((A-\lambda I)^{k-1}v\) 是真正的特征向量（属于 \(\ker(A - \lambda I)\)）。</p>
+            <p>链基法的关键约束是：不同 Jordan 链之间必须线性无关（链不能"重叠"）。实际操作中，需要从最大块开始逐级构造，在每一层"补选"起始向量时保证与已选链的兼容性。这种"自上而下"的策略确保了构造的一致性。</p>
+            <p>从模论角度看，每条 Jordan 链对应一个循环子模 \(K[x]/(x-\lambda)^k\) 的标准基。整个过程等价于将 \(V_\lambda\) 分解为循环子模的直和，并在每个直和项中指定标准生成元。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>链基法</strong>: 对每个特征值 \(\lambda\): 1) 计算 \(\ker(A-\lambda I)^k\) 的维数链，确定 Jordan 块结构。 2) 对每个 \(k\) 阶 Jordan 块，选 \(v \in \ker(A-\lambda I)^k \setminus \ker(A-\lambda I)^{k-1}\)。 3) Jordan 链: \(\{(A-\lambda I)^{k-1}v, \ldots, (A-\lambda I)v, v\}\)。 验证: \((A-\lambda I)^{k-1}v \neq 0\) 且 \((A-\lambda I)^k v = 0\)。 在这组基下 \(A\) 的矩阵表示恰好是 \(J_k(\lambda)\)。 \[\text{Jordan 链: } (A-\lambda I)^{k-1}v, \ldots, (A-\lambda I)v, v\]</p>
+            <h4>1. Jordan 链的定义</h4>
+            <p>对特征值 \(\lambda\) 的 \(k\) 阶 Jordan 块，选 \(v\) 满足 \((A - \lambda I)^k v = 0\) 且 \((A - \lambda I)^{k-1} v \ne 0\)。链为：</p>
+            \[\underbrace{(A-\lambda I)^{k-1}v}_{\text{特征向量}},\; (A-\lambda I)^{k-2}v,\; \ldots,\; (A-\lambda I)v,\; v\]
+            <p>在这组基（按上述顺序）下，\(A\) 在此 \(k\) 维子空间上的矩阵表示恰为 \(J_k(\lambda)\)。注意基的排序：特征向量在前，链顶在后。</p>
+
+            <h4>2. 链基法的系统步骤</h4>
+            <p>(i) 由维数链 \(d_1, d_2, \ldots\) 确定 Jordan 块结构：大小 \(k\) 的块个数 = \(\Delta_k - \Delta_{k+1}\)。</p>
+            <p>(ii) 从最大块 \(k = m\) 开始：在 \(\ker(A-\lambda I)^m \setminus \ker(A-\lambda I)^{m-1}\) 中选起始向量 \(v\)，生成链。</p>
+            <p>(iii) 逐步处理较小的块：在 \(\ker(A-\lambda I)^{k}\) 中选新的起始向量，要求其链末端（特征向量）与已选的所有特征向量线性无关。</p>
+            <p>(iv) 将所有链拼接为 \(V_\lambda\) 的 Jordan 基。对每个特征值重复此过程。</p>
+
+            <h4>3. 兼容性条件</h4>
+            <p>选择新链的起始向量时，必须保证它不在已有链的跨度中。形式化地：若已选链生成子空间 \(W \subseteq V_\lambda\)，新起始向量 \(v\) 需满足 \(v \notin W + \ker(A-\lambda I)^{k-1}\)。这保证了链的线性无关性。</p>
+
+            <h4>4. 验证方法</h4>
+            <p>构造完成后，令 \(P\) 的列为所有 Jordan 链向量（按正确顺序排列），则 \(P^{-1}AP = J\)。验证：(i) \(P\) 可逆（列线性无关），(ii) \(AP = PJ\)（每列满足 \(Av_i = \lambda v_i + v_{i-1}\) 或 \(Av_1 = \lambda v_1\)）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>微分方程系统的显式求解</strong>：对 \(\dot{x} = Ax\)，找到 Jordan 基 \(P\) 后，变量替换 \(y = P^{-1}x\) 化为 \(\dot{y} = Jy\)，解耦为各 Jordan 块上的独立系统。每个 \(k\) 阶块的解包含 \(e^{\lambda t}\) 乘以 \(1, t, t^2/2!, \ldots, t^{k-1}/(k-1)!\) 的线性组合——基的具体表达直接给出 \(x(t) = Py(t)\)。</p>
+            <p><strong>矩阵对数与根</strong>：若 \(A\) 无零特征值且 Jordan 形已知，\(\log A = P(\log J)P^{-1}\) 可按块计算：\(\log J_k(\lambda) = \log\lambda \cdot I + \sum_{m=1}^{k-1}(-1)^{m+1}(N/\lambda)^m/m\)。Jordan 基提供了显式变换矩阵 \(P\)。</p>
+            <p><strong>算子半群理论</strong>：有限维 \(C_0\)-半群 \(e^{tA}\) 的增长率由 Jordan 形的谱界 \(s(A) = \max \operatorname{Re}\lambda_i\) 和最大 Jordan 块大小 \(k\) 共同决定：\(\|e^{tA}\| = O(t^{k-1}e^{s(A)t})\)。Jordan 基使增长估计的常数可以精确化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\)。求 Jordan 基。 解答: \(\lambda = 2\)，需 \(J_2(2)\)。 选 \(v \in \ker(A-2I)^2 \setminus \ker(A-2I)\)。 \(v = e_2 = (0,1)^T\)。\((A-2I)v = (1,0)^T = e_1\)。 Jordan 基: \(\{e_1, e_2\}\)。 易错点: 链基的顺序。Jordan 块中第一个基向量对应链的末端 （在 \(\ker(A-\lambda I)\) 中），不是起始向量。</p>
+            <p><strong>例 1</strong>：\(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\)，求 Jordan 基。</p>
+            <p><em>第一步（确定结构）</em>：\(\lambda = 2\)，代数重数 2，\(\dim\ker(A-2I) = 1\)。故 1 个 \(J_2(2)\) 块。</p>
+            <p><em>第二步（选链顶）</em>：需 \(v \in \ker(A-2I)^2 \setminus \ker(A-2I) = \mathbb{R}^2 \setminus \operatorname{span}\{e_1\}\)。选 \(v = e_2 = (0,1)^T\)。</p>
+            <p><em>第三步（生成链）</em>：\((A-2I)v = \begin{pmatrix}0&1\\0&0\end{pmatrix}\begin{pmatrix}0\\1\end{pmatrix} = \begin{pmatrix}1\\0\end{pmatrix} = e_1\)。</p>
+            <p><em>Jordan 基</em>：\(\{e_1, e_2\}\)（先特征向量，后链顶）。\(P = \begin{pmatrix}1&0\\0&1\end{pmatrix} = I\)，本例 \(A\) 已经是 Jordan 形。</p>
+
+            <p><strong>例 2</strong>：\(A = \begin{pmatrix}0&1&0\\0&0&1\\0&0&0\end{pmatrix}\)（幂零矩阵），求 Jordan 基。</p>
+            <p><em>第一步</em>：\(\lambda = 0\)，\(A = N_3\)，\(d_1 = 1, d_2 = 2, d_3 = 3\)。1 个 \(J_3(0)\) 块。</p>
+            <p><em>第二步</em>：选 \(v \in \ker A^3 \setminus \ker A^2\)。\(\ker A^2 = \operatorname{span}\{e_1, e_2\}\)，取 \(v = e_3\)。</p>
+            <p><em>第三步</em>：\(Av = e_2\)，\(A^2 v = e_1\)。Jordan 链：\(\{e_1, e_2, e_3\}\)（即 \(\{A^2 v, Av, v\}\)）。</p>
+            <p><em>验证</em>：\(Ae_1 = 0 = 0 \cdot e_1\)，\(Ae_2 = e_1 = 0 \cdot e_2 + e_1\)，\(Ae_3 = e_2 = 0 \cdot e_3 + e_2\)。✓</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ Jordan 链的排序错误——链应以特征向量（\(\ker(A-\lambda I)\) 中的元素）开头，链顶（广义特征向量）在末尾。顺序颠倒会导致矩阵表示不是 Jordan 块形式。</li>
+              <li>❌ 选择的链顶向量落在较低核空间内——若 \(v \in \ker(A-\lambda I)^{k-1}\)，则链长度 \(< k\)，无法产生所需大小的 Jordan 块。</li>
+              <li>✅ 正确方法：从最大块开始构造，每次选链顶时验证 \((A-\lambda I)^{k-1}v \ne 0\) 且与已有特征向量线性无关。用 \(AP = PJ\) 做最终验证。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -571,35 +714,78 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>线性 ODE 系统 \(X' = AX\) 的解为 \(X(t) = e^{tA}X(0)\)。计算 \(e^{tA}\) 的关键是 Jordan 形: \(e^{tA} = P e^{tJ} P^{-1}\)，而 \(e^{tJ}\) 可以 按块计算。Jordan 标准形因此是解常系数线性 ODE 的核心工具。</p>
+            <p>线性常系数 ODE 系统 \(X' = AX\) 的解为 \(X(t) = e^{tA}X_0\)，但如何具体计算 \(e^{tA}\)？对于 \(n \times n\) 矩阵，展开 \(\sum (tA)^k / k!\) 并非可行策略。Jordan 标准形提供了优雅的解法：\(e^{tA} = Pe^{tJ}P^{-1}\)，而 \(e^{tJ}\) 按块分解、每块有闭合公式。</p>
+            <ul>
+              <li><strong>电路分析</strong>：RLC 电路的状态方程是线性 ODE 系统，矩阵指数给出电压-电流的瞬态响应，Jordan 块大小决定响应中是否出现 \(te^{\alpha t}\) 型临界阻尼项。</li>
+              <li><strong>控制工程</strong>：状态转移矩阵 \(\Phi(t) = e^{tA}\) 是线性控制理论的基础，它出现在可达集计算、李代数方法、零输入响应等几乎所有核心工具中。</li>
+              <li><strong>概率论</strong>：连续时间 Markov 链的转移速率矩阵 \(Q\) 通过 \(P(t) = e^{tQ}\) 给出转移概率，Jordan 分解揭示了暂态行为与收敛速率。</li>
+            </ul>
+            <p>矩阵指数是将"代数结构"（Jordan 形）转化为"动力学行为"（解的时间演化）的桥梁，也是 Jordan 理论最重要的实际应用之一。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(e^{tJ_k(\lambda)} = e^{\lambda t} e^{tN_k}\)，其中 \(N_k\) 幂零， \(e^{tN_k}\) 是有限多项式——拇指数的多项式系数特征。</p>
+            <p>矩阵指数 \(e^{tA} = \sum_{k=0}^\infty \frac{(tA)^k}{k!}\) 是从矩阵代数到矩阵李群的指数映射，将"无穷小生成元"\(A\) 映射为"有限变换"\(e^{tA}\)。对矩阵级数的收敛性，\(M_n(K)\) 上任何范数下该级数均绝对收敛——这是有限维的优势。</p>
+            <p>Jordan 分解将 \(e^{tA}\) 的计算化为代数操作：\(A = PJP^{-1}\) 意味着 \(e^{tA} = Pe^{tJ}P^{-1}\)，而 \(e^{tJ} = \bigoplus e^{tJ_{k_i}(\lambda_i)}\) 按块独立。每个 Jordan 块 \(J_k(\lambda) = \lambda I + N\) 的指数利用了 \(\lambda I\) 与 \(N\) 的交换性：\(e^{t(\lambda I + N)} = e^{\lambda t} e^{tN}\)，而 \(e^{tN}\) 因 \(N^k = 0\) 是有限求和。</p>
+            <p>从泛函分析角度看，矩阵指数是有限维 \(C_0\)-半群的完整描述。Jordan 形给出了半群生成元的谱表示，解的增长率 \(\omega_0 = \max \operatorname{Re}\lambda_i\) 是谱界，多项式前因子 \(t^{k-1}\) 来自非平凡 Jordan 块。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>矩阵指数</strong>: \(e^{tA} = \sum_{k=0}^{\infty} \frac{(tA)^k}{k!}\)。 <strong>Jordan 块的指数</strong>: \[e^{tJ_k(\lambda)} = e^{\lambda t} \begin{pmatrix} 1 & t & t^2/2! & \cdots \\ 0 & 1 & t & \cdots \\ \vdots & & \ddots & \\ 0 & \cdots & 0 & 1 \end{pmatrix}\] <strong>应用于 ODE</strong>: \(X' = AX\) 的通解 \(X(t) = e^{tA}X(0)\)。 若 \(A \sim J\)（\(A = PJP^{-1}\)），则 \(e^{tA} = P e^{tJ} P^{-1}\)。 <strong>应用于递推</strong>: \(a_{n+k} = c_1 a_{n+k-1} + \cdots + c_k a_n\)。 写成 \(X_{n+1} = AX_n\)，解 \(X_n = A^n X_0\)。 \(A^n = PJ^nP^{-1}\)，\(J^n\) 按块计算。</p>
+            <h4>1. 矩阵指数的定义与基本性质</h4>
+            <p>定义 \(e^A = \sum_{k=0}^\infty \frac{A^k}{k!}\)。基本性质：(i) \(e^0 = I\)；(ii) \(e^{(s+t)A} = e^{sA}e^{tA}\)；(iii) \((e^A)^{-1} = e^{-A}\)；(iv) 若 \(AB = BA\) 则 \(e^{A+B} = e^A e^B\)（注意交换性条件！）</p>
+
+            <h4>2. Jordan 块的指数</h4>
+            <p>\(J_k(\lambda) = \lambda I + N_k\)，\(N_k^k = 0\)。由 \([\lambda I, N_k] = 0\)：</p>
+            \[e^{tJ_k(\lambda)} = e^{\lambda t} e^{tN_k} = e^{\lambda t} \sum_{m=0}^{k-1} \frac{t^m}{m!} N_k^m = e^{\lambda t} \begin{pmatrix} 1 & t & \frac{t^2}{2!} & \cdots & \frac{t^{k-1}}{(k-1)!} \\ 0 & 1 & t & \cdots & \frac{t^{k-2}}{(k-2)!} \\ \vdots & & \ddots & & \vdots \\ 0 & \cdots & & 1 & t \\ 0 & \cdots & & 0 & 1 \end{pmatrix}\]
+            <p>每个元素形如 \(e^{\lambda t} \cdot t^j / j!\)——指数因子来自特征值，多项式因子来自 Jordan 块的幂零部分。</p>
+
+            <h4>3. 完整计算流程</h4>
+            <p>(i) 求 \(A\) 的 Jordan 形 \(J\) 和 Jordan 基 \(P\)。(ii) 计算 \(e^{tJ} = \bigoplus e^{tJ_{k_i}(\lambda_i)}\)（每块用上述公式）。(iii) \(e^{tA} = Pe^{tJ}P^{-1}\)。(iv) 通解 \(X(t) = e^{tA}X_0\)。</p>
+
+            <h4>4. 矩阵幂 \(A^n\) 的计算</h4>
+            <p>类似地，\(A^n = PJ^nP^{-1}\)。\(J_k(\lambda)^n\) 的 \((i,j)\) 元素（\(j \ge i\)）为 \(\binom{n}{j-i}\lambda^{n-(j-i)}\)。当 \(|\lambda| < 1\) 时 \(J_k(\lambda)^n \to 0\)；当 \(|\lambda| = 1\) 且 \(k \ge 2\) 时 \(\|J_k(\lambda)^n\| \sim n^{k-1}\)（多项式增长）。</p>
+
+            <h4>5. 特殊情形：可对角化</h4>
+            <p>若 \(A\) 可对角化，Jordan 块全为 \(1 \times 1\)，\(e^{tA} = P\operatorname{diag}(e^{\lambda_1 t}, \ldots, e^{\lambda_n t})P^{-1}\)。这是最简单的情形，每个分量独立指数演化。</p>
+
+            <h4>6. 稳定性准则</h4>
+            <p>\(e^{tA} \to 0\)（\(t \to +\infty\)）\(\Leftrightarrow\) \(A\) 的所有特征值实部 \(< 0\)。若某特征值 \(\operatorname{Re}\lambda = 0\) 且对应 Jordan 块 \(k \ge 2\)，则 \(\|e^{tA}\|\) 以 \(t^{k-1}\) 多项式增长——系统不稳定。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>控制系统的稳定性分析；信号处理中滤波器的脉冲响应。</p>
+            <p><strong>结构工程（振动分析）</strong>：多层建筑在地震作用下的响应方程 \(M\ddot{x} + C\dot{x} + Kx = F(t)\) 可化为一阶系统 \(\dot{z} = Az + BF\)。矩阵指数 \(e^{tA}\) 的 Jordan 结构决定了各振动模态的衰减速率和振荡频率——实部对应阻尼，虚部对应频率，Jordan 块大小影响临界阻尼行为。</p>
+            <p><strong>量子计算（量子门）</strong>：单量子比特门 \(U = e^{-i\theta \hat{n}\cdot\vec{\sigma}/2}\) 是 Pauli 矩阵的指数映射，多量子比特门 \(U = e^{-iHt}\) 依赖哈密顿量 \(H\) 的谱分解。Jordan/谱理论使门操作的精确时间可以解析计算。</p>
+            <p><strong>传染病模型</strong>：SIR/SEIR 模型线性化后为 \(\dot{x} = Jx\)（\(J\) 是无病平衡点的 Jacobi 矩阵），基本再生数 \(R_0\) 与 \(J\) 的谱半径直接相关。矩阵指数计算给出疾病传播的早期指数增长率。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}\)。计算 \(e^{tA}\)。 解答: \(\chi_A = x^2 + 1\)，特征值 \(\pm i\)。可对角化（复数域）。 也可直接: \(A^2 = -I\)，\(A^3 = -A\)，\(A^4 = I\)。 \(e^{tA} = \cos t \cdot I + \sin t \cdot A = \begin{pmatrix}\cos t & \sin t \\ -\sin t & \cos t\end{pmatrix}\)。 易错点: 以为 \(e^{A+B} = e^A e^B\) 总成立。 只有当 \(AB = BA\) 时才成立。</p>
+            <p><strong>例 1</strong>：计算 \(e^{tA}\)，其中 \(A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}\)。</p>
+            <p><em>第一步（分析）</em>：\(\chi_A = x^2 + 1\)，特征值 \(\pm i\)。\(A\) 可对角化（在 \(\mathbb{C}\) 上）。</p>
+            <p><em>第二步（直接方法）</em>：\(A^2 = -I\)，\(A^3 = -A\)，\(A^4 = I\)。于是 \(e^{tA} = \sum \frac{t^k A^k}{k!} = (\sum \frac{(-1)^k t^{2k}}{(2k)!})I + (\sum \frac{(-1)^k t^{2k+1}}{(2k+1)!})A\)。</p>
+            <p><em>结果</em>：\(e^{tA} = \cos t \cdot I + \sin t \cdot A = \begin{pmatrix}\cos t & \sin t \\ -\sin t & \cos t\end{pmatrix}\)——旋转矩阵！</p>
+
+            <p><strong>例 2</strong>：\(B = \begin{pmatrix}1&1\\0&1\end{pmatrix} = J_2(1)\)，计算 \(e^{tB}\) 和 \(B^n\)。</p>
+            <p><em>矩阵指数</em>：\(e^{tB} = e^t \begin{pmatrix}1&t\\0&1\end{pmatrix}\)。</p>
+            <p><em>矩阵幂</em>：\(B^n = \begin{pmatrix}1&n\\0&1\end{pmatrix}\)（特征值 1，多项式增长项 \(n\)）。</p>
+            <p><em>验证</em>：\(B^2 = \begin{pmatrix}1&2\\0&1\end{pmatrix}\)，\(B^3 = \begin{pmatrix}1&3\\0&1\end{pmatrix}\)，归纳法可证。✓</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 认为 \(e^{A+B} = e^A e^B\) 总成立——Baker-Campbell-Hausdorff 公式表明，非交换时 \(e^{A+B} = e^A e^B e^{-[A,B]/2}\cdots\)。仅当 \(AB = BA\) 时等号成立。</li>
+              <li>❌ 忘记 \(e^{tA}\) 中多项式因子的贡献——对 \(J_2(0)\)，\(e^{tJ_2(0)} = \begin{pmatrix}1&t\\0&1\end{pmatrix} \ne I\)，不是常数矩阵！</li>
+              <li>✅ 正确策略：先化为 Jordan 形 → 按块计算 \(e^{tJ_k(\lambda)}\) → 组装回原坐标。对简单情况（如 \(A^2\) 可简化），可直接用级数截断。</li>
+            </ul>
           </div>
         </div>
       </div>

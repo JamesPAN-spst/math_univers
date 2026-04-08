@@ -394,35 +394,90 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在研究群的商结构时，我们需要一种特殊的子群，使得「陪集上的乘 法」能被良好定义。并非所有子群都允许这样做——只有当左陪集与右 陪集一致时，商集 G/H 才能继承群运算。这种特殊子群就是正规子 群。理解正规子群是打开同态基本定理和群分类理论的钥匙。</p>
+            <p>我们已经知道，子群 \(H \leq G\) 将群 \(G\) 分割成若干陪集。一个自然的想法是：能否在陪集的集合上定义群运算，得到一个「更小的群」？答案并非总是肯定的——只有当子群满足一个额外的相容性条件时，陪集乘法才是良定义的。这个条件催生了群论最核心的概念之一：正规子群。</p>
+            <ul>
+              <li><strong>同态理论</strong>：任何群同态 \(\varphi: G \to H\) 的核 \(\ker\varphi\) 都是正规子群——正规性是同态基本定理成立的前提；</li>
+              <li><strong>物理学</strong>：粒子物理的规范对称群 \(SU(3) \times SU(2) \times U(1)\) 中，正规子群对应于不同相互作用的「可分离性」，决定了对称性自发破缺的方式；</li>
+              <li><strong>密码学</strong>：RSA 等公钥体系依赖 \((\mathbb{Z}/n\mathbb{Z})^*\) 的群结构，其中正规子群的存在与否直接影响代数攻击的可行性。</li>
+            </ul>
+            <p>正规子群的本质是「在共轭变换下不变」。这一条件看似纯代数，却蕴含深刻的几何直觉：正规子群衡量的是群内部哪些对称性是「全局一致」的，而非依赖于观察视角的。理解正规子群，就打开了从群同态到群分类的大门。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心抽象: 共轭不变性。\(N \trianglelefteq G\) 当且仅当对任意 \(g \in G\)，有 \(gNg^{-1} = N\)。这意味着 \(N\) 作为集合在群的 「内部对称变换」下不变——这是一种对称性的对称性。</p>
+            <p>正规子群的核心抽象在于<strong>共轭不变性</strong>：子群 \(N\) 在群 \(G\) 的每一个「内自同构」\(\iota_g: x \mapsto gxg^{-1}\) 下都映到自身。换言之，\(N\) 不仅是子群，而且是 \(G\) 对自身共轭作用下的不动点。</p>
+            <p>从陪集的角度看，\(N \trianglelefteq G\) 等价于「左陪集 = 右陪集」，即 \(gN = Ng\) 对一切 \(g \in G\) 成立。正是这一条件保证了陪集的集合 \(G/N\) 上可以良定义乘法 \((g_1N)(g_2N) = (g_1g_2)N\)——否则运算会依赖于代表元的选取而不自洽。</p>
+            <p>正规子群有多种等价刻画，它们在不同场景下各有用途：</p>
+            <ul>
+              <li>\(\forall g \in G,\; gNg^{-1} = N\)（共轭不变性——定义本身）；</li>
+              <li>\(\forall g \in G,\; gN = Ng\)（左右陪集相等——构造商群时使用）；</li>
+              <li>\(N = \ker\varphi\)，某个同态的核（同态基本定理中使用）。</li>
+            </ul>
+            <p>特别地，交换群的所有子群自动正规（因为 \(gng^{-1} = n\)），而<strong>指数为 2 的子群</strong>也一定正规——只有两个陪集时，左陪集分解与右陪集分解别无选择地相同。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>定义: \(N \trianglelefteq G\) iff \(\forall g \in G, gNg^{-1} = N\)。 等价条件: (a) \(\forall g \in G\), \(gN = Ng\)（左陪集 = 右陪集） (b) \(\forall g \in G, \forall n \in N\), \(gng^{-1} \in N\) (c) \(N\) 是某个群同态 \(\varphi: G \to H\) 的核 证明 (a)\(\Rightarrow\)(b): 若 \(gN = Ng\)，则对任意 \(n \in N\)， \(gn \in gN = Ng\)，故存在 \(n' \in N\) 使 \(gn = n'g\)， 即 \(gng^{-1} = n' \in N\)。 商群构造: 定义 \(G/N = \{gN : g \in G\}\)，运算 \((g_1 N)(g_2 N) = (g_1 g_2)N\)。 良定义性: 若 \(g_1 N = g_1' N\) 且 \(g_2 N = g_2' N\)， 则 \(g_1' = g_1 n_1\), \(g_2' = g_2 n_2\)， \(g_1' g_2' = g_1 n_1 g_2 n_2 = g_1 g_2 (g_2^{-1} n_1 g_2) n_2\)。 因为 \(N\) 正规，\(g_2^{-1} n_1 g_2 \in N\)，故 \(g_1'g_2' \in g_1 g_2 N\)。</p>
+            <h4>1. 正规子群的严格定义</h4>
+            <p>设 \(G\) 为群，\(N \leq G\)。称 \(N\) 为 \(G\) 的正规子群，记为 \(N \trianglelefteq G\)，若</p>
+            <p>\[\forall g \in G,\quad gNg^{-1} = N\]</p>
+            <p>直觉：这要求每一个内自同构 \(\iota_g\) 都将 \(N\) 映到自身。与普通子群不同，正规子群不会被共轭「振到别处」。</p>
+
+            <h4>2. 等价条件与证明思路</h4>
+            <p>以下三个条件与定义等价：</p>
+            <p>(a) \(\forall g \in G,\; gN = Ng\)（左陪集 = 右陪集）；<br>
+               (b) \(\forall g \in G,\; \forall n \in N,\; gng^{-1} \in N\)；<br>
+               (c) \(N = \ker\varphi\)，即 \(N\) 是某个群同态的核。</p>
+            <p>推导思路 (a)⇒(b)：若 \(gN = Ng\)，取任意 \(n \in N\)，则 \(gn \in gN = Ng\)，故存在 \(n' \in N\) 使 \(gn = n'g\)，即 \(gng^{-1} = n' \in N\)。关键区别：\(gN = Ng\) 不是说 \(gn = ng\)（那是交换性），而是说左右陪集作为<em>集合</em>相等。</p>
+
+            <h4>3. 陪集乘法的良定义性</h4>
+            <p>定义 \(G/N = \{gN : g \in G\}\)，运算：</p>
+            <p>\[(g_1 N)(g_2 N) = (g_1 g_2)N\]</p>
+            <p>良定义性验证：设 \(g_1' = g_1 n_1\)，\(g_2' = g_2 n_2\)，则 \(g_1'g_2' = g_1 n_1 g_2 n_2 = g_1 g_2 \cdot (g_2^{-1}n_1 g_2)\cdot n_2\)。正规性保证 \(g_2^{-1}n_1 g_2 \in N\)，故 \(g_1'g_2' \in g_1 g_2 N\)。直觉：正规性的作用恰好是使「中间的 \(n_1\) 可以安全地越过 \(g_2\)」，被 \(N\) 吸收。</p>
+
+            <h4>4. 同态核的视角</h4>
+            <p>若 \(\varphi: G \to H\) 是群同态，则 \(\ker\varphi \trianglelefteq G\)。验证：对任意 \(g \in G\)，\(n \in \ker\varphi\)，</p>
+            <p>\[\varphi(gng^{-1}) = \varphi(g)\varphi(n)\varphi(g)^{-1} = \varphi(g) \cdot e_H \cdot \varphi(g)^{-1} = e_H\]</p>
+            <p>故 \(gng^{-1} \in \ker\varphi\)。这说明核自动具有正规性。反过来，每个正规子群都是自然投射 \(\pi: G \to G/N\) 的核，因此「正规子群 = 同态核」。</p>
+
+            <h4>5. 反例：非正规子群</h4>
+            <p>\(S_3\) 中 \(H = \{e, (1\;2)\}\) 是子群但非正规。计算：</p>
+            <p>\[(1\;3)H(1\;3)^{-1} = \{e,\; (1\;3)(1\;2)(1\;3) \} = \{e,\; (2\;3)\} \neq H\]</p>
+            <p>左陪集 \((1\;3)H = \{(1\;3),(1\;2\;3)\}\) 而右陪集 \(H(1\;3) = \{(1\;3),(1\;3\;2)\}\)，两者不等。这揭示了非交换群中子群未必正规的核心困难。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>物理中正规子群对应「无法被外部破坏」的内禀对称性； 密码学中群的正规子群结构用于分析加密方案的代数安全性。</p>
+            <p><strong>粒子物理</strong>：标准模型的规范群 \(SU(3) \times SU(2) \times U(1)\) 中，各因子互为正规子群。对称性破缺时，商群 \(G/N\) 的结构决定了剩余对称性及 Goldstone 玻色子的数目。</p>
+            <p><strong>密码学</strong>：在基于群的密码方案（如基于轭序群的 ElGamal）中，攻击者试图利用正规子群将问题㊣约至更小的商群中求解（Pohlig–Hellman 攻击）。因此，选择没有小正规子群的群是安全设计的关键。</p>
+            <p><strong>材料科学</strong>：晶体学中，空间群 \(G\) 的平移子群 \(T \trianglelefteq G\) 是正规子群，商群 \(G/T\) 就是点群（旋转 + 反射）。晶体的对称分类完全由这一正规子群结构决定。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 证明 \(S_3\) 中 \(A_3 = \{e, (123), (132)\}\) 是正规子群。 解答: \([S_3 : A_3] = 2\)，指数为 2 的子群一定正规。 因为只有两个陪集 \(A_3\) 和 \(S_3 \setminus A_3\)， 左右陪集必须相同。 易错点: 误以为「所有子群都是正规子群」。 反例: \(S_3\) 中 \(H = \{e, (12)\}\) 不是正规子群， 因为 \((13)(12)(13)^{-1} = (23) \notin H\)。</p>
+            <h4>例题 1：指数为 2 的子群一定正规</h4>
+            <p>证明 \(A_3 = \{e, (1\;2\;3), (1\;3\;2)\} \trianglelefteq S_3\)。</p>
+            <p><strong>第 1 步</strong>：计算指数 \([S_3 : A_3] = |S_3|/|A_3| = 6/3 = 2\)。</p>
+            <p><strong>第 2 步</strong>：指数为 2 的子群只有两个陪集：\(A_3\) 本身和补集 \(S_3 \setminus A_3\)。对任意 \(g \in G\)，左陪集 \(gA_3\) 要么等于 \(A_3\)（当 \(g \in A_3\)），要么等于补集；右陪集同理。因此 \(gA_3 = A_3 g\) 对一切 \(g\) 成立，故 \(A_3 \trianglelefteq S_3\)。</p>
+
+            <h4>例题 2：用同态核判定正规性</h4>
+            <p>证明 \(SL_2(\mathbb{R}) \trianglelefteq GL_2(\mathbb{R})\)。</p>
+            <p><strong>解法</strong>：行列式映射 \(\det: GL_2(\mathbb{R}) \to \mathbb{R}^*\) 是群同态，而 \(SL_2(\mathbb{R}) = \ker(\det) = \{A \in GL_2(\mathbb{R}) : \det A = 1\}\)。群同态的核自动正规，故 \(SL_2(\mathbb{R}) \trianglelefteq GL_2(\mathbb{R})\)。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「阶为 2 的子群一定正规」— 混淆了"阶"和"指数"。\(S_3\) 中 \(H = \{e,(1\;2)\}\) 阶为 2 但指数为 3，并非正规；是<em>指数</em>为 2 才正规。</li>
+              <li>❌ 「\(gN = Ng\) 意味着 \(gn = ng\) 对每个 \(n\)」— 左右陪集相等是集合相等，不是逐元素交换。\(gn\) 不必等于 \(ng\)，只需 \(gn = n'g\) 对某个 \(n' \in N\)。</li>
+              <li>✅ 判定正规性的快速路径：先查是否为某个已知同态的核，再查指数是否为 2，最后才逐一验证共轭。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -467,28 +522,84 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>正规子群的意义在于它允许我们构造「更小的群」——商群 \(G/N\)。 商群是将正规子群 \(N\) 中的元素「压缩为一点」后得到的群，它保留了 \(G\) 中被 \(N\) 忽略的结构。理解商群是建立同态基本定理的基石。</p>
+            <p>正规子群的意义不仅是它本身，更在于它允许我们构造一个「更小的群」——商群 \(G/N\)。商群将 \(N\) 中的所有元素「压缩为一点」，保留 \(G\) 中被 \(N\) 忽略的粗略结构。这一思想贯穿代数学始终。</p>
+            <ul>
+              <li><strong>模运算</strong>：整数群 \(\mathbb{Z}\) 模去 \(n\mathbb{Z}\) 得到 \(\mathbb{Z}/n\mathbb{Z}\)，这就是最基本的商群——全部模运算都是商群运算的特例；</li>
+              <li><strong>同态基本定理</strong>：商群是 \(G/\ker\varphi \cong \mathrm{Im}\,\varphi\) 的核心载体，它将同态、核、商群三者统一为一个优美的框架；</li>
+              <li><strong>Galois 理论</strong>：域扩张的 Galois 群与其商群之间的对应关系，直接决定了多项式能否通过根式求解。</li>
+            </ul>
+            <p>商群的深刻之处在于「丢失信息的可控性」：我们可以精确地描述「哪些区别被抛弃了（\(N\) 内的差异）」和「哪些结构被保留了（商群中的乘法）」。这种「先抽象再还原」的思路是整个抽象代数的方法论基础。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>商群是一种「粗粒化」——将群中关于 \(N\) 等价的元素归为一类。 这与实数中模运算 \(\mathbb{Z}/n\mathbb{Z}\) 的思想一致。</p>
+            <p>商群的核心思想是<strong>「粗粒化」</strong>：将群 \(G\) 中关于 \(N\) 等价的元素合并为一类，类内的差异被「抹平」，类之间的乘法被保留。这与 \(\mathbb{Z}/n\mathbb{Z}\) 中模运算的思想完全一致。</p>
+            <p>形式上，\(G/N\) 的元素是陪集 \(gN = \{gn : n \in N\}\)。两个元素 \(g_1, g_2\) 被视为「等价」当且仅当 \(g_1^{-1}g_2 \in N\)——正如整数 \(a, b\) 模 \(n\) 同余当且仅当 \(a - b \in n\mathbb{Z}\)。这个类比揭示了商群的本质。</p>
+            <p>自然投射 \(\pi: G \to G/N,\; g \mapsto gN\) 是一个满射同态，且 \(\ker\pi = N\)。这建立了商群与同态之间的桥梁：<strong>每个商群都是某个满同态的像，反之亦然</strong>。</p>
+            <p>关键性质：\(G/N\) 是交换群当且仅当换位子群 \([G,G] \subseteq N\)。因此商群「有多交换」取决于 \(N\) 有多大：\(N\) 越大，商群越「简单」。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>商群 \(G/N\) 的元素是陪集 \(\{gN : g \in G\}\)，运算为 \((g_1 N)(g_2 N) = (g_1 g_2) N\)。 <strong>阶</strong>: \(|G/N| = [G:N] = |G|/|N|\)。 <strong>单位元</strong>: \(eN = N\)。<strong>逆元</strong>: \((gN)^{-1} = g^{-1}N\)。 <strong>自然投影</strong>: \(\pi: G \to G/N,\; g \mapsto gN\)， 是满射同态，\(\ker \pi = N\)。 关键性质: 交换群的子群都正规，故交换群的任何子群 都可构造商群。\(G/N\) 交换 \(\Leftrightarrow\) \([G,G] \subseteq N\)， 其中 \([G,G] = \langle ghg^{-1}h^{-1} \rangle\) 为换位子群。 \[|G/N| = [G : N]\]</p>
+            <h4>1. 商群的定义与运算</h4>
+            <p>设 \(N \trianglelefteq G\)。商群 \(G/N\) 的元素是 \(N\) 的陪集集合，运算为：</p>
+            <p>\[(g_1 N)(g_2 N) = (g_1 g_2)N\]</p>
+            <p>直觉：两个陪集相乘，先取各自的代表元相乘，再取其所在的陪集。正规性保证了结果不依赖代表元的选取。</p>
+
+            <h4>2. 基本代数性质</h4>
+            <p>商群 \(G/N\) 满足：</p>
+            <p>\[|G/N| = [G:N] = |G|/|N|\]</p>
+            <p>单位元为 \(eN = N\)（即 \(N\) 本身），逆元为 \((gN)^{-1} = g^{-1}N\)。结合律继承自 \(G\)。注意 \(G/N\) 的阶等于 \(N\) 在 \(G\) 中的指数，而非 \(|N|\) 本身。</p>
+
+            <h4>3. 自然投影与同态基本定理</h4>
+            <p>映射 \(\pi: G \to G/N,\; g \mapsto gN\) 是满射同态，且 \(\ker\pi = N\)。由此得到：</p>
+            <p>\[G/\ker\varphi \cong \mathrm{Im}\,\varphi\]</p>
+            <p>这就是同态基本定理（第一同构定理）。直觉：同态 \(\varphi\) 的像与 \(G\) 模掉核后的结构完全一样——核中的信息被 \(\varphi\) 完全丢弃，剩下的被忠实保留。</p>
+
+            <h4>4. 换位子群与交换性判据</h4>
+            <p>换位子群 \([G,G] = \langle ghg^{-1}h^{-1} : g,h \in G \rangle\) 度量了 \(G\) 的「非交换程度」。</p>
+            <p>\[G/N \text{ 是交换群} \;\Longleftrightarrow\; [G,G] \subseteq N\]</p>
+            <p>因此 \(G/[G,G]\) 是 \(G\) 的最大交换商群——它捕获了 \(G\) 中所有交换性信息。如果 \(G\) 本身交换，则 \([G,G] = \{e\}\)，商群就是 \(G\) 本身。</p>
+
+            <h4>5. 第三同构定理</h4>
+            <p>若 \(K \subseteq N\) 且两者都正规于 \(G\)，则有自然同构：</p>
+            <p>\[(G/K)\,/\,(N/K) \;\cong\; G/N\]</p>
+            <p>直觉：先模掉 \(K\) 再模掉 \(N/K\)，等价于一步模掉 \(N\)。这如同整数中先模 6 再模 3 等价于直接模 3。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>编码理论</strong>：线性码可以看作向量空间 \(\mathbb{F}_q^n\) 模掉码字子空间的商结构。校验位本质上是商群（商空间）中的元素，错误检测等价于判断收到的向量在哪个陪集中。</p>
+            <p><strong>量子力学</strong>：Pauli 群 \(\mathcal{P}_n\) 的中心 \(Z(\mathcal{P}_n)\) 是正规子群，商群 \(\mathcal{P}_n / Z(\mathcal{P}_n)\) 同构于 \(\mathbb{Z}_2^{2n}\)，这一结构是量子纠错码（稳定子码）的代数基础。</p>
+            <p><strong>数论</strong>：理想类群 \(\mathrm{Cl}(K)\) 是分数理想群模掉主理想群的商群，它度量了数域 \(K\) 中唯一分解失败的程度。类数 \(h_K = |\mathrm{Cl}(K)|\) 是代数数论中最重要的不变量之一。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 描述 \(\mathbb{Z}/6\mathbb{Z}\) 中子群 \(H = \{\overline{0}, \overline{3}\}\) 的商群 \((\mathbb{Z}/6\mathbb{Z})/H\)。 解答: 陪集为 \(\overline{0}+H = \{\overline{0},\overline{3}\}\)， \(\overline{1}+H = \{\overline{1},\overline{4}\}\)， \(\overline{2}+H = \{\overline{2},\overline{5}\}\)。 共 3 个陪集，商群同构于 \(\mathbb{Z}/3\mathbb{Z}\)。 易错点: 在商群中运算时代入陪集的具体代表元不同， 以为会得到不同结果。商群运算与代表元选取无关（正规性保证）。</p>
+            <h4>例题 1：具体商群的计算</h4>
+            <p>描述 \((\mathbb{Z}/6\mathbb{Z}) / H\)，其中 \(H = \{\overline{0}, \overline{3}\}\)。</p>
+            <p><strong>第 1 步</strong>：\(H = \langle \overline{3} \rangle\)，\(|H| = 2\)。商群阶 \(= 6/2 = 3\)。</p>
+            <p><strong>第 2 步</strong>：列出陪集：\(\overline{0}+H = \{\overline{0},\overline{3}\}\)，\(\overline{1}+H = \{\overline{1},\overline{4}\}\)，\(\overline{2}+H = \{\overline{2},\overline{5}\}\)。</p>
+            <p><strong>第 3 步</strong>：三个陪集构成 3 阶循环群，\((\mathbb{Z}/6\mathbb{Z})/H \cong \mathbb{Z}/3\mathbb{Z}\)。</p>
+
+            <h4>例题 2：利用第三同构定理</h4>
+            <p>设 \(6\mathbb{Z} \subseteq 2\mathbb{Z} \subseteq \mathbb{Z}\)，求 \((\mathbb{Z}/6\mathbb{Z})/(2\mathbb{Z}/6\mathbb{Z})\)。</p>
+            <p><strong>解法</strong>：由第三同构定理 \((G/K)/(N/K) \cong G/N\)，取 \(G = \mathbb{Z}\)，\(K = 6\mathbb{Z}\)，\(N = 2\mathbb{Z}\)。则 \((\mathbb{Z}/6\mathbb{Z})/(2\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。验证：\(2\mathbb{Z}/6\mathbb{Z} = \{\overline{0},\overline{2},\overline{4}\}\) 阶为 3，商群阶 \(= 6/3 = 2\)。✓</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「商群 \(G/N\) 的元素是 \(G\) 的元素」— 商群的元素是<em>陪集</em>（集合），不是群元素。\(\overline{2} + H\) 是集合 \(\{\overline{2}, \overline{5}\}\)，不是 \(\overline{2}\)。</li>
+              <li>❌ 「选不同代表元会得到不同陪集乘法结果」— 正规性保证了良定义性：无论选 \(\overline{1}\) 还是 \(\overline{4}\) 作为代表元，陪集乘法结果一样。</li>
+              <li>✅ 验证两个陪集相等的标准方法：\(g_1 N = g_2 N \Leftrightarrow g_1^{-1}g_2 \in N\)（加法群中为 \(g_1 - g_2 \in N\)）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -535,35 +646,83 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>共轭是群中最重要的等价关系：\(a \sim b\) 当且仅当存在 \(g\) 使 \(gag^{-1} = b\)。共轭类反映了元素的「本质相似性」。当一个群除了 平凡情形没有正规子群时，称其为单群——这是群论中的「素数」， 是有限群分类的基本构件。</p>
+            <p>群中两个元素何时算「本质相同」？如果它们只相差一个内自同构的作用——即存在 \(g \in G\) 使 \(b = gag^{-1}\)——我们就说 \(a\) 与 \(b\) 共轭。共轭类将群分成若干类，反映元素的「结构角色」。而当一个群无法再通过正规子群被分解时，它就是单群——群论的「原子」。</p>
+            <ul>
+              <li><strong>置换群</strong>：\(S_n\) 中共轭类恍好对应轮换类型，这是对称群表示论的出发点（Frobenius 特征标）；</li>
+              <li><strong>有限群分类</strong>：单群是有限群的「素数」，有限单群分类定理是 20 世纪代数学最伟大的成就之一；</li>
+              <li><strong>方程可解性</strong>：\(A_5\) 是最小的非交换单群，它的单性直接导致五次方程无法用根式求解。</li>
+            </ul>
+            <p>共轭类与单群揭示了群结构的两个互补层面：共轭类描述元素之间的「本质相似性」，而单群给出群的「不可分解性」。两者通过一个关键事实联系在一起：<strong>正规子群总是共轭类的并</strong>。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>共轭是内自同构作用产生的等价关系。正规子群恰好是共轭类的并。 单群是指除 \(\{e\}\) 和 \(G\) 本身外没有正规子群的群——不可再 「分解」为更小的商群。</p>
+            <p>共轭关系 \(a \sim_c b \Leftrightarrow \exists g \in G,\; gag^{-1} = b\) 是群 \(G\) 通过内自同构作用在自身上的轨道等价关系。每个等价类 \(\mathrm{Cl}(a) = \{gag^{-1}: g \in G\}\) 就是一个共轭类，它收集了所有与 \(a\) 「结构相同」的元素。</p>
+            <p>正规子群与共轭类的联系既简洁又深刻：\(N \trianglelefteq G\) 当且仅当 \(N\) 是若干完整共轭类的并。这说明正规子群的存在情况完全取决于群的共轭类结构。</p>
+            <p>单群的定义是「不可分解性」的极端表现：\(G\) 是单群当且仅当 \(|G| > 1\) 且它的正规子群只有 \(\{e\}\) 和 \(G\)。交换单群的分类很简单——恰好是素阶循环群 \(\mathbb{Z}/p\mathbb{Z}\)；非交换单群则包括 \(A_n\)\((n \geq 5)\)、Lie 型单群和 26 个散在单群。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>共轭关系</strong>: \(a \sim_c b \Leftrightarrow \exists g \in G,\; gag^{-1} = b\)。 共轭类: \(\mathrm{Cl}(a) = \{gag^{-1} : g \in G\}\)。 由轨道-稳定子定理: \(|\mathrm{Cl}(a)| = [G : C_G(a)]\)。 \(N \trianglelefteq G \Leftrightarrow N\) 是若干共轭类的并。 <strong>单群定义</strong>: \(G\) 是单群，若 \(|G| > 1\) 且 \(G\) 的正规子群 只有 \(\{e\}\) 和 \(G\)。 例: 素阶群 \(\mathbb{Z}/p\mathbb{Z}\) 是（交换）单群。 \(A_5\)（60阶）是最小的非交换单群。 交换群的子群都正规，故交换单群只有 \(\mathbb{Z}/p\mathbb{Z}\)。</p>
+            <h4>1. 共轭类与轨道-稳定子定理</h4>
+            <p>元素 \(a\) 的共轭类定义为 \(\mathrm{Cl}(a) = \{gag^{-1} : g \in G\}\)。其大小由轨道-稳定子定理给出：</p>
+            <p>\[|\mathrm{Cl}(a)| = [G : C_G(a)]\]</p>
+            <p>其中 \(C_G(a) = \{g \in G : ga = ag\}\) 是 \(a\) 的中心化子。直觉：跟 \(a\) 交换的元素越多，\(C_G(a)\) 越大，共轭类越小。极端情况：\(a \in Z(G)\) 时 \(\mathrm{Cl}(a) = \{a\}\)。</p>
+
+            <h4>2. 类方程</h4>
+            <p>群 \(G\) 被分解为不相交的共轭类之并，由此得到类方程：</p>
+            <p>\[|G| = |Z(G)| + \sum_{i=1}^{r} [G : C_G(g_i)]\]</p>
+            <p>其中求和遍历所有大小 \(> 1\) 的共轭类（每类取一个代表元 \(g_i\)）。直觉：左边是群的总元素数，右边把中心元素（各自单独一类）和非中心元素（按共轭类分组）分开计数。</p>
+
+            <h4>3. \(S_n\) 中的共轭类</h4>
+            <p>在对称群 \(S_n\) 中，共轭类恰好对应轮换类型。例如 \(S_3\) 的轮换类型有三种：恒等、对换、\(3\)-轮换，共轭类分解为：</p>
+            <p>\[S_3 = \underbrace{\{e\}}_{1} \sqcup \underbrace{\{(1\;2),(1\;3),(2\;3)\}}_{3} \sqcup \underbrace{\{(1\;2\;3),(1\;3\;2)\}}_{2}\]</p>
+            <p>类方程：\(6 = 1 + 3 + 2\)。注意：在 \(S_n\) 中同型轮换必属同一共轭类，但在 \(A_n\) 中可能分裂（如 \(A_5\) 中的 \(5\)-轮换）。</p>
+
+            <h4>4. 正规子群与共轭类的关系</h4>
+            <p>\(N \trianglelefteq G\) 当且仅当 \(N\) 是若干完整共轭类的并。因此，要找所有正规子群，只需：</p>
+            <p>(i) 算出全部共轭类；(ii) 找包含 \(\{e\}\) 且元素数整除 \(|G|\) 的共轭类组合。</p>
+            <p>例如 \(S_3\) 中，\(\{e\} \cup \{(1\;2\;3),(1\;3\;2)\} = A_3\)，\(|A_3| = 3\) 整除 \(6\)，故 \(A_3 \trianglelefteq S_3\)。而 \(\{e\} \cup \{(1\;2)\}\) 不是完整共轭类的并，所以不正规。</p>
+
+            <h4>5. 单群的定义与基本事实</h4>
+            <p>\(G\) 是单群，若 \(|G| > 1\) 且 \(G\) 的正规子群只有 \(\{e\}\) 和 \(G\)。</p>
+            <p>\[\text{交换单群} \;\Longleftrightarrow\; \mathbb{Z}/p\mathbb{Z}\;(p \text{ 素数})\]</p>
+            <p>因为交换群的每个子群都正规，所以交换单群不能有非平凡真子群，由 Lagrange 定理只能是素阶循环群。\(A_5\)（60 阶）是最小的非交换单群——可通过类方程 \(60 = 1 + 12 + 12 + 15 + 20\) 并验证没有大小整除 60 的共轭类并来证明。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>有限单群分类是20世纪代数学最大的成就之一； \(A_5\) 的单性是五次方程不可根式求解的关键。</p>
+            <p><strong>表示论与化学</strong>：分子的对称群的共轭类直接对应其不可约表示，用于预测分子振动模式和光谱的选择定则。例如水分子 \(H_2O\) 的对称群 \(C_{2v}\) 有 4 个共轭类，对应 4 种振动模式。</p>
+            <p><strong>算法设计</strong>：Rubik 魔方群（约 \(4.3 \times 10^{19}\) 阶）中，利用共轭类和商群将问题分层降维，是 Thistlethwaite 算法将最少步数问题分解为可计算子问题的关键。</p>
+            <p><strong>数论</strong>：\(A_5\) 的单性是 Abel–Ruffini 定理的核心：五次一般方程的 Galois 群为 \(S_5\)，其合成列包含非交换单群 \(A_5\)，导致商群链无法全部交换，因此无根式解。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 求 \(S_3\) 的所有共轭类。 解答: 按轮换类型分组: \(\{e\}\)（恒等）, \(\{(12),(13),(23)\}\)（对换）, \(\{(123),(132)\}\)（3-轮换）。共 3 个共轭类。 验证: \(A_3 = \{e,(123),(132)\}\) 恰好是两个共轭类之并， 故 \(A_3 \trianglelefteq S_3\)。✓ 易错点: 以为每个轮换类型只有一个共轭类。在 \(S_n\) 中确实如此， 但在 \(A_n\) 中可能分裂为两个类（如 \(A_5\) 中的 5-轮换）。</p>
+            <h4>例题 1：求 \(S_3\) 的所有共轭类</h4>
+            <p><strong>第 1 步</strong>：按轮换类型分类——恒等 \((1)\)、对换 \((2)\)、\(3\)-轮换 \((3)\)。</p>
+            <p><strong>第 2 步</strong>：恒等：\(\{e\}\)（1 个）；对换：\(\{(1\;2),(1\;3),(2\;3)\}\)（3 个）；\(3\)-轮换：\(\{(1\;2\;3),(1\;3\;2)\}\)（2 个）。</p>
+            <p><strong>第 3 步</strong>：验证类方程 \(6 = 1 + 3 + 2\) ✓。由此 \(A_3 = \{e\} \cup \{(1\;2\;3),(1\;3\;2)\}\) 是两个完整共轭类的并，故 \(A_3 \trianglelefteq S_3\)。</p>
+
+            <h4>例题 2：证明 \(A_5\) 是单群（思路）</h4>
+            <p><strong>第 1 步</strong>：计算 \(A_5\) 的共轭类大小。类方程为 \(60 = 1 + 12 + 12 + 15 + 20\)。</p>
+            <p><strong>第 2 步</strong>：若 \(N \trianglelefteq A_5\)，则 \(|N|\) 必须整除 60 且 \(N\) 必须是若干共轭类的并（含 \(\{e\}\)）。</p>
+            <p><strong>第 3 步</strong>：检验所有 \(1 +\) 其他共轭类大小之和的组合，发现没有任何组合整除 60（除 1 和 60）。故 \(A_5\) 无非平凡正规子群，是单群。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「\(S_n\) 中的共轭类分类方法可以直接搬到 \(A_n\)」— 在 \(A_n\) 中，\(S_n\) 的一个共轭类可能分裂为两个 \(A_n\)-共轭类。例如 \(A_5\) 中 \(5\)-轮换分裂为两个大小为 12 的类。</li>
+              <li>❌ 「\(|Z(G)| = 1\) 意味着 \(G\) 是单群」— 中心平凡只说明没有大小为 1 的非平凡共轭类，但 \(G\) 仍可能有正规子群（如 \(S_3\) 中心平凡但有 \(A_3\)）。</li>
+              <li>✅ 判定单群的系统方法：先算共轭类大小，再穷举所有整除 \(|G|\) 的共轭类并组合，检验是否构成子群。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -590,35 +749,81 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如何系统地将群「拆解」为单群？合成列 \(G = G_0 \supsetneq G_1 \supsetneq \cdots \supsetneq G_k = \{e\}\) 给出这样的分解链，其中每个 \(G_i/G_{i+1}\) 都是单群。当这些单群都是交换的（即循环 \(p\)-群）， 群就被称为可解群——正是 Galois 用来判定方程可否根式求解的概念。</p>
+            <p>群可以通过正规子群取商，商群又可以继续取商——这自然引导我们问：能否将群一层一层拆解到「不可分解」的单群？这就是合成列的思想。而当每一层商群都是交换的，群就称为可解群——这个概念直接决定了多项式方程能否用根式求解。</p>
+            <ul>
+              <li><strong>Galois 理论</strong>：多项式方程可根式求解当且仅当其 Galois 群可解，这是 Galois 理论的核心结论；</li>
+              <li><strong>有限群结构</strong>：Jordan–Hölder 定理给出群的「素因子分解」的唯一性，如同整数的素因子分解唯一；</li>
+              <li><strong>拓扑学</strong>：基本群 \(\pi_1\) 的可解性决定了空间的 Abel 覆盖塔的结构，这在代数几何中有重要应用。</li>
+            </ul>
+            <p>合成列与可解性揭示了群的「复杂度层次」：可解群可以被交换单群逐层構建，而不可解群必然包含非交换单群作为「不可抵消的复杂性核心」。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>合成列是群结构的「素因子分解」——正如整数分解为素数之积， 群分解为单群之「塔」。</p>
+            <p>合成列的思想类比于整数的素因子分解。正如 \(60 = 2^2 \times 3 \times 5\) 将整数拆解为素数之积，合成列将群拆解为单群的「塔」。每一层 \(G_i / G_{i+1}\) 就是一个「素因子」。</p>
+            <p>可解群对应于「素因子全是交换的」的情形。更精确地，\(G\) 可解当且仅当存在子群链 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\)，使每个商 \(G_i/G_{i+1}\) 是交换群。等价条件：合成因子全为素阶循环群。</p>
+            <p>Jordan–Hölder 定理保证了合成因子的唯一性（不计顺序），因此可解性是群的内在性质，不依赖于具体合成列的选取。注意：其证明需要 Schreier 细化定理，超出本章范围，此处只需掌握陈述。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>合成列</strong>: 子群链 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\)，其中每个 \(G_i / G_{i+1}\) 是单群（称为合成因子）。 <strong>Jordan-Hölder 定理</strong>（陈述）: 任何两个合成列的合成因子 （作为多重集）相同（不计顺序）。即合成因子唯一确定。 <strong>可解群</strong>: \(G\) 是可解群，若存在子群链 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\)，使得每个 \(G_i/G_{i+1}\) 是交换群。 等价地，合成因子全为素阶循环群 \(\mathbb{Z}/p\mathbb{Z}\)。 \[S_n \text{ 可解} \Leftrightarrow n \leq 4\] \(A_5\) 是单群 \(\Rightarrow\) \(S_5\) 不可解 \(\Rightarrow\) 五次一般方程不可根式求解。</p>
+            <h4>1. 合成列的定义</h4>
+            <p>子群链 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\) 称为合成列，若每个商 \(G_i/G_{i+1}\) 都是单群（称为合成因子）。</p>
+            <p>直觉：合成列是「不能再插入新正规子群」的最细分解，如同素因子分解中不能再拆分素数。</p>
+
+            <h4>2. Jordan–Hölder 定理（陈述）</h4>
+            <p>任何有限群的两个合成列的合成因子（作为多重集）相同，不计顺序。</p>
+            <p>\[\{G_i/G_{i+1}\}_{0 \leq i < k} = \{G_j'/G_{j+1}'\}_{0 \leq j < l} \quad (\text{作为多重集})\]</p>
+            <p>直觉：尽管合成列不唯一，但「素因子」是唯一的——正如分解顺序不同但素因子逻辑相同（如 \(12 = 2 \times 2 \times 3 = 3 \times 2 \times 2\)）。</p>
+
+            <h4>3. 可解群的定义与等价条件</h4>
+            <p>\(G\) 可解，若存在正规列 \(G = G_0 \triangleright G_1 \triangleright \cdots \triangleright G_k = \{e\}\) 使每个 \(G_i/G_{i+1}\) 是交换群。等价地，合成因子全为素阶循环群 \(\mathbb{Z}/p\mathbb{Z}\)。</p>
+            <p>\[G \text{ 可解} \;\Longleftrightarrow\; \text{合成因子全为 } \mathbb{Z}/p\mathbb{Z}\]</p>
+            <p>直觉：可解群可以「一层一层剥开」，每层都是交换的。不可解群则包含某一层「无法交换化」的障碍——某个非交换单群。</p>
+
+            <h4>4. \(S_n\) 的可解性</h4>
+            <p>关键结论：</p>
+            <p>\[S_n \text{ 可解} \;\Longleftrightarrow\; n \leq 4\]</p>
+            <p>\(S_4\) 可解的合成列为 \(\{e\} \triangleleft \mathbb{Z}/2\mathbb{Z} \triangleleft V_4 \triangleleft A_4 \triangleleft S_4\)，合成因子为 \(\mathbb{Z}/2\mathbb{Z},\; \mathbb{Z}/2\mathbb{Z},\; \mathbb{Z}/3\mathbb{Z},\; \mathbb{Z}/2\mathbb{Z}\)，全为素阶循环群。而 \(S_5\) 的合成列经过 \(A_5\)，\(A_5\) 是非交换单群，所以 \(S_5\) 不可解。</p>
+
+            <h4>5. 与方程可解性的联系</h4>
+            <p>Galois 理论的核心结论：多项式方程可根式求解当且仅当其 Galois 群是可解群。五次一般方程的 Galois 群为 \(S_5\)，它不可解，故无根式解。</p>
+            <p>直觉：每一次「开根号」对应取一个素阶循环商群。若 Galois 群可解，则可以逐层开根号；若某一层的商是非交换单群，则没有对应的根号操作可以执行。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Galois 理论中，多项式可根式求解 \(\Leftrightarrow\) 其 Galois 群可解。 \(S_5\) 不可解是五次方程不可根式求解的直接原因。</p>
+            <p><strong>Galois 理论与方程求解</strong>：\(S_5\) 不可解直接证明五次一般方程无根式解（Abel–Ruffini 定理）。而二、三、四次方程的求根公式存在，恰好因为 \(S_2, S_3, S_4\) 都可解。</p>
+            <p><strong>密码学与信息安全</strong>：很多密码协议的安全性分析需要研究群的合成列。例如，基于群的密钥交换协议中，如果群可解，则可以通过商群链逐层降维攻击，这解释了为何实践中偏好选择素阶或“接近单群”的群。</p>
+            <p><strong>计算复杂性</strong>：判定群是否可解的问题 可以透过反复计算导出子群 \(G^{(i+1)} = [G^{(i)}, G^{(i)}]\) 完成：\(G\) 可解当且仅当导出列最终到达 \(\{e\}\)。这给出了一个可计算的判定方法。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 验证 \(S_3\) 是可解群。 解答: \(S_3 \triangleright A_3 \triangleright \{e\}\)。 \(S_3/A_3 \cong \mathbb{Z}/2\mathbb{Z}\)（交换）， \(A_3/\{e\} \cong \mathbb{Z}/3\mathbb{Z}\)（交换）。 每步商群均为交换群，故 \(S_3\) 可解。✓ 易错点: 试图展开 Jordan-Hölder 定理的完整证明—— 该证明需要 Schreier 细化定理及 Zassenhaus 引理， 超出本章范围，只需掌握陈述。</p>
+            <h4>例题 1：验证 \(S_3\) 的可解性</h4>
+            <p><strong>第 1 步</strong>：构造子群链 \(S_3 \triangleright A_3 \triangleright \{e\}\)。</p>
+            <p><strong>第 2 步</strong>：计算合成因子：\(S_3/A_3 \cong \mathbb{Z}/2\mathbb{Z}\)（交换），\(A_3/\{e\} \cong \mathbb{Z}/3\mathbb{Z}\)（交换）。</p>
+            <p><strong>第 3 步</strong>：两个合成因子都是素阶循环群，故 \(S_3\) 可解。✓</p>
+
+            <h4>例题 2：\(S_4\) 的完整合成列</h4>
+            <p><strong>第 1 步</strong>：\\(S_4\) 的合成列为 \(\{e\} \triangleleft \langle (1\;2)(3\;4) \rangle \triangleleft V_4 \triangleleft A_4 \triangleleft S_4\)，其中 \(V_4 = \{e, (1\;2)(3\;4), (1\;3)(2\;4), (1\;4)(2\;3)\}\)。</p>
+            <p><strong>第 2 步</strong>：合成因子依次为 \(\mathbb{Z}/2\mathbb{Z}\)，\(\mathbb{Z}/2\mathbb{Z}\)，\(\mathbb{Z}/3\mathbb{Z}\)，\(\mathbb{Z}/2\mathbb{Z}\)。</p>
+            <p><strong>第 3 步</strong>：全部为素阶循环群，故 \(S_4\) 可解。注意 \(V_4/\{e\} \cong V_4 \cong \mathbb{Z}/2 \times \mathbb{Z}/2\) 不是单群，所以 \(\{e\} \triangleleft V_4\) 不是合成列的一段，需要再精炼一步。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「\(V_4\) 是单群，因为它的阶很小」— \(V_4 \cong \mathbb{Z}/2 \times \mathbb{Z}/2\) 有非平凡正规子群 \(\{e, (1\;2)(3\;4)\}\)（阶 2），不是单群。合成列必须精炼到每层商是单群。</li>
+              <li>❌ 「\(S_5\) 不可解是因为 \(|S_5| = 120\) 太大」— 可解性与阶没有直接关系。存在阶很大的可解群（如 \(p\)-群都可解），关键是合成因子中是否出现非交换单群。</li>
+              <li>✅ 快速判断可解性：有限 \(p\)-群一定可解；\\(S_n\\) 在 \\(n \geq 5\\) 时不可解；交换群一定可解。</li>
+            </ul>
           </div>
         </div>
       </div>

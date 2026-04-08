@@ -412,6 +412,15 @@
           </div>
         </div>
 
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>密码学</strong>：模 \(n\) 整数环 \(\mathbb{Z}/n\mathbb{Z}\) 的可逆元群 \((\mathbb{Z}/n\mathbb{Z})^\times\) 是 RSA 加密和 Diffie-Hellman 协议的数学基石：公钥运算在该环上执行，安全性依赖于大整数分解的困难。</p>
+            <p><strong>信号处理</strong>：多项式环 \(\mathbb{R}[x]\) 中的乘法对应时域卷积。FIR 滤波器的级联等价于多项式相乘，环结构确保了信号处理的线性叠加原理。</p>
+            <p><strong>线性代数与控制论</strong>：矩阵环 \(M_n(K)\) 的可逆元群 \(GL_n(K)\)、幂零元（Jordan 块）直接对应线性系统的可逆性和稳定性分析。</p>
+          </div>
+        </div>
+
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
@@ -452,10 +461,28 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>子环和环同态将「局部结构」与「全局映射」统一起来。子环判别法只需检查减法和乘法封闭性，而环同态在保加法的同时还要保乘法——比群同态多一层约束。</p>
+            <p>核心洞察是：环同态的核不仅是加法子群，还是理想。这比群论中「核是正规子群」更强，因为环多了乘法吸收性。正是这种额外结构允许我们构造商环。</p>
+            <p>同态基本定理 \(R/\ker\varphi \cong \mathrm{im}\varphi\) 把「局部丢失的信息」（核）与「保留的信息」（像）精确关联，是环论中一切商结构的起点。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
             <p><strong>子环</strong>: \(S \subseteq R\) 关于 \(R\) 的加法和乘法封闭。 <strong>环同态</strong>: \(\varphi: R \to S\) 满足 \(\varphi(a+b) = \varphi(a) + \varphi(b)\)， \(\varphi(ab) = \varphi(a)\varphi(b)\)。 <strong>同态基本定理</strong>: \(R/\ker\varphi \cong \mathrm{im}\varphi\)。 \[R/\ker\varphi \cong \mathrm{im}\varphi\] \(\ker\varphi\) 是 \(R\) 的理想（不仅是子群/子环）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>编码理论</strong>：校验码（ISBN、EAN）的验证本质是赋值同态 \(\mathbb{Z}[x] \to \mathbb{Z}/n\mathbb{Z}\)。代入特定值后检查同态像是否为零即判定正误。</p>
+            <p><strong>数据库与哈希</strong>：哈希函数可视为从字符串环到 \(\mathbb{Z}/m\mathbb{Z}\) 的环同态，保加法（拼接）保乘法（重复）结构用于快速查找与完整性校验。</p>
+            <p><strong>代数几何</strong>：赋值同态 \(\varphi_a: K[x] \to K\)（\(f \mapsto f(a)\)）的核 \((x-a)\) 对应点 \(a\)，将「点」和「极大理想」建立一一对应，是代数几何的起点。</p>
           </div>
         </div>
 
@@ -489,7 +516,16 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>环中元素的「好坏」很不一样。单位（可逆元）赌似「健康」元素， 零因子挐制了消去律，幂等元和幂零元反映「退化」行为。理解这些 特殊元素是掌握环结构的关键。</p>
+            <p>环中元素的「好坏」很不一样。可逆元像「健康」元素，零因子破坏消去律，幂等元和幂零元反映「退化」行为。理解这些特殊元素是掌握环结构的关键。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>环中特殊元素的分类提供了一张「元素健康度光谱」：从可逆元（最好）到幂零元（最坏），中间还有幂等元（自满足）和零因子（传染性退化）。</p>
+            <p>这些分类并非孤立性质。可逆元永远不是零因子（\(ua=0 \Rightarrow a=u^{-1}(ua)=0\)）；幂零元一定是零因子（\(a^n=0 \Rightarrow a \cdot a^{n-1}=0\)）。理解它们之间的包含和排斥关系是环论的基本直觉。</p>
+            <p>在有限环中，非零元要么可逆要么是零因子——没有第三种可能。这种二分法在 \(\mathbb{Z}/n\mathbb{Z}\) 中最为直观：\(\gcd(a,n)=1\) 则可逆，否则为零因子。</p>
           </div>
         </div>
 
@@ -497,6 +533,15 @@
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
             <p><strong>单位/可逆元</strong>: \(u \in R\) 可逆 \(\Leftrightarrow\) \(\exists v: uv = vu = 1\)。 可逆元组成群 \(R^\times\)。 <strong>零因子</strong>: \(a \neq 0, b \neq 0\) 但 \(ab = 0\)。 零因子存在 \(\Rightarrow\) 消去律失效。 <strong>幂等元</strong>: \(e^2 = e\)。例: \(0, 1\)。 <strong>幂零元</strong>: \(\exists n, a^n = 0\)。 <strong>关系</strong>: 可逆元不能是零因子。 若 \(ua = 0\) 且 \(u\) 可逆，则 \(a = u^{-1}(ua) = 0\)。 \[u \text{ 可逆} \Rightarrow u \text{ 不是零因子}\]</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>密码学</strong>：RSA 的安全性依赖于 \(\mathbb{Z}/n\mathbb{Z}\) 中区分可逆元和零因子：知道 \(n=pq\) 的分解就能计算 \(\varphi(n)\) 并找到解密指数，而不知分解则无法区分。</p>
+            <p><strong>数值计算</strong>：矩阵的幂零部分（Jordan 块中的幂零分量）决定了迭代算法的收敛速度。幂零指数越高，过渡过程越长。</p>
+            <p><strong>电路设计</strong>：布尔环 \(\mathbb{F}_2^n\) 中每个元素都是幂等的（\(e^2=e\)），对应逻辑门的「锁存」行为；幂等元分解直接对应电路的并行路径划分。</p>
           </div>
         </div>
 

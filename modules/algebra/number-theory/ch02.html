@@ -394,7 +394,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>同余是整数间的等价关系：「只关心余数」。时钟的 12 小时循环、星期的 7 天循环都是同余的日常实例。同余运算将无穷的整数问题压缩到有限 世界，是数论的核心工具。</p>
+            <p>同余是整数间的等价关系：「只关心余数」。同余运算将无穷的整数问题压缩到有限世界，是数论的核心工具。</p>
+            <ul>
+              <li>时钟的 12 小时循环—— 22 时显示为晚上 10 时，因为 \(22 \equiv 10 \pmod{12}\)；</li>
+              <li>星期的 7 天循环——「今天星期三，100 天后是星期几」等价于 \((3+100) \bmod 7 = 5\)，即星期五；</li>
+              <li>ISBN-13 校验码通过 \(\sum a_i w_i \equiv 0 \pmod{10}\) 检测录入错误。</li>
+            </ul>
+            <p>同余关系将无限集 \(\mathbb{Z}\) 折叠为有限集 \(\{0,1,\ldots,n-1\}\)，从而使得穷举、验证、算法设计成为可能。</p>
           </div>
         </div>
 
@@ -415,7 +421,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>ISBN 校验码、身份证号校验都基于模运算。</p>
+            <p><strong>校验算法</strong>：ISBN-13 校验码通过 \(\sum a_i w_i \equiv 0 \pmod{10}\) 检测录入错误，身份证号末位校验也是模 11 加权和，同余算术直接保障这些运算的正确性。</p>
+            <p><strong>计算机图形学</strong>：像素坐标变换中大量使用模运算实现环绕寻址（如纹理重复贴图 \(u \bmod W\)），确保索引永远落在有效范围。</p>
+            <p><strong>音乐理论</strong>：平均律中 12 个半音的音程关系在模 12 算术下描述，五度圈对应 \(\mathbb{Z}/12\mathbb{Z}\) 中的加 7 生成元，转位与逆行都是模运算。</p>
           </div>
         </div>
 
@@ -449,7 +457,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>同余类不仅保持加减乘，还形成了严格的代数结构: \(\mathbb{Z}/n\mathbb{Z}\) 是 环，其中可逆元构成乘法群 \((\mathbb{Z}/n\mathbb{Z})^*\)。理解这两个结构 是应用欧拉定理、费马小定理等工具的前提。</p>
+            <p>同余类不仅保持加减乘，还形成了严格的代数结构。了解这些结构是应用欧拉定理、费马小定理等工具的前提。</p>
+            <ul>
+              <li>\(\mathbb{Z}/n\mathbb{Z}\) 是环：加法和乘法模 \(n\) 封闭，且分配律成立；</li>
+              <li>其中可逆元构成乘法群 \((\mathbb{Z}/n\mathbb{Z})^*\)，阶为 \(\varphi(n)\)——与 \(n\) 互素的元素癌切的个数；</li>
+              <li>零因子的存在（如 \(\overline{2} \cdot \overline{3} = \overline{0}\) 在 \(\mathbb{Z}/6\mathbb{Z}\) 中）说明「消去律」在模合数时失效。</li>
+            </ul>
+            <p>理解 \(\mathbb{Z}/n\mathbb{Z}\) 的环与群结构是通往欧拉定理、原根、二次剩余等深层工具的必经之路。</p>
           </div>
         </div>
 
@@ -470,7 +484,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\((\mathbb{Z}/n\mathbb{Z})^*\) 是 RSA、ElGamal 等公钥密码体系的工作群。</p>
+            <p><strong>密码学</strong>：RSA、ElGamal、Diffie-Hellman 等公钥体系均圪\((\mathbb{Z}/n\mathbb{Z})^*\) 上进行运算，电子签名与密钥协商的安全性依赖于该群的结构复杂性。</p>
+            <p><strong>编码理论</strong>：线性码在有限域 \(\mathrm{GF}(p)\) 上的生成矩阵运算就是 \(\mathbb{Z}/p\mathbb{Z}\) 环结构的直接应用，可逆元判断决定了码字的可解性。</p>
+            <p><strong>量子计算</strong>：Shor 算法的核心步骤是在 \((\mathbb{Z}/N\mathbb{Z})^*\) 中寻找元素的阶（求周期），获得阶后用 \(\gcd\) 提取因子。</p>
           </div>
         </div>
 
@@ -504,7 +520,27 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>求解 \(ax \equiv b \pmod{n}\) 是数论中最基本的方程问题。它的可解性 完全由 \(\gcd(a,n)\) 决定，解法依赖 Bézout 等式。这是密码学中求 私钥的基本操作。</p>
+            <p>求解 \(ax \equiv b \pmod{n}\) 是数论中最基本的方程问题，其可解性完全由 \(\gcd(a,n)\) 决定，解法依赖 Bézout 等式。</p>
+            <ul>
+              <li>RSA 私钥计算：\(ed \equiv 1 \pmod{\varphi(N)}\)，是 \(\gcd(e,\varphi(N))=1\) 时的标准线性同余方程；</li>
+              <li>工厂排班：「每隔 \(a\) 天上白班、每 \(n\) 天一循环、第 \(b\) 天开始」可归结为 \(ax \equiv b \pmod{n}\)；</li>
+              <li>编程中求数组循环移位后的下标对应关系，本质上也是线性同余问题。</li>
+            </ul>
+            <p>线性同余方程是连接整除理论与同余理论的桥梁，也是 CRT 和原根理论的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>线性同余方程 \(ax \equiv b \pmod{n}\) 本质上是在商环 \(\mathbb{Z}/n\mathbb{Z}\) 中求解方程 \(\bar{a}\bar{x} = \bar{b}\)。当 \(\bar{a}\) 是环中的可逆元（即 \(\gcd(a,n)=1\)）时，解唯一；当 \(\bar{a}\) 是零因子时，方程可能无解或有多组解。</p>
+            <p>这种视角将整数域上的整除问题统一到环论语言中：</p>
+            <ul>
+              <li>可逆元构成群 \((\mathbb{Z}/n\mathbb{Z})^*\)，阶为 \(\varphi(n)\)；</li>
+              <li>零因子对应非互素情形，由 \(\gcd(a,n) > 1\) 刻画；</li>
+              <li>解个数恰为 \(d = \gcd(a,n)\) 或 \(0\)，取决于 \(d \mid b\) 是否成立。</li>
+            </ul>
+            <p>由此，线性同余方程的求解可以理解为：先在商环中判断可解性，再用 Bézout 系数回到整数域找特解，最后用陪集结构列出所有解。</p>
           </div>
         </div>
 
@@ -518,7 +554,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>RSA 中计算私钥 \(d\) 满足 \(ed \equiv 1 \pmod{\varphi(N)}\)。</p>
+            <p><strong>密码学</strong>：RSA 私钥 \(d\) 的计算等价于求解 \(ed \equiv 1 \pmod{\varphi(N)}\)，这正是线性同余方程在 \(\gcd(e,\varphi(N))=1\) 情形下的标准应用。</p>
+            <p><strong>计算机网络</strong>：CRC 校验和帧编号中常用模 \(n\) 算术来维护滑动窗口，发送方与接收方通过同余比较检测丢包与乱序。</p>
+            <p><strong>调度算法</strong>：工厂排班、循环任务分配等问题归结为线性同余方程组，利用 \(\gcd\) 判可解性、用特解+步长生成所有可行排班。</p>
           </div>
         </div>
 
@@ -552,7 +590,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>「今有物不知其数，三三数之剩二，五五数之剩三，七七数之剩二」—— 《孙子算经》中的经典问题引出了中国剩余定理（CRT）。CRT 将大模数 的同余方程分解为若干小模数的独立方程，是数论计算的重要工具。</p>
+            <p>「今有物不知其数，三三数之剩二，五五数之剩三，七七数之剩二」——《孙子算经》中的经典问题引出了中国剩余定理（CRT）。</p>
+            <ul>
+              <li>复原“物不知数”：已知余数信息 \(x \equiv 2 \pmod{3}\)、\(x \equiv 3 \pmod{5}\)，确定唯一解 \(x \equiv 8 \pmod{15}\)；</li>
+              <li>RSA 快速解密：将 \(c^d \bmod N\) 拆为模 \(p\) 和模 \(q\) 两个小问题分别计算，再由 CRT 合并，速度提升约 4 倍；</li>
+              <li>GPU 上的大数运算：将数百位整数按 CRT 拆分为多个小模数上的独立计算，充分利用并行性。</li>
+            </ul>
+            <p>CRT 体现了「局部→全局」的思想：将大模数问题分解为若干互素小模数上的独立问题，再无损地复原。</p>
           </div>
         </div>
 
@@ -573,7 +617,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>RSA 的快速解密（用 CRT 分别模 \(p\) 和 \(q\) 计算后合并）； 计算机中大数运算的并行化。</p>
+            <p><strong>加密系统</strong>：RSA 的快速解密通过 CRT 分别计算 \(c^d \bmod p\) 和 \(c^d \bmod q\) 再合并，运算速度提升约 4 倍，这是所有主流 TLS 库的标准优化。</p>
+            <p><strong>大数运算</strong>：多精度整数运算可用 CRT 拆分为小模数上的独立计算并行执行，这在 GPU/FPGA 加速场景中广泛使用。</p>
+            <p><strong>历史与博弈论</strong>：《孙子算经》中「物不知数」问题是 CRT 的原型，其思想也表现在日历编制（干支纪年的 60 年周期来自 \(\mathrm{lcm}(10,12)\)）。</p>
           </div>
         </div>
 

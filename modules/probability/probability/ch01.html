@@ -394,35 +394,64 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>掷骰子、抽彩票、天气预报——日常生活充满不确定性。如何将含糊的 「可能性」变成严格的数学对象？1933 年 Kolmogorov 用测度论给出了 答案：概率空间 \((\Omega, \mathcal{F}, P)\) 的三条公理统一了整个 概率论的基础，使所有关于随机现象的推理都有坚实的逻辑根基。</p>
+            <p>人们凭直觉说「明天大概会下雨」「翻到红心的机会有多大」——但这些表述无法支撑定理推导与工程计算。如何把含糊的「可能性」变成严格的数学对象？</p>
+            <ul>
+              <li><strong>赌博中的公平性</strong>：Pascal 与 Fermat 的通信揭示了分赌金问题，催生了对"期望"的早期研究。</li>
+              <li><strong>保险定价</strong>：Lloyd's 精算师需要量化灾害风险，要求概率有可靠的计算框架。</li>
+              <li><strong>量子物理</strong>：Born 规则将粒子位置视为概率分布，迫使概率论走向测度论基础。</li>
+            </ul>
+            <p>1933 年 Kolmogorov 用测度论三公理统一了整个领域：概率空间 \((\Omega, \mathcal{F}, P)\) 成为一切随机推理的逻辑根基，使概率论从"计算技巧"升格为"数学理论"。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心抽象：将「不确定性」编码为三元组 \((\Omega, \mathcal{F}, P)\)。 \(\Omega\) 是所有可能结果的集合，\(\mathcal{F}\)（\(\sigma\)-代数）编码 我们能够「提问」的全部事件，\(P\) 对每个事件给出 \([0,1]\) 中的答案。 这直接推广了 Lebesgue 测度论的框架。</p>
+            <p>核心思想是将「不确定性」编码为三元组 \((\Omega, \mathcal{F}, P)\)，类比 Lebesgue 测度论中对面积/体积的严格定义。</p>
+            <p>\(\Omega\)（样本空间）是所有可能结果的集合。掷骰子时 \(\Omega = \{1,\dots,6\}\)；测量寿命时 \(\Omega = [0,\infty)\)。</p>
+            <p>\(\mathcal{F}\)（\(\sigma\)-代数）编码了我们能够提问的全部事件。只有属于 \(\mathcal{F}\) 的子集才有权被赋予概率。在不可数 \(\Omega\) 上并非所有子集都能合理赋概率（Vitali 集的教训），因此 \(\mathcal{F}\) 不可或缺。</p>
+            <p>\(P: \mathcal{F} \to [0,1]\) 是概率测度。三条公理（非负性、规范性、可列可加性）约束了 \(P\) 的行为，使所有概率推理有据可循。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>Kolmogorov 公理：设 \(\Omega \neq \emptyset\)，\(\mathcal{F}\) 为 \(\Omega\) 上的 \(\sigma\)-代数，\(P: \mathcal{F} \to [0,1]\) 满足： (P1) 非负性：\(P(A) \geq 0\)，\(\forall A \in \mathcal{F}\) (P2) 规范性：\(P(\Omega) = 1\) (P3) 可列可加性：若 \(A_1, A_2, \ldots\) 两两不相交， \[P\!\left(\bigcup_{n=1}^{\infty} A_n\right) = \sum_{n=1}^{\infty} P(A_n)\] 基本推论： - 补事件：\(P(A^c) = 1 - P(A)\)（令 \(A_1=A, A_2=A^c\)，由 P2+P3） - 单调性：\(A \subseteq B \Rightarrow P(A) \leq P(B)\) - 容斥：\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\) 概率的连续性：若 \(A_n \uparrow A\)，则 \(P(A_n) \to P(A)\)。 证明：令 \(B_1 = A_1\)，\(B_n = A_n \setminus A_{n-1}\)（不交化），则 \[P(A) = P\!\left(\bigcup_n B_n\right) = \sum_n P(B_n) = \lim_N \sum_{n=1}^{N} P(B_n) = \lim_N P(A_N)\]</p>
+            <h4>Kolmogorov 三公理</h4>
+            <p>设 \(\Omega \neq \emptyset\)，\(\mathcal{F}\) 为 \(\sigma\)-代数，\(P: \mathcal{F} \to [0,1]\) 满足：(P1) \(P(A) \geq 0\)；(P2) \(P(\Omega) = 1\)；(P3) 两两不相交时 \[P\!\left(\bigcup_{n=1}^{\infty} A_n\right) = \sum_{n=1}^{\infty} P(A_n)\]</p>
+            <p>直觉：P1 排除负概率，P2 归一化，P3 将不交并拆成逐项之和。</p>
+            <h4>补事件与单调性</h4>
+            <p>\(P(A^c) = 1 - P(A)\)（令 \(A_1=A, A_2=A^c\)，由 P2+P3）。\(A \subseteq B \Rightarrow P(A) \leq P(B)\)。</p>
+            <h4>容斥公式</h4>
+            <p>\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\)。直觉：直接相加重复计算了交集。</p>
+            <h4>概率的连续性</h4>
+            <p>若 \(A_n \uparrow A\)，则 \(P(A_n) \to P(A)\)。证明：不交化 \(B_n = A_n \setminus A_{n-1}\)，则 \[P(A) = \sum_n P(B_n) = \lim_N P(A_N)\]</p>
+            <p>直觉：概率像体积，逐渐填满趋近极限。此性质依赖可列可加性，有限可加性不够。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>保险精算中，概率空间是计算保费和理赔风险的基础框架； 量子力学中，Born 规则本质上定义了一个概率测度。</p>
+            <p><strong>保险精算</strong>：概率空间是计算保费和理赔风险的基础框架；精算师通过 \(P\) 定价每份保单的风险。</p>
+            <p><strong>量子力学</strong>：Born 规则 \(P(\text{粒子在 }A) = \int_A |\psi|^2 dx\) 在位置空间上定义概率测度。</p>
+            <p><strong>通信工程</strong>：信道噪声建模需在信号空间构造概率测度；Shannon 信息论根基正是公理化概率。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\Omega = \{1,2,3,4,5,6\}\)，\(\mathcal{F} = 2^\Omega\)， \(P\) 均匀。求「点数为奇数或大于 4」的概率。 解答：\(A_1 = \{1,3,5\}\)，\(A_2 = \{5,6\}\)。 \(P(A_1 \cup A_2) = 3/6 + 2/6 - 1/6 = 4/6 = 2/3\)。 易错点：忘记减去 \(P(A_1 \cap A_2) = P(\{5\}) = 1/6\)， 直接相加得 \(5/6\)，重复计算了元素 5。</p>
+            <p><strong>例1</strong>：\(\Omega=\{1,\dots,6\}\) 均匀。求「奇数或大于 4」的概率。</p>
+            <p>解：\(A_1=\{1,3,5\}\)，\(A_2=\{5,6\}\)。\(P(A_1 \cup A_2)=3/6+2/6-1/6=2/3\)。</p>
+            <p><strong>例2</strong>：\(P(A)=0.6\)，\(P(B)=0.5\)，\(P(A \cap B)=0.3\)。求 \(P(A^c \cap B^c)\)。</p>
+            <p>解：De Morgan \(A^c \cap B^c=(A \cup B)^c\)。\(P(A \cup B)=0.8\)，故答案 \(=0.2\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>容斥忘减 \(P(A \cap B)\)，得出超过 1 的"概率"。</li>
+              <li>混淆"互斥"（\(A \cap B=\emptyset\)）与"独立"（\(P(A \cap B)=P(A)P(B)\)）。</li>
+              <li>对连续分布的单点赋正概率：连续型 r.v. 恒有 \(P(\{x\})=0\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -470,28 +499,64 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>当我们获得部分信息时，需要更新对事件的概率判断。医学检测阳性后， 患病的真实概率是多少？这类「已知证据后更新信念」的问题催生了条件 概率和 Bayes 公式——从垃圾邮件过滤到法医鉴定都依赖于此工具。</p>
+            <p>获得部分信息后，对事件的概率判断应当更新。概率不是静态的——新证据改变信念。</p>
+            <ul>
+              <li><strong>医学诊断</strong>：检测阳性后，真正患病的概率往往比直觉低得多。</li>
+              <li><strong>垃圾邮件过滤</strong>：看到"中奖"一词后，垃圾邮件的概率从先验跃升到后验。</li>
+              <li><strong>法医鉴定</strong>：DNA 匹配证据如何改变嫌疑人有罪的概率？</li>
+            </ul>
+            <p>条件概率和 Bayes 公式将「已知证据后更新信念」数学化，是从数据科学到法律推理的基础工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>条件概率的核心是将样本空间"收缩"到已知事件 \(B\) 上：\(A\) 在 \(B\) 已发生的世界中的概率等于 \(A \cap B\) 占 \(B\) 的比重。</p>
+            <p>形式上，\(P(\cdot|B)\) 本身构成新的概率测度——在缩小后的世界中满足 Kolmogorov 三公理。所有概率推论（容斥、连续性等）自动继承。</p>
+            <p>Bayes 公式实现了因果方向的反转：从"原因→结果"的似然出发，结合先验，推出"结果→原因"的后验。这是贝叶斯统计的数学基石。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>条件概率定义：设 \(P(B) > 0\)， \[P(A|B) = \frac{P(A \cap B)}{P(B)}\] 全概率公式：若 \(B_1, \ldots, B_n\) 是 \(\Omega\) 的划分（两两不交， 并为 \(\Omega\)），且 \(P(B_i) > 0\)，则 \[P(A) = \sum_{i=1}^{n} P(A|B_i)\,P(B_i)\] 证明：\(A = \bigcup_i (A \cap B_i)\)，由不交性直接展开。 Bayes 公式：将「原因→结果」反转为「结果→原因」： \[P(B_j|A) = \frac{P(A|B_j)\,P(B_j)}{\sum_{i=1}^{n} P(A|B_i)\,P(B_i)}\] 先验 \(P(B_j)\) 经似然 \(P(A|B_j)\) 更新为后验 \(P(B_j|A)\)。</p>
+            <h4>条件概率的定义</h4>
+            <p>设 \(P(B) > 0\)，\[P(A|B) = \frac{P(A \cap B)}{P(B)}\]</p>
+            <p>直觉：在 \(B\) 已发生的世界中，\(A\) 的比重就是 \(A \cap B\) 占 \(B\) 的份额。</p>
+            <h4>全概率公式</h4>
+            <p>若 \(B_1, \ldots, B_n\) 是 \(\Omega\) 的划分且 \(P(B_i)>0\)，则 \[P(A) = \sum_{i=1}^{n} P(A|B_i)\,P(B_i)\]</p>
+            <p>直觉：按"原因"分类汇总每条路径的概率贡献。</p>
+            <h4>Bayes 公式</h4>
+            <p>\[P(B_j|A) = \frac{P(A|B_j)\,P(B_j)}{\sum_i P(A|B_i)\,P(B_i)}\]</p>
+            <p>先验 \(P(B_j)\) 经似然 \(P(A|B_j)\) 更新为后验 \(P(B_j|A)\)。分母是全概率，起归一化作用。</p>
+            <h4>乘法规则</h4>
+            <p>\(P(A_1 \cap \cdots \cap A_n) = P(A_1)\,P(A_2|A_1)\,P(A_3|A_1 \cap A_2) \cdots\)。逐步条件化，适用于分步实验。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>医学检测：患病率 1%，灵敏度 99%，假阳性率 5%。阳性后真实患病 概率仅约 \(0.99 \times 0.01 / (0.99 \times 0.01 + 0.05 \times 0.99) \approx 16.7\%\)。</p>
+            <p><strong>医学诊断</strong>：患病率 1%、灵敏度 99%、假阳性率 5% 时，阳性后真实患病概率仅约 16.7%——低患病率下假阳性主导结果。</p>
+            <p><strong>垃圾邮件过滤</strong>：朴素贝叶斯分类器对每个词计算 \(P(\text{spam}|\text{词})\)，用全概率公式组合实现自动分类。</p>
+            <p><strong>法庭推理</strong>：DNA 匹配率极高，但若先验极低（大城市随机抽到犯人的概率），后验仍可能不高——"检察官谬误"。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：工厂线 A 占产量 60%，次品率 2%；线 B 占 40%，次品率 5%。 随机取到次品，来自线 A 的概率？ 解答：\(P(\text{次}) = 0.02 \times 0.6 + 0.05 \times 0.4 = 0.032\)。 \(P(A|\text{次}) = 0.012/0.032 = 0.375\)。 易错点：直觉认为「A 产量多故次品多来自 A」，实际 \(P(B|\text{次}) = 0.625\)， B 的高次品率主导了结果。</p>
+            <p><strong>例1</strong>：工厂线 A 占 60%、次品率 2%；线 B 占 40%、次品率 5%。取到次品，来自 A 的概率？</p>
+            <p>解：\(P(\text{次})=0.032\)。\(P(A|\text{次})=0.012/0.032=0.375\)。B 高次品率使 \(P(B|\text{次})=0.625\)。</p>
+            <p><strong>例2</strong>：Monty Hall 问题——选门 1 后主持人开空门 3，换门是否有利？</p>
+            <p>解：\(P(\text{奖在2}|\text{开3})=2/3\)，换门胜率翻倍。主持人的行为提供了额外信息。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>分母写错：\(P(A|B)\) 的分母是 \(P(B)\) 而非 \(P(A)\)。</li>
+              <li>混淆 \(P(A|B)\) 与 \(P(B|A)\)——"已知阳性求患病"与"已知患病求阳性"不同。</li>
+              <li>Bayes 计算忘记分母归一化，导致后验之和不为 1。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -518,28 +583,62 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>两个事件「没有关系」到底是什么意思？一枚硬币的正反不影响另一枚， 但如何严格化这种「互不影响」？独立性的数学定义精炼了此直觉。然而 「两两独立」并不等于「相互独立」——Bernstein 的经典反例警示我们 必须对独立性的层次保持警惕。</p>
+            <p>两个事件"没有关系"到底意味着什么？直觉告诉我们"一枚硬币的正反不影响另一枚"，但如何将"互不影响"变成精确的数学条件？</p>
+            <ul>
+              <li><strong>密码学</strong>：密钥各比特必须相互独立，否则攻击者可利用高阶相关性破解。</li>
+              <li><strong>临床试验</strong>：受试者反应假定独立，统计推断的有效性依赖此假设。</li>
+              <li><strong>保险</strong>：若保单间不独立（同一地震），风险聚集将远超精算预期。</li>
+            </ul>
+            <p>独立性的数学定义精炼了"互不影响"的直觉，但"两两独立 ≠ 相互独立"——Bernstein 反例警示必须区分独立性的不同层次。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>独立性的定义不依赖条件概率，而是直接用乘积关系 \(P(A \cap B) = P(A) P(B)\) 刻画，避免了 \(P(B)=0\) 时条件概率无定义的困难。</p>
+            <p>从测度论视角，\(A \perp\!\!\!\perp B\) 等价于 \(\sigma(A)\) 和 \(\sigma(B)\) 两个 \(\sigma\)-代数独立——任意从两侧取出的事件都满足乘积关系。</p>
+            <p>相互独立要求所有子族都满足乘积公式，条件远强于两两独立。Bernstein 反例表明这一差距不可忽视。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>定义：事件 \(A, B\) 独立（记 \(A \perp\!\!\!\perp B\)）iff \[P(A \cap B) = P(A) \cdot P(B)\] 等价地（若 \(P(B) > 0\)）：\(P(A|B) = P(A)\)。 相互独立 vs 两两独立：\(A_1, \ldots, A_n\) 相互独立要求对 每个子集 \(S \subseteq \{1,\ldots,n\}\), \[P\!\left(\bigcap_{i \in S} A_i\right) = \prod_{i \in S} P(A_i)\] 两两独立仅要求 \(|S| = 2\) 的情形。 Bernstein 反例：\(\Omega = \{1,2,3,4\}\) 等概率， \(A = \{1,2\}\)，\(B = \{1,3\}\)，\(C = \{1,4\}\)。 \(P(A \cap B) = P(A \cap C) = P(B \cap C) = 1/4\) ✓ 两两独立 但 \(P(A \cap B \cap C) = 1/4 \neq 1/8 = P(A)P(B)P(C)\) ✗</p>
+            <h4>两事件独立的定义</h4>
+            <p>\(A \perp\!\!\!\perp B\) iff \(P(A \cap B) = P(A) \cdot P(B)\)。等价地（\(P(B)>0\) 时）：\(P(A|B) = P(A)\)。</p>
+            <h4>相互独立 vs 两两独立</h4>
+            <p>相互独立要求对每个 \(S \subseteq \{1,\dots,n\}\)（\(|S|\geq 2\)）：\(P(\bigcap_{i\in S}A_i)=\prod_{i\in S}P(A_i)\)。两两独立仅要求 \(|S|=2\)。</p>
+            <h4>Bernstein 反例</h4>
+            <p>\(\Omega=\{1,2,3,4\}\) 等概率，\(A=\{1,2\}\)，\(B=\{1,3\}\)，\(C=\{1,4\}\)。两两独立 ✓ 但 \(P(ABC)=1/4 \neq 1/8\) ✗。</p>
+            <p>直觉：知道 \(A,B\) 同时发生后 \(C\) 变为必然——高阶依赖。</p>
+            <h4>补事件的独立性</h4>
+            <p>\(A \perp\!\!\!\perp B \Rightarrow A^c \perp\!\!\!\perp B\)，\(A \perp\!\!\!\perp B^c\)，\(A^c \perp\!\!\!\perp B^c\)。证明：\(P(A^c \cap B)=P(B)-P(AB)=P(A^c)P(B)\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>密码学中密钥各位需要相互独立（非仅两两独立），否则攻击者可 利用高阶相关性来破解加密方案。</p>
+            <p><strong>密码学</strong>：密钥各比特需相互独立——若仅两两独立，攻击者可利用高阶相关性破解。</p>
+            <p><strong>实验设计</strong>：随机化保证处理分配与混杂因素独立，是因果推断有效性的来源。</p>
+            <p><strong>可靠性工程</strong>：组件故障是否独立决定冗余策略——共因故障下并联可靠性远低于独立假设估计。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：掷两枚骰子，\(A\) = 第一枚偶数，\(B\) = 第二枚偶数， \(C\) = 两枚之和为偶数。验证是否相互独立。 解答：\(P(A)=P(B)=P(C)=1/2\)。\(P(A \cap B) = 1/4\) ✓ \(A \cap C\)：第一偶+和偶 → 第二也偶，故 \(A \cap C = A \cap B\)， \(P(A \cap C) = 1/4\) ✓。类似 \(P(B \cap C) = 1/4\) ✓。 但 \(P(A \cap B \cap C) = P(A \cap B) = 1/4 \neq 1/8\)。非相互独立。 易错点：只检查了两两条件就断言相互独立，遗漏三重交集的验证。</p>
+            <p><strong>例1</strong>：掷两枚骰子，\(A\)=第一偶，\(B\)=第二偶，\(C\)=和为偶。验证是否相互独立。</p>
+            <p>解：两两独立 ✓（各交集 \(=1/4\)）。但 \(A \cap B \Rightarrow C\)，故 \(P(ABC)=1/4 \neq 1/8\)。非相互独立。</p>
+            <p><strong>例2</strong>：\(P(A)=0.3\)，\(P(B)=0.4\)，\(A \perp\!\!\!\perp B\)。求 \(P(A \cup B)\)。</p>
+            <p>解：\(P(A \cap B)=0.12\)。\(P(A \cup B)=0.3+0.4-0.12=0.58\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>混淆"独立"与"互斥"：独立时 \(P(AB)>0\)；互斥时 \(P(AB)=0\)。两者几乎相反。</li>
+              <li>只检查两两独立就断言相互独立，遗漏三重交集验证。</li>
+              <li>从不相关 \(\text{Cov}=0\) 推出独立——不相关仅消除线性关联。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -565,35 +664,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>为什么概率论要用「神秘」的 \(\sigma\)-代数，而非简单取所有子集？ 在不可数 \(\Omega\)（如实数轴）上，并非所有子集都能合理赋予概率 （Vitali 集的教训）。\(\sigma\)-代数精确描述了「可获取的信息」—— 这个视角在条件期望和随机过程中至关重要。</p>
+            <p>为什么概率论要用看似"神秘"的 \(\sigma\)-代数，而非简单地取所有子集？表面上增加了复杂性，但在不可数 \(\Omega\) 上别无选择。</p>
+            <ul>
+              <li><strong>Vitali 集的教训</strong>：在 \(\mathbb{R}\) 上不可能对所有子集一致赋予平移不变的测度。</li>
+              <li><strong>信息建模</strong>：\(\sigma\)-代数编码"在给定信息下可区分的事件"——条件期望和滤的基础。</li>
+              <li><strong>可测性</strong>：要求 \(X^{-1}(B) \in \mathcal{F}\) 保证了 \(P(X \leq x)\) 有定义。</li>
+            </ul>
+            <p>\(\sigma\)-代数精确描述了"可获取的信息"，这个视角贯穿条件期望、鞅论和随机过程的全部理论。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(\sigma\)-代数 \(\mathcal{G} \subseteq \mathcal{F}\) 表示信息层次： \(\mathcal{G}\) 越大，信息越丰富。\(\sigma(X)\) 恰好编码了「观测 \(X\) 后能确定的所有事件」。</p>
+            <p>\(\sigma\)-代数 \(\mathcal{G} \subseteq \mathcal{F}\) 表示信息层次：\(\mathcal{G}\) 越大信息越丰富；\(\{\emptyset,\Omega\}\) 是"一无所知"，\(\mathcal{F}\) 是"全部信息"。</p>
+            <p>\(\sigma(X) = \{X^{-1}(B): B \in \mathcal{B}(\mathbb{R})\}\) 编码了"观测 \(X\) 后能确定的所有事件"。无法被 \(\sigma(X)\) 区分的事件在只知 \(X\) 的观测者看来不可分辨。</p>
+            <p>这一抽象通向条件期望：\(E[Y|\sigma(X)]\) 是在"只观测到 \(X\)"约束下对 \(Y\) 的最佳预测。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>\(\sigma\)-代数定义：\(\mathcal{F} \subseteq 2^\Omega\) 满足 (F1) \(\Omega \in \mathcal{F}\) (F2) \(A \in \mathcal{F} \Rightarrow A^c \in \mathcal{F}\) (F3) \(A_1, A_2, \ldots \in \mathcal{F} \Rightarrow \bigcup_n A_n \in \mathcal{F}\) 生成 \(\sigma\)-代数：给定集族 \(\mathcal{C}\)， \[\sigma(\mathcal{C}) = \bigcap\{\mathcal{G} : \mathcal{G} \supseteq \mathcal{C},\; \mathcal{G} \text{ 为 } \sigma\text{-代数}\}\] Borel \(\sigma\)-代数：\(\mathcal{B}(\mathbb{R}) = \sigma(\{(a,b): a<b\})\)。 它包含所有开集、闭集、可数集，但不含 Vitali 集等不可测集。 随机变量生成的 \(\sigma\)-代数： \[\sigma(X) = \{X^{-1}(B) : B \in \mathcal{B}(\mathbb{R})\}\] \(\sigma(X)\) 中的事件恰好是「通过观测 \(X\) 即可判断」的事件。</p>
+            <h4>\(\sigma\)-代数的定义</h4>
+            <p>\(\mathcal{F} \subseteq 2^\Omega\) 满足：(F1) \(\Omega \in \mathcal{F}\)；(F2) \(A \in \mathcal{F} \Rightarrow A^c \in \mathcal{F}\)；(F3) \(A_1,A_2,\ldots \in \mathcal{F} \Rightarrow \bigcup_n A_n \in \mathcal{F}\)。</p>
+            <p>直觉：对补和可列并封闭，因此也对可列交封闭（De Morgan）。</p>
+            <h4>生成 \(\sigma\)-代数</h4>
+            <p>\(\sigma(\mathcal{C}) = \bigcap\{\mathcal{G}: \mathcal{G} \supseteq \mathcal{C},\, \mathcal{G}\text{ 为 }\sigma\text{-代数}\}\)——包含 \(\mathcal{C}\) 的最小 \(\sigma\)-代数。类比线性代数的"张成子空间"。</p>
+            <h4>Borel \(\sigma\)-代数</h4>
+            <p>\(\mathcal{B}(\mathbb{R}) = \sigma(\{(a,b): a<b\})\)，包含所有开集、闭集、可数集。实数上几乎所有"正常"集合都是 Borel 集。</p>
+            <h4>随机变量生成的 \(\sigma\)-代数</h4>
+            <p>\(\sigma(X)=\{X^{-1}(B): B \in \mathcal{B}\}\)，其事件恰是"通过观测 \(X\) 即可判断"的事件。</p>
+            <p>直觉：若 \(X\) 只取两个值，\(\sigma(X)\) 仅有 4 个元素——信息量有限。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>金融数学中 \(\mathcal{F}_t\) 表示 \(t\) 时刻前市场可获的全部信息， 形成滤(filtration)，是定义适应过程和鞅的基础。</p>
+            <p><strong>金融数学</strong>：\(\mathcal{F}_t\) 表示 \(t\) 时刻前市场可获信息，形成滤(filtration)，是鞅和期权定价的基础。</p>
+            <p><strong>信号处理</strong>：滤波器设计依赖观测 \(\sigma\)-代数——只能基于已接收信号做最优估计。</p>
+            <p><strong>博弈论</strong>：信息集对应不同玩家的 \(\sigma\)-代数，策略必须是该 \(\sigma\)-代数可测的。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\Omega = \{a,b,c,d\}\)，\(X(a)=X(b)=1\)，\(X(c)=X(d)=2\)。 求 \(\sigma(X)\)。 解答：\(X^{-1}(\{1\}) = \{a,b\}\)，\(X^{-1}(\{2\}) = \{c,d\}\)。 \(\sigma(X) = \{\emptyset, \{a,b\}, \{c,d\}, \Omega\}\)。 易错点：以为 \(\sigma(X)\) 必含所有单点集。实际上 \(\sigma(X)\) 只能 区分 \(X\) 取不同值的事件，无法区分 \(a\) 和 \(b\)。</p>
+            <p><strong>例1</strong>：\(\Omega=\{a,b,c,d\}\)，\(X(a)=X(b)=1\)，\(X(c)=X(d)=2\)。求 \(\sigma(X)\)。</p>
+            <p>解：\(\sigma(X)=\{\emptyset,\{a,b\},\{c,d\},\Omega\}\)，只有 4 个元素。</p>
+            <p><strong>例2</strong>：证明 \(\{\emptyset,\{1,2\},\{3,4\},\Omega\}\) 是 \(\Omega=\{1,2,3,4\}\) 上的 \(\sigma\)-代数，但 \(\{\emptyset,\{1\},\Omega\}\) 不是。</p>
+            <p>解：前者对补和并封闭 ✓。后者 \(\{1\}^c=\{2,3,4\}\notin\mathcal{F}\) ✗。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>以为 \(\sigma(X)\) 必含所有单点集——它只能区分 \(X\) 取不同值的事件。</li>
+              <li>以为 Borel 集 = 所有子集。\(\mathcal{B}(\mathbb{R})\) 严格小于 \(2^{\mathbb{R}}\)。</li>
+              <li>忘记 \(\sigma\)-代数必须对可列并（不仅有限并）封闭。</li>
+            </ul>
           </div>
         </div>
       </div>

@@ -394,35 +394,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>随机变量的「平均值」是概率论最基本的总结性指标。赌场的期望收益、 保险的预期赔付、投资的平均回报都依赖于期望。期望的线性性是 其最强大的性质——无需独立性就能把复杂问题分解为简单部分之和。</p>
+            <p>随机变量的「平均值」是概率论最基本的总结性指标。知道分布并不等于知道一切——但期望用一个数字捕捉了分布的「重心」。</p>
+            <ul>
+              <li><strong>保险精算</strong>：纯保费 = 期望损失，这一个数字决定了保费定价的起点。</li>
+              <li><strong>赌场策略</strong>：「庄家优势」意味着玩家期望收益为负，长期而言必输。</li>
+              <li><strong>算法设计</strong>：随机算法的期望运行时间决定了它是否实用，线性性可把复杂问题拆解。</li>
+            </ul>
+            <p>期望的线性性是其最强大的性质——无需独立性就能把复杂问题分解为简单部分之和。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>期望本质是 Lebesgue 积分 \(E[X] = \int_\Omega X\,dP\)。这将 离散情形（求和）和连续情形（积分）统一在同一个框架下。</p>
+            <p>期望本质是 Lebesgue 积分 \(E[X] = \int_\Omega X\,dP\)。这将离散情形（求和）和连续情形（积分）统一在同一个框架下。</p>
+            <p>期望的存在性要求 \(E[|X|] < \infty\)（\(X \in L^1\)）。Cauchy 分布是期望不存在的典型反例：尾部太重导致积分发散。</p>
+            <p>LOTUS（无意识统计学家定理）\(E[g(X)] = \int g(x) f_X(x)\,dx\) 是实践中最常用的计算工具——无需先求 \(g(X)\) 的分布即可计算期望。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>离散情形：\(E[X] = \sum_i x_i P(X = x_i)\)。 连续情形：\(E[X] = \int_{-\infty}^{\infty} x f_X(x)\,dx\)。 一般定义（Lebesgue 积分）： \[E[X] = \int_\Omega X(\omega)\,dP(\omega)\] 存在性要求：\(E[|X|] < \infty\)（\(X \in L^1\)）。 线性性：对任意随机变量 \(X, Y\)（无需独立）， \[E[aX + bY] = aE[X] + bE[Y]\] 证明直接由 Lebesgue 积分的线性性获得。 LOTUS（无意识统计学家定理）： \[E[g(X)] = \int g(x) f_X(x)\,dx\] 无需先求 \(g(X)\) 的分布即可计算期望。</p>
+            <h4>离散情形与连续情形</h4>
+            <p>离散：\(E[X] = \sum_i x_i P(X = x_i)\)。连续：\(E[X] = \int_{-\infty}^{\infty} x f_X(x)\,dx\)。两者约定相同——概率权重下的均值。</p>
+            <h4>一般定义（Lebesgue 积分）</h4>
+            <p>\[E[X] = \int_\Omega X(\omega)\,dP(\omega)\] 存在性要求：\(E[|X|] < \infty\)（\(X \in L^1\)）。</p>
+            <h4>线性性</h4>
+            <p>对任意随机变量 \(X, Y\)（无需独立）：\[E[aX + bY] = aE[X] + bE[Y]\] 证明直接由 Lebesgue 积分的线性性获得。这是期望最强大的性质。</p>
+            <h4>LOTUS（无意识统计学家定理）</h4>
+            <p>\[E[g(X)] = \int g(x) f_X(x)\,dx\] 无需先求 \(g(X)\) 的分布即可计算期望。本质是测度论中的换元公式。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>保险精算中的纯保费 = 期望损失；赌场中「庄家优势」意味着 玩家期望收益为负。</p>
+            <p><strong>保险精算</strong>：纯保费 = \(E[\text{损失}]\)，期望是定价模型的基础，商业险可用条件期望细化定价。</p>
+            <p><strong>投资决策</strong>：期望收益率 \(E[R]\) 是资产比较的第一指标，配合方差构成均值-方差分析框架。</p>
+            <p><strong>算法分析</strong>：随机算法的期望运行时间是复杂度衡量标准，线性性将复杂算法拆解为简单步骤之和。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：随机取 \(n\) 个人的帽子随机分配，期望有多少人取回自己的帽子？ 解答：令 \(X_i = 1\) 若第 \(i\) 人取回自己帽子。\(E[X_i] = 1/n\)。 由线性性：\(E[\sum_i X_i] = \sum_i E[X_i] = n \cdot 1/n = 1\)。 无论 \(n\) 多大，期望始终等于 1。 易错点：认为线性性需要 \(X_i\) 独立。实际上 \(X_i\) 高度相关， 但线性性对任意随机变量成立，无需独立。</p>
+            <h4>例 1：帽子问题（线性性经典）</h4>
+            <p>随机取 \(n\) 个人的帽子随机分配，期望有多少人取回自己的？</p>
+            <p>解：令 \(X_i = 1\) 若第 \(i\) 人取回自己帽子。\(E[X_i] = 1/n\)。由线性性：\(E[\sum_i X_i] = n \cdot 1/n = 1\)。无论 \(n\) 多大，期望始终等于 1。</p>
+            <h4>例 2：LOTUS 应用</h4>
+            <p>\(X \sim U(0,1)\)，求 \(E[X^2]\)。</p>
+            <p>解：由 LOTUS，\(E[X^2] = \int_0^1 x^2 \cdot 1\,dx = 1/3\)。无需先求 \(X^2\) 的分布。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>认为线性性需要 \(X_i\) 独立。实际上 \(X_i\) 可以高度相关，线性性对任意随机变量成立。</li>
+              <li>混淆 \(E[g(X)]\) 与 \(g(E[X])\)：一般 \(E[X^2] \neq (E[X])^2\)，等号仅当方差为 0。</li>
+              <li>忽略期望存在性条件：Cauchy 分布的期望不存在，\(E[|X|] = \infty\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -467,28 +495,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>期望只告诉我们「中心在哪」，但没有告诉我们「波动有多大」。方差 衡量了随机变量偏离均值的程度。而协方差和相关系数刻画了 两个变量「同涨同跌」的程度——这在金融投资组合理论中至关重要。</p>
+            <p>期望告诉我们「中心在哪」，但没有告诉我们「波动有多大」。方差衡量了随机变量偏离均值的程度，而协方差和相关系数刻画了两个变量「同涨同跌」的程度。</p>
+            <ul>
+              <li><strong>金融投资</strong>：资产组合的风险（方差）取决于各资产之间的协方差矩阵，分散化降低风险的数学基础就在于此。</li>
+              <li><strong>质量控制</strong>：方差越小产品越稳定，六西格玛管理的核心就是压缩方差。</li>
+              <li><strong>气候研究</strong>：温度与降雨的协方差揭示了气候系统的耦合模式，负协方差意味着反向关联。</li>
+            </ul>
+            <p>方差的加法公式 \(\text{Var}(X+Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)\) 类比向量模的平行四边形法则。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>方差 \(\text{Var}(X) = E[(X-\mu)^2]\) 本质上是 \(X\) 到常数 \(\mu\) 在 \(L^2\) 中的距离的平方。它度量了随机变量围绕均值的「分散程度」。</p>
+            <p>协方差 \(\text{Cov}(X,Y) = E[(X-\mu_X)(Y-\mu_Y)]\) 可以看作 \(L^2\) 内积：中心化后的 \(X-\mu_X\) 和 \(Y-\mu_Y\) 的「点乘」。Cauchy-Schwarz 不等式 \(|\text{Cov}| \leq \sigma_X \sigma_Y\) 保证了相关系数 \(\rho \in [-1,1]\)。</p>
+            <p>方差的加法公式 \(\text{Var}(X+Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)\) 类比向量模的平行四边形法则，协方差项就是「交叉项」。独立时交叉项消失，方差可加。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>方差： \[\text{Var}(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2\] 第二个等号证明：展开平方用线性性。 \(\text{Var}(X) \geq 0\)，等号 iff \(X\) 几乎必然为常数。 协方差： \[\text{Cov}(X,Y) = E[(X-\mu_X)(Y-\mu_Y)] = E[XY] - E[X]E[Y]\] 相关系数：\(\rho(X,Y) = \text{Cov}(X,Y) / (\sigma_X \sigma_Y)\)， \(|\rho| \leq 1\)（由 Cauchy-Schwarz 不等式）。 方差的加法： \[\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)\] 若 \(X \perp\!\!\!\perp Y\)，则 \(\text{Cov}(X,Y) = 0\)，方差可加。</p>
+            <h4>方差的定义与计算公式</h4>
+            <p>\[\text{Var}(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2\] 第二个等号由展开平方+线性性获得。\(\text{Var}(X) \geq 0\)，等号 iff \(X\) 几乎必然为常数。</p>
+            <h4>协方差与相关系数</h4>
+            <p>\[\text{Cov}(X,Y) = E[(X-\mu_X)(Y-\mu_Y)] = E[XY] - E[X]E[Y]\] 相关系数：\(\rho(X,Y) = \text{Cov}(X,Y) / (\sigma_X \sigma_Y)\)，\(|\rho| \leq 1\)（Cauchy-Schwarz）。</p>
+            <h4>方差的加法公式</h4>
+            <p>\[\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X,Y)\] 若 \(X \perp\!\!\!\perp Y\)，则 \(\text{Cov}(X,Y) = 0\)，方差可加。类比向量模：\(\|a+b\|^2 = \|a\|^2 + \|b\|^2 + 2\langle a,b\rangle\)。</p>
+            <h4>不相关 ≠ 独立</h4>
+            <p>\(\text{Cov}(X,Y)=0\) 仅说明「线性无关」。反例：\(X \sim N(0,1)\)，\(Y=X^2\)，\(\text{Cov}=0\) 但显然不独立。仅当联合正态时不相关⇔独立。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Markowitz 投资组合理论中，资产组合的风险（方差）取决于各资产之间 的协方差矩阵，分散化降低风险的数学基础就在于此。</p>
+            <p><strong>Markowitz 投资组合</strong>：资产组合的风险（方差）由协方差矩阵决定，分散化降低风险的数学基础就在于此。</p>
+            <p><strong>实验设计</strong>：样本方差 \(S^2\) 是总体方差的无偏估计，\(n-1\) 自由度校正来自协方差结构的约束。</p>
+            <p><strong>信号分析</strong>：自相关函数 \(R(\tau) = \text{Cov}(X_t, X_{t+\tau})\) 是平稳随机过程功率谱分析的基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(X \sim \text{Poisson}(\lambda)\)，求 \(\text{Var}(X)\)。 解答：\(E[X] = \lambda\)。 \(E[X(X-1)] = \sum_{k=0}^{\infty} k(k-1) e^{-\lambda}\lambda^k/k! = \lambda^2\)。 \(E[X^2] = E[X(X-1)] + E[X] = \lambda^2 + \lambda\)。 \(\text{Var}(X) = \lambda^2 + \lambda - \lambda^2 = \lambda\)。 易错点：Poisson 分布的均值和方差都等于 \(\lambda\)，但这是 Poisson 的特殊性质，不要误以为所有分布均值=方差。</p>
+            <h4>例 1：Poisson 方差</h4>
+            <p>\(X \sim \text{Poisson}(\lambda)\)，求 \(\text{Var}(X)\)。</p>
+            <p>解：\(E[X(X-1)] = \lambda^2\)，\(E[X^2] = \lambda^2 + \lambda\)，\(\text{Var}(X) = \lambda^2 + \lambda - \lambda^2 = \lambda\)。此结果是 Poisson 分布的特征性质。</p>
+            <h4>例 2：投资组合方差</h4>
+            <p>两资产 \(\sigma_X = 10\%, \sigma_Y = 15\%, \rho = 0.3\)，等权组合 \(W = (X+Y)/2\)。</p>
+            <p>解：\(\text{Var}(W) = \frac{1}{4}(0.01 + 0.0225 + 2 \times 0.3 \times 0.1 \times 0.15) = 0.01038\)，\(\sigma_W \approx 10.2\%\)。分散化显著降低风险。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>认为所有分布均值 = 方差。Poisson 的 \(\mu = \sigma^2 = \lambda\) 是特殊性质，非普遍规律。</li>
+              <li>用 \(E[X^2] - E[X]^2\) 计算时漏平方：\(\text{Var} = E[X^2] - (E[X])^{\mathbf{2}}\)，不是 \(E[X^2] - E[X]\)。</li>
+              <li>方差加法忘加协方差项：\(\text{Var}(X+Y) \neq \text{Var}(X) + \text{Var}(Y)\)（除非不相关）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -515,35 +578,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>分布函数和密度函数完整描述了随机变量，但并不总是易于操作。矩母 函数和特征函数提供了「变换域」的视角——就像 Laplace/Fourier 变换一样，它们将卷积变为乘法，极大简化了独立和之分布的计算。</p>
+            <p>分布函数和密度完整描述了随机变量，但并不总是易于操作。矩母函数和特征函数提供了「变换域」的视角——将卷积变为乘法。</p>
+            <ul>
+              <li><strong>验证分布族</strong>：矩母函数唯一确定分布，可用于验证随机变量服从某个分布。</li>
+              <li><strong>求矩</strong>：\(E[X^k] = M_X^{(k)}(0)\)，MGF 代替了逐个积分计算高阶矩。</li>
+              <li><strong>证明 CLT</strong>：特征函数将独立和的分布收敛问题转化为函数极限问题，是 CLT 标准证明的核心工具。</li>
+            </ul>
+            <p>MGF 和 CF 与 Laplace/Fourier 变换直接对应，是概率论与调和分析的交汇点。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>概率分布的 Fourier 变换视角：\(\varphi_X(t) = E[e^{itX}]\) 总存在， 且唯一确定分布，提供了处理概率问题的强力调和分析工具。</p>
+            <p>概率分布的 Fourier 变换视角：特征函数 \(\varphi_X(t) = E[e^{itX}]\) 总存在（因 \(|e^{itx}| = 1\)），且唯一确定分布。</p>
+            <p>MGF \(M_X(t) = E[e^{tX}]\) 是 Laplace 变换视角，存在性更强但不总罢有。它的优势在于求导直接给出矩：\(E[X^k] = M^{(k)}(0)\)。</p>
+            <p>两者的共同功能：将卷积变为乘法——\(\varphi_{X+Y} = \varphi_X \cdot \varphi_Y\)（独立时），极大简化了独立和的分布计算。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>矩母函数(MGF)： \[M_X(t) = E[e^{tX}] = \sum_{k=0}^{\infty} \frac{E[X^k]}{k!} t^k\] 优点：\(E[X^k] = M_X^{(k)}(0)\)（各阶矩的生成函数）。 缺点：不一定存在（如 Cauchy 分布 \(M(t) = \infty\)，\(t \neq 0\)）。 特征函数(CF)： \[\varphi_X(t) = E[e^{itX}] = \int e^{itx} dF_X(x)\] 始终存在（因 \(|e^{itx}| = 1\)）且唯一确定分布。 关键性质：\(X \perp\!\!\!\perp Y\) 时 \(\varphi_{X+Y}(t) = \varphi_X(t) \cdot \varphi_Y(t)\) （卷积→乘法）。这是证明 CLT 的核心工具。</p>
+            <h4>矩母函数（MGF）</h4>
+            <p>\[M_X(t) = E[e^{tX}] = \sum_{k=0}^{\infty} \frac{E[X^k]}{k!} t^k\] 优点：\(E[X^k] = M_X^{(k)}(0)\)（各阶矩的生成函数）。缺点：不一定存在（如 Cauchy 分布）。</p>
+            <h4>特征函数（CF）</h4>
+            <p>\[\varphi_X(t) = E[e^{itX}] = \int e^{itx} dF_X(x)\] 始终存在且唯一确定分布。它是概率测度的 Fourier 变换。</p>
+            <h4>卷积→乘法</h4>
+            <p>\(X \perp\!\!\!\perp Y\) 时 \(\varphi_{X+Y}(t) = \varphi_X(t) \cdot \varphi_Y(t)\)。直觉：Fourier 变换将卷积变为点乘。这是证明 CLT 的核心工具。</p>
+            <h4>Lévy 连续性定理（提及）</h4>
+            <p>若 \(\varphi_{X_n} \to \varphi\) 逐点收敛且 \(\varphi\) 在 0 处连续，则 \(X_n \xrightarrow{d} X\)。这将分布收敛问题转化为函数极限问题。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>特征函数法是证明中心极限定理的标准方法；矩母函数在 概率母函数(PGF)形式下用于分支过程的细维量分析。</p>
+            <p><strong>统计推断</strong>：矩母函数快速验证独立正态和的分布：\(M_{X+Y}(t) = M_X(t) M_Y(t)\)，直接读出参数。</p>
+            <p><strong>分支过程</strong>：概率母函数（PGF）形式的 MGF 分析后代种群的灭绝概率和增长速率。</p>
+            <p><strong>信号处理</strong>：特征函数就是 Fourier 变换，在通信中用于分析噪声的谱特征和信道容量。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：用 MGF 证明 \(X \sim N(0,1)\) 的 \(E[X^2] = 1\)，\(E[X^4] = 3\)。 解答：\(M(t) = e^{t^2/2}\)。\(M'(t) = te^{t^2/2}\)，\(M'(0)=0=E[X]\)。 \(M''(t) = (1+t^2)e^{t^2/2}\)，\(M''(0)=1=E[X^2]\)。 继续求导得 \(M^{(4)}(0) = 3 = E[X^4]\)。 易错点：混淆 MGF 和 CF。MGF 为 \(E[e^{tX}]\)，CF 为 \(E[e^{itX}]\)。 对正态分布：\(M(t)=e^{t^2/2}\) 但 \(\varphi(t)=e^{-t^2/2}\)（指数符号不同）。</p>
+            <h4>例 1：用 MGF 求矩</h4>
+            <p>\(X \sim N(0,1)\)，用 MGF 求 \(E[X^2]\) 和 \(E[X^4]\)。</p>
+            <p>解：\(M(t) = e^{t^2/2}\)。\(M''(t) = (1+t^2)e^{t^2/2}\)，\(M''(0) = 1 = E[X^2]\)。继续求导得 \(M^{(4)}(0) = 3 = E[X^4]\)。</p>
+            <h4>例 2：用特征函数验证分布</h4>
+            <p>\(X_i \sim \text{Poisson}(\lambda_i)\) 独立，求 \(S = \sum X_i\) 的分布。</p>
+            <p>解：\(\varphi_{X_i}(t) = e^{\lambda_i(e^{it}-1)}\)。\(\varphi_S(t) = \prod_i \varphi_{X_i}(t) = e^{(\sum \lambda_i)(e^{it}-1)}\)，故 \(S \sim \text{Poisson}(\sum \lambda_i)\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>混淆 MGF \(E[e^{tX}]\) 和 CF \(E[e^{itX}]\)：对正态分布，\(M(t) = e^{t^2/2}\) 但 \(\varphi(t) = e^{-t^2/2}\)。</li>
+              <li>认为 MGF 总存在：Cauchy 分布连一阶矩都没有，MGF 在 \(t \neq 0\) 时为无穷。</li>
+              <li>将 \(\varphi_{X+Y} = \varphi_X \cdot \varphi_Y\) 用于非独立的 \(X, Y\)——乘法性质仅对独立随机变量成立。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -570,28 +661,63 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在概率论中，精确计算往往困难，但不等式提供了强大的「粗略估计」 工具。Markov 和 Chebyshev 不等式仅用均值/方差就能给出尾部概率 的界；Jensen 不等式揭示了凸性对期望的影响。这些工具是大数定律 和集中不等式的基础。</p>
+            <p>在概率论中，精确计算往往困难，但不等式提供了强大的「粗略估计」工具。仅用有限的矩信息就能给出尾部概率的界。</p>
+            <ul>
+              <li><strong>风险管理</strong>：Chebyshev 不等式无需分布假设，仅用均值和方差就能给出尾部概率的保守上界。</li>
+              <li><strong>信息论</strong>：Jensen 不等式证明了 KL 散度 \(D_{KL} \geq 0\)，这是信息论的基础。</li>
+              <li><strong>机器学习</strong>：Chernoff 界给出指数级衰减的尾部控制，是学习理论中样本复杂度分析的基础。</li>
+            </ul>
+            <p>这些不等式形成从粗到精的层次：Markov → Chebyshev → Chernoff，每一级加入更多信息、给出更紧的界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>概率不等式形成从粗到精的层次体系：Markov 仅用一阶矩，Chebyshev 加入二阶矩，Chernoff 用全部矩（通过 MGF），每一级都给出更紧的尾部控制。</p>
+            <p>其共同范式是「反转问题」：不必精确计算分布，而只用矩信息给出概率的上界。这一思路贯穿了集中不等式理论，从经典 Chebyshev 延伸到 Hoeffding、Bernstein 和 sub-Gaussian 等现代工具。</p>
+            <p>Jensen 不等式则走了不同路径——它刻画了凸性对期望的影响，是 AM-GM、对数不等式、KL 散度非负性等经典结果的统一根源。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p>Markov 不等式：若 \(X \geq 0\)，\(a > 0\)， \[P(X \geq a) \leq \frac{E[X]}{a}\] 证明：\(E[X] = E[X \cdot \mathbf{1}_{X \geq a}] + E[X \cdot \mathbf{1}_{X < a}] \geq a \cdot P(X \geq a)\)。 Chebyshev 不等式：对 \(X\) 任意，\(\varepsilon > 0\)， \[P(|X - \mu| \geq \varepsilon) \leq \frac{\text{Var}(X)}{\varepsilon^2}\] 证明：对 \((X - \mu)^2\) 用 Markov， \(P(|X-\mu|^2 \geq \varepsilon^2) \leq E[(X-\mu)^2]/\varepsilon^2\)。 Jensen 不等式：若 \(g\) 为凸函数，\(E[|X|] < \infty\)，则 \[g(E[X]) \leq E[g(X)]\]</p>
+            <h4>Markov 不等式</h4>
+            <p>若 \(X \geq 0\)，\(a > 0\)：\[P(X \geq a) \leq \frac{E[X]}{a}\] 证明：\(E[X] \geq E[X \cdot \mathbf{1}_{X \geq a}] \geq a \cdot P(X \geq a)\)。仅用一阶矩，最粗略但最通用。</p>
+            <h4>Chebyshev 不等式</h4>
+            <p>\[P(|X - \mu| \geq \varepsilon) \leq \frac{\text{Var}(X)}{\varepsilon^2}\] 证明：对 \((X - \mu)^2\) 用 Markov。加入二阶矩后界更紧。</p>
+            <h4>Jensen 不等式</h4>
+            <p>若 \(g\) 为凸函数，\(E[|X|] < \infty\)：\[g(E[X]) \leq E[g(X)]\] 几何直觉：凸函数图像在弦下方，混合后的函数值不低于均值的函数值。</p>
+            <h4>Chernoff 界（提及）</h4>
+            <p>\[P(X \geq a) \leq \inf_{t>0} e^{-ta} M_X(t)\] 将 Markov 作用于 \(e^{tX}\) 并优化 \(t\)，得到指数级衰减的尾部控制。是大偏差理论的起点。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Chebyshev 不等式直接用于弱大数律律的证明； Jensen 不等式证明了 \(E[\ln X] \leq \ln E[X]\)（AM-GM 的概率版）。</p>
+            <p><strong>金融风控</strong>：Chebyshev 不需分布假设，适合厚尾金融数据的尾部风险估算。</p>
+            <p><strong>信息论</strong>：Jensen 不等式证明 \(E[\ln X] \leq \ln E[X]\)（AM-GM 的概率版）和 KL 散度的非负性。</p>
+            <p><strong>弱大数律证明</strong>：Chebyshev 不等式直接用于弱大数律的标准证明，把方差衰减转化为概率收敛。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(X\) 的均值为 100，方差 25。求 \(P(|X - 100| \geq 20)\) 的上界。 解答：Chebyshev：\(P(|X-100| \geq 20) \leq 25/400 = 1/16 = 0.0625\)。 易错点：Markov 不等式要求 \(X \geq 0\)，若直接对可取负值的 \(X\) 用 Markov 会得到错误结果。应用于 \(|X - \mu|^2\) 则合法。</p>
+            <h4>例 1：Chebyshev 上界</h4>
+            <p>\(X\) 均值 100，方差 25。求 \(P(|X - 100| \geq 20)\) 的上界。</p>
+            <p>解：Chebyshev：\(P(|X-100| \geq 20) \leq 25/400 = 1/16 = 0.0625\)。</p>
+            <h4>例 2：Jensen 不等式应用</h4>
+            <p>\(X > 0\)，\(g(x) = -\ln x\) 为凸函数。证明 \(E[\ln X] \leq \ln E[X]\)。</p>
+            <p>解：由 Jensen，\(-E[\ln X] = E[-\ln X] \geq -\ln E[X]\)，即 \(E[\ln X] \leq \ln E[X]\)。等号当且仅当 \(X\) 为常数 a.s.。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>Markov 不等式要求 \(X \geq 0\)，直接对可取负值的随机变量用 Markov 会出错。</li>
+              <li>Jensen 不等式方向记反：凸函数是 \(g(E[X]) \leq E[g(X)]\)，凹函数反向。</li>
+              <li>Chebyshev 界往往很松，但它的价值在于不需分布假设——不是“不好”，而是“最通用”。</li>
+            </ul>
           </div>
         </div>
       </div>

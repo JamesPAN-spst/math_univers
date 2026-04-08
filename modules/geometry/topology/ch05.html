@@ -394,22 +394,26 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>在实分析中，"有界闭集上的连续函数一定取到最大值和最小值"是一切优化理论的起点。然而"有界"和"闭"都依赖于度量结构——当我们进入一般拓扑空间时，该如何刻画这种"空间足够小以保证良好性质"的本质？这正是紧致性概念诞生的动因。</p>
             <ul>
-              <li><strong>替代"有界闭"：</strong>分析学中"有界闭集上连续函数取最值"是基石定理，但"有界闭"依赖度量。紧致性用开覆盖的有限子覆盖来刻画"有限性"，适用于一般拓扑空间。</li>
-              <li><strong>拓扑学最重要的性质之一：</strong>紧致性深刻影响分析（极值定理）、代数（有限生成性）和几何（闭流形分类），是贯穿数学各分支的核心概念。</li>
-              <li><strong>"有限逼近无限"：</strong>紧致性的本质是任何无穷开覆盖都可精简为有限子覆盖——空间"不太大"。</li>
+              <li><strong>分析学的基石：</strong>微积分中极值定理、一致连续性定理的核心前提都是定义域紧致。紧致性将"有界且闭"推广为不依赖度量的纯拓扑语言。</li>
+              <li><strong>几何学的骨架：</strong>闭曲面、闭流形天然具备紧致性，Gauss-Bonnet 定理、Hodge 分解等深刻结果均以紧致性为前提。</li>
+              <li><strong>代数与逻辑的工具：</strong>代数几何中 Noether 环的素谱在 Zariski 拓扑下紧致（拟紧），模型论中紧致性定理保证有限可满足的理论全局可满足。</li>
             </ul>
+            <p>从"用有限代替无限"这一视角看，紧致性是数学中最核心的有限性条件之一：任何无穷开覆盖都可精简为有限子覆盖，空间在拓扑意义上"不太大"。掌握它，是理解后续连续映射、乘积空间和紧致化理论的必要基础。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>紧致性的定义采用<strong>开覆盖语言</strong>：空间 \(X\) 紧致，当且仅当它的每一个开覆盖都有有限子覆盖。这个定义完全不依赖距离、坐标或范数，是纯拓扑的刻画方式。</p>
             <ul>
-              <li><strong>开覆盖视角：</strong>紧致 = 每个开覆盖有有限子覆盖。这是纯拓扑定义，不依赖距离或坐标。</li>
-              <li><strong>拓扑不变量：</strong>紧致性被同胚保持，更广地被连续满射保持（连续像紧致定理）。</li>
-              <li><strong>与 Hausdorff 的联动：</strong>Hausdorff + 紧致 = 紧致子集闭 + 闭子集紧致，形成完美的闭合关系。</li>
+              <li><strong>拓扑不变量：</strong>紧致性被同胚保持，甚至被连续满射保持——如果 \(f\) 连续且 \(X\) 紧致，则 \(f(X)\) 也紧致。</li>
+              <li><strong>"有限逼近无限"：</strong>开覆盖可以看成用"局部信息"拼合全局，有限子覆盖的存在意味着有限步即可完成拼合。</li>
             </ul>
+            <p>紧致性在 Hausdorff 空间中表现尤为优美。Hausdorff 条件保证极限唯一，与紧致性联合后产生一个完美的闭合关系：紧子集一定是闭集，而紧空间中的闭子集一定紧致。这一"紧 ⟺ 闭"的对偶性是后续推导的基石。</p>
+            <p>值得注意的是，紧致性不同于"有界"——后者依赖度量。在一般拓扑空间中，紧致性是唯一正确的"空间大小有限"概念，它统一了分析、几何和代数中看似不同的"有限性"要求。</p>
           </div>
         </div>
 
@@ -418,6 +422,7 @@
           <div class="step-body">
             <h4>1. 紧致性的定义</h4>
             <p>\(X\) <strong>紧致</strong> \(\iff\) 每个开覆盖 \(\{U_\alpha\}_{\alpha \in A}\) 都存在有限子覆盖 \(\{U_{\alpha_1}, \ldots, U_{\alpha_n}\}\)。</p>
+            <p>直觉上，"有限子覆盖"意味着无论如何用开集去"铺满"空间，总能只留下有限块就够了——空间没有"逃向无穷"的余地。</p>
 
             <h4>2. Hausdorff 空间中紧子集是闭集</h4>
             <p>设 \(K \subseteq X\) 紧，\(x \notin K\)。对每个 \(k \in K\)，由 Hausdorff 性取不相交开邻域 \(U_k \ni x\)，\(V_k \ni k\)。</p>
@@ -426,35 +431,51 @@
               <li>令 \(U = U_{k_1} \cap \cdots \cap U_{k_n}\)，则 \(U\) 是 \(x\) 的开邻域且 \(U \cap K = \emptyset\)。</li>
               <li>故 \(x \notin \overline{K}\)，即 \(K\) 闭。</li>
             </ul>
+            <p>关键思路是：紧致性将<strong>无穷多对</strong>分离邻域压缩为<strong>有限交</strong>，从而得到仍然是开集的分离邻域。这正是"有限性"的威力。</p>
 
             <h4>3. 紧空间的闭子集是紧集</h4>
-            <p>\(F \subseteq X\) 闭，\(\{U_\alpha\}\) 覆盖 \(F\)。则 \(\{U_\alpha\} \cup \{X \setminus F\}\) 覆盖 \(X\)。\(X\) 紧 ⟹ 有有限子覆盖，去掉 \(X \setminus F\) 即得 \(F\) 的有限子覆盖。</p>
-            \[\text{Hausdorff 空间中: 紧} \iff \text{闭}(\text{当环境空间紧})\]
+            <p>\(F \subseteq X\) 闭，\(\{U_\alpha\}\) 覆盖 \(F\)。则 \(\{U_\alpha\} \cup \{X \setminus F\}\) 覆盖 \(X\)。\(X\) 紧 \(\Rightarrow\) 有有限子覆盖，去掉 \(X \setminus F\) 即得 \(F\) 的有限子覆盖。</p>
+            <p>这说明在紧空间中，闭集"继承"了整个空间的紧致性。反过来结合前一条，在 Hausdorff 紧空间中子集紧当且仅当它是闭集。</p>
+
+            <h4>4. 紧 Hausdorff 空间中紧与闭的完美对偶</h4>
+            \[\text{Hausdorff 空间中: 紧} \iff \text{闭}\;\;(\text{当环境空间紧时})\]
+            <p>这个等价关系将"紧致性"这一拓扑概念与"闭集"这一直观概念统一起来。在 \(\mathbb{R}^n\) 中配合有界性就变成经典的 Heine-Borel 定理。</p>
+
+            <h4>5. 有限并与任意交的封闭性</h4>
+            <p>有限个紧集的并仍紧致（对每个因子分别取有限子覆盖再合并）。在 Hausdorff 空间中，任意个紧集的交仍紧致（紧集闭 \(\Rightarrow\) 交仍闭 \(\Rightarrow\) 闭子集紧）。</p>
+            <p>这两条封闭性保证了紧致子集构成一个"好的"集族，在后续讨论紧致化和滤子理论时非常有用。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p><strong>极值定理（Weierstrass）：</strong>连续实值函数 \(f: K \to \mathbb{R}\) 在紧集 \(K\) 上取到最大值和最小值。证明：\(f(K)\) 紧 ⊂ \(\mathbb{R}\) ⟹ 有界闭 ⟹ \(\sup, \inf \in f(K)\)。</p>
-            <p><strong>紧流形上的分析：</strong>Hodge 定理、Atiyah-Singer 指标定理等深刻结果都首先在紧（闭）流形上成立。紧致性保证了椭圆算子的 Fredholm 性。</p>
+            <p><strong>实分析 — 极值定理：</strong>连续实值函数 \(f: K \to \mathbb{R}\) 在紧集 \(K\) 上一定取到最大值和最小值。证明核心是 \(f(K)\) 紧致，作为 \(\mathbb{R}\) 的紧子集它有界且闭，因此上确界和下确界都在 \(f(K)\) 内。这是微积分和优化理论中最基本的存在性保障。</p>
+            <p><strong>微分几何 — 紧流形上的全局分析：</strong>Hodge 定理断言紧致 Riemann 流形上每个 de Rham 上同调类有唯一的调和代表元。紧致性保证了 Laplace 算子的 Fredholm 性（谱离散、核有限维），使得椭圆方程的解理论变得可控。</p>
+            <p><strong>经济学 — 存在性定理：</strong>许多均衡存在性证明（如 Nash 均衡、Arrow-Debreu 一般均衡）的第一步都是将策略集或商品集假设为紧致。紧致性确保效用函数取到最大值，再配合不动点定理即可得到均衡的存在。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：\((0,1)\) 不紧致</h4>
+            <h4>例题 1：\((0,1)\) 不紧致</h4>
             <p><strong>题目：</strong>证明开区间 \((0,1)\) 在标准拓扑中不紧致。</p>
             <p><strong>第一步 — 构造开覆盖：</strong>取 \(\mathcal{U} = \{(1/n, 1) : n \geq 2\}\)。</p>
-            <p><strong>第二步 — 验证是覆盖：</strong>\(\bigcup_{n=2}^{\infty} (1/n, 1) = (0, 1)\)。✔</p>
-            <p><strong>第三步 — 无有限子覆盖：</strong>任取有限子族 \(\{(1/n_1, 1), \ldots, (1/n_k, 1)\}\)，令 \(N = \max(n_1, \ldots, n_k)\)，则并集 = \((1/N, 1)\)，不覆盖 \((0, 1/N]\) 中的点。→ 不紧致。✔</p>
+            <p><strong>第二步 — 验证是覆盖：</strong>\(\bigcup_{n=2}^{\infty} (1/n, 1) = (0, 1)\)。</p>
+            <p><strong>第三步 — 无有限子覆盖：</strong>任取有限子族 \(\{(1/n_1, 1), \ldots, (1/n_k, 1)\}\)，令 \(N = \max(n_1, \ldots, n_k)\)，则并集 = \((1/N, 1)\)，不覆盖 \((0, 1/N]\) 中的点。故 \((0,1)\) 不紧致。</p>
+
+            <h4>例题 2：余有限拓扑下的紧致性</h4>
+            <p><strong>题目：</strong>证明无穷集合 \(X\) 上的余有限拓扑空间 \((X, \tau_{\mathrm{cf}})\) 紧致。</p>
+            <p><strong>第一步 — 取开覆盖：</strong>设 \(\{U_\alpha\}\) 是任意开覆盖。选一个非空 \(U_{\alpha_0}\)。</p>
+            <p><strong>第二步 — 分析补集：</strong>由余有限拓扑的定义，\(X \setminus U_{\alpha_0}\) 是<strong>有限集</strong>，设 \(= \{x_1, \ldots, x_m\}\)。</p>
+            <p><strong>第三步 — 有限覆盖：</strong>每个 \(x_i\) 属于某个 \(U_{\alpha_i}\)。则 \(\{U_{\alpha_0}, U_{\alpha_1}, \ldots, U_{\alpha_m}\}\) 构成有限子覆盖。故紧致。</p>
 
             <h4>常见错误</h4>
             <ul>
               <li>❌ 认为 \((0,1)\) 有界所以紧致。<br>✅ Heine-Borel 要求"有界<strong>且闭</strong>"。\((0,1)\) 有界但不闭，因此不紧。</li>
-              <li>❌ 混淆"存在一个没有有限子覆盖的开覆盖"与"所有开覆盖都没有有限子覆盖"。<br>✅ 不紧致只需<strong>一个</strong>无有限子覆盖的开覆盖。紧致要求<strong>所有</strong>开覆盖都有。</li>
-              <li>❌ 认为"紧子集一定闭"在所有空间成立。<br>✅ 只在 Hausdorff 空间中成立。余有限拓扑中所有子集都紧但不一定闭。</li>
+              <li>❌ 混淆"存在一个没有有限子覆盖的开覆盖"与"所有开覆盖都没有有限子覆盖"。<br>✅ 不紧致只需<strong>一个</strong>无有限子覆盖的开覆盖存在即可。紧致要求<strong>所有</strong>开覆盖都有有限子覆盖。</li>
+              <li>❌ 认为"紧子集一定闭"在所有空间成立。<br>✅ 只在 Hausdorff 空间中成立。例如余有限拓扑中所有子集都紧致（子空间也是余有限的），但无穷真子集不是闭集。</li>
             </ul>
           </div>
         </div>
@@ -500,22 +521,25 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>紧致性之所以成为拓扑学中最重要的性质之一，是因为它在连续映射下具有惊人的稳定性：连续函数将紧集映为紧集。正是这个简洁的结论，直接催生了分析学中的极值定理——"\(f\) 连续 + 定义域紧 \(\Rightarrow\) \(f\) 取到最值"——以及闭映射定理和连续双射自动为同胚等一系列强有力的工具。</p>
             <ul>
-              <li><strong>紧致性的威力传递：</strong>连续函数将紧集映为紧集，直接给出极值定理：\(f\) 连续 + \(K\) 紧 ⟹ \(f(K)\) 紧 \(\subseteq \mathbb{R}\) ⟹ 有界闭 ⟹ 取到最值。</li>
-              <li><strong>抽象与具体的桥梁：</strong>Heine-Borel 定理将抽象的紧致性（开覆盖定义）与 \(\mathbb{R}^n\) 中具体的"有界且闭"等价起来。</li>
-              <li><strong>紧→Hausdorff 技巧：</strong>紧空间到 Hausdorff 空间的连续双射自动为同胚——这个结论在商空间构造（ch04）中已多次使用。</li>
+              <li><strong>极值定理的基础：</strong>\(f\) 连续，\(K\) 紧 \(\Rightarrow\) \(f(K)\) 紧 \(\subseteq \mathbb{R}\) \(\Rightarrow\) 有界闭，因此 \(f\) 在 \(K\) 上取到最大值和最小值。这是优化理论的逻辑起点。</li>
+              <li><strong>Heine-Borel 定理——抽象与具体的桥梁：</strong>在 \(\mathbb{R}^n\) 中，紧致性恰好等价于"有界且闭"。这将抽象的开覆盖定义翻译为可验证的度量条件。</li>
+              <li><strong>紧→Hausdorff 自动同胚：</strong>紧空间到 Hausdorff 空间的连续双射自动是同胚，这个技巧在商空间、等价关系和分类问题中被反复使用。</li>
             </ul>
+            <p>本节的命题看起来简单，但它们构成了拓扑分析的核心引擎：连续映射保持紧致性、极值定理保障最优解的存在、Heine-Borel 提供具体的判定准则、闭映射性质简化同胚的验证。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>连续映射保紧致性的证明策略极其简洁：把 \(f(K)\) 的开覆盖通过 \(f^{-1}\) 拉回为 \(K\) 的开覆盖，利用 \(K\) 的紧致性取有限子覆盖，再用 \(f\) 推回去。整个论证是一步"拉回 — 压缩 — 推前"的范式。</p>
             <ul>
-              <li><strong>函子视角：</strong>紧致性是拓扑不变量，被连续映射（不仅是同胚）保持。这使它成为区分空间的有效工具。</li>
-              <li><strong>"紧+Hausdorff"是黄金组合：</strong>紧 Hausdorff 空间中，紧 \(\iff\) 闭；连续双射 \(\Rightarrow\) 同胚；正规（\(T_4\)）自动成立。</li>
-              <li><strong>Heine-Borel 的局限：</strong>仅在 \(\mathbb{R}^n\) 中"紧 \(\iff\) 有界闭"。一般度量空间中有界闭不保证紧（如 \(\ell^\infty\) 的闭单位球）。</li>
+              <li><strong>函子视角：</strong>紧致性不仅被同胚保持，甚至被连续满射保持——这意味着紧致性的"传递"只需要连续性，不需要可逆性。</li>
+              <li><strong>"紧+Hausdorff"黄金组合：</strong>在紧 Hausdorff 空间中，紧与闭等价、连续双射自动为同胚、空间自动正规（\(T_4\)）。</li>
             </ul>
+            <p>Heine-Borel 定理揭示了 \(\mathbb{R}^n\) 的特殊性：紧致 \(\iff\) 有界闭。但这个等价关系在一般度量空间中<strong>不成立</strong>。例如 \(\ell^\infty\) 的闭单位球有界且闭，但不紧致（标准基序列无收敛子列）。认识到这一局限性，才能避免把 Heine-Borel 不当地推广。</p>
           </div>
         </div>
 
@@ -525,46 +549,65 @@
             <h4>1. 连续映射保紧致性</h4>
             <p>设 \(f: X \to Y\) 连续，\(K \subseteq X\) 紧。设 \(\{V_\alpha\}\) 覆盖 \(f(K)\)。</p>
             <ul>
-              <li>\(\{f^{-1}(V_\alpha)\}\) 是 \(K\) 的开覆盖（\(f\) 连续 ⟹ 原像开）。</li>
-              <li>\(K\) 紧 ⟹ 存在有限子覆盖 \(\{f^{-1}(V_{\alpha_i})\}_{i=1}^n\)。</li>
+              <li>\(\{f^{-1}(V_\alpha)\}\) 是 \(K\) 的开覆盖（\(f\) 连续 \(\Rightarrow\) 原像开）。</li>
+              <li>\(K\) 紧 \(\Rightarrow\) 存在有限子覆盖 \(\{f^{-1}(V_{\alpha_i})\}_{i=1}^n\)。</li>
               <li>则 \(\{V_{\alpha_i}\}_{i=1}^n\) 覆盖 \(f(K)\)。故 \(f(K)\) 紧。</li>
             </ul>
+            <p>这个证明的核心手法——"拉回取有限子覆盖再推前"——是一个反复出现的范式，后续在乘积空间和函子性质中都会遇到。</p>
 
             <h4>2. 极值定理（Weierstrass）</h4>
-            <p>\(f: K \to \mathbb{R}\) 连续，\(K\) 紧。\(f(K)\) 紧 ⊂ \(\mathbb{R}\) ⟹ 有界闭（Heine-Borel）⟹ \(\sup f(K), \inf f(K) \in f(K)\)。</p>
+            <p>\(f: K \to \mathbb{R}\) 连续，\(K\) 紧。\(f(K)\) 紧 \(\subseteq \mathbb{R}\) \(\Rightarrow\) 有界闭（Heine-Borel）\(\Rightarrow\) \(\sup f(K), \inf f(K) \in f(K)\)。</p>
+            <p>直觉上，紧致性阻止了函数值"逃向 \(\pm\infty\)"或"无限逼近但永远达不到"上确界的情况。</p>
 
-            <h4>3. Heine-Borel 定理</h4>
+            <h4>3. 紧→Hausdorff 的闭映射性质</h4>
+            <p>\(f: X \to Y\) 连续，\(X\) 紧，\(Y\) Hausdorff。则 \(f\) 是<strong>闭映射</strong>：</p>
+            \[F \subseteq X \text{ 闭} \;\Rightarrow\; F \text{ 紧} \;\Rightarrow\; f(F) \text{ 紧} \;\Rightarrow\; f(F) \text{ 闭}\]
+            <p>推论：若 \(f\) 还是双射，则闭映射 + 连续双射 = 同胚。这避免了验证逆映射连续性的麻烦——紧致性"免费"提供了这一点。</p>
+
+            <h4>4. Heine-Borel 定理</h4>
             <p>\(A \subseteq \mathbb{R}^n\) 紧 \(\iff A\) 有界且闭。</p>
             <ul>
-              <li><strong>(⟹)：</strong>紧 ⟹ 闭（\(\mathbb{R}^n\) Hausdorff）+ 有界（取 \(\{B(0,k)\}_{k=1}^\infty\) 覆盖，有限子覆盖 ⟹ 有界）。</li>
-              <li><strong>(⟸)：</strong>\(A\) 有界 ⟹ \(A \subseteq [-M,M]^n\)。\([-M,M]^n\) 紧（Tychonoff 或直接证明）。\(A\) 闭 ⟹ 闭子集紧。</li>
+              <li><strong>(\(\Rightarrow\))：</strong>紧 \(\Rightarrow\) 闭（\(\mathbb{R}^n\) Hausdorff）+ 有界（取 \(\{B(0,k)\}_{k=1}^\infty\) 覆盖，有限子覆盖 \(\Rightarrow\) 有界）。</li>
+              <li><strong>(\(\Leftarrow\))：</strong>\(A\) 有界 \(\Rightarrow A \subseteq [-M,M]^n\)。\([-M,M]^n\) 紧致（\([-M,M]\) 紧致的有限积紧致）。\(A\) 闭 \(\Rightarrow\) 紧空间的闭子集紧致。</li>
             </ul>
+            <p>Heine-Borel 的深层原因在于 \(\mathbb{R}^n\) 是局部紧、\(\sigma\)-紧的完备度量空间，使得"全有界 + 完备"与"有界闭"恰好重合。</p>
+
+            <h4>5. Heine-Borel 的失效与推广</h4>
+            <p>在无穷维空间中，Heine-Borel 不再成立。例如 \(\ell^2\) 的闭单位球 \(\overline{B} = \{x : \|x\| \leq 1\}\) 有界且闭，但标准基 \(\{e_n\}\) 满足 \(\|e_n - e_m\| = \sqrt{2}\)（\(n \neq m\)），无收敛子列，因此 \(\overline{B}\) 不紧致。</p>
+            <p>正确的推广是：度量空间中紧致 \(\iff\) 完备且全有界，其中全有界意味着对每个 \(\varepsilon > 0\) 存在有限个 \(\varepsilon\)-球覆盖。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p><strong>最优化理论：</strong>在紧致可行域 \(K \subseteq \mathbb{R}^n\) 上，连续目标函数一定取到最优值。这是线性规划、非线性规划解存在性的理论基础。</p>
-            <p><strong>概率论 — Prokhorov 定理：</strong>紧致度量空间上概率测度的全体在弱拓扑下自动紧致。一般度量空间中，Prokhorov 的"紧致近似"条件保证测度序列有弱收敛子列。</p>
+            <p><strong>最优化理论：</strong>在连续目标函数 \(f\) 和紧致可行域 \(K \subseteq \mathbb{R}^n\) 下，极值定理保证 \(f\) 一定在 \(K\) 上取到最优值。这是线性规划（多面体有界闭 = 紧）和非线性规划解存在性的理论基础。</p>
+            <p><strong>概率论 — Prokhorov 定理：</strong>紧致度量空间上概率测度的全体在弱拓扑下紧致。更一般地，Prokhorov 定理说明，如果一族概率测度是"紧致近似"的（每个测度的质量集中在紧集附近），则该族在弱拓扑下相对紧致，保证了弱收敛子列的存在。</p>
+            <p><strong>拓扑动力学 — 极小集：</strong>紧致度量空间上的连续映射 \(T: X \to X\) 一定存在非空闭不变集（Zorn 引理 + 紧致性）。极小不变集上的动力系统被称为极小系统，是遍历理论的基本对象。</p>
           </div>
+        </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：紧集上的极值</h4>
+            <h4>例题 1：紧集上的极值</h4>
             <p><strong>题目：</strong>\(f(x,y) = x^2 + y^2 - xy\) 在 \(K = \{(x,y) : x^2 + y^2 \leq 1\}\) 上的最大值和最小值。</p>
-            <p><strong>第一步 — 确认极值存在：</strong>\(K\) 有界闭（Heine-Borel ⟹ 紧），\(f\) 连续。极值定理保证最值存在。</p>
+            <p><strong>第一步 — 确认极值存在：</strong>\(K\) 有界闭（Heine-Borel \(\Rightarrow\) 紧），\(f\) 连续。极值定理保证最值存在。</p>
             <p><strong>第二步 — 内部临界点：</strong>\(\nabla f = (2x-y,\; 2y-x) = 0 \Rightarrow x = y = 0\)，\(f(0,0) = 0\)。</p>
             <p><strong>第三步 — 边界极值：</strong>参数化 \(x = \cos\theta,\; y = \sin\theta\)，\(f = 1 - \sin(2\theta)/2\)。最大 \(3/2\)（\(\theta = 3\pi/4\)），最小 \(1/2\)（\(\theta = \pi/4\)）。</p>
-            <p><strong>结论：</strong>全局最小值 \(\min(0, 1/2) = 0\)（内部），全局最大值 \(3/2\)（边界）。✔</p>
+            <p><strong>结论：</strong>全局最小值 \(\min(0, 1/2) = 0\)（内部），全局最大值 \(3/2\)（边界）。</p>
+
+            <h4>例题 2：紧→Hausdorff 连续双射是同胚</h4>
+            <p><strong>题目：</strong>设 \(f: [0, 2\pi) \to S^1\)，\(f(t) = (\cos t, \sin t)\)。\(f\) 是连续双射但非同胚。为什么"紧→Hausdorff 自动同胚"的结论不适用？</p>
+            <p><strong>分析：</strong>\(f\) 确实是连续双射，\(S^1\) 确实 Hausdorff。但定义域 \([0, 2\pi)\) <strong>不紧致</strong>（半开区间不闭）。紧→Hausdorff 定理的前提"定义域紧"不满足，所以结论不成立。</p>
+            <p><strong>对比：</strong>若换成 \([0,1]/(0 \sim 1) \to S^1\)，则定义域是紧致商空间，连续双射就确实是同胚。</p>
 
             <h4>常见错误</h4>
             <ul>
               <li>❌ 只检查内部临界点，忘记边界。<br>✅ 紧集上求极值必须比较<strong>内部临界点</strong>与<strong>边界极值</strong>。</li>
-              <li>❌ 将 Heine-Borel 推广到一般度量空间。<br>✅ \(\ell^\infty\) 中闭单位球有界且闭但不紧。Heine-Borel 仅对 \(\mathbb{R}^n\) 成立。</li>
-              <li>❌ 认为连续函数在任何定义域上都取到最值。<br>✅ 极值定理的前提是定义域<strong>紧致</strong>。\(f(x) = x\) 在 \(\mathbb{R}\) 上无最值。</li>
+              <li>❌ 将 Heine-Borel 推广到一般度量空间。<br>✅ \(\ell^2\) 中闭单位球有界且闭但不紧致。Heine-Borel 仅对 \(\mathbb{R}^n\) 成立。</li>
+              <li>❌ 认为连续双射总是同胚。<br>✅ 需<strong>定义域紧致</strong>且<strong>值域 Hausdorff</strong>。缺少紧致性时连续双射的逆可能不连续。</li>
             </ul>
           </div>
         </div>
@@ -592,22 +635,25 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>开覆盖定义虽然简洁优美，但在实际论证中却不总是最方便的工具。在度量空间——分析学的主战场上——我们更习惯"序列"语言：取子列、令 \(n \to \infty\)、构造 \(\varepsilon\text{-}\delta\) 论证。序列紧致正是将紧致性翻译成序列语言的等价刻画，让分析学家得以在熟悉的框架内使用紧致性的全部威力。</p>
             <ul>
-              <li><strong>序列语言更直观：</strong>在度量空间中，"每个序列有收敛子列"（序列紧致）等价于紧致。这是分析学中更常用的紧致性刻画。</li>
-              <li><strong>Lebesgue 数 — 覆盖的统一粒度：</strong>紧致度量空间的每个开覆盖都有一个正的 Lebesgue 数 \(\delta\)：半径 \(\delta\) 的球一定落入某个覆盖成员中。这是证明一致连续性和单纯逼近定理的关键。</li>
-              <li><strong>三个等价条件：</strong>度量空间中 紧致 \(\iff\) 序列紧 \(\iff\) 完备且全有界。这三个视角各有用武之地。</li>
+              <li><strong>Bolzano-Weierstrass 的推广：</strong>"有界序列有收敛子列"是实分析的基石。序列紧致将其推广到一般度量空间，成为提取收敛子列的通用保障。</li>
+              <li><strong>Lebesgue 数——覆盖的统一粒度：</strong>紧致度量空间的每个开覆盖都有正的 Lebesgue 数 \(\delta\)：半径 \(\delta\) 的球总落入某个覆盖成员。这是证明一致连续性和单纯逼近定理的关键。</li>
+              <li><strong>三重等价：</strong>度量空间中紧致 \(\iff\) 序列紧 \(\iff\) 完备且全有界。三个视角各有用武之地，灵活切换是分析学的基本技能。</li>
             </ul>
+            <p>本节将建立这三者之间的等价关系，并从中推导出 Lebesgue 数引理——一个看似技术性却在代数拓扑和数值分析中都有深远应用的结果。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>序列紧致将"开覆盖的有限性"翻译为"序列的收敛行为"——两种看似不同的有限性概念在度量空间中恰好统一。这种统一的桥梁是<strong>全有界性</strong>：空间可以被有限个 \(\varepsilon\)-球覆盖。</p>
             <ul>
-              <li><strong>开覆盖 → 序列：</strong>序列紧致将"开覆盖的有限性"翻译为"序列的收敛性"——分析学更习惯的语言。</li>
-              <li><strong>全有界 — 有限 \(\varepsilon\)-网：</strong>全有界意味着空间可被有限个 \(\varepsilon\)-球覆盖，是紧致性"有限逼近无限"思想的度量版本。</li>
-              <li><strong>度量空间 vs 一般空间：</strong>在一般拓扑空间中，序列紧致与紧致不等价。反例存在于不可数积空间等。</li>
+              <li><strong>全有界 = 离散版紧致：</strong>全有界意味着空间在每个尺度上都可以被有限网格近似，是紧致性"有限逼近无限"思想的度量版本。</li>
+              <li><strong>完备 + 全有界 = 紧致：</strong>全有界保证子列逐步聚拢于越来越小的球中，完备性保证极限存在。两者合力等价于紧致。</li>
             </ul>
+            <p>需要注意的是，在一般拓扑空间中，序列紧致与紧致<strong>不等价</strong>。反例出现在不可数积空间中：\(\{0,1\}^{[0,1]}\) 由 Tychonoff 定理紧致，但可构造没有收敛子列的序列。理解等价性的边界，才能在具体问题中选对工具。</p>
           </div>
         </div>
 
@@ -616,40 +662,55 @@
           <div class="step-body">
             <h4>1. 序列紧致的定义</h4>
             <p>\(X\) <strong>序列紧</strong> \(\iff\) 每个序列 \((x_n)\) 都有收敛子列 \(x_{n_k} \to x \in X\)。</p>
+            <p>注意收敛子列的极限 \(x\) 必须属于 \(X\) 本身——这排除了序列"逃出"空间的可能。</p>
 
-            <h4>2. 度量空间中的等价关系</h4>
+            <h4>2. 度量空间中的三重等价</h4>
             \[\text{紧致} \iff \text{序列紧} \iff \text{完备且全有界}\]
-            <p>Bolzano-Weierstrass 定理是 \(\mathbb{R}^n\) 中的特殊情形：有界序列有收敛子列。</p>
+            <p>Bolzano-Weierstrass 定理是 \(\mathbb{R}^n\) 中的特殊情形。在一般度量空间中，"有界"需加强为"全有界"（对每个 \(\varepsilon > 0\) 存在有限 \(\varepsilon\)-网），"闭"需加强为"完备"（Cauchy 列收敛）。</p>
 
             <h4>3. Lebesgue 数引理</h4>
             <p>设 \((X, d)\) 紧致度量空间，\(\{U_\alpha\}\) 为开覆盖。则 \(\exists\; \delta > 0\)（Lebesgue 数）使得</p>
             \[\forall x \in X,\; \exists\, \alpha: \quad B(x, \delta) \subseteq U_\alpha\]
-            <p><strong>证明（反证法）：</strong>若不存在，对每个 \(n\) 存在 \(x_n\) 使 \(B(x_n, 1/n) \not\subseteq U_\alpha\; \forall \alpha\)。序列紧 ⟹ 取 \(x_{n_k} \to x_0\)。\(x_0 \in U_{\alpha_0}\)，取 \(\varepsilon > 0\) 使 \(B(x_0, \varepsilon) \subseteq U_{\alpha_0}\)。当 \(k\) 够大，\(d(x_{n_k}, x_0) < \varepsilon/2\) 且 \(1/n_k < \varepsilon/2\)，故 \(B(x_{n_k}, 1/n_k) \subseteq B(x_0, \varepsilon) \subseteq U_{\alpha_0}\)，矛盾。</p>
+            <p>直觉上，Lebesgue 数是覆盖的"统一粒度"：只要观察尺度不超过 \(\delta\)，就能保证每次观察到的区域都完整地落入某一个覆盖成员中。</p>
+
+            <h4>4. Lebesgue 数引理的证明</h4>
+            <p><strong>反证法：</strong>若不存在正的 Lebesgue 数，则对每个 \(n\) 存在 \(x_n\) 使 \(B(x_n, 1/n) \not\subseteq U_\alpha\;\forall \alpha\)。由序列紧致取 \(x_{n_k} \to x_0\)。\(x_0 \in U_{\alpha_0}\)，取 \(\varepsilon > 0\) 使 \(B(x_0, \varepsilon) \subseteq U_{\alpha_0}\)。当 \(k\) 够大，\(d(x_{n_k}, x_0) < \varepsilon/2\) 且 \(1/n_k < \varepsilon/2\)，故 \(B(x_{n_k}, 1/n_k) \subseteq B(x_0, \varepsilon) \subseteq U_{\alpha_0}\)，矛盾。</p>
+            <p>这个证明展示了序列紧致的典型用法：先假设没有统一的 \(\delta\) 界，构造"反例序列"，再用序列紧致提取收敛子列得到矛盾。</p>
+
+            <h4>5. 紧致度量空间上连续 \(\Rightarrow\) 一致连续</h4>
+            <p>给定 \(\varepsilon > 0\)，取覆盖 \(\{f^{-1}(B(y, \varepsilon/2)) : y \in Y\}\) 的 Lebesgue 数 \(\delta\)。若 \(d(x_1, x_2) < \delta\)，则 \(x_1, x_2\) 同时落入某个 \(f^{-1}(B(y, \varepsilon/2))\)，从而 \(d_Y(f(x_1), f(x_2)) < \varepsilon\)。</p>
+            <p>关键结论：在紧致度量空间上，连续性自动升级为一致连续性。\(\delta\) 只依赖 \(\varepsilon\)，不依赖点的位置。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p><strong>一致连续性：</strong>紧致度量空间上的连续函数一定一致连续。证明：给定 \(\varepsilon > 0\)，取覆盖 \(\{f^{-1}(B(y, \varepsilon/2))\}\)，其 Lebesgue 数 \(\delta\) 就是一致连续的模。</p>
-            <p><strong>代数拓扑 — 单纯逼近定理：</strong>紧致度量空间之间的连续映射可被单纯映射逼近。关键步骤是用 Lebesgue 数保证足够细的三角剖分将每个单形映入某一星形内。</p>
+            <p><strong>实分析 — 一致连续性：</strong>紧致度量空间上的连续函数一定一致连续。这直接由 Lebesgue 数引理给出：给定 \(\varepsilon > 0\)，适当覆盖的 Lebesgue 数就是一致连续的模。这个结论是 Riemann 积分理论中"连续函数可积"的基础。</p>
+            <p><strong>代数拓扑 — 单纯逼近定理：</strong>紧致度量空间之间的连续映射可被单纯映射逼近。关键步骤是用 Lebesgue 数保证三角剖分足够细，使每个单形的像落入某一星形内，从而可以用组合方法（单纯映射）近似连续映射。</p>
+            <p><strong>数值分析 — 有限元收敛性：</strong>Lebesgue 数的思想在有限元方法中有天然对应：网格划分的"最小网格尺度"类似于 Lebesgue 数。当网格足够细时（\(\delta\) 足够小），每个单元上的函数行为可被有限维基函数充分逼近，保证离散解收敛到精确解。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：计算开覆盖的 Lebesgue 数</h4>
+            <h4>例题 1：计算开覆盖的 Lebesgue 数</h4>
             <p><strong>题目：</strong>\([0,1]\) 上开覆盖 \(\mathcal{U} = \{(k/10 - 0.15,\; k/10 + 0.15) : k = 0,1,\ldots,10\}\)，求 Lebesgue 数。</p>
             <p><strong>第一步 — 区间结构：</strong>相邻区间中心相距 \(0.1\)，每个区间半径 \(0.15\)，重叠区域长度 \(0.2\)。</p>
             <p><strong>第二步 — 最坏情况：</strong>对任意 \(x \in [0,1]\)，存在 \(k\) 使 \(|x - k/10| \leq 0.05\)。此时 \(B(x, 0.1) \subseteq (k/10 - 0.15,\; k/10 + 0.15)\)。</p>
-            <p><strong>第三步 — 精确值：</strong>当 \(x\) 恰好在两个中心的中点时，\(B(x, r)\) 要求 \(r \leq 0.1\) 才能落入某个覆盖成员。Lebesgue 数 \(\delta = 0.1\)。✔</p>
+            <p><strong>第三步 — 精确值：</strong>当 \(x\) 恰好在两个中心的中点时，\(B(x, r)\) 要求 \(r \leq 0.1\) 才能落入某个覆盖成员。Lebesgue 数 \(\delta = 0.1\)。</p>
+
+            <h4>例题 2：完备但不全有界的空间</h4>
+            <p><strong>题目：</strong>说明 \(\mathbb{R}\)（标准度量）完备但不紧致，并指出哪个等价条件失败。</p>
+            <p><strong>分析：</strong>\(\mathbb{R}\) 完备（Cauchy 列收敛），但不全有界：对 \(\varepsilon = 1\)，任何有限个半径 \(1\) 的开球 \(\{B(a_i, 1)\}_{i=1}^n\) 都无法覆盖 \(\mathbb{R}\)（取 \(x = \max(a_i) + 2\) 即可）。因此"完备且全有界"的第二个条件失败，\(\mathbb{R}\) 不紧致。</p>
+            <p><strong>对比：</strong>\([0,1]\) 既完备又全有界（对任意 \(\varepsilon\)，取 \(\lceil 1/\varepsilon \rceil\) 个点即可覆盖），所以紧致。</p>
 
             <h4>常见错误</h4>
             <ul>
-              <li>❌ 在一般拓扑空间中使用"序列紧 ⟹ 紧"。<br>✅ 仅在度量空间（或更广地，\(C_1\) 空间）中两者等价。一般空间中不等价。</li>
-              <li>❌ 认为 Lebesgue 数只取决于空间，不取决于覆盖。<br>✅ Lebesgue 数是<strong>覆盖的性质</strong>，不同覆盖有不同的 \(\delta\)。</li>
-              <li>❌ 混淆"全有界"与"有界"。<br>✅ 全有界要求：\(\forall \varepsilon > 0\) 存在<strong>有限</strong>个 \(\varepsilon\)-球覆盖。有界只要求存在一个包含全空间的球。\(\ell^\infty\) 的单位球有界但非全有界。</li>
+              <li>❌ 在一般拓扑空间中使用"序列紧 \(\Rightarrow\) 紧"。<br>✅ 仅在度量空间（或更广地，第一可数空间）中两者等价。一般空间中不等价。</li>
+              <li>❌ 认为 Lebesgue 数只取决于空间，不取决于覆盖。<br>✅ Lebesgue 数是<strong>覆盖的性质</strong>，不同覆盖有不同的 \(\delta\)。更细的覆盖通常有更小的 Lebesgue 数。</li>
+              <li>❌ 混淆"全有界"与"有界"。<br>✅ 全有界要求对<strong>每个</strong> \(\varepsilon > 0\) 存在有限 \(\varepsilon\)-网。有界只要求存在一个包含全空间的球。\(\mathbb{R}\) 的任何有界子集都全有界，但 \(\mathbb{R}\) 本身不全有界。</li>
             </ul>
           </div>
         </div>
@@ -677,68 +738,86 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>许多最重要的空间——\(\mathbb{R}^n\)、\(\mathbb{C}\)、一般的非紧流形——本身并不紧致，但它们在每个点的"局部"却拥有紧致性。这种"局部紧致"性质既保留了紧致性带来的分析便利（如函数的局部极值存在），又允许空间在全局上无限延伸。更妙的是，局部紧 Hausdorff 空间可以通过添加一个"无穷远点"变成紧致空间——这就是一点紧致化的思想。</p>
             <ul>
-              <li><strong>\(\mathbb{R}^n\) 不紧但"局部紧"：</strong>\(\mathbb{R}^n\) 整体不紧致，但每个点都有紧邻域（闭球）。局部紧致性是介于紧致和非紧致之间的重要中间概念。</li>
-              <li><strong>一点紧致化：</strong>通过添加一个"无穷远点"将局部紧 Hausdorff 空间变为紧致空间。经典例子：\(\mathbb{R}^n \cup \{\infty\} \cong S^n\)，\(\mathbb{C} \cup \{\infty\} \cong S^2\)（Riemann 球面）。</li>
-              <li><strong>Tychonoff 定理：</strong>紧空间的任意积仍紧——这是拓扑学中最深刻的定理之一，等价于选择公理，是 Banach-Alaoglu 等定理的基础。</li>
+              <li><strong>局部紧致性：</strong>\(\mathbb{R}^n\) 的每个点都有紧邻域（闭球），这使得局部分析（如偏微分方程的局部解）可以利用紧致性工具。</li>
+              <li><strong>一点紧致化：</strong>添加无穷远点 \(\infty\) 将 \(\mathbb{R}^n\) 变为 \(S^n\)，将 \(\mathbb{C}\) 变为 Riemann 球面 \(\hat{\mathbb{C}} \cong S^2\)。这一构造将"非紧"问题转化为"紧"问题，是复分析和代数几何中的标准技巧。</li>
+              <li><strong>Tychonoff 定理：</strong>紧空间的任意积在积拓扑下仍紧致。这是拓扑学中最深刻的定理之一，等价于选择公理，是 Banach-Alaoglu 定理等泛函分析基石的证明基础。</li>
             </ul>
+            <p>局部紧致性、紧致化与 Tychonoff 定理形成一套完整的工具链：当空间本身不紧致时，要么在局部利用紧致性，要么通过紧致化将空间补全为紧致空间，要么通过乘积构造在更大的紧致空间中工作。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>紧致化的核心思想是<strong>边界补全</strong>：通过添加"理想边界"将非紧空间变为紧致空间。一点紧致化是最小的补全方式——只添加一个点 \(\infty\)；Stone-Cech 紧致化是最大的补全方式——添加尽可能多的边界点以保证所有到紧 Hausdorff 空间的连续映射都可延拓。</p>
             <ul>
-              <li><strong>紧致化 = 边界补全：</strong>一点紧致化通过添加理想边界（无穷远点）将"非紧"问题转化为"紧"问题。类似地，Stone-Čech 紧致化添加更多的边界点。</li>
-              <li><strong>Tychonoff = 选择公理的拓扑化身：</strong>有限积的紧致性不需要 AC；无穷积需要。事实上 Tychonoff 定理 \(\iff\) AC。</li>
-              <li><strong>Alexander 子基定理：</strong>只需子基的覆盖有有限子覆盖即可推出紧致。这是 Tychonoff 定理最优雅的证明路径。</li>
+              <li><strong>极小 vs 极大：</strong>所有 Hausdorff 紧致化形成一个偏序，一点紧致化 \(X^*\) 在底端，Stone-Cech 紧致化 \(\beta X\) 在顶端。</li>
+              <li><strong>Tychonoff = 选择公理的拓扑化身：</strong>有限积的紧致性可用归纳法（管状引理）证明，不需要 AC。无穷积需要选择公理，且 Tychonoff 定理与 AC 等价（Kelley, 1950）。</li>
             </ul>
+            <p>Alexander 子基定理是证明 Tychonoff 定理最优雅的路径：只需检验积拓扑的一个子基（形如 \(\pi_\alpha^{-1}(U)\) 的集合）生成的覆盖有有限子覆盖，即可推出整个空间紧致。这大幅减少了需要检验的覆盖数量。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <h4>1. 局部紧致</h4>
+            <h4>1. 局部紧致的定义</h4>
             <p>\(X\) <strong>局部紧</strong> \(\iff \forall x \in X,\; \exists\) 紧集 \(K\) 使 \(x \in K^\circ\)。在 Hausdorff 空间中等价于：每点有紧闭邻域。</p>
+            <p>直觉上，局部紧致性保证空间在每个点的"视野范围内"都表现得像紧致空间。\(\mathbb{R}^n\) 的每个点都被闭球包围，\(\mathbb{Q}\) 则做不到（有理数集中没有任何点有紧邻域）。</p>
 
             <h4>2. Alexandrov 一点紧致化</h4>
-            <p>设 \(X\) 非紧、Hausdorff、局部紧。\(X^* = X \cup \{\infty\}\)，拓扑：</p>
+            <p>设 \(X\) 非紧、Hausdorff、局部紧。\(X^* = X \cup \{\infty\}\)，拓扑由两类开集组成：</p>
             <ul>
               <li>\(X\) 中原来的开集仍为开集。</li>
               <li>\(\{\infty\} \cup (X \setminus K)\) 是开集，其中 \(K \subseteq X\) 紧。</li>
             </ul>
-            <p>则 \(X^*\) 紧 Hausdorff，\(X \hookrightarrow X^*\) 为开嵌入。经典例子：</p>
-            \[\mathbb{R}^n \cup \{\infty\} \cong S^n \quad (\text{球极投影})\]
+            <p>则 \(X^*\) 紧 Hausdorff，\(X \hookrightarrow X^*\) 为开嵌入。第二类开集说明 \(\infty\) 的邻域"吞掉"紧集 \(K\) 的补集——集合越大（\(K\) 越大），\(\infty\) 的邻域越小。</p>
 
-            <h4>3. Tychonoff 定理</h4>
+            <h4>3. 经典的一点紧致化例子</h4>
+            \[\mathbb{R}^n \cup \{\infty\} \cong S^n \quad (\text{通过球极投影})\]
+            <p>特别地，\(\mathbb{R} \cup \{\infty\} \cong S^1\)（圆），\(\mathbb{C} \cup \{\infty\} \cong S^2\)（Riemann 球面）。球极投影将球面上除北极外的所有点双连续地映到 \(\mathbb{R}^n\)，北极对应 \(\infty\)。</p>
+
+            <h4>4. 一点紧致化是 Hausdorff 的充要条件</h4>
+            <p>\(X^*\) 是 Hausdorff 紧致空间当且仅当 \(X\) 是 Hausdorff 且局部紧致。</p>
+            <p>这说明局部紧致性不仅是一个"好性质"，它恰好精确刻画了何时可以通过添加一个点得到 Hausdorff 紧空间。\(\mathbb{Q}\) 不局部紧，因此 \(\mathbb{Q}^*\) 存在但不 Hausdorff。</p>
+
+            <h4>5. Tychonoff 定理</h4>
             <p>若 \(\{X_\alpha\}_{\alpha \in A}\) 都紧致，则 \(\prod_{\alpha \in A} X_\alpha\)（积拓扑）紧致。</p>
-            <p><strong>证明思路（Alexander 子基定理）：</strong>积拓扑的子基为 \(\{\pi_\alpha^{-1}(U)\}\)。只需证明子基的覆盖有有限子覆盖。利用每个 \(X_\alpha\) 的紧致性逐步提取有限子覆盖（此步需选择公理/Zorn 引理）。</p>
+            <p><strong>证明思路（Alexander 子基定理）：</strong>积拓扑的子基为 \(\{\pi_\alpha^{-1}(U) : U \subseteq X_\alpha \text{ 开}\}\)。只需证子基覆盖有有限子覆盖。对每个 \(\alpha\)，收集所有以 \(\alpha\) 为坐标的子基开集，利用 \(X_\alpha\) 的紧致性逐步提取有限子覆盖（此步需 Zorn 引理）。</p>
+            <p>Tychonoff 定理的威力在于对<strong>任意</strong>指标集 \(A\) 成立——\(A\) 可以是不可数的。这使得它能处理函数空间（如 \([0,1]^X\)）的紧致性问题。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p><strong>Riemann 球面：</strong>\(\hat{\mathbb{C}} = \mathbb{C} \cup \{\infty\} \cong S^2\) 是复分析中的基本对象。亚纯函数视为 \(\hat{\mathbb{C}} \to \hat{\mathbb{C}}\) 的全纯映射，极点变为取值 \(\infty\) 的正则点。</p>
-            <p><strong>Banach-Alaoglu 定理：</strong>赋范空间 \(X^*\) 的闭单位球在弱*拓扑下紧致。证明：将 \(B_{X^*}\) 嵌入 \(\prod_{x \in B_X} [-\|x\|, \|x\|]\)（每个因子紧），用 Tychonoff 定理得积紧致，再证嵌入像是闭子集。</p>
+            <p><strong>复分析 — Riemann 球面：</strong>\(\hat{\mathbb{C}} = \mathbb{C} \cup \{\infty\} \cong S^2\) 是复分析的基本舞台。亚纯函数视为 \(\hat{\mathbb{C}} \to \hat{\mathbb{C}}\) 的全纯映射，极点变为取值 \(\infty\) 的正则点。一点紧致化将函数的奇异行为纳入了统一的紧致框架中处理。</p>
+            <p><strong>泛函分析 — Banach-Alaoglu 定理：</strong>赋范空间 \(X\) 的对偶空间 \(X^*\) 的闭单位球在弱*拓扑下紧致。证明思路是将 \(B_{X^*}\) 嵌入紧致积空间 \(\prod_{x \in B_X} [-\|x\|, \|x\|]\)（Tychonoff 定理），再证嵌入像是闭子集。这个定理是弱收敛理论和变分法的基础。</p>
+            <p><strong>调和分析 — Gelfand 谱：</strong>交换 Banach 代数 \(A\) 的极大理想空间（Gelfand 谱）\(\hat{A}\) 是紧致 Hausdorff 空间（局部紧代数取一点紧致化后紧致）。Gelfand 表示定理将 \(A\) 同构地嵌入 \(C(\hat{A})\)，是算子代数理论的出发点。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：\(\mathbb{R}\) 的一点紧致化同胚于 \(S^1\)</h4>
+            <h4>例题 1：\(\mathbb{R}\) 的一点紧致化同胚于 \(S^1\)</h4>
             <p><strong>题目：</strong>给出 \(\mathbb{R}^* \cong S^1\) 的同胚映射。</p>
             <p><strong>第一步 — 球极投影：</strong>\(\varphi: S^1 \setminus \{N\} \to \mathbb{R}\)，\(N = (0,1)\)，\(\varphi(\cos\theta, \sin\theta) = \cos\theta/(1-\sin\theta)\)。</p>
             <p><strong>第二步 — 验证同胚：</strong>\(\varphi\) 是 \(S^1 \setminus \{N\}\) 到 \(\mathbb{R}\) 的同胚（连续双射，逆也连续）。</p>
-            <p><strong>第三步 — 扩展到紧致化：</strong>令 \(\bar{\varphi}: S^1 \to \mathbb{R}^*\)，\(\bar{\varphi}(N) = \infty\)，\(\bar{\varphi}|_{S^1 \setminus \{N\}} = \varphi\)。由一点紧致化的万有性质，\(\bar{\varphi}\) 是同胚。✔</p>
+            <p><strong>第三步 — 扩展到紧致化：</strong>令 \(\bar{\varphi}: S^1 \to \mathbb{R}^*\)，\(\bar{\varphi}(N) = \infty\)，\(\bar{\varphi}|_{S^1 \setminus \{N\}} = \varphi\)。由一点紧致化的万有性质，\(\bar{\varphi}\) 是同胚。</p>
+
+            <h4>例题 2：Tychonoff 定理的应用——Hilbert 方体紧致</h4>
+            <p><strong>题目：</strong>证明 Hilbert 方体 \([0,1]^{\mathbb{N}} = \prod_{n=1}^{\infty} [0,1]\) 在积拓扑下紧致。</p>
+            <p><strong>分析：</strong>每个因子 \([0,1]\) 紧致（Heine-Borel）。由 Tychonoff 定理，可数积 \([0,1]^{\mathbb{N}}\) 在积拓扑下紧致。</p>
+            <p><strong>注意：</strong>在 box 拓扑下 \([0,1]^{\mathbb{N}}\) 不紧致。例如序列 \(x^{(n)}\)（第 \(n\) 个坐标为 \(0\)，其余为 \(1\)）在 box 拓扑下没有收敛子列，因为 box 拓扑比积拓扑严格更细。Tychonoff 定理只对积拓扑成立。</p>
 
             <h4>常见错误</h4>
             <ul>
-              <li>❌ 对非局部紧空间做一点紧致化并期望 Hausdorff。<br>✅ \(\mathbb{Q}\) 不局部紧，其一点紧致化存在但不 Hausdorff。局部紧 + Hausdorff 是 \(X^*\) Hausdorff 的必要条件。</li>
-              <li>❌ 认为 Tychonoff 定理对 box 拓扑成立。<br>✅ 仅对<strong>积拓扑</strong>成立。\([0,1]^\mathbb{N}\) 在 box 拓扑下不紧致。</li>
-              <li>❌ 认为 Tychonoff 定理的有限积版本需要选择公理。<br>✅ 有限积的紧致性可用归纳法证明（管状引理），不需 AC。AC 仅在无穷积中必要。</li>
+              <li>❌ 对非局部紧空间做一点紧致化并期望 Hausdorff。<br>✅ \(\mathbb{Q}\) 不局部紧，其一点紧致化存在但不 Hausdorff。局部紧 + Hausdorff 是 \(X^*\) Hausdorff 的充要条件。</li>
+              <li>❌ 认为 Tychonoff 定理对 box 拓扑成立。<br>✅ 仅对<strong>积拓扑</strong>成立。\([0,1]^{\mathbb{N}}\) 在 box 拓扑下不紧致。</li>
+              <li>❌ 认为 Tychonoff 定理的有限积版本需要选择公理。<br>✅ 有限积的紧致性可用归纳法（管状引理）证明，不需要 AC。AC 仅在无穷积中必要。</li>
             </ul>
           </div>
         </div>

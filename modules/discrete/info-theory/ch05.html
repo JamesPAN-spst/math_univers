@@ -412,6 +412,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从单用户信道到多址接入信道（MAC）的跨越在于：性能度量从单一的「容量 \(C\)」变成了「容量域」——一个描述所有可同时达到的速率组合 \((R_1, R_2)\) 的<strong>二维区域</strong>。这一推广将优化问题从标量变为集合。</p>
+            <p>高斯 MAC 容量域由三个线性不等式围成五边形：两个单用户约束 \(R_i \leq \frac{1}{2}\log(1+P_i/N)\) 和一个总速率约束 \(R_1+R_2 \leq \frac{1}{2}\log(1+(P_1+P_2)/N)\)。五边形上的两个角点对应两种 SIC 解码顺序——先解谁，谁就承受对方的干扰。</p>
+            <p>核心见解：<strong>简单的时分复用（TDMA）只能达到和速率边界上两个端点的凸组合</strong>，而联合编码 + SIC 可以达到整个五边形——这是多用户联合处理超越正交方案的根本原因。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -460,6 +469,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>广播信道的核心抽象是<strong>功率分层</strong>：发送方将总功率 \(P\) 分为两层——功率 \((1-\alpha)P\) 给弱用户信息（基础层），\(\alpha P\) 给强用户信息（增强层）。发送信号是两层的叠加 \(X = X_1 + X_2\)。</p>
+            <p>弱用户信噪比低，只能把增强层视为额外噪声，直接解码基础层。强用户信噪比高，可以先成功解码基础层并从接收信号中减去（SIC），然后在「干净」的信号中解增强层。这种<strong>逐次干扰消除</strong>机制是叠加编码的配对解码策略。</p>
+            <p>关键的对偶关系：MAC 中多个用户「争抢」信道资源，广播中一个发送者「分配」资源。数学上，高斯退化广播信道的容量域与 MAC 容量域呈<strong>对偶</strong>——功率分配参数 \(\alpha\) 扮演了与 MAC 中 SIC 解码顺序相同的角色。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -505,6 +523,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>中继信道中一个中间节点帮助源与目的地通信。网络编码则突破了 「中间节点只能存储转发」的传统思维，允许对数据做代数操作， 提升网络吐吐量。这些是网络信息论中最富有挑战性的方向。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>中继信道的核心抽象是「中间节点的处理策略」。三种经典策略形成从简单到复杂的层次：<strong>放大转发（AF）</strong>直接放大接收信号——最简单但会放大噪声；<strong>解码转发（DF）</strong>完全解码再重编——消除噪声但受限于中继解码能力；<strong>压缩转发（CF）</strong>量化接收信号后发送——折中方案。</p>
+            <p>网络编码则代表了更根本的范式转变：传统路由中中间节点只做存储-转发（store-and-forward），而网络编码允许中间节点对数据执行<strong>代数运算</strong>（如有限域上的线性组合）。核心定理是「多播容量 = 最大流-最小割」，且线性网络编码足以达到此极限。</p>
+            <p>两个方向的共同主题是：<strong>中间节点不是被动管道，而是主动的信息处理器</strong>。从「只能转发」到「可以编码」的观念跨越，正是网络信息论相比经典点对点理论最深刻的区别。</p>
           </div>
         </div>
 

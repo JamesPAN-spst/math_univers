@@ -394,35 +394,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在研究函数空间和无穷维线性空间时，我们需要一种"大小"概念来衡量 向量之间的距离。有限维空间中所有范数等价，但无穷维空间中不同范数 可以导致完全不同的拓扑结构。赋范空间的理论为分析学提供了统一的 几何框架——它推广了 \(\mathbb{R}^n\) 中熟悉的距离概念。</p>
+            <p>在研究函数空间和无穷维线性空间时，我们需要衡量"大小"与"距离"的工具——这正是范数的角色。有限维空间中范数的选择不影响拓扑，但无穷维空间中不同范数可能导致截然不同的分析行为。</p>
+            <ul>
+              <li><strong>逼近论</strong>：用 \(\|\cdot\|_\infty\) 度量函数逼近误差，与用 \(\|\cdot\|_2\) 得到完全不同的最优逼近多项式。</li>
+              <li><strong>PDE</strong>：Sobolev 嵌入定理的成立依赖 \(W^{k,p}\) 范数的选择——范数"编码"了函数的正则性层级。</li>
+              <li><strong>概率论</strong>：随机变量的 \(L^p\) 范数控制矩与尾概率，不同 \(p\) 刻画不同的集中性。</li>
+            </ul>
+            <p>赋范空间的理论将这些实例统一在同一个几何框架下，为无穷维分析奠定了公理化基础。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>范数将"大小"概念公理化为三条性质：正定性、齐次性和三角不等式。 赋范空间 \((X, \|\cdot\|)\) 自动成为度量空间（\(d(x,y) = \|x - y\|\)）， 从而拓扑学的所有概念（开集、收敛、连续等）自动可用。</p>
+            <p>范数将"大小"概念公理化为三条性质：正定性（\(\|x\| = 0 \Leftrightarrow x = 0\)）、齐次性（\(\|\alpha x\| = |\alpha|\|x\|\)）和三角不等式（\(\|x+y\| \leq \|x\| + \|y\|\)）。这三条公理足以导出完整的拓扑结构。</p>
+            <p>赋范空间 \((X, \|\cdot\|)\) 自动成为度量空间（\(d(x,y) = \|x-y\|\)），开集、收敛、连续等拓扑概念全部可用。范数的齐次性保证拓扑是平移不变的——在任意点附近的局部结构完全相同。</p>
+            <p>不同范数可能给出不同的拓扑。两个范数"等价"意味着存在常数 \(c, C > 0\) 使得 \(c\|x\|_a \leq \|x\|_b \leq C\|x\|_a\)。有限维空间上所有范数等价——无穷维空间中此性质一般失效。</p>
+            <p>赋范空间的范畴为泛函分析提供了"舞台"：对象是赋范空间，态射是有界线性算子。整个理论围绕如何在无穷维中恢复有限维的好性质而展开。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：线性空间 \(X\) 上的范数 \(\|\cdot\|: X \to [0, \infty)\) 满足： (N1) \(\|x\| = 0 \Leftrightarrow x = 0\)（正定性） (N2) \(\|\alpha x\| = |\alpha| \|x\|\)（齐次性） (N3) \(\|x + y\| \leq \|x\| + \|y\|\)（三角不等式） <strong>典型范数</strong>： - \(\mathbb{R}^n\)：\(\|x\|_p = (\sum |x_i|^p)^{1/p}\)（\(1 \leq p \leq \infty\)） - \(C([a,b])\)：\(\|f\|_\infty = \sup_{x \in [a,b]} |f(x)|\) - \(L^p\)：\(\|f\|_p = (\int |f|^p)^{1/p}\) <strong>等价范数</strong>：\(\|\cdot\|_1 \sim \|\cdot\|_2\) 若存在 \(c, C > 0\) 使 \[c\|x\|_1 \leq \|x\|_2 \leq C\|x\|_1, \quad \forall x \in X\] <strong>有限维空间上所有范数等价</strong>（证明利用紧致性）。</p>
+            <h4>范数的公理定义</h4>
+            <p>线性空间 \(X\) 上的范数 \(\|\cdot\|: X \to [0, \infty)\) 满足：(N1) \(\|x\| = 0 \Leftrightarrow x = 0\)（正定性）；(N2) \(\|\alpha x\| = |\alpha|\|x\|\)（齐次性）；(N3) \(\|x + y\| \leq \|x\| + \|y\|\)（三角不等式）。</p>
+            <p>直觉：正定性排除退化测度，齐次性保证缩放一致，三角不等式保证"绕路不近"。</p>
+            <h4>典型范数实例</h4>
+            <p>\(\mathbb{R}^n\)：\(\|x\|_p = (\sum |x_i|^p)^{1/p}\)（\(1 \leq p \leq \infty\)）；\(C([a,b])\)：\(\|f\|_\infty = \sup |f(x)|\)；\(L^p\)：\(\|f\|_p = (\int |f|^p)^{1/p}\)。</p>
+            <p>直觉：\(\|\cdot\|_1\) 衡量"总资源"，\(\|\cdot\|_\infty\) 衡量"最坏情形"，\(\|\cdot\|_2\) 衡量"均方幅度"。</p>
+            <h4>范数等价</h4>
+            <p>\(\|\cdot\|_a \sim \|\cdot\|_b\) 若 \(\exists\, c, C > 0\) 使 \[c\|x\|_a \leq \|x\|_b \leq C\|x\|_a, \quad \forall x \in X.\]</p>
+            <p>直觉：等价范数下收敛、开集完全相同——改变的是几何（单位球形状），不变的是拓扑。</p>
+            <h4>有限维空间上所有范数等价</h4>
+            <p>证明思路：\(\|\cdot\|_b\) 在 \((X, \|\cdot\|_a)\) 的单位球面 \(S\) 上连续。有限维时 \(S\) 紧，连续函数在紧集上有正的上下界。无穷维时球面不紧，论证失败。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>赋范空间是信号处理、控制论和数值分析的基础。不同范数选择 对应不同的误差度量：\(\|\cdot\|_\infty\) 度量最坏情形误差， \(\|\cdot\|_2\) 度量均方误差。</p>
+            <p><strong>信号处理</strong>：\(\|\cdot\|_\infty\) 控制信号峰值（DAC 溢出保护），\(\|\cdot\|_2\) 对应均方误差（功率最小化），\(\|\cdot\|_1\) 推动稀疏重构（压缩感知 / LASSO）。</p>
+            <p><strong>数值分析</strong>：条件数 \(\kappa(A) = \|A\|\|A^{-1}\|\) 量化求解 \(Ax = b\) 的敏感性。范数选择影响条件数的值，但有限维范数等价保证病态/良态的定性结论不变。</p>
+            <p><strong>机器学习</strong>：正则化项 \(\|\theta\|_p\) 中 \(p\) 的选择决定模型结构——\(p=1\) 促进稀疏（特征选择），\(p=2\) 防止大权重（权重衰减）。赋范空间为这些选择提供统一的最优化框架。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(C([0,1])\) 上，证明 \(\|f\|_1 = \int_0^1 |f| dx\) 和 \(\|f\|_\infty = \sup |f|\) 不等价。 解答：取 \(f_n(x) = x^n\)。\(\|f_n\|_\infty = 1\) 对所有 \(n\)， 但 \(\|f_n\|_1 = 1/(n+1) \to 0\)。若等价，则 \(c \|f_n\|_\infty \leq \|f_n\|_1\) 对某 \(c > 0\)，矛盾。 易错点：在无穷维空间中假设所有范数等价。 只有有限维空间上范数才等价。</p>
+            <h4>例题 1</h4>
+            <p>在 \(C([0,1])\) 上，证明 \(\|f\|_1 = \int_0^1 |f|\, dx\) 和 \(\|f\|_\infty = \sup |f|\) 不等价。</p>
+            <p><strong>解</strong>：取 \(f_n(x) = x^n\)。\(\|f_n\|_\infty = 1\)，但 \(\|f_n\|_1 = 1/(n+1) \to 0\)。若等价则 \(c\|f_n\|_\infty \leq \|f_n\|_1\) 对某 \(c > 0\)，令 \(n \to \infty\) 得矛盾。</p>
+            <h4>例题 2</h4>
+            <p>证明 \((\mathbb{R}^2, \|\cdot\|_1)\) 和 \((\mathbb{R}^2, \|\cdot\|_2)\) 的范数等价，并给出最优常数。</p>
+            <p><strong>解</strong>：\(\|x\|_2 \leq \|x\|_1 \leq \sqrt{2}\|x\|_2\)（右侧由 Cauchy-Schwarz）。等号在 \(|x_1| = |x_2|\) 时达到。最优常数 \(c = 1, C = \sqrt{2}\)。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li><strong>在无穷维空间假设范数等价</strong>：仅在有限维成立。反例如 \(\|\cdot\|_1\) 与 \(\|\cdot\|_\infty\) 在 \(C([0,1])\) 上不等价。</li>
+              <li><strong>混淆赋范空间与 Banach 空间</strong>：赋范空间不要求完备。\((C([0,1]), \|\cdot\|_1)\) 是赋范空间但不是 Banach 空间。</li>
+              <li><strong>忘记验证正定性</strong>：半范数允许 \(\|x\| = 0\) 而 \(x \neq 0\)。例如 \(p(f) = |f(0)|\) 是 \(C([0,1])\) 上的半范数而非范数。</li>
+            </ol>
           </div>
         </div>
       </div>
@@ -471,28 +503,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>线性映射是线性代数的核心对象，但在无穷维空间中，线性映射 不一定连续！（有限维空间中线性 ⇒ 连续，但无穷维不行。） 有界线性算子正是"连续的线性映射"，算子范数则量化了一个 线性算子"放大向量"的最大程度。</p>
+            <p>线性映射是线性代数的核心对象，但在无穷维空间中线性映射不一定连续——这与有限维的经验截然不同。有界线性算子正是"连续的线性映射"，算子范数量化了放大效应的最大程度。</p>
+            <ul>
+              <li><strong>微分算子</strong>：\(D: C^1 \to C\)，\(Df = f'\)，在 \(\|\cdot\|_\infty\) 下无界——微分是无穷维中最典型的不连续线性算子。</li>
+              <li><strong>积分算子</strong>：Volterra 算子 \((Tf)(x) = \int_0^x f(t)\,dt\) 在 \(\|\cdot\|_\infty\) 下有界（\(\|T\| = 1\)）——积分"平滑化"控制了放大。</li>
+              <li><strong>矩阵算子</strong>：\(T_A x = Ax\) 的算子范数在 \(\ell^2\) 下等于最大奇异值 \(\sigma_1(A)\)——连接了线性代数与泛函分析。</li>
+            </ul>
+            <p>算子范数将算子空间自身变为赋范空间，使"算子的分析"（收敛、连续依赖）成为可能。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>算子范数 \(\|T\| = \sup_{\|x\| \leq 1} \|Tx\|\) 将算子空间自身 变为赋范空间。"有界 ⇔ 连续"是泛函分析中线性算子理论的出发点。</p>
+            <p>算子范数 \(\|T\| = \sup_{\|x\| \leq 1} \|Tx\|\) 将算子空间自身变为赋范空间。核心等价关系："有界 \(\Leftrightarrow\) 连续 \(\Leftrightarrow\) 在 \(0\) 处连续"是泛函分析中线性算子理论的出发点。</p>
+            <p>这一等价对非线性算子不成立——线性性是关键。它意味着一个线性算子的全局行为完全由其在零附近的行为决定。</p>
+            <p>算子范数还满足乘法次可加性 \(\|ST\| \leq \|S\|\cdot\|T\|\)，使得 \(B(X)\) 成为赋范代数——连接了分析与代数结构。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：线性算子 \(T: X \to Y\)（\(X, Y\) 赋范空间）有界，若 \[\|T\| := \sup_{\|x\| \leq 1} \|Tx\| < \infty\] 等价定义：\(\|T\| = \sup_{x \neq 0} \|Tx\|/\|x\|\) \(= \inf\{M : \|Tx\| \leq M\|x\|, \forall x\}\)。 <strong>关键定理</strong>：\(T\) 有界 \(\Leftrightarrow\) \(T\) 连续 \(\Leftrightarrow\) \(T\) 在 \(0\) 处连续。 证明 (\(\Leftarrow\))：设 \(T\) 在 \(0\) 处连续但无界，则存在 \(x_n\) 使 \(\|x_n\| = 1\) 但 \(\|Tx_n\| \geq n\)。 令 \(y_n = x_n/n \to 0\)，但 \(\|Ty_n\| = \|Tx_n\|/n \geq 1\)， 矛盾于 \(Ty_n \to T(0) = 0\)。 <strong>算子范数的乘法性</strong>：\(\|ST\| \leq \|S\| \cdot \|T\|\)。</p>
+            <h4>算子范数的定义</h4>
+            <p>线性算子 \(T: X \to Y\) 有界，若 \(\|T\| := \sup_{\|x\| \leq 1} \|Tx\| < \infty\)。等价定义：\(\|T\| = \sup_{x \neq 0} \|Tx\|/\|x\| = \inf\{M : \|Tx\| \leq M\|x\|\}\)。</p>
+            <p>直觉：\(\|T\|\) 是 \(T\) 在单位球面上的"最大拉伸因子"。</p>
+            <h4>有界等价于连续</h4>
+            <p>\(T\) 有界 \(\Leftrightarrow\) \(T\) 连续 \(\Leftrightarrow\) \(T\) 在 \(0\) 处连续。</p>
+            <p>证明（\(\Leftarrow\) 的逆否）：设 \(T\) 在 \(0\) 处连续但无界，取 \(x_n\) 使 \(\|x_n\| = 1\) 而 \(\|Tx_n\| \geq n\)。令 \(y_n = x_n/n \to 0\)，则 \(\|Ty_n\| \geq 1\)，矛盾于 \(Ty_n \to 0\)。</p>
+            <h4>算子范数的代数性质</h4>
+            <p>乘法不等式：\(\|ST\| \leq \|S\|\cdot\|T\|\)。加上恒等元 \(\|I\| = 1\)，\(B(X)\) 成为赋范代数。</p>
+            <p>直觉：复合两个线性变换，放大因子至多相乘。</p>
+            <h4>算子空间的完备性</h4>
+            <p>若 \(Y\) 是 Banach 空间，则 \(B(X, Y)\) 在算子范数下完备。特别地对偶空间 \(X^* = B(X, \mathbb{K})\) 总是 Banach 空间。</p>
+            <p>直觉：值域完备保证逐点极限算子仍有界。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>控制论</strong>：系统的传递函数 \(G(s)\) 的 \(H_\infty\) 范数 \(\|G\|_\infty = \sup_\omega \sigma_{\max}(G(j\omega))\) 量化最坏情况增益，是鲁棒控制设计的核心指标。</p>
+            <p><strong>深度学习</strong>：全连接层 \(f(x) = Wx + b\) 的 Lipschitz 常数等于 \(\sigma_{\max}(W)\)；谱归一化（spectral normalization）约束 \(\sigma_{\max} = 1\) 以稳定 GAN 训练。</p>
+            <p><strong>量子力学</strong>：可观测量由自伴算子 \(A\) 表示，其算子范数 \(\|A\|\) 等于谱的最大绝对值，物理上对应测量值的上界。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：积分算子 \(T: C([0,1]) \to C([0,1])\)，\((Tf)(x) = \int_0^x f(t) dt\)。 求 \(\|T\|\)（用 \(\|\cdot\|_\infty\) 范数）。 解答：\(\|Tf\|_\infty = \sup_x |\int_0^x f(t) dt| \leq \sup_x \int_0^x |f(t)| dt \leq \|f\|_\infty\)。故 \(\|T\| \leq 1\)。 取 \(f = 1\)，\(Tf(x) = x\)，\(\|Tf\|_\infty = 1 = \|f\|_\infty\)。 故 \(\|T\| = 1\)。 易错点：混淆"有界算子"（\(\|T\| < \infty\)）和"有界函数"。 有界算子是指算子范数有限，而不是像集有界。</p>
+            <h4>例题 1</h4>
+            <p>积分算子 \(T: C([0,1]) \to C([0,1])\)，\((Tf)(x) = \int_0^x f(t)\,dt\)。求 \(\|T\|\)（\(\|\cdot\|_\infty\)）。</p>
+            <p><strong>解</strong>：\(|Tf(x)| \leq \int_0^x |f(t)|\,dt \leq x\|f\|_\infty \leq \|f\|_\infty\)，故 \(\|T\| \leq 1\)。取 \(f \equiv 1\)：\(Tf(x) = x\)，\(\|Tf\|_\infty = 1\)。故 \(\|T\| = 1\)。</p>
+            <h4>例题 2</h4>
+            <p>右移算子 \(R: \ell^2 \to \ell^2\)，\(R(x_1,x_2,\ldots) = (0,x_1,x_2,\ldots)\)。求 \(\|R\|\)。</p>
+            <p><strong>解</strong>：\(\|Rx\|_2 = \|x\|_2\)，故 \(R\) 是等距算子，\(\|R\| = 1\)。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li><strong>混淆"有界算子"与"有界函数"</strong>：有界算子指 \(\|T\| < \infty\)，而非像集有界。</li>
+              <li><strong>忽略线性性前提</strong>：有界 \(\Leftrightarrow\) 连续仅对线性算子成立；非线性映射有界不蕴含连续。</li>
+              <li><strong>遗漏 \(Y\) 完备时 \(B(X,Y)\) 完备</strong>：若 \(Y\) 不完备，\(B(X,Y)\) 未必完备。</li>
+            </ol>
           </div>
         </div>
       </div>
@@ -519,28 +590,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在有限维赋范空间中，许多"好的"性质自动成立：所有范数等价、 空间自动完备、单位球紧致、线性算子自动连续。但这些性质在 无穷维空间中全部失效！理解有限维的特殊性是掌握泛函分析的 第一步——泛函分析的定理都在弥补无穷维带来的困难。</p>
+            <p>在有限维赋范空间中，许多"好的"性质自动成立——所有范数等价、空间完备、单位球紧致、线性算子连续。但在无穷维空间中这些性质全部失效。</p>
+            <ul>
+              <li><strong>范数等价失效</strong>：\(C([0,1])\) 上 \(\|\cdot\|_1\) 与 \(\|\cdot\|_\infty\) 不等价，导致不同的收敛概念。</li>
+              <li><strong>紧性失效</strong>：\(\ell^2\) 的单位球中标准基 \(\{e_n\}\) 两两距离 \(\sqrt{2}\)，无收敛子列。</li>
+              <li><strong>连续性失效</strong>：存在不连续的线性泛函（需选择公理构造）——有限维中不可能发生。</li>
+            </ul>
+            <p>理解有限维的特殊性是掌握泛函分析的第一步——泛函分析的定理都在弥补无穷维带来的结构性困难。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Riesz 引理刻画了有限维与无穷维的本质区别：单位球紧致 当且仅当空间有限维。这说明无穷维空间中不存在"有限覆盖"， 是许多泛函分析难题的根源。</p>
+            <p>Riesz 定理（\(\dim X < \infty \Leftrightarrow\) 闭单位球紧）刻画了有限维与无穷维的本质区别。这说明无穷维空间中有界闭集不再自动紧——紧性必须通过额外条件（等度连续、紧算子等）来恢复。</p>
+            <p>Riesz 引理提供了定量估计：对闭真子空间，总能在单位球面上找到与子空间距离接近 \(1\) 的向量。这是"无穷维空间足够大"的精确表述。</p>
+            <p>这些结果将有限维线性代数中"显然"的紧性与连续性升级为需要单独证明的非平凡定理，为泛函分析的三大定理埋下伏笔。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定理</strong>：赋范空间 \(X\) 有限维 \(\Leftrightarrow\) 闭单位球 \(\overline{B} = \{x : \|x\| \leq 1\}\) 紧致。 <strong>Riesz 引理</strong>：设 \(Y \subsetneq X\) 为闭真子空间，则对任意 \(0 < \theta < 1\)，存在 \(x_\theta \in X\) 使 \(\|x_\theta\| = 1\) 且 \(d(x_\theta, Y) \geq \theta\)。 <strong>推论</strong>：无穷维空间的闭单位球不紧致。 证明：取真闭子空间链 \(Y_1 \subsetneq Y_2 \subsetneq \cdots\)， 由 Riesz 引理取 \(x_n \in Y_{n+1}\), \(\|x_n\| = 1\), \(d(x_n, Y_n) \geq 1/2\)。对 \(m < n\)，\(x_m \in Y_n\)，故 \(\|x_n - x_m\| \geq 1/2\)，\(\{x_n\}\) 无收敛子列。 <strong>有限维空间的性质</strong>： (i) 所有范数等价 (ii) 完备（因为同构于 \(\mathbb{R}^n\)） (iii) 线性算子自动有界（连续）</p>
+            <h4>Riesz 定理</h4>
+            <p>赋范空间 \(X\) 有限维 \(\Leftrightarrow\) 闭单位球 \(\overline{B} = \{x : \|x\| \leq 1\}\) 紧致。</p>
+            <p>直觉：有限维空间"小到"每个有界序列都有聚点；无穷维空间有足够的"空间"让序列逃逸。</p>
+            <h4>Riesz 引理</h4>
+            <p>设 \(Y \subsetneq X\) 闭真子空间，则对任意 \(0 < \theta < 1\)，存在 \(x_\theta \in X\)，\(\|x_\theta\| = 1\)，\(d(x_\theta, Y) \geq \theta\)。</p>
+            <p>直觉：闭真子空间"不够厚"——总能在单位球面上找到远离它的点。</p>
+            <h4>无穷维单位球不紧：证明</h4>
+            <p>构造闭子空间链 \(Y_1 \subsetneq Y_2 \subsetneq \cdots\)，由 Riesz 引理取 \(x_n \in Y_{n+1}\)，\(\|x_n\| = 1\)，\(d(x_n, Y_n) \geq 1/2\)。则 \(\|x_n - x_m\| \geq 1/2\)（\(n \neq m\)），无收敛子列。</p>
+            <h4>有限维空间三大特殊性质</h4>
+            <p>(i) 所有范数等价；(ii) 自动完备（同构于 \(\mathbb{R}^n\)）；(iii) 线性算子自动有界。这三条在无穷维中全部失效。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>有限元法</strong>：PDE 的有限元解在有限维子空间 \(V_h \subset V\) 中求解——利用有限维的紧性与范数等价保证离散问题的适定性和收敛性。</p>
+            <p><strong>数据压缩</strong>：PCA 将高维数据投影到有限维子空间，有限维范数等价保证不同损失度量下的误差一致收敛。</p>
+            <p><strong>优化理论</strong>：有限维空间中有界闭凸集上连续函数取极值（Weierstrass），直接给出线性规划的最优解存在性。无穷维需要弱紧性替代。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：在 \(l^2\) 中，标准基 \(\{e_n\}\) 满足 \(\|e_n\| = 1\)， \(\|e_m - e_n\| = \sqrt{2}\)（\(m \neq n\)），无收敛子列。 这验证了闭单位球在 \(l^2\) 中不紧致。 易错点：试图在无穷维空间中用"有界闭集紧致"（Heine-Borel）。 Heine-Borel 仅对 \(\mathbb{R}^n\) 成立，不对无穷维空间成立。</p>
+            <h4>例题 1</h4>
+            <p>证明 \(\ell^2\) 的单位闭球不紧致。</p>
+            <p><strong>解</strong>：标准基 \(\{e_n\}\) 满足 \(\|e_n\| = 1\)，\(\|e_m - e_n\| = \sqrt{2}\)（\(m \neq n\)），无收敛子列，故闭单位球不列紧。</p>
+            <h4>例题 2</h4>
+            <p>在 \(\mathbb{R}^3\) 中，证明 \(\|\cdot\|_1\) 和 \(\|\cdot\|_\infty\) 等价并给出常数。</p>
+            <p><strong>解</strong>：\(\|x\|_\infty \leq \|x\|_1 \leq 3\|x\|_\infty\)。左侧：\(\max |x_i| \leq \sum |x_i|\)。右侧：\(\sum |x_i| \leq 3\max |x_i|\)。常数 \(c = 1, C = 3\)（\(n\) 维为 \(c = 1, C = n\)）。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li><strong>在无穷维中使用 Heine-Borel</strong>：有界闭 \(\Rightarrow\) 紧仅在 \(\mathbb{R}^n\) 成立，无穷维不行。</li>
+              <li><strong>混淆 Riesz 引理中 \(\theta\) 的范围</strong>：一般赋范空间中 \(\theta\) 不能取 \(1\)，但 Hilbert 空间可以（取正交补中单位向量）。</li>
+              <li><strong>以为有限维子空间可能不闭</strong>：有限维子空间在任何赋范空间中自动闭（范数等价性保证）。</li>
+            </ol>
           </div>
         </div>
       </div>
@@ -567,28 +675,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在有限维空间中，紧致性（有界闭 ⇔ 紧）是分析学的核心工具。 无穷维空间中有界闭集不再紧致，这迫使我们寻找新的"紧致性替代品"。 紧算子（将有界集映为列紧集）和弱拓扑紧性成为替代方案。Riesz 引理 不仅刻画了有限维，也是估计子空间距离的基本工具。</p>
+            <p>在有限维空间中紧致性（有界闭 \(\Leftrightarrow\) 紧）是分析学的核心工具。无穷维空间中有界闭集不再紧致，这迫使我们寻找替代品。</p>
+            <ul>
+              <li><strong>紧算子</strong>：将有界集映为列紧集——用算子"压缩"来弥补空间的"膨胀"。</li>
+              <li><strong>弱拓扑</strong>：Banach-Alaoglu 定理保证对偶空间单位球在弱*拓扑下紧。</li>
+              <li><strong>等度连续</strong>：Arzelà-Ascoli 定理给出 \(C(K)\) 中列紧集的完整刻画。</li>
+            </ul>
+            <p>Riesz 引理不仅刻画了维数与紧性的关系，也是估计子空间距离的基本工具——在逼近论和数值方法中反复出现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>紧性在泛函分析中被分层替代：列紧（序列有收敛子列）、全有界（可被有限个 \(\varepsilon\)-球覆盖）、弱紧（弱拓扑下紧）。在完备空间中列紧等价于全有界。</p>
+            <p>Riesz 引理的几何含义是：无穷维空间的单位球面"足够大"，使得存在与任何给定有限维子空间几乎正交的方向。这与有限维中"方向用尽"的直觉截然相反。</p>
+            <p>紧集在无穷维中必须同时是闭、有界且"足够小"——有限秩算子的像集、等度连续族的闭包都满足这个条件。紧集的刻画因空间不同而异\((C(K)\) 用 Arzelà-Ascoli，\(\ell^p\) 用尾部衰减等\)。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Riesz 引理的证明</strong>：设 \(Y \subsetneq X\) 闭，\(0 < \theta < 1\)。 取 \(x_0 \in X \setminus Y\)，令 \(d = d(x_0, Y) = \inf_{y \in Y} \|x_0 - y\| > 0\) （\(Y\) 闭故 \(d > 0\)）。取 \(y_0 \in Y\) 使 \(\|x_0 - y_0\| < d/\theta\)。 令 \(x_\theta = (x_0 - y_0)/\|x_0 - y_0\|\)，则 \(\|x_\theta\| = 1\)。 对任意 \(y \in Y\)： \[\|x_\theta - y\| = \frac{\|x_0 - y_0 - \|x_0 - y_0\| y\|}{\|x_0 - y_0\|} = \frac{\|x_0 - (y_0 + \|x_0 - y_0\| y)\|}{\|x_0 - y_0\|} \geq \frac{d}{\|x_0 - y_0\|} > \theta\] <strong>列紧集</strong>：\(A \subseteq X\) 列紧，若其中的每个序列都有收敛子列 （极限属于 \(\overline{A}\)）。列紧 + 完备 ⇒ 紧致。 <strong>无穷维空间中的紧集</strong>：必须是闭、有界且"足够小"（如有限秩 算子的像集、等度连续族等）。</p>
+            <h4>Riesz 引理的证明</h4>
+            <p>设 \(Y \subsetneq X\) 闭，\(0 < \theta < 1\)。取 \(x_0 \in X \setminus Y\)，令 \(d = d(x_0, Y) > 0\)（\(Y\) 闭保证）。取 \(y_0 \in Y\) 使 \(\|x_0 - y_0\| < d/\theta\)。令 \(x_\theta = (x_0 - y_0)/\|x_0 - y_0\|\)。</p>
+            <p>对任意 \(y \in Y\)：\(\|x_\theta - y\| = \|x_0 - (y_0 + \|x_0 - y_0\|y)\|/\|x_0 - y_0\| \geq d/\|x_0 - y_0\| > \theta\)。</p>
+            <p>直觉：在球面上找到的 \(x_\theta\) 像一个"几乎正交于 \(Y\)"的方向。</p>
+            <h4>列紧集与全有界</h4>
+            <p>\(A \subseteq X\) 列紧（每个序列有收敛子列）\(\Leftrightarrow\) \(A\) 全有界（完备空间中）。列紧 + 完备 \(\Rightarrow\) 紧致。</p>
+            <h4>无穷维空间中的紧集</h4>
+            <p>必须是闭、有界且满足额外约束。\(C(K)\) 用 Arzelà-Ascoli（一致有界 + 等度连续 \(\Leftrightarrow\) 列紧）；\(\ell^p\) 中加上尾部一致衰减条件。</p>
+            <h4>Arzelà-Ascoli 定理</h4>
+            <p>\(F \subseteq C(K)\) 列紧 \(\Leftrightarrow\) \(F\) 一致有界且等度连续。这是 \(C(K)\) 中判断紧性的主力工具。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Arzelà-Ascoli 定理给出 \(C([a,b])\) 中列紧集的刻画： 一致有界 + 等度连续 ⇔ 列紧。</p>
+            <p><strong>逼近论</strong>：Arzelà-Ascoli 定理保证等度连续的逼近族（如 Bernstein 多项式）在 \(C([a,b])\) 中列紧——每个子序列有一致收敛子列。</p>
+            <p><strong>PDE 存在性</strong>：椭圆型 PDE 的弱解存在性证明中，通过先验估计得到解序列的有界性，再用紧嵌入（Rellich-Kondrachov）提取收敛子列。</p>
+            <p><strong>数值分析</strong>：有限元方法的误差分析中，投影到有限维子空间的逼近性质本质上依赖 Riesz 引理给出的子空间距离估计。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(l^1\) 中的集合 \(A = \{x : \sum n|x_n| \leq 1\}\) 紧致。 解答：A 闭且有界（\(\|x\|_1 \leq 1\)）。对任意 \(\varepsilon > 0\)， 取 \(N\) 使 \(1/N < \varepsilon\)。对 \(x \in A\)， \(\sum_{n > N} |x_n| \leq (1/N) \sum n|x_n| \leq 1/N < \varepsilon\)。 故 \(A\) 可被有限维集 \(\varepsilon\)-逼近，满足全有界性。 易错点：误以为 Banach 空间中有界闭集自动紧致。 有限维才有这个性质；无穷维需要额外条件。</p>
+            <h4>例题 1</h4>
+            <p>证明 \(\ell^1\) 中 \(A = \{x : \sum n|x_n| \leq 1\}\) 紧致。</p>
+            <p><strong>解</strong>：\(A\) 有界（\(\|x\|_1 \leq 1\)）。对任意 \(\varepsilon > 0\)，取 \(N\) 使 \(1/N < \varepsilon\)。对 \(x \in A\)，\(\sum_{n>N} |x_n| \leq (1/N)\sum n|x_n| \leq 1/N < \varepsilon\)，故 \(A\) 可被有限维集 \(\varepsilon\)-逼近（全有界）。加上闭性和 \(\ell^1\) 完备性得紧致。</p>
+            <h4>例题 2</h4>
+            <p>\(K = \{f \in C([0,1]) : \|f\|_\infty \leq 1,\; |f(x) - f(y)| \leq |x-y|\}\)。证明 \(K\) 紧。</p>
+            <p><strong>解</strong>：一致有界（\(\|f\|_\infty \leq 1\)）且等度连续（Lipschitz 常数 \(\leq 1\)）。Arzelà-Ascoli 给出列紧。\(K\) 闭（极限保持 Lipschitz），故紧。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li><strong>误以为 Banach 空间中有界闭集紧</strong>：仅有限维有此性质；无穷维必须验证额外条件。</li>
+              <li><strong>混淆列紧与紧</strong>：在度量空间中列紧等价于全有界 + 完备 = 紧，但一般拓扑空间中可能不等价。</li>
+              <li><strong>忘记 Arzelà-Ascoli 需要闭性</strong>：等度连续 + 一致有界仅给出列紧（相对紧），需要闭性才得到紧。</li>
+            </ol>
           </div>
         </div>
       </div>

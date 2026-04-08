@@ -447,6 +447,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>操作模式的核心抽象是：将块加密 \(E_k\) 视为黑盒组件，通过不同的"连接方式"将其扩展到任意长消息。每种模式本质上定义了一种<strong>从块操作到流操作的提升策略</strong>。</p>
+            <p>分类维度有两条：一是密文块之间是否存在依赖关系（无依赖→可并行，如 ECB/CTR；有依赖→需串行，如 CBC）；二是块加密是否用于加密本身还是仅用于生成密钥流（CTR 模式中 \(E_k\) 只加密计数器，明文通过 XOR 处理，实质上是流加密）。</p>
+            <p>现代趋势是<strong>认证加密（AEAD）</strong>：同时提供机密性和完整性。GCM 将 CTR 加密与 GHASH 多项式认证结合，一次通过完成加密+认证。核心层次链：<strong>ECB（不安全）⊂ CBC/CTR（CPA 安全）⊂ GCM/CCM（CCA 安全 + 完整性）</strong>。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">

@@ -394,35 +394,60 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>实函数的可微性要求极限只从左右两个方向趋近。但复数平面是 二维的——极限可以从任意方向趋近。这一更强的条件产生了惊人的 后果：复可微一次 ⇒ 无穷次可微 + 解析，这在实分析中完全不成立。 Cauchy-Riemann 方程将复可微条件翻译为实二维语言。</p>
+            <p>实函数的可微性要求极限只从左右两个方向趋近，但复数平面是二维的——极限可从任意方向趋近。这一看似微小的差异产生了截然不同的数学世界。</p>
+            <ul>
+              <li>实分析中 \(C^\infty\) 不蕴含解析：\(e^{-1/x^2}\)（补充 \(f(0)=0\)）在原点各阶导数为零，Taylor 级数恒零但函数非零。</li>
+              <li>复可微一次 ⇒ 无穷次可微 + 解析：全纯函数自动展为收敛幂级数——这在实分析中不可能。</li>
+              <li>CR 方程 \(u_x = v_y,\; u_y = -v_x\) 将复可微翻译为实偏导条件，同时蕴含 Laplace 方程 \(\Delta u = 0\)。</li>
+            </ul>
+            <p>正是复可微要求"所有方向一致"的严苛性，赋予了全纯函数惊人的刚性——一次可微的微弱假设蕴含无穷正则性。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>复可微性统一了实部和虚部的耦合关系。CR 方程 \(u_x = v_y\), \(u_y = -v_x\) 是调和方程的特殊形式， 将复分析与 PDE（调和函数论）连接起来。</p>
+            <p>复可微性统一了实部 \(u\) 和虚部 \(v\) 的耦合关系：两个实函数并非独立，而是通过 CR 方程 \(u_x = v_y,\; u_y = -v_x\) 严格绑定。</p>
+            <p>这种绑定有深刻的 PDE 含义：对 CR 方程交叉求导立即得到 Laplace 方程 \(\Delta u = 0\)、\(\Delta v = 0\)。因此全纯函数理论与调和函数论（位势论）天然相连。</p>
+            <p>从代数视角看，CR 方程等价于 \(\partial f / \partial \bar{z} = 0\)——函数仅依赖于 \(z\) 而不依赖于 \(\bar{z}\)。这一 Wirtinger 导数表述将全纯性压缩为单一条件。</p>
+            <p>在几何层面，\(f'(z_0) \neq 0\) 的全纯映射在 \(z_0\) 处保角且保向（共形）——无穷小圆映为无穷小圆，复可微的分析条件具有纯粹的几何意义。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>复导数</strong>：\(f'(z_0) = \lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h}\) （\(h \in \mathbb{C}\) 从任意方向趋于 0）。 <strong>Cauchy-Riemann 方程</strong>：设 \(f = u + iv\)，\(z = x + iy\)。 \(f\) 在 \(z_0\) 复可微 \(\Rightarrow\) \[\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \quad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}\] 证明：令 \(h = t\)（实方向）得 \(f' = u_x + iv_x\)； 令 \(h = it\) 得 \(f' = v_y - iu_y\)。两者相等即 CR 方程。 反之，CR 方程 + 偏导数连续 ⇒ 复可微。 <strong>推论</strong>：\(u\) 和 \(v\) 都是调和函数： \(\Delta u = u_{xx} + u_{yy} = 0\)，\(\Delta v = 0\)。 （由 CR 方程：\(u_{xx} = v_{yx} = -u_{yy}\)。）</p>
+            <h4>复导数的定义</h4>
+            <p>\(f'(z_0) = \lim_{h \to 0} \frac{f(z_0 + h) - f(z_0)}{h}\)，其中 \(h \in \mathbb{C}\) 从任意方向趋于 \(0\)。关键在于极限不依赖于 \(h\) 的方向——这比实导数苛刻得多。</p>
+            <h4>推导 Cauchy-Riemann 方程</h4>
+            <p>设 \(f = u + iv\)，\(z = x + iy\)。令 \(h = t\)（实方向）得 \(f' = u_x + iv_x\)；令 \(h = it\)（虚方向）得 \(f' = v_y - iu_y\)。两式相等要求 \[\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y}, \quad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}\] 直觉：水平和垂直方向的导数必须"兼容"，把实部与虚部锁成一对。</p>
+            <h4>充分条件与逆定理</h4>
+            <p>反之，CR 方程成立且偏导数连续（\(C^1\)）⇒ \(f\) 复可微。即 CR + 正则性 ⇔ 全纯——这是实测验全纯性的标准工具。</p>
+            <h4>调和性推论</h4>
+            <p>对 CR 交叉求导：\(u_{xx} = v_{yx}\)，\(u_{yy} = -v_{xy}\)。若偏导 \(C^2\)，混合偏导相等得 \(\Delta u = u_{xx} + u_{yy} = 0\)，同理 \(\Delta v = 0\)。全纯函数的实部、虚部自动是调和函数。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>流体力学中，不可压缩无旋流的速度势 \(\phi\) 和流函数 \(\psi\) 恰好满足 CR 方程——复势 \(f = \phi + i\psi\) 是全纯的。</p>
+            <p><strong>流体力学</strong>：二维不可压缩无旋流的速度势 \(\phi\) 和流函数 \(\psi\) 满足 CR 方程——复势 \(f = \phi + i\psi\) 全纯，等势线与流线正交。</p>
+            <p><strong>静电学</strong>：二维静电场中电位 \(u\) 满足 \(\Delta u = 0\)，其调和共轭 \(v\) 给出电力线；\(f = u + iv\) 同时描述电位与电力线。</p>
+            <p><strong>热传导</strong>：稳态温度分布满足 \(\Delta T = 0\)（调和），CR 方程将温度场与热流线耦合为全纯函数。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：验证 \(f(z) = z^2 = (x^2 - y^2) + i(2xy)\) 满足 CR 方程。 解答：\(u = x^2 - y^2\), \(v = 2xy\)。 \(u_x = 2x = v_y\)，\(u_y = -2y = -v_x\)。✓ \(f'(z) = u_x + iv_x = 2x + i(2y) = 2(x + iy) = 2z\)。✓ 易错点：\(f(z) = \bar{z} = x - iy\) 不满足 CR（\(u_x = 1 \neq v_y = -1\)）， 故 \(\bar{z}\) 不全纯！共轭运算破坏全纯性。</p>
+            <p><strong>例题 1</strong>：验证 \(f(z) = z^2 = (x^2 - y^2) + i(2xy)\) 满足 CR 方程。<br>解答：\(u = x^2 - y^2\)，\(v = 2xy\)。\(u_x = 2x = v_y\) ✓，\(u_y = -2y = -v_x\) ✓。导数 \(f'(z) = u_x + iv_x = 2x + 2iy = 2z\)。</p>
+            <p><strong>例题 2</strong>：判断 \(f(z) = e^{\bar{z}}\) 是否全纯。<br>解答：\(e^{\bar{z}} = e^{x - iy} = e^x(\cos y - i\sin y)\)。\(u = e^x\cos y\)，\(v = -e^x\sin y\)。\(u_x = e^x\cos y\)，\(v_y = -e^x\cos y\)。\(u_x \neq v_y\)，处处不全纯。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>\(\bar{z}\) 实可微但不全纯（\(u_x = 1 \neq v_y = -1\)）——共轭运算破坏全纯性。</li>
+              <li>混淆 CR 的"必要"与"充分"：CR 成立但偏导不连续时 \(f\) 可能不全纯，需 \(C^1\) 条件。</li>
+              <li>把 \(|z|^2 = x^2 + y^2\) 当全纯：\(v = 0\)，CR 要求 \(u_x = u_y = 0\)，仅 \(z = 0\) 满足。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -455,28 +480,59 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>复指数函数、三角函数、对数函数在复数域上的行为远比实数域丰富。 \(e^z\) 变成周期函数（虚方向周期 \(2\pi i\)）、\(\ln z\) 变成多值函数、 \(z^a\) 的定义需要选择"分支"。理解这些初等全纯函数是复分析的基础。</p>
+            <p>复指数、三角、对数函数在实数域的行为单纯，但延拓到复数域后呈现全新面貌。理解这些初等全纯函数的"异域"行为，是一切后续理论的基砖。</p>
+            <ul>
+              <li>\(e^z\) 变成周期函数——虚方向周期 \(2\pi i\)；\(|e^z| = e^x\) 不依赖于 \(y\)，在虚轴方向反复振荡。</li>
+              <li>\(\ln z\) 变成多值函数：\(\log z = \ln|z| + i\arg z\)，绕原点一圈辐角变化 \(2\pi\)，需要"分支"概念。</li>
+              <li>\(z^a\)（\(a \notin \mathbb{Z}\)）的定义 \(z^a = e^{a\log z}\) 继承了对数的多值性，\(i^i = e^{-\pi/2 - 2k\pi}\) 竟是实数。</li>
+            </ul>
+            <p>这些初等函数的多值性和周期性是 Riemann 面理论的原始动力，也是后续 Laurent 展开和留数计算的必备工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从 \(\mathbb{R}\) 到 \(\mathbb{C}\) 的延拓不只是换个定义域：函数的拓扑性质根本改变。\(e^z\) 从单调变为周期，\(\log z\) 从单值变为多值——这些现象由复平面的拓扑（非单连通性）驱动。</p>
+            <p>分支切割是处理多值性的标准工具：沿负实轴"切开"平面，在切割面上选取连续的辐角分支 \(\text{Arg}\, z \in (-\pi, \pi]\)。切割的选择不唯一，但必须保证函数在切割面上单值全纯。</p>
+            <p>Liouville 定理（有界整函数 = 常数）是全纯函数"全局刚性"的终极体现：\(e^z\) 不有界故逃脱，但任何有界整函数必退化为常数。由此直接推出代数基本定理。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>复指数</strong>：\(e^z = e^x(\cos y + i\sin y)\)（Euler 公式）。 性质：\(e^{z+w} = e^z e^w\)，\(|e^z| = e^x\)，周期 \(2\pi i\)。 <strong>复对数</strong>：\(\log z = \ln|z| + i\arg z\)（多值！）。 主值：\(\text{Log}\, z = \ln|z| + i\text{Arg}\, z\)（\(\text{Arg} \in (-\pi, \pi]\)）。 \(\text{Log}\) 在负实轴上不连续——<strong>分支切割</strong>。 <strong>复幂</strong>：\(z^a = e^{a \log z}\)（一般多值）。 例：\(i^i = e^{i \log i} = e^{i(i\pi/2 + 2k\pi i)} = e^{-\pi/2 - 2k\pi}\)（实数！）。 <strong>Liouville 定理</strong>：有界整函数为常数。 证明（预览，用 Cauchy 估计）：\(|f'(z)| \leq M/R \to 0\)（\(R \to \infty\)）， 故 \(f' = 0\)。</p>
+            <h4>复指数函数</h4>
+            <p>\(e^z = e^x(\cos y + i\sin y)\)（Euler 公式）。性质：\(e^{z+w} = e^z e^w\)，\(|e^z| = e^x\)，周期 \(2\pi i\)。\(e^z\) 处处全纯且 \((e^z)' = e^z\)。直觉：\(e^{iy}\) 在单位圆上旋转，\(e^x\) 控制模长。</p>
+            <h4>复对数与分支</h4>
+            <p>\(\log z = \ln|z| + i\arg z\)（多值！）。主值 \(\text{Log}\, z = \ln|z| + i\text{Arg}\, z\)，\(\text{Arg} \in (-\pi, \pi]\)。\(\text{Log}\) 在负实轴不连续——分支切割。直觉：绕原点一圈，辐角增加 \(2\pi\)，对数值"跳"了 \(2\pi i\)。</p>
+            <h4>复幂函数</h4>
+            <p>\(z^a = e^{a\log z}\)（一般多值）。例：\(i^i = e^{i\log i} = e^{i(i\pi/2 + 2k\pi i)} = e^{-\pi/2 - 2k\pi}\)——纯虚数的纯虚数次幂竟是实数！直觉：复幂继承了对数的多值性。</p>
+            <h4>Liouville 定理预览</h4>
+            <p>有界整函数为常数。证明用 Cauchy 估计：\(|f'(z)| \leq M/R \to 0\)（\(R \to \infty\)），故 \(f' = 0\)。直觉：在整个 \(\mathbb{C}\) 上不增长——只能退化为常数。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>电气工程中，交流电路分析用 \(e^{i\omega t}\) 表示信号， 阻抗 \(Z = R + iX\) 是全纯函数理论的直接应用。</p>
+            <p><strong>电气工程</strong>：交流电路分析用 \(e^{i\omega t}\) 表示信号，阻抗 \(Z = R + iX\) 是全纯函数理论的直接应用。</p>
+            <p><strong>信号处理</strong>：Fourier 变换的核 \(e^{-i\omega t}\) 是复指数；信号的频域表示依赖于 \(e^z\) 的周期性和正交性。</p>
+            <p><strong>量子力学</strong>：波函数 \(\psi = Ae^{i(kx - \omega t)}\) 是复指数，\(|\psi|^2\) 给出概率密度；相位信息由复数编码。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(\log(-1)\) 的所有值。 解答：\(\log(-1) = \ln|-1| + i\arg(-1) = 0 + i(\pi + 2k\pi) = i(2k+1)\pi\)（\(k \in \mathbb{Z}\)）。 主值 \(\text{Log}(-1) = i\pi\)。 易错点：把 \(\log(z_1 z_2) = \log z_1 + \log z_2\) 当作恒等式。 多值函数下等号变为集合相等，取主值后不一定成立。</p>
+            <p><strong>例题 1</strong>：求 \(\log(-1)\) 的所有值。<br>解答：\(\log(-1) = \ln|-1| + i\arg(-1) = 0 + i(\pi + 2k\pi) = i(2k+1)\pi\)（\(k \in \mathbb{Z}\)）。主值 \(\text{Log}(-1) = i\pi\)。</p>
+            <p><strong>例题 2</strong>：计算 \((-1)^{1/3}\) 的所有值。<br>解答：\((-1)^{1/3} = e^{\frac{1}{3}\log(-1)} = e^{i(2k+1)\pi/3}\)。\(k = 0\)：\(e^{i\pi/3} = \frac{1}{2} + \frac{\sqrt{3}}{2}i\)；\(k = 1\)：\(e^{i\pi} = -1\)；\(k = 2\)：\(e^{i5\pi/3} = \frac{1}{2} - \frac{\sqrt{3}}{2}i\)。共三个值。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>把 \(\log(z_1 z_2) = \log z_1 + \log z_2\) 当恒等式——多值函数下等号是集合相等，取主值后不一定成立。</li>
+              <li>忘记 \(e^z = 0\) 无解——\(e^z\) 永不为零，这是其最重要的性质之一。</li>
+              <li>混淆 \(\text{Log}\) 和 \(\log\)：前者是主值（单值），后者是多值；\(\text{Log}(z^2) \neq 2\text{Log}\, z\)。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -509,28 +565,59 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>实分析中，无穷次可微不代表等于 Taylor 级数（如 \(e^{-1/x^2}\)）。 但复分析中，全纯一次 ⇒ 可以展开为收敛幂级数！这一"全纯 = 解析" 的等价性是复分析最核心的奇迹之一——复可微性远比实可微性强。</p>
+            <p>实分析中无穷次可微不等于等于 Taylor 级数——\(e^{-1/x^2}\) 的 Taylor 级数在原点恒零但函数非零。复分析中的奇迹在于全纯 = 解析，它们完全等价。</p>
+            <ul>
+              <li>全纯函数可以展为收敛幂级数：\(f(z) = \sum a_n(z-z_0)^n\)，收敛半径 \(R\) = 到最近奇点的距离。</li>
+              <li>收敛半径有精确公式（Hadamard）：\(1/R = \limsup |a_n|^{1/n}\)。</li>
+              <li>\(1/(1+x^2)\) 在实轴上处处光滑，但 Taylor 级数收敛半径仅为 1——因为复平面上 \(z = \pm i\) 是奇点。</li>
+            </ul>
+            <p>"全纯 = 解析"这一等价性，使得幂级数成为函数的"完全坐标"——系数序列唯一决定了函数的一切行为。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>全纯函数在收敛圆盘内完全由系数决定——幂级数提供了"无穷维坐标"。 收敛半径由最近奇点的距离决定。</p>
+            <p>全纯函数在收敛圆盘内完全由系数序列决定——幂级数提供了"无穷维坐标"。这是函数空间中一种强大的表示方法。</p>
+            <p>收敛半径由最近奇点的距离决定——这一事实揭示了实数轴上不可见的复奇点如何"暗地"控制 Taylor 级数的收敛性。</p>
+            <p>逐项可微性意味着全纯函数无穷次可微，且各阶导数的 Taylor 级数收敛半径不变——一次可微自动蕴含无穷平滑。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>幂级数</strong>：\(f(z) = \sum_{n=0}^\infty a_n (z - z_0)^n\)。 <strong>收敛半径</strong>：\(R = 1/\limsup |a_n|^{1/n}\)（Hadamard 公式）。 级数在 \(|z - z_0| < R\) 内绝对一致收敛（紧子集上）， 在 \(|z - z_0| > R\) 发散。 <strong>逐项求导</strong>：\(f'(z) = \sum n a_n (z - z_0)^{n-1}\)， 收敛半径不变。全纯函数无穷次可微。 <strong>核心定理（后证）</strong>：全纯 ⇔ 解析（局部可展为幂级数）。 每个全纯函数在其定义域内每点可展开 Taylor 级数： \[f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!}(z - z_0)^n\] 收敛半径 = \(z_0\) 到最近奇点的距离。</p>
+            <h4>幂级数的定义与收敛</h4>
+            <p>\(f(z) = \sum_{n=0}^\infty a_n (z - z_0)^n\)。收敛半径 \(R = 1/\limsup |a_n|^{1/n}\)（Hadamard 公式）。级数在 \(|z - z_0| < R\) 内绝对一致收敛（紧子集上），在 \(|z - z_0| > R\) 发散。直觉：收敛区域是圆盘——复分析特有的几何。</p>
+            <h4>逐项求导定理</h4>
+            <p>\(f'(z) = \sum n a_n (z - z_0)^{n-1}\)，收敛半径不变。反复求导得全纯函数无穷次可微。直觉：一次可微自动蕴含无穷平滑——复可微从一步"杠杆"出全部正则性。</p>
+            <h4>核心等价：全纯 ⇔ 解析</h4>
+            <p>每个全纯函数在其定义域内每点可展开 Taylor 级数：\[f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(z_0)}{n!}(z - z_0)^n\] 收敛半径 = \(z_0\) 到最近奇点的距离。直觉：Taylor 级数"看到了"复平面上所有奇点，包括实轴上看不见的。</p>
+            <h4>收敛半径的几何意义</h4>
+            <p>例：\(1/(1+x^2)\) 在实轴上处处 \(C^\infty\)，但在 \(x_0 = 0\) 的 Taylor 展开收敛半径仅为 1——被"隐藏"在复平面中的奇点 \(z = \pm i\) 阻止。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>数值计算</strong>：函数的 Taylor 展开是数值库（如 \(\sin, \cos, \exp\)）实现的核心；收敛半径决定了多项式逼近的有效范围。</p>
+            <p><strong>物理学</strong>：量子力学微扰理论将哈密顿量展为幂级数 \(H = H_0 + \lambda V\)，收敛半径对应微扰参数 \(\lambda\) 的有效范围。</p>
+            <p><strong>组合数学</strong>：生成函数 \(\sum a_n z^n\) 用幂级数编码计数序列，收敛半径给出序列增长率的渐近信息。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(f(z) = 1/(1-z)\)。求以 \(z_0 = 0\) 为中心的 Taylor 级数和收敛半径。 解答：\(f(z) = \sum_{n=0}^\infty z^n\)，\(R = 1\)。 最近奇点 \(z = 1\)，\(|z_0 - 1| = 1 = R\)。✓ 以 \(z_0 = i\) 为中心呢？\(f(z) = \frac{1}{1-i-(z-i)} = \frac{1}{1-i} \cdot \frac{1}{1 - (z-i)/(1-i)} = \sum \frac{(z-i)^n}{(1-i)^{n+1}}\)。 \(R = |1-i| = \sqrt{2}\)（到奇点 \(z=1\) 的距离）。✓ 易错点：实轴上无奇点不意味实 Taylor 级数收敛半径无穷。 \(1/(1+x^2)\) 实轴处处光滑，但 Taylor 级数在 \(|x| > 1\) 发散—— 因为复奇点 \(z = \pm i\) 距原点为 1。</p>
+            <p><strong>例题 1</strong>：\(f(z) = 1/(1-z)\) 在 \(z_0 = 0\) 展开。<br>解答：\(f(z) = \sum_{n=0}^\infty z^n\)，\(R = 1\)。最近奇点 \(z = 1\)，\(|z_0 - 1| = 1 = R\) ✓。</p>
+            <p><strong>例题 2</strong>：\(f(z) = 1/(1-z)\) 以 \(z_0 = i\) 为中心展开的收敛半径。<br>解答：\(f(z) = \frac{1}{1-i-(z-i)} = \frac{1}{1-i}\sum \frac{(z-i)^n}{(1-i)^n}\)。\(R = |1-i| = \sqrt{2}\)（到奇点 \(z=1\) 的距离）✓。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>以为展开中心不同但收敛半径总相同——\(R\) 取决于展开中心到最近奇点的距离，随 \(z_0\) 变化。</li>
+              <li>实轴上无奇点 ≠ 实 Taylor 级数收敛半径无穷。如 \(1/(1+x^2)\) 的复奇点 \(\pm i\) 限制了 \(R = 1\)。</li>
+              <li>忘记收敛圆边界行为不确定——\(|z - z_0| = R\) 上可能收敛也可能发散，需逐点讨论。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -557,35 +644,59 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>全纯函数有惊人的"刚性"：如果两个全纯函数在一个有聚点的集合上 相等，则它们在整个连通区域上相等（唯一性定理/零点孤立性）。 这意味着全纯函数完全由"很少的信息"决定——这在实分析中 不可能（光滑函数可以在任意开集外为 0）。</p>
+            <p>全纯函数有惊人的"刚性"——它的值被"少量信息"完全锁定。如果两个全纯函数在很小的集合上相等，它们就必须处处相等。</p>
+            <ul>
+              <li>唯一性定理：两个全纯函数在有聚点的集合上相等 ⇒ 在整个连通域上相等。</li>
+              <li>零点孤立性：非常数全纯函数的零点不能有聚点——与实分析中"可在任意开集外为零"的光滑函数截然不同。</li>
+              <li>最大模原理：\(|f|\) 在区域内部不取最大值——非常数全纯函数"无法在内部达到peak"。</li>
+            </ul>
+            <p>这种刚性是解析延拓、辐角原理和复几何的理论基石——全纯函数由局部信息唯一确定全局行为。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>零点孤立性是"全纯 = 解析"的直接推论——幂级数不能在非 孤立零点处非零。全纯函数的值在区域内"全局锁定"。</p>
+            <p>零点孤立性是"全纯 = 解析"的直接推论：幂级数在非孤立零点处必须恒为零。因此全纯函数的值在区域内"全局锁定"。</p>
+            <p>这一刚性在代数层面表现为：全纯函数环是整环（无零因子），零点个数受到严格限制。</p>
+            <p>最大模原理可视为调和函数均值性质的推论：调和函数在中心点取周围的平均值，故不能在内部取到严格最大。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>零点孤立性定理</strong>：设 \(f\) 在区域 \(D\) 上全纯且 \(f \not\equiv 0\)。 则 \(f\) 的零点集 \(\{z : f(z) = 0\}\) 没有聚点在 \(D\) 内。 <strong>证明</strong>：设 \(f(z_0) = 0\)。Taylor 展开 \(f(z) = (z - z_0)^m g(z)\)（\(g(z_0) \neq 0\), \(m \geq 1\)）。 \(g\) 连续故在 \(z_0\) 附近 \(g \neq 0\)，故 \(z_0\) 是孤立零点。 <strong>唯一性定理</strong>：设 \(f, g\) 在连通区域 \(D\) 上全纯，且 \(f = g\) 在 具有 \(D\) 内聚点的子集 \(S\) 上。则 \(f \equiv g\) 在 \(D\) 上。 <strong>最大模原理</strong>：非常数全纯函数 \(|f|\) 在区域内部不取最大值。 \[\max_{z \in \overline{D}} |f(z)| = \max_{z \in \partial D} |f(z)|\]</p>
+            <h4>零点孤立性定理</h4>
+            <p>设 \(f\) 在区域 \(D\) 上全纯且 \(f \not\equiv 0\)。则 \(f\) 的零点集无聚点在 \(D\) 内。证明：Taylor 展开 \(f(z) = (z - z_0)^m g(z)\)（\(g(z_0) \neq 0\)），\(g\) 连续故 \(z_0\) 附近 \(g \neq 0\)，\(z_0\) 是孤立零点。直觉：幂级数的首非零项控制了附近的行为。</p>
+            <h4>唯一性定理</h4>
+            <p>设 \(f, g\) 在连通区域 \(D\) 上全纯，且 \(f = g\) 在有 \(D\) 内聚点的子集 \(S\) 上。则 \(f \equiv g\)。直觉：\(f - g\) 的零点有聚点 ⇒ \(f - g \equiv 0\)。</p>
+            <h4>最大模原理</h4>
+            <p>非常数全纯函数 \(|f|\) 在区域内部不取最大值：\[\max_{z \in \overline{D}} |f(z)| = \max_{z \in \partial D} |f(z)|\] 直觉：全纯映射是开映射——像包含开集，内部点的像不能是边界极值。</p>
+            <h4>开映射定理</h4>
+            <p>非常数全纯函数将开集映为开集。推论：全纯函数不能在内部取实数极值（否则 \(f(D)\) 不是开集）。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>解析延拓的理论基础：全纯函数从小区域"唯一"延拓到大区域。</p>
+            <p><strong>解析延拓</strong>：唯一性定理保证全纯函数从小区域"唯一"延拓到大区域，是复分析最深刻的应用之一。</p>
+            <p><strong>控制理论</strong>：传递函数的零极点分布（由唯一性定理约束）决定系统稳定性；最大模原理用于 \(H^\infty\) 控制设计。</p>
+            <p><strong>密码学</strong>：椭圆曲线上的有理函数满足零点孤立性，其零极点结构是椭圆曲线密码系统安全性的数学基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：若 \(f\) 在单位圆盘上全纯，且 \(f(1/n) = 0\) 对所有 \(n \geq 1\)， 证明 \(f \equiv 0\)。 解答：\(\{1/n\}\) 的聚点 \(0 \in D\)（单位圆盘）。 由唯一性定理 \(f \equiv 0\)。 易错点：零点集可以是无穷的（如 \(\sin z\) 在 \(z = n\pi\) 处为零）， 但不能有聚点在定义域内。\(\sin z\) 的零点 \(n\pi \to \infty\)， 聚点不在任何有界区域内。</p>
+            <p><strong>例题 1</strong>：若 \(f\) 在单位圆盘上全纯，且 \(f(1/n) = 0\) 对所有 \(n \geq 1\)，证明 \(f \equiv 0\)。<br>解答：\(\{1/n\}\) 的聚点 \(0 \in D\)（单位圆盘）。由唯一性定理 \(f \equiv 0\)。</p>
+            <p><strong>例题 2</strong>：\(f\) 在单位圆盘全纯有界，\(|f| \leq M\)。证明 \(|f(z)| \leq M\) 在内部成立且等号只在 \(f\) 为常数时取到。<br>解答：最大模原理直接给出 \(\max_{\overline{D}} |f| = \max_{\partial D} |f| \leq M\)。若内部某点取 \(M\)，则 \(f\) 为常数。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>零点集可以是无穷的（如 \(\sin z\) 在 \(z = n\pi\)），但不能有聚点在定义域内——\(n\pi \to \infty\) 的聚点不在有界域内。</li>
+              <li>混淆"零点孤立"与"有限个零点"——无穷多孤立零点是允许的。</li>
+              <li>最大模原理仅对非常数全纯函数成立——常数函数处处取最大值，不违反定理。</li>
+            </ul>
           </div>
         </div>
       </div>

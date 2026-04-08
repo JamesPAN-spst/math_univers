@@ -459,6 +459,13 @@
             <p><strong>第 3 步</strong>：特征向量。\(\lambda_1 = -1\)：\(\mathbf{v}_1 = (1, -1)^T\)。\(\lambda_2 = -2\)：\(\mathbf{v}_2 = (1, -2)^T\)。</p>
             <p><strong>基解矩阵</strong>：</p>
             \[\Phi(t) = \begin{pmatrix} e^{-t} & e^{-2t} \\ -e^{-t} & -2e^{-2t} \end{pmatrix}\]
+
+            <h4>例题 2：求解初值问题</h4>
+            <p>求上述系统在 \(\mathbf{X}(0) = (1,0)^T\) 下的解。</p>
+            <p><strong>第 1 步</strong>：将初值分解为特征向量的线性组合：\(c_1(1,-1)^T + c_2(1,-2)^T = (1,0)^T\)，解得 \(c_1 = 2\)，\(c_2 = -1\)。</p>
+            <p><strong>第 2 步</strong>：\(\mathbf{X}(t) = 2\begin{pmatrix} 1 \\ -1 \end{pmatrix}e^{-t} - \begin{pmatrix} 1 \\ -2 \end{pmatrix}e^{-2t} = \begin{pmatrix} 2e^{-t} - e^{-2t} \\ -2e^{-t} + 2e^{-2t} \end{pmatrix}\)。</p>
+            <p><strong>验证</strong>：\(\mathbf{X}(0) = (2-1, -2+2)^T = (1, 0)^T\)。✓</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 改写为一阶系统时，伴侣矩阵最后一行的符号弄反。标准形 \(y'' + 3y' + 2y = 0\) 对应 \(x_2' = -2x_1 - 3x_2\)（系数取负号）。</li>
@@ -558,6 +565,13 @@
             <p><strong>第 1 步</strong>：计算 \(A\) 的幂。\(A^2 = \begin{pmatrix} 0 & 0 \\ 0 & 0 \end{pmatrix} = 0\)。</p>
             <p><strong>第 2 步</strong>：级数截断。\(e^{tA} = I + tA + 0 + 0 + \cdots = \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}\)。</p>
             <p><strong>验证</strong>：\(\frac{d}{dt}e^{tA} = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} = A\)，而 \(Ae^{tA} = A\)。✓</p>
+
+            <h4>例题 2：可对角化矩阵的指数</h4>
+            <p>计算 \(e^{tA}\)，\(A = \begin{pmatrix} -1 & 2 \\ 0 & 1 \end{pmatrix}\)。</p>
+            <p><strong>第 1 步</strong>：特征值 \(\lambda_1 = -1\)，\(\lambda_2 = 1\)；特征向量 \(\mathbf{v}_1 = (1,0)^T\)，\(\mathbf{v}_2 = (1,1)^T\)。</p>
+            <p><strong>第 2 步</strong>：\(P = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)，\(P^{-1} = \begin{pmatrix} 1 & -1 \\ 0 & 1 \end{pmatrix}\)。</p>
+            <p><strong>第 3 步</strong>：\(e^{tA} = P\begin{pmatrix} e^{-t} & 0 \\ 0 & e^t \end{pmatrix}P^{-1} = \begin{pmatrix} e^{-t} & e^t - e^{-t} \\ 0 & e^t \end{pmatrix}\)。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 对不可交换的矩阵使用 \(e^{A+B} = e^Ae^B\)。这是最常见的错误——必须先检查 \([A, B] = 0\)。</li>
@@ -653,6 +667,13 @@
             <p><strong>第 2 步</strong>：计算。</p>
             \[e^{tA} = e^t \cdot e^{tN} = e^t(I + tN) = e^t \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix}\]
             <p><strong>验证</strong>：\(\frac{d}{dt}\begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix} = \begin{pmatrix} e^t & e^t + te^t \\ 0 & e^t \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} e^t & te^t \\ 0 & e^t \end{pmatrix}\)。✓</p>
+
+            <h4>例题 2：Cayley-Hamilton 方法</h4>
+            <p>用 Cayley-Hamilton 定理计算 \(e^{tA}\)，\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)。</p>
+            <p><strong>第 1 步</strong>：特征多项式 \(\lambda^2 + 1 = 0\)，特征值 \(\pm i\)。</p>
+            <p><strong>第 2 步</strong>：设 \(e^{tA} = \alpha_0 I + \alpha_1 A\)。由 \(e^{it} = \alpha_0 + i\alpha_1\) 和 \(e^{-it} = \alpha_0 - i\alpha_1\)，解得 \(\alpha_0 = \cos t\)，\(\alpha_1 = \sin t\)。</p>
+            <p><strong>第 3 步</strong>：\(e^{tA} = \cos t \cdot I + \sin t \cdot A = \begin{pmatrix} \cos t & -\sin t \\ \sin t & \cos t \end{pmatrix}\)——正是旋转矩阵！</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 处理 Jordan 块时忘记 \(e^{\lambda t}\) 的前因子。\(e^{tJ_k(\lambda)} = e^{\lambda t} \cdot e^{tN}\)，不是 \(e^{tN}\) 单独。</li>
@@ -787,6 +808,12 @@
             <p><strong>最终结果</strong>：</p>
             \[\mathbf{X}(t) = \begin{pmatrix} e^t - 1 \\[4pt] \dfrac{1}{4}(e^{2t} - 1) - \dfrac{t}{2} \end{pmatrix}\]
             <p><strong>验证</strong>：\(x_2'(t) = \frac{1}{2}e^{2t} - \frac{1}{2} = 2 \cdot \left[\frac{1}{4}(e^{2t}-1) - \frac{t}{2}\right] + t = 2x_2 + t\)。✓</p>
+
+            <h4>例题 2：解耦系统与稳态解</h4>
+            <p>求 \(\mathbf{X}' = \begin{pmatrix} -1 & 0 \\ 0 & -2 \end{pmatrix}\mathbf{X} + \begin{pmatrix} 1 \\ 1 \end{pmatrix}\)，\(\mathbf{X}(0) = \mathbf{0}\)。</p>
+            <p><strong>第 1 步</strong>：\(A\) 对角，两分量解耦：\(x_1' = -x_1 + 1\)，\(x_2' = -2x_2 + 1\)。</p>
+            <p><strong>第 2 步</strong>：各自求解：\(x_1 = 1 - e^{-t}\)，\(x_2 = \frac{1}{2}(1 - e^{-2t})\)。</p>
+            <p><strong>第 3 步</strong>：\(t \to \infty\) 时 \(\mathbf{X} \to (1, 1/2)^T = -A^{-1}\mathbf{b}\)——稳态解。由于 \(A\) 的特征值均为负，瞬态部分指数衰减。</p>
 
             <h4>常见易错点</h4>
             <ul>

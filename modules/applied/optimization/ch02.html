@@ -471,6 +471,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>梯度下降的核心抽象是"局部线性近似 + 信赖域"思想。在当前点 \(x_k\) 处，函数被一阶 Taylor 展开近似为 \(f(x_k) + \nabla f(x_k)^T(x - x_k)\)；在以 \(x_k\) 为中心的小球内，沿负梯度方向移动使线性近似下降最快。步长 \(\alpha\) 控制了信赖域的大小。</p>
+            <p>收敛分析的抽象框架由两个不等式支撑：光滑性提供"充分下降"（每步至少减少 \(\frac{1}{2L}\|\nabla f\|^2\)），凸性提供"从梯度到最优间隙的桥梁"（\(\|\nabla f(x)\| = 0\) 当且仅当 \(x\) 最优）。两者联合产出收敛速率。</p>
+            <p>步长选择可以看作"信赖域半径的自适应调整"：固定步长 \(1/L\) 是最保守的全局选择；Armijo 线搜索通过回溯逐步试探可接受的步长；Wolfe 条件则同时要求充分下降和曲率条件，在保证收敛的同时避免步长过小。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -571,6 +580,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>梯度下降只用一阶信息，条件数大时收敛慢。Newton 法利用二阶信 息（Hessian）在极值点附近实现二次收敛——误差以平方速率缩小。 但 Hessian 的 \(O(n^2)\) 存储和 \(O(n^3)\) 求逆对高维问题不实际， BFGS 以 \(O(n^2)\) 代价近似 Hessian 逆，是实践中的折中方案。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Newton 法的核心抽象是"二次模型精确求解"：在当前点 \(x_k\) 处用二阶 Taylor 展开 \(f(x_k) + \nabla f^T d + \frac{1}{2} d^T \nabla^2 f\, d\) 构造目标函数的局部二次近似，然后精确求解这个二次子问题。梯度下降可视为 Newton 法的简化——把 Hessian 替换为单位矩阵 \(I\)。</p>
+            <p>从几何角度看，Newton 法在"Hessian 度量"下做最速下降。它自动适配各方向的曲率差异，等效于在一个经过仿射变换（使等高线变圆）的空间里做梯度下降。这就是为什么 Newton 法对条件数不敏感——它用 Hessian 消除了条件数的影响。</p>
+            <p>拟 Newton 法是在"精确 Hessian"与"单位矩阵"之间的连续折中。BFGS 通过逐步积累梯度差信息来构建 Hessian 逆的近似，每步只需 \(O(n^2)\) 运算。其抽象思想是"用历史信息学习曲率"，无需显式计算二阶导数，便可逐渐逼近 Newton 方向。</p>
           </div>
         </div>
 

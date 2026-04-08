@@ -459,6 +459,13 @@
             \[|f(t,y_1) - f(t,y_2)| = |(t^2 + \sin y_1) - (t^2 + \sin y_2)| = |\sin y_1 - \sin y_2|\]
             <p><strong>第 2 步</strong>：利用 \(\sin\) 的 Lipschitz 性质。由均值定理，\(|\sin y_1 - \sin y_2| = |\cos \xi| \cdot |y_1 - y_2| \leq |y_1 - y_2|\)。</p>
             <p><strong>结论</strong>：\(f\) 关于 \(y\) 全局 Lipschitz，\(L = 1\)。</p>
+
+            <h4>例题 2：非 Lipschitz 的情形</h4>
+            <p>验证 \(f(t,y) = \sqrt{|y|}\) 在 \(y = 0\) 附近是否满足 Lipschitz 条件。</p>
+            <p><strong>第 1 步</strong>：取 \(y_1 = 0\)，\(y_2 = \varepsilon > 0\)：\(\displaystyle\frac{|\sqrt{\varepsilon} - 0|}{|\varepsilon - 0|} = \varepsilon^{-1/2} \to \infty\)（\(\varepsilon \to 0\)）。</p>
+            <p><strong>第 2 步</strong>：不存在有限 Lipschitz 常数。IVP \(y' = \sqrt{|y|}\), \(y(0) = 0\) 确实有多个解：\(y \equiv 0\) 和 \(y = t^2/4\)（\(t \geq 0\)）。</p>
+            <p><strong>结论</strong>：Lipschitz 条件的失败直接导致解的唯一性丧失。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 将 \(f(t,y) = |y|\) 误判为不满足 Lipschitz——实际上 \(||y_1| - |y_2|| \leq |y_1 - y_2|\)，所以 \(|y|\) 全局 Lipschitz（\(L=1\)），尽管在 \(y=0\) 不可微。<strong>Lipschitz 不要求可微</strong>。</li>
@@ -562,6 +569,13 @@
             <p><strong>第 3 步</strong>：\(y_2(t) = 1 + \int_0^t (1+s)\,ds = 1 + t + \frac{t^2}{2}\)。</p>
             <p><strong>第 4 步</strong>：\(y_3(t) = 1 + \int_0^t \left(1+s+\frac{s^2}{2}\right)ds = 1 + t + \frac{t^2}{2} + \frac{t^3}{6}\)。</p>
             <p><strong>模式识别</strong>：\(y_n(t) = \sum_{k=0}^{n} \frac{t^k}{k!}\)，这是 \(e^t\) 的 Taylor 多项式。极限 \(y(t) = e^t\)。</p>
+
+            <h4>例题 2：Picard 迭代求解 \(y' = 2ty\)，\(y(0) = 1\)</h4>
+            <p><strong>第 1 步</strong>：\(y_0(t) = 1\)。</p>
+            <p><strong>第 2 步</strong>：\(y_1(t) = 1 + \int_0^t 2s \cdot 1\,ds = 1 + t^2\)。</p>
+            <p><strong>第 3 步</strong>：\(y_2(t) = 1 + \int_0^t 2s(1+s^2)\,ds = 1 + t^2 + \frac{t^4}{2}\)。</p>
+            <p><strong>模式识别</strong>：\(y_n(t) = \sum_{k=0}^{n} \frac{(t^2)^k}{k!}\)，极限 \(y(t) = e^{t^2}\)。验证：\((e^{t^2})' = 2te^{t^2} = 2ty\)。✓</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 忽略存在区间的有限性。定理只保证解在 \([t_0 - \alpha, t_0 + \alpha]\) 上存在（局部解），不保证全局存在。例如 \(y' = y^2\)，\(y(0)=1\) 的解 \(y = 1/(1-t)\) 在 \(t=1\) 爆破。</li>
@@ -694,6 +708,13 @@
             <p><strong>第 3 步</strong>：代入初值 \(y(0) = 0\)：\(\arctan 0 = 0 + C\)，故 \(C = 0\)。</p>
             <p><strong>第 4 步</strong>：\(y(t) = \tan t\)。当 \(t \to \pi/2^-\) 时 \(\tan t \to +\infty\)，爆破时间 \(t^+ = \pi/2\)。</p>
             <p><strong>验证</strong>：\(f(t,y) = 1 + y^2\) 关于 \(y\) 局部 Lipschitz（\(f_y = 2y\) 在有界域上有界），所以 Cauchy-Lipschitz 保证局部唯一解。但 \(f\) 不是全局 Lipschitz 的，解无法全局延拓。</p>
+
+            <h4>例题 2：唯一性失败的经典例子</h4>
+            <p>讨论 IVP \(y' = y^{2/3}\)，\(y(0) = 0\) 的解。</p>
+            <p><strong>第 1 步 — 平凡解</strong>：\(y(t) \equiv 0\) 显然满足方程和初值。</p>
+            <p><strong>第 2 步 — 非平凡解</strong>：分离变量 \(y^{-2/3}dy = dt\)，积分得 \(3y^{1/3} = t\)，故 \(y = (t/3)^3\)（\(t \geq 0\)）。</p>
+            <p><strong>第 3 步 — 解释</strong>：\(f(y) = y^{2/3}\) 在 \(y = 0\) 处 \(f_y = \tfrac{2}{3}y^{-1/3} \to \infty\)，不满足 Lipschitz。Cauchy-Lipschitz 不适用，Peano 定理仅保证存在性，唯一性确实丧失。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 误以为连续 ODE 的解总是全局存在。非线性方程可以在有限时间爆破——必须检查最大存在区间。</li>

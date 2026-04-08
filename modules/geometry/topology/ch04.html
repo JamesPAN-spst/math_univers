@@ -394,22 +394,26 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>在数学研究中，我们经常需要把目光聚焦到一个大空间的某个子集上——曲面上的一条曲线、\(\mathbb{R}^n\) 中的一个约束区域、函数空间里的某族特殊函数。这时，一个自然的问题浮现出来：子集应该"继承"怎样的拓扑结构，才能让分析工作在子集上顺畅地进行？</p>
             <ul>
-              <li><strong>子集继承环境结构：</strong>研究大空间中的子集时，需要子集"自然地"继承环境空间的拓扑。子空间拓扑（诱导拓扑）提供了标准方案。</li>
-              <li><strong>性质遗传的精细差异：</strong>哪些拓扑性质能遗传给子空间？Hausdorff 性、\(C_1/C_2\) 可以；紧致性只对闭子集遗传；连通性和正规性不遗传。这些差别在实际应用中至关重要。</li>
-              <li><strong>初始拓扑的特例：</strong>子空间拓扑就是关于包含映射 \(\iota: A \hookrightarrow X\) 的初始拓扑，是 ch02 万有构造的第一个具体实例。</li>
+              <li><strong>优化中的可行域：</strong>约束优化问题的可行域是 \(\mathbb{R}^n\) 的子集，Weierstrass 极值定理能否适用，取决于子集在继承的拓扑下是否紧致。</li>
+              <li><strong>微分几何中的子流形：</strong>球面 \(S^{n-1} \subset \mathbb{R}^n\) 的拓扑来自 \(\mathbb{R}^n\) 的诱导拓扑，Whitney 嵌入定理正是将抽象流形放回欧氏空间来研究。</li>
+              <li><strong>泛函分析中的子空间：</strong>Banach 空间的闭子空间自动是 Banach 空间，但非闭子空间则不一定——区别恰恰在于子空间拓扑下的完备性。</li>
             </ul>
+            <p>这些例子揭示了一个共同主题：子空间拓扑不仅提供了"自然"的结构继承方案，更决定了哪些关键性质能从大空间传递到子集。理解性质遗传的精细差异——Hausdorff 性遗传到任意子集，紧致性只遗传到闭子集，连通性完全不保证遗传——是拓扑分析中的基本功。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>子空间拓扑的核心思想可以用一个形象的比喻来理解：用子集 \(A\) 去"切割"环境空间 \(X\) 的拓扑。具体地，对 \(X\) 的每一个开集 \(U\)，取交集 \(U \cap A\) 就得到 \(A\) 的一个开集。这种"切片"操作保证了最大限度的结构继承。</p>
             <ul>
-              <li><strong>"切片"拓扑：</strong>子空间拓扑 = 将环境空间的每个开集与 \(A\) 做交。形象地说，就是用 \(A\) 去"切割"环境空间的拓扑。</li>
-              <li><strong>万有性质：</strong>\(f: Y \to A\) 在子空间拓扑下连续 \(\iff \iota \circ f: Y \to X\) 连续。这使得子空间的连续映射理论与环境空间兼容。</li>
-              <li><strong>遗传性 vs 非遗传性：</strong>可遗传的性质称为"遗传性质"。判断性质是否遗传是一般拓扑的基本技能。</li>
+              <li><strong>万有性质：</strong>\(f: Y \to A\) 在子空间拓扑下连续 \(\iff \iota \circ f: Y \to X\) 连续。这使得子空间的连续映射理论与环境空间完全兼容。</li>
+              <li><strong>初始拓扑视角：</strong>子空间拓扑就是关于包含映射 \(\iota: A \hookrightarrow X\) 的初始拓扑——使 \(\iota\) 连续的最弱拓扑。</li>
             </ul>
+            <p>判断一个性质是否"遗传"到子空间，是一般拓扑学的基本技能。遗传分为三个层次：对任意子空间遗传（如 Hausdorff、\(C_1\)、\(C_2\)）、仅对闭子空间遗传（如紧致性、正规性）、以及完全不保证遗传（如连通性）。掌握这一分类，就能在遇到具体问题时快速判断哪些工具可用。</p>
+            <p>值得注意的是，"在子空间中闭"与"在环境空间中闭"是两个不同概念。子集 \(A\) 在自身的子空间拓扑中永远是闭集（\(A = A\)），但在 \(X\) 中未必闭——这种区分在讨论紧致性遗传时至关重要。</p>
           </div>
         </div>
 
@@ -419,6 +423,7 @@
             <h4>1. 子空间拓扑的定义</h4>
             <p>设 \((X, \tau)\) 为拓扑空间，\(A \subseteq X\)。<strong>子空间拓扑</strong>为</p>
             \[\tau_A = \{U \cap A : U \in \tau\}\]
+            <p>直觉上，这是在 \(A\) 上保留"从 \(X\) 能看到"的全部开信息。\(A\) 上的开集不是凭空产生的，每一个都由 \(X\) 的某个开集"切出来"。</p>
 
             <h4>2. 验证确实是拓扑</h4>
             <ul>
@@ -426,33 +431,52 @@
               <li>(T2)：\((U_1 \cap A) \cap (U_2 \cap A) = (U_1 \cap U_2) \cap A\)。</li>
               <li>(T3)：\(\bigcup_\alpha (U_\alpha \cap A) = (\bigcup_\alpha U_\alpha) \cap A\)。</li>
             </ul>
+            <p>验证的关键在于交集和并集运算与"切割"操作可交换——这正是集合论中分配律的直接体现。</p>
 
-            <h4>3. 性质遗传总结</h4>
+            <h4>3. 万有性质与初始拓扑</h4>
+            <p>子空间拓扑是使包含映射 \(\iota: A \hookrightarrow X\) 连续的最弱拓扑。等价地：</p>
+            \[f: Y \to A \;\text{连续} \quad\Longleftrightarrow\quad \iota \circ f: Y \to X \;\text{连续}\]
+            <p>这意味着要检验一个到 \(A\) 的映射是否连续，只需把它看成到 \(X\) 的映射来检验——子空间的"连续性测试"不比环境空间更难。</p>
+
+            <h4>4. Hausdorff 性的遗传</h4>
+            <p>若 \(X\) Hausdorff，\(a, b \in A\)，\(a \neq b\)，则存在 \(X\) 中不相交开集 \(U \ni a, V \ni b\)：</p>
+            \[U \cap A \;\text{与}\; V \cap A \;\text{不相交，且分别包含}\; a, b\]
+            <p>所以 \(A\) 也是 Hausdorff 的。证明之所以如此简洁，是因为 Hausdorff 判据只涉及"两点的分离"，而子空间拓扑天然保留了分离能力。</p>
+
+            <h4>5. 性质遗传总表</h4>
             <ul>
               <li><strong>遗传到任意子集：</strong>\(T_0, T_1, T_2, T_3\)；\(C_1, C_2\)；可分性（到开子集或稠密子集）。</li>
-              <li><strong>遗传到闭子集：</strong>紧致性（闭子集 of 紧空间 ⟹ 紧）；\(T_4\)。</li>
+              <li><strong>遗传到闭子集：</strong>紧致性（闭子集 of 紧空间 ⟹ 紧）；\(T_4\)（正规性）。</li>
               <li><strong>不遗传：</strong>连通性（\((0,1) \cup (2,3) \subseteq \mathbb{R}\) 不连通）；紧致性到开子集（\((0,1) \subseteq [0,1]\) 不紧）。</li>
             </ul>
             \[\text{闭子集 of 紧空间} \;\Longrightarrow\; \text{紧}\]
+            <p>记忆法：分离类性质（\(T_i\)）只需要局部信息，因此容易遗传；覆盖类性质（紧致性）需要全局控制，因此只对"不丢失边界"的闭子集遗传。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p><strong>约束优化中的可行域：</strong>优化问题的可行域通常是 \(\mathbb{R}^n\) 的闭子空间。闭性 + 有界性保证紧致性（Heine-Borel），从而保证连续目标函数在其上取到最值（Weierstrass 极值定理）。</p>
-            <p><strong>嵌入与子流形：</strong>光滑流形中的子流形拓扑就是子空间拓扑。Whitney 嵌入定理将抽象流形视为 \(\mathbb{R}^{2n+1}\) 的子空间。</p>
+            <p><strong>约束优化：</strong>优化问题的可行域通常是 \(\mathbb{R}^n\) 的子空间。闭性加有界性保证紧致性（Heine-Borel），从而由 Weierstrass 极值定理保证连续目标函数在可行域上取到最值。线性规划中的多面体可行域正是这一原理的典型应用。</p>
+            <p><strong>微分几何与嵌入：</strong>光滑流形中的子流形拓扑就是子空间拓扑。Whitney 嵌入定理保证任何 \(n\) 维抽象流形都可嵌入 \(\mathbb{R}^{2n+1}\) 中，此后子流形的拓扑性质（如紧致性）可直接从欧氏空间继承。</p>
+            <p><strong>数据科学与流形学习：</strong>高维数据集常被建模为低维流形的子空间。子空间拓扑的遗传性决定了哪些全局结构（如连通分量、紧致性）在降维后仍然保持，这是 UMAP 和 t-SNE 等流形学习算法的理论根基之一。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：\([0,1] \cap \mathbb{Q}\) 是否紧致？</h4>
+            <h4>例题 1：\([0,1] \cap \mathbb{Q}\) 是否紧致？</h4>
             <p><strong>题目：</strong>\(A = [0,1] \cap \mathbb{Q}\) 在 \(\mathbb{R}\) 的子空间拓扑中是否紧致？</p>
             <p><strong>第一步 — 闭性检验：</strong>\(A\) 在 \(\mathbb{R}\) 中不闭：\(\sqrt{2}/2 \in \overline{A}\) 但 \(\sqrt{2}/2 \notin A\)。</p>
             <p><strong>第二步 — Heine-Borel 不适用：</strong>\(A\) 有界但不闭 → Heine-Borel 定理不保证紧致。</p>
             <p><strong>第三步 — 给出反例开覆盖：</strong>对每个 \(q \in A\)，取不含 \(\sqrt{2}/2\) 的开区间 \(V_q\)。则 \(\{V_q \cap A\}\) 覆盖 \(A\) 但无有限子覆盖（被 \(\sqrt{2}/2\) "分隔"）。→ <strong>不紧致</strong>。✔</p>
+
+            <h4>例题 2：\((0,1) \cup (2,3)\) 中的 clopen 集</h4>
+            <p><strong>题目：</strong>设 \(A = (0,1) \cup (2,3)\) 是 \(\mathbb{R}\) 的子空间。证明 \((0,1)\) 在 \(A\) 中既开又闭。</p>
+            <p><strong>第一步 — 开性：</strong>\((0,1)\) 本身是 \(\mathbb{R}\) 的开集，故 \((0,1) = (0,1) \cap A\) 是 \(A\) 中的开集。✔</p>
+            <p><strong>第二步 — 闭性：</strong>其补集 \(A \setminus (0,1) = (2,3)\) 同样是 \(\mathbb{R}\) 的开集与 \(A\) 的交，故 \((2,3)\) 在 \(A\) 中开。补集开则原集闭。✔</p>
+            <p><strong>结论：</strong>\((0,1)\) 是 \(A\) 中的 clopen 集，这反映了 \(A\) 不连通——它可以分解为两个非空 clopen 子集的不交并。</p>
 
             <h4>常见错误</h4>
             <ul>
@@ -514,22 +538,25 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>当我们想同时考察多个空间的信息时——比如一个质点的位置与速度、一对粒子各自的状态、甚至无穷多个随机变量的联合行为——就需要在笛卡尔积上构造拓扑。但"自然"的选择并非显而易见：box 拓扑虽然直觉简单，却在无穷积时让太多映射不连续，破坏了拓扑学的核心工具。</p>
             <ul>
-              <li><strong>笛卡尔积上的拓扑选择：</strong>给定族 \(\{X_\alpha\}\)，如何在 \(\prod X_\alpha\) 上定义"自然"拓扑？最直觉的 box 拓扑在无穷积时让太多映射不连续。</li>
-              <li><strong>积拓扑的关键优势：</strong>只限制有限多个分量，保证 (i) 所有投影 \(\pi_\alpha\) 连续，(ii) \(f\) 连续 \(\iff\) 每个 \(\pi_\alpha \circ f\) 连续。这导致了 Tychonoff 定理。</li>
-              <li><strong>范畴视角：</strong>积拓扑是 \(\mathbf{Top}\) 范畴中的积（categorical product），满足万有性质。</li>
+              <li><strong>物理中的相空间：</strong>经典力学中 \(n\) 个粒子的相空间是 \((\mathbb{R}^3 \times \mathbb{R}^3)^n\) 的积空间，积拓扑保证了位置和动量的逐分量分析是连续的。</li>
+              <li><strong>概率论的无穷积：</strong>随机过程 \(\{X_t\}_{t \in T}\) 的样本空间是 \(\prod_{t \in T} \mathbb{R}\)，Kolmogorov 扩张定理的 \(\sigma\)-代数正以积拓扑的开集为起点。</li>
+              <li><strong>泛函分析的弱拓扑：</strong>Banach-Alaoglu 定理通过将对偶空间嵌入积空间 \(\prod_{x \in X} \mathbb{R}\)，利用 Tychonoff 定理证明闭单位球弱*-紧致。</li>
             </ul>
+            <p>积拓扑之所以成为"正确"选择，根本原因在于它满足万有性质：\(f\) 连续当且仅当每个分量映射 \(\pi_\alpha \circ f\) 连续。这一性质不仅使拓扑分析变得可操作，更给出了 Tychonoff 定理和逐点收敛等深刻结果的理论基础。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>积拓扑是关于一整族投影映射 \(\pi_\alpha: \prod X_\beta \to X_\alpha\) 的初始拓扑——使<em>所有</em>投影同时连续的最弱拓扑。它的子基由形如 \(\pi_\alpha^{-1}(U)\) 的集合构成，含义是"第 \(\alpha\) 个分量落在 \(U\) 中，其余分量不受限"。</p>
             <ul>
-              <li><strong>初始拓扑的实例：</strong>积拓扑 = 关于所有投影映射 \(\pi_\alpha: \prod X_\beta \to X_\alpha\) 的初始拓扑。子基为 \(\{\pi_\alpha^{-1}(U): U \in \tau_\alpha\}\)。</li>
-              <li><strong>有限 vs 无穷：</strong>有限积时 box = product；无穷积时 box 严格细于 product。差异的根源："有限交"在积拓扑中是拓扑公理的自然产物，而 box 拓扑则破坏了这一限制。</li>
-              <li><strong>万有性质：</strong>\(f: Y \to \prod X_\alpha\) 连续 \(\iff \forall \alpha,\; \pi_\alpha \circ f\) 连续。这是积拓扑的<em>定义性特征</em>。</li>
+              <li><strong>有限 vs 无穷：</strong>有限积时 box 拓扑与积拓扑一致；无穷积时 box 严格更细。差异的根源在于：积拓扑只允许有限交（拓扑公理的自然产物），而 box 拓扑打破了这一限制。</li>
+              <li><strong>万有性质：</strong>\(f: Y \to \prod X_\alpha\) 连续 \(\iff \forall \alpha,\; \pi_\alpha \circ f\) 连续。这把到积空间的连续性分解为逐分量检验，是积拓扑的定义性特征。</li>
             </ul>
+            <p>从范畴论的角度看，积拓扑正是 \(\mathbf{Top}\) 范畴中的积（categorical product）。任何不满足上述万有性质的拓扑——比如 box 拓扑——都不能充当范畴积，这正是数学家选择积拓扑而非 box 拓扑的根本理由。</p>
           </div>
         </div>
 
@@ -538,20 +565,29 @@
           <div class="step-body">
             <h4>1. 有限积拓扑</h4>
             <p>\(X_1 \times X_2\) 上以 \(\{U_1 \times U_2 : U_i \in \tau_i\}\) 为基。此时 box 拓扑 = 积拓扑。</p>
+            <p>直觉上，有限积中 \(U_1 \times U_2\) 已经是"每个分量都受限"的集合，但分量有限个，所以有限交不会产生额外限制。</p>
 
             <h4>2. 无穷积拓扑</h4>
             <p>\(\prod_{\alpha \in A} X_\alpha\) 上积拓扑的<strong>子基</strong>为 \(\{\pi_\alpha^{-1}(U): U \in \tau_\alpha\}\)，<strong>基</strong>为有限交：</p>
             \[\pi_{\alpha_1}^{-1}(U_1) \cap \cdots \cap \pi_{\alpha_n}^{-1}(U_n) = \prod_{\alpha} V_\alpha\]
             <p>其中 \(V_{\alpha_i} = U_i\)，其余 \(V_\alpha = X_\alpha\)。即只有<strong>有限多</strong>个分量被限制。</p>
+            <p>可以这样理解：积拓扑中的"基本邻域"只"观测"有限多个坐标——就像通过有限个窗口观察一个无穷维对象。</p>
 
             <h4>3. Box 拓扑 vs 积拓扑</h4>
             <ul>
               <li><strong>Box 基：</strong>\(\prod U_\alpha\)，所有 \(U_\alpha\) 开（不要求"几乎全等于 \(X_\alpha\)"）。</li>
               <li><strong>包含关系：</strong>积拓扑 \(\subseteq\) box 拓扑（积拓扑更粗）。有限积时相等。</li>
-              <li><strong>连续性判据差异：</strong></li>
             </ul>
+            <p>Box 拓扑要求<em>同时</em>控制所有分量，这在无穷积时过于严苛，导致很多自然映射失去连续性。</p>
+
+            <h4>4. 连续性判据对比</h4>
             \[\text{积拓扑: } f \text{ 连续} \iff \forall \alpha,\; \pi_\alpha \circ f \text{ 连续}\]
             <p>box 拓扑下连续 \(\Rightarrow\) 每个分量映射连续，但反向不成立。</p>
+            <p>万有性质的失败是 box 拓扑的致命缺陷：它意味着我们无法通过逐分量检查来判断连续性，整个"分量分析"方法论在 box 拓扑下失效。</p>
+
+            <h4>5. Tychonoff 定理（提及）</h4>
+            \[\prod_{\alpha \in A} K_\alpha \;\text{紧致} \quad (\text{每个}\; K_\alpha \;\text{紧致，积拓扑})\]
+            <p>这是积拓扑最深刻的定理，其证明需要选择公理（等价于 AC）。在 box 拓扑下该定理不成立——即使每个 \(K_\alpha = \{0,1\}\) 都紧致，\(\{0,1\}^{\mathbb{N}}\) 在 box 拓扑下也不紧致。</p>
           </div>
         </div>
 
@@ -567,13 +603,19 @@
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：对角映射在 box 拓扑下不连续</h4>
+            <h4>例题 1：对角映射在 box 拓扑下不连续</h4>
             <p><strong>题目：</strong>设 \(\Delta: \mathbb{R} \to \mathbb{R}^\mathbb{N}\)，\(\Delta(x) = (x, x, x, \ldots)\)。证明 \(\Delta\) 在积拓扑下连续但在 box 拓扑下不连续。</p>
             <p><strong>第一步 — 积拓扑：</strong>\(\pi_n \circ \Delta = \mathrm{id}_{\mathbb{R}}\) 对所有 \(n\) 连续。由万有性质，\(\Delta\) 在积拓扑下连续。✔</p>
             <p><strong>第二步 — Box 拓扑反例：</strong>取 \(W = \prod_{n=1}^{\infty} (-1/n,\; 1/n)\)，这是 box 拓扑中的开集。</p>
             <p><strong>第三步 — 计算原像：</strong></p>
             \[\Delta^{-1}(W) = \{x \in \mathbb{R} : x \in (-1/n, 1/n)\; \forall n\} = \bigcap_{n=1}^{\infty} (-1/n, 1/n) = \{0\}\]
             <p>\(\{0\}\) 不是 \(\mathbb{R}\) 中的开集 → \(\Delta\) 在 box 拓扑下不连续。✔</p>
+
+            <h4>例题 2：\(\mathbb{R}^2\) 的积拓扑与度量拓扑一致</h4>
+            <p><strong>题目：</strong>证明 \(\mathbb{R} \times \mathbb{R}\) 的积拓扑与 \(\mathbb{R}^2\) 的欧氏度量拓扑相同。</p>
+            <p><strong>第一步 — 度量拓扑 \(\subseteq\) 积拓扑：</strong>度量拓扑的基是开圆盘 \(B(p,r)\)。对 \(p = (a,b) \in B(p_0, r)\)，取充分小的 \(\varepsilon\)，使得 \((a-\varepsilon, a+\varepsilon) \times (b-\varepsilon, b+\varepsilon) \subseteq B(p_0, r)\)（因为夹在小正方形中的点到 \(p_0\) 的距离\( < r\)）。</p>
+            <p><strong>第二步 — 积拓扑 \(\subseteq\) 度量拓扑：</strong>积拓扑的基元素 \((a,b) \times (c,d)\) 是开矩形。对其中任一点，可以画一个足够小的开圆盘仍落在矩形内。</p>
+            <p><strong>结论：</strong>两个拓扑互相包含，因此相等。更一般地，\(\mathbb{R}^n\) 的积拓扑与欧氏拓扑一致（因为 \(\ell^\infty\) 范数与 \(\ell^2\) 范数等价）。✔</p>
 
             <h4>常见错误</h4>
             <ul>
@@ -607,22 +649,25 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>拿一张纸条，把两端对齐粘起来就得到一个圆筒；如果粘合前先扭转半圈，就得到莫比乌斯带。这种"粘合"操作在几何中无处不在，但如何让它在拓扑学中获得严格的数学意义？答案就是商拓扑——它把等价关系下的"识别"转化为新空间上的拓扑结构。</p>
             <ul>
-              <li><strong>"粘合"操作的数学化：</strong>将正方形的对边粘合得环面、将圆盘边界缩成一点得球面——这些几何直觉需要严格的拓扑框架。商拓扑正是将等价关系下"粘合"精确化的工具。</li>
-              <li><strong>构造新空间的主力：</strong>流形、CW 复形、轨道空间等许多重要空间都通过商拓扑构造。它与子空间、积拓扑并列为三大基本构造。</li>
-              <li><strong>终止拓扑的特例：</strong>商拓扑是关于商映射 \(q\) 的终止拓扑——使 \(q\) 连续的最强（最细）拓扑。</li>
+              <li><strong>几何构造的数学化：</strong>将正方形的对边粘合得环面、将圆盘边界缩成一点得球面——这些几何直觉需要商拓扑来精确表述。</li>
+              <li><strong>代数拓扑的基石：</strong>CW 复形——代数拓扑中最重要的空间类别——完全通过商拓扑逐层粘合而成。</li>
+              <li><strong>对称性的商化：</strong>群 \(G\) 作用于空间 \(X\) 时，轨道空间 \(X/G\) 的自然拓扑就是商拓扑，这在物理学的规范场论和数学的模空间理论中都是核心构造。</li>
             </ul>
+            <p>商拓扑与子空间拓扑形成完美的对偶：子空间拓扑是初始拓扑（使包含映射连续的最弱拓扑），商拓扑是终止拓扑（使商映射连续的最强拓扑）。掌握这一对偶，就掌握了拓扑构造的两大支柱。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>商拓扑的定义采用了一种"自上而下"的策略：不是直接描述哪些集合是开的，而是规定"一个集合是开的，当且仅当它的原像在原空间中是开的"。这恰好保证了商映射 \(q\) 连续，而且是使 \(q\) 连续的最细拓扑。</p>
             <ul>
-              <li><strong>终止拓扑：</strong>商拓扑 = 使 \(q: X \to X/{\sim}\) 连续的最细拓扑。对偶于子空间拓扑（初始拓扑）。</li>
-              <li><strong>开性判据的反转：</strong>不是"开集的像是开集"，而是"原像是开集 \(\Rightarrow\) 集合本身开"。这导致商映射不一定是开映射。</li>
-              <li><strong>万有性质：</strong>\(g: X/{\sim} \to Z\) 连续 \(\iff g \circ q\) 连续。这将商空间上的连续性问题化归为原空间上的连续性问题。</li>
+              <li><strong>开性判据的反转：</strong>不同于开映射（"开集的像是开集"），商拓扑要求的是"原像是开集 \(\Rightarrow\) 集合本身开"。因此商映射不一定是开映射——这是初学者常犯的错误。</li>
+              <li><strong>万有性质：</strong>\(g: X/{\sim} \to Z\) 连续 \(\iff g \circ q\) 连续。这把商空间上的连续性问题完全化归为原空间上的连续性问题。</li>
             </ul>
+            <p>商拓扑的关键难点在于"Hausdorff 性不保持"：即使原空间是 Hausdorff 的，商空间也可能不是。判定商空间是否 Hausdorff 需要检查等价关系是否为 \(X \times X\) 中的闭集——这在应用中常常是最困难的一步。</p>
           </div>
         </div>
 
@@ -632,7 +677,7 @@
             <h4>1. 商拓扑的定义</h4>
             <p>设 \(\sim\) 为 \(X\) 上的等价关系，\(q: X \to X/{\sim}\)，\(q(x)=[x]\)。<strong>商拓扑</strong>：</p>
             \[\tau_{X/\sim} = \{U \subseteq X/{\sim} : q^{-1}(U) \in \tau_X\}\]
-            <p>即 \(U\) 开 \(\iff\) 其原像（所有代表元的并）在 \(X\) 中开。</p>
+            <p>即 \(U\) 开 \(\iff\) 其原像（所有代表元的并）在 \(X\) 中开。直觉上，商空间的开集必须是"等价关系可见的"——被粘合到一起的点不能被拆分到一个集合的内部和外部。</p>
 
             <h4>2. 商映射的判定</h4>
             <p>满射 \(f: X \to Y\) 是商映射 \(\iff V \subseteq Y\) 开 \(\iff f^{-1}(V)\) 在 \(X\) 中开。</p>
@@ -641,6 +686,7 @@
               <li><strong>充分条件 2：</strong>\(f\) 满射 + 闭映射 → 商映射。</li>
               <li><strong>注意：</strong>商映射不一定是开映射，也不一定是闭映射。</li>
             </ul>
+            <p>这些充分条件提供了实际操作中验证商映射的"快速通道"：如果能证明满射 + 开（或闭），就不必逐一检查所有开集的原像。</p>
 
             <h4>3. 商空间的性质传递</h4>
             <ul>
@@ -648,6 +694,13 @@
               <li>连通性传递：\(X\) 连通 \(\Rightarrow X/{\sim}\) 连通。</li>
               <li>Hausdorff<strong>不</strong>传递：\(\mathbb{R}\) Hausdorff 但某些商空间不 Hausdorff。</li>
             </ul>
+            <p>紧性和连通性传递的本质原因是它们被连续满射保持。而 Hausdorff 性不传递，因为商映射可以把本来分得开的点"粘"到一起。</p>
+
+            <h4>4. Hausdorff 商的判定准则</h4>
+            <p>商空间 \(X/{\sim}\) 是 Hausdorff 的充要条件是等价关系图</p>
+            \[R = \{(x,y) \in X \times X : x \sim y\}\]
+            <p>是 \(X \times X\) 中的闭集，加上商映射 \(q\) 是开映射。</p>
+            <p>直觉上，"\(R\) 是闭的"意味着"被粘合的点对构成一个闭集"——没有点在极限过程中被"意外粘合"。反例：\(\mathbb{R}/\mathbb{Q}\) 不 Hausdorff，因为 \(\{(x,y): x-y \in \mathbb{Q}\}\) 在 \(\mathbb{R}^2\) 中稠密而非闭。</p>
           </div>
         </div>
 
@@ -663,12 +716,18 @@
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：\(S^1 \cong [0,1]/\{0 \sim 1\}\)</h4>
+            <h4>例题 1：\(S^1 \cong [0,1]/\{0 \sim 1\}\)</h4>
             <p><strong>题目：</strong>证明圆 \(S^1\) 同胚于区间 \([0,1]\) 的端点粘合商空间。</p>
             <p><strong>第一步 — 构造映射：</strong>定义 \(f: [0,1] \to S^1\)，\(f(t) = e^{2\pi i t}\)。</p>
             <p><strong>第二步 — 验证相容性：</strong>\(f(0) = f(1) = 1\)，且 \(f\) 在 \((0,1)\) 上单射。故 \(f\) 与等价关系 \(0 \sim 1\) 相容，诱导双射 \(\bar{f}: [0,1]/{\sim} \to S^1\)。</p>
             <p><strong>第三步 — 万有性质：</strong>\(\bar{f} \circ q = f\) 连续 ⟹ \(\bar{f}\) 连续。</p>
             <p><strong>第四步 — 紧→Hausdorff：</strong>\([0,1]\) 紧 ⟹ \([0,1]/{\sim}\) 紧。\(S^1\) Hausdorff。紧空间到 Hausdorff 空间的连续双射 ⟹ 同胚。✔</p>
+
+            <h4>例题 2：将 \(D^2\) 边界 \(S^1\) 粘成一点得 \(S^2\)</h4>
+            <p><strong>题目：</strong>证明 \(D^2/\partial D^2 \cong S^2\)（将闭圆盘的边界缩成一点得球面）。</p>
+            <p><strong>第一步 — 构造映射：</strong>定义 \(f: D^2 \to S^2\)，将 \(D^2\) 通过球极投影的逆映射送到 \(S^2\) 的上半球面，边界 \(\partial D^2\) 全部映到南极。具体地，设 \(f(r, \theta) = (\sin(\pi(1-r)) \cos\theta,\; \sin(\pi(1-r)) \sin\theta,\; -\cos(\pi(1-r)))\)。</p>
+            <p><strong>第二步 — 验证相容性：</strong>\(r = 1\) 时，\(f(1, \theta) = (0, 0, 1)\) 为南极，与 \(\theta\) 无关。所以 \(\partial D^2\) 上的所有点映到同一点，与等价关系相容。</p>
+            <p><strong>第三步 — 紧→Hausdorff：</strong>\(D^2\) 紧 ⟹ \(D^2/\partial D^2\) 紧。\(S^2\) Hausdorff。诱导映射 \(\bar{f}\) 是连续双射，故为同胚。✔</p>
 
             <h4>常见错误</h4>
             <ul>
@@ -721,22 +780,25 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>前面三节建立了子空间、积和商拓扑的一般理论，但理论的真正力量需要通过经典实例来检验和串联。莫比乌斯带、环面、射影空间、Klein 瓶——这些在几何、物理和代数拓扑中反复出现的空间，都可以用前面的构造工具严格定义。同时，不交并（余积）作为与积拓扑对偶的构造，完善了我们的工具箱。</p>
             <ul>
-              <li><strong>理论的检验场：</strong>莫比乌斯带、环面、射影空间、Klein 瓶等经典空间，都可以用子空间、积和商拓扑来严格构造。这些实例检验并串联前面所有抽象概念。</li>
-              <li><strong>代数拓扑的测试对象：</strong>这些空间是计算基本群、同调群、Euler 示性数的主要对象。</li>
-              <li><strong>不交并（余积）：</strong>"分离地放在一起"的操作，与积拓扑对偶，是范畴论中的余积。</li>
+              <li><strong>曲面分类的基本建筑块：</strong>曲面分类定理指出，每个紧致可定向曲面都是球面和若干环面的连通和。环面和射影平面是分类的基本单元。</li>
+              <li><strong>纤维丛的原型：</strong>莫比乌斯带和圆柱分别是 \(S^1\) 上非平凡与平凡线丛的范例——整个纤维丛理论从区分这两者开始。</li>
+              <li><strong>分散系统的数学模型：</strong>不交并（余积）将多个独立空间"放在一起"但保持各自结构，自然地描述了分布式网络中独立节点的状态空间。</li>
             </ul>
+            <p>通过计算这些经典空间的拓扑不变量——基本群 \(\pi_1\)、Euler 示性数 \(\chi\)、可定向性——我们不仅验证了构造方法的有效性，还积累了代数拓扑所需的核心直觉。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>构造经典空间的核心技巧是"粘合方向决定拓扑类型"。同一矩形，同向粘合一对边得圆柱；反向粘合得莫比乌斯带。两对边的粘合组合则产生环面、Klein 瓶或射影平面。这种"边缘标记法"（用箭头标注粘合方向）提供了一种纯组合的方式来描述复杂拓扑空间。</p>
             <ul>
-              <li><strong>粘合方向决定拓扑类型：</strong>同一矩形，同向粘合一对边得圆柱；反向粘合得莫比乌斯带。两对边的粘合组合产生环面、Klein 瓶、\(\mathbb{RP}^2\)。</li>
-              <li><strong>"紧→Hausdorff"万能钥匙：</strong>构造同胚时，找连续双射后用"紧→Hausdorff"自动得同胚，是本节的核心技巧。</li>
-              <li><strong>不变量区分空间：</strong>\(\pi_1\)（基本群）和 \(\chi\)（Euler 示性数）能区分看似相似的空间。</li>
+              <li><strong>"紧→Hausdorff"万能钥匙：</strong>构造同胚时，通常先找连续双射，再利用"紧空间到 Hausdorff 空间的连续双射自动是同胚"来完成证明。这一技巧在本节反复使用。</li>
+              <li><strong>不变量区分空间：</strong>基本群 \(\pi_1\) 和 Euler 示性数 \(\chi\) 能区分看似相似的空间。例如 \(\pi_1(T^2) = \mathbb{Z}^2\) 而 \(\pi_1(\text{Klein}) = \mathbb{Z} \rtimes \mathbb{Z}\)，两者不同胚。</li>
             </ul>
+            <p>不交并（余积）\(X \sqcup Y\) 与积拓扑形成范畴论中的对偶：积的万有性质涉及"映入"（从外部到积），余积的万有性质涉及"映出"（从余积到外部）。\(f: X \sqcup Y \to Z\) 连续 \(\iff f|_X\) 和 \(f|_Y\) 分别连续——这完全类比于积拓扑的逐分量判据。</p>
           </div>
         </div>
 
@@ -775,12 +837,19 @@
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <h4>例题：\(\mathbb{RP}^1 \cong S^1\)</h4>
+            <h4>例题 1：\(\mathbb{RP}^1 \cong S^1\)</h4>
             <p><strong>题目：</strong>证明实射影直线同胚于圆。</p>
             <p><strong>第一步 — 构造映射：</strong>\(\mathbb{RP}^1 = S^1/{\sim}\)，\(z \sim -z\)。定义 \(f: S^1 \to S^1\)，\(f(e^{i\theta}) = e^{2i\theta}\)。</p>
             <p><strong>第二步 — 验证相容性：</strong>\(f(e^{i\theta}) = e^{2i\theta} = f(e^{i(\theta+\pi)})\)，故 \(f\) 与对径等价相容，诱导 \(\bar{f}: \mathbb{RP}^1 \to S^1\)。</p>
             <p><strong>第三步 — 连续双射：</strong>\(\bar{f}\) 连续（万有性质）。\(\bar{f}\) 单射（\(e^{2i\theta_1} = e^{2i\theta_2} \Rightarrow \theta_1 - \theta_2 \in \pi\mathbb{Z}\)，即 \(e^{i\theta_1} \sim e^{i\theta_2}\)）。满射显然。</p>
             <p><strong>第四步 — 紧→Hausdorff：</strong>\(S^1\) 紧 ⟹ \(\mathbb{RP}^1\) 紧。\(S^1\) Hausdorff。→ 同胚。✔</p>
+
+            <h4>例题 2：环面的粘合构造</h4>
+            <p><strong>题目：</strong>证明 \([0,1]^2\) 按 \((x,0) \sim (x,1)\)，\((0,y) \sim (1,y)\) 粘合后同胚于 \(S^1 \times S^1\)。</p>
+            <p><strong>第一步 — 构造映射：</strong>定义 \(f: [0,1]^2 \to S^1 \times S^1\)，\(f(x,y) = (e^{2\pi ix}, e^{2\pi iy})\)。</p>
+            <p><strong>第二步 — 验证相容性：</strong>\(f(x,0) = (e^{2\pi ix}, 1) = f(x,1)\)，\(f(0,y) = (1, e^{2\pi iy}) = f(1,y)\)。所以 \(f\) 在等价类上取值一致，诱导连续双射 \(\bar{f}: [0,1]^2/{\sim} \to S^1 \times S^1\)。</p>
+            <p><strong>第三步 — 紧→Hausdorff：</strong>\([0,1]^2\) 紧 ⟹ 商空间紧。\(S^1 \times S^1\) Hausdorff。连续双射 ⟹ 同胚。✔</p>
+            <p><strong>推论：</strong>\(\pi_1(T^2) \cong \mathbb{Z}^2\)（两个独立的绕行方向），\(\chi(T^2) = 0\)。</p>
 
             <h4>常见错误</h4>
             <ul>

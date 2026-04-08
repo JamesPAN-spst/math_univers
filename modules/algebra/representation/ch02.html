@@ -418,6 +418,15 @@
             <p>例题: 列出 \(S_3\) 的所有不可约复表示。 解答: \(S_3\) 有 3 个共轭类: \(\{e\}\)，\(\{(12),(13),(23)\}\)，\(\{(123),(132)\}\)。 故有 3 个不可约表示，维数 \(1, 1, 2\)（\(1+1+4=6\)）。 \(\rho_1\): 平凡。\(\rho_2\): 符号。\(\rho_3\): 2维标准。 易错点: 将共轭类个数和表示维数混淆。 共轭类个数 = 不可约表示个数，不是维数。</p>
           </div>
         </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>光谱学</strong>：分子电子态按对称群的不可约表示分类。选择定则规定只有特定不可约表示之间的跃迁被允许——判断谱线是否出现，本质上是检查两个不可约表示的张量积是否含平凡分量。</p>
+            <p><strong>密码学</strong>：有限群上的特征标和（character sums）提供密码安全性的数学保障。不可约表示的正交性使特征标和具有指数衰减性质，这是 Weil 界和差集、序列设计等密码学构造的核心工具。</p>
+            <p><strong>化学</strong>：分子轨道按点群的不可约表示标记（如 \(A_1, B_2, E\)）。共价键类型（\(\sigma, \pi, \delta\)）对应不同不可约表示的组合，杂化轨道理论的数学基础就是将自然表示分解为不可约直和。</p>
+          </div>
+        </div>
       </div>
 
       <div class="inline-quiz" id="iq-kp1">
@@ -466,6 +475,15 @@
             <p>例题: \(\mathbb{C}[S_3]\) 中，平凡表示 \(\rho_1\) 和符号表示 \(\rho_2\) 之间 的 \(G\)-等变映射是什么？ 解答: \(\rho_1 \not\cong \rho_2\)，由 Schur 引理，\(\mathrm{Hom}_G(\rho_1, \rho_2) = 0\)。 易错点: Schur 引理中 \(T = \lambda I\) 要求 \(K\) 代数闭。 \(\mathbb{R}\) 上可能有 \(T\) 不是数量矩阵（如旋转）。</p>
           </div>
         </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>量子力学</strong>：Wigner-Eckart 定理是 Schur 引理的直接推论——对称群不可约表示空间之间的等变算子由一个约化矩阵元完全确定。这将角动量耦合中的矩阵元计算从 \(d^2\) 个独立量简化为 1 个。</p>
+            <p><strong>机器学习</strong>：等变神经网络中 \(G\)-等变线性层的参数空间为 \(\mathrm{Hom}_G(\rho_{\mathrm{in}}, \rho_{\mathrm{out}})\)。Schur 引理表明：不同不可约表示之间无可学习参数，同一不可约表示仅有一个标量参数 \(\lambda I\)，极大压缩了参数空间。</p>
+            <p><strong>调和分析</strong>：紧群上的 Peter-Weyl 定理将 \(L^2(G)\) 分解为不可约表示的矩阵系数。Schur 正交性保证了这些矩阵系数构成正交基，推广了经典 Fourier 分析到非交换群。</p>
+          </div>
+        </div>
       </div>
 
       <div class="inline-quiz" id="iq-kp2">
@@ -494,6 +512,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思路是将 Schur 引理从"映射维数"翻译为"函数内积"。用特征标 \(\chi_i(g) = \mathrm{tr}(\rho_i(g))\) 代替表示矩阵后，\(\mathrm{Hom}_G\) 的维数等于类函数的 Hermite 内积。</p>
+            <p>类函数空间 \(\mathrm{Cl}(G)\) 是 \(r\) 维的（\(r =\) 共轭类数），赋予内积 \(\langle f, g \rangle = \frac{1}{|G|}\sum \bar{f}g\) 后成为 Hilbert 空间。不可约特征标 \(\{\chi_1, \ldots, \chi_r\}\) 是其正交归一基。</p>
+            <p>任何表示的特征标可唯一展开为 \(\chi_V = \sum n_i \chi_i\)，系数 \(n_i = \langle \chi_V, \chi_i \rangle\) 即是不可约分量的重数。这将"分解表示"化约为"计算内积"。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -505,6 +532,15 @@
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
             <p>例题: \(S_3\) 的正则表示 \(\mathbb{C}[S_3]\) 中各不可约表示的重数。 解答: \(\mathbb{C}[S_3] \cong \rho_1^{\oplus 1} \oplus \rho_2^{\oplus 1} \oplus \rho_3^{\oplus 2}\)。 重数 = 维数: \(n_i = d_i\)（正则表示的特殊性质）。 易错点: 重数与维数混淆。 一般表示中 \(n_i\) 和 \(d_i = \dim V_i\) 的关系无规律。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>分子光谱</strong>：判断某振动模式是否红外活性，等价于计算振动表示与平移表示的特征标内积 \(\langle \chi_{\mathrm{vib}}, \chi_T \rangle\)。若内积非零则该模式可被红外光激发，避免了逐一计算矩阵元。</p>
+            <p><strong>数论</strong>：Burnside \(p^a q^b\) 定理用特征标正交性证明阶为 \(p^a q^b\) 的群可解。Dirichlet \(L\)-函数和素数在算术级数中的分布证明也依赖类函数的正交性。</p>
+            <p><strong>统计数据分析</strong>：对称群特征标的正交性是非交换 Fourier 分析的基础。在排列数据（如投票排名）上做统计时，将频率函数按 \(S_n\) 的不可约特征标展开，各分量重数揭示数据的对称性结构。</p>
           </div>
         </div>
       </div>
@@ -541,6 +577,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>中心幂等元将"从内积计算重数"上升为"在群代数中直接投影"。不必先求特征标再算内积，而是直接用代数元素 \(e_i\) 作用于表示空间，切出对应的不可约分量。</p>
+            <p>正交幂等元分解 \(1 = e_1 + e_2 + \cdots + e_r\) 对应了单位元的"频率分解"。每个 \(e_i\) 属于群代数的中心，在任何 \(\mathbb{C}[G]\)-模上都是投影算子，像空间恰好是 \(V_i\)-同型分量。</p>
+            <p>这给出了<strong>算法化的分解流程</strong>：给定任何表示 \(V\)，只需计算 \(e_i v\) 即可得到 \(V\) 在 \(V_i\) 方向上的投影，不再需要解特征方程或寻找不变子空间。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -552,6 +597,15 @@
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
             <p>例题: \(G = \mathbb{Z}/2\mathbb{Z} = \{e, g\}\)。求中心幂等元。 解答: 两个不可约表示: \(\chi_1(g) = 1\)，\(\chi_2(g) = -1\)。 \(e_1 = \frac{1}{2}(e + g)\)，\(e_2 = \frac{1}{2}(e - g)\)。 验证: \(e_1^2 = \frac{1}{4}(e + 2g + g^2) = \frac{1}{4}(e + 2g + e) = \frac{1}{2}(e + g) = e_1\)。✓ 易错点: 忘记取共轭（复表示时）。 \(e_i\) 中是 \(\overline{\chi_i(g)}\)，不是 \(\chi_i(g)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>量子信息</strong>：量子纠错码的设计利用群代数幂等元投影。Knill-Laflamme 条件可用投影公式表述：码空间是群作用下特定不可约分量的像，\(e_i\) 直接给出编码投影算子。</p>
+            <p><strong>信号滤波</strong>：循环群的中心幂等元就是 DFT 基向量，它们作用于信号相当于理想带通滤波器。推广到非交换群可设计对称性适配的滤波器组（如球谐滤波）。</p>
+            <p><strong>晶体学</strong>：晶体场理论中，用点群的幂等元将电子轨道分解为对称性适配基组。投影算子 \(e_i\) 从原子轨道线性组合中提取属于特定不可约表示（如 \(t_{2g}, e_g\)）的分量。</p>
           </div>
         </div>
       </div>

@@ -394,35 +394,73 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>群太大时，我们希望找到其中「自成一体」的小群——子群。 在解方程、分析对称性时，子群对应于部分对称性或约束条件。 子群判定法提供了高效的验证工具，避免逐条检查群公理。</p>
+            <p>一个群往往包含大量元素和复杂的运算关系，直接分析整体结构可能无从下手。子群——群内部「自成一体」的小群——为我们提供了化整为零的钥匙：先理解局部，再拼合全局。</p>
+            <ul>
+              <li>在 \((\mathbb{Z}, +)\) 中，偶数集合 \(2\mathbb{Z}\) 关于加法自成一群，它是最直观的子群范例。</li>
+              <li>在正方形对称群 \(D_4\) 中，仅保留旋转的子群 \(\{e, r, r^2, r^3\}\) 描述了不含反射的旋转对称性。</li>
+              <li>在 \(GL_n(\mathbb{R})\) 中，行列式为正的矩阵构成子群 \(GL_n^+(\mathbb{R})\)，精确刻画了保持定向的线性变换。</li>
+            </ul>
+            <p>子群判定法把验证"某子集是否为子群"从逐条检查四条公理压缩为一步或两步操作，极大简化了实际论证过程。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>子群是群结构的「遗传」：子集继承了母群的运算并自身构成群。 一步判定法 \(ab^{-1} \in H\) 将四条公理压缩为一个条件。</p>
+            <p>子群的核心思想是结构的「遗传」：一个子集不仅要在运算下封闭，还要继承母群的单位元和逆元，从而自身构成完整的群。这种遗传性质使子群成为群论中最基本的分析工具。</p>
+            <p>判定子群时，我们不需要逐条验证群的四条公理。关键观察如下：</p>
+            <ul>
+              <li>一步判定法将封闭性、单位元存在性、逆元存在性三个条件统一为"\(ab^{-1} \in H\)"一个测试。</li>
+              <li>对有限子集，封闭性甚至可以单独保证子群性质（因为有限半群中封闭蕴含逆元存在）。</li>
+              <li>生成子群 \(\langle S \rangle\) 提供了从一组"种子"元素构造最小子群的系统方法。</li>
+            </ul>
+            <p>从范畴论的视角看，子群对应于群范畴中的单态射（子对象）。每个群同态的核和像都自然产生子群，这使子群概念在同态理论中无处不在。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>：\(H \subseteq G\) 是子群（记 \(H \leq G\)），若 \(H\) 关于 \(G\) 的运算自身构成群。 <strong>一步判定法</strong>：\(H \neq \emptyset\) 且 \(\forall a,b \in H,\; ab^{-1} \in H \Rightarrow H \leq G\)。 证明：取 \(a = b\) 得 \(e \in H\)；取 \(a = e\) 得 \(b^{-1} \in H\)； 再由 \(ab^{-1} \in H\) 取 \(b\) 换为 \(b^{-1}\) 得封闭性。 <strong>两步判定法</strong>：\(H \neq \emptyset\)，封闭且 \(a \in H \Rightarrow a^{-1} \in H\)。 <strong>生成子群</strong> \(\langle S \rangle\) = 包含 \(S\) 的最小子群 = \(S\) 中元素及其逆的所有有限乘积。</p>
+            <h4>子群的形式定义</h4>
+            <p>设 \((G, \cdot)\) 是群，非空子集 \(H \subseteq G\) 称为 \(G\) 的<strong>子群</strong>（记 \(H \leq G\)），若 \(H\) 关于 \(G\) 的运算自身构成群。这意味着 \(H\) 满足封闭性、结合律（从 \(G\) 继承）、含单位元、含逆元四条性质。</p>
+            <h4>一步判定法</h4>
+            <p>\(H \neq \emptyset\) 且 \(\forall a,b \in H,\; ab^{-1} \in H \;\Rightarrow\; H \leq G\)。</p>
+            <p>直觉：条件 \(ab^{-1} \in H\) 同时编码了三个信息——取 \(a = b\) 得 \(e \in H\)；取 \(a = e\) 得 \(b^{-1} \in H\)（逆元）；把 \(b\) 换成 \(b^{-1}\) 得 \(ab \in H\)（封闭性）。一个条件"压缩"了三条公理。</p>
+            <h4>两步判定法</h4>
+            <p>\(H \neq \emptyset\)，且同时满足：① \(\forall a,b \in H,\; ab \in H\)（封闭性）；② \(\forall a \in H,\; a^{-1} \in H\)（逆元）。</p>
+            <p>直觉：这是把一步判定法拆成两个更直观的条件。在实际验证中，有时分别检查封闭和逆更方便。</p>
+            <h4>有限子集判定法</h4>
+            <p>若 \(H\) 是 \(G\) 的<strong>有限</strong>非空子集且对运算封闭，则 \(H \leq G\)。</p>
+            <p>直觉：有限集中封闭性保证每个元素反复运算终究回到自身，从而逆元自动存在。这对有限群中的计算验证特别实用。</p>
+            <h4>生成子群</h4>
+            <p>给定子集 \(S \subseteq G\)，由 \(S\) 生成的子群定义为：
+            \[\langle S \rangle = \bigcap_{S \subseteq H \leq G} H\]
+            等价地，\(\langle S \rangle\) 是 \(S\) 中元素及其逆的所有有限乘积组成的集合。当 \(S = \{g\}\) 时，\(\langle g \rangle = \{g^n : n \in \mathbb{Z}\}\) 是循环子群。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>在编码理论中，线性码是 \(\mathbb{F}_q^n\) 的加法子群； 在化学中，分子点群的子群对应于部分对称操作。</p>
+            <p><strong>编码理论</strong>：线性码是 \(\mathbb{F}_q^n\) 的加法子群。子群判定法被用于验证码字集合确实构成线性码，进而利用子群结构设计高效的编码与解码算法。</p>
+            <p><strong>化学晶体学</strong>：分子点群的子群对应于去掉某些对称操作后保留的部分对称性。例如 \(D_4\) 的旋转子群 \(C_4\) 描述纯旋转对称，判断晶体旋光性时正是检查手性子群。</p>
+            <p><strong>数论</strong>：\((\mathbb{Z}/n\mathbb{Z})^*\) 的子群结构直接决定了模 \(n\) 同余方程的可解性。判定某个元素集合是否构成子群，是分析原根存在性和二次剩余的基本步骤。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(H = \{A \in GL_2(\mathbb{R}) : \det(A) > 0\}\) 是 \(GL_2(\mathbb{R})\) 的子群。 解答：\(I_2 \in H\)（\(\det(I_2)=1>0\)），\(H \neq \emptyset\)。 \(\det(AB^{-1}) = \det(A)/\det(B) > 0\)。由一步判定法，\(H \leq G\)。 易错点：忘记验证 \(H \neq \emptyset\)。空集满足 「\(\forall a,b \in H, ab^{-1} \in H\)」（空真命题）， 但空集不是子群。</p>
+            <p><strong>例题 1</strong>：证明 \(H = \{A \in GL_2(\mathbb{R}) : \det(A) > 0\}\) 是 \(GL_2(\mathbb{R})\) 的子群。</p>
+            <p>解答：\(I_2 \in H\)（\(\det(I_2)=1>0\)），故 \(H \neq \emptyset\)。对任意 \(A, B \in H\)，\(\det(AB^{-1}) = \det(A)/\det(B) > 0\)，故 \(AB^{-1} \in H\)。由一步判定法，\(H \leq GL_2(\mathbb{R})\)。</p>
+            <p><strong>例题 2</strong>：在 \((\mathbb{Z}, +)\) 中，证明 \(n\mathbb{Z} = \{nk : k \in \mathbb{Z}\}\) 是子群。</p>
+            <p>解答：\(0 = n \cdot 0 \in n\mathbb{Z}\)，非空。对 \(na, nb \in n\mathbb{Z}\)，\(na - nb = n(a-b) \in n\mathbb{Z}\)。由一步判定法，\(n\mathbb{Z} \leq \mathbb{Z}\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>忘记验证非空</strong>：空集对"\(\forall a,b \in H,\; ab^{-1} \in H\)"空真成立，但空集不是子群。判定法要求 \(H \neq \emptyset\) 在前。</li>
+              <li><strong>混淆封闭性与子群性</strong>：\(\{n \in \mathbb{Z} : n \geq 0\}\) 对加法封闭，但 \(1\) 的逆元 \(-1\) 不在集合中，不是子群。</li>
+              <li><strong>以为"含单位元 + 封闭"就够了</strong>：集合 \(\{0, 2, 4\}\) 在 \(\mathbb{Z}/6\mathbb{Z}\) 中含 \(\overline{0}\) 且对加法封闭，碰巧也含逆元，是子群。但一般情况必须单独验证逆元或用一步判定法。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -449,28 +487,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>给定群中的一个元素或子集，哪些元素与它「交换」？哪些元素 「保持它不变」？这些问题产生了中心 \(Z(G)\)、中心化子 \(C_G(a)\) 和正规化子 \(N_G(H)\) 等重要子群概念，它们在分析群的内部结构时 反复出现。</p>
+            <p>非交换群中并非所有元素之间都"和平共处"。我们自然想知道：群里到底有哪些元素彼此可交换？对于给定的元素或子集，谁与它"兼容"？回答这些问题将揭示群结构中隐藏的对称层次。</p>
+            <ul>
+              <li>在矩阵群 \(GL_n(\mathbb{R})\) 中，数量矩阵 \(\lambda I\) 与所有矩阵交换——它们构成了中心 \(Z(GL_n)\)。</li>
+              <li>在对称群 \(S_n\) 中，给定置换 \(\sigma\)，只有特定的置换与 \(\sigma\) 可交换——这就是中心化子 \(C_{S_n}(\sigma)\)。</li>
+              <li>在 \(D_4\) 中，正规化子 \(N_{D_4}(H)\) 精确刻画了哪些对称操作保持子群 \(H\) 整体不变。</li>
+            </ul>
+            <p>中心、中心化子和正规化子分别从全局、单元素和子集三个层面量化"交换程度"，它们在共轭类计数、正规子群判定和群作用分析中起核心作用。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>核心思想是「交换性的定量描述」——不是整个群都交换，而是精确 刻画哪些元素与给定对象交换，形成的子集恰好构成子群。</p>
+            <p>核心思想是将"交换性"从定性判断（群是否交换）提升为定量描述：不是问整个群是否交换，而是精确刻画"哪些元素之间可以交换"。</p>
+            <p>这三个概念形成自然的包含链：</p>
+            <ul>
+              <li>\(Z(G)\)（中心）：与<strong>所有</strong>元素交换的元素集合——最强的交换性要求。</li>
+              <li>\(C_G(a)\)（中心化子）：与<strong>特定元素</strong> \(a\) 交换的元素集合——局部的交换性。</li>
+              <li>\(N_G(H)\)（正规化子）：使子群 \(H\) 在共轭下<strong>整体不变</strong>的元素集合——更弱的"兼容"条件。</li>
+            </ul>
+            <p>它们满足 \(Z(G) \subseteq C_G(a) \subseteq N_G(\langle a \rangle) \leq G\)，每一步放宽条件都扩大了集合。这种层级结构是分析非交换群的基本框架。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>中心</strong>：\(Z(G) = \{z \in G : \forall g \in G,\; zg = gz\}\)。 \(Z(G) \trianglelefteq G\)（正规子群）。\(G\) 交换 \(\Leftrightarrow Z(G) = G\)。 <strong>中心化子</strong>：\(C_G(a) = \{g \in G : ga = ag\}\)。 \(C_G(a) \leq G\)（用一步判定法：\(g_1 a = a g_1,\; g_2 a = a g_2 \Rightarrow g_1 g_2^{-1} a = g_1 a g_2^{-1} = a g_1 g_2^{-1}\)）。 显然 \(Z(G) = \bigcap_{a \in G} C_G(a)\)。 <strong>正规化子</strong>：\(N_G(H) = \{g \in G : gHg^{-1} = H\}\)。 \(H \leq N_G(H) \leq G\)，且 \(H \trianglelefteq N_G(H)\)。 \(H \trianglelefteq G \Leftrightarrow N_G(H) = G\)。</p>
+            <h4>中心 \(Z(G)\)</h4>
+            <p>\[Z(G) = \{z \in G : \forall g \in G,\; zg = gz\}\]</p>
+            <p>\(Z(G)\) 总是 \(G\) 的正规子群：对任意 \(z \in Z(G)\) 和 \(g \in G\)，\(gzg^{-1} = zgg^{-1} = z \in Z(G)\)。直觉上，与所有人交换的元素在任何共轭操作下都"不受影响"。\(G\) 交换 \(\Leftrightarrow Z(G) = G\)。</p>
+            <h4>中心化子 \(C_G(a)\)</h4>
+            <p>\[C_G(a) = \{g \in G : ga = ag\}\]</p>
+            <p>子群性验证（一步判定法）：若 \(g_1 a = ag_1\) 且 \(g_2 a = ag_2\)，则 \(g_1 g_2^{-1} a = g_1 a g_2^{-1} = a g_1 g_2^{-1}\)，故 \(g_1 g_2^{-1} \in C_G(a)\)。直觉：中心化子度量了元素 \(a\) "有多接近中心"——\(C_G(a)\) 越大，\(a\) 的交换性越好。</p>
+            <h4>中心与中心化子的关系</h4>
+            <p>\[Z(G) = \bigcap_{a \in G} C_G(a)\]</p>
+            <p>直觉：与所有元素都交换，就是对每个 \(a\) 都落在 \(C_G(a)\) 中。中心是所有中心化子的"公共部分"。</p>
+            <h4>正规化子 \(N_G(H)\)</h4>
+            <p>\[N_G(H) = \{g \in G : gHg^{-1} = H\}\]</p>
+            <p>关键性质：\(H \leq N_G(H) \leq G\)，且 \(H \trianglelefteq N_G(H)\)（\(H\) 在其正规化子中正规）。判定正规性：\(H \trianglelefteq G\) 当且仅当 \(N_G(H) = G\)。直觉：正规化子是"让 \(H\) 正规"的最大范围。</p>
+            <h4>轨道-稳定子联系</h4>
+            <p>共轭类大小公式 \(|\mathrm{Cl}(a)| = [G : C_G(a)]\) 将中心化子与群的共轭作用联系起来。中心化子越大，共轭类越小。特别地，\(a \in Z(G) \Leftrightarrow |\mathrm{Cl}(a)| = 1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>量子力学</strong>：可观测量对应于算子，两个算子可同时精确测量当且仅当它们交换——即属于彼此的中心化子。不确定性原理本质上源于位置算子与动量算子不交换。</p>
+            <p><strong>粒子物理</strong>：规范理论中对称群（如 \(SU(3)\)）的中心 \(Z(SU(3)) \cong \mathbb{Z}/3\mathbb{Z}\) 决定了夸克禁闭的拓扑性质。中心元素对应于不改变任何物理态的全局相位变换。</p>
+            <p><strong>机器人学</strong>：机器人关节运动群中，正规化子 \(N_G(H)\) 描述了哪些运动序列保持某个关节子系统的构型空间不变，用于简化运动规划中的对称性约化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：求 \(S_3\) 的中心 \(Z(S_3)\)。 解答：\(S_3 = \{e, (12), (13), (23), (123), (132)\}\)。 检查 \((12)\)：\((12)(123) = (23)\) 而 \((123)(12) = (13)\)，不相等。 故 \((12) \notin Z(S_3)\)。类似地所有非恒等元素都不与所有元素 交换。故 \(Z(S_3) = \{e\}\)。 易错点：误以为「中心总是非平凡的」。非交换群的中心可以是平凡的 （如 \(S_3\)）。但 \(p\)-群的中心一定非平凡（由类方程推出）。</p>
+            <p><strong>例题 1</strong>：求 \(S_3\) 的中心 \(Z(S_3)\)。</p>
+            <p>解答：\(S_3 = \{e, (12), (13), (23), (123), (132)\}\)。检查 \((12)\)：\((12)(123) = (23)\) 而 \((123)(12) = (13)\)，不相等，故 \((12) \notin Z(S_3)\)。类似地，所有非恒等元素均不与全体元素交换。故 \(Z(S_3) = \{e\}\)。</p>
+            <p><strong>例题 2</strong>：求 \(D_4\) 的中心 \(Z(D_4)\)，其中 \(D_4 = \langle r, s \mid r^4 = s^2 = e,\; srs = r^{-1} \rangle\)。</p>
+            <p>解答：\(r^2\) 与 \(r\) 显然交换。又 \(sr^2 s = r^{-2} = r^2\)，故 \(r^2\) 与 \(s\) 也交换。但 \(r\) 不与 \(s\) 交换（\(srs = r^{-1} \neq r\)）。故 \(Z(D_4) = \{e, r^2\}\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>以为非交换群的中心总非平凡</strong>：\(S_3\) 的中心只有 \(\{e\}\)。非交换不意味着有"部分交换"的中心元素（但 \(p\)-群的中心确实非平凡）。</li>
+              <li><strong>混淆 \(C_G(a)\) 和 \(\langle a \rangle\)</strong>：中心化子是所有与 \(a\) 交换的元素，不只是 \(a\) 的幂。例如在 \(D_4\) 中 \(C_{D_4}(r^2) = D_4 \supsetneq \langle r^2 \rangle\)。</li>
+              <li><strong>把 \(gHg^{-1} = H\) 理解为逐元素不动</strong>：正规化子要求共轭操作保持 \(H\) <em>整体</em>不变，不要求 \(ghg^{-1} = h\) 对每个 \(h\) 成立。共轭可以交换 \(H\) 内部元素的位置。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -497,28 +579,69 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>给定群 \(G\) 及子群 \(H\)，如何系统地「分解」\(G\)？陪集 \(aH\) 把 \(G\) 的元素按照与 \(H\) 的关系进行分组。这种划分是 Lagrange 定理的基础，也是构建商群的第一步。</p>
+            <p>确定了子群之后，下一个自然问题是：子群与母群的"差距"如何量化？陪集提供了精确的答案——它把群中剩余的元素按照与子群的关系系统地分组，就像整除关系中余数类划分整数一样。</p>
+            <ul>
+              <li>在 \((\mathbb{Z}, +)\) 中，子群 \(3\mathbb{Z}\) 将整数分成三个陪集 \(\{0,3,6,\ldots\}\)、\(\{1,4,7,\ldots\}\)、\(\{2,5,8,\ldots\}\)——正是模 3 的三个余数类。</li>
+              <li>在 \(S_3\) 中，子群 \(H = \{e, (12)\}\) 的三个左陪集对应于三种"等价的对称操作类"。</li>
+              <li>在 \(GL_n(\mathbb{R})\) 中，\(SL_n(\mathbb{R})\) 的陪集按行列式值分类：同一陪集中的矩阵行列式相同。</li>
+            </ul>
+            <p>陪集划分不仅是 Lagrange 定理的证明工具，更是构建商群的基础——将群"模掉"一个正规子群，所得的商恰由陪集构成。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>陪集本质是等价关系 \(a \sim b \Leftrightarrow a^{-1}b \in H\) 诱导的等价类。这把集合论中等价类划分的抽象框架应用到了群结构中。</p>
+            <p>陪集的抽象化路径是将群的分解问题转化为等价关系问题。定义 \(a \sim b \Leftrightarrow a^{-1}b \in H\)，这是一个等价关系，其等价类恰好是左陪集 \(aH\)。</p>
+            <p>这个视角有两层深意：</p>
+            <ul>
+              <li>陪集划分是集合论中等价类划分的群论具体化——群结构保证了每个等价类大小相同（都等于 \(|H|\)）。</li>
+              <li>左、右陪集一般不同（除非 \(H\) 正规），这种不对称性恰恰反映了群运算的非交换性。</li>
+            </ul>
+            <p>从几何角度看，陪集可以理解为"平移"：\(aH\) 是子群 \(H\) 被群元素 \(a\) "平移"后的像。在李群中，这对应于齐次空间 \(G/H\) 的各个"层"。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>左陪集</strong>：\(aH = \{ah : h \in H\}\)，<strong>右陪集</strong>：\(Ha\)。 定义等价关系 \(a \sim b \Leftrightarrow a^{-1}b \in H\)， 则 \([a] = aH\)。 <strong>等势性</strong>：映射 \(\varphi: H \to aH,\; h \mapsto ah\) 是双射， 故 \(|aH| = |H|\)。所有左陪集大小相同。 <strong>划分</strong>：\(G\) 被左陪集不交地划分： \[G = \bigsqcup_{i} a_i H\] 每个元素恰属于一个陪集。陪集个数称为<strong>指数</strong> \([G:H] = |G|/|H|\)（\(G\) 有限时）。 <strong>指数乘法性</strong>：若 \(K \leq H \leq G\)， 则 \([G:K] = [G:H] \cdot [H:K]\)。</p>
+            <h4>左陪集与右陪集</h4>
+            <p>设 \(H \leq G\)，对 \(a \in G\) 定义：左陪集 \(aH = \{ah : h \in H\}\)，右陪集 \(Ha = \{ha : h \in H\}\)。一般情况下 \(aH \neq Ha\)。</p>
+            <h4>陪集的等价关系刻画</h4>
+            <p>定义 \(a \sim_L b \Leftrightarrow a^{-1}b \in H\)。验证三条性质：自反性（\(a^{-1}a = e \in H\)）、对称性（\(a^{-1}b \in H \Rightarrow b^{-1}a = (a^{-1}b)^{-1} \in H\)）、传递性（\(a^{-1}b, b^{-1}c \in H \Rightarrow a^{-1}c = (a^{-1}b)(b^{-1}c) \in H\)）。等价类 \([a] = aH\)。</p>
+            <h4>等势性与计数</h4>
+            <p>映射 \(\varphi: H \to aH,\; h \mapsto ah\) 是双射（左消去律保证单射，满射显然），故 \(|aH| = |H|\)。所有陪集大小相同，这是 Lagrange 定理的关键技术步骤。</p>
+            <h4>陪集划分</h4>
+            <p>\[G = \bigsqcup_{i=1}^{[G:H]} a_i H\]</p>
+            <p>每个元素恰属于一个陪集。<strong>指数</strong>定义为陪集个数 \([G:H]\)。当 \(G\) 有限时 \([G:H] = |G|/|H|\)。直觉：把群"均匀切片"，每片大小 \(|H|\)，片数即为指数。</p>
+            <h4>指数的乘法性</h4>
+            <p>若 \(K \leq H \leq G\)，则 \([G:K] = [G:H] \cdot [H:K]\)。</p>
+            <p>直觉：先按 \(H\) 切 \(G\) 得 \([G:H]\) 大片，再在每片内按 \(K\) 切 \(H\) 得 \([H:K]\) 小片，总片数为两者之积。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>编码理论</strong>：线性码 \(C \leq \mathbb{F}_q^n\) 的陪集用于错误检测与纠正。每个陪集中的向量对应相同的校验综合征（syndrome），接收端通过计算综合征来定位传输错误。</p>
+            <p><strong>密码学</strong>：Diffie-Hellman 密钥交换的安全性依赖于循环群 \((\mathbb{Z}/p\mathbb{Z})^*\) 中陪集结构的计算复杂性。离散对数问题本质上是确定元素所在的循环子群陪集。</p>
+            <p><strong>计算化学</strong>：分子的构象空间可以用对称群的陪集描述。例如水分子 \(\text{H}_2\text{O}\) 的对称群 \(C_{2v}\) 在更大旋转群 \(SO(3)\) 中的陪集，参数化了分子在空间中所有不等价的取向。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：列出 \(\mathbb{Z}\) 中子群 \(3\mathbb{Z}\) 的所有左陪集。 解答：\(0 + 3\mathbb{Z} = \{\ldots,-3,0,3,6,\ldots\}\)， \(1 + 3\mathbb{Z} = \{\ldots,-2,1,4,7,\ldots\}\)， \(2 + 3\mathbb{Z} = \{\ldots,-1,2,5,8,\ldots\}\)。 共 3 个陪集，\([\mathbb{Z}:3\mathbb{Z}] = 3\)。 易错点：以为 \(aH = Ha\) 对任意子群成立。 左右陪集相等当且仅当 \(H\) 是正规子群。一般情况下可能不同。</p>
+            <p><strong>例题 1</strong>：列出 \(\mathbb{Z}\) 中子群 \(3\mathbb{Z}\) 的所有左陪集。</p>
+            <p>解答：\(0 + 3\mathbb{Z} = \{\ldots,-3,0,3,6,\ldots\}\)，\(1 + 3\mathbb{Z} = \{\ldots,-2,1,4,7,\ldots\}\)，\(2 + 3\mathbb{Z} = \{\ldots,-1,2,5,8,\ldots\}\)。共 3 个陪集，\([\mathbb{Z}:3\mathbb{Z}] = 3\)。</p>
+            <p><strong>例题 2</strong>：在 \(S_3\) 中，设 \(H = \{e, (12)\}\)。比较左陪集 \((13)H\) 与右陪集 \(H(13)\)。</p>
+            <p>解答：\((13)H = \{(13),\; (13)(12)\} = \{(13),\; (132)\}\)。\(H(13) = \{(13),\; (12)(13)\} = \{(13),\; (123)\}\)。二者不同，因为 \(H\) 不是 \(S_3\) 的正规子群。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>以为 \(aH = Ha\) 对任意子群成立</strong>：左右陪集相等当且仅当 \(H \trianglelefteq G\)。在非交换群中，左右陪集通常不同。</li>
+              <li><strong>混淆"陪集"与"子群"</strong>：除了 \(H\) 本身（\(eH = H\)），其他陪集 \(aH\)（\(a \notin H\)）不含单位元，因此不是子群。</li>
+              <li><strong>重复计数陪集代表元</strong>：在 \(\mathbb{Z}/6\mathbb{Z}\) 中若 \(H = \{\overline{0}, \overline{3}\}\)，则 \(\overline{3} + H = \overline{0} + H = H\)，不要把 \(\overline{3}+H\) 当成新陪集。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -564,35 +687,73 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Lagrange 定理是有限群论最基本的结果：子群的阶必须整除群的阶。 这个简洁的整除关系立刻排除了大量子群不存在的可能性，并导出 素阶群是循环群等重要推论。</p>
+            <p>有了陪集划分的工具后，一个深刻的整除关系呼之欲出：子群的阶必须整除群的阶。Lagrange 定理是有限群论最基本、应用最广的结果之一，它一举将群结构分析与初等数论的整除理论连接起来。</p>
+            <ul>
+              <li>想在 \(S_4\)（24 阶）中找子群？Lagrange 定理告诉我们阶只能是 1, 2, 3, 4, 6, 8, 12, 24——不需要尝试 5 阶或 7 阶。</li>
+              <li>在 7 阶群中，任何非单位元的阶只能是 7——因此该群必定是循环群，结构完全确定。</li>
+              <li>费马小定理 \(a^{p-1} \equiv 1 \pmod{p}\) 是 Lagrange 定理在 \((\mathbb{Z}/p\mathbb{Z})^*\) 中的直接推论。</li>
+            </ul>
+            <p>但 Lagrange 定理的逆不成立——\(d \mid |G|\) 并不保证存在 \(d\) 阶子群，\(A_4\) 无 6 阶子群就是经典反例。理解定理的边界与反例同样重要。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Lagrange 定理把群的「大小」问题翻译为「整除」问题，连接了 群论与初等数论。</p>
+            <p>Lagrange 定理的抽象本质是"均匀分割"原理：群被子群的陪集等分，每份大小相同，因此总量是每份大小的整数倍。这把组合计数中"分组计数"的思想应用到了代数结构中。</p>
+            <p>从这个视角看，定理的证明策略极为自然：</p>
+            <ul>
+              <li>构建分割：陪集将 \(G\) 不交地覆盖。</li>
+              <li>等势性：每个陪集与 \(H\) 有相同的大小。</li>
+              <li>计数：\(|G| = (\text{陪集个数}) \times |H|\)，因此 \(|H| \mid |G|\)。</li>
+            </ul>
+            <p>定理虽然只是一个整除声明，但其推论影响深远：约束了元素的阶、确定了素阶群的结构、为 Sylow 定理铺平了道路。它示范了"局部结构（子群）约束全局性质（群阶）"这一群论的核心思维方式。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Lagrange 定理</strong>：若 \(H \leq G\)，\(G\) 有限，则 \[|H| \;\big|\; |G|\] 证明：由陪集划分 \(G = \bigsqcup_{i=1}^{[G:H]} a_i H\)， 且每个 \(|a_i H| = |H|\)，故 \(|G| = [G:H] \cdot |H|\)。 <strong>推论 1</strong>：\(\mathrm{ord}(g) \mid |G|\) （因为 \(\langle g \rangle \leq G\)，\(\mathrm{ord}(g) = |\langle g \rangle|\)）。 <strong>推论 2</strong>：\(g^{|G|} = e\)（因为 \(|G| = \mathrm{ord}(g) \cdot k\)）。 <strong>推论 3</strong>：素阶群 \(|G| = p\) 是循环群（除 \(e\) 外每个元素阶为 \(p\)）。 <strong>推论 4</strong>（Lagrange 逆不一定成立）：\(d \mid |G|\) 不保证存在 \(d\) 阶子群（\(A_4\) 无 6 阶子群）。</p>
+            <h4>Lagrange 定理</h4>
+            <p>设 \(G\) 是有限群，\(H \leq G\)，则 \(|H| \mid |G|\)，且 \(|G| = [G:H] \cdot |H|\)。</p>
+            <p>证明：由陪集划分 \(G = \bigsqcup_{i=1}^{[G:H]} a_i H\)，每个 \(|a_i H| = |H|\)（等势性），对两边取基数得 \(|G| = [G:H] \cdot |H|\)。直觉：把群想象成一盒糖果，按 \(|H|\) 颗一袋分装，整除性保证能分完。</p>
+            <h4>推论 1：元素阶整除群阶</h4>
+            <p>\[\mathrm{ord}(g) \mid |G|\]</p>
+            <p>因 \(\langle g \rangle \leq G\) 且 \(|\langle g \rangle| = \mathrm{ord}(g)\)。直觉：元素在群中"自转"一圈回到单位元所需的步数，必须是群总容量的因子。</p>
+            <h4>推论 2：群阶幂消去</h4>
+            <p>\[\forall g \in G,\; g^{|G|} = e\]</p>
+            <p>由 \(|G| = \mathrm{ord}(g) \cdot k\)，故 \(g^{|G|} = (g^{\mathrm{ord}(g)})^k = e^k = e\)。当 \(G = (\mathbb{Z}/p\mathbb{Z})^*\) 时，这就是费马小定理。</p>
+            <h4>推论 3：素阶群是循环群</h4>
+            <p>若 \(|G| = p\)（素数），取 \(g \neq e\)。则 \(\mathrm{ord}(g) \mid p\) 且 \(\mathrm{ord}(g) > 1\)，因此 \(\mathrm{ord}(g) = p\)，\(G = \langle g \rangle \cong \mathbb{Z}/p\mathbb{Z}\)。</p>
+            <p>直觉：素数不可分解，所以群中不可能有"真的"子群，任何非平凡元素只能生成整个群。</p>
+            <h4>Lagrange 逆命题的失效</h4>
+            <p>\(d \mid |G|\) 不保证 \(G\) 有 \(d\) 阶子群。经典反例：\(A_4\)（\(|A_4| = 12\)）没有 6 阶子群。</p>
+            <p>直觉：整除是子群存在的必要条件，但非充分条件。Sylow 定理保证素数幂阶子群一定存在（\(p^k \mid |G|\) 时存在 \(p^k\) 阶子群），但一般因子不然。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>在密码学中，Lagrange 定理保证了 Diffie-Hellman 群中元素的 阶整除群阶，从而可计算离散对数的搜索空间大小。</p>
+            <p><strong>密码学</strong>：RSA 加密的正确性依赖于欧拉定理 \(a^{\varphi(n)} \equiv 1 \pmod{n}\)，而欧拉定理是 Lagrange 定理在 \((\mathbb{Z}/n\mathbb{Z})^*\) 中的推论。Lagrange 定理还限定了 Diffie-Hellman 群中元素的阶，从而决定了密钥空间的大小。</p>
+            <p><strong>纠错编码</strong>：线性码 \(C \leq \mathbb{F}_2^n\) 的陪集个数 \([\mathbb{F}_2^n : C] = 2^n / |C|\) 由 Lagrange 定理保证为整数。这个指数等于综合征的个数，直接决定了码的纠错能力。</p>
+            <p><strong>数论</strong>：费马小定理（\(a^{p-1} \equiv 1 \pmod{p}\)）和欧拉定理是 Lagrange 定理在模算术群中的实例。它们是 Miller-Rabin 素性测试和快速幂算法的理论基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 7 阶群 \(G\) 是循环群。 解答：取 \(g \neq e\)，则 \(\mathrm{ord}(g) \mid 7\)，且 \(\mathrm{ord}(g) > 1\)。因为 7 是素数，\(\mathrm{ord}(g) = 7\)， 故 \(G = \langle g \rangle \cong \mathbb{Z}/7\mathbb{Z}\)。 易错点：误以为 Lagrange 定理的逆成立——即 \(d \mid |G|\) 就 存在 \(d\) 阶子群。反例：\(A_4\)（\(|A_4|=12\)）没有 6 阶子群。 （但 Sylow 定理保证素数幂阶子群存在。）</p>
+            <p><strong>例题 1</strong>：证明 7 阶群 \(G\) 是循环群。</p>
+            <p>解答：取 \(g \neq e\)。由 Lagrange 定理，\(\mathrm{ord}(g) \mid 7\)。因 7 是素数且 \(\mathrm{ord}(g) > 1\)，故 \(\mathrm{ord}(g) = 7\)，\(G = \langle g \rangle \cong \mathbb{Z}/7\mathbb{Z}\)。</p>
+            <p><strong>例题 2</strong>：设 \(|G| = 24\)，\(g \in G\) 且 \(\mathrm{ord}(g) = 8\)。求 \(\mathrm{ord}(g^6)\)。</p>
+            <p>解答：\(\mathrm{ord}(g^6) = \mathrm{ord}(g) / \gcd(6, \mathrm{ord}(g)) = 8 / \gcd(6,8) = 8/2 = 4\)。验证：\((g^6)^4 = g^{24} = (g^8)^3 = e\)，且 \((g^6)^2 = g^{12} = g^{8+4} = g^4 \neq e\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>以为 Lagrange 逆命题成立</strong>：\(6 \mid 12\) 不意味着 \(A_4\) 有 6 阶子群。Lagrange 定理只给出必要条件，不是充分条件。</li>
+              <li><strong>对 \(\mathrm{ord}(g^k)\) 公式记错</strong>：正确公式是 \(\mathrm{ord}(g^k) = \mathrm{ord}(g) / \gcd(k, \mathrm{ord}(g))\)，不是简单的 \(\mathrm{ord}(g)/k\) 或 \(\mathrm{ord}(g) \cdot k\)。</li>
+              <li><strong>推论 2 中忘记有限群前提</strong>：\(g^{|G|} = e\) 要求 \(G\) 是有限群。对无限群（如 \(\mathbb{Z}\)），不存在"群阶"的概念，推论不适用。</li>
+            </ul>
           </div>
         </div>
       </div>

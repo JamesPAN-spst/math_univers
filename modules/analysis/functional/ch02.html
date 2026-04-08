@@ -394,14 +394,22 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>赋范空间不一定完备——Cauchy 列可能"逃逸"到空间之外。但分析学 的许多定理（如不动点定理、三大定理）需要完备性。完备的赋范空间 称为 Banach 空间，它们是泛函分析的核心对象。理解"完备"的多种 等价刻画对证明完备性至关重要。</p>
+            <p>赋范空间不一定完备——Cauchy 列可能"逃逸"到空间之外。但泛函分析的三大定理和不动点方法都需要完备性。</p>
+            <ul>
+              <li><strong>不完备的灾难</strong>：\((C([0,1]), \|\cdot\|_1)\) 中阶梯函数逼近列的极限不再连续——Cauchy 列没有极限。</li>
+              <li><strong>完备化的必要</strong>：\(\mathbb{Q}\) 对分析学不够用，完备化得 \(\mathbb{R}\)；类似地 \(C([0,1])\) 在 \(\|\cdot\|_2\) 下完备化得 \(L^2\)。</li>
+              <li><strong>级数判据</strong>："绝对收敛 \(\Rightarrow\) 收敛"等价于完备性——这是实践中验证完备性的最便利工具。</li>
+            </ul>
+            <p>Banach 空间是泛函分析的核心舞台，几乎所有重要的存在性定理都以完备性为前提。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>完备性的核心意义：逼近过程具有极限。在 Banach 空间中， "绝对收敛 ⇒ 收敛" 等价于完备性——这是将有限维的经验 推广到无穷维的关键桥梁。</p>
+            <p>完备性的核心意义：逼近过程具有极限。在 Banach 空间中，"绝对收敛 \(\Rightarrow\) 收敛"等价于完备性——这是从有限维推广到无穷维的关键桥梁。</p>
+            <p>完备化过程保证每个赋范空间都能"嵌入"一个 Banach 空间：取 Cauchy 列的等价类，定义极限范数。结果在等距意义下唯一。</p>
+            <p>Banach 空间构成了"好的"函数空间范畴：在其中，极限过程封闭、不动点存在、算子逆的连续性可由 Baire 范畴保证。</p>
           </div>
         </div>
 
@@ -412,10 +420,30 @@
           </div>
         </div>
 
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>随机分析</strong>：Itô 积分的定义依赖 \(L^2(\Omega)\) 的完备性——将简单过程的 Itô 积分经等距延拓到一般适应过程，极限过程在 Banach 空间中收敛。</p>
+            <p><strong>PDE 弱解</strong>：Sobolev 空间 \(W^{k,p}\) 是 Banach 空间；弱解的存在性证明中，逼近序列的极限（在完备空间中）自动属于同一空间。</p>
+            <p><strong>数值逼近</strong>：完备化保证数值方法的收敛目标存在于空间内——Galerkin 方法在 Banach 空间的有限维子空间中求解，完备性保证误差估计有意义。</p>
+          </div>
+        </div>
+
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \((C([0,1]), \|\cdot\|_\infty)\) 是 Banach 空间。 解答：设 \(\{f_n\}\) 是 Cauchy 列。对每个 \(x\)，\(\{f_n(x)\}\) 是 \(\mathbb{R}\) 中 Cauchy 列，收敛到 \(f(x)\)。一致 Cauchy 保证 \(f_n \to f\) 一致收敛，\(f\) 连续，\(\|f_n - f\|_\infty \to 0\)。 易错点：\((C([0,1]), \|\cdot\|_1)\) 不完备！ \(f_n(x) = \max(0, \min(1, n(x - 1/2) + 1/2))\) 在 \(\|\cdot\|_1\) 下是 Cauchy 列但极限不连续。</p>
+            <h4>例题 1</h4>
+            <p>证明 \((C([0,1]), \|\cdot\|_\infty)\) 是 Banach 空间。</p>
+            <p><strong>解</strong>：设 \(\{f_n\}\) Cauchy。对每个 \(x\)，\(\{f_n(x)\}\) 在 \(\mathbb{R}\) 中 Cauchy，收敛到 \(f(x)\)。一致 Cauchy 保证 \(f_n \to f\) 一致收敛，\(f\) 连续，\(\|f_n - f\|_\infty \to 0\)。</p>
+            <h4>例题 2</h4>
+            <p>证明 \((C([0,1]), \|\cdot\|_1)\) 不完备。</p>
+            <p><strong>解</strong>：取 \(f_n(x) = \min(1, \max(0, n(x - 1/2) + 1/2))\)。\(\{f_n\}\) 在 \(\|\cdot\|_1\) 下 Cauchy，但其极限（阶跃函数）不连续，不属于 \(C([0,1])\)。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li><strong>把"完备"等同于"闭"</strong>：完备是一个空间的内在性质；闭是子集相对于环境空间的性质。但在完备空间中，闭子空间确实完备。</li>
+              <li><strong>忘记检查极限属于空间</strong>：证明完备性时，不仅要证 Cauchy 列有极限，还要验证极限元素属于该空间（如连续性、可积性等）。</li>
+              <li><strong>混淆 \(\|\cdot\|_\infty\) 与 \(\|\cdot\|_1\) 的完备性差异</strong>：同一集合在不同范数下可能完备或不完备。</li>
+            </ol>
           </div>
         </div>
       </div>
@@ -471,28 +499,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>掌握泛函分析不能只知道抽象定义——必须了解最重要的具体 Banach 空间。\(C([a,b])\), \(l^p\), \(L^p\) 是三大类基本例子，各有不同的性质。 这些空间在 PDE、概率论、数值分析和信号处理中反复出现。</p>
+            <p>理论离不开实例。掌握泛函分析需要熟悉最重要的具体 Banach 空间——\(C(K)\)、\(\ell^p\)、\(L^p\)——它们在分析各分支中反复出现。</p>
+            <ul>
+              <li><strong>\(C([0,1])\)</strong>：连续函数空间，是逼近论和数值分析的自然框架。</li>
+              <li><strong>\(\ell^p\)</strong>：序列空间，是离散信号处理和组合分析的工具箱。</li>
+              <li><strong>\(L^p\)</strong>：Lebesgue 空间，是 PDE、概率和调和分析的基本建构块。</li>
+            </ul>
+            <p>了解每个空间的可分性、自反性、对偶结构是选择正确空间框架的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Banach 空间的分类学关注几个关键不变量：可分性（是否有可数稠密子集）、自反性（典范嵌入是否满射）、Schauder 基的存在性。</p>
+            <p>对偶空间 \(X^*\) 总是 Banach 空间（\(\mathbb{K}\) 完备保证），且对偶操作可以改变空间的性质。例如 \((c_0)^* = \ell^1\)，\((\ell^1)^* = \ell^\infty\)——从可分到不可分。</p>
+            <p>空间之间的包含关系（如 \(\ell^p \subset \ell^q\)，\(p < q\)）和嵌入关系（如 Sobolev 嵌入）编码了正则性与可积性的权衡。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>\(C([a,b])\)</strong>（\(\|\cdot\|_\infty\)）：连续函数空间。 可分（Weierstrass 逼近定理：多项式稠密）。不是 Hilbert 空间。 <strong>\(l^p\)</strong>（\(1 \leq p \leq \infty\)）：序列空间。 \(l^p = \{(x_n) : \sum |x_n|^p < \infty\}\)。 Banach 空间。\(l^2\) 是 Hilbert 空间。 \(l^p\)（\(1 \leq p < \infty\)）可分；\(l^\infty\) 不可分。 包含关系：\(l^p \subsetneq l^q\)（\(p < q\)）。 <strong>\(L^p(\mu)\)</strong>（\(1 \leq p \leq \infty\)）：Lebesgue 空间。 Banach（Riesz-Fischer）。\(L^2\) 是 Hilbert。 <strong>关键区别</strong>：\(L^p\) 中的"元素"是等价类（a.e. 相等的函数视为相同）。 <strong>\(B(X, Y)\)</strong>（有界线性算子空间）：若 \(Y\) 完备则 \(B(X, Y)\) 完备。 特别地 \(X^* = B(X, \mathbb{K})\) 总是 Banach 空间。</p>
+            <h4>\(C([a,b])\) — 连续函数空间</h4>
+            <p>范数取上确界：\(\|f\|_\infty = \sup_{t\in[a,b]}|f(t)|\)。完备性源于一致收敛极限保持连续性。</p>
+            <p>可分（Weierstrass：多项式在 \(\|\cdot\|_\infty\) 下稠密）。不自反，不是 Hilbert 空间。</p>
+            <h4>\(\ell^p\)（\(1 \le p \le \infty\)）— 序列空间</h4>
+            <p>\(\ell^p = \{(x_n) : \sum|x_n|^p < \infty\}\)，范数 \(\|x\|_p = (\sum|x_n|^p)^{1/p}\)。完备性由逐分量收敛再控制尾部和得到。</p>
+            <p>\(\ell^2\) 是 Hilbert 空间；\(\ell^p\)（\(p < \infty\)）可分，\(\ell^\infty\) 不可分。包含关系：\(\ell^p \subsetneq \ell^q\)（\(p < q\)）。</p>
+            <h4>\(L^p(\mu)\)（\(1 \le p \le \infty\)）— Lebesgue 空间</h4>
+            <p>完备性即 Riesz-Fischer 定理：从绝对收敛级数提取 a.e. 收敛子列再控制 \(L^p\) 范数。</p>
+            <p>元素是等价类（a.e. 相等视为相同），这是范数正定性的保证。\(L^2\) 是 Hilbert 空间。</p>
+            <h4>\(B(X,Y)\) — 有界线性算子空间</h4>
+            <p>若 \(Y\) 完备，则 \(B(X,Y)\) 携算子范数是 Banach 空间。证明与 \(C(K)\) 类似——算子列逐点收敛后验证一致有界。</p>
+            <p>特别地 \(X^* = B(X,\mathbb{K})\) 总是 Banach 空间，这赋予对偶理论以坚实基础。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\(C([a,b])\) 是数值逼近理论的框架；\(L^2\) 是信号处理和量子力学 的状态空间；\(l^1\) 在绝对收敛级数理论和 Fourier 分析中出现。</p>
+            <p><strong>逼近理论</strong>：\(C([a,b])\) 携 \(\|\cdot\|_\infty\) 是 Weierstrass 逼近定理的天然框架——多项式在其中稠密，使数值逼近有效。</p>
+            <p><strong>量子力学</strong>：\(L^2(\mathbb{R}^3)\) 是量子态的 Hilbert 空间；可分性保证了可数正交基的存在（能级的离散化）。</p>
+            <p><strong>信号处理</strong>：\(\ell^1(\mathbb{Z})\) 是绝对可加卷积代数——DTFT 的收敛与 \(\ell^1\) 范数直接相关。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：证明 \(c_0 = \{(x_n) \in l^\infty : x_n \to 0\}\) 是 \(l^\infty\) 的闭子空间，因此是 Banach 空间。 解答：设 \(x^{(k)} \in c_0\)，\(x^{(k)} \to x\) 在 \(l^\infty\) 中。 对任意 \(\varepsilon > 0\)，取 \(K\) 使 \(\|x^{(K)} - x\|_\infty < \varepsilon/2\)。 \(x^{(K)} \in c_0\) 故存在 \(N\) 使 \(|x^{(K)}_n| < \varepsilon/2\)（\(n > N\)）。 则 \(|x_n| \leq |x_n - x^{(K)}_n| + |x^{(K)}_n| < \varepsilon\)。 故 \(x \in c_0\)，\(c_0\) 闭。闭子空间继承完备性。✓ 易错点：混淆 \(l^p\) 的包含关系方向。 \(l^p \subsetneq l^q\)（\(p < q\)），例如 \((1/n) \in l^2\) 但 \(\notin l^1\)。</p>
+            <h4>例 1：\(c_0\) 是 Banach 空间</h4>
+            <p>\(c_0 = \{(x_n) \in \ell^\infty : x_n \to 0\}\)。只需证 \(c_0\) 是 \(\ell^\infty\) 的闭子空间。</p>
+            <p>设 \(x^{(k)} \in c_0\)，\(x^{(k)} \to x\) 在 \(\ell^\infty\) 中。对 \(\varepsilon > 0\)，取 \(K\) 使 \(\|x^{(K)} - x\|_\infty < \varepsilon/2\)。因 \(x^{(K)} \in c_0\)，存在 \(N\) 使 \(n > N \Rightarrow |x_n^{(K)}| < \varepsilon/2\)。于是 \(|x_n| \le |x_n - x_n^{(K)}| + |x_n^{(K)}| < \varepsilon\)，故 \(x \in c_0\)。✓</p>
+            <h4>例 2：\(\ell^1 \subsetneq \ell^2\) 的严格性</h4>
+            <p>取 \(x_n = 1/n\)。\(\sum 1/n^2 < \infty\) 故 \(x \in \ell^2\)，但 \(\sum 1/n = \infty\) 故 \(x \notin \ell^1\)。包含 \(\ell^p \subsetneq \ell^q\)（\(p < q\)）由 Hölder 不等式保证。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li>把 \(\ell^p\) 包含关系方向搞反——正确方向：\(\ell^p \subset \ell^q\)（\(p < q\)），注意与 \(L^p\) 在有限测度空间的方向相同但 \(\sigma\)-有限空间中可能相反。</li>
+              <li>忘记 \(L^p\) 的元素是等价类而非函数——修改零测集上的值不改变 \(L^p\) 元素。</li>
+              <li>声称 \(\ell^\infty\) 可分——\(\ell^\infty\) 不可分，\(\{0,1\}^{\mathbb{N}}\) 是不可数的 \(\varepsilon\)-分离集。</li>
+            </ol>
           </div>
         </div>
       </div>
@@ -519,21 +585,64 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>子空间和商空间是线性代数中的基本构造。在 Banach 空间中， 子空间必须是闭的才能继承完备性。商空间 \(X/M\) 上可以自然 定义商范数，当 \(M\) 闭时商空间也是 Banach 空间。这些构造 在同调代数和 PDE 的商空间方法中不可或缺。</p>
+            <p>子空间和商空间是线性代数中的基本构造，但在无限维 Banach 空间中需要额外的拓扑约束。</p>
+            <ul>
+              <li><strong>完备性继承</strong>：子空间完备当且仅当闭——这赋予"闭子空间"核心地位。</li>
+              <li><strong>商范数</strong>：\(X/M\) 上的距离范数需 \(M\) 闭才满足正定性。</li>
+              <li><strong>应用动机</strong>：PDE 弱解空间、同调上同调群都依赖子空间/商空间的 Banach 结构。</li>
+            </ul>
+            <p>理解何时子空间闭、商空间完备，是对偶理论和算子谱分析的前提。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>闭子空间与商空间体现"拓扑↔代数"交互的核心模式：代数构造（线性子空间、商）满足拓扑条件（闭性）时才保持完备性。</p>
+            <p>商范数 \(\|x + M\| = d(x, M)\) 将几何概念（到子空间的距离）转化为代数结构（商空间的范数），是泛函分析中反复出现的"距离→范数"桥梁。</p>
+            <p>短正合列 \(0 \to M \to X \to X/M \to 0\) 将问题纳入同调代数框架。分裂性与互补子空间直接对应，在 Banach 空间中并非总成立（区别于 Hilbert 空间）。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>闭子空间</strong>：Banach 空间 \(X\) 的子空间 \(Y\) 是 Banach 空间 \(\Leftrightarrow\) \(Y\) 在 \(X\) 中闭。（完备子集 ⇔ 闭子集， 在完备空间中。） <strong>商空间</strong>：\(M \subseteq X\) 为闭子空间。 \(X/M = \{x + M : x \in X\}\)。 <strong>商范数</strong>：\(\|x + M\| = \inf_{m \in M} \|x + m\| = d(x, M)\)。 验证范数公理：正定性需要 \(M\) 闭（\(d(x, M) = 0 \Leftrightarrow x \in \overline{M} = M\)）。 <strong>定理</strong>：若 \(X\) 是 Banach 空间且 \(M\) 闭，则 \(X/M\) 是 Banach 空间。 证明：设 \(\sum \|x_n + M\| < \infty\)，取 \(m_n\) 使 \(\|x_n + m_n\| < \|x_n + M\| + 2^{-n}\)，则 \(\sum \|x_n + m_n\| < \infty\)， 由 \(X\) 的完备性 \(\sum (x_n + m_n)\) 收敛，故 \(\sum (x_n + M)\) 在 \(X/M\) 收敛。</p>
+            <h4>闭子空间定理</h4>
+            <p>\(X\) 为 Banach 空间，\(Y \subseteq X\) 线性子空间。则 \(Y\) 是 Banach 空间 \(\Leftrightarrow\) \(Y\) 在 \(X\) 中闭。</p>
+            <p>直觉：完备度量空间中，子集完备 ⇔ 闭——Cauchy 列极限留在 \(Y\) 等价于 \(Y\) 闭。</p>
+            <h4>商范数的构造</h4>
+            <p>\(M\) 为 \(X\) 的闭子空间，定义 \(\|x + M\| = \inf_{m \in M}\|x + m\| = d(x, M)\)。</p>
+            <p>正定性依赖闭性：\(d(x,M)=0 \Leftrightarrow x \in \overline{M}=M\)。三角不等式和齐次性由 \(\inf\) 性质直接得到。</p>
+            <h4>商空间的完备性</h4>
+            <p>定理：\(X\) Banach、\(M\) 闭 ⇒ \(X/M\) Banach。</p>
+            <p>证明：设 \(\sum\|x_n+M\|<\infty\)，取 \(y_n\) 使 \(\|y_n\|<\|x_n+M\|+2^{-n}\)。则 \(\sum y_n\) 在 \(X\) 绝对收敛→收敛，其像给出 \(X/M\) 中级数的和。</p>
+            <h4>互补子空间</h4>
+            <p>若 \(X = M \oplus N\)（代数直和且投影连续），则 \(N \cong X/M\)。但非每个闭子空间都有拓扑互补——这是 Banach 与 Hilbert 空间的关键区别。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>PDE 弱解理论</strong>：Sobolev 空间 \(W^{1,p}_0(\Omega)\) 是 \(W^{1,p}(\Omega)\) 的闭子空间（零边界条件），保证弱解的完备性框架。</p>
+            <p><strong>同调代数</strong>：上同调群 \(H^n = \ker d^n / \operatorname{im} d^{n-1}\) 是商空间；算子像闭时上同调继承 Banach 结构。</p>
+            <p><strong>控制理论</strong>：系统可达子空间若闭，可在商空间 \(X/\text{可达}\) 上分析不可控分量的结构。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(c_0\) 是 \(l^\infty\) 的闭子空间。描述 \(l^\infty / c_0\) 的含义。 解答：\(x \sim y\) 在 \(l^\infty / c_0\) 中当且仅当 \(x - y \in c_0\)， 即 \(x_n - y_n \to 0\)。商范数 \(\|x + c_0\| = \limsup |x_n|\)。 \(l^\infty / c_0\) 是一个不可分的 Banach 空间。 易错点：忘记 \(M\) 必须是闭子空间。若 \(M\) 不闭， \(\|x + M\| = 0\) 不意味着 \(x \in M\)，商范数不满足正定性。</p>
+            <h4>例 1：\(\ell^\infty / c_0\) 的结构</h4>
+            <p>\(c_0\) 是 \(\ell^\infty\) 的闭子空间。在 \(\ell^\infty/c_0\) 中 \(x \sim y \Leftrightarrow x_n - y_n \to 0\)，商范数 \(\|x+c_0\|=\limsup|x_n|\)。该商空间不可分。</p>
+            <h4>例 2：非闭子空间的商</h4>
+            <p>\(c_{00}\)（有限支撑序列）在 \(\ell^\infty\) 中不闭（\(\overline{c_{00}} = c_0\)）。此时 \(d(x, c_{00})=0\) 但 \(x \notin c_{00}\) 是可能的，"商范数"退化为半范数。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li>认为任何线性子空间都闭——无限维空间中稠密真子空间（如 \(c_{00} \subset c_0\)）是反例。</li>
+              <li>对非闭子空间使用商范数正定性——\(M\) 不闭时 \(\|x+M\|=0\) 不确保 \(x \in M\)。</li>
+              <li>混淆代数互补与拓扑互补——代数直和分解存在不意味着投影连续。</li>
+            </ol>
           </div>
         </div>
       </div>
@@ -560,28 +669,65 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Banach 空间的完备性在实际分析中如何发挥作用？最典型的应用是 不动点定理和级数方法。Banach 不动点定理通过 Cauchy 列的收敛性 保证迭代法收敛；Neumann 级数将矩阵逆的公式推广到算子。</p>
+            <p>Banach 空间的完备性在实际分析中如何发挥威力？答案是不动点方法和级数方法。</p>
+            <ul>
+              <li><strong>Banach 不动点定理</strong>：压缩映射在完备空间中保证唯一不动点——ODE 存在唯一性的经典证明工具。</li>
+              <li><strong>Neumann 级数</strong>：将矩阵几何级数 \((I-A)^{-1}=\sum A^n\) 推广到算子，连接完备性与可逆性。</li>
+              <li><strong>可逆性的开性</strong>：可逆算子集是 \(B(X)\) 中的开集，体现了完备性对算子代数拓扑结构的控制。</li>
+            </ul>
+            <p>这些结果不仅在理论上优美，更是数值迭代法和微分方程存在性定理的数学基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>不动点定理和 Neumann 级数的共同主题是"绝对收敛 ⇒ 收敛"——这恰好等价于完备性。这种等价揭示了完备性不仅是 Cauchy 列的收敛，更是级数方法系统性有效的根基。</p>
+            <p>Neumann 级数 \(\sum T^n\) 是几何级数的算子推广。其收敛依赖于 \(B(X)\) 自身是 Banach 空间——即算子范数下的完备性，这是完备性的"自指"应用。</p>
+            <p>可逆算子集 \(GL(X)\) 的开性意味着可逆性对微小扰动稳定。这种扰动分析思想（小变动不破坏结构）贯穿泛函分析，从 Fredholm 理论到谱的连续性。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Banach 不动点定理</strong>：设 \(X\) 为 Banach 空间（或完备度量空间）， \(T: X \to X\) 满足 \(\|Tx - Ty\| \leq q\|x - y\|\)（\(0 < q < 1\)）。 则 \(T\) 有唯一不动点 \(x^* = \lim T^n(x_0)\)。 <strong>Neumann 级数</strong>：若 \(\|T\| < 1\)（\(T \in B(X)\), \(X\) Banach），则 \(I - T\) 可逆且 \[(I - T)^{-1} = \sum_{n=0}^{\infty} T^n\] 收敛于 \(B(X)\) 中（因为 \(\sum \|T^n\| \leq \sum \|T\|^n < \infty\)， 绝对收敛 ⇒ 收敛于 Banach 空间 \(B(X)\)）。 <strong>推论</strong>：\(\|(I-T)^{-1}\| \leq 1/(1 - \|T\|)\)。 可逆算子集 \(GL(X)\) 是 \(B(X)\) 中的开集 （\(A\) 可逆，\(\|B - A\| < 1/\|A^{-1}\|\) ⇒ \(B\) 可逆）。</p>
+            <h4>Banach 不动点定理</h4>
+            <p>设 \(X\) Banach（或完备度量空间），\(T: X \to X\) 满足 \(\|Tx - Ty\| \le q\|x-y\|\)（\(0 < q < 1\)）。则 \(T\) 有唯一不动点 \(x^* = \lim T^n(x_0)\)。</p>
+            <p>直觉：迭代序列 \(T^n(x_0)\) 是 Cauchy 列（相邻项距离以 \(q^n\) 衰减），完备性保证极限存在。</p>
+            <h4>Neumann 级数</h4>
+            <p>\(T \in B(X)\)，\(\|T\| < 1\) 时，\(I - T\) 可逆且 \((I-T)^{-1} = \sum_{n=0}^{\infty} T^n\)。</p>
+            <p>因为 \(\sum\|T^n\| \le \sum\|T\|^n < \infty\)，绝对收敛在 Banach 空间 \(B(X)\) 中保证收敛。范数估计：\(\|(I-T)^{-1}\| \le 1/(1-\|T\|)\)。</p>
+            <h4>可逆算子集的开性</h4>
+            <p>设 \(A\) 可逆，\(\|B - A\| < 1/\|A^{-1}\|\)。则 \(B = A(I - A^{-1}(A-B))\)，其中 \(\|A^{-1}(A-B)\| < 1\)，Neumann 级数保证 \(B\) 可逆。</p>
+            <p>因此 \(GL(X)\) 是 \(B(X)\) 的开集，且求逆映射 \(A \mapsto A^{-1}\) 连续。</p>
+            <h4>绝对收敛与完备性的等价</h4>
+            <p>定理：赋范空间 \(X\) 是 Banach 空间 \(\Leftrightarrow\) \(X\) 中每个绝对收敛级数都收敛。</p>
+            <p>这给出了完备性的另一特征：级数方法的系统有效性。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Neumann 级数在数值分析中用于迭代求解线性方程组 \(Ax = b\)： 将 \(A = I - T\) 后迭代 \(x_{n+1} = Tx_n + b\)； Banach 不动点用于证明 ODE 的 Picard-Lindelöf 存在唯一性。</p>
+            <p><strong>ODE 存在唯一性</strong>：Picard-Lindelöf 定理通过在 \(C([t_0-\delta, t_0+\delta])\) 上构造压缩映射，利用 Banach 不动点定理证明初值问题的局部存在唯一性。</p>
+            <p><strong>数值迭代</strong>：Neumann 级数用于迭代求解 \(Ax = b\)：将 \(A = I - T\) 后迭代 \(x_{n+1} = Tx_n + b\)，收敛速度受 \(\|T\|\) 控制。</p>
+            <p><strong>扰动分析</strong>：矩阵条件数理论的泛函分析推广——\(\|A^{-1}\|^{-1}\) 衡量 \(A\) 与奇异算子的"距离"。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：设 \(T \in B(l^2)\)，\(\|T\| = 0.5\)。证明 \(I - T\) 可逆 并估计 \(\|(I-T)^{-1}\|\)。 解答：\(\|T\| = 0.5 < 1\)，由 Neumann 级数 \((I-T)^{-1} = \sum T^n\)， \(\|(I-T)^{-1}\| \leq 1/(1 - 0.5) = 2\)。 易错点：对不完备空间使用 Neumann 级数。 绝对收敛 ⇒ 收敛需要空间完备。在不完备空间中级数可能发散。</p>
+            <h4>例 1：Neumann 级数的估计</h4>
+            <p>设 \(T \in B(\ell^2)\)，\(\|T\| = 0.5\)。则 \(I-T\) 可逆，\((I-T)^{-1} = \sum T^n\)，且 \(\|(I-T)^{-1}\| \le 1/(1-0.5) = 2\)。</p>
+            <h4>例 2：Picard 迭代</h4>
+            <p>对 \(x'(t) = f(t, x(t))\)（\(f\) Lipschitz），定义 \(T\varphi(t) = x_0 + \int_{t_0}^t f(s, \varphi(s))\,ds\)。在充分小的区间上 \(T\) 是压缩映射，\(T^n\varphi_0\) 收敛到唯一解。</p>
+            <h4>常见错误</h4>
+            <ol>
+              <li>对不完备空间使用 Neumann 级数——绝对收敛 ⇒ 收敛需完备性，不完备空间中级数可能发散。</li>
+              <li>忘记 Banach 不动点要求全空间的压缩——若只在子集上压缩，需该子集闭（或完备）且 \(T\)-不变。</li>
+              <li>误将谱半径条件用作 Neumann 级数收敛条件——\(\sum T^n\) 收敛的充分条件是 \(\|T\| < 1\)（算子范数），而非 \(r(T) < 1\)（谱半径），除非取等价范数。</li>
+            </ol>
           </div>
         </div>
       </div>

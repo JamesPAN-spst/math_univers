@@ -474,6 +474,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>KKT 条件可以理解为 Lagrange 乘子法从等式约束到不等式约束的自然推广。等式约束中乘子 \(\nu\) 无符号限制；不等式约束则引入两个新要素：乘子的符号约束 \(\lambda_j \geq 0\)（对偶可行性）和互补松弛 \(\lambda_j g_j = 0\)。这两个条件共同编码了"约束是否活跃"的二值逻辑。</p>
+            <p>从几何角度看，KKT 的梯度条件 \(\nabla f + \sum \lambda_j \nabla g_j + \sum \nu_i \nabla h_i = 0\) 表示在最优点处，目标函数的梯度可以被活跃约束的法向量"线性表出"，且系数非负。这意味着目标的下降方向被约束的可行方向所阻挡——无法在保持可行的同时继续降低目标。</p>
+            <p>互补松弛的抽象含义是"经济学中的边际分析"：若某约束未被用尽（\(g_j < 0\)），它对最优值无影响，对应的"价格" \(\lambda_j = 0\)；只有紧约束（资源完全耗尽）才有正的边际价值。这套框架将约束优化的分析统一为一个代数系统。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -519,6 +528,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>KKT 条件并非总是极值的必要条件——需要额外的约束限定条件(CQ)。 同时对凸问题，KKT 还是充分条件。理解何时 KKT 必要、何时充分， 是正确使用约束优化理论的关键，也是凸优化软件（CVX）的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>约束限定条件（Constraint Qualification）的核心抽象是"约束在最优点附近的正则性"。KKT 条件的推导依赖于用约束梯度的线性组合来近似可行集的切锥；当约束梯度退化（如线性相关或为零向量）时，这种近似失效，KKT 就可能遗漏最优点。CQ 正是排除这些退化情形的正则性假设。</p>
+            <p>不同的 CQ 代表了不同强度的正则性要求。LICQ（线性无关约束限定）是最强的——要求活跃约束梯度线性无关，保证 KKT 乘子唯一。Slater 条件适用于凸问题，只需要一个严格可行点存在，不涉及梯度的线性无关性，因此更容易验证。MFCQ 介于两者之间，在实际计算中更常用。</p>
+            <p>凸问题的特殊地位在于：一旦 CQ 满足，KKT 条件既是必要的也是充分的。这是因为凸函数的一阶条件已经刻画了全局最优，而 KKT 恰好提供了这些一阶条件在约束下的表达。这一"必要+充分"的双重性质正是凸优化求解器能高效且可靠地找到全局最优解的理论根基。</p>
           </div>
         </div>
 

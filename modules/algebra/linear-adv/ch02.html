@@ -394,28 +394,72 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>矩阵 \(A\) 满足哪些多项式方程？最小多项式 \(m_A(x)\) 是零化 \(A\) 的 最低次多项式，它完全确定了 \(A\) 的「代数复杂度」。理解它与特征 多项式的关系是深入研究线性算子的关键。</p>
+            <p>给定一个矩阵 \(A\)，它满足哪些多项式方程 \(p(A)=0\)？这些方程的「最简版本」就是最小多项式 \(m_A(x)\)——零化 \(A\) 的最低次首一多项式。它是矩阵「代数复杂度」的精确度量。</p>
+            <ul>
+              <li><strong>矩阵幂运算</strong> 计算 \(A^{100}\) 时，利用 \(m_A(A)=0\) 可将高次幂化简为不超过 \(\deg m_A - 1\) 次的多项式——避免了暴力矩阵乘法；</li>
+              <li><strong>对角化判定</strong> \(m_A\) 无重根 \(\Leftrightarrow\) \(A\) 可对角化——这比逐个检查特征空间维数高效得多；</li>
+              <li><strong>微分方程</strong> 线性 ODE \(\dot{x}=Ax\) 的解 \(e^{tA}\) 的结构由 \(m_A\) 的根（特征值）和重数完全控制。</li>
+            </ul>
+            <p>最小多项式与特征多项式 \(\chi_A\) 之间的微妙关系——相同的根但可能不同的重数——编码了矩阵从「是否可对角化」到「Jordan 标准形长什么样」的全部信息。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>最小多项式是理想 \(\{p(x) : p(A) = 0\}\) 的生成元——反映了 \(K[x] \to \mathrm{End}(V)\) 这个环同态的核结构。</p>
+            <p>考虑环同态 \(\mathrm{ev}_A: K[x] \to \mathrm{End}(V)\)，\(p(x) \mapsto p(A)\)。这个映射的核 \(\ker(\mathrm{ev}_A) = \{p(x): p(A)=0\}\) 是 \(K[x]\) 的一个理想。由于 \(K[x]\) 是主理想整环（PID），这个核由唯一的首一多项式生成——这就是 \(m_A(x)\)。</p>
+            <p>因此最小多项式的核心身份是：<strong>\(m_A\) 是零化理想的生成元</strong>。任何零化 \(A\) 的多项式 \(p\) 必然被 \(m_A\) 整除。</p>
+            <p>与特征多项式的关系通过整除链联系：</p>
+            <ul>
+              <li>\(m_A \mid \chi_A\)（Cayley-Hamilton 保证 \(\chi_A(A)=0\)，故 \(m_A \mid \chi_A\)）；</li>
+              <li>\(m_A\) 和 \(\chi_A\) 有相同的不可约因子（即相同的根集）。</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>: \(m_A(x)\) = 零化 \(A\) 的最低次首一多项式。 即 \(m_A(A) = 0\) 且 \(\deg m_A\) 最小。 <strong>性质</strong>: 1) \(p(A) = 0 \Rightarrow m_A \mid p\) 2) \(m_A \mid \chi_A\)（\(m_A\) 整除特征多项式） 3) \(m_A\) 与 \(\chi_A\) 有相同的不可约因子（即相同的根） \[m_A(A) = 0, \quad m_A \mid \chi_A\]</p>
+            <h4>1. 最小多项式的定义</h4>
+            <p>\(m_A(x)\) 是满足 \(m_A(A)=0\) 的最低次首一多项式。「首一」是为了唯一性（否则常数因子任意）；「最低次」排除了 \(\chi_A\) 等更高次的零化多项式。</p>
+            <p>\[m_A(A) = 0, \quad \deg m_A \;\text{最小}\]</p>
+            <h4>2. 整除性质</h4>
+            <p>若 \(p(A)=0\)，则 \(m_A \mid p\)。证明：用带余除法 \(p = qm_A + r\)，\(\deg r < \deg m_A\)。代入 \(A\) 得 \(r(A)=0\)。由最小性知 \(r=0\)。</p>
+            <p>直觉：\(m_A\) 是零化 \(A\) 的多项式中的「最大公因子」（实际上是生成元）。</p>
+            <h4>3. \(m_A\) 与 \(\chi_A\) 的根关系</h4>
+            <p>\(m_A\) 和 \(\chi_A\) 拥有相同的根集（不计重数）。即 \(\lambda\) 是 \(A\) 的特征值 \(\Leftrightarrow\) \(m_A(\lambda)=0\)。</p>
+            <p>证明关键：若 \(m_A(\lambda)\neq 0\)，则 \(m_A(A)\) 在 \(\ker(A-\lambda I)\) 上可逆，矛盾于 \(m_A(A)=0\)。</p>
+            <h4>4. 如何计算最小多项式</h4>
+            <p>实用算法：从 \(\chi_A\) 出发，逐个降低各因子的幂次，检测 \(p(A)=0\) 是否成立。例如 \(\chi_A=(x-1)^3(x-2)^2\)，则 \(m_A\) 的形式为 \((x-1)^a(x-2)^b\)，\(1 \leq a \leq 3\)，\(1 \leq b \leq 2\)。</p>
+            <p>快捷判据：若 \(A-\lambda I\) 的秩 \(= n-(\text{几何重数})\)，而代数重数更大，则 \(m_A\) 中 \((x-\lambda)\) 的幂次 \(>1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>线性递推与密码学</strong>：线性反馈移位寄存器（LFSR）的特征多项式决定输出序列的周期。最小多项式给出了序列的<strong>最短生成规则</strong>——Berlekamp-Massey 算法就是从序列数据中恢复最小多项式。</p>
+            <p><strong>控制论</strong>：状态空间模型 \(\dot{x}=Ax+Bu\) 中，最小多项式决定了系统的可控性和可观性。Cayley-Hamilton 定理保证 \(e^{tA}\) 可表示为 \(A\) 的不超过 \(n-1\) 次多项式，使得矩阵指数的计算成为有限维问题。</p>
+            <p><strong>数值线性代数</strong>：Krylov 子空间方法（如 GMRES、Lanczos 算法）的收敛速度直接取决于 \(m_A\) 的次数——\(m_A\) 次数越小，迭代终止越快。最小多项式因此是衡量"矩阵对迭代法的友好程度"的核心指标。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(A = \begin{pmatrix}2&0\\0&2\end{pmatrix}\)。 求 \(m_A\) 和 \(\chi_A\)。 解答: \(\chi_A(x) = (x-2)^2\)。 \(A - 2I = 0 \Rightarrow m_A(x) = x - 2\)。 验证: \(m_A \mid \chi_A\): \((x-2) \mid (x-2)^2\)。✓ 易错点: 以为 \(m_A = \chi_A\)。只有当每个特征值的几何重数 = 1 时才有 \(m_A = \chi_A\)。</p>
+            <h4>例题 1：纯量矩阵</h4>
+            <p>\(A = \begin{pmatrix}2&0\\0&2\end{pmatrix} = 2I\)。求 \(m_A\) 和 \(\chi_A\)。</p>
+            <p><strong>解</strong>：\(\chi_A(x) = (x-2)^2\)。但 \(A-2I=0\)，故 \(m_A(x) = x-2\)（一次就零化了）。\(m_A \neq \chi_A\)！</p>
+            <h4>例题 2：不可对角化情形</h4>
+            <p>\(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\)。求 \(m_A\)。</p>
+            <p><strong>第 1 步</strong>：\(\chi_A = (x-2)^2\)。检查 \(A-2I = \begin{pmatrix}0&1\\0&0\end{pmatrix} \neq 0\)。</p>
+            <p><strong>第 2 步</strong>：\((A-2I)^2 = 0\) ✓。因此 \(m_A = (x-2)^2 = \chi_A\)。</p>
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「最小多项式总等于特征多项式」— 只有当每个 Jordan 块大小等于代数重数时才成立（即每个特征值只有一个 Jordan 块）。对角矩阵 \(\mathrm{diag}(2,2)\) 就是反例。</li>
+              <li>❌ 「\(m_A\) 的根和 \(\chi_A\) 的根可能不同」— 根集完全相同！区别仅在重数。\(m_A\) 中 \((x-\lambda)^a\) 的 \(a\) = 最大 Jordan 块大小；\(\chi_A\) 中的 \(a\) = 代数重数。</li>
+              <li>✅ 快速判断：若 \(\chi_A\) 无重根，则 \(m_A = \chi_A\)，且 \(A\) 一定可对角化。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -497,28 +541,71 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>最小多项式和特征多项式还不能完全描述矩阵的结构。不变因子（Smith 标准形）提供了更细致的信息，将多项式矩阵的等价类完全分类。 有理标准形是不需要扩展基域的标准形，在任意域上都可用。</p>
+            <p>最小多项式和特征多项式只给出了矩阵的「粗略轮廓」：根集和重数。但两个矩阵可以有相同的 \(\chi_A\) 和 \(m_A\) 却不相似！不变因子（Smith 标准形）提供了完全分类矩阵相似类的精细信息。</p>
+            <ul>
+              <li><strong>矩阵分类</strong> 两个矩阵相似 \(\Leftrightarrow\) 它们有相同的不变因子列表——这是判定相似性的<strong>完全不变量</strong>；</li>
+              <li><strong>有限交换群</strong> 有限生成交换群的结构定理与不变因子分解在本质上完全相同（\(\mathbb{Z}\)-模 vs \(K[x]\)-模）；</li>
+              <li><strong>任意域上的标准形</strong> Jordan 标准形需要代数闭域，而有理标准形在<strong>任何域</strong>上都存在——对有限域上的应用尤其重要。</li>
+            </ul>
+            <p>不变因子把 \(\chi_A\) 和 \(m_A\) 的信息统一为一条<strong>整除链</strong> \(d_1 \mid d_2 \mid \cdots \mid d_n\)，既精确又优雅——链的末端 \(d_n = m_A\)，全部乘积 \(\prod d_i = \chi_A\)。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Smith 标准形是多项式环上的「对角化」——将 \(xI - A\) 的信息 编码为对角元列。</p>
+            <p>核心框架是将向量空间 \(V\) 连同算子 \(A\) 的作用视为 \(K[x]\)-模（\(x\) 的作用 = 左乘 \(A\)）。这样线性代数问题就变成了<strong>模论</strong>问题。</p>
+            <p>\(K[x]\) 是主理想整环（PID），PID 上有限生成模的结构定理说：\(V \cong K[x]/(d_1) \oplus \cdots \oplus K[x]/(d_r)\)，\(d_1 \mid d_2 \mid \cdots \mid d_r\)。这些 \(d_i\) 就是不变因子。</p>
+            <p>Smith 标准形是实现这一分解的算法手段：对多项式矩阵 \(xI-A\) 施加初等行列变换，化为对角形 \(\mathrm{diag}(d_1,\ldots,d_n)\)。每个非平凡的 \(d_i\) 对应一个「不可再分」的循环子模。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Smith 标准形</strong>: 多项式矩阵 \(xI - A\) 可通过初等行列变换 化为对角形 \(\mathrm{diag}(d_1(x), \ldots, d_n(x))\)， 其中 \(d_i \mid d_{i+1}\)。\(d_i\) 称为不变因子。 \(\chi_A = \prod d_i\)，\(m_A = d_n\)（最后一个）。 <strong>有理标准形</strong>: 每个不变因子 \(d_i\) 对应一个尺同矩阵： \[C(d_i) = \begin{pmatrix} 0 & & -c_0 \\ 1 & \ddots & \vdots \\ & 1 & -c_{k-1} \end{pmatrix}\] \(A\) 相似于这些尺同矩阵的直和。</p>
+            <h4>1. Smith 标准形</h4>
+            <p>多项式矩阵 \(xI-A\) 可通过初等行列变换化为对角形：</p>
+            <p>\[\mathrm{diag}(d_1(x), d_2(x), \ldots, d_n(x)), \quad d_i \mid d_{i+1}\]</p>
+            <p>\(d_i\) 称为不变因子。关键公式：\(d_n = m_A\)，\(\prod d_i = \chi_A\)。</p>
+            <p>直觉：不变因子是从「最弱的约束」(\(d_1\)) 到「最强的约束」(\(d_n = m_A\)) 逐级加强的链条。</p>
+            <h4>2. 友矩阵（companion matrix）</h4>
+            <p>对多项式 \(d(x) = x^k + c_{k-1}x^{k-1} + \cdots + c_0\)，定义友矩阵：</p>
+            <p>\[C(d) = \begin{pmatrix}0 &  & & -c_0\\ 1 & 0 & & -c_1\\ & \ddots & \ddots & \vdots\\ & & 1 & -c_{k-1}\end{pmatrix}\]</p>
+            <p>\(C(d)\) 的特征多项式 = 最小多项式 = \(d(x)\)。直觉：友矩阵是多项式的「矩阵化身」。</p>
+            <h4>3. 有理标准形</h4>
+            <p>\(A\) 相似于不变因子友矩阵的直和：\(A \sim C(d_1) \oplus C(d_2) \oplus \cdots \oplus C(d_r)\)。</p>
+            <p>关键优势：有理标准形在<strong>任何域</strong>上存在（对比 Jordan 形需要代数闭域），且直和分解唯一。</p>
+            <h4>4. 不变因子的计算</h4>
+            <p>实用方法：对 \(xI-A\) 进行初等行列变换化为对角形。也可通过行列式因子 \(\Delta_k\)（所有 \(k\times k\) 子式的 gcd）计算：\(d_k = \Delta_k / \Delta_{k-1}\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>编码理论</strong>：有限域 \(\mathbb{F}_q\) 上线性反馈移位寄存器（LFSR）的状态转移矩阵的有理标准形决定了输出序列的周期结构。由于 Jordan 标准形在非代数闭域上不存在，有理标准形是唯一的分析工具。</p>
+            <p><strong>模论与代数</strong>：有限生成交换群的结构定理 \(G \cong \mathbb{Z}/d_1 \oplus \cdots \oplus \mathbb{Z}/d_r\)（\(d_i \mid d_{i+1}\)）与不变因子分解在形式上完全平行——前者是 \(\mathbb{Z}\)-模，后者是 \(K[x]\)-模。</p>
+            <p><strong>系统辨识</strong>：控制论中，从输入-输出数据恢复系统矩阵时，有理标准形提供了最经济的表示——参数个数 = 不变因子的次数之和 = \(n\)，避免了过参数化。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(\chi_A = (x-1)(x-2)^2\)，可能的不变因子列表是什么？ 解答: 两种可能: (1) \(d_1 = 1, d_2 = 1, d_3 = (x-1)(x-2)^2\)（\(m_A = \chi_A\)） (2) \(d_1 = 1, d_2 = (x-2), d_3 = (x-1)(x-2)\)（\(m_A = (x-1)(x-2)\)） 第二种对应 \(A\) 可对角化或 \(m_A\) 无重根。 易错点: 忘记 \(d_i \mid d_{i+1}\) 的整除条件。</p>
+            <h4>例题 1：列出可能的不变因子</h4>
+            <p>\(\chi_A = (x-1)(x-2)^2\)（\(3\times3\) 矩阵）。列出所有可能的不变因子列表。</p>
+            <p><strong>解</strong>：\(\prod d_i = (x-1)(x-2)^2\)，\(d_i \mid d_{i+1}\)。两种可能：</p>
+            <p>(1) \(d_1=1,\; d_2=1,\; d_3=(x-1)(x-2)^2\) → \(m_A=\chi_A\)，不可对角化。</p>
+            <p>(2) \(d_1=1,\; d_2=(x-2),\; d_3=(x-1)(x-2)\) → \(m_A=(x-1)(x-2)\)，无重根，可对角化。</p>
+            <h4>例题 2：友矩阵</h4>
+            <p>\(d(x)=x^2-5x+6=(x-2)(x-3)\)。\(C(d) = \begin{pmatrix}0&-6\\1&5\end{pmatrix}\)。</p>
+            <p>验证：\(\chi_{C(d)}(x) = x^2-5x+6 = d(x)\) ✓。特征值 2 和 3。</p>
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 「不变因子列表可以是 \(d_1=(x-1),\; d_2=(x-2),\; d_3=(x-2)\)」— 违反整除条件！\(d_2 \mid d_3\) 要求 \((x-2) \mid (x-2)\) ✓，但 \(d_1 \mid d_2\) 要求 \((x-1) \mid (x-2)\) ✗。</li>
+              <li>❌ 「有理标准形和 Jordan 标准形是同一回事」— Jordan 形需要代数闭域且分块按特征值组织，有理标准形在任何域上存在且分块按不变因子组织。</li>
+              <li>✅ 记忆：\(d_n = m_A\)（最大不变因子 = 最小多项式），\(\prod d_i = \chi_A\)（乘积 = 特征多项式）；整除条件 \(d_i \mid d_{i+1}\) 不可忽略。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -572,35 +659,83 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>什么时候矩阵可以对角化？特征值重数的分析是基本方法，而最小多项式 提供了简洁的等价条件: \(A\) 可对角化 \(\Leftrightarrow\) \(m_A\) 无重根。 这比逐个检查特征空间维数更高效。</p>
+            <p>矩阵对角化是线性代数的核心目标之一：一旦 \(A = PDP^{-1}\)，所有关于 \(A\) 的运算都降为对角阵的简单运算。然而判断"能否对角化"比对角化本身更基本——特征多项式只告诉我们特征值及代数重数，却不直接回答几何重数是否匹配。最小多项式恰好填补了这一空白：它以一个简洁的无重根条件，一步到位地给出等价判定。</p>
+            <ul>
+              <li><strong>量子力学</strong>：可观测量对应自伴算符，其可对角化性保证了测量值的确定性与谱分解的存在。</li>
+              <li><strong>离散动力系统</strong>：递推 \(x_{n+1} = Ax_n\) 的长期行为取决于 \(A\) 能否对角化——若能，解形如 \(\lambda^n\) 的线性组合；若不能，出现 \(n\lambda^{n-1}\) 等多项式增长项。</li>
+              <li><strong>数据科学</strong>：PCA 依赖协方差矩阵的对角化（谱分解），对角化判定决定了能否进行完整的主成分提取。</li>
+            </ul>
+            <p>因此，最小多项式不仅是理论判定工具，更是实际应用中评估算法可行性的关键一步。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(m_A\) 无重根 \(\Leftrightarrow\) 广义特征空间 = 普通特征空间， 这是 Jordan 标准形退化为对角形的条件。</p>
+            <p>设 \(T: V \to V\) 是有限维向量空间上的线性算子，\(m_T(x)\) 为其最小多项式。对角化的代数本质可以从 \(K[x]\)-模的角度理解：\(V\) 经由 \(T\) 成为 \(K[x]\)-模 \(V_T\)，其中 \(p(x) \cdot v = p(T)(v)\)。对角化等价于 \(V_T\) 分解为"循环模的直和"，且每个循环因子的零化子由一次不可约多项式生成。</p>
+            <p>核心判据是：\(T\) 可对角化 \(\Leftrightarrow\) \(m_T(x)\) 在基域 \(K\) 上分解为互不相同的一次因子之积。这一条件同时蕴含两件事——所有特征值属于 \(K\)（可裂条件），且每个特征值在 \(m_T\) 中的幂次恰好为 1（无重根条件）。</p>
+            <p>从结构定理看，可对角化条件正是"每个初等因子均为一次"的特殊情形——初等因子一旦出现高次幂 \((x - \lambda)^k\)（\(k \ge 2\)），就必须在标准形中使用 Jordan 块，从而不可对角化。因此最小多项式无重根 ⟺ 所有 Jordan 块大小为 1 ⟺ Jordan 标准形退化为对角矩阵。</p>
+            <p>这一视角也揭示了半单性的代数内涵：在有限维情形下，\(T\) 半单（可对角化）等价于 \(K[x]/(m_T)\) 是半单 \(K\)-代数，即 \(m_T\) 无重因子——这是一般半单性理论在矩阵代数中的具体化身。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>对角化充要条件</strong>: \(A\) 可对角化 \(\Leftrightarrow\) \(m_A(x)\) 在 \(K\) 上分解为不同一次因子之积: \[m_A(x) = (x - \lambda_1)(x - \lambda_2) \cdots (x - \lambda_r), \quad \lambda_i \text{ 两两不同}\] 证: \(m_A\) 无重根 \(\Rightarrow\) \(V = \bigoplus \ker(A - \lambda_i I)\) （中国剩余定理于多项式），即 \(V\) 是特征空间的直和。 <strong>计算方法</strong>: 用 \(\chi_A\) 的因子逐个检测: \((A - \lambda I) = 0\)？若否，\((A-\lambda I)^2 = 0\)？确定重数。</p>
+            <h4>1. 对角化的充要条件</h4>
+            <p>\(A \in M_n(K)\) 可对角化 \(\Leftrightarrow\) 最小多项式 \(m_A(x)\) 在 \(K\) 上分解为不同一次因子之积：</p>
+            \[m_A(x) = (x - \lambda_1)(x - \lambda_2) \cdots (x - \lambda_r), \quad \lambda_i \text{ 两两不同}\]
+            <p>直观地说，每个特征值对应的"最顽固的向量"只需做一次 \((A - \lambda_i I)\) 就消灭，不存在需要更高幂次才能消灭的广义特征向量。</p>
+
+            <h4>2. 充分性证明（核分解）</h4>
+            <p>若 \(m_A = \prod_{i=1}^r (x - \lambda_i)\)，各因子两两互素，由中国剩余定理（多项式版本）：</p>
+            \[V = \ker(A - \lambda_1 I) \oplus \ker(A - \lambda_2 I) \oplus \cdots \oplus \ker(A - \lambda_r I)\]
+            <p>每个 \(\ker(A - \lambda_i I)\) 恰好是 \(\lambda_i\) 的特征空间，直和分解意味着 \(V\) 有由特征向量构成的基，故 \(A\) 可对角化。关键在于"互素"保证了核的直和覆盖全空间。</p>
+
+            <h4>3. 必要性证明</h4>
+            <p>反之，若 \(A\) 可对角化，取特征向量基 \(\{v_1, \dots, v_n\}\)，\(Av_j = \lambda_j v_j\)。令 \(q(x) = \prod_{i=1}^r (x - \lambda_i)\)（不同特征值之积），则对每个基向量 \(q(A)v_j = 0\)，故 \(q(A) = 0\)。由最小多项式的极小性，\(m_A \mid q\)，因此 \(m_A\) 的因子也都是一次且无重复的。</p>
+
+            <h4>4. 代数重数 vs 几何重数的联系</h4>
+            <p>对特征值 \(\lambda\)，设代数重数 \(a_\lambda\)、几何重数 \(g_\lambda\)。始终有 \(1 \le g_\lambda \le a_\lambda\)。对角化等价于每个特征值 \(g_\lambda = a_\lambda\)。用最小多项式表述：\(\lambda\) 在 \(m_A\) 中的幂次 \(= 1\) 当且仅当最大 Jordan 块大小为 1，即 \(g_\lambda = a_\lambda\)。</p>
+
+            <h4>5. 实用判定流程</h4>
+            <p>给定 \(A \in M_n(K)\)：(i) 计算 \(\chi_A(x)\) 并分解；(ii) 对每个特征值 \(\lambda_i\) 的代数重数 \(a_i\)，检查 \(\operatorname{rank}(A - \lambda_i I)\) 是否等于 \(n - a_i\)（即 \(g_i = a_i\)）；(iii) 或者等价地，检查 \((A - \lambda_i I)^1\) 是否已使对应的广义特征子空间变为零（即 \(m_A\) 中 \((x - \lambda_i)\) 幂次为 1）。</p>
+
+            <h4>6. 同时对角化</h4>
+            <p>两个矩阵 \(A, B\) 可同时对角化 \(\Leftrightarrow\) 它们各自可对角化且 \(AB = BA\)。证明的关键是：\(A\) 的每个特征空间在 \(B\) 下不变（交换性），而 \(B\) 限制在这些不变子空间上仍可对角化，从而在交集基上同时对角化。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>对角化在计算 \(A^n\)、\(e^A\)、解微分方程等场景中至关重要。</p>
+            <p><strong>微分方程求解</strong>：线性常系数 ODE 系统 \(\mathbf{x}' = A\mathbf{x}\) 的通解形式完全取决于 \(A\) 的对角化性质。若 \(A\) 可对角化 \(A = PDP^{-1}\)，通解为 \(\mathbf{x}(t) = P\operatorname{diag}(e^{\lambda_i t})P^{-1}\mathbf{x}_0\)——每个分量独立指数衰减或增长。不可对角化时出现 \(t^k e^{\lambda t}\) 型项（Jordan 块效应），长期行为本质不同。</p>
+            <p><strong>量子信息</strong>：量子态的演化算符 \(U = e^{-iHt/\hbar}\) 要求哈密顿量 \(H\) 可对角化（自伴算符在复数域必可对角化）。对角化判定保证了能级的良定义性——每个本征值对应一个可测能级，对角化基给出系统的能量表象。密度矩阵的谱分解 \(\rho = \sum p_i |\psi_i\rangle\langle\psi_i|\) 也依赖此判定。</p>
+            <p><strong>图论与网络分析</strong>：图的邻接矩阵或 Laplacian 矩阵的可对角化性决定了谱方法的适用性。对称图（无向图）的邻接矩阵是实对称的，必可对角化，其特征值分布编码了图的连通性、二部性、扩展性等信息。Markov 链转移矩阵的对角化性决定了收敛速率估计的简洁程度。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\)，判断可否对角化。 解答: \(\chi_A = (x-2)^2\)。 \(A - 2I = \begin{pmatrix}0&1\\0&0\end{pmatrix} \neq 0\)。 故 \(m_A = (x-2)^2\)，有重根，不可对角化。 易错点: 只用特征值不同来判断。即使特征值有重复， 只要 \(m_A\) 无重根就可对角化（如 \(A = \mathrm{diag}(2,2)\)）。</p>
+            <p><strong>例 1</strong>：判断 \(A = \begin{pmatrix}2&1\\0&2\end{pmatrix}\) 能否对角化。</p>
+            <p><em>第一步（特征多项式）</em>：\(\chi_A(x) = (x-2)^2\)，唯一特征值 \(\lambda = 2\)，代数重数 2。</p>
+            <p><em>第二步（几何重数）</em>：\(A - 2I = \begin{pmatrix}0&1\\0&0\end{pmatrix}\)，\(\operatorname{rank} = 1\)，故 \(g_2 = 2 - 1 = 1 \ne 2 = a_2\)。</p>
+            <p><em>第三步（最小多项式）</em>：\((A - 2I) \ne 0\) 但 \((A-2I)^2 = 0\)，故 \(m_A = (x-2)^2\)，有重根。</p>
+            <p><em>结论</em>：\(A\) 不可对角化。等价地，\(A\) 的 Jordan 形为 \(J_2(2)\)（一个 \(2 \times 2\) Jordan 块）。</p>
+
+            <p><strong>例 2</strong>：设 \(B = \begin{pmatrix}1&0&0\\0&1&0\\0&0&3\end{pmatrix}\)，判断可否对角化。</p>
+            <p><em>第一步</em>：\(\chi_B = (x-1)^2(x-3)\)，特征值 \(\lambda_1 = 1\)（\(a_1 = 2\)），\(\lambda_2 = 3\)（\(a_2 = 1\)）。</p>
+            <p><em>第二步</em>：\(B\) 已经是对角矩阵！\(g_1 = 2 = a_1\)，\(g_2 = 1 = a_2\)。</p>
+            <p><em>第三步</em>：\(m_B = (x-1)(x-3)\)，无重根。虽然 \(\chi_B\) 有重因子 \((x-1)^2\)，但 \(m_B\) 中 \((x-1)\) 只出现一次。</p>
+            <p><em>结论</em>：\(B\) 可对角化。特征多项式有重根 ≠ 不可对角化，关键看最小多项式。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ "特征多项式有重根 \(\Rightarrow\) 不可对角化"——反例：\(I_n\) 的 \(\chi = (x-1)^n\) 有重根，但显然可对角化（\(m = x - 1\) 无重根）。</li>
+              <li>❌ 混淆"在 \(\mathbb{R}\) 上可对角化"与"在 \(\mathbb{C}\) 上可对角化"——旋转矩阵 \(\begin{pmatrix}0&-1\\1&0\end{pmatrix}\) 在 \(\mathbb{R}\) 上不可对角化（\(m = x^2+1\) 不可裂），但在 \(\mathbb{C}\) 上可以（\(m = (x-i)(x+i)\)）。</li>
+              <li>✅ 正确策略：先算 \(\chi_A\) 分解，若所有特征值代数重数为 1 则必可对角化（\(m_A\) 无重根自动满足）；若有重特征值，再检查几何重数或计算最小多项式。</li>
+            </ul>
           </div>
         </div>
       </div>

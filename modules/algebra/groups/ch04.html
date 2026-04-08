@@ -394,35 +394,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>群同态是连接两个群的「结构保持映射」。就像两个国家的地图可能比 例不同但保持了地理关系一样，群同态 \(\varphi(ab)=\varphi(a)\varphi(b)\) 保持了群运算。核和像分别刻画了映射「丢失了什么信息」和「覆盖了 多少目标」。</p>
+            <p>群同态是连接两个群的「结构保持映射」。就像两个国家的地图可能比例不同但保持了地理拓扑关系一样，群同态 \(\varphi(ab)=\varphi(a)\varphi(b)\) 保持了群的运算规则。核和像分别刻画了映射「丢失了什么信息」和「覆盖了多少目标」。</p>
+            <ul>
+              <li>行列式 \(\det: GL_n(\mathbb{R}) \to \mathbb{R}^*\) 将矩阵乘法映为实数乘法，核恰好是行列式为 1 的所有矩阵。</li>
+              <li>符号映射 \(\mathrm{sgn}: S_n \to \{\pm 1\}\) 将置换映为其奇偶性，核是交替群 \(A_n\)。</li>
+              <li>自然投射 \(\pi: \mathbb{Z} \to \mathbb{Z}/n\mathbb{Z}\) 将整数加法映射到模算术，核为 \(n\mathbb{Z}\)。</li>
+            </ul>
+            <p>这些例子表明：核越大映射丢失的信息越多，像越大映射覆盖的范围越广。同态是将复杂群「简化」为更小群的系统工具，正是同构定理体系的出发点。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>同态是范畴论中态射的原型——保持结构的映射。 核 \(\ker\varphi\) 度量信息损失，像 \(\mathrm{Im}(\varphi)\) 度量覆盖范围。</p>
+            <p>从范畴论的视角看，群同态就是群范畴 \(\mathbf{Grp}\) 中的态射——保持结构的映射。每个同态自然地将群分解为「丢失的部分」（核）与「到达的部分」（像）。</p>
+            <p>核 \(\ker\varphi\) 度量映射的信息损失：它是 \(G\) 中被折叠到单位元的全部元素。像 \(\mathrm{Im}(\varphi)\) 度量映射的覆盖范围：它是 \(H\) 中真正被到达的部分。两者由指标公式 \(|\mathrm{Im}(\varphi)| = [G:\ker\varphi]\) 精确关联。</p>
+            <ul>
+              <li>单射同态（嵌入）：核为平凡群，无信息损失</li>
+              <li>满射同态（覆盖）：像为全体 \(H\)，完全覆盖目标</li>
+              <li>同构：同时单射且满射，完美保持所有代数结构</li>
+            </ul>
+            <p>这种「核—像」对偶性贯穿整个代数学：环同态、模同态、线性映射都呈现同样的分解模式，掌握群同态的核与像就掌握了代数结构分析的核心工具。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>: \(\varphi: G \to H\) 是群同态，若 \(\forall a,b \in G,\; \varphi(ab) = \varphi(a)\varphi(b)\)。 自动有: \(\varphi(e_G) = e_H\)，\(\varphi(a^{-1}) = \varphi(a)^{-1}\)。 <strong>核</strong>: \(\ker\varphi = \{g \in G : \varphi(g) = e_H\}\)。 \(\ker\varphi \trianglelefteq G\)（正规子群！）。 证: \(g \in G, n \in \ker\varphi \Rightarrow \varphi(gng^{-1}) = \varphi(g)e_H \varphi(g)^{-1} = e_H\)。 <strong>像</strong>: \(\mathrm{Im}(\varphi) = \{\varphi(g) : g \in G\} \leq H\)。 \(\varphi\) 单射 \(\Leftrightarrow \ker\varphi = \{e\}\)。 \(\varphi\) 满射 \(\Leftrightarrow \mathrm{Im}(\varphi) = H\)。 \[|\mathrm{Im}(\varphi)| = [G : \ker\varphi]\]</p>
+            <h4>同态的定义</h4>
+            <p>设 \((G,\cdot)\) 和 \((H,*)\) 为群。映射 \(\varphi: G \to H\) 是<strong>群同态</strong>，若 \[\forall a,b \in G,\;\varphi(a \cdot b) = \varphi(a) * \varphi(b)\]</p>
+            <p>直觉：同态是「尊重运算规则」的翻译——先在 \(G\) 中运算再翻译，等同于先翻译再在 \(H\) 中运算。</p>
+            <h4>自动性质</h4>
+            <p>\[\varphi(e_G) = e_H, \qquad \varphi(a^{-1}) = \varphi(a)^{-1}\]</p>
+            <p>第一式由 \(\varphi(e_G) = \varphi(e_G \cdot e_G) = \varphi(e_G)\varphi(e_G)\) 两边消去得到；第二式由 \(e_H = \varphi(aa^{-1}) = \varphi(a)\varphi(a^{-1})\) 得到。同态定义已蕴含「保持单位元和逆元」。</p>
+            <h4>核的定义与正规性</h4>
+            <p>\[\ker\varphi = \{g \in G : \varphi(g) = e_H\} \trianglelefteq G\]</p>
+            <p>核是正规子群：对 \(g \in G,\, n \in \ker\varphi\)，有 \(\varphi(gng^{-1}) = \varphi(g)e_H\varphi(g)^{-1} = e_H\)。直觉上，核对共轭封闭是因为同态让共轭操作在 \(H\) 中变成了恒等。</p>
+            <h4>像与单满性判据</h4>
+            <p>\[\mathrm{Im}(\varphi) = \{\varphi(g) : g \in G\} \leq H, \qquad |\mathrm{Im}(\varphi)| = [G : \ker\varphi]\]</p>
+            <p>\(\varphi\) 单射当且仅当 \(\ker\varphi = \{e\}\)；\(\varphi\) 满射当且仅当 \(\mathrm{Im}(\varphi) = H\)。指标公式将核的大小与像的大小通过 Lagrange 定理直接关联。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>行列式 \(\det: GL_n(K) \to K^*\) 是群同态，其核为 \(SL_n(K)\)； 符号映射 \(\mathrm{sgn}: S_n \to \{\pm 1\}\) 的核为 \(A_n\)。</p>
+            <p><strong>线性代数</strong>：行列式映射 \(\det: GL_n(K) \to K^*\) 是经典群同态，其核 \(SL_n(K)\) 是特殊线性群。这一同态将矩阵的「体积缩放因子」提取出来，是线性代数中最基本的不变量之一。</p>
+            <p><strong>组合学与置换</strong>：符号映射 \(\mathrm{sgn}: S_n \to \{\pm 1\}\) 的核是交替群 \(A_n\)。它在行列式的 Leibniz 展开公式、图论着色和组合恒等式中起关键作用。</p>
+            <p><strong>密码学</strong>：离散对数问题本质上是循环群同态 \(\varphi: \mathbb{Z} \to (\mathbb{Z}/p\mathbb{Z})^*\)，\(\varphi(k) = g^k\) 的求逆问题。同态核的结构直接决定了 Diffie-Hellman 密钥交换等协议的安全性。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 设 \(\varphi: \mathbb{Z} \to \mathbb{Z}/5\mathbb{Z}\) 为自然投射 \(n \mapsto \overline{n}\)。求 \(\ker\varphi\) 和 \(\mathrm{Im}(\varphi)\)。 解答: \(\ker\varphi = 5\mathbb{Z} = \{\ldots,-5,0,5,10,\ldots\}\)。 \(\mathrm{Im}(\varphi) = \mathbb{Z}/5\mathbb{Z}\)（满射）。 \([\mathbb{Z} : 5\mathbb{Z}] = 5 = |\mathbb{Z}/5\mathbb{Z}|\)。✓ 易错点: 忘记验证 \(\varphi(e_G) = e_H\) 不是额外条件—— 它自动由 \(\varphi(ab)=\varphi(a)\varphi(b)\) 推出 （取 \(a = b = e\)）。</p>
+            <p><strong>例题 1</strong>：设 \(\varphi: \mathbb{Z} \to \mathbb{Z}/5\mathbb{Z}\) 为自然投射 \(n \mapsto \overline{n}\)。求 \(\ker\varphi\) 和 \(\mathrm{Im}(\varphi)\)。</p>
+            <p><strong>解答</strong>：\(\ker\varphi = 5\mathbb{Z} = \{\ldots,-5,0,5,10,\ldots\}\)。\(\mathrm{Im}(\varphi) = \mathbb{Z}/5\mathbb{Z}\)（满射）。验证：\([\mathbb{Z} : 5\mathbb{Z}] = 5 = |\mathbb{Z}/5\mathbb{Z}|\)。✓</p>
+            <p><strong>例题 2</strong>：验证 \(\varphi: \mathbb{Z} \to \mathbb{Z}\)，\(\varphi(n) = 2n\) 是加法群同态，并求其核与像。</p>
+            <p><strong>解答</strong>：\(\varphi(a+b) = 2(a+b) = 2a + 2b = \varphi(a) + \varphi(b)\)，是同态。\(\ker\varphi = \{n : 2n = 0\} = \{0\}\)（单射）。\(\mathrm{Im}(\varphi) = 2\mathbb{Z}\)，不满射。✓</p>
+            <p><strong>常见错误 1</strong>：认为 \(\varphi(e_G) = e_H\) 是需要额外验证的条件——实际上它由同态性自动推出（取 \(a = b = e_G\) 并消去）。</p>
+            <p><strong>常见错误 2</strong>：混淆核与像。例如 \(\varphi(n) = 2n\) 的核是 \(\{0\}\)，像是 \(2\mathbb{Z}\)，不要将 \(2\mathbb{Z}\) 误认为核。</p>
+            <p><strong>常见错误 3</strong>：忘记检查定义域和陪域的群运算是否一致。例如 \(\varphi(n) = 2n\) 从 \((\mathbb{Z},+)\) 到 \((\mathbb{Z},+)\) 是同态，但从 \((\mathbb{Z},+)\) 到 \((\mathbb{Z},\times)\) 不是（\(2(a+b) \neq 2a \cdot 2b\) 一般不成立）。</p>
           </div>
         </div>
       </div>
@@ -471,35 +503,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>第一同构定理（也称基本同构定理）是群论中最核心的定理：它将 同态的核、像和商群三者精确联系起来。直觉上说，「商掉映射丢失的 信息（核），得到的恰好就是映射实际到达的部分（像）」。这个定理 几乎是后续所有结构定理的基石。</p>
+            <p>第一同构定理（基本同构定理）是群论中最核心的定理：它将同态的核、像和商群三者精确联系起来。直觉上说，「商掉映射丢失的信息（核），得到的恰好就是映射实际到达的部分（像）」。</p>
+            <ul>
+              <li>\(\det: GL_n \to K^*\) 给出 \(GL_n/SL_n \cong K^*\)，将平凡矩阵分类为「行列式相同的类」。</li>
+              <li>\(\mathrm{sgn}: S_n \to \{\pm 1\}\) 给出 \(S_n/A_n \cong \mathbb{Z}/2\mathbb{Z}\)，将置换分为奇偶两类。</li>
+              <li>中国剩余定理 \(\mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)（\(\gcd(m,n)=1\)）是第一同构定理的直接应用。</li>
+            </ul>
+            <p>这个定理几乎是后续所有结构定理的基石——无论是第二、第三同构定理还是 Jordan-Hölder 定理，都以它为出发点。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>\(G/\ker\varphi \cong \mathrm{Im}(\varphi)\) 体现了「商 = 像」的 范畴化原则——任何满同态都可以分解为自然投射后跟同构。</p>
+            <p>\(G/\ker\varphi \cong \mathrm{Im}(\varphi)\) 体现了「商 = 像」的范畴化原则。在范畴论中，任何满同态都可以分解为「自然投射」后跟「同构」，再跟「嵌入」。</p>
+            <p>这个分解 \(\varphi = \iota \circ \bar{\varphi} \circ \pi\) 说明了同态的所有信息都集中在三个层面：折叠（核）、重命名（同构）和包含（像的嵌入）。</p>
+            <ul>
+              <li>自然投射 \(\pi: G \twoheadrightarrow G/\ker\varphi\) —— 折叠信息</li>
+              <li>诱导同构 \(\bar{\varphi}: G/\ker\varphi \xrightarrow{\sim} \mathrm{Im}(\varphi)\) —— 重命名</li>
+              <li>包含映射 \(\iota: \mathrm{Im}(\varphi) \hookrightarrow H\) —— 嵌入目标</li>
+            </ul>
+            <p>此分解在环论、模论、拓扑学中都有完全类似的形式，是代数结构中最普遍的分解范式。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>第一同构定理</strong>: 设 \(\varphi: G \to H\) 为群同态，则 \[G / \ker\varphi \;\cong\; \mathrm{Im}(\varphi)\] 证明: 定义 \(\bar{\varphi}: G/\ker\varphi \to \mathrm{Im}(\varphi)\)， \(\bar{\varphi}(g \ker\varphi) = \varphi(g)\)。 - 良定义: \(g' \in g\ker\varphi \Rightarrow g' = gn,\; \varphi(g') = \varphi(g)\varphi(n) = \varphi(g)\)。 - 同态: \(\bar{\varphi}(g_1 N \cdot g_2 N) = \varphi(g_1 g_2) = \varphi(g_1)\varphi(g_2)\)。 - 单射: \(\bar{\varphi}(gN) = e \Rightarrow g \in \ker\varphi \Rightarrow gN = N\)。 - 满射: 由定义直接成立。</p>
+            <h4>定理陈述</h4>
+            <p>设 \(\varphi: G \to H\) 为群同态，则 \[G / \ker\varphi \;\cong\; \mathrm{Im}(\varphi)\]</p>
+            <p>核心思想：把同一个像的原像（一个陪集）看作一个点，就得到像。</p>
+            <h4>证明——良定义与同态性</h4>
+            <p>定义 \(\bar{\varphi}: G/\ker\varphi \to \mathrm{Im}(\varphi)\)，\(\bar{\varphi}(g\ker\varphi) = \varphi(g)\)。</p>
+            <p>良定义：\(g' \in g\ker\varphi \Rightarrow g' = gn\)，\(\varphi(g') = \varphi(g)\varphi(n) = \varphi(g)\)。同态性：\(\bar{\varphi}(g_1N \cdot g_2N) = \varphi(g_1g_2) = \varphi(g_1)\varphi(g_2)\)。</p>
+            <h4>证明——单射与满射</h4>
+            <p>单射：\(\bar{\varphi}(gN) = e \Rightarrow \varphi(g) = e \Rightarrow g \in \ker\varphi \Rightarrow gN = N\)。满射：对任意 \(h \in \mathrm{Im}(\varphi)\)，存在 \(g\) 使 \(\varphi(g) = h\)，故 \(\bar{\varphi}(gN) = h\)。</p>
+            <p>因此 \(\bar{\varphi}\) 是同构，定理得证。</p>
+            <h4>重要推论</h4>
+            <p>\[|G| = |\ker\varphi| \cdot |\mathrm{Im}(\varphi)|\]</p>
+            <p>这是 Lagrange 定理的直接推广：核的阶乘以像的阶等于原群的阶。它提供了计算未知群阶的强大工具。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>\(\det: GL_n \to K^*\) 给出 \(GL_n / SL_n \cong K^*\)； \(\mathrm{sgn}: S_n \to \{\pm 1\}\) 给出 \(S_n / A_n \cong \mathbb{Z}/2\mathbb{Z}\)。</p>
+            <p><strong>线性代数</strong>：\(\det: GL_n(K) \to K^*\) 给出 \(GL_n/SL_n \cong K^*\)。这说明可逆矩阵按行列式值分类，每个类都同构于 \(SL_n\) 的一个陪集。</p>
+            <p><strong>数论</strong>：中国剩余定理 \(\mathbb{Z}/mn\mathbb{Z} \cong \mathbb{Z}/m\mathbb{Z} \times \mathbb{Z}/n\mathbb{Z}\)（\(\gcd(m,n)=1\)）是第一同构定理的直接应用，在 RSA 加密和散列算法中都有关键作用。</p>
+            <p><strong>拓扑学</strong>：基本群的同态像刻画了覆盖空间的结构。例如 \(\pi_1(S^1) \cong \mathbb{Z}\)，从第一同构定理可导出圆的 \(n\) 重覆盖对应 \(\mathbb{Z}/n\mathbb{Z}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 设 \(\varphi: \mathbb{Z} \to \mathbb{Z}/n\mathbb{Z}\) 为自然同态， 用第一同构定理确定 \(\mathbb{Z}/n\mathbb{Z}\) 的结构。 解答: \(\ker\varphi = n\mathbb{Z}\)，\(\mathrm{Im}(\varphi) = \mathbb{Z}/n\mathbb{Z}\)。 由第一同构定理 \(\mathbb{Z}/n\mathbb{Z} \cong \mathbb{Z}/n\mathbb{Z}\)。✓ 这看起来同义反复，但它确认了商群构造确实产生了正确的结构。 易错点: 使用第一同构定理时忘记验证 \(\varphi\) 是同态。 必须先确认映射保持运算，才能应用定理。</p>
+            <p><strong>例题 1</strong>：设 \(\varphi: \mathbb{Z} \to \mathbb{Z}/n\mathbb{Z}\) 为自然同态，用第一同构定理确定 \(\mathbb{Z}/n\mathbb{Z}\) 的结构。</p>
+            <p><strong>解答</strong>：\(\ker\varphi = n\mathbb{Z}\)，\(\mathrm{Im}(\varphi) = \mathbb{Z}/n\mathbb{Z}\)。由第一同构定理 \(\mathbb{Z}/n\mathbb{Z} \cong \mathbb{Z}/n\mathbb{Z}\)。这看似同义反复，但它确认了商群构造确实产生了正确的结构。✓</p>
+            <p><strong>例题 2</strong>：设 \(\varphi: S_3 \to \{\pm 1\}\) 为符号映射。用第一同构定理确定 \(S_3/A_3\)。</p>
+            <p><strong>解答</strong>：\(\ker(\mathrm{sgn}) = A_3\)，\(\mathrm{Im}(\mathrm{sgn}) = \{\pm 1\} \cong \mathbb{Z}/2\mathbb{Z}\)。由第一同构定理 \(S_3/A_3 \cong \mathbb{Z}/2\mathbb{Z}\)。验证：\(|S_3|/|A_3| = 6/3 = 2\)。✓</p>
+            <p><strong>常见错误 1</strong>：使用第一同构定理时忘记验证 \(\varphi\) 是同态。必须先确认映射保持运算，才能应用定理。</p>
+            <p><strong>常见错误 2</strong>：混淆 \(\mathrm{Im}(\varphi)\) 和 \(H\)。当 \(\varphi\) 不满射时，\(G/\ker\varphi \cong \mathrm{Im}(\varphi) \subsetneq H\)，不是 \(G/\ker\varphi \cong H\)。</p>
+            <p><strong>常见错误 3</strong>：忘记检查 \(\bar{\varphi}\) 的良定义。不同代表元必须给出相同的像，即 \(g' \in gN \Rightarrow \varphi(g') = \varphi(g)\)，这正是核的定义所保证的。</p>
           </div>
         </div>
       </div>
@@ -545,28 +609,66 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>第一同构定理只是开始。第二定理（菱形定理）刻画两个子群的「交互」； 第三定理告诉我们「商的商还是商」；对应定理则建立了 \(G/N\) 的子群 与 \(G\) 中包含 \(N\) 的子群之间的完美双射。这些定理构成了群结构 分析的完整工具箱。</p>
+            <p>第一同构定理只是开始。群的结构分析需要更精细的工具来处理子群之间的交互、商群的叠加以及子群格的结构。第二、第三同构定理和对应定理构成了群结构分析的完整工具箱。</p>
+            <ul>
+              <li>第二定理（菱形定理）刻画两个子群 \(H\) 和 \(N\) 的「交互」：\(H/(H \cap N) \cong HN/N\)。</li>
+              <li>第三定理告诉我们「商的商还是商」：\((G/K)/(N/K) \cong G/N\)。</li>
+              <li>对应定理建立了 \(G/N\) 的子群与 \(G\) 中包含 \(N\) 的子群之间的完美双射。</li>
+            </ul>
+            <p>这三个定理共同提供了从不同角度分解和重组群结构的能力，是进一步研究 Jordan-Hölder 定理和可解群理论的基础。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>对应定理是「格同构」的体现——商群的子群格与母群中包含核的 子群格保持包含关系和正规性。</p>
+            <p>对应定理是「格同构」的体现：商群 \(G/N\) 的子群格与母群 \(G\) 中包含 \(N\) 的子群格保持包含关系和正规性。</p>
+            <p>从范畴论视角，这三个定理都是不同类型的「标准分解」。第二定理处理两个子对象的「拼接」，第三定理处理连续商的「合并」。</p>
+            <ul>
+              <li>第二定理：「拼接」—— \(H\) 和 \(N\) 生成的群 \(HN\) 与它们的交 \(H \cap N\) 之间的格关系</li>
+              <li>第三定理：「合并」—— 先商再商等价于直接用更大的正规子群商</li>
+              <li>对应定理：「投影」—— 商群的子群格是母群子群格的精确「截断」</li>
+            </ul>
+            <p>这种格保持性质在环论、模论中也完全成立，是代数结构分析的普遍工具。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>第二同构定理（菱形定理）</strong>: 设 \(H \leq G\)，\(N \trianglelefteq G\)， 则 \(HN \leq G\)，\(H \cap N \trianglelefteq H\)，且 \[H / (H \cap N) \cong HN / N\] <strong>第三同构定理</strong>: 设 \(K \trianglelefteq N \trianglelefteq G\)， \(K \trianglelefteq G\)，则 \[(G/K) / (N/K) \cong G/N\] <strong>对应定理</strong>: 设 \(N \trianglelefteq G\)，则 \(G/N\) 的子群 与 \(G\) 中包含 \(N\) 的子群之间存在保序双射： \(\overline{H} \leftrightarrow H\)（\(N \subseteq H \subseteq G\)）， 且 \(\overline{H} \trianglelefteq G/N \Leftrightarrow H \trianglelefteq G\)。</p>
+            <h4>第二同构定理（菱形定理）</h4>
+            <p>设 \(H \leq G\)，\(N \trianglelefteq G\)，则 \(HN \leq G\)，\(H \cap N \trianglelefteq H\)，且 \[H / (H \cap N) \cong HN / N\]</p>
+            <p>直觉：\(H\) 中的元素在 \(HN/N\) 中的「重复」恰好由 \(H \cap N\) 刻画。正如菱形图中 \(H\) 和 \(N\) 的两条「路径」在 \(HN\) 汇合，在 \(H \cap N\) 分叉。</p>
+            <h4>第三同构定理</h4>
+            <p>设 \(K \trianglelefteq N \trianglelefteq G\) 且 \(K \trianglelefteq G\)，则 \[(G/K) / (N/K) \cong G/N\]</p>
+            <p>直觉：先商掉 \(K\) 再商掉 \(N/K\)，等价于直接商掉 \(N\)。就像先按省分组再按地区合并，等价于直接按地区分组。</p>
+            <h4>对应定理</h4>
+            <p>设 \(N \trianglelefteq G\)，则 \(G/N\) 的子群与 \(G\) 中包含 \(N\) 的子群之间存在保序双射： \[\overline{H} \leftrightarrow H \quad (N \subseteq H \subseteq G)\]</p>
+            <p>且正规性保持：\(\overline{H} \trianglelefteq G/N \Leftrightarrow H \trianglelefteq G\)。这意味着商群的子群格是母群子群格的一个精确「截断」。</p>
+            <h4>三个定理的统一视角</h4>
+            <p>三个同构定理都可以通过构造合适的同态并应用第一同构定理来证明。它们本质上是同一个思想在不同场景下的体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>有限群分类</strong>：对应定理是分析有限群正规子群链的关键工具。例如确定 \(S_4\) 的所有正规子群时，先求 \(S_4/V_4 \cong S_3\)，再由对应定理反推 \(S_4\) 中包含 \(V_4\) 的正规子群。</p>
+            <p><strong>编码理论</strong>：第二同构定理在线性码的子空间分析中自然出现。两个线性码 \(C_1, C_2 \leq \mathbb{F}_q^n\) 的「并集码」\(C_1 + C_2\) 的维数由 \(\dim(C_1 + C_2) = \dim C_1 + \dim C_2 - \dim(C_1 \cap C_2)\) 给出。</p>
+            <p><strong>代数拓扑</strong>：第三同构定理在基本群的复合中广泛使用。例如对于覆盖空间序列 \(X \to Y \to Z\)，第三定理告诉我们 \(\pi_1(Y)/\pi_1(X) \cong \pi_1(Z)/\pi_1(Y)\) 的结构。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 在 \(\mathbb{Z}\) 中，\(6\mathbb{Z} \subseteq 2\mathbb{Z}\)， 用第三同构定理描述 \((\mathbb{Z}/6\mathbb{Z}) / (2\mathbb{Z}/6\mathbb{Z})\)。 解答: 由第三同构定理: \((\mathbb{Z}/6\mathbb{Z}) / (2\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。 其中 \(2\mathbb{Z}/6\mathbb{Z} = \{\overline{0}, \overline{2}, \overline{4}\}\) 是 \(\mathbb{Z}/6\mathbb{Z}\) 的 3 阶子群，商群阶 = 6/3 = 2。✓ 易错点: 使用第三同构定理时忘记验证 \(K \trianglelefteq G\) （不仅仅是 \(K \trianglelefteq N\)）。</p>
+            <p><strong>例题 1</strong>：在 \(\mathbb{Z}\) 中，\(6\mathbb{Z} \subseteq 2\mathbb{Z}\)，用第三同构定理描述 \((\mathbb{Z}/6\mathbb{Z}) / (2\mathbb{Z}/6\mathbb{Z})\)。</p>
+            <p><strong>解答</strong>：由第三同构定理：\((\mathbb{Z}/6\mathbb{Z}) / (2\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。其中 \(2\mathbb{Z}/6\mathbb{Z} = \{\overline{0}, \overline{2}, \overline{4}\}\) 是 \(\mathbb{Z}/6\mathbb{Z}\) 的3 阶子群，商群阶 = 6/3 = 2。✓</p>
+            <p><strong>例题 2</strong>：设 \(H = \{e, (1\;2)\} \leq S_4\)，\(N = A_4 \trianglelefteq S_4\)。用第二同构定理计算 \(H/(H \cap N)\)。</p>
+            <p><strong>解答</strong>：\(H \cap N = \{e\}\)（\((1\;2)\) 是奇置换，不在 \(A_4\) 中）。\(|HN| = |H||N|/|H \cap N| = 2 \times 12/1 = 24 = |S_4|\)。第二同构定理：\(H/(H \cap N) \cong HN/N = S_4/A_4 \cong \mathbb{Z}/2\mathbb{Z}\)。✓</p>
+            <p><strong>常见错误 1</strong>：使用第三同构定理时忘记验证 \(K \trianglelefteq G\)（不仅仅是 \(K \trianglelefteq N\)）。当 \(K\) 仅在 \(N\) 中正规时，\(N/K\) 可能不是 \(G/K\) 的正规子群。</p>
+            <p><strong>常见错误 2</strong>：在第二定理中忘记 \(N\) 必须是正规子群。若 \(N\) 不正规，\(HN\) 可能不是子群，定理无法应用。</p>
+            <p><strong>常见错误 3</strong>：混淆对应定理的方向。\(G/N\) 的子群对应 \(G\) 中<em>包含</em> \(N\) 的子群，而不是 \(G\) 的所有子群。不包含 \(N\) 的子群在商群中没有直接对应。</p>
           </div>
         </div>
       </div>
@@ -593,35 +695,67 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>「每个群都可以看成置换群」——Cayley 定理说每个群都同构于某个 对称群的子群。这不仅给出了群的具体几何图像，也说明了对称群的 普遍性。自同构群 \(\mathrm{Aut}(G)\) 则刻画了群自身的「对称性」， 其中内自同构子群与中心的关系揭示了群结构的深层信息。</p>
+            <p>「每个群都可以看成置换群」——Cayley 定理说每个群都同构于某个对称群的子群。这不仅给出了群的具体几何图像，也说明了对称群的普遍性。自同构群 \(\mathrm{Aut}(G)\) 则刻画了群自身的「对称性」。</p>
+            <ul>
+              <li>Cayley 定理将每个 3 阶群嵌入 \(S_3\)，让抽象群元素变成可操作的置换。</li>
+              <li>\(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)：循环群的自同构由 Euler 函数 \(\varphi(n)\) 完全决定。</li>
+              <li>\(\mathrm{Inn}(G) \cong G/Z(G)\)：内自同构与中心的关系揭示了群的「非交换程度」。</li>
+            </ul>
+            <p>Cayley 定理和自同构群的理论共同提供了从「外部表示」和「内部对称性」两个角度理解群结构的工具，是群作用和表示论的入口。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Cayley 定理是群作用理论的特例（\(G\) 通过左乘作用于自身）。 \(\mathrm{Inn}(G) \cong G/Z(G)\) 将自同构群与中心联系起来。</p>
+            <p>Cayley 定理是群作用理论的特例：\(G\) 通过左乘作用于自身，即 \(\lambda_g(x) = gx\)。这个「正则表示」是最自然的群嵌入。</p>
+            <p>自同构群 \(\mathrm{Aut}(G)\) 本身又是一个群，它的子群结构揭示了原群的对称性层次。内自同构 \(\mathrm{Inn}(G)\) 是 \(\mathrm{Aut}(G)\) 的正规子群，商群 \(\mathrm{Out}(G) = \mathrm{Aut}(G)/\mathrm{Inn}(G)\) 称为外自同构群。</p>
+            <ul>
+              <li>\(\mathrm{Inn}(G) \cong G/Z(G)\)：内自同构与中心的关系</li>
+              <li>\(G\) 交换 \(\Rightarrow \mathrm{Inn}(G) = \{e\}\)：交换群没有非平凡的内自同构</li>
+              <li>\(\mathrm{Aut}(\mathbb{Z}/n\mathbb{Z}) \cong (\mathbb{Z}/n\mathbb{Z})^*\)：循环群的自同构由单位群描述</li>
+            </ul>
+            <p>这些关系将群的「内部对称性」与「数论」联系起来，是群表示论和 Galois 理论的重要基础。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Cayley 定理</strong>: 每个群 \(G\) 同构于 \(S_G\)（\(G\) 上置换群）的子群。 证明: 定义 \(\lambda: G \to S_G,\; \lambda_g(x) = gx\)（左乘）。 \(\lambda_{gh}(x) = ghx = \lambda_g(\lambda_h(x))\)，故 \(\lambda\) 是同态。\(\lambda_g = \mathrm{id} \Rightarrow gx = x\) 对所有 \(x\)，故 \(g = e\)，即 \(\lambda\) 单射。 由此 \(G \cong \mathrm{Im}(\lambda) \leq S_G\)。 若 \(|G| = n\)，则 \(G\) 嵌入 \(S_n\)。 <strong>自同构群</strong>: \(\mathrm{Aut}(G)\) 是 \(G\) 到自身的所有同构组成的群。 <strong>内自同构</strong>: \(\mathrm{Inn}(G) = \{\varphi_g : x \mapsto gxg^{-1}\}\)。 \(\mathrm{Inn}(G) \trianglelefteq \mathrm{Aut}(G)\)，且 \[\mathrm{Inn}(G) \cong G / Z(G)\]</p>
+            <h4>Cayley 定理</h4>
+            <p>每个群 \(G\) 同构于 \(S_G\)（\(G\) 上置换群）的子群。若 \(|G| = n\)，则 \(G\) 嵌入 \(S_n\)。</p>
+            <p>证明：定义 \(\lambda: G \to S_G\)，\(\lambda_g(x) = gx\)（左乘）。\(\lambda_{gh}(x) = ghx = \lambda_g(\lambda_h(x))\)，故 \(\lambda\) 是同态。\(\lambda_g = \mathrm{id} \Rightarrow gx = x\) 对所有 \(x\)，故 \(g = e\)，即 \(\lambda\) 单射。因此 \(G \cong \mathrm{Im}(\lambda) \leq S_G\)。</p>
+            <h4>自同构群</h4>
+            <p>\[\mathrm{Aut}(G) = \{\sigma: G \xrightarrow{\sim} G \mid \sigma \text{ 是群同构}\}\]</p>
+            <p>\(\mathrm{Aut}(G)\) 在复合运算下构成群。对于循环群，\(\mathrm{Aut}(\mathbb{Z}/n\mathbb{Z}) \cong (\mathbb{Z}/n\mathbb{Z})^*\)，阶为 Euler 函数 \(\varphi(n)\)。</p>
+            <h4>内自同构与中心</h4>
+            <p>\[\mathrm{Inn}(G) = \{\varphi_g : x \mapsto gxg^{-1}\} \trianglelefteq \mathrm{Aut}(G), \quad \mathrm{Inn}(G) \cong G / Z(G)\]</p>
+            <p>内自同构由共轭操作定义。\(\varphi_g = \mathrm{id}\) 当且仅当 \(g \in Z(G)\)，因此映射 \(g \mapsto \varphi_g\) 的核恰好是中心。群越非交换，\(\mathrm{Inn}(G)\) 越大。</p>
+            <h4>外自同构群</h4>
+            <p>\[\mathrm{Out}(G) = \mathrm{Aut}(G) / \mathrm{Inn}(G)\]</p>
+            <p>外自同构群刻画了「不能由共轭实现」的自同构。例如 \(\mathrm{Out}(S_n) = \{e\}\) 对 \(n \neq 6\)，但 \(|\mathrm{Out}(S_6)| = 2\)——这是对称群理论中的著名例外。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Cayley 定理为有限群的计算机表示提供了基础—— 任何群都可用置换矩阵来存储和运算。</p>
+            <p><strong>计算机代数</strong>：Cayley 定理为有限群的计算机表示提供了基础——任何群都可用置换矩阵来存储和运算。GAP、Magma 等计算代数系统均基于置换表示。</p>
+            <p><strong>密码学</strong>：\(\mathrm{Aut}(\mathbb{Z}/n\mathbb{Z}) \cong (\mathbb{Z}/n\mathbb{Z})^*\) 直接关联自同构与 Euler 函数。RSA 加密中模 \(n\) 幂运算的安全性依赖于 \((\mathbb{Z}/n\mathbb{Z})^*\) 的结构复杂性。</p>
+            <p><strong>分子生物学</strong>：DNA 序列的对称性分析可用自同构群刻画。例如四联体的旋转对称性群 \(\cong \mathbb{Z}/2\mathbb{Z} \times \mathbb{Z}/2\mathbb{Z}\)，其自同构群 \(\cong S_3\) 描述了所有可能的对称重新标记。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 求 \(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z})\)。 解答: \(\mathbb{Z}/6\mathbb{Z}\) 的自同构由生成元的像决定。 生成元 \(\overline{1}\) 必须映到同阶元素（阶 6）， 即 \(\{\overline{1}, \overline{5}\}\)。 故 \(|\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z})| = \varphi(6) = 2\)， \(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。 易错点: 以为 \(\overline{1}\) 可以映到任意非零元素。 自同构必须保持阶，故像也必须是生成元。</p>
+            <p><strong>例题 1</strong>：求 \(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z})\)。</p>
+            <p><strong>解答</strong>：\(\mathbb{Z}/6\mathbb{Z}\) 的自同构由生成元 \(\overline{1}\) 的像决定。\(\overline{1}\) 必须映到同阶元素（阶 6），即 \(\{\overline{1}, \overline{5}\}\)。故 \(|\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z})| = \varphi(6) = 2\)，\(\mathrm{Aut}(\mathbb{Z}/6\mathbb{Z}) \cong \mathbb{Z}/2\mathbb{Z}\)。✓</p>
+            <p><strong>例题 2</strong>：设 \(G\) 非交换，\(|G| = 8\)，\(|Z(G)| = 2\)。求 \(|\mathrm{Inn}(G)|\)。</p>
+            <p><strong>解答</strong>：\(|\mathrm{Inn}(G)| = |G/Z(G)| = 8/2 = 4\)。例如 \(D_4\)：\(|Z(D_4)| = 2\)，\(\mathrm{Inn}(D_4) \cong D_4/Z(D_4)\) 阶 4，同构于 Klein 四元群 \(V_4\)。✓</p>
+            <p><strong>常见错误 1</strong>：以为 \(\overline{1}\) 可以映到任意非零元素。自同构必须保持阶，故像必须是生成元（与原元素同阶）。</p>
+            <p><strong>常见错误 2</strong>：混淆 \(\mathrm{Aut}(G)\) 与 \(\mathrm{Inn}(G)\)。当 \(G\) 交换时 \(\mathrm{Inn}(G) = \{e\}\)，但 \(\mathrm{Aut}(G)\) 可能很大（如 \(|\mathrm{Aut}(V_4)| = 6\)）。</p>
+            <p><strong>常见错误 3</strong>：Cayley 定理给出的嵌入通常不是最优的。例如 \(\mathbb{Z}/3\mathbb{Z}\) 嵌入 \(S_3\) 而非 \(S_2\)，但实际上 \(\mathbb{Z}/3\mathbb{Z} \cong A_3 \leq S_3\) 已是最小的对称群嵌入。</p>
           </div>
         </div>
       </div>

@@ -394,11 +394,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>数学和物理中重积分 \(\iint f(x,y)\,dx\,dy\) 无处不在，但在测度论框架下，"两个测度空间的乘积"并非不言自明——如何从 \((X,\mathcal{F},\mu)\) 和 \((Y,\mathcal{G},\nu)\) 出发，严格构造出乘积空间上的 σ-代数和测度？</p>
             <ul>
-              <li><strong>多变量积分的需求</strong>——数学和物理中重积分 \(\iint f(x,y)\,dx\,dy\) 无处不在，但在测度论框架下，如何严格定义两个测度空间 \((X,\mathcal{F},\mu)\) 和 \((Y,\mathcal{G},\nu)\) 的"乘积"测度空间？</li>
-              <li><strong>概率论的基础</strong>——联合分布、独立性的精确定义都依赖于乘积 σ-代数上的测度；不严格构造会导致条件概率等高级概念出现悖论</li>
-              <li><strong>从有限到无限的延拓</strong>——矩形集 \(A \times B\) 上的测度值 \(\mu(A)\nu(B)\) 显然；困难在于如何把这一"局部"定义一致地延拓到全体乘积可测集</li>
+              <li><strong>概率论</strong>：联合分布和独立性的精确定义依赖于乘积 σ-代数上的测度——不严格构造会导致条件概率等高级概念出现悖论；</li>
+              <li><strong>统计力学</strong>：多粒子系统的相空间是单粒子相空间的乘积，配分函数的计算需要在乘积测度上积分；</li>
+              <li><strong>PDE 理论</strong>：时空域上的积分 \(\int_0^T \int_\Omega f(x,t)\,dx\,dt\) 需要时间测度与空间测度的乘积结构。</li>
             </ul>
+            <p>矩形集 \(A \times B\) 上的测度值 \(\mu(A)\nu(B)\) 是自然的出发点；难点在于将这一"局部"定义一致地延拓到全体乘积可测集。Carathéodory 延拓再次登场——σ-有限性保证了延拓的唯一性，截面可测性定理则为后续 Tonelli/Fubini 定理打下基础。</p>
           </div>
         </div>
 
@@ -495,11 +497,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>有了乘积测度之后，最核心的运算是将乘积空间上的积分化为逐次积分——选择更方便的积分顺序可以极大简化计算。Tonelli 定理对非负可测函数无条件允许交换积分顺序，这一自由度在实践中价值巨大。</p>
             <ul>
-              <li><strong>交换积分顺序</strong>——有了乘积测度，最核心的运算是把 \(\iint f\,d(\mu \times \nu)\) 化为逐次积分 \(\int(\int f\,d\nu)\,d\mu\)；选择更方便的积分顺序可以极大简化计算</li>
-              <li><strong>非负情形的自由性</strong>——Tonelli 定理对非负可测函数<strong>无条件</strong>允许交换（结果允许为 \(+\infty\)），这比 Fubini 的条件宽松得多</li>
-              <li><strong>作为 Fubini 的入口</strong>——实际使用中，先用 Tonelli 对 \(|f|\) 检验可积性，再用 Fubini 对 \(f\) 本身交换积分顺序，Tonelli 是这一"两步法"的第一步</li>
+              <li><strong>概率论</strong>：计算联合分布的边际分布时，Tonelli 保证对非负密度函数可先积任一变量——这是贝叶斯推断中边际化的数学基础；</li>
+              <li><strong>调和分析</strong>：卷积的 \(L^1\) 范数估计 \(\|f*g\|_1 \leq \|f\|_1\|g\|_1\) 的证明中，Tonelli 用于将乘积空间上的积分分步计算；</li>
+              <li><strong>组合数学</strong>：计数问题的"交换求和顺序"是 Tonelli 定理在离散测度（计数测度）上的特例。</li>
             </ul>
+            <p>Tonelli 定理不要求可积性的根本原因在于非负性消除了符号问题——所有部分和与积分都单调递增，\(+\infty - \infty\) 的不确定性不会出现。证明遵循测度论标准三步范式：特征函数 → 简单函数（线性性）→ 一般非负函数（MCT 取极限），每一步都建立在前一步之上。</p>
           </div>
         </div>
 
@@ -591,11 +595,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>Tonelli 定理限于非负函数，但物理和概率中大量被积函数是变号的——正弦函数、Fourier 核、带正负权的密度差都需要在乘积空间上积分。Fubini 定理以"绝对可积"为代价，换取了对变号函数的积分顺序交换权。</p>
             <ul>
-              <li><strong>变号函数的需求</strong>——Tonelli 限于非负函数，但物理与概率中大量函数是变号的（如 \(\sin\)、Fourier 核、带正负权的密度差）；需要在更一般条件下交换积分顺序</li>
-              <li><strong>可积性是代价</strong>——Fubini 定理要求 \(f \in L^1(\mu \times \nu)\)（绝对可积），以此为代价换取对变号函数的积分交换权</li>
-              <li><strong>核心工具地位</strong>——在 PDE（弱解的对偶论证）、概率论（条件期望的存在性）、调和分析（卷积定理的证明）中，Fubini 是最常引用的定理之一</li>
+              <li><strong>PDE 理论</strong>：弱解的对偶论证需要将试探函数与解在时空域上的积分交换顺序——Fubini 是这一步骤的法律依据；</li>
+              <li><strong>概率论</strong>：条件期望的存在性证明中，将联合密度上的积分分解为逐次积分需要 Fubini；</li>
+              <li><strong>调和分析</strong>：Fourier 反演公式和 Plancherel 定理的证明都以 Fubini 可以合法交换积分顺序为前提。</li>
             </ul>
+            <p>实际使用中，Fubini 几乎总是与 Tonelli 搭配出现，形成"两步法"工作流：先用 Tonelli 对 \(|f|\) 交换积分顺序检验可积性，若有限则 Fubini 适用于 \(f\) 本身。Tonelli 是守门人（检验），Fubini 是执行者（交换）——两者的分工是测度论分析的标准工作流。</p>
           </div>
         </div>
 
@@ -688,11 +694,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
+            <p>卷积 \((f * g)(x) = \int f(x-y)g(y)\,dy\) 是分析学中最重要的二元运算之一——它在乘积测度理论与单变量函数空间之间架起桥梁，将两个函数的"交互作用"编码为一个新函数。</p>
             <ul>
-              <li><strong>无处不在的运算</strong>——卷积 \((f * g)(x) = \int f(x-y)g(y)\,dy\) 是分析学中最重要的二元运算之一，连接了乘积测度理论与单变量函数空间</li>
-              <li><strong>物理意义：输入-输出与叠加</strong>——线性时不变系统的输出 = 输入与脉冲响应的卷积；高斯模糊 = 图像与高斯核的卷积；这些都是卷积在工程中的直观体现</li>
-              <li><strong>代数结构</strong>——\(L^1(\mathbb{R})\) 在卷积下构成 Banach 代数，这一结构是抽象调和分析的起点；Fourier 变换将卷积化为点乘，揭示了频域与时域的对偶性</li>
+              <li><strong>信号处理</strong>：线性时不变系统的输出 = 输入与脉冲响应的卷积；高斯模糊 = 图像与高斯核的卷积——几乎所有滤波操作都可表示为卷积；</li>
+              <li><strong>概率论</strong>：两个独立随机变量之和的密度是各自密度的卷积 \(f_{X+Y} = f_X * f_Y\)——将加法运算转化为积分运算；</li>
+              <li><strong>PDE 理论</strong>：基本解（Green 函数）与源项的卷积给出方程的解——位势理论和分布论的核心工具。</li>
             </ul>
+            <p>卷积的深层威力来自 Fourier 对偶性：\(\widehat{f * g} = \hat{f} \cdot \hat{g}\)（卷积定理）将时域中复杂的积分运算化为频域中简单的逐点乘积——这一对偶从根本上驱动了 FFT 算法和现代信号处理的整个框架。与光滑核的卷积更具"正则化"效应：\(f * \varphi_\varepsilon \in C^\infty\) 即使 \(f\) 仅在 \(L^1\) 中，这是 PDE 正则化理论和分布论的基础工具。</p>
           </div>
         </div>
 

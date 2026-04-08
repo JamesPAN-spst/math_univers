@@ -394,7 +394,27 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>在模 \(n\) 乘法群中，元素 \(a\) 的阶 \(\mathrm{ord}_n(a)\) 描述它的「周期」。 理解阶的性质是研究乘法群结构的基础，也是定义原根和离散对数的 前提。</p>
+            <p>在模 \(n\) 乘法群中，元素 \(a\) 的阶 \(\mathrm{ord}_n(a)\) 描述它的「周期」——理解阶是研究乘法群结构的基础。</p>
+            <ul>
+              <li>\(\mathrm{ord}_7(2) = 3\)：\(2^1=2, 2^2=4, 2^3=8\equiv 1\)，所以 2 的「重复周期」是 3；</li>
+              <li>\(\mathrm{ord}_{13}(2) = 12 = \varphi(13)\)，所以 2 是模 13 的原根——它生成整个乘法群；</li>
+              <li>Diffie-Hellman 密钥交换要求生成元的阶中含大素因子，以保证离散对数问题的困难性。</li>
+            </ul>
+            <p>阶的概念是定义原根和离散对数的前提，也是所有有限群理论的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>元素的阶在群论中对应由该元素生成的循环子群 \(\langle a \rangle\) 的阶。\(\mathrm{ord}_n(a) = |\langle a \rangle|\)，而 Lagrange 定理保证 \(|\langle a \rangle|\) 整除 \(|(\mathbb{Z}/n\mathbb{Z})^*| = \varphi(n)\)。</p>
+            <p>从这个视角可以统一理解阶的各项性质：</p>
+            <ul>
+              <li>\(a^m \equiv 1 \Leftrightarrow \mathrm{ord}(a) \mid m\) 对应子群元素的周期性；</li>
+              <li>\(\mathrm{ord}(a^k) = \mathrm{ord}(a)/\gcd(k, \mathrm{ord}(a))\) 对应循环群中幂元素的阶公式；</li>
+              <li>当 \((\mathbb{Z}/n\mathbb{Z})^*\) 本身是循环群时，存在阶为 \(\varphi(n)\) 的元素——即原根。</li>
+            </ul>
+            <p>阶的概念将「模运算中的重复」翻译为「群中的循环结构」，使得许多看似计算性的结论获得了结构性的证明。</p>
           </div>
         </div>
 
@@ -408,7 +428,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>阶的计算在密码学中用于确定密钥空间大小。</p>
+            <p><strong>密码学</strong>：Diffie-Hellman 密钥交换需要确定元素的阶足够大（通常要求阶中含大素因子），以保证离散对数问题的困难性。</p>
+            <p><strong>伪随机生成</strong>：线性同余发生器 \(x_{k+1} = ax_k + c \bmod m\) 的最大周期为 \(m\)，当且仅当 \(a\) 的阶满足特定条件，阶的理论直接决定了生成器质量。</p>
+            <p><strong>编码理论</strong>：循环码的最小距离与生成元的阶直接相关，BCH 码的设计过程中需要计算有限域元素的阶来确定纠错能力。</p>
           </div>
         </div>
 
@@ -442,7 +464,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>如果存在一个元素 \(g\) 使得 \(\mathrm{ord}_n(g) = \varphi(n)\)，则 \((\mathbb{Z}/n\mathbb{Z})^*\) 是循环群，\(g\) 称为原根。哪些 \(n\) 有原根？ 这个问题的答案是经典而优雅的。</p>
+            <p>如果存在元素 \(g\) 使得 \(\mathrm{ord}_n(g) = \varphi(n)\)，则 \((\mathbb{Z}/n\mathbb{Z})^*\) 是循环群，\(g\) 称为原根。哪些 \(n\) 有原根？</p>
+            <ul>
+              <li>所有素数 \(p\) 都有原根：例如模 7 的原根是 3 和 5（\(\mathrm{ord}_7(3)=\mathrm{ord}_7(5)=6\)）；</li>
+              <li>\(n = 8\) 无原根：\((\mathbb{Z}/8\mathbb{Z})^* \cong (\mathbb{Z}/2\mathbb{Z})^2\) 不是循环群，最大阶只有 2；</li>
+              <li>ElGamal 加密体系选择素数 \(p\) 和原根 \(g\) 作为公开参数，保证密钥空间最大化。</li>
+            </ul>
+            <p>原根存在性的完整分类 \(n = 1, 2, 4, p^k, 2p^k\) 是数论中经典而优雅的结果。</p>
           </div>
         </div>
 
@@ -463,7 +491,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>密码学中 ElGamal 加密体系选择素数 \(p\) 和原根 \(g\) 作为公开参数。</p>
+            <p><strong>公钥密码</strong>：ElGamal 加密体系选择素数 \(p\) 和原根 \(g\) 作为公开参数，原根保证 \(\langle g \rangle = (\mathbb{Z}/p\mathbb{Z})^*\) 遍历整个群，从而最大化密钥空间。</p>
+            <p><strong>网络安全</strong>：TLS 1.3 中的 FFDHE 参数组需要验证生成元确实为原根，否则密钥交换有可能落入真子群，降低安全强度。</p>
+            <p><strong>数字电路</strong>：反馈移位寄存器 (LFSR) 的最大周期条件等价于反馈多项式是 \(\mathrm{GF}(2)\) 上的本原多项式，其根是 \(\mathrm{GF}(2^n)\) 的原根。</p>
           </div>
         </div>
 
@@ -526,7 +556,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>\((\mathbb{Z}/p\mathbb{Z})^*\) 是循环群（即存在原根）这一事实是数论的基本定理。 它说明每个素数模下的乘法群结构尽可能简单，为指标（离散对数） 的定义提供了基础。</p>
+            <p>\((\mathbb{Z}/p\mathbb{Z})^*\) 是循环群（即存在原根）这一事实是数论的基本定理，说明每个素数模下的乘法群结构尽可能简单。</p>
+            <ul>
+              <li>模 11 中 \(2\) 是原根：\(\{2^0, 2^1, \ldots, 2^9\} = \{1,2,4,8,5,10,9,7,3,6\}\) 遍历全部 10 个非零元素；</li>
+              <li>证明核心：\(\mathbb{Z}/p\mathbb{Z}\) 是域，\(d\) 次多项式至多 \(d\) 个根——这排除了「中等阶元素过多」的可能；</li>
+              <li>将这个结果应用于 \(\mathrm{GF}(p^k)\)，得到任意有限域的乘法群都是循环的。</li>
+            </ul>
+            <p>群的循环性为指标（离散对数）的定义提供了基础，也是有限域理论的基石。</p>
           </div>
         </div>
 
@@ -547,7 +583,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>离散对数问题（DLP）的定义依赖于循环群结构，是密码学安全性的基础。</p>
+            <p><strong>密码分析</strong>：DLP 的定义依赖于循环群结构，原根的存在保证了 \((\mathbb{Z}/p\mathbb{Z})^*\) 是循环群，从而指标表的完备性是许多密码算法的前提。</p>
+            <p><strong>数字签名</strong>：DSA 签名方案中签名过程需计算 \(k^{-1} \bmod q\) 再利用指标关系 \(\mathrm{ind}_g(\cdot)\) 将乘法问题转为加法问题，与普通对数思想一致。</p>
+            <p><strong>计算数论</strong>：指标演算 (Index Calculus) 是当前最强的 DLP 求解方法，其复杂度为 \(L_p[1/2, c]\)，直接决定了密码参数的安全边界。</p>
           </div>
         </div>
 
@@ -581,7 +619,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>有了原根 \(g\)，每个可逆元素都可以写成 \(g^k\) 的形式。指标 \(\mathrm{ind}_g(a) = k\)（离散对数）将乘法转化为加法，类似于对数。 离散对数的计算困难性是现代密码学的基石。</p>
+            <p>有了原根 \(g\)，每个可逆元素都可写成 \(g^k\) 的形式。指标 \(\mathrm{ind}_g(a)=k\)（离散对数）将乘法转化为加法，类似于普通对数。</p>
+            <ul>
+              <li>\(\mathrm{ind}_3(5) = 5 \pmod{6}\) 在模 7 下：\(3^5 = 243 \equiv 5 \pmod{7}\)；</li>
+              <li>\(\mathrm{ind}_g(ab) = \mathrm{ind}_g(a) + \mathrm{ind}_g(b) \pmod{\varphi(n)}\)，与 \(\log(ab) = \log a + \log b\) 完全平行；</li>
+              <li>Diffie-Hellman 的安全性基于：给定 \(g^a \bmod p\) 求 \(a\)(即 DLP)计算上困难。</li>
+            </ul>
+            <p>离散对数的计算困难性是现代密码学的基石之一，与大整数分解并列为两大“困难问题”。</p>
           </div>
         </div>
 
@@ -602,7 +646,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Diffie-Hellman 密钥交换、ElGamal 加密、DSA 签名算法的安全性 基于 DLP 的困难性。</p>
+            <p><strong>密码学</strong>：离散对数问题 (DLP) 的困难性是 Diffie-Hellman、ElGamal、DSA 等体系的安全基石，循环群结构保证了问题的良好定义。</p>
+            <p><strong>信息安全</strong>：Diffie-Hellman 密钥交换中 \(g^a \bmod p\) 和 \(g^b \bmod p\) 公开，但恢复 \(a, b\) 等价于解 DLP，这是现代密钥协商协议的理论基础。</p>
+            <p><strong>算法研究</strong>：Baby-step Giant-step、Pollard rho、Index Calculus 等 DLP 算法的复杂度直接决定了密码参数的选择标准（如 2048-bit DH 对应 112-bit 安全级）。</p>
           </div>
         </div>
 

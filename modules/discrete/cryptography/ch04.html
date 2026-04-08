@@ -391,6 +391,15 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>签名方案的统一抽象是三元组 \((\text{Gen}, \text{Sign}, \text{Verify})\)：密钥生成产生公私钥对，签名用私钥生成消息的"指纹绑定"，验证用公钥检查绑定的一致性。关键区别在于<strong>底层的数学单向函数</strong>：RSA 签名基于大整数分解，DSA 基于离散对数。</p>
+            <p>RSA 签名利用了 RSA 函数的<strong>trapdoor 性质</strong>：\(\sigma = H(m)^d\) 只有知道 \(d\) 才能计算，但任何人可用 \(e\) 验证 \(\sigma^e = H(m)\)。DSA 则利用了离散对数中的"承诺-挑战-响应"结构——签名过程隐含了一个零知识协议的非交互化。</p>
+            <p>两类方案的共同弱点是<strong>对哈希函数的依赖</strong>：Hash-then-Sign 范式要求哈希的碰撞抗性，否则攻击者可伪造签名。实际中 RSA 需要 PSS 填充（可证明安全），DSA 天然是概率方案但对随机数 \(k\) 的质量有严格要求——\(k\) 的任何偏差都可能导致私钥泄露。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
@@ -491,6 +500,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>ECDSA 将 DSA 迁移到椭圆曲线上，在保持安全性的同时大幅缩短 签名和密钥长度。它是 Bitcoin 和以太坊交易签名、TLS 证书、 物联网设备认证的核心算法。EdDSA（如 Ed25519）进一步简化了 实现并消除了随机数相关的安全隐患。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>ECDSA 的抽象核心是将 DSA 从 \(\mathbb{Z}_p^*\) 迁移到<strong>椭圆曲线群</strong> \(E(\mathbb{F}_p)\) 上。群运算从模幂 \(g^k \bmod p\) 变为点乘 \([k]G\)，但离散对数问题（ECDLP）在椭圆曲线上的最优算法是 Pollard rho（\(O(\sqrt{n})\)），没有亚指数级捷径。</p>
+            <p>这意味着同等安全级别下，椭圆曲线的群阶可以远小于 \(\mathbb{Z}_p^*\)。256 位椭圆曲线提供 128 位安全性，而 RSA/DSA 需要 3072 位密钥才能达到同等水平。<strong>密钥/签名长度的巨大优势</strong>（ECDSA 64 字节 vs RSA 384 字节）使其成为资源受限环境的首选。</p>
+            <p>EdDSA 在此基础上进一步改进了工程安全性：使用<strong>确定性 nonce</strong> \(k=H(\text{prefix}\|m)\)，消除了 ECDSA 最大的实现隐患——随机数生成器的质量问题。从 ECDSA 到 EdDSA 的演进体现了"将安全从概率保证提升到确定性保证"的设计哲学。</p>
           </div>
         </div>
 

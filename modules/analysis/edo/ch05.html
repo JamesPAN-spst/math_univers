@@ -458,6 +458,13 @@
             <p><strong>第 2 步</strong>：Jacobian \(A = \begin{pmatrix} 1-y & -x \\ y & x-1 \end{pmatrix}\)。</p>
             <p><strong>第 3 步</strong>：在 \((0,0)\)：\(A = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}\)，特征值 \(\lambda = 1, -1\) → <strong>鞍点</strong>（不稳定）。</p>
             <p><strong>第 4 步</strong>：在 \((1,1)\)：\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)，\(\tau = 0\)，\(\Delta = 1 > 0\)，特征值 \(\lambda = \pm i\) → <strong>中心</strong>。</p>
+
+            <h4>例题 2：含多个平衡点的系统</h4>
+            <p>分析 \(x' = y\)，\(y' = x - x^3\) 的平衡点。</p>
+            <p><strong>第 1 步</strong>：令 \(y = 0\) 且 \(x(1 - x^2) = 0\)。平衡点：\((0,0)\)，\((1,0)\)，\((-1,0)\)。</p>
+            <p><strong>第 2 步</strong>：Jacobian \(A = \begin{pmatrix} 0 & 1 \\ 1-3x^2 & 0 \end{pmatrix}\)。在 \((0,0)\)：\(\Delta = -1 < 0\) → <strong>鞍点</strong>。在 \((\pm 1,0)\)：\(\Delta = 2 > 0\)，\(D = -8 < 0\) → <strong>中心</strong>（线性化）。</p>
+            <p><strong>物理含义</strong>：这是 Duffing 方程 \(\ddot{x} = x - x^3\)。\(x = 0\) 是势能极大点（鞍点），\(x = \pm 1\) 是势能极小点（稳定振荡）。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 线性化在<strong>中心</strong>情况下不能确定非线性系统的定性行为。中心可能因非线性项变为焦点（稳定或不稳定），需要更精细的分析（如 Lyapunov 函数或首次积分）。</li>
@@ -558,6 +565,13 @@
             <p><strong>第 2 步</strong>：判别式 \(D = \tau^2 - 4\Delta = 4 - 20 = -16 < 0\) → 复特征值。</p>
             <p><strong>第 3 步</strong>：特征值 \(\lambda = -1 \pm 2i\)。\(\mathrm{Re}(\lambda) = -1 < 0\) → <strong>稳定焦点</strong>。</p>
             <p><strong>第 4 步</strong>：旋转方向。在 \((1,0)^\top\) 处速度为 \(A\binom{1}{0} = \binom{-1}{-2}\)，\(y\) 分量为负 → <strong>顺时针</strong>旋转。</p>
+
+            <h4>例题 2：鞍点的相图</h4>
+            <p>画 \(A = \begin{pmatrix} 1 & 0 \\ 0 & -2 \end{pmatrix}\) 的相图草图。</p>
+            <p><strong>第 1 步</strong>：\(\Delta = -2 < 0\) → <strong>鞍点</strong>。特征值 \(\lambda_1 = 1\)（不稳定），\(\lambda_2 = -2\)（稳定）。</p>
+            <p><strong>第 2 步</strong>：特征向量 \(\mathbf{v}_1 = (1,0)^T\)，\(\mathbf{v}_2 = (0,1)^T\)。不稳定流形沿 \(x\) 轴，稳定流形沿 \(y\) 轴。</p>
+            <p><strong>第 3 步</strong>：轨线沿 \(y\) 轴快速趋近原点（\(|\lambda_2| = 2\) 更大），再沿 \(x\) 轴缓慢离去——典型的鞍点双曲线族。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 混淆判别式 \(D = \tau^2 - 4\Delta\) 与行列式 \(\Delta = \det(A)\)。\(D < 0\) → 复特征值（焦点/中心），\(\Delta < 0\) → 鞍点。</li>
@@ -720,6 +734,13 @@
             <p><strong>第 2 步</strong>：Jacobian \(A = \begin{pmatrix} -1 & 2y \\ 0 & -2 \end{pmatrix}\bigg|_{(0,0)} = \begin{pmatrix} -1 & 0 \\ 0 & -2 \end{pmatrix}\)。</p>
             <p><strong>第 3 步</strong>：特征值 \(\lambda_1 = -1\)，\(\lambda_2 = -2\)，均为负实数。\(\mathrm{Re}(\lambda_i) \neq 0\) → <strong>双曲</strong>平衡点。</p>
             <p><strong>第 4 步</strong>：线性化为稳定结点。由 Hartman-Grobman 定理，非线性系统在原点附近也呈<strong>稳定结点</strong>行为。</p>
+
+            <h4>例题 2：非双曲情况的判断</h4>
+            <p>单摆方程 \(x' = y\)，\(y' = -\sin x\) 在 \((0,0)\) 处能否使用 Hartman-Grobman？</p>
+            <p><strong>第 1 步</strong>：Jacobian \(A = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}\)，特征值 \(\lambda = \pm i\)，\(\mathrm{Re}(\lambda) = 0\) → <strong>非双曲</strong>，定理不适用。</p>
+            <p><strong>第 2 步</strong>：替代方法——能量函数 \(H = \tfrac{1}{2}y^2 - \cos x\) 沿轨线守恒（\(\dot{H} = 0\)），证明 \((0,0)\) 确实是中心（而非焦点）。</p>
+            <p><strong>结论</strong>：纯虚特征值时必须超越线性化，利用守恒量、Lyapunov 函数或中心流形方法。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 特征值为纯虚（\(\mathrm{Re}(\lambda) = 0\)）时仍使用 Hartman-Grobman。此时中心可能变为焦点，定理不适用，必须用 Lyapunov 函数或中心流形方法。</li>
@@ -819,6 +840,13 @@
             </ul>
             <p><strong>第 3 步</strong>：环形区域 \(D\) 内无平衡点（原点不在 \(D\) 内）。</p>
             <p><strong>结论</strong>：由 Poincaré-Bendixson 定理，\(D\) 内必有极限环。由 \(r' = 0 \Leftrightarrow r = 1\) 知极限环为 \(r = 1\)（单位圆）。</p>
+
+            <h4>例题 2：用 Bendixson 判据排除周期轨道</h4>
+            <p>证明 \(x' = y + x^3\)，\(y' = -x + y^3\) 在 \(\mathbb{R}^2\) 上无周期轨道。</p>
+            <p><strong>第 1 步</strong>：计算散度 \(\nabla \cdot \mathbf{F} = 3x^2 + 3y^2 \geq 0\)，仅在原点为 0。</p>
+            <p><strong>第 2 步</strong>：由 Bendixson 判据，散度不变号且不恒为零 → 任何单连通域内无周期轨道。</p>
+            <p><strong>直觉</strong>：散度 \(> 0\) 意味着相流「膨胀面积」，与周期轨道围的面积守恒矛盾。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ Poincaré-Bendixson <strong>仅适用于 \(\mathbb{R}^2\)</strong>。三维系统中有界轨线可有混沌行为（如 Lorenz 吸引子），该定理完全失效。</li>

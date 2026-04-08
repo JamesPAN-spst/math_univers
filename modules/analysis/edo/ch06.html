@@ -456,6 +456,13 @@
             <p><strong>第 2 步</strong>：\(x(t) \to 0\) as \(t \to \infty\) → 渐近稳定。</p>
             <p><strong>第 3 步</strong>：衰减速率分析。\(|x(t)| \sim \frac{1}{\sqrt{2t}}\) 是<strong>多项式衰减</strong>，不存在 \(\alpha > 0\) 使 \(|x(t)| \leq Me^{-\alpha t}\)。</p>
             <p><strong>结论</strong>：\(x = 0\) 是渐近稳定但<strong>非</strong>指数稳定的。</p>
+
+            <h4>例题 2：分类线性系统的稳定性</h4>
+            <p>讨论 \(\dot{\mathbf{X}} = A\mathbf{X}\) 的稳定性，\(A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}\)。</p>
+            <p><strong>第 1 步</strong>：特征值 \(\lambda_1 = \lambda_2 = 0\)（二重零特征值），Jordan 块为 \(2 \times 2\)。</p>
+            <p><strong>第 2 步</strong>：\(e^{tA} = I + tA = \begin{pmatrix} 1 & t \\ 0 & 1 \end{pmatrix}\)，故 \(x_1(t) = x_1(0) + tx_2(0)\)。</p>
+            <p><strong>第 3 步</strong>：若 \(x_2(0) \neq 0\)，\(|x_1(t)| \to \infty\) → <strong>不稳定</strong>。特征值实部为 0 但 Jordan 块大于 \(1 \times 1\)，Lyapunov 稳定都不满足。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 将渐近稳定等同于指数稳定。非线性系统的衰减可以任意慢（多项式甚至对数衰减），指数稳定是额外的强条件。</li>
@@ -602,6 +609,13 @@
             <p><strong>第 3 步</strong>：衰减率 \(\alpha = \min(2, 3) = 2\)，\(\|\mathbf{X}(t)\| \leq Me^{-2t}\|\mathbf{X}(0)\|\)。</p>
             <h4>边界情况对比</h4>
             <p>\(A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\)：特征值 \(\lambda = \pm i\)（纯虚，\(1 \times 1\) 块） → Lyapunov 稳定但<strong>非</strong>渐近稳定（中心，解为周期函数）。</p>
+
+            <h4>例题 2：Routh-Hurwitz 判据</h4>
+            <p>判断特征多项式 \(p(\lambda) = \lambda^3 + 2\lambda^2 + 3\lambda + 4\) 的根是否全在左半平面。</p>
+            <p><strong>第 1 步</strong>：所有系数 \(a_1 = 2,\; a_2 = 3,\; a_3 = 4 > 0\)（必要条件满足）。</p>
+            <p><strong>第 2 步</strong>：三阶 Routh-Hurwitz 充要条件：\(a_1 a_2 > a_3\)，即 \(2 \times 3 = 6 > 4\)。✓</p>
+            <p><strong>结论</strong>：所有根实部为负 → 渐近稳定。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ 将「所有特征值实部 \(\leq 0\)」等同于渐近稳定。\(\leq 0\) 只保证 Lyapunov 稳定（在 Jordan 块条件满足时），渐近稳定要求<strong>严格&lt; 0</strong>。</li>
@@ -696,6 +710,13 @@
             <p><strong>第 3 步</strong>：在小邻域 \(x^2 + y^2 \leq r^2\) 内估计交叉项。由 \(|y^2| \leq r^2\) 和 \(|2xy^2| \leq 2|x| \cdot r^2 \leq r(x^2 + r^2)\)，当 \(r\) 足够小时：</p>
             \[\dot{V} \leq -2x^2 + r(x^2 + r^2) - 2y^2 \leq -(2-r)(x^2 + y^2) < 0\]
             <p><strong>结论</strong>：在 \(r < 2\) 的邻域内 \(\dot{V}\) 负定 → 渐近稳定。</p>
+
+            <h4>例题 2：非线性系统的 Lyapunov 分析</h4>
+            <p>证明 \(x' = -x^3\)，\(y' = -y\) 在原点渐近稳定。</p>
+            <p><strong>第 1 步</strong>：取 \(V = \frac{1}{2}x^2 + \frac{1}{2}y^2\)（正定）。</p>
+            <p><strong>第 2 步</strong>：\(\dot{V} = x(-x^3) + y(-y) = -x^4 - y^2 < 0\) 对所有 \((x,y) \neq (0,0)\) → \(\dot{V}\) 负定。</p>
+            <p><strong>结论</strong>：渐近稳定。但 \(x\) 方向衰减为多项式阶（\(x(t) \sim t^{-1/2}\)），仅渐近稳定而非指数稳定。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ \(\dot{V} \leq 0\)（负半定）只能得 Lyapunov 稳定，<strong>不能</strong>直接得渐近稳定。需要 \(\dot{V} < 0\)（负定）或使用 LaSalle 不变性原理。</li>
@@ -772,11 +793,13 @@
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
+            <p>Lyapunov 直接法的两个补充工具——Chetaev 定理和 LaSalle 原理——分别解决不稳定性判定和负半定情况下的渐近稳定性：</p>
             <ul>
               <li><strong>Chetaev 的对偶思想</strong>：如果 Lyapunov 方法是「找递减的正定函数证稳定」，Chetaev 方法就是「找递增的函数证不稳定」——轨线被强制推离平衡点。</li>
               <li><strong>LaSalle 的精炼</strong>：\(\dot{V} \leq 0\) 保证 \(V\) 单调下降且有下界(0)，故 \(V(\mathbf{X}(t)) \to c\)。轨线的极限集必须在 \(\dot{V} = 0\) 的集合上——再排除非平衡点即可。</li>
               <li><strong>正不变集的核心角色</strong>：LaSalle 原理的关键是「\(\dot{V} = 0\) 中最大的正不变集 \(M\)」——轨线不是趋向 \(\dot{V} = 0\) 的所有点，而是只趋向那些可以一直停留的点。</li>
             </ul>
+            <p>Chetaev 与 Lyapunov 形成「攻守对偶」，LaSalle 原理则弥合了负半定与负定之间的落差——三者合力构成非线性稳定性分析的完整工具箱。</p>
           </div>
         </div>
 
@@ -833,6 +856,13 @@
               <li>\(y \equiv 0 \Rightarrow y' \equiv 0 \Rightarrow -x - 0 = 0 \Rightarrow x = 0\)</li>
             </ul>
             <p><strong>第 4 步</strong>：\(E\) 中最大正不变集 \(M = \{(0,0)\}\)。由 LaSalle 原理，所有轨线趋向原点 → <strong>渐近稳定</strong>。</p>
+
+            <h4>例题 2：Chetaev 定理证明不稳定</h4>
+            <p>证明 \(x' = y + x(x^2 + y^2)\)，\(y' = -x + y(x^2 + y^2)\) 在原点不稳定。</p>
+            <p><strong>第 1 步</strong>：取 \(V = \frac{1}{2}(x^2 + y^2)\)（正定），\(\dot{V} = (x^2+y^2)^2 > 0\) 对 \(\mathbf{X} \neq 0\)。</p>
+            <p><strong>第 2 步</strong>：\(V\) 正定且 \(\dot{V}\) 正定 → 轨线被推离原点。</p>
+            <p><strong>结论</strong>：由 Chetaev 定理，原点<strong>不稳定</strong>。线性化特征值 \(\pm i\)（中心），但非线性项完全改变了定性行为。</p>
+
             <h4>常见易错点</h4>
             <ul>
               <li>❌ LaSalle 原理需要<strong>正不变紧集</strong> \(\Omega\)。对于无界系统，需先论证轨线有界（通常利用 \(V\) 的水平集 \(\{V \leq c\}\) 是紧的）。</li>

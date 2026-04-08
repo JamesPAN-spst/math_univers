@@ -394,35 +394,59 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>实分析中，路径积分依赖于路径的选择。复分析中 Cauchy 定理 揭示了全纯函数的路径积分只依赖于端点（单连通区域中）—— 甚至绕闭曲线积分为零！这一看似简单的结论是复分析大厦的基石， 它导出 Cauchy 积分公式、Taylor/Laurent 展开和留数定理。</p>
+            <p>实分析中路径积分依赖于路径的选择，但复分析中 Cauchy 定理揭示了全纯函数的路径积分只依赖端点。这一发现是复分析大厦的基石。</p>
+            <ul>
+              <li>全纯函数沿闭曲线积分为零（单连通域中）——路径可以自由形变而积分不变。</li>
+              <li>\(\oint_{|z|=1} 1/z\, dz = 2\pi i \neq 0\)——奇点的存在打破了积分为零的规律。</li>
+              <li>Goursat 证明了 Cauchy 定理不需要假设 \(f'\) 连续——仅复可微就够了。</li>
+            </ul>
+            <p>这看似简单的"闭路积分为零"导出了 Cauchy 积分公式、Taylor/Laurent 展开和留数定理——复分析的全部核心定理。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Cauchy 定理的深层含义：全纯函数的闭路积分为零等价于 "全纯函数有原函数"，这是微积分基本定理在复数域的推广。</p>
+            <p>Cauchy 定理的深层含义：全纯函数的闭路积分为零等价于"全纯函数有原函数"，这是微积分基本定理在复数域的推广。</p>
+            <p>从同调论角度看，Cauchy 定理说全纯 1-形式 \(f(z)\,dz\) 是闭形式；单连通域上闭形式 = 恰当形式——积分与路径无关。</p>
+            <p>多连通域中积分不再总为零：积分依赖于路径绕奇点的"绕数"——这为留数理论埋下伏笔。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>复线积分</strong>：\(\int_\gamma f(z) dz = \int_a^b f(\gamma(t)) \gamma'(t) dt\)。 <strong>Cauchy-Goursat 定理</strong>：设 \(f\) 在单连通区域 \(D\) 上全纯， \(\gamma\) 为 \(D\) 中的闭曲线。则 \[\oint_\gamma f(z)\, dz = 0\] <strong>证明思路（Goursat）</strong>：对三角形区域，反复四等分，选择积分 模最大的子三角形。\(|\oint_{\Delta_n}| \geq |\oint_\Delta|/4^n\)。 用 \(f(z) = f(z_0) + f'(z_0)(z - z_0) + \varepsilon(z)(z - z_0)\) 逼近： 线性部分的积分为零，余项被 \(|\varepsilon| \cdot (\text{perimeter})^2/4^n\) 控制， 得 \(|\oint_\Delta| = 0\)。推广到一般闭曲线用三角剖分。 <strong>推论</strong>：\(f\) 全纯 ⇒ 在单连通域上有原函数 \(F(z) = \int_{z_0}^z f(\zeta) d\zeta\)，\(F' = f\)。</p>
+            <h4>复线积分的定义</h4>
+            <p>\(\int_\gamma f(z) dz = \int_a^b f(\gamma(t)) \gamma'(t) dt\)。\(dz = \gamma'(t) dt\) 是复数值微元——积分同时涉及方向和大小。</p>
+            <h4>Cauchy-Goursat 定理</h4>
+            <p>设 \(f\) 在单连通区域 \(D\) 上全纯，\(\gamma\) 为 \(D\) 中闭曲线。则 \[\oint_\gamma f(z)\, dz = 0\] 直觉：全纯意味着 \(\partial f/\partial\bar{z} = 0\)，Green 公式将面积分化为零。</p>
+            <h4>Goursat 证明思路</h4>
+            <p>对三角形反复四等分，选积分模最大的子三角形。用线性逼近 \(f(z) \approx f(z_0) + f'(z_0)(z-z_0)\) 控制余项：线性部分积分为零，余项被 \(|\varepsilon| \cdot (\text{perimeter})^2/4^n\) 控制，令 \(|\oint_\Delta| = 0\)。</p>
+            <h4>原函数的存在</h4>
+            <p>\(f\) 在单连通域全纯 ⇒ 有原函数 \(F(z) = \int_{z_0}^z f(\zeta) d\zeta\)，\(F' = f\)。直觉：积分值只取决于端点——正是因为闭路积分为零。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>快速计算看似复杂的实积分：\(\int_0^\infty \frac{\cos x}{1+x^2} dx = \frac{\pi}{2e}\) （通过围道积分）。</p>
+            <p><strong>实积分计算</strong>：围道积分将难以处理的实积分化为留数计算，例如 \(\int_0^\infty \frac{\cos x}{1+x^2}\,dx = \frac{\pi}{2e}\)——经典方法需要复杂的换元，围道法只需识别极点。</p>
+            <p><strong>流体力学</strong>：不可压缩无旋流在单连通域中的复势函数是全纯的；Cauchy 定理保证环量为零（无奇点时），而绕翼型的环量（Kutta 条件）正是由奇点贡献决定升力。</p>
+            <p><strong>信号处理</strong>：因果系统的传递函数 \(H(s)\) 在右半平面全纯，Laplace 反变换 \(h(t) = \frac{1}{2\pi i}\int_{\sigma-i\infty}^{\sigma+i\infty} H(s)e^{st}\,ds\) 本质是一条复线积分——Cauchy 定理允许变形积分路径以简化计算。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题：\(\oint_{|z|=1} z^n dz\)（\(n \in \mathbb{Z}\)）。 解答：\(\gamma(t) = e^{it}\), \(dz = ie^{it} dt\)。 \(\oint z^n dz = \int_0^{2\pi} e^{int} \cdot ie^{it} dt = i\int_0^{2\pi} e^{i(n+1)t} dt\)。 \(n \neq -1\)：\(= i \cdot \frac{e^{i(n+1) \cdot 2\pi} - 1}{i(n+1)} = 0\)。 \(n = -1\)：\(= i \int_0^{2\pi} 1\, dt = 2\pi i\)。 易错点：\(\oint_{|z|=1} 1/z\, dz = 2\pi i \neq 0\)！ \(1/z\) 在 \(z = 0\) 不全纯，Cauchy 定理不适用。</p>
+            <p><strong>例题 1</strong>：计算 \(\oint_{|z|=1} z^n\,dz\)（\(n \in \mathbb{Z}\)）。参数化 \(\gamma(t) = e^{it}\)，\(dz = ie^{it}\,dt\)。\(\oint z^n\,dz = i\int_0^{2\pi} e^{i(n+1)t}\,dt\)。当 \(n \neq -1\) 时积分为 \(0\)（周期函数在完整周期上积分）；\(n = -1\) 时为 \(2\pi i\)。关键：\(z^{-1}\) 是唯一贡献非零积分的幂次。</p>
+            <p><strong>例题 2</strong>：计算 \(\int_0^{1+i} z^2\,dz\)。\(z^2\) 全纯，原函数 \(F(z) = z^3/3\)。由路径无关性直接得 \(F(1+i) - F(0) = (1+i)^3/3 = (-2+2i)/3\)。无需参数化路径。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li>对 \(\oint_{|z|=1} 1/z\,dz\) 错误使用 Cauchy 定理——\(1/z\) 在 \(z=0\) 不全纯，定理不适用于包含奇点的闭路。</li>
+              <li>混淆复线积分与弧长积分：\(\int_\gamma f\,dz\) 是复值的（含 \(\gamma'(t)\)），而 \(\int_\gamma f\,|dz|\) 是实值的弧长积分。</li>
+              <li>在多连通域中遗忘"洞"的贡献：例如环域 \(1 < |z| < 3\) 内 \(\oint 1/z\,dz\) 沿外圆与沿内圆相等（而非为零）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -455,28 +479,49 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Cauchy 积分公式是复分析最强大的工具之一：全纯函数在区域内部 一点的值完全由它在边界上的值决定！更进一步，各阶导数也同样 由边界积分决定。这一"边界决定内部"的性质在实分析中毫无对应。</p>
+            <p>全纯函数在区域内一点的值完全由它在边界上的值决定——这在实分析中毫无对应。Cauchy 积分公式将这一"边界决定内部"的直觉精确化为积分表达式。</p>
+            <ul>
+              <li>\(f(z_0) = \frac{1}{2\pi i}\oint_\gamma \frac{f(z)}{z-z_0}\,dz\)——一个点的值由整条曲线上的信息"重建"。</li>
+              <li>对积分号下参数求导得到高阶导数公式——全纯函数自动无穷次可微。</li>
+              <li>ML 估计 + Cauchy 公式直接给出 Liouville 定理和代数基本定理——几行推导解决千年问题。</li>
+            </ul>
+            <p>Cauchy 积分公式是复分析的"瑞士军刀"：Taylor 展开、Laurent 展开、留数定理、Schwarz 引理都以它为出发点。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>Cauchy 公式将"局部信息（点值）"用"全局信息（边界积分）" 表达。这是全纯函数极端刚性的又一体现。</p>
+            <p>Cauchy 积分公式的核心是再生核思想：\(1/(z-z_0)\) 充当"采样核"，通过加权平均从边界数据重建内部值。这与泛函分析中再生核 Hilbert 空间（RKHS）的思想一脉相承。</p>
+            <p>高阶导数公式表明全纯函数的所有微分信息都编码在边界积分中，因此全纯 ⇒ \(C^\infty\) ⇒ 解析——复可微一次便自动拥有一切光滑性，这是 CR 方程的椭圆正则性在最尖锐形式下的体现。</p>
+            <p>Cauchy 估计将"模的上界"转化为"导数的上界"。这种从整体控制局部的策略是复分析中各种刚性定理（Liouville、Schwarz、Montel）的共同母体。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Cauchy 积分公式</strong>：设 \(f\) 在区域 \(D\) 上全纯，\(\gamma\) 为 \(D\) 中绕 \(z_0\) 逆时针的简单闭曲线。则 \[f(z_0) = \frac{1}{2\pi i} \oint_\gamma \frac{f(z)}{z - z_0}\, dz\] <strong>高阶导数公式</strong>： \[f^{(n)}(z_0) = \frac{n!}{2\pi i} \oint_\gamma \frac{f(z)}{(z - z_0)^{n+1}}\, dz\] <strong>Cauchy 估计</strong>：\(|f^{(n)}(z_0)| \leq \frac{n! M}{R^n}\) （\(M = \max_{|z - z_0| = R} |f(z)|\)）。 <strong>Liouville 定理</strong>（严格证明）：有界整函数 \(f\)。 \(|f'(z_0)| \leq M/R\)（\(M\) 为全局界，\(R\) 任意大）， 故 \(f' \equiv 0\)，\(f\) 为常数。 <strong>代数基本定理</strong>：\(n\) 次多项式有 \(n\) 个复根（Liouville 推论）。</p>
+            <h4>Cauchy 积分公式</h4>
+            <p>设 \(f\) 在区域 \(D\) 上全纯，\(\gamma\) 为 \(D\) 中绕 \(z_0\) 逆时针的简单闭曲线。挖去 \(z_0\) 的小圆 \(C_\varepsilon\)，环域内 \(f(z)/(z-z_0)\) 全纯，Cauchy 定理给出 \(\oint_\gamma = \oint_{C_\varepsilon}\)。令 \(\varepsilon \to 0\) 得 \[f(z_0) = \frac{1}{2\pi i}\oint_\gamma \frac{f(z)}{z-z_0}\,dz\]</p>
+            <h4>高阶导数公式</h4>
+            <p>对 Cauchy 公式关于 \(z_0\) 在积分号下求导（一致收敛保证合法）：\[f^{(n)}(z_0) = \frac{n!}{2\pi i}\oint_\gamma \frac{f(z)}{(z-z_0)^{n+1}}\,dz\] 直觉：每求一次导，分母多一个 \((z-z_0)\)，系数多一个 \(n\) 因子。</p>
+            <h4>Cauchy 估计</h4>
+            <p>对高阶公式用 ML 不等式：\(|f^{(n)}(z_0)| \leq \frac{n!\,M}{R^n}\)，其中 \(M = \max_{|z-z_0|=R}|f(z)|\)。直觉：边界模越小、圆越大，导数就越受压制。</p>
+            <h4>Liouville 定理与代数基本定理</h4>
+            <p>\(f\) 有界整函数：取 \(n=1\)，\(|f'(z_0)| \leq M/R\)，令 \(R \to \infty\) 得 \(f' \equiv 0\)，故 \(f\) 为常数。推论：\(n\) 次多项式 \(P(z)\) 若无零点则 \(1/P(z)\) 为有界整函数，矛盾——代数基本定理。</p>
           </div>
         </div>
 
-        <div class="step-card step-example">
-          <div class="step-label">✏️ 例题分析与易错点</div>
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>例题：\(\oint_{|z|=2} \frac{e^z}{z - 1} dz\)。 解答：\(e^z\) 全纯，\(z_0 = 1\) 在 \(|z| = 2\) 内部。 Cauchy 公式：\(= 2\pi i \cdot e^1 = 2\pi i e\)。 例题：\(\oint_{|z|=1} \frac{e^z}{z^3} dz\)。 解答：\(f(z) = e^z\), \(z_0 = 0\), \(n = 2\)。 \(= 2\pi i \cdot f''(0)/2! = 2\pi i \cdot 1/2 = \pi i\)。 易错点：如果 \(z_0\) 在曲线外部，积分为 0（不是 \(2\pi i f(z_0)\)）。</p>
+            <p><strong>偏微分方程</strong>：Cauchy 积分公式是椭圆型 PDE 正则性理论的原型——解的内部光滑性由边界数据控制。Schauder 估计和 Calderon-Zygmund 理论都借鉴了这一"核积分"框架。</p>
+            <p><strong>数值分析</strong>：Cauchy 估计保证 Taylor 级数在收敛圆盘内指数衰减，为谱方法和 Padé 逼近提供理论基础；算法可通过 FFT 在圆周上采样来数值恢复 Taylor 系数。</p>
+            <p><strong>量子场论</strong>：传播子 \(G(z) = 1/(z - z_0)\) 正是 Cauchy 核；Feynman 图的计算本质上是多维 Cauchy 积分公式在动量空间的推广。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example"> 解答：\(e^z\) 全纯，\(z_0 = 1\) 在 \(|z| = 2\) 内部。 Cauchy 公式：\(= 2\pi i \cdot e^1 = 2\pi i e\)。 例题：\(\oint_{|z|=1} \frac{e^z}{z^3} dz\)。 解答：\(f(z) = e^z\), \(z_0 = 0\), \(n = 2\)。 \(= 2\pi i \cdot f''(0)/2! = 2\pi i \cdot 1/2 = \pi i\)。 易错点：如果 \(z_0\) 在曲线外部，积分为 0（不是 \(2\pi i f(z_0)\)）。</p>
           </div>
         </div>
       </div>
@@ -510,6 +555,16 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>Cauchy 定理和积分公式衍生出整套强大工具：Morera 定理（积分版 全纯性判据）、Schwarz 引理（单位圆上的刚性估计）、Liouville 定理的延伸。这些工具在几何函数论和值分布理论中反复使用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Cauchy 定理的推论展现了复分析的一个核心主题：<strong>全局信息由局部约束完全决定</strong>。Morera 定理从"积分为零"反推出"全纯"，表明全纯性可以用积分条件来刻画——这给出了验证全纯性的实用工具，避免了直接计算偏导数和检验 CR 方程。</p>
+            <p>Schwarz 引理体现了复分析独有的<strong>刚性</strong>：对单位圆盘到自身的全纯映射，仅凭 \(f(0) = 0\) 这一个条件就能控制整个映射的模和导数。与实分析中函数可以有大量自由度不同，复全纯映射被极少的条件"锁死"。这种刚性在双曲几何中体现为 Schwarz-Pick 引理——全纯映射收缩 Poincaré 度量。</p>
+            <p>最大模原理进一步揭示了全纯函数的"反直觉"性质：非常数全纯函数在其定义域内部不取 \(|f|\) 的最大值。换言之，\(|f|\) 的极值只能出现在边界上。这既是 Cauchy 积分公式的直接推论（均值性质排除了内部极值），也是开映射定理的推论（\(f\) 将开集映为开集，因此像集不可能是紧集的"顶点"）。</p>
+            <p>这三个结果的共同精神：全纯函数受到远超实函数的约束，"边界决定内部"的原则贯穿始终——从积分判据、模估计到极值原理，全纯性不断将全局结构强加于局部行为。</p>
           </div>
         </div>
 

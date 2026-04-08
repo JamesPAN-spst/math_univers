@@ -394,28 +394,62 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>两个向量空间 \(V, W\) 之间的双线性映射有很多。张量积 \(V \otimes W\) 是一种 「万能翻译器」——它将所有双线性映射统一为线性映射。 这种泛性质的思想贯穿现代代数的各个分支。</p>
+            <p>在线性代数中，双线性映射无处不在：内积、行列式的每一行、矩阵乘法……然而，双线性映射不能直接套用线性代数的核–像–秩工具箱。我们需要一种方法把「双线性」翻译成「线性」。</p>
+            <ul>
+              <li><strong>内积</strong>：\(\langle v, w \rangle\) 关于 \(v, w\) 各自线性，但整体不是线性映射。</li>
+              <li><strong>行列式</strong>：\(\det\) 对每一行线性，共 \(n\) 行→多重线性，非线性。</li>
+              <li><strong>矩阵乘法</strong>：\((A, B) \mapsto AB\) 对 \(A, B\) 各自线性，但对 \((A, B)\) 不是线性函数。</li>
+            </ul>
+            <p>张量积 \(V \otimes W\) 正是解决这个问题的「万能翻译器」——它将所有双线性映射统一转化为线性映射，使线性代数的全部工具重新可用。这种泛性质思想贯穿从同调代数到量子力学的各个领域。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>张量积的泛性质: \(V \times W \xrightarrow{\otimes} V \otimes W\) 使得任何双线性映射 \(B: V \times W \to U\) 唯一因子化为 \(V \otimes W \xrightarrow{\tilde{B}} U\)。这是范畴论中「自由对象」的实例。</p>
+            <p>泛性质（universal property）是范畴论的核心语言。它不告诉你「怎么造」张量积，而是告诉你张量积「必须满足什么」——这比任何具体构造更根本。</p>
+            <p>具体地，张量积 \(V \otimes W\) 配备一个双线性映射 \(\otimes: V \times W \to V \otimes W\)，使得任何双线性映射 \(B: V \times W \to U\) 都能唯一地因子化为一个线性映射 \(\tilde{B}: V \otimes W \to U\)。用交换图表示：\(B = \tilde{B} \circ \otimes\)。</p>
+            <p>这意味着 \(V \otimes W\) 是「最自由的」双线性结果空间——它不丢弃任何双线性信息，同时又是一个向量空间。这种「自由对象 + 商」的构造模式在代数学中反复出现：自由群、自由模、自由代数都遵循相同的范式。</p>
+            <p>关键类比：正如笛卡尔积 \(A \times B\) 是集合范畴中的积，张量积 \(V \otimes W\) 是「双线性映射范畴」中的万有对象。掌握这个视角，你就掌握了抽象代数最重要的思维工具之一。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>张量积 \(V \otimes W\)</strong> 的泛性质: 存在双线性 \(\otimes: V \times W \to V \otimes W\)， 使得对任何双线性 \(B: V \times W \to U\)， 存在唯一线性 \(\tilde{B}: V \otimes W \to U\) 满足 \(B = \tilde{B} \circ \otimes\)。即: \[B(v, w) = \tilde{B}(v \otimes w)\] \(v \otimes w\) 称为纯张量（可分解张量）。 一般元素是纯张量的线性组合: \(\sum_i v_i \otimes w_i\)。</p>
+            <h4>泛性质的精确陈述</h4>
+            <p>存在双线性映射 \(\otimes: V \times W \to V \otimes W\)，使得对任何向量空间 \(U\) 和任何双线性映射 \(B: V \times W \to U\)，存在唯一线性映射 \(\tilde{B}: V \otimes W \to U\) 满足： \[B(v, w) = \tilde{B}(v \otimes w), \quad \forall\, v \in V, \, w \in W\] 直觉：\(\otimes\) 是「最经济」的双线性映射——任何其他双线性映射都通过 \(\otimes\) 分解。</p>
+            <h4>纯张量与一般元素</h4>
+            <p>形如 \(v \otimes w\) 的元素称为纯张量（可分解张量）。一般的张量是纯张量的有限线性组合： \[T = \sum_{i=1}^r \alpha_i\, v_i \otimes w_i\] 注意：不是所有元素都是纯张量！纯张量的集合不构成子空间（它不对加法封闭）。</p>
+            <h4>泛性质的唯一性保证</h4>
+            <p>若 \((V \otimes W, \otimes)\) 和 \((T, \beta)\) 都满足泛性质，则存在唯一同构 \(\phi: V \otimes W \xrightarrow{\sim} T\) 使得 \(\beta = \phi \circ \otimes\)。因此，张量积在同构意义下唯一——泛性质完全刻画了它。</p>
+            <h4>双线性映射空间的同构</h4>
+            <p>泛性质等价于自然同构： \[\mathrm{Hom}(V \otimes W,\, U) \cong \mathrm{Bil}(V \times W,\, U)\] 左边是线性映射空间，右边是双线性映射空间。线性化的收益：线性映射空间有良好的线性结构（核、像、秩），双线性映射空间则不然。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>量子力学</strong>：复合量子系统的态空间是子系统态空间的张量积 \(\mathcal{H}_1 \otimes \mathcal{H}_2\)。泛性质保证了所有双线性可观测量都可在张量积空间中线性表示，纠缠态正是不可分解的纯张量。</p>
+            <p><strong>同调代数</strong>：张量函子 \(- \otimes_R M\) 是模范畴中的基本工具。它的右正合性以及导出函子 \(\mathrm{Tor}\) 在计算同调群、分类模结构中不可或缺。</p>
+            <p><strong>多重线性代数</strong>：行列式、永久式等多重线性函数本质上都是通过张量积的泛性质定义的——先张量积线性化，再施加对称/反对称约束，得到对称代数与外代数。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(V = \mathbb{R}^2\)，\(W = \mathbb{R}^2\)。 \(e_1 \otimes f_1 + e_2 \otimes f_2\) 是纯张量吗？ 解答: 不一定。纯张量 \(v \otimes w\) 对应秩-1 矩阵， 而 \(e_1 \otimes f_1 + e_2 \otimes f_2\) 对应 \(I_2\)（秩 2）， 所以<strong>不是</strong>纯张量。 易错点: 以为 \(V \otimes W\) 中的每个元素都是 \(v \otimes w\) 的形式。 一般元素是纯张量的线性组合。</p>
+            <p><strong>例题 1</strong>：\(V = \mathbb{R}^2\)，\(W = \mathbb{R}^2\)。判断 \(e_1 \otimes f_1 + e_2 \otimes f_2\) 是否为纯张量。</p>
+            <p><strong>解</strong>：纯张量 \(v \otimes w\) 对应秩-1 矩阵 \(vw^T\)。而 \(e_1 \otimes f_1 + e_2 \otimes f_2\) 对应 \(I_2\)（秩 2），故<strong>不是</strong>纯张量。</p>
+            <p><strong>例题 2</strong>：设 \(B: \mathbb{R}^2 \times \mathbb{R}^2 \to \mathbb{R}\) 由 \(B(u,v) = u_1 v_2 - u_2 v_1\)（行列式）定义。写出对应的线性映射 \(\tilde{B}: \mathbb{R}^2 \otimes \mathbb{R}^2 \to \mathbb{R}\)。</p>
+            <p><strong>解</strong>：由泛性质，\(\tilde{B}(e_i \otimes e_j) = B(e_i, e_j)\)。计算得 \(\tilde{B}(e_1 \otimes e_2) = 1\)，\(\tilde{B}(e_2 \otimes e_1) = -1\)，其余为 0。对一般元素线性延拓即可。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>误以为所有张量都是纯张量</strong>：\(V \otimes W\) 中的一般元素是纯张量的线性组合，不一定可以写成单个 \(v \otimes w\)。</li>
+              <li><strong>混淆张量积与笛卡尔积</strong>：\(V \times W\) 是集合层面的配对，维数为 \(m + n\)；\(V \otimes W\) 是双线性结构，维数为 \(mn\)。</li>
+              <li><strong>忽略唯一性</strong>：泛性质不仅保证存在 \(\tilde{B}\)，还保证它<strong>唯一</strong>。忽略唯一性会丢失关键信息。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -467,28 +501,62 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>泛性质告诉我们张量积「应该做什么」，但怎么构造它？ 具体构造为自由向量空间模掉双线性关系，基的张量积给出了 \(V \otimes W\) 的基，从而 \(\dim(V \otimes W) = \dim V \cdot \dim W\)。</p>
+            <p>泛性质告诉我们张量积「应该做什么」，但没有告诉我们它「长什么样」。为了计算和应用，我们需要一个具体的构造，特别是需要知道张量积的维数和基。</p>
+            <ul>
+              <li><strong>维数公式</strong>：\(\dim(V \otimes W) = \dim V \cdot \dim W\)——为什么是乘法而不是加法？</li>
+              <li><strong>矩阵表示</strong>：\(\mathbb{R}^m \otimes \mathbb{R}^n \cong M_{m \times n}(\mathbb{R})\)——张量积就是矩阵空间？</li>
+              <li><strong>Kronecker 积</strong>：选定基后，\(f \otimes g\) 的矩阵是 \(A \otimes_K B\)（分块乘法）——具体怎么算？</li>
+            </ul>
+            <p>掌握构造细节，你才能把抽象的泛性质转化为实际的计算工具，无论是理论证明还是数值算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>构造张量积的关键思路是「自由生成 + 施加关系」。先创造一个巨大的自由向量空间 \(F(V \times W)\)，以所有有序对 \((v, w)\) 为基，然后模掉双线性关系，得到恰好满足泛性质的商空间。</p>
+            <p>这种「自由对象模关系」的构造范式在代数中极为普遍：群的生成元与关系、多项式环的理想商、自由模的商模——本质相同的策略反复出现。</p>
+            <p>一旦完成构造，基的选取使一切变得具体：若 \(\{e_i\}\) 和 \(\{f_j\}\) 分别是 \(V\) 和 \(W\) 的基，则 \(\{e_i \otimes f_j\}\) 构成 \(V \otimes W\) 的基。这解释了维数为什么是乘积——基元素的个数是两组基个数的乘积。</p>
+            <p>矩阵同构 \(\mathbb{R}^m \otimes \mathbb{R}^n \cong M_{m \times n}\) 是这个基选取的直接推论：\(e_i \otimes f_j\) 对应矩阵单位 \(E_{ij}\)。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>构造</strong>: \(V \otimes W = F(V \times W) / R\)， 其中 \(F(V \times W)\) 是以 \((v,w)\) 为基的自由向量空间， \(R\) 是由双线性关系生成的子空间: \((v_1+v_2, w) - (v_1, w) - (v_2, w)\), \((\alpha v, w) - \alpha(v, w)\) 等。 <strong>基</strong>: 若 \(\{e_i\}\) 是 \(V\) 的基，\(\{f_j\}\) 是 \(W\) 的基， 则 \(\{e_i \otimes f_j\}\) 是 \(V \otimes W\) 的基。 \[\dim(V \otimes W) = \dim V \cdot \dim W\] <strong>与矩阵的关系</strong>: \(\mathbb{R}^m \otimes \mathbb{R}^n \cong M_{m \times n}(\mathbb{R})\)。</p>
+            <h4>自由向量空间与商构造</h4>
+            <p>\(V \otimes W = F(V \times W) / R\)，其中 \(F(V \times W)\) 是以 \((v, w) \in V \times W\) 为基的自由向量空间，\(R\) 由双线性关系生成： \[(v_1 + v_2,\, w) - (v_1,\, w) - (v_2,\, w), \quad (\alpha v,\, w) - \alpha (v,\, w)\] 以及对第二变量的类似关系。模掉 \(R\) 后，等价类 \(\overline{(v, w)}\) 就是 \(v \otimes w\)。</p>
+            <h4>基与维数公式</h4>
+            <p>若 \(\{e_1, \ldots, e_m\}\) 和 \(\{f_1, \ldots, f_n\}\) 分别是 \(V\) 和 \(W\) 的基，则 \(\{e_i \otimes f_j : 1 \le i \le m,\, 1 \le j \le n\}\) 是 \(V \otimes W\) 的基： \[\dim(V \otimes W) = \dim V \cdot \dim W = mn\] 直觉：每对基向量的「组合」产生一个独立方向，共 \(mn\) 个。</p>
+            <h4>与矩阵空间的同构</h4>
+            <p>\(\mathbb{R}^m \otimes \mathbb{R}^n \cong M_{m \times n}(\mathbb{R})\)，同构由 \(e_i \otimes f_j \mapsto E_{ij}\) 给出。纯张量 \(v \otimes w\) 对应秩-1 矩阵 \(vw^T\)。一般张量对应一般矩阵。</p>
+            <h4>Kronecker 积</h4>
+            <p>线性映射 \(f: V \to V'\)，\(g: W \to W'\) 诱导的张量积映射 \(f \otimes g\) 在选定基下的矩阵表示是 Kronecker 积 \(A \otimes_K B\)： \[A \otimes_K B = \begin{pmatrix} a_{11}B & \cdots & a_{1m}B \\ \vdots & \ddots & \vdots \\ a_{m1}B & \cdots & a_{mm}B \end{pmatrix}\] 大小：\((mp) \times (nq)\)，其中 \(A\) 是 \(m \times n\)，\(B\) 是 \(p \times q\)。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>量子力学: 两个量子系统的复合态空间是张量积 \(\mathcal{H}_1 \otimes \mathcal{H}_2\)（纠缠态 = 不可分解张量）。</p>
+            <p><strong>量子计算</strong>：两个 qubit 的态空间是 \(\mathbb{C}^2 \otimes \mathbb{C}^2\)（维数 4）。纠缠态如 Bell 态 \(|\Phi^+\rangle = \frac{1}{\sqrt{2}}(|00\rangle + |11\rangle)\) 是不可分解的张量——张量积维数公式决定了量子系统的状态空间大小。</p>
+            <p><strong>信号处理</strong>：Kronecker 积在 MIMO 天线阵列建模中普遍使用。信道矩阵 \(H = H_r \otimes_K H_t\) 利用发送端和接收端的独立结构，将高维信道分解为低维因子的张量积。</p>
+            <p><strong>数值线性代数</strong>：Kronecker 积结构使得 \(mn \times mn\) 的大矩阵可以用 \(m \times m\) 和 \(n \times n\) 的小矩阵存储和运算，节省从 \(O(m^2 n^2)\) 到 \(O(m^2 + n^2)\) 的空间。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(\dim V = 3\)，\(\dim W = 4\)。\(\dim(V \otimes W) = ?\) 解答: \(\dim(V \otimes W) = 3 \times 4 = 12\)。 易错点: 以为 \(\dim(V \otimes W) = \dim V + \dim W\)。 张量积的维数是<strong>乘积</strong>，不是和。直和才是和。</p>
+            <p><strong>例题 1</strong>：计算 \(\dim(\mathbb{R}^3 \otimes \mathbb{R}^4)\) 和 \(\dim(\mathbb{R}^3 \oplus \mathbb{R}^4)\)。</p>
+            <p><strong>解</strong>：\(\dim(\mathbb{R}^3 \otimes \mathbb{R}^4) = 3 \times 4 = 12\)，\(\dim(\mathbb{R}^3 \oplus \mathbb{R}^4) = 3 + 4 = 7\)。张量积取乘积，直和取加和。</p>
+            <p><strong>例题 2</strong>：\(A = \begin{pmatrix}1 & 2\end{pmatrix}\)（\(1 \times 2\)），\(B = \begin{pmatrix}3\\4\end{pmatrix}\)（\(2 \times 1\)）。计算 Kronecker 积 \(A \otimes_K B\)。</p>
+            <p><strong>解</strong>：\(A \otimes_K B = \begin{pmatrix}1 \cdot B & 2 \cdot B\end{pmatrix} = \begin{pmatrix}3 & 6\\4 & 8\end{pmatrix}\)，大小 \(2 \times 2\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>维数取加法</strong>：\(\dim(V \otimes W) = mn\)，不是 \(m + n\)。加法是直和 \(V \oplus W\) 的维数公式。</li>
+              <li><strong>Kronecker 积大小算错</strong>：\(A\)（\(m \times n\)）与 \(B\)（\(p \times q\)）的 Kronecker 积是 \((mp) \times (nq)\)，不是 \((m+p) \times (n+q)\)。</li>
+              <li><strong>混淆纯张量与一般元素</strong>：纯张量 \(v \otimes w\) 对应秩-1 矩阵，但 \(V \otimes W\) 中大部分张量不是纯的——例如 \(I_n\) 对应秩为 \(n\) 的张量。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -515,35 +583,62 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>张量积不区分顺序——但对称张量和反对称张量在物理（玻色子/费米子） 和几何（微分形式）中分别起核心作用。对称代数 \(\mathrm{Sym}(V)\) 和 外代数 \(\Lambda(V)\) 正是这两种特殊张量的系统框架。</p>
+            <p>张量积 \(V^{\otimes k}\) 包含了所有 \(k\)-线性信息，但其中许多成分彼此对称或反对称。对称张量和反对称张量在不同领域中分别扮演核心角色。</p>
+            <ul>
+              <li><strong>微分形式</strong>：流形上的 \(k\)-形式 \(\omega = \sum f_{i_1 \cdots i_k} dx^{i_1} \wedge \cdots \wedge dx^{i_k}\) 是反对称张量→外代数是微分几何的语言。</li>
+              <li><strong>量子力学</strong>：费米子（电子等）的多粒子态空间是外代数 \(\Lambda^k(\mathcal{H})\)；玻色子的态空间是对称代数 \(\mathrm{Sym}^k(\mathcal{H})\)。</li>
+              <li><strong>行列式</strong>：\(\det\) 是 \(\Lambda^n(V)\) 的元素——\(n\) 维空间中唯一的（up to scalar）全反对称 \(n\)-线性函数。</li>
+            </ul>
+            <p>对称代数和外代数为这些反复出现的结构提供了统一的代数框架——从微积分到粒子物理，掌握它们就打通了多个核心领域的共同语言。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>对称代数取张量积模掉「交换关系」(\(v \otimes w - w \otimes v\))， 外代数取模掉「反交换关系」(\(v \otimes v\))。</p>
+            <p>张量代数 \(T(V) = \bigoplus_{k=0}^{\infty} V^{\otimes k}\) 是所有阶张量的直和，它是以 \(V\) 生成的最自由的结合代数。对称代数和外代数分别是张量代数的两种特殊商。</p>
+            <p>对称代数 \(\mathrm{Sym}(V) = T(V) / (v \otimes w - w \otimes v)\)：模掉交换关系，使乘法可交换。当 \(V = K^n\) 时，\(\mathrm{Sym}(V)\) 同构于多项式环 \(K[x_1, \ldots, x_n]\)——对称代数就是抽象的多项式。</p>
+            <p>外代数 \(\Lambda(V) = T(V) / (v \otimes v)\)：模掉 \(v \otimes v = 0\)，等价地 \(v \wedge w = -w \wedge v\)（反交换）。反对称性保证了重复方向自动消去。</p>
+            <p>两者都是分次代数（graded algebra）：\(\mathrm{Sym}^k(V)\) 和 \(\Lambda^k(V)\) 分别是 \(k\) 次齐次部分。张量空间的分解 \(V^{\otimes 2} = \mathrm{Sym}^2(V) \oplus \Lambda^2(V)\)（特征 \(\neq 2\)）是这种结构的最基本体现。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>外代数</strong>: \(\Lambda^k(V)\) 是反对称 \(k\)-张量空间。 楔积 \(v \wedge w = -w \wedge v\)，\(v \wedge v = 0\)。 若 \(\dim V = n\)，则 \[\dim \Lambda^k(V) = \binom{n}{k}\] 基: \(\{e_{i_1} \wedge \cdots \wedge e_{i_k} : i_1 < \cdots < i_k\}\)。 特别地 \(\dim \Lambda^n(V) = 1\)（行列式空间）。 <strong>对称代数</strong>: \(\mathrm{Sym}^k(V)\) 是对称 \(k\)-张量空间。 \[\dim \mathrm{Sym}^k(V) = \binom{n+k-1}{k}\]</p>
+            <h4>外代数的基本性质</h4>
+            <p>楔积 \(\wedge\) 满足：\(v \wedge v = 0\) 对所有 \(v \in V\)。由此推出反交换性： \[v \wedge w = -w \wedge v\] 证明：\(0 = (v + w) \wedge (v + w) = v \wedge w + w \wedge v\)。直觉：楔积「检测独立性」——相同方向的贡献自动消去。</p>
+            <h4>外代数的维数公式</h4>
+            <p>若 \(\dim V = n\)，则 \[\dim \Lambda^k(V) = \binom{n}{k}\] 基：\(\{e_{i_1} \wedge \cdots \wedge e_{i_k} : 1 \le i_1 < \cdots < i_k \le n\}\)。特别地，\(\Lambda^n(V)\) 是一维的——它就是行列式所在的空间。\(k > n\) 时 \(\Lambda^k(V) = 0\)。</p>
+            <h4>对称代数的维数公式</h4>
+            <p>\[\dim \mathrm{Sym}^k(V) = \binom{n + k - 1}{k}\] 这是「\(n\) 个变量的 \(k\) 次齐次单项式个数」。验证：\(V^{\otimes 2} = \mathrm{Sym}^2(V) \oplus \Lambda^2(V)\) 的维数 \[n^2 = \binom{n+1}{2} + \binom{n}{2} = \frac{n(n+1)}{2} + \frac{n(n-1)}{2} \;\checkmark\]</p>
+            <h4>行列式与顶层外代数</h4>
+            <p>\(\Lambda^n(V)\) 是一维空间。线性映射 \(f: V \to V\) 诱导 \(\Lambda^n(f): \Lambda^n(V) \to \Lambda^n(V)\)，而一维空间上的线性映射就是数乘： \[\Lambda^n(f)(\omega) = \det(f) \cdot \omega\] 这给出行列式的内在（无坐标）定义。直觉：行列式测量的是 \(f\) 对「体积元」的缩放因子。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>微分形式 \(\omega = \sum f_{ij} dx^i \wedge dx^j\) 是外代数的元素。 行列式 \(\det: V^n \to K\) 是 \(\Lambda^n(V)\) 中的唯一（up to scalar）元素。</p>
+            <p><strong>微分几何</strong>：流形上的微分形式 \(\omega \in \Omega^k(M) = \Gamma(\Lambda^k T^*M)\) 是外代数的截面。de Rham 上同调用外微分 \(d: \Omega^k \to \Omega^{k+1}\) 将拓扑信息编码在外代数中。</p>
+            <p><strong>量子场论</strong>：费米子的 Fock 空间是 \(\Lambda(\mathcal{H}) = \bigoplus_k \Lambda^k(\mathcal{H})\)，玻色子的 Fock 空间是 \(\mathrm{Sym}(\mathcal{H})\)。Pauli 不相容原理（\(v \wedge v = 0\)）直接编码在外代数结构中。</p>
+            <p><strong>计算机图形学</strong>：Grassmann 代数（外代数）是 Geometric Algebra 的反对称部分，用于高效表示旋转、反射和投影。Plücker 坐标（\(\Lambda^2(\mathbb{R}^4)\)）表示射影空间中的直线，广泛用于碰撞检测和光线追踪。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(V = \mathbb{R}^4\)。\(\dim \Lambda^2(V) = ?\) 解答: \(\binom{4}{2} = 6\)。 基: \(e_1 \wedge e_2, e_1 \wedge e_3, e_1 \wedge e_4, e_2 \wedge e_3, e_2 \wedge e_4, e_3 \wedge e_4\)。 易错点: 以为 \(\Lambda^k(V)\) 在 \(k > n\) 时有非零元素。 \(k > n\) 时 \(\Lambda^k(V) = 0\)（反对称性迫使一切为零）。</p>
+            <p><strong>例题 1</strong>：\(V = \mathbb{R}^4\)。计算 \(\dim \Lambda^2(V)\) 并写出基。</p>
+            <p><strong>解</strong>：\(\binom{4}{2} = 6\)。基：\(e_1 \wedge e_2,\, e_1 \wedge e_3,\, e_1 \wedge e_4,\, e_2 \wedge e_3,\, e_2 \wedge e_4,\, e_3 \wedge e_4\)。</p>
+            <p><strong>例题 2</strong>：判断 \(\omega = e_1 \wedge e_2 + e_3 \wedge e_4 \in \Lambda^2(\mathbb{R}^4)\) 是否可分解。</p>
+            <p><strong>解</strong>：计算 \(\omega \wedge \omega = 2\, e_1 \wedge e_2 \wedge e_3 \wedge e_4 \neq 0\)。判据：\(\omega\) 可分解 \(\Leftrightarrow\) \(\omega \wedge \omega = 0\)。故 \(\omega\) 不可分解。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>以为 \(\Lambda^k(V)\) 在 \(k > n\) 时有非零元素</strong>：\(k > \dim V\) 时 \(\Lambda^k(V) = 0\)——反对称性迫使一切为零。</li>
+              <li><strong>符号错误</strong>：交换楔积因子时忘记变号。\(e_2 \wedge e_1 = -e_1 \wedge e_2\)，每次相邻对换改变一次符号。</li>
+              <li><strong>混淆对称代数与外代数维数</strong>：\(\dim \mathrm{Sym}^k = \binom{n+k-1}{k}\)（组合带重复），\(\dim \Lambda^k = \binom{n}{k}\)（组合不重复）。二者公式不同。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -570,35 +665,62 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>不是每个张量都是纯张量 \(v \otimes w\)。表示一个张量所需的最少纯张量项数 称为张量秩。它在信号处理、量子信息和代数复杂度理论中有深刻应用， 如矩阵乘法的最优算法与张量秩直接相关。</p>
+            <p>不是每个张量都是纯张量 \(v \otimes w\)——表示一个张量所需的最少纯张量项数称为张量秩。这个看似简单的概念通向了计算复杂度理论的核心难题。</p>
+            <ul>
+              <li><strong>矩阵乘法</strong>：Strassen 发现 \(2 \times 2\) 矩阵乘法张量的秩为 7（非朴素的 8），由此发明了第一个亚立方矩阵乘法算法。</li>
+              <li><strong>数据科学</strong>：高阶数据（用户 × 商品 × 时间）的 CP 分解等价于张量秩分解，是推荐系统和信号处理的核心工具。</li>
+              <li><strong>量子信息</strong>：纠缠度量与张量秩直接相关——秩-1 张量对应可分态，秩 \(> 1\) 对应纠缠态。</li>
+            </ul>
+            <p>理解张量秩不仅是代数的理论需要，更是连接纯数学与算法、物理、数据科学的桥梁。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>张量秩推广了矩阵秩（矩阵秩 = 二阶张量秩）。但高阶张量秩的计算 是 NP-hard 问题——这是一种根本性的复杂度障碍。</p>
+            <p>张量秩推广了矩阵秩：对二阶张量 \(T \in V \otimes W\)，张量秩等于矩阵秩——可用高斯消元在 \(O(n^3)\) 内精确计算。这是线性代数中最基本的不变量之一。</p>
+            <p>然而，高阶张量秩（三阶及以上）的情况发生质变：精确计算是 NP-hard 问题（Håstad 1990）。这意味着不存在（除非 P = NP）多项式时间的精确算法——高阶张量比矩阵从根本上更复杂。</p>
+            <p>实际中，人们转向近似算法：交替最小二乘法（ALS）、梯度下降法、非负张量分解等。这些方法不保证找到精确秩，但在工程应用中表现良好。</p>
+            <p>Strassen 的发现揭示了一个深层联系：算法的乘法复杂度等价于相应张量的秩。因此，寻找最优矩阵乘法算法的问题化归为计算矩阵乘法张量的秩——代数几何和计算复杂度在此交汇。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>张量秩</strong>: \(T \in V \otimes W\) 的秩 \(= \min\{r : T = \sum_{i=1}^r v_i \otimes w_i\}\)。 对 \(V \otimes W \cong M_{m \times n}\)，这就是矩阵秩。 <strong>高阶张量</strong>: \(T \in V_1 \otimes V_2 \otimes V_3\) 的秩: \[\mathrm{rank}(T) = \min\{r : T = \sum_{i=1}^r v_i^{(1)} \otimes v_i^{(2)} \otimes v_i^{(3)}\}\] 这称为 CP（Canonical Polyadic）分解。 <strong>Strassen</strong>: 矩阵乘法 \(\langle 2,2,2 \rangle\) 张量的秩为 7（非朴素的 8）， 这是 Strassen 算法的理论基础。</p>
+            <h4>二阶张量秩 = 矩阵秩</h4>
+            <p>\(T \in V \otimes W\) 的张量秩定义为 \[\mathrm{rank}(T) = \min\{r : T = \sum_{i=1}^r v_i \otimes w_i\}\] 在 \(V \otimes W \cong M_{m \times n}\) 下，\(v \otimes w \mapsto vw^T\)（秩-1 矩阵），故张量秩 = 矩阵秩。直觉：秩衡量张量的「不可约复杂度」。</p>
+            <h4>CP 分解（高阶张量）</h4>
+            <p>三阶张量 \(T \in V_1 \otimes V_2 \otimes V_3\) 的 CP（Canonical Polyadic）分解： \[T = \sum_{i=1}^r v_i^{(1)} \otimes v_i^{(2)} \otimes v_i^{(3)}\] 最小的 \(r\) 就是张量秩。与矩阵的 SVD 不同，CP 分解在温和条件下具有本质唯一性（Kruskal 定理），这是它在盲源分离中的优势。</p>
+            <h4>Strassen 算法与矩阵乘法张量</h4>
+            <p>\(2 \times 2\) 矩阵乘法 \((A, B) \mapsto AB\) 是三线性映射，对应张量 \(\langle 2, 2, 2 \rangle \in \mathbb{R}^4 \otimes \mathbb{R}^4 \otimes \mathbb{R}^4\)。朴素算法使用 \(8 = 2^3\) 次乘法→秩 \(\le 8\)。Strassen 构造了 7 次乘法的方案→秩 \(\le 7\)。下界证明秩 \(\ge 7\)，故 \(\mathrm{rank}\langle 2, 2, 2 \rangle = 7\)。递归应用：\(O(n^{\log_2 7}) \approx O(n^{2.807})\)。</p>
+            <h4>秩的上下界估计</h4>
+            <p>对一般张量 \(T\)：矩阵化（展平为矩阵）给出下界。例如将三阶张量 \(T \in \mathbb{R}^{m \times n \times p}\) 展平为 \(\mathbb{R}^{m \times (np)}\) 矩阵，其秩 \(\le \mathrm{rank}(T)\)。上界通过显式构造分解得到。精确值通常极难确定。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>信号处理中的盲源分离（BSS）: 将混合信号分解为独立源， 数学上等价于张量分解。</p>
+            <p><strong>信号处理（盲源分离）</strong>：混合信号 \(X = \sum_{i=1}^r a_i \otimes b_i \otimes c_i\)（时间 × 频率 × 空间），CP 分解自动恢复独立源的特征。张量分解的本质唯一性（Kruskal 定理）保证了源可识别性——这是矩阵分解做不到的。</p>
+            <p><strong>代数复杂度理论</strong>：\(n \times n\) 矩阵乘法的最优乘法次数等于矩阵乘法张量 \(\langle n, n, n \rangle\) 的秩。当前最佳渐近上界为 \(O(n^{2.371552})\)，而最终目标是判断指数 \(\omega\) 是否等于 2。</p>
+            <p><strong>机器学习</strong>：张量分解用于潜在语义分析、主题模型和神经网络压缩。高阶矩的张量分解可以恢复隐变量模型的参数（Anandkumar 等人的张量方法），是混合模型参数估计的理论基础。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(T = e_1 \otimes e_1 \otimes e_1 + e_2 \otimes e_2 \otimes e_2 \in (\mathbb{R}^2)^{\otimes 3}\)。张量秩是多少？ 解答: 两个纯张量的和，\(\mathrm{rank}(T) \leq 2\)。 若 \(T = v \otimes v' \otimes v''\)（秩 1），则各分量矩阵秩为 1， 但 \(T\) 在 \(e_1, e_2\) 两个方向上贡献，矛盾。故 \(\mathrm{rank}(T) = 2\)。 易错点: 以为张量秩 = 矩阵化后的矩阵秩。 矩阵化（展平）给出秩的下界，但不是张量秩本身。</p>
+            <p><strong>例题 1</strong>：\(I_2 \in M_{2 \times 2} \cong \mathbb{R}^2 \otimes \mathbb{R}^2\)。求张量秩。</p>
+            <p><strong>解</strong>：\(I_2 = e_1 \otimes e_1 + e_2 \otimes e_2\)（2 个纯张量项）→秩 \(\le 2\)。若 \(I_2 = v \otimes w\)，则 \(vw^T\) 秩为 1，矛盾。故秩 = 2 = 矩阵秩。</p>
+            <p><strong>例题 2</strong>：\(T = e_1 \otimes e_1 \otimes e_1 + e_2 \otimes e_2 \otimes e_2 \in (\mathbb{R}^2)^{\otimes 3}\)。求张量秩。</p>
+            <p><strong>解</strong>：显然 \(\mathrm{rank}(T) \le 2\)。若 \(T = v \otimes v' \otimes v''\)（秩 1），则各 mode 展平后矩阵秩为 1，但 \(T\) 的 mode-1 展平矩阵秩为 2，矛盾。故秩 = 2。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>以为张量秩 = 矩阵化后的秩</strong>：矩阵化给出张量秩的下界，但不是张量秩本身。只有二阶张量（矩阵）二者才相等。</li>
+              <li><strong>以为 CP 分解像 SVD 一样总存在正交分量</strong>：CP 分解的分量一般不正交，也不像 SVD 那样有递推算法。</li>
+              <li><strong>忽视 NP-hard 复杂度</strong>：试图用矩阵秩的方法精确计算三阶张量秩是行不通的——这是一个根本性的计算障碍，必须使用近似方法。</li>
+            </ul>
           </div>
         </div>
       </div>

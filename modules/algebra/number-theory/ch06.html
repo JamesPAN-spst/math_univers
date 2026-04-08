@@ -394,7 +394,27 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>线性丢番图方程 \(ax + by = c\) 是最简单的整数方程，但元素的「整数性」 约束使得问题并不平凡。可解性完全由 \(\gcd(a,b) \mid c\) 决定， 解集是线性参数族。Bézout 等式是其完美工具。</p>
+            <p>线性丢番图方程 \(ax + by = c\) 是最简单的整数方程，但「整数性」约束使得问题并不平凡。</p>
+            <ul>
+              <li>钱币找零：用 5 元和 7 元硬币能否凑出 23 元？等价于 \(5x + 7y = 23\) 有没有非负整数解；</li>
+              <li>化学配平：\(\text{H}_2 + \text{Cl}_2 \to \text{HCl}\) 的系数平衡归结为整数线性方程；</li>
+              <li>排列组合：「用 3 分和 7 分硬币能否恋得 \(c\) 分」的 Frobenius 数为 \(3 \times 7 - 3 - 7 = 11\)。</li>
+            </ul>
+            <p>可解性完全由 \(\gcd(a,b) \mid c\) 决定，解集是线性参数族——Bézout 等式是其完美工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从格 (lattice) 的视角看，\(ax + by = c\) 的整数解集是 \(\mathbb{Z}^2\) 中一条仿射直线与整数格点的交。方程有解当且仅当目标值 \(c\) 属于格 \(a\mathbb{Z} + b\mathbb{Z} = \gcd(a,b)\mathbb{Z}\)。</p>
+            <p>解的结构也可以用 \(\mathbb{Z}\)-模的语言来刻画：</p>
+            <ul>
+              <li>齐次方程 \(ax + by = 0\) 的解集是 \(\mathbb{Z}^2\) 的一个秩 1 子模，由 \((b/d, -a/d)\) 生成；</li>
+              <li>非齐次方程的通解 = 特解 + 齐次解，与线性代数中的结构完全平行；</li>
+              <li>Bézout 等式 \(ax_0 + by_0 = d\) 提供了从齐次解空间到特解的「提升」。</li>
+            </ul>
+            <p>这个视角在高维推广时尤为重要：\(n\) 元丢番图方程组的解集由 Smith 标准形完全刻画。</p>
           </div>
         </div>
 
@@ -408,7 +428,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>钱币找零问题：用 5 元和 7 元的硬币能否凑出 \(c\) 元？</p>
+            <p><strong>运筹与经济</strong>：钱币找零问题「用面值 \(a\) 和 \(b\) 的硬币能否凑出 \(c\) 元」直接归结为 \(ax+by=c\) 的非负解存在性，Frobenius 数定量了不可表示的最大值。</p>
+            <p><strong>算法设计</strong>：整数线性规划 (ILP) 中，两变量线性丢番图方程是最简单情形，通解的参数化结构是分枝定界等 ILP 算法的理论基础。</p>
+            <p><strong>化学计量</strong>：化学反应配平中，各元素原子数的平衡等价于求解一组整数线性方程，可解性由 \(\gcd\) 条件判定。</p>
           </div>
         </div>
 
@@ -442,7 +464,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>\(a^2 + b^2 = c^2\) 是数学史上最古老的问题之一。什么样的整数三元组 满足勾股定理？完全参数化给出了优雅的答案，展示了数论中「参数化」 的强大方法。</p>
+            <p>\(a^2 + b^2 = c^2\) 是数学史上最古老的问题之一。什么样的整数三元组满足勾股定理？完全参数化给出了优雅的答案。</p>
+            <ul>
+              <li>\((3,4,5)\) 是最小的本原勾股数，由参数 \(m=2, n=1\) 生成；</li>
+              <li>\((9,12,15) = 3 \times (3,4,5)\) 是勾股数但不是本原的——\(\gcd=3\)；</li>
+              <li>参数化定理说明每个本原勾股数都恰好由一对互素、奇偶不同的 \((m,n)\) 唯一生成。</li>
+            </ul>
+            <p>勾股数的参数化展示了数论中「将离散问题转化为连续参数」的强大方法。</p>
           </div>
         </div>
 
@@ -463,7 +491,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>勾股数在信号处理中用于构造整数坐标的直角三角形。</p>
+            <p><strong>计算机图形学</strong>：屏幕分辨率设计中，宽高比为整数的直角三角形构造用于像素精确旋转，本原勾股数的参数化提供了所有候选方案。</p>
+            <p><strong>物理学</strong>：勾股数三元组出现在结晶学中的晶格平面指数 (Miller 指数) 以及相对论中的四动量计算。</p>
+            <p><strong>教育与竞赛</strong>：勾股数生成是数学竞赛的经典题型，参数化定理是解决「求所有整数直角三角形」类问题的标准方法。</p>
           </div>
         </div>
 
@@ -528,7 +558,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>Pell 方程 \(x^2 - Dy^2 = 1\)（\(D\) 非完全平方数）是最重要的二次丢番图 方程。它有无穷多解，全部由一个「基本解」生成。连分数展开提供了 求基本解的精妙算法。</p>
+            <p>Pell 方程 \(x^2 - Dy^2 = 1\)（\(D\) 非完全平方数）是最重要的二次丢番图方程，它有无穷多解，全部由一个「基本解」生成。</p>
+            <ul>
+              <li>\(x^2 - 2y^2 = 1\) 的基本解 \((3,2)\)，下一组 \((17,12)\)，\(17/12 \approx 1.4167 \approx \sqrt{2}\)；</li>
+              <li>\(x^2 - 3y^2 = 1\) 的基本解 \((2,1)\)，下一组 \((7,4)\)，\(7/4 = 1.75 \approx \sqrt{3}\)；</li>
+              <li>连分数展开 \(\sqrt{D}\) 的周期渐近分数自动给出基本解。</li>
+            </ul>
+            <p>Pell 方程是连分数、二次域单位群与数值逼近的交汇点，其解的生成结构深刻而优美。</p>
           </div>
         </div>
 
@@ -549,7 +585,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>早期印度数学家 Brahmagupta 用 Pell 方程求 \(\sqrt{D}\) 的精确有理逼近。</p>
+            <p><strong>数值近似</strong>：印度数学家 Brahmagupta 用 Pell 方程的解 \((x_n, y_n)\) 构造 \(\sqrt{D}\) 的精确有理逼近 \(x_n/y_n\)，收敛速度为二次指数级。</p>
+            <p><strong>密码学</strong>：基于 Pell 方程的循环群结构可构造序列密码，解的递推关系保证了序列的伪随机性和不可预测性。</p>
+            <p><strong>代数数论</strong>：Pell 方程的解集对应实二次域 \(\mathbb{Q}(\sqrt{D})\) 的单位群，基本解即基本单位，这是 Dirichlet 单位定理的最简单情形。</p>
           </div>
         </div>
 
@@ -583,7 +621,13 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>费马大定理——“\(x^n + y^n = z^n\)（\(n \geq 3\)）无正整数解”——是数学史上 最著名的问题，困扰了数学家 350 年。费马本人用「无穷递降法」 证明了 \(n=4\) 的情况，展示了一种优雅的证明方法。</p>
+            <p>费马大定理——「\(x^n + y^n = z^n\)（\(n \geq 3\)）无正整数解」——是数学史上最著名的问题，困扰了数学家 350 年。</p>
+            <ul>
+              <li>\(n=2\) 时有无穷多组勾股数解（如 \(3^2+4^2=5^2\)），但 \(n=3\) 起就完全无解；</li>
+              <li>费马本人用「无穷递降法」证明了 \(n=4\) 的情形：\(x^4+y^4=z^2\) 无正整数解；</li>
+              <li>1995 年 Wiles 的证明依赖椭圆曲线与模形式的深刻关联（证明细节超出本课范围）。</li>
+            </ul>
+            <p>\(n=4\) 的无穷递降证明展示了一种优雅的论证策略：假设存在解，构造更小的解，无穷重复得到矛盾。</p>
           </div>
         </div>
 
@@ -604,7 +648,9 @@
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>Wiles 的证明催生了模形式理论的重大发展，影响了整个算术几何。</p>
+            <p><strong>算术几何</strong>：Wiles 证明费马大定理的过程建立了椭圆曲线与模形式的深刻联系（Taniyama-Shimura 猜想），催生了算术几何的重大发展。</p>
+            <p><strong>数学教育</strong>：\(n=4\) 的无穷递降证明是数学竞赛和教学中的经典方法，展示了「构造更小解导致矛盾」的论证策略。</p>
+            <p><strong>密码学</strong>：费马大定理所属的椭圆曲线理论已成为 ECC 密码的基础，其安全性与椭圆曲线上有理点的稀疏性紧密相关。</p>
           </div>
         </div>
 

@@ -394,35 +394,77 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>向量的长度、角度、面积等几何量都依赖于两个向量之间的「配对」运算。 双线性形式 \(B(u,v)\) 是内积的推广——它对两个变量分别线性， 但不一定正定也不一定对称。理解它是掌握二次型、内积、辛形式的基础。</p>
+            <p>向量空间中"长度""角度""面积"等几何量，都需要一种将两个向量"配对"为标量的运算。内积是最熟悉的一种，但它太特殊——必须对称且正定。放宽这些条件，就得到双线性形式：一个对两个变量分别线性的函数 \(B: V \times V \to K\)。这个看似简单的推广打开了广阔的理论与应用空间。</p>
+            <ul>
+              <li><strong>经典力学</strong>：辛形式（反对称非退化双线性形式）是哈密顿力学的数学语言，相空间上的 Poisson 括号本质是辛形式的逆。</li>
+              <li><strong>相对论</strong>：Minkowski 时空的度规 \(ds^2 = -c^2 dt^2 + dx^2 + dy^2 + dz^2\) 是符号 \((3,1)\) 的对称双线性形式，既不正定也不负定——但它定义了光锥和因果结构。</li>
+              <li><strong>代数几何</strong>：代数簇上的交叉形式是双线性形式，其符号与几何性质深刻相关（Hodge 指标定理）。</li>
+            </ul>
+            <p>因此，双线性形式是从线性代数走向几何、物理和高等数学的基本接口。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>双线性形式是 \(V \times V \to K\) 的双线性映射，等价于 \(V \to V^*\) 的线性映射。 这是对偶空间与线性形式理论的自然延伸。</p>
+            <p>双线性形式 \(B: V \times V \to K\) 要求对每个变量分别线性：\(B(\alpha u + \beta u', v) = \alpha B(u,v) + \beta B(u',v)\)，对第二变量同理。这与线性映射的区别在于"双线性"——单独看每个变量是线性的，但整体不是 \(V\) 上的线性函数。</p>
+            <p>核心的对偶视角：每个双线性形式 \(B\) 自然诱导一个线性映射 \(\hat{B}: V \to V^*\)，定义为 \(\hat{B}(v)(w) = B(v, w)\)。\(B\) 非退化 \(\Leftrightarrow\) \(\hat{B}\) 是同构——此时 \(B\) 提供了 \(V\) 与 \(V^*\) 之间的自然对应，无需选择基底。这正是"升降指标"（raising/lowering indices）在物理中的代数来源。</p>
+            <p>双线性形式按对称性分为三大类：对称（\(B(u,v) = B(v,u)\)）、反对称（\(B(u,v) = -B(v,u)\)）、一般。在 \(\mathrm{char}\,K \ne 2\) 时，任何双线性形式可唯一分解为对称部分和反对称部分：\(B = B_+ + B_-\)，其中 \(B_\pm(u,v) = \frac{1}{2}[B(u,v) \pm B(v,u)]\)。</p>
+            <p>选定基底后，双线性形式由 Gram 矩阵 \(A = (B(e_i, e_j))\) 完全描述，\(B(u,v) = u^T A v\)。基变换 \(e'_i = \sum P_{ji}e_j\) 下，Gram 矩阵变为 \(A' = P^T A P\)——这就是矩阵的合同变换，是双线性形式理论的核心等价关系。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>定义</strong>: \(B: V \times V \to K\) 满足对两个变量分别线性。 <strong>矩阵表示</strong>: 选基 \(\{e_1, \ldots, e_n\}\)，令 \(a_{ij} = B(e_i, e_j)\)。 则 \(B(u, v) = u^T A v\)，其中 \(A = (a_{ij})\)。 <strong>分类</strong>: - 对称: \(B(u,v) = B(v,u)\)，即 \(A = A^T\) - 反对称: \(B(u,v) = -B(v,u)\)，即 \(A = -A^T\) - 非退化: \(\ker(B) = 0\)，即 \(A\) 可逆 \[B(u,v) = u^T A v, \quad \ker(B) = \{v : B(v,w) = 0, \forall w\}\]</p>
+            <h4>1. 矩阵表示</h4>
+            <p>选基 \(\{e_1, \ldots, e_n\}\)，Gram 矩阵 \(A\) 的元素 \(a_{ij} = B(e_i, e_j)\)。对任意 \(u = \sum x_i e_i\)，\(v = \sum y_j e_j\)：</p>
+            \[B(u, v) = \sum_{i,j} x_i y_j B(e_i, e_j) = \mathbf{x}^T A \mathbf{y}\]
+            <p>矩阵 \(A\) 完全确定 \(B\)（在给定基下），不同基给出合同等价的矩阵。</p>
+
+            <h4>2. 对称与反对称的矩阵特征</h4>
+            <p>\(B\) 对称 \(\Leftrightarrow\) \(A = A^T\)；\(B\) 反对称 \(\Leftrightarrow\) \(A = -A^T\)且对角线为零。反对称形式只在偶数维空间上可能非退化（\(\det(-A^T) = (-1)^n \det A\)，奇数维时 \(\det A = 0\)）。</p>
+
+            <h4>3. 核与非退化性</h4>
+            <p>左核 \(\ker_L(B) = \{v \in V : B(v, w) = 0, \forall w\}\)，右核类似。对称或反对称时左右核相同，记为 \(\ker B\)。非退化 \(\Leftrightarrow\) \(\ker B = 0\) \(\Leftrightarrow\) \(\det A \ne 0\)。</p>
+
+            <h4>4. 合同变换</h4>
+            <p>基变换 \(P\) 下 \(A' = P^TAP\)。两个对称矩阵合同 \(\Leftrightarrow\) 对应的二次型等价。合同保持秩，在 \(\mathbb{R}\) 上还保持符号（Sylvester 定理）。</p>
+
+            <h4>5. 辛形式的标准形</h4>
+            <p>非退化反对称双线性形式（辛形式）在适当基下的标准矩阵为 \(J = \begin{pmatrix}0 & I_m \\ -I_m & 0\end{pmatrix}\)，\(\dim V = 2m\)。这是辛几何的起点。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>辛几何中的辛形式（反对称非退化双线性形式）是哈密顿力学的数学基础。</p>
+            <p><strong>辛几何与经典力学</strong>：哈密顿系统的相空间 \((\mathbb{R}^{2n}, \omega)\) 上的辛形式 \(\omega = \sum dp_i \wedge dq_i\) 是反对称非退化双线性形式。Hamilton 方程 \(\dot{z} = J \nabla H\) 中的辛矩阵 \(J\) 正是辛形式的标准表示。保辛变换（正则变换）保持 \(\omega\) 不变——这是 Liouville 定理和 Noether 定理的代数基础。</p>
+            <p><strong>广义相对论</strong>：Minkowski 度规 \(\eta = \mathrm{diag}(-1, 1, 1, 1)\) 是符号 \((3,1)\) 的对称双线性形式。Lorentz 变换是保持 \(\eta\) 不变的线性变换——即 \(\Lambda^T \eta \Lambda = \eta\)。弯曲时空上的度规张量 \(g_{\mu\nu}\) 是逐点变化的对称双线性形式，其非退化性保证了测地线方程的良定义性。</p>
+            <p><strong>信号处理与核方法</strong>：核函数 \(K(x, y)\) 在机器学习中定义了特征空间上的内积（对称正定双线性形式）。Gram 矩阵 \(K_{ij} = K(x_i, x_j)\) 的正定性是核方法合法性的充要条件（Mercer 定理），而半正定核的谱分解直接对应主成分分析。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(V = \mathbb{R}^2\)，\(B(u,v) = u_1 v_2 - u_2 v_1\)。判断类型。 解答: \(A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}\)。 \(A^T = -A\)，故反对称。\(\det A = 1 \neq 0\)，非退化。 这是标准辛形式。 易错点: 混淆「对称双线性形式」和「内积」。 内积还需要正定性，对称双线性形式不需要。</p>
+            <p><strong>例 1</strong>：\(V = \mathbb{R}^2\)，\(B(u,v) = u_1 v_2 - u_2 v_1\)。分析其类型。</p>
+            <p><em>第一步（矩阵表示）</em>：\(A = \begin{pmatrix}0&1\\-1&0\end{pmatrix}\)。</p>
+            <p><em>第二步（对称性）</em>：\(A^T = \begin{pmatrix}0&-1\\1&0\end{pmatrix} = -A\)，故 \(B\) 反对称。</p>
+            <p><em>第三步（非退化性）</em>：\(\det A = 0 \cdot 0 - 1 \cdot (-1) = 1 \ne 0\)，非退化。</p>
+            <p><em>结论</em>：\(B\) 是 \(\mathbb{R}^2\) 上的标准辛形式，对应有向面积（平行四边形面积的带符号版本）。</p>
+
+            <p><strong>例 2</strong>：\(V = \mathbb{R}^3\)，\(B(u,v) = u_1 v_1 + u_2 v_2 - u_3 v_3\)。判断类型与非退化性。</p>
+            <p><em>第一步</em>：\(A = \mathrm{diag}(1, 1, -1)\)，\(A = A^T\)，对称。</p>
+            <p><em>第二步</em>：\(\det A = -1 \ne 0\)，非退化。</p>
+            <p><em>结论</em>：符号 \((2, 1)\) 的非退化对称双线性形式——对应 Minkowski 型度规（2+1 维）。不是内积（不正定），但定义了良好的光锥结构。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"对称双线性形式"与"内积"——内积还要求正定性（\(B(v,v) > 0, \forall v \ne 0\)），对称双线性形式可以不定甚至退化。</li>
+              <li>❌ 认为"反对称形式在任意维度上都可以非退化"——奇数维空间上反对称矩阵必定奇异（\(\det(-A^T) = (-1)^n \det A = -\det A\) 当 \(n\) 奇时 \(\det A = 0\)），故辛空间必须是偶数维的。</li>
+              <li>✅ 判定流程：先写出 Gram 矩阵 \(A\) → 检查 \(A = A^T\) 或 \(A = -A^T\) → 计算 \(\det A\) 判断退化性 → 若对称，进一步分析符号。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -449,28 +491,76 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>二次型 \(Q(v) = B(v,v)\) 在几何中描述曲面（椭圆、双曲面等）， 在物理中描述能量。将二次型化为标准形（只有平方项）大大简化分析。 配方法和合同变换是实现标准化的核心工具。</p>
+            <p>二次型 \(Q(v) = B(v,v)\) 将对称双线性形式"对角化"为单变量的二次函数，是连接代数与几何的关键桥梁。几何上，\(Q(x) = c\) 定义了二次曲面（椭球、双曲面、抛物面等）；物理上，动能 \(T = \frac{1}{2}v^T M v\) 和势能 \(U = \frac{1}{2}x^T K x\) 都是二次型。将二次型化为"只有平方项"的标准形，不仅简化了分类，更使判定正定性等性质成为一眼可见的事。</p>
+            <ul>
+              <li><strong>解析几何</strong>：\(ax^2 + bxy + cy^2 = 1\) 的交叉项 \(bxy\) 使得曲线类型模糊不清。配方消去交叉项后，标准形 \(Au^2 + Bv^2 = 1\) 立刻告诉我们这是椭圆（\(A, B > 0\)）还是双曲线（异号）。</li>
+              <li><strong>优化理论</strong>：函数 \(f(x)\) 在临界点附近的 Taylor 展开中，二阶项是 Hessian 的二次型——其标准形直接决定了极值类型：正定=极小，负定=极大，不定=鞍点。</li>
+              <li><strong>振动分析</strong>：多体系统的动能和势能均为广义坐标的二次型，标准化过程对应"解耦正则模态"——每个正则坐标独立振动。</li>
+            </ul>
+            <p>标准化是将复杂的多变量耦合结构简化为独立分量的基本手法，贯穿于数学和应用科学的方方面面。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>设 \(B\) 是 \(V\) 上的对称双线性形式，二次型 \(Q: V \to K\) 定义为 \(Q(v) = B(v, v)\)。在 \(\mathrm{char}\,K \ne 2\) 时，\(Q\) 与 \(B\) 通过极化恒等式互相确定：\(B(u, v) = \frac{1}{2}[Q(u+v) - Q(u) - Q(v)]\)。因此研究二次型等价于研究对称双线性形式。</p>
+            <p>"标准化"的代数含义是找基底使 Gram 矩阵变为对角阵——即寻找 \(P\) 使 \(P^TAP = D\)（合同对角化）。注意这不是相似对角化（\(P^{-1}AP\)）！合同变换保持的不变量是秩和符号，而非特征值。</p>
+            <p>标准化方法有两类：(1) 配方法（Lagrange 方法）——通过逐步配方消去交叉项，不依赖特征值计算，适用于任何域；(2) 正交对角化——利用谱定理，用正交矩阵 \(P^TAP = \Lambda\)，但仅适用于实对称矩阵且需要计算特征值。两种方法得到的对角元素不同，但正负号的模式（符号）相同（Sylvester 定理）。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>二次型与双线性形式的关系</strong>: \(Q(v) = B(v,v)\)。 反过来（\(\mathrm{char} K \neq 2\)）: \[B(u,v) = \frac{1}{2}[Q(u+v) - Q(u) - Q(v)]\] 这是极化恒等式。 <strong>标准化</strong>: 存在基使 \(Q = a_1 x_1^2 + \cdots + a_n x_n^2\)。 方法: - 配方法（逐项消去交叉项） - 矩阵: 找可逆 \(P\) 使 \(P^T A P = D\)（合同对角化） 合同变换保持秩和符号（实数域上）。</p>
+            <h4>1. 极化恒等式</h4>
+            <p>\(Q(v) = B(v,v)\) 恢复 \(B\)：</p>
+            \[B(u, v) = \frac{1}{2}[Q(u+v) - Q(u) - Q(v)]\]
+            <p>这表明二次型与对称双线性形式一一对应（\(\mathrm{char} \ne 2\) 时）。极化是"从对角信息恢复全矩阵"的技巧。</p>
+
+            <h4>2. 配方法（Lagrange 对角化）</h4>
+            <p>核心思想：逐个变量配方消去交叉项。若 \(Q\) 含 \(x_1^2\) 项，将所有含 \(x_1\) 的项配方为 \((x_1 + \ell)^2 - \ell^2\)，其中 \(\ell\) 是 \(x_2, \ldots, x_n\) 的线性函数。反复进行直到所有交叉项消失。</p>
+            <p>若 \(Q\) 不含任何 \(x_i^2\) 项但含交叉项 \(2a x_i x_j\)，先换元 \(x_i = u + v, x_j = u - v\)，使 \(2a x_i x_j = 2a(u^2 - v^2)\) 出现平方项。</p>
+
+            <h4>3. 正交对角化</h4>
+            <p>对实对称矩阵 \(A\)，谱定理保证存在正交矩阵 \(Q\) 使 \(Q^TAQ = \Lambda = \mathrm{diag}(\lambda_1, \ldots, \lambda_n)\)。在正交基下 \(Q = \lambda_1 y_1^2 + \cdots + \lambda_n y_n^2\)，系数恰为特征值。</p>
+
+            <h4>4. 合同变换的不变量</h4>
+            <p>合同变换 \(A \mapsto P^TAP\) 保持秩 \(r\)。在 \(\mathbb{R}\) 上还保持符号 \((p, q)\)（Sylvester 定理）。在 \(\mathbb{C}\) 上，合同不变量只有秩（所有非零系数均可归一化为 1）。</p>
+
+            <h4>5. 标准形的分类（实数域）</h4>
+            <p>\(n\) 维实二次型在合同下恰有 \(\frac{(n+1)(n+2)}{2}\) 种标准形，由 \((p, q)\) 满足 \(0 \le p, q\) 且 \(p + q \le n\) 参数化。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>曲面分类: \(ax^2 + bxy + cy^2 = 1\) 化为标准形后判断椭圆/双曲线。</p>
+            <p><strong>二次曲面分类</strong>：\(\mathbb{R}^3\) 中 \(\sum a_{ij}x_ix_j + \sum b_i x_i + c = 0\) 标准化后，二次部分的符号 \((p,q)\) 决定了曲面类型——\((3,0)\) 为椭球面，\((2,1)\) 为单叶双曲面，\((2,0)\) 为椭圆柱面等。线性项的处理通过平移消去（完成平方），最终给出 17 种标准二次曲面。</p>
+            <p><strong>统计学（多元正态分布）</strong>：\(n\) 维正态分布 \(\mathcal{N}(\mu, \Sigma)\) 的概率密度函数中，指数项 \(-\frac{1}{2}(x-\mu)^T \Sigma^{-1}(x-\mu)\) 是负定二次型。\(\Sigma\) 的正定性保证了密度函数的可积性。主轴变换（\(\Sigma\) 的谱分解）将等概率曲面从一般椭球化为标准椭球，各轴长度 \(\sqrt{\lambda_i}\) 是标准差。</p>
+            <p><strong>结构力学（稳定性分析）</strong>：弹性结构的势能 \(U = \frac{1}{2}\mathbf{q}^T K \mathbf{q}\) 是广义坐标的二次型。刚度矩阵 \(K\) 的正定性等价于结构在平衡位置附近稳定。标准化将耦合变形分解为独立的主应变模态，简化了屈曲分析和振动频率计算。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(Q(x,y) = x^2 + 4xy + 3y^2\)。化为标准形。 解答: 配方: \(Q = (x+2y)^2 + 3y^2 - 4y^2 = (x+2y)^2 - y^2\)。 令 \(u = x+2y, v = y\)，则 \(Q = u^2 - v^2\)。 标准形为 \(u^2 - v^2\)（符号 \((1, -1)\)）。 易错点: 配方后忘记换元，写成 \((x+2y)^2 - y^2\) 却仍称为「标准形」。 标准形要求变量之间无交叉，应写新变量。</p>
+            <p><strong>例 1</strong>：用配方法标准化 \(Q(x,y) = x^2 + 4xy + 3y^2\)。</p>
+            <p><em>第一步（配方 \(x\) 项）</em>：\(Q = (x^2 + 4xy) + 3y^2 = (x + 2y)^2 - 4y^2 + 3y^2 = (x+2y)^2 - y^2\)。</p>
+            <p><em>第二步（换元）</em>：令 \(u = x + 2y\)，\(v = y\)，则 \(Q = u^2 - v^2\)。</p>
+            <p><em>结论</em>：标准形 \(u^2 - v^2\)，符号 \((1, 1)\)，秩 2。对应双曲线。</p>
+
+            <p><strong>例 2</strong>：用正交对角化标准化 \(Q = 2x^2 + 2xy + 2y^2\)。</p>
+            <p><em>第一步</em>：\(A = \begin{pmatrix}2&1\\1&2\end{pmatrix}\)，\(\chi_A = (\lambda-1)(\lambda-3)\)，特征值 1 和 3。</p>
+            <p><em>第二步</em>：特征向量 \(v_1 = \frac{1}{\sqrt{2}}(1,-1)^T\)，\(v_2 = \frac{1}{\sqrt{2}}(1,1)^T\)。</p>
+            <p><em>结论</em>：\(Q = u_1^2 + 3u_2^2\)，其中 \(u = Q^T x\)。正定（两个特征值均正）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 配方后忘记换元——\((x+2y)^2 - y^2\) 仍含 \(x, y\) 的耦合（\(u = x+2y\) 是 \(x, y\) 的线性组合），必须明确写出新变量才是标准形。</li>
+              <li>❌ 混淆合同对角化与相似对角化——配方法给出 \(P^TAP = D\)（合同），不是 \(P^{-1}AP = D\)（相似）。合同的基变换矩阵 \(P\) 一般不正交也不等于特征向量矩阵。</li>
+              <li>✅ 选择策略：快速判定正定性用顺序主子式法；需要几何解释时用正交对角化（特征值=轴长）；域不是 \(\mathbb{R}\) 或不想算特征值时用配方法。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -521,35 +611,73 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>配方法给出的标准形取决于配方顺序，不同方法得到的系数不同。 但 Sylvester 惯性定理保证<strong>正系数的个数和负系数的个数是不变量</strong>。 正定性（所有系数为正）在优化、统计中意味着极小值的存在。</p>
+            <p>配方法可以将二次型化为标准形，但不同的配方顺序会给出不同的系数——那么标准形是否"唯一"？Sylvester 惯性定理给出了令人满意的回答：正系数的个数和负系数的个数是不变量（称为惯性指数），不随标准化方法而改变。这意味着实二次型在合同变换下的完全分类只需要一对整数 \((p, q)\)。</p>
+            <ul>
+              <li><strong>优化理论</strong>：多元函数 \(f\) 在临界点的 Hessian 矩阵 \(H\) 是对称的，其惯性指数直接判定极值类型——\(H\) 正定（\(p=n, q=0\)）意味着严格极小，负定（\(p=0, q=n\)）意味着严格极大，不定则为鞍点。</li>
+              <li><strong>相对论</strong>：Minkowski 度规的符号 \((3,1)\)（或 \((1,3)\)）是不变量——任何坐标变换都不可能把类时间距改为类空间距，因为惯性指数受保护。</li>
+              <li><strong>机器学习</strong>：损失函数的 Hessian 在鞍点处不定（\(p \ge 1, q \ge 1\)），惯性指数量化了"逃逸方向"的数目，影响梯度下降的收敛行为。</li>
+            </ul>
+            <p>惯性定理是线性代数中最优雅的不变量定理之一，它将看似复杂的分类问题简化为数一数正、负号。</p>
           </div>
         </div>
 
         <div class="step-card step-abstraction">
           <div class="step-label">🔍 抽象化方法</div>
           <div class="step-body">
-            <p>惯性定理说明实二次型的合同不变量只有 \((p, q)\)——正负惯性指数。 这是合同等价类的完全分类。</p>
+            <p>Sylvester 惯性定理断言：对实对称矩阵 \(A\)，其任何合同对角化 \(P^TAP = \mathrm{diag}(d_1, \ldots, d_n)\) 中，正 \(d_i\) 的个数 \(p\) 和负 \(d_i\) 的个数 \(q\) 恒定。三元组 \((p, q, n-p-q)\) 称为惯性——\(p\) 为正惯性指数，\(q\) 为负惯性指数，\(n-p-q\) 为零惯性指数（= 核的维数 = \(n - \mathrm{rank}\,A\)）。</p>
+            <p>惯性定理的推论是：两个实对称矩阵合同 \(\Leftrightarrow\) 它们有相同的 \((p, q)\)。这给出了实对称双线性形式/二次型在合同下的完全分类，比相似分类（需要全部特征值）粗糙得多。</p>
+            <p>正定性是最重要的特殊情形：\(A\) 正定 \(\Leftrightarrow\) \((p, q) = (n, 0)\) \(\Leftrightarrow\) 所有特征值 \(> 0\) \(\Leftrightarrow\) 所有顺序主子式 \(> 0\) \(\Leftrightarrow\) 存在可逆 \(C\) 使 \(A = C^TC\)（Cholesky 分解）。正定矩阵定义了真正的内积，是几何结构的基石。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>Sylvester 惯性定理</strong>: 实对称矩阵 \(A\) 的任何合同对角化 \(P^T A P = \mathrm{diag}(d_1, \ldots, d_n)\) 中， 正 \(d_i\) 的个数 \(p\) 和负 \(d_i\) 的个数 \(q\) 不变。\((p, q)\) 称为符号。 <strong>证明思路</strong>: 假设两种标准化给出不同的 \((p,q)\)， 则存在子空间 \(W^+\)（\(Q > 0\)）和 \(W^-\)（\(Q \leq 0\)）， \(\dim W^+ + \dim W^- > n\)，故 \(W^+ \cap W^- \neq 0\)， 矛盾。 \[\text{符号 } (p, q) \text{ 是合同不变量, } p + q = \mathrm{rank}(A)\] <strong>正定</strong>: \(p = n, q = 0\)。等价条件: 1) 所有特征值 > 0 2) 所有顺序主子式 > 0 3) \(Q(v) > 0\)，\(\forall v \neq 0\)</p>
+            <h4>1. 惯性定理的陈述</h4>
+            <p>设 \(A\) 是 \(n \times n\) 实对称矩阵，\(P, Q\) 为可逆矩阵使 \(P^TAP\) 和 \(Q^TAQ\) 均为对角阵。则两个对角阵中正对角元素的个数相同，负对角元素的个数也相同。</p>
+
+            <h4>2. 证明（维数论证）</h4>
+            <p>设 \(P^TAP = \mathrm{diag}(d_1, \ldots, d_p, -d_{p+1}, \ldots, -d_{p+q}, 0, \ldots, 0)\)。令 \(W^+ = \mathrm{span}\{Pe_1, \ldots, Pe_p\}\)——在此子空间上 \(Q|_{W^+} > 0\)。类似地，从 \(Q^TAQ\) 得 \(W'^-\)（含零子空间）使 \(Q|_{W'^-} \le 0\)。若正惯性指数不同（\(p' < p\)），则 \(\dim W'^- \ge n - p' > n - p\)，故 \(\dim W^+ + \dim W'^- > n\)，\(W^+ \cap W'^- \ne \{0\}\)——在交集中 \(Q\) 同时正和非正，矛盾。</p>
+
+            <h4>3. 正定性的等价条件</h4>
+            <p>以下条件等价（设 \(A\) 实对称 \(n \times n\)）：</p>
+            <p>(i) \(x^TAx > 0\)，\(\forall x \ne 0\)（正定定义）。(ii) 所有特征值 \(\lambda_i > 0\)。(iii) 所有顺序主子式 \(\Delta_k > 0\)（\(k = 1, \ldots, n\)）。(iv) 存在可逆矩阵 \(C\) 使 \(A = C^TC\)（Cholesky 分解推广）。(v) 符号 \((p, q) = (n, 0)\)。</p>
+
+            <h4>4. 顺序主子式判别法</h4>
+            <p>\(\Delta_k = \det(A_{1:k, 1:k})\)。正定 \(\Leftrightarrow\) \(\Delta_1, \ldots, \Delta_n\) 全正。负定 \(\Leftrightarrow\) \((-1)^k \Delta_k > 0\)。此判别法的优势在于只需 \(n\) 次行列式计算，不需要求特征值。</p>
+
+            <h4>5. Cholesky 分解</h4>
+            <p>\(A\) 正定 \(\Rightarrow\) 存在唯一的下三角矩阵 \(L\)（对角元为正）使 \(A = LL^T\)。算法复杂度 \(O(n^3/3)\)，比一般 LU 分解更高效。分解失败（出现负数或零的平方根）意味着 \(A\) 不正定——这本身就是一种判定方法。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>机器学习中 Hessian 矩阵的正定性判定损失函数的局部极小。</p>
+            <p><strong>机器学习（Hessian 分析）</strong>：深度学习损失函数 \(L(\theta)\) 的 Hessian \(H = \nabla^2 L\) 的惯性指数量化了损失景观的局部几何。在鞍点处 \((p, q)\) 中 \(q > 0\) 的方向为"逃逸方向"——沿此方向 loss 下降。高维中鞍点远多于极小值，惯性指数的分布决定了优化动力学。</p>
+            <p><strong>金融数学（协方差矩阵）</strong>：资产收益的协方差矩阵 \(\Sigma\) 必须半正定（物理上，组合方差不能为负）。当估计的 \(\hat{\Sigma}\) 因样本误差不是半正定时，需要"最近半正定投影"——将负特征值截断为零，这利用了惯性指数的诊断能力。</p>
+            <p><strong>有限元方法（刚度矩阵）</strong>：结构力学中全局刚度矩阵 \(K\) 的正定性保证了位移解的唯一性。若 \(K\) 有零特征值，对应刚体运动模态（未约束自由度）；若出现负特征值，说明模型存在不稳定性（屈曲），惯性指数 \(q\) 直接给出不稳定模态的数目。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: \(A = \begin{pmatrix}2&1\\1&3\end{pmatrix}\)。判断正定性。 解答: 顺序主子式: \(\Delta_1 = 2 > 0\)，\(\Delta_2 = 6-1 = 5 > 0\)。 所有顺序主子式为正，\(A\) 正定。 或特征值: \(\lambda = \frac{5 \pm \sqrt{5}}{2}\)，均为正。 易错点: 用「所有主子式 > 0」代替「顺序主子式 > 0」。 正定只需检查顺序主子式（左上角子矩阵的行列式）。</p>
+            <p><strong>例 1</strong>：判断 \(A = \begin{pmatrix}2&1\\1&3\end{pmatrix}\) 的正定性。</p>
+            <p><em>方法一（顺序主子式）</em>：\(\Delta_1 = 2 > 0\)，\(\Delta_2 = 2 \cdot 3 - 1 = 5 > 0\)。正定。</p>
+            <p><em>方法二（特征值）</em>：\(\chi_A = \lambda^2 - 5\lambda + 5\)，\(\lambda = \frac{5 \pm \sqrt{5}}{2} \approx 3.62, 1.38\)。均正。正定。</p>
+            <p><em>方法三（Cholesky）</em>：\(A = LL^T\)，\(L = \begin{pmatrix}\sqrt{2}&0\\1/\sqrt{2}&\sqrt{5/2}\end{pmatrix}\)。分解成功，正定。</p>
+
+            <p><strong>例 2</strong>：\(B = \begin{pmatrix}1&2\\2&1\end{pmatrix}\)，判断正定性。</p>
+            <p><em>第一步</em>：\(\Delta_1 = 1 > 0\)，\(\Delta_2 = 1 - 4 = -3 < 0\)。不正定。</p>
+            <p><em>分析</em>：特征值 \(3\) 和 \(-1\)。符号 \((1, 1)\)——不定（有正有负特征值）。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 用"所有主子式 > 0"判定正定——应该用"所有顺序主子式（leading principal minors）> 0"。\(\begin{pmatrix}-1&0\\0&-1\end{pmatrix}\) 的所有 \(2 \times 2\) 主子式 = 1 > 0，但显然负定。</li>
+              <li>❌ 认为"对称 + 行列式 > 0 ⇒ 正定"——\(\begin{pmatrix}-1&0\\0&-1\end{pmatrix}\) 的 \(\det = 1 > 0\)，但负定。必须检查所有顺序主子式，不能只看最后一个。</li>
+              <li>✅ 快速判定：2×2 对称矩阵 \(\begin{pmatrix}a&b\\b&c\end{pmatrix}\) 正定 \(\Leftrightarrow\) \(a > 0\) 且 \(ac - b^2 > 0\)。高维用 Cholesky 分解（若不报错则正定）。</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -576,28 +704,78 @@
         <div class="step-card step-motivation">
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
-            <p>内积把「长度」和「角度」引入向量空间。Gram-Schmidt 过程将任意基 转化为正交基，是数值计算（QR 分解）和理论分析的基石。 它在傅里叶分析、最小二乘等领域无处不在。</p>
+            <p>内积将"长度""角度""投影"等几何概念引入抽象向量空间，使线性代数从纯代数结构升格为具有度量结构的理论。而 Gram-Schmidt 正交化过程——从任意基构造正交基——是将内积空间的理论潜力转化为计算工具的关键算法。它的矩阵形式就是 QR 分解，是数值线性代数的基石之一。</p>
+            <ul>
+              <li><strong>傅里叶分析</strong>：函数空间 \(L^2[0, 2\pi]\) 上标准内积 \(\langle f, g \rangle = \int_0^{2\pi} f\bar{g}\,dx\) 下，\(\{e^{inx}\}\) 是正交基——Fourier 系数就是内积取值，Gram-Schmidt 在此空间上的推广产生了各种正交多项式族。</li>
+              <li><strong>统计学</strong>：最小二乘法的正规方程 \(A^TAx = A^Tb\) 本质上是将 \(b\) 正交投影到 \(A\) 的列空间——投影理论完全建立在内积上。</li>
+              <li><strong>量子力学</strong>：Hilbert 空间上的正交归一基（量子态）和内积（概率幅）是量子理论的数学基础。</li>
+            </ul>
+            <p>内积空间和正交化过程是线性代数中理论与应用结合最紧密的主题之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>内积是向量空间 \(V\) 上的正定对称（或共轭对称）双线性形式 \(\langle \cdot, \cdot \rangle: V \times V \to K\)，满足：(i) 共轭对称 \(\langle u, v \rangle = \overline{\langle v, u \rangle}\)，(ii) 对第一变量线性，(iii) 正定 \(\langle v, v \rangle > 0\)（\(v \ne 0\)）。实内积空间中 (i) 退化为对称性。</p>
+            <p>内积引出范数 \(\|v\| = \sqrt{\langle v, v \rangle}\) 和度量 \(d(u,v) = \|u - v\|\)，使 \(V\) 成为度量空间。核心不等式 Cauchy-Schwarz \(|\langle u, v \rangle| \le \|u\| \cdot \|v\|\) 保证了夹角 \(\cos\theta = \frac{\langle u, v \rangle}{\|u\|\|v\|}\) 的良定义性。</p>
+            <p>Gram-Schmidt 过程本质上是对正交补空间的递归投影：对已有部分正交组 \(\{u_1, \ldots, u_{k-1}\}\)，新向量 \(v_k\) 减去它在 \(\mathrm{span}\{u_1, \ldots, u_{k-1}\}\) 上的正交投影，残差 \(u_k\) 自然正交于之前所有向量。这一过程的矩阵表达就是 QR 分解：\(A = QR\)，\(Q\) 列正交，\(R\) 上三角。</p>
           </div>
         </div>
 
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
-            <p><strong>内积</strong>: \(\langle \cdot, \cdot \rangle: V \times V \to K\) 满足 对称（共轭对称）、线性、正定。 <strong>Gram-Schmidt 过程</strong>: 给定 \(\{v_1, \ldots, v_n\}\)， \[u_1 = v_1, \quad u_k = v_k - \sum_{j=1}^{k-1} \frac{\langle v_k, u_j \rangle}{\langle u_j, u_j \rangle} u_j\] \(\{u_1, \ldots, u_n\}\) 两两正交。归一化得标准正交基。 <strong>QR 分解</strong>: \(A = QR\)，\(Q\) 正交，\(R\) 上三角。 本质就是对 \(A\) 的列向量做 Gram-Schmidt。</p>
+            <h4>1. 内积的公理化定义</h4>
+            <p>实内积空间：\(\langle u, v \rangle\) 满足对称性、双线性、正定性。复内积空间：将对称性换为共轭对称 \(\langle u, v \rangle = \overline{\langle v, u \rangle}\)，线性约定于第一变量（物理约定为第二变量）。</p>
+
+            <h4>2. 正交投影</h4>
+            <p>向量 \(v\) 到子空间 \(W = \mathrm{span}\{u_1, \ldots, u_k\}\)（\(u_i\) 两两正交）的正交投影：</p>
+            \[\mathrm{proj}_W(v) = \sum_{i=1}^k \frac{\langle v, u_i \rangle}{\langle u_i, u_i \rangle} u_i\]
+            <p>残差 \(v - \mathrm{proj}_W(v) \perp W\)。这是最佳逼近定理的具体化。</p>
+
+            <h4>3. Gram-Schmidt 过程</h4>
+            <p>输入 \(\{v_1, \ldots, v_n\}\) 线性无关。递归：</p>
+            \[u_1 = v_1, \quad u_k = v_k - \sum_{j=1}^{k-1} \frac{\langle v_k, u_j \rangle}{\langle u_j, u_j \rangle} u_j, \quad k = 2, \ldots, n\]
+            <p>归一化：\(e_k = u_k / \|u_k\|\) 得标准正交基。每步的计算量为 \(O(kn)\) 次内积运算，总复杂度 \(O(n^2 m)\)（\(m\) 为向量维度）。</p>
+
+            <h4>4. QR 分解</h4>
+            <p>将 Gram-Schmidt 写成矩阵形式：\(A = QR\)，其中 \(Q\) 的列为正交归一化后的 \(e_k\)，\(R\) 是上三角矩阵，\(r_{jk} = \langle v_k, e_j \rangle\)。QR 分解是数值线性代数的核心工具——它用于解最小二乘、计算特征值（QR 算法）、等。</p>
+
+            <h4>5. 数值稳定性：Modified Gram-Schmidt</h4>
+            <p>经典 Gram-Schmidt 在浮点运算下可能丧失正交性（舍入误差积累）。Modified Gram-Schmidt 逐步更新：每加入一个投影就立即从剩余向量中减去，大大改善了数值稳定性。Householder 反射法进一步保证了正交性到机器精度。</p>
           </div>
         </div>
 
         <div class="step-card step-application">
           <div class="step-label">🌐 实际应用</div>
           <div class="step-body">
-            <p>最小二乘法: \(\hat{x} = (A^T A)^{-1} A^T b\) 的推导用到正交投影。</p>
+            <p><strong>最小二乘法</strong>：超定方程 \(Ax \approx b\) 的最小二乘解 \(\hat{x} = \arg\min \|Ax - b\|^2\) 通过正规方程 \(A^TAx = A^Tb\) 或等价地通过 QR 分解 \(A = QR\) 求解 \(Rx = Q^Tb\)。QR 方法数值上更稳定——避免了 \(A^TA\) 的条件数平方化。在回归分析、曲线拟合、图像重建等场景中无处不在。</p>
+            <p><strong>信号处理（正交基展开）</strong>：任何 \(L^2\) 信号可展开为正交基的级数——离散版本为 DFT（使用正交 Fourier 基），连续版本为 Fourier-Legendre、小波展开等。Gram-Schmidt 的推广（Lanczos 算法）用于在大规模 Krylov 子空间中构造正交基，是计算稀疏矩阵特征值的标准方法。</p>
+            <p><strong>量子计算</strong>：量子态的测量基是 Hilbert 空间中的标准正交基。量子算法（如 Grover 搜索、Shor 因式分解）的核心操作——酉变换——就是正交基之间的旋转。Gram-Schmidt 在量子纠错码的构造中用于正交化综合征子空间。</p>
           </div>
         </div>
 
         <div class="step-card step-example">
           <div class="step-label">✏️ 例题分析与易错点</div>
           <div class="step-body">
-            <p>例题: 对 \(v_1 = (1,1,0)\)，\(v_2 = (1,0,1)\) 做 Gram-Schmidt。 解答: \(u_1 = (1,1,0)\)。 \(\langle v_2, u_1 \rangle = 1\)，\(\langle u_1, u_1 \rangle = 2\)。 \(u_2 = (1,0,1) - \frac{1}{2}(1,1,0) = (\frac{1}{2}, -\frac{1}{2}, 1)\)。 验证: \(\langle u_1, u_2 \rangle = \frac{1}{2} - \frac{1}{2} = 0\)。✓ 易错点: Gram-Schmidt 产生的向量只是正交，未必标准正交。 需额外除以 \(\|u_k\|\) 进行归一化。</p>
+            <p><strong>例 1</strong>：对 \(v_1 = (1,1,0)^T\)，\(v_2 = (1,0,1)^T\) 做 Gram-Schmidt 正交化。</p>
+            <p><em>第一步</em>：\(u_1 = v_1 = (1,1,0)^T\)。</p>
+            <p><em>第二步</em>：\(\langle v_2, u_1 \rangle = 1 \cdot 1 + 0 \cdot 1 + 1 \cdot 0 = 1\)，\(\langle u_1, u_1 \rangle = 2\)。\(u_2 = (1,0,1) - \frac{1}{2}(1,1,0) = (\frac{1}{2}, -\frac{1}{2}, 1)^T\)。</p>
+            <p><em>验证</em>：\(\langle u_1, u_2 \rangle = \frac{1}{2} - \frac{1}{2} + 0 = 0\)。✓</p>
+            <p><em>归一化</em>：\(e_1 = \frac{1}{\sqrt{2}}(1,1,0)^T\)，\(e_2 = \frac{1}{\sqrt{3/2}}(\frac{1}{2}, -\frac{1}{2}, 1)^T = \frac{1}{\sqrt{6}}(1,-1,2)^T\)。</p>
+
+            <p><strong>例 2</strong>：用 QR 分解解最小二乘 \(\begin{pmatrix}1&1\\0&1\\1&0\end{pmatrix}x = \begin{pmatrix}1\\1\\0\end{pmatrix}\)。</p>
+            <p><em>第一步（QR）</em>：对列向量 \(a_1 = (1,0,1)^T\)，\(a_2 = (1,1,0)^T\) 做 Gram-Schmidt，得 \(Q, R\)。</p>
+            <p><em>第二步</em>：解 \(Rx = Q^Tb\)（上三角系统，回代即可）。</p>
+            <p><em>优势</em>：避免了 \(A^TA = \begin{pmatrix}2&1\\1&2\end{pmatrix}\) 的可能数值病态性。</p>
+
+            <h4>常见错误</h4>
+            <ul>
+              <li>❌ 混淆"正交"与"标准正交"——Gram-Schmidt 产生正交向量，不一定是单位向量。归一化（除以范数）是额外步骤。</li>
+              <li>❌ 在复内积空间中忘记共轭——\(\langle u, v \rangle = \sum u_i \overline{v_i}\)（物理约定）或 \(\sum \overline{u_i} v_i\)（数学约定），遗漏共轭会导致"正交化"后不正交。</li>
+              <li>✅ 数值实践：优先使用 Modified Gram-Schmidt 或 Householder 变换实现 QR 分解。经典 Gram-Schmidt 仅在教学中使用——浮点下的正交性损失可能达到 \(O(\kappa(A)\epsilon_{\mathrm{mach}})\)。</li>
+            </ul>
           </div>
         </div>
       </div>

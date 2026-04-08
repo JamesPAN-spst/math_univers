@@ -368,6 +368,16 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 关键概念抽象</div>
+          <div class="step-body">
+            <p>近似推断的核心问题是：当后验分布 \(p(z|x)\) 无法精确计算时，如何获得一个足够好的近似？这个问题可以从两个截然不同的角度来解决——优化（变分推断）和采样（MCMC），两者构成了现代概率机器学习的推断工具箱。</p>
+            <p>变分推断将推断问题转化为优化问题：在简单分布族 \(\mathcal{Q}\) 中找到最接近 \(p(z|x)\) 的成员 \(q^*\)。"接近"由 KL 散度衡量，而 ELBO（证据下界）是其可计算的替代目标。平均场近似进一步将 \(q\) 分解为各变量独立的乘积，使得高维优化变为逐变量的低维问题。</p>
+            <p>MCMC 方法则走一条不同的路：通过构造一条马尔可夫链，使其平稳分布恰好是目标后验。Gibbs 采样利用条件分布逐变量更新，Metropolis-Hastings 通过接受-拒绝机制保证细致平衡。理论上 MCMC 可恢复精确后验，但收敛速度是实践中的主要瓶颈。</p>
+            <p>VI 与 MCMC 的对比形成了一对互补的理解框架：VI 快速但有系统偏差（\(D_{\mathrm{KL}}(q\|p)\) 倾向低估方差），MCMC 渐近无偏但收敛难以诊断。现代方法（如随机 VI、哈密顿蒙特卡洛 HMC）试图融合两者的优点。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">

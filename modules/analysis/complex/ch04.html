@@ -398,10 +398,28 @@
           </div>
         </div>
 
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>留数的概念揭示了围道积分的本质：在 Laurent 展开 \(\sum a_n (z-z_0)^n\) 中，所有 \(n \neq -1\) 的项在闭路上积分为零（因为它们有原函数），唯一"残留"下来的贡献是 \(a_{-1}\)——这正是"residue"（残留物）一词的来源。</p>
+            <p>从更抽象的角度看，留数是全纯 1-形式 \(f(z)\,dz\) 在奇点处的 de Rham 上同调障碍。如果留数为零，则形式在该奇点的去心邻域内是恰当的（有原函数）；留数非零则表明存在不可消除的拓扑障碍。</p>
+            <p>留数定理将全局信息（围道积分）归结为局部信息（各奇点的 \(a_{-1}\)），这是"局部-整体原理"的典型体现。每个奇点独立贡献其留数，总积分等于所有贡献之和——线性叠加思想在复分析中的精确体现。</p>
+          </div>
+        </div>
+
         <div class="step-card step-derivation">
           <div class="step-label">📐 公式推导 / 模型建立</div>
           <div class="step-body">
             <p><strong>留数定义</strong>：\(f\) 在 \(z_0\) 有孤立奇点， \(\text{Res}(f, z_0) = a_{-1} = \frac{1}{2\pi i}\oint f(z) dz\) （绕 \(z_0\) 的小圆）。 <strong>留数定理</strong>：\(f\) 在区域 \(D\) 内除孤立奇点 \(z_1, \ldots, z_n\) 外全纯。则 \[\oint_{\partial D} f(z)\, dz = 2\pi i \sum_{k=1}^n \text{Res}(f, z_k)\] <strong>计算公式</strong>： - 一阶极点：\(\text{Res}(f, z_0) = \lim_{z \to z_0} (z - z_0) f(z)\) - \(m\) 阶极点：\(\text{Res}(f, z_0) = \frac{1}{(m-1)!} \lim_{z \to z_0} \frac{d^{m-1}}{dz^{m-1}} [(z-z_0)^m f(z)]\) - \(f = p/q\) 型（\(q\) 有简单零点）：\(\text{Res}(f, z_0) = p(z_0)/q'(z_0)\)</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>电路分析</strong>：RLC 电路的阻抗 \(Z(s)\) 是关于复频率 \(s\) 的有理函数，其极点对应电路的自然振荡频率。留数给出各模态的振幅和衰减率——部分分式分解 \(Z(s) = \sum \text{Res}/(s - p_k)\) 直接对应时域中指数衰减分量的叠加。</p>
+            <p><strong>概率论</strong>：特征函数 \(\varphi(t) = E[e^{itX}]\) 的反演公式是一个围道积分。分布的矩可通过 \(\varphi(t)\) 在 \(t = 0\) 的 Taylor 系数获得，而分布的尾行为由 \(\varphi\) 在复平面中最近奇点的留数控制。</p>
+            <p><strong>数论</strong>：素数计数函数 \(\pi(x)\) 的渐近行为通过 \(\zeta(s)\) 的对数导数 \(-\zeta'/\zeta\) 的留数来提取——\(\zeta\) 在 \(s = 1\) 的极点贡献主项 \(x/\ln x\)，非平凡零点的留数贡献振荡修正项。</p>
           </div>
         </div>
 
@@ -423,10 +441,10 @@
         <div class="iq-header">⚡ 快速检测</div>
         <div class="iq-prompt">\(\text{Res}(\frac{1}{z(z-1)^2}, 0) = ?\)</div>
         <div class="iq-options">
-          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z = 0\\) 一阶极点，$\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}')">A. \(-1\)</button>
-          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(z = 0\\) 一阶极点，$\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}')">B. \(1\)</button>
-          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z = 0\\) 一阶极点，$\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}')">C. \(2\)</button>
-          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z = 0\\) 一阶极点，$\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}')">D. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z = 0\\) 一阶极点，\\(\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}\\)')">A. \(-1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(z = 0\\) 一阶极点，\\(\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}\\)')">B. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z = 0\\) 一阶极点，\\(\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}\\)')">C. \(2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(z = 0\\) 一阶极点，\\(\\text{Res} = \\lim_{z \\to 0} z \\cdot \\frac{1}{z(z-1)^2}\\)')">D. \(0\)</button>
         </div>
       </div>
     </section>
@@ -442,6 +460,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>留数定理最精彩的应用是计算困难的实积分。通过选择适当的围道 （半圆、矩形、扇形等），将实轴上的积分转化为复平面上的围道 积分，再用留数定理求值。这种方法能处理许多初等方法无法攻克 的积分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>用留数计算实积分的核心策略是"升维"：将一维实轴上的积分嵌入二维复平面，在补充的路径上利用解析性和衰减性使贡献消失，从而用留数定理反求原积分。围道的选择是一门"艺术"——三角积分用单位圆，有理函数积分用半圆，含指数因子时依赖 Jordan 引理。</p>
+            <p>这一方法的本质是利用 Cauchy 定理的"守恒律"：闭路积分为留数之和，而闭路由"想要计算的部分"（实轴段）和"辅助部分"（弧线）组成。如果辅助部分的贡献可控（趋于零或可计算），就能从留数和中"解出"目标积分。</p>
+            <p>从方法论上看，留数法将困难的积分问题转化为代数问题（找极点、算留数）加上一个分析估计（验证辅助路径贡献为零）。这种"代数+估计"的搭配是分析学中的典型范式。</p>
           </div>
         </div>
 
@@ -471,10 +498,10 @@
         <div class="iq-header">⚡ 快速检测</div>
         <div class="iq-prompt">\(\int_{-\infty}^\infty \frac{x^2}{(1+x^2)^2} dx = ?\)</div>
         <div class="iq-options">
-          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(z = i\\) 二阶极点，$\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}')">A. \(\pi\)</button>
-          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(z = i\\) 二阶极点，$\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}')">B. \(\pi/2\)</button>
-          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(z = i\\) 二阶极点，$\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}')">C. \(\pi/4\)</button>
-          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(z = i\\) 二阶极点，$\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}')">D. \(2\pi\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(z = i\\) 二阶极点，\\(\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}\\)')">A. \(\pi\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(z = i\\) 二阶极点，\\(\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}\\)')">B. \(\pi/2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(z = i\\) 二阶极点，\\(\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}\\)')">C. \(\pi/4\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(z = i\\) 二阶极点，\\(\\text{Res} = \\lim \\frac{d}{dz}\\frac{z^2}{(z+i)^2}|_{z=i}\\)')">D. \(2\pi\)</button>
         </div>
       </div>
     </section>
@@ -490,6 +517,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>不是所有实积分都能用标准半圆围道解决。含有 \(\log x\)、\(x^a\) （分数幂）或在正半轴上积分的问题需要"钥匙孔"围道或矩形围道。 掌握围道选择是留数方法的核心艺术。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特殊围道的设计原则是利用被积函数的对称性或多值性。钥匙孔围道绕分支切割一圈，利用多值函数（如 \(z^a\) 或 \(\log z\)）在切割两侧取值不同这一事实，将正半轴上的积分"隔离"出来：上下两段积分之差恰好等于已知因子乘以目标积分。</p>
+            <p>矩形围道则利用被积函数的拟周期性——例如 \(e^{2\pi iz}\) 沿虚方向平移后回到自身。将上下两条水平边的积分联系起来，左右竖边贡献消失，就把无穷区间积分转化为留数。扇形围道则利用 \(z^n\) 的旋转对称性 \(z \mapsto ze^{2\pi i/n}\)。</p>
+            <p>这些看似 ad hoc 的技巧背后有一个统一思想：选择围道使得辅助路径上的积分要么为零（衰减估计），要么与目标积分成已知比例（对称性）。围道设计本质上是在 Riemann 面上寻找拓扑上等价但分析上更易处理的积分路径。</p>
           </div>
         </div>
 
@@ -538,6 +574,15 @@
           <div class="step-label">🎯 为什么研究这个问题</div>
           <div class="step-body">
             <p>标准留数定理处理有限远奇点。在无穷远点也可以定义留数—— 这对处理"所有奇点之和"问题很有用。此外，留数还能用来 计算无穷级数的和，将离散求和问题转化为连续积分问题。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>无穷远处的留数将 Riemann 球面的观点贯彻到底：\(\hat{\mathbb{C}}\) 上亚纯函数的所有留数之和为零，这是 Stokes 定理在紧 Riemann 面上的直接推论——紧流形上恰当形式的积分为零。</p>
+            <p>用留数进行级数求和的思想极为巧妙：\(\pi\cot(\pi z)\) 恰好在每个整数 \(n\) 处有留数 1 的简单极点，因此它是天然的"采样核"。将 \(f(z)\cot(\pi z)\) 沿大正方形积分，围道贡献趋于零（\(\cot\) 在远离实轴处有界），留数定理就把整数点上的求和与 \(f\) 自身极点处的留数联系起来。</p>
+            <p>这种方法将离散求和转化为连续积分，体现了分析学中"离散 ↔ 连续"对偶的深层主题。Poisson 求和公式、Abel-Plana 公式都是这一思想的变体——通过在复平面中选择合适的核函数，将数列的性质翻译为函数的解析性质。</p>
           </div>
         </div>
 
