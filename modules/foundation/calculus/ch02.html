@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.2 导数与微分 — 微积分 Calculus — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "calculus-ch02-q1",
+        "question": "按定义 \\(f'(x_0)=\\lim_{h\\to 0}\\dfrac{f(x_0+h)-f(x_0)}{h}\\)，求 \\(f(x)=x^2\\) 在 \\(x_0=3\\) 处的导数。",
+        "options": ["\\(3\\)", "\\(6\\)", "\\(9\\)", "\\(12\\)"],
+        "answer": 1,
+        "explanation": "\\(\\dfrac{(3+h)^2-9}{h}=\\dfrac{6h+h^2}{h}=6+h\\to 6\\)。故 \\(f'(3)=6\\)。这与求导公式 \\((x^2)'=2x\\) 在 \\(x=3\\) 的值一致。考察按定义直接计算的能力，是理解导数本质的最基础题型。"
+      },
+      {
+        "id": "calculus-ch02-q2",
+        "question": "曲线 \\(y=x^2\\) 在点 \\((1,1)\\) 处的切线方程是？",
+        "options": ["\\(y=2x-1\\)", "\\(y=2x+1\\)", "\\(y=x\\)", "\\(y=x+1\\)"],
+        "answer": 0,
+        "explanation": "\\(y'=2x\\)，在 \\(x=1\\) 处斜率 \\(k=2\\)。切线过 \\((1,1)\\)：\\(y-1=2(x-1)\\)，即 \\(y=2x-1\\)。这是「导数即切线斜率」几何意义的直接应用，切线方程一律使用点斜式。"
+      },
+      {
+        "id": "calculus-ch02-q3",
+        "question": "下列函数中，在 \\(x=0\\) 处不可导但连续的是？",
+        "options": ["\\(f(x)=x^2\\)", "\\(f(x)=|x|\\)", "\\(f(x)=\\sin x\\)", "\\(f(x)=e^x\\)"],
+        "answer": 1,
+        "explanation": "\\(|x|\\) 在 0 处连续：\\(\\lim_{x\\to 0}|x|=0=|0|\\)；但左导数 \\(\\lim_{h\\to 0^-}|h|/h=-1\\)，右导数 \\(\\lim_{h\\to 0^+}|h|/h=1\\)，二者不等故不可导。这说明「连续 ⇏ 可导」，是经典反例。"
+      },
+      {
+        "id": "calculus-ch02-q4",
+        "question": "若 \\(f\\) 在 \\(x_0\\) 可导，下列必然成立的是？",
+        "options": ["\\(f\\) 在 \\(x_0\\) 单调", "\\(f\\) 在 \\(x_0\\) 连续", "\\(f''(x_0)\\) 存在", "\\(f(x_0)=0\\)"],
+        "answer": 1,
+        "explanation": "可导 ⇒ 连续：由 \\(\\lim_{x\\to x_0}[f(x)-f(x_0)]=\\lim\\dfrac{f(x)-f(x_0)}{x-x_0}\\cdot(x-x_0)=f'(x_0)\\cdot 0=0\\)，故 \\(\\lim f(x)=f(x_0)\\)。反之不真（如 \\(|x|\\)）。其余选项均无必然性。"
+      },
+      {
+        "id": "calculus-ch02-q5",
+        "question": "函数 \\(f(x)=\\begin{cases}x^2,&x\\le 1\\\\ ax+b,&x>1\\end{cases}\\) 在 \\(x=1\\) 处可导，则 \\((a,b)\\) 为？",
+        "options": ["\\((1,0)\\)", "\\((2,-1)\\)", "\\((2,1)\\)", "\\((1,1)\\)"],
+        "answer": 1,
+        "explanation": "可导先要连续：\\(1=a+b\\)。导数相等：左导 \\(=2x|_{x=1}=2\\)，右导 \\(=a\\)，故 \\(a=2\\)，\\(b=-1\\)。「分段函数在分界点的可导性」需同时验证函数值与导数值的左右一致，这是最常考的细节。"
+      },
+      {
+        "id": "calculus-ch02-q6",
+        "question": "求 \\(\\dfrac{d}{dx}(x^3\\sin x)\\)。",
+        "options": [
+          "\\(3x^2\\cos x\\)",
+          "\\(3x^2\\sin x+x^3\\cos x\\)",
+          "\\(3x^2\\sin x-x^3\\cos x\\)",
+          "\\(x^3\\cos x\\)"
+        ],
+        "answer": 1,
+        "explanation": "由乘积法则 \\((uv)'=u'v+uv'\\)：\\((x^3)'\\sin x+x^3(\\sin x)'=3x^2\\sin x+x^3\\cos x\\)。乘积法则的常见错误是漏掉一项或写成 \\((u'v')\\)；务必牢记两项相加形式。"
+      },
+      {
+        "id": "calculus-ch02-q7",
+        "question": "求 \\(\\dfrac{d}{dx}\\sin(x^2)\\)。",
+        "options": [
+          "\\(\\cos(x^2)\\)",
+          "\\(2x\\cos(x^2)\\)",
+          "\\(2x\\sin(x^2)\\)",
+          "\\(\\cos(2x)\\)"
+        ],
+        "answer": 1,
+        "explanation": "链式法则：令 \\(u=x^2\\)，外层 \\(\\sin u\\) 对 \\(u\\) 导 \\(=\\cos u\\)，内层 \\(u'=2x\\)。故 \\(\\dfrac{d}{dx}\\sin(x^2)=\\cos(x^2)\\cdot 2x=2x\\cos(x^2)\\)。漏乘内层导数 \\(2x\\) 是最常见的错误。"
+      },
+      {
+        "id": "calculus-ch02-q8",
+        "question": "求 \\(\\dfrac{d}{dx}\\dfrac{x}{x^2+1}\\)。",
+        "options": [
+          "\\(\\dfrac{1}{x^2+1}\\)",
+          "\\(\\dfrac{1-x^2}{(x^2+1)^2}\\)",
+          "\\(\\dfrac{2x}{(x^2+1)^2}\\)",
+          "\\(\\dfrac{1+x^2}{(x^2+1)^2}\\)"
+        ],
+        "answer": 1,
+        "explanation": "商法则 \\((u/v)'=(u'v-uv')/v^2\\)：分子 \\(1\\cdot(x^2+1)-x\\cdot 2x=1-x^2\\)，分母 \\((x^2+1)^2\\)。常见错误是把分子写成 \\(u'v+uv'\\) 或漏负号。"
+      },
+      {
+        "id": "calculus-ch02-q9",
+        "question": "若 \\(y=\\arcsin x\\)，则 \\(\\dfrac{dy}{dx}=\\)？",
+        "options": [
+          "\\(\\dfrac{1}{\\sqrt{1-x^2}}\\)",
+          "\\(\\dfrac{1}{1+x^2}\\)",
+          "\\(\\dfrac{1}{\\sqrt{1+x^2}}\\)",
+          "\\(\\cos x\\)"
+        ],
+        "answer": 0,
+        "explanation": "由反函数求导：\\(x=\\sin y\\)，\\(\\dfrac{dx}{dy}=\\cos y=\\sqrt{1-\\sin^2 y}=\\sqrt{1-x^2}\\)（取主值 \\(y\\in[-\\pi/2,\\pi/2]\\) 使 \\(\\cos y\\ge 0\\)）。故 \\(\\dfrac{dy}{dx}=\\dfrac{1}{\\sqrt{1-x^2}}\\)。这是反函数求导公式 \\(\\dfrac{dy}{dx}=\\dfrac{1}{dx/dy}\\) 的典型应用。"
+      },
+      {
+        "id": "calculus-ch02-q10",
+        "question": "由参数方程 \\(\\begin{cases}x=t^2\\\\ y=t^3\\end{cases}\\)（\\(t\\ne 0\\)）确定的 \\(\\dfrac{dy}{dx}=\\)？",
+        "options": [
+          "\\(\\dfrac{3}{2}t\\)",
+          "\\(\\dfrac{2}{3}t\\)",
+          "\\(\\dfrac{3t^2}{2t}\\) 不化简也算对",
+          "\\(t\\)"
+        ],
+        "answer": 0,
+        "explanation": "参数方程求导 \\(\\dfrac{dy}{dx}=\\dfrac{dy/dt}{dx/dt}=\\dfrac{3t^2}{2t}=\\dfrac{3}{2}t\\)（\\(t\\ne 0\\)）。注意要求最简形式；选项 C 虽数值正确但未化简。参数方程求导的核心是「分子分母都对参数 t 求导」。"
+      },
+      {
+        "id": "calculus-ch02-q11",
+        "question": "\\(\\dfrac{d}{dx}\\ln|\\sin x|=\\)？",
+        "options": [
+          "\\(\\cot x\\)",
+          "\\(\\tan x\\)",
+          "\\(\\dfrac{1}{\\sin x}\\)",
+          "\\(\\dfrac{\\cos x}{|\\sin x|}\\)"
+        ],
+        "answer": 0,
+        "explanation": "对 \\(\\ln|u|\\) 求导得 \\(u'/u\\)（与符号无关）：\\(\\dfrac{(\\sin x)'}{\\sin x}=\\dfrac{\\cos x}{\\sin x}=\\cot x\\)。这是「绝对值内对数求导」公式 \\((\\ln|u|)'=u'/u\\) 的应用，用于不指定 u 符号的场景。"
+      },
+      {
+        "id": "calculus-ch02-q12",
+        "question": "由方程 \\(x^2+y^2=25\\) 确定的隐函数 \\(y=y(x)\\)，求 \\(\\dfrac{dy}{dx}\\)（\\(y\\ne 0\\)）。",
+        "options": [
+          "\\(-\\dfrac{x}{y}\\)",
+          "\\(\\dfrac{x}{y}\\)",
+          "\\(-\\dfrac{y}{x}\\)",
+          "\\(\\dfrac{y}{x}\\)"
+        ],
+        "answer": 0,
+        "explanation": "对方程两边关于 x 求导：\\(2x+2y\\dfrac{dy}{dx}=0\\)，解出 \\(\\dfrac{dy}{dx}=-x/y\\)。这是隐函数求导的基本步骤：把 y 视为 x 的函数应用链式法则，再解出 \\(dy/dx\\)。\\(y=0\\) 处切线竖直、不存在 \\(dy/dx\\)。"
+      },
+      {
+        "id": "calculus-ch02-q13",
+        "question": "求 \\((\\sin x)^{(4)}\\)（即 \\(\\sin x\\) 的四阶导数）。",
+        "options": [
+          "\\(\\sin x\\)",
+          "\\(-\\sin x\\)",
+          "\\(\\cos x\\)",
+          "\\(-\\cos x\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\sin x)'=\\cos x,\\ (\\sin x)''=-\\sin x,\\ (\\sin x)'''=-\\cos x,\\ (\\sin x)^{(4)}=\\sin x\\)。一般公式 \\((\\sin x)^{(n)}=\\sin(x+n\\pi/2)\\)。周期 4 的循环是高阶导数中最经典的现象。"
+      },
+      {
+        "id": "calculus-ch02-q14",
+        "question": "\\(y=x e^x\\)，求 \\(y^{(n)}\\)。",
+        "options": [
+          "\\((x+n)e^x\\)",
+          "\\(xe^x\\)",
+          "\\(ne^x\\)",
+          "\\(n!e^x\\)"
+        ],
+        "answer": 0,
+        "explanation": "Leibniz 公式 \\((uv)^{(n)}=\\sum_{k=0}^n C_n^k u^{(k)}v^{(n-k)}\\)。取 \\(u=x,v=e^x\\)：\\(u'=1,u''=\\dots=0\\)，\\(v^{(k)}=e^x\\)。故 \\((xe^x)^{(n)}=x e^x+n\\cdot 1\\cdot e^x=(x+n)e^x\\)。Leibniz 公式在 u 为多项式时尤其简洁，因 u 的高阶导从某处起为 0。"
+      },
+      {
+        "id": "calculus-ch02-q15",
+        "question": "求 \\(\\dfrac{d^n}{dx^n}\\dfrac{1}{1-x}\\)（\\(x<1\\)）。",
+        "options": [
+          "\\(\\dfrac{n!}{(1-x)^{n+1}}\\)",
+          "\\(\\dfrac{n!}{(1-x)^n}\\)",
+          "\\(\\dfrac{1}{(1-x)^{n+1}}\\)",
+          "\\(\\dfrac{(-1)^n n!}{(1-x)^{n+1}}\\)"
+        ],
+        "answer": 0,
+        "explanation": "记 \\(f(x)=(1-x)^{-1}\\)。\\(f'=(1-x)^{-2}\\)，\\(f''=2(1-x)^{-3}\\)，归纳 \\(f^{(n)}=n!(1-x)^{-(n+1)}\\)。「内层 \\((-1)\\) 与外层负幂指数 \\(-(k)\\) 反复相乘抵消」是本题不出现 \\((-1)^n\\) 的关键，是高阶导易错点。"
+      },
+      {
+        "id": "calculus-ch02-q16",
+        "question": "若 \\(f\\) 在 \\(x_0\\) 可导，下列对微分 \\(dy=f'(x_0)dx\\) 的理解正确的是？",
+        "options": [
+          "\\(dy\\) 等于函数增量 \\(\\Delta y\\)",
+          "\\(dy\\) 是 \\(\\Delta y\\) 的线性主部，二者差为 \\(o(\\Delta x)\\)",
+          "\\(dy=\\Delta y\\) 且 \\(dx=\\Delta x\\)",
+          "\\(dy\\) 是 \\(\\Delta y\\) 的平均"
+        ],
+        "answer": 1,
+        "explanation": "由可导定义可写 \\(\\Delta y=f'(x_0)\\Delta x+o(\\Delta x)\\)（\\(\\Delta x\\to 0\\)）。微分 \\(dy=f'(x_0)dx\\) 是 \\(\\Delta y\\) 的「线性主部」，与真实增量相差一个比 \\(\\Delta x\\) 高阶的小量。注意 \\(dx=\\Delta x\\) 是约定，但 \\(dy\\ne\\Delta y\\)。"
+      },
+      {
+        "id": "calculus-ch02-q17",
+        "question": "用微分近似计算 \\(\\sqrt{4.04}\\)（保留四位有效数字）。",
+        "options": [
+          "\\(2.0100\\)",
+          "\\(2.0050\\)",
+          "\\(2.0200\\)",
+          "\\(2.0040\\)"
+        ],
+        "answer": 0,
+        "explanation": "令 \\(f(x)=\\sqrt{x}\\)，\\(x_0=4,\\Delta x=0.04\\)。\\(f'(x)=\\dfrac{1}{2\\sqrt{x}}\\)，\\(f'(4)=\\dfrac{1}{4}\\)。\\(\\sqrt{4.04}\\approx f(4)+f'(4)\\Delta x=2+0.25\\times 0.04=2.01\\)。这是线性近似 \\(f(x_0+\\Delta x)\\approx f(x_0)+f'(x_0)\\Delta x\\) 的标准应用。"
+      },
+      {
+        "id": "calculus-ch02-q18",
+        "question": "测得圆半径 \\(r=10\\) cm，绝对误差 \\(\\Delta r=0.1\\) cm，问由公式 \\(S=\\pi r^2\\) 算面积时的绝对误差约为？",
+        "options": [
+          "\\(0.1\\pi\\)",
+          "\\(\\pi\\)",
+          "\\(2\\pi\\)",
+          "\\(0.01\\pi\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(dS=2\\pi r\\,dr=2\\pi\\times 10\\times 0.1=2\\pi\\) cm²。微分给出绝对误差的线性近似。注意「绝对误差」用微分 \\(dS\\) 估计，「相对误差」用 \\(dS/S=2\\,dr/r\\) 估计，本题为前者。"
+      },
+      {
+        "id": "calculus-ch02-q19",
+        "question": "「\\(f\\) 在 \\(x_0\\) 可微」与「\\(f\\) 在 \\(x_0\\) 可导」的关系是？",
+        "options": [
+          "可微 ⇒ 可导，反向不真",
+          "可导 ⇒ 可微，反向不真",
+          "在一元函数中二者等价",
+          "无关"
+        ],
+        "answer": 2,
+        "explanation": "对一元函数：可导 \\(\\Leftrightarrow\\) 可微，且 \\(dy=f'(x_0)dx\\)。一方面可导给出 \\(\\Delta y=f'\\Delta x+o(\\Delta x)\\) 故可微；另一方面若 \\(\\Delta y=A\\Delta x+o(\\Delta x)\\) 则 \\(\\dfrac{\\Delta y}{\\Delta x}\\to A\\)，可导且 \\(f'=A\\)。多元函数才有差别（不在本节范围内）。"
+      },
+      {
+        "id": "calculus-ch02-q20",
+        "question": "求 \\(\\dfrac{d}{dx}x^x\\)（\\(x>0\\)）。",
+        "options": [
+          "\\(x\\cdot x^{x-1}\\)",
+          "\\(x^x\\ln x\\)",
+          "\\(x^x(\\ln x+1)\\)",
+          "\\(x^x\\)"
+        ],
+        "answer": 2,
+        "explanation": "对数求导：令 \\(y=x^x\\)，取对数 \\(\\ln y=x\\ln x\\)，两边求导：\\(\\dfrac{y'}{y}=\\ln x+1\\)，故 \\(y'=x^x(\\ln x+1)\\)。常见错误是套幂函数 \\((x^a)'=ax^{a-1}\\) 或指数 \\((a^x)'=a^x\\ln a\\)，但 \\(x^x\\) 底数与指数都是变量，必须用对数法。"
+      },
+      {
+        "id": "calculus-ch02-q21",
+        "question": "曲线 \\(y=e^x\\) 在 \\(x=0\\) 处的切线与 \\(x\\) 轴交于哪一点？",
+        "options": [
+          "\\((-1,0)\\)",
+          "\\((1,0)\\)",
+          "\\((0,0)\\)",
+          "\\((-2,0)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(y'=e^x\\)，\\(y'(0)=1\\)，切点 \\((0,1)\\)。切线方程 \\(y-1=1\\cdot(x-0)\\)，即 \\(y=x+1\\)。令 \\(y=0\\)：\\(x=-1\\)，故交于 \\((-1,0)\\)。综合考察求斜率→写切线→求交点的整个流程。"
+      },
+      {
+        "id": "calculus-ch02-q22",
+        "question": "由方程 \\(e^{xy}+xy=2\\) 在点 \\((1,0)\\) 附近确定 \\(y=y(x)\\)，求 \\(y'(1)\\)。",
+        "options": [
+          "\\(0\\)",
+          "\\(-1\\)",
+          "\\(1\\)",
+          "\\(-\\dfrac{1}{2}\\)"
+        ],
+        "answer": 0,
+        "explanation": "两边对 x 求导：\\(e^{xy}\\cdot(y+xy')+(y+xy')=0\\)，即 \\((y+xy')(e^{xy}+1)=0\\)。代入 \\((x,y)=(1,0)\\)：\\(e^0+1=2\\ne 0\\)，故 \\(y+xy'=0\\)，即 \\(0+1\\cdot y'(1)=0\\)，\\(y'(1)=0\\)。隐函数求导后代入具体点能大幅简化运算。"
+      },
+      {
+        "id": "calculus-ch02-q23",
+        "question": "Leibniz 公式 \\((uv)^{(n)}=\\sum_{k=0}^{n}C_n^k u^{(k)}v^{(n-k)}\\) 与下列哪一公式形式上最相似？",
+        "options": [
+          "\\((u+v)^n=\\sum C_n^k u^k v^{n-k}\\)（二项展开）",
+          "\\((uv)'=u'v+uv'\\)",
+          "\\((u/v)'=(u'v-uv')/v^2\\)",
+          "\\(\\sum 1/k^2=\\pi^2/6\\)"
+        ],
+        "answer": 0,
+        "explanation": "Leibniz 公式与二项展开式在形式上完全平行：组合系数 \\(C_n^k\\)、指标和为 \\(n\\)。区别仅在于此处是「\\(k\\) 阶导」而非「\\(k\\) 次幂」，可以理解为「微分作为线性算子的二项展开」。"
+      },
+      {
+        "id": "calculus-ch02-q24",
+        "question": "用一阶线性近似估计 \\(\\sin 31°\\)（取 \\(\\sin 30°=0.5,\\cos 30°=\\sqrt{3}/2\\approx 0.866\\)，\\(1°=\\pi/180\\approx 0.01745\\)）。",
+        "options": [
+          "约 \\(0.515\\)",
+          "约 \\(0.500\\)",
+          "约 \\(0.530\\)",
+          "约 \\(0.520\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\sin(30°+1°)\\approx \\sin 30°+\\cos 30°\\cdot \\Delta x=0.5+0.866\\times 0.01745\\approx 0.5+0.01511\\approx 0.5151\\)，故约 \\(0.515\\)。注意角度必须先转为弧度再代入导数公式，否则系数错。"
+      },
+      {
+        "id": "calculus-ch02-q25",
+        "question": "若 \\(f\\) 在 \\(x_0\\) 二阶可导，则下列必然成立的是？",
+        "options": [
+          "\\(f\\) 在 \\(x_0\\) 邻域三阶可导",
+          "\\(f'\\) 在 \\(x_0\\) 连续",
+          "\\(f''(x_0)>0\\)",
+          "\\(f'(x_0)=0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f''(x_0)\\) 存在意味 \\(f'\\) 在 \\(x_0\\) 处可导，由「可导 ⇒ 连续」得 \\(f'\\) 在 \\(x_0\\) 连续。但 \\(f'\\) 在 \\(x_0\\) 邻域内是否可导（即 \\(f'''\\) 是否存在）无从判断；\\(f''(x_0)\\) 的符号、\\(f'(x_0)\\) 的值更与可导性无关。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="calculus"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../calculus.html" class="module-name">微积分 Calculus</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.2 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 导数的定义与几何意义</a></li>
+      <li><a href="#kp2">02 · 求导法则与链式法则</a></li>
+      <li><a href="#kp3">03 · 高阶导数与隐函数求导</a></li>
+      <li><a href="#kp4">04 · 微分与线性近似</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 2</p>
+      <h1>导数与微分</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>导数的定义与几何意义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>17 世纪牛顿研究天体运动需要刻画「瞬时速度」，莱布尼茨研究曲线则要求「切线斜率」。两个看似不同的几何与物理问题在数学上指向同一对象——函数在某点的「瞬时变化率」，即导数。</p>
+            <ul>
+              <li><strong>物理：瞬时速度</strong>。位置 \(s(t)\) 在 \(t_0\) 时刻的速度是 \(\lim_{\Delta t\to 0}\dfrac{s(t_0+\Delta t)-s(t_0)}{\Delta t}\)。</li>
+              <li><strong>几何：切线斜率</strong>。曲线 \(y=f(x)\) 在点 \((x_0,f(x_0))\) 的切线斜率是「割线斜率」当另一点趋于 \(x_0\) 的极限。</li>
+              <li><strong>统一抽象</strong>：所有「单位变化引起的响应量」——边际成本、电流强度、人口增长率——都是导数。</li>
+            </ul>
+            <p>导数把上一章的极限工具应用于「差商」，是微积分进入「定量计算」阶段的第一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>导数的定义</h4>
+            <p>设 \(f\) 在 \(x_0\) 的某邻域内有定义。若极限</p>
+            \[f'(x_0)=\lim_{h\to 0}\frac{f(x_0+h)-f(x_0)}{h}\]
+            <p>存在，则称 \(f\) 在 \(x_0\) 可导，\(f'(x_0)\) 称为 \(f\) 在 \(x_0\) 处的导数；亦可写作 \(\dfrac{df}{dx}\bigg|_{x_0}\) 或 \(\dot f(x_0)\)（牛顿记法，多用于时间变量）。等价的「换元」形式是 \(f'(x_0)=\lim_{x\to x_0}\dfrac{f(x)-f(x_0)}{x-x_0}\)。</p>
+
+            <h4>几何意义：切线斜率</h4>
+            <p>差商 \(\dfrac{f(x_0+h)-f(x_0)}{h}\) 是连接 \((x_0,f(x_0))\) 与 \((x_0+h,f(x_0+h))\) 的割线斜率。当 \(h\to 0\)，割线趋于切线，故 \(f'(x_0)\) 即切线斜率。切线方程：</p>
+            \[y-f(x_0)=f'(x_0)(x-x_0).\]
+
+            <h4>左、右导数</h4>
+            <p>左导数 \(f'_-(x_0)=\lim_{h\to 0^-}\dfrac{f(x_0+h)-f(x_0)}{h}\)，右导数同理用 \(h\to 0^+\)。\(f\) 在 \(x_0\) 可导 ⇔ 左、右导数均存在且相等。</p>
+
+            <h4>可导与连续的关系</h4>
+            <p><strong>可导 ⇒ 连续</strong>：由 \(\lim_{x\to x_0}[f(x)-f(x_0)]=\lim\dfrac{f(x)-f(x_0)}{x-x_0}\cdot (x-x_0)=f'(x_0)\cdot 0=0\)，故 \(\lim f(x)=f(x_0)\)。</p>
+            <p><strong>反之不真</strong>：\(f(x)=|x|\) 在 0 处连续，但左导 \(=-1\)，右导 \(=1\)，不可导。更极端的反例是 Weierstrass 函数（处处连续却处处不可导，本课程仅提及）。</p>
+
+            <h4>基本初等函数的导数</h4>
+            <p>由定义可推出：\((C)'=0\)，\((x^a)'=ax^{a-1}\)，\((\sin x)'=\cos x\)，\((\cos x)'=-\sin x\)，\((e^x)'=e^x\)，\((\ln x)'=1/x\)（\(x>0\)）。这些是后续运算的基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：按定义求 \(f(x)=\sqrt{x}\) 在 \(x_0=4\) 处的导数。</p>
+            <p><em>解答</em>：\(\dfrac{\sqrt{4+h}-2}{h}=\dfrac{(\sqrt{4+h}-2)(\sqrt{4+h}+2)}{h(\sqrt{4+h}+2)}=\dfrac{h}{h(\sqrt{4+h}+2)}=\dfrac{1}{\sqrt{4+h}+2}\to \dfrac{1}{4}\)。故 \(f'(4)=1/4\)。「分子有理化」是处理含根号差商的标准技巧。</p>
+            <p><strong>例题 2</strong>：写出曲线 \(y=\ln x\) 在 \(x=1\) 处的切线方程。</p>
+            <p><em>解答</em>：\(y'=1/x\)，\(y'(1)=1\)，切点 \((1,0)\)。切线 \(y-0=1\cdot(x-1)\)，即 \(y=x-1\)。</p>
+            <p><strong>例题 3</strong>：判别 \(f(x)=|x|\) 在 \(x=0\) 处的可导性。</p>
+            <p><em>解答</em>：\(f'_-(0)=\lim_{h\to 0^-}|h|/h=-1\)，\(f'_+(0)=\lim_{h\to 0^+}|h|/h=1\)。左右不等，故不可导。但 \(f\) 在 0 处连续。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>误以为「连续 ⇒ 可导」</strong>：反方向不成立，\(|x|\) 即反例。</li>
+              <li><strong>分段函数分界点漏验左右导数</strong>：仅算其中一侧不足以判定可导。</li>
+              <li><strong>切线方程写成法线方程</strong>：切线斜率是 \(f'(x_0)\)，法线斜率是 \(-1/f'(x_0)\)（\(f'\ne 0\) 时）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列函数中在 \(x=0\) 处可导的是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '|x| 与 x^{1/3} 在 0 处不可导：前者左右导数不等（±1），后者切线竖直（差商→∞）。x sin(1/x) 在 0 处连续但差商 sin(1/h) 极限不存在，亦不可导。仅 x^2 处处可导。')">A. \(f(x)=|x|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '|x| 与 x^{1/3} 在 0 处不可导：前者左右导数不等（±1），后者切线竖直（差商→∞）。x sin(1/x) 在 0 处连续但差商 sin(1/h) 极限不存在，亦不可导。仅 x^2 处处可导。')">B. \(f(x)=x^2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '|x| 与 x^{1/3} 在 0 处不可导：前者左右导数不等（±1），后者切线竖直（差商→∞）。x sin(1/x) 在 0 处连续但差商 sin(1/h) 极限不存在，亦不可导。仅 x^2 处处可导。')">C. \(f(x)=x^{1/3}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>求导法则与链式法则</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>仅依靠定义计算导数过于繁琐。通过若干「运算法则」（线性、乘积、商、链式、反函数），任何由初等函数复合而成的函数都能机械地求导，这使导数从「极限难题」变成「代数过程」。</p>
+            <ul>
+              <li><strong>计算自动化</strong>：求导法则是符号计算系统（如 Mathematica、SymPy）的核心算法。</li>
+              <li><strong>链式法则是分析骨架</strong>：从多元微积分到流形、从神经网络反向传播到物理变换都用到链式法则。</li>
+              <li><strong>反函数与隐函数</strong>：扩展了「显式公式」之外的求导能力。</li>
+            </ul>
+            <p>本节是后续所有章节计算的工具箱。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>线性、乘积、商法则</h4>
+            <p>设 \(f,g\) 在 \(x\) 处可导，\(C\) 为常数。则：</p>
+            \[(Cf)'=Cf',\quad (f\pm g)'=f'\pm g',\]
+            \[(fg)'=f'g+fg',\quad \left(\frac{f}{g}\right)'=\frac{f'g-fg'}{g^2}\ (g\ne 0).\]
+            <p>乘积法则的证明：\(\dfrac{f(x+h)g(x+h)-f(x)g(x)}{h}=\dfrac{f(x+h)-f(x)}{h}g(x+h)+f(x)\dfrac{g(x+h)-g(x)}{h}\to f'(x)g(x)+f(x)g'(x)\)（用 \(g\) 在 \(x\) 处连续）。</p>
+
+            <h4>链式法则</h4>
+            <p>设 \(g\) 在 \(x\) 可导，\(f\) 在 \(g(x)\) 可导。则复合函数 \(f\circ g\) 在 \(x\) 可导，且</p>
+            \[(f\circ g)'(x)=f'(g(x))\cdot g'(x).\]
+            <p>记法：若 \(y=f(u),u=g(x)\)，则 \(\dfrac{dy}{dx}=\dfrac{dy}{du}\cdot\dfrac{du}{dx}\)。「分母 du 与分子 du 看似相消」是直观助记，但本质上是极限相乘。</p>
+
+            <h4>反函数求导</h4>
+            <p>若 \(y=f(x)\) 在 \(x_0\) 可导且 \(f'(x_0)\ne 0\)，且存在反函数 \(x=f^{-1}(y)\)，则反函数在 \(y_0=f(x_0)\) 可导，</p>
+            \[(f^{-1})'(y_0)=\frac{1}{f'(x_0)}.\]
+            <p>由此可推出 \((\arcsin x)'=1/\sqrt{1-x^2}\)，\((\arctan x)'=1/(1+x^2)\)，\((\ln x)'=1/x\) 等。</p>
+
+            <h4>参数方程求导</h4>
+            <p>若 \(\begin{cases}x=\varphi(t)\\ y=\psi(t)\end{cases}\)，\(\varphi'(t)\ne 0\)，则 \(\dfrac{dy}{dx}=\dfrac{dy/dt}{dx/dt}=\dfrac{\psi'(t)}{\varphi'(t)}\)。这是链式法则的另一种应用形式。</p>
+
+            <h4>对数求导法</h4>
+            <p>对形如 \(y=u(x)^{v(x)}\) 或多个因子相乘的函数，先取对数 \(\ln y\)，再对 \(x\) 求导，可避免直接套公式的繁琐。例如 \(y=x^x\)：\(\ln y=x\ln x\Rightarrow y'/y=\ln x+1\Rightarrow y'=x^x(\ln x+1)\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(\dfrac{d}{dx}(x^2+1)^{10}\)。</p>
+            <p><em>解答</em>：链式：外层 \(u^{10}\) 对 \(u\) 导 \(=10u^9\)，内层 \((x^2+1)'=2x\)。故结果 \(=10(x^2+1)^9\cdot 2x=20x(x^2+1)^9\)。</p>
+            <p><strong>例题 2</strong>：求 \(\dfrac{d}{dx}\dfrac{e^x}{x^2+1}\)。</p>
+            <p><em>解答</em>：商法则：\(\dfrac{e^x(x^2+1)-e^x\cdot 2x}{(x^2+1)^2}=\dfrac{e^x(x^2-2x+1)}{(x^2+1)^2}=\dfrac{e^x(x-1)^2}{(x^2+1)^2}\)。</p>
+            <p><strong>例题 3</strong>：求 \(\dfrac{dy}{dx}\)，其中 \(y=\sqrt{x}\cdot e^x\cdot \sin x\)（用对数求导）。</p>
+            <p><em>解答</em>：\(\ln y=\dfrac{1}{2}\ln x+x+\ln\sin x\)。求导：\(\dfrac{y'}{y}=\dfrac{1}{2x}+1+\cot x\)。故 \(y'=\sqrt{x}e^x\sin x\left(\dfrac{1}{2x}+1+\cot x\right)\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>链式漏内层导数</strong>：写 \(\dfrac{d}{dx}\sin(x^2)=\cos(x^2)\) 漏 \(2x\)。</li>
+              <li><strong>商法则分子顺序错</strong>：必须 \(u'v-uv'\)（不是 \(uv'-u'v\)），分母为 \(v^2\) 而非 \(v\)。</li>
+              <li><strong>把 \(x^x\) 当幂函数或指数函数</strong>：底数与指数都是变量时只能用对数法。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">求 \(\dfrac{d}{dx}\cos(3x+1)\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '链式：外层 cos u 导 = -sin u，内层 (3x+1)\\'=3。结果 = -3 sin(3x+1)。漏掉内层因子 3 是常见错误。')">A. \(-\sin(3x+1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '链式：外层 cos u 导 = -sin u，内层 (3x+1)\\'=3。结果 = -3 sin(3x+1)。漏掉内层因子 3 是常见错误。')">B. \(-3\sin(3x+1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '链式：外层 cos u 导 = -sin u，内层 (3x+1)\\'=3。结果 = -3 sin(3x+1)。漏掉内层因子 3 是常见错误。')">C. \(3\sin(3x+1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>高阶导数与隐函数求导</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>导数本身又是一个函数，可以再求导，得到二阶、三阶……的高阶导数。它们承载了比一阶导更精细的信息：物理上 \(s''(t)\) 是加速度；几何上 \(y''\) 决定凹凸；分析中 Taylor 公式以高阶导刻画函数的局部展开。</p>
+            <ul>
+              <li><strong>物理：加速度与高阶变化</strong>。位置→速度→加速度→加加速度（jerk），刻画运动的层级结构。</li>
+              <li><strong>几何：凹凸与拐点</strong>。\(y''>0\) 表示曲线凹向上，\(y''=0\) 处常为拐点。</li>
+              <li><strong>分析：Taylor 展开</strong>。所有阶导数是 Taylor 公式的「系数生成器」（详见下一章）。</li>
+            </ul>
+            <p>隐函数则把「不能解出 \(y\) 显式表达」的方程也纳入求导框架，是处理曲线方程、约束优化等的关键工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>高阶导数定义</h4>
+            <p>若 \(f\) 在某点 \(x_0\) 的邻域内一阶可导，则 \(f'\) 也是一个函数。若 \(f'\) 在 \(x_0\) 可导，定义 \(f''(x_0)=(f')'(x_0)\) 为二阶导数；递推定义 \(f^{(n)}(x)=(f^{(n-1)})'(x)\) 为 \(n\) 阶导数。</p>
+
+            <h4>常见函数的 \(n\) 阶导数</h4>
+            <ul>
+              <li>\((x^n)^{(k)}=\dfrac{n!}{(n-k)!}x^{n-k}\)（\(k\le n\)），特别 \((x^n)^{(n)}=n!\)。</li>
+              <li>\((e^x)^{(n)}=e^x\)；\((a^x)^{(n)}=a^x(\ln a)^n\)。</li>
+              <li>\((\sin x)^{(n)}=\sin\!\left(x+\dfrac{n\pi}{2}\right)\)；\((\cos x)^{(n)}=\cos\!\left(x+\dfrac{n\pi}{2}\right)\)。</li>
+              <li>\((\ln x)^{(n)}=(-1)^{n-1}\dfrac{(n-1)!}{x^n}\)（\(x>0\)）。</li>
+            </ul>
+
+            <h4>Leibniz 公式</h4>
+            <p>设 \(u,v\) 都 \(n\) 次可导，则乘积的 \(n\) 阶导：</p>
+            \[(uv)^{(n)}=\sum_{k=0}^{n}\binom{n}{k}u^{(k)}v^{(n-k)}.\]
+            <p>形式上与二项式定理一致。当 \(u\) 为多项式（高阶导从某项起为 0）时尤其有用。例：\((x^2 e^x)^{(n)}=x^2 e^x+n\cdot 2x\cdot e^x+\binom{n}{2}\cdot 2\cdot e^x=e^x[x^2+2nx+n(n-1)]\)。</p>
+
+            <h4>隐函数求导</h4>
+            <p>若方程 \(F(x,y)=0\) 在某点附近确定 \(y=y(x)\)，对方程两边关于 \(x\) 求导（把 \(y\) 视作 \(x\) 的函数，应用链式法则），即可解出 \(\dfrac{dy}{dx}\)。</p>
+            <p>例：\(x^2+y^2=1\)。求导：\(2x+2y\cdot y'=0\Rightarrow y'=-x/y\)（\(y\ne 0\)）。再求二阶：\(y''=\dfrac{-y-(-x)y'}{y^2}=\dfrac{-y+x(-x/y)}{y^2}=\dfrac{-(y^2+x^2)}{y^3}=\dfrac{-1}{y^3}\)。</p>
+
+            <h4>对数求导后再代回</h4>
+            <p>对 \(y=u^v\) 形式或乘积复杂的函数，可先用对数求导得 \(y'/y\)，再乘回 \(y\) 得 \(y'\)。求二阶时类似处理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(y=x^2 e^x\) 的 \(n\) 阶导数。</p>
+            <p><em>解答</em>：用 Leibniz：\(u=x^2,v=e^x\)。\(u^{(0)}=x^2,u'=2x,u''=2,u^{(k)}=0\ (k\ge 3)\)。\(v^{(k)}=e^x\)。故 \(y^{(n)}=x^2 e^x+\binom{n}{1}\cdot 2x\cdot e^x+\binom{n}{2}\cdot 2\cdot e^x=e^x[x^2+2nx+n(n-1)]\)。</p>
+            <p><strong>例题 2</strong>：由 \(\sin(xy)=x+y\) 求 \(\dfrac{dy}{dx}\)。</p>
+            <p><em>解答</em>：两边求导：\(\cos(xy)\cdot(y+xy')=1+y'\)。整理：\(y'[x\cos(xy)-1]=1-y\cos(xy)\)，故 \(y'=\dfrac{1-y\cos(xy)}{x\cos(xy)-1}\)（分母非零时）。</p>
+            <p><strong>例题 3</strong>：由参数方程 \(x=\cos t,y=\sin t\) 求 \(\dfrac{d^2 y}{dx^2}\)。</p>
+            <p><em>解答</em>：\(\dfrac{dy}{dx}=\dfrac{\cos t}{-\sin t}=-\cot t\)。\(\dfrac{d^2 y}{dx^2}=\dfrac{d}{dx}(-\cot t)=\dfrac{d(-\cot t)/dt}{dx/dt}=\dfrac{\csc^2 t}{-\sin t}=-\dfrac{1}{\sin^3 t}\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>对参数方程求二阶时直接对 \(x\) 求导</strong>：必须再用「除以 \(dx/dt\)」一次。</li>
+              <li><strong>隐函数求导后忘记 \(y'\) 仍是 \(x,y\) 的表达式</strong>：求二阶时还需再代回 \(y'=-x/y\) 等。</li>
+              <li><strong>Leibniz 公式系数与导数阶搞反</strong>：第 \(k\) 项是 \(\binom{n}{k}u^{(k)}v^{(n-k)}\)，下标和恒为 \(n\)。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">由 \(x^2+y^2=4\) 确定的隐函数 \(y(x)\)，在点 \((\sqrt{2},\sqrt{2})\) 处 \(\dfrac{dy}{dx}\) 的值是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '隐函数求导：2x+2y·y\\'=0，得 y\\'=-x/y。代入 (√2,√2)：y\\'=-1。圆在该点切线斜率正是 -1（与法线方向 (1,1) 垂直）。')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '隐函数求导：2x+2y·y\\'=0，得 y\\'=-x/y。代入 (√2,√2)：y\\'=-1。圆在该点切线斜率正是 -1（与法线方向 (1,1) 垂直）。')">B. \(-1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '隐函数求导：2x+2y·y\\'=0，得 y\\'=-x/y。代入 (√2,√2)：y\\'=-1。圆在该点切线斜率正是 -1（与法线方向 (1,1) 垂直）。')">C. \(0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>微分与线性近似</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>导数 \(f'(x_0)\) 是一个数，描述函数在 \(x_0\) 的「瞬时变化率」；微分 \(dy=f'(x_0)dx\) 则是一个「随自变量增量线性变化」的量，是函数增量的最佳线性近似。微分的引入使我们能：</p>
+            <ul>
+              <li><strong>近似计算</strong>：用 \(f(x_0+\Delta x)\approx f(x_0)+f'(x_0)\Delta x\) 估算未知函数值（如 \(\sqrt{4.04}\)、\(\sin 31°\)）。</li>
+              <li><strong>误差估计</strong>：测量误差 \(\Delta x\) 引起的函数误差近似为 \(|f'(x_0)|\Delta x\)。</li>
+              <li><strong>积分的反向准备</strong>：定积分通过 Riemann 和「\(\sum f(x_i)\Delta x_i\)」定义，与微分形式 \(f(x)dx\) 概念上呼应。</li>
+            </ul>
+            <p>「线性近似」是分析中最朴素也最有力的思想之一，多元微积分中的全微分与流形上的切向量都是它的推广（本节不展开多元情形）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>微分的定义</h4>
+            <p>设 \(f\) 在 \(x_0\) 的邻域有定义。若存在常数 \(A\) 使得</p>
+            \[\Delta y=f(x_0+\Delta x)-f(x_0)=A\Delta x+o(\Delta x)\quad (\Delta x\to 0),\]
+            <p>则称 \(f\) 在 \(x_0\) 可微，并称 \(A\Delta x\) 为微分，记作 \(dy\)。\(o(\Delta x)\) 表示「比 \(\Delta x\) 高阶的无穷小」。</p>
+
+            <h4>可微 ⟺ 可导（一元情形）</h4>
+            <p><strong>可导 ⇒ 可微</strong>：由可导定义，\(\dfrac{\Delta y}{\Delta x}\to f'(x_0)\)，故 \(\Delta y=f'(x_0)\Delta x+o(\Delta x)\)，可微，\(A=f'(x_0)\)。</p>
+            <p><strong>可微 ⇒ 可导</strong>：由 \(\Delta y=A\Delta x+o(\Delta x)\)，得 \(\dfrac{\Delta y}{\Delta x}=A+o(1)\to A\)，故 \(f'(x_0)=A\)。</p>
+            <p>结论：一元函数的「可导」与「可微」等价，\(dy=f'(x_0)dx\)（约定 \(dx=\Delta x\)）。</p>
+
+            <h4>线性近似公式</h4>
+            <p>由可微定义直接得：</p>
+            \[f(x_0+\Delta x)\approx f(x_0)+f'(x_0)\Delta x\quad (\Delta x\ \text{较小}).\]
+            <p>这是「用切线代替曲线」的代数形式。误差 \(o(\Delta x)\) 当 \(\Delta x\to 0\) 时比 \(\Delta x\) 小一个数量级。</p>
+
+            <h4>误差估计</h4>
+            <p>若 \(y=f(x)\)，\(x\) 测量绝对误差为 \(\Delta x\)：</p>
+            <ul>
+              <li><strong>绝对误差近似</strong>：\(|\Delta y|\approx |f'(x_0)|\cdot |\Delta x|\)。</li>
+              <li><strong>相对误差近似</strong>：\(\left|\dfrac{\Delta y}{y}\right|\approx \left|\dfrac{f'(x_0)}{f(x_0)}\right|\cdot |\Delta x|\)。</li>
+            </ul>
+            <p>例如 \(S=\pi r^2\)：\(\dfrac{dS}{S}=\dfrac{2\pi r\,dr}{\pi r^2}=2\dfrac{dr}{r}\)，相对误差被「放大 2 倍」。</p>
+
+            <h4>微分的运算</h4>
+            <p>由导数的运算法则可立得：\(d(u\pm v)=du\pm dv\)，\(d(uv)=v\,du+u\,dv\)，\(d(u/v)=(v\,du-u\,dv)/v^2\)，\(d(f(u))=f'(u)du\)。这与导数法则一一对应，但写成微分形式后「形式不变」（链式法则在 \(u\) 自变或函数都成立）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>近似计算</strong>：在没有计算器的时代，工程师用 \(\sqrt{x_0+\Delta x}\approx\sqrt{x_0}+\dfrac{\Delta x}{2\sqrt{x_0}}\) 之类公式做估算。即使今天，CPU 的某些函数库（如低端嵌入式）也用线性/多项式近似实现 \(\sin,\exp\)。</p>
+            <p><strong>误差传播</strong>：物理实验中，测量量 \(x\) 的不确定度通过函数 \(f(x)\) 传播为 \(|f'(x)|\sigma_x\)（线性近似），更高阶（多元）情形是「误差合成公式」。</p>
+            <p><strong>Newton 法</strong>：求方程 \(f(x)=0\) 的迭代格式 \(x_{n+1}=x_n-\dfrac{f(x_n)}{f'(x_n)}\)，本质上每一步都用线性近似 \(f(x)\approx f(x_n)+f'(x_n)(x-x_n)\) 代替 \(f\)，然后求新近似根。该方法收敛速度二次，是数值求根的主力工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用线性近似估计 \(\ln 1.02\)。</p>
+            <p><em>解答</em>：取 \(f(x)=\ln x,x_0=1,\Delta x=0.02\)。\(f'(x)=1/x,f'(1)=1\)。\(\ln 1.02\approx \ln 1+1\cdot 0.02=0.02\)。真实值约 \(0.0198\)，误差 \(\approx 2\times 10^{-4}\)。</p>
+            <p><strong>例题 2</strong>：测得正方体边长 \(a=10\) cm，绝对误差 \(0.05\) cm。估计体积 \(V=a^3\) 的绝对误差。</p>
+            <p><em>解答</em>：\(dV=3a^2\,da=3\times 100\times 0.05=15\) cm³。相对误差 \(dV/V=3\,da/a=3\times 0.005=1.5\%\)。可见三次方关系把相对误差放大 3 倍。</p>
+            <p><strong>例题 3</strong>：求函数 \(y=\sin x\) 在 \(x=0\) 处的微分 \(dy\)。</p>
+            <p><em>解答</em>：\(y'=\cos x,y'(0)=1\)。故 \(dy=\cos 0\cdot dx=dx\)。这与 \(\sin x\approx x\)（\(x\to 0\)）的常用近似一致。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>角度未转弧度</strong>：用 \(\sin(x_0+\Delta x)\approx \sin x_0+\cos x_0\cdot \Delta x\) 时 \(\Delta x\) 必须以弧度为单位。</li>
+              <li><strong>把 \(dy\) 当 \(\Delta y\)</strong>：二者只是「线性主部 + 高阶余项」的关系，不是相等。</li>
+              <li><strong>忘记 \(\Delta x\) 太大时近似无效</strong>：线性近似只在 \(\Delta x\) 小的范围内合理；大 \(\Delta x\) 需要 Taylor 公式（下一章）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">用线性近似估计 \(\sqrt[3]{8.06}\)（取 \(\sqrt[3]{8}=2\)）。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, 'f(x)=x^{1/3}，f\\'(x)=1/(3x^{2/3})，f\\'(8)=1/12。f(8.06)≈2+(1/12)·0.06=2+0.005=2.005。')">A. \(2.020\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, 'f(x)=x^{1/3}，f\\'(x)=1/(3x^{2/3})，f\\'(8)=1/12。f(8.06)≈2+(1/12)·0.06=2+0.005=2.005。')">B. \(2.060\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, 'f(x)=x^{1/3}，f\\'(x)=1/(3x^{2/3})，f\\'(8)=1/12。f(8.06)≈2+(1/12)·0.06=2+0.005=2.005。')">C. \(2.005\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch01.html" class="nav-prev">← Ch.1 极限与连续性</a>
+      <a href="../calculus.html" class="nav-overview">📋 概览</a>
+      <a href="ch03.html" class="nav-next">Ch.3 微分中值定理与应用 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "calculus-ch02";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>

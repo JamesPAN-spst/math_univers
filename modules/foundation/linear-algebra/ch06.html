@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 内积空间与正交性 — 线性代数 Algèbre linéaire — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-algebra-ch06-q1",
+        "question": "设 \\(x=(1,2,3),\\ y=(4,-1,2)\\)。计算 \\(\\mathbb{R}^3\\) 中标准内积 \\(\\langle x,y\\rangle\\)。",
+        "options": ["\\(8\\)", "\\(6\\)", "\\(12\\)", "\\(0\\)"],
+        "answer": 0,
+        "explanation": "标准内积按分量乘加：\\(\\langle x,y\\rangle=1\\cdot4+2\\cdot(-1)+3\\cdot2=4-2+6=8\\)。常见错误是漏掉负号或者把内积写成叉积。注意内积返回标量，叉积才返回向量。"
+      },
+      {
+        "id": "linear-algebra-ch06-q2",
+        "question": "向量 \\(v=(2,-2,1)\\) 的欧氏范数 \\(\\|v\\|\\) 等于？",
+        "options": ["\\(3\\)", "\\(\\sqrt{5}\\)", "\\(5\\)", "\\(\\sqrt{7}\\)"],
+        "answer": 0,
+        "explanation": "\\(\\|v\\|=\\sqrt{\\langle v,v\\rangle}=\\sqrt{4+4+1}=\\sqrt{9}=3\\)。范数由内积诱导，即 \\(\\|v\\|=\\sqrt{\\sum v_i^2}\\)。常见错误是忘开方而直接得到 9。"
+      },
+      {
+        "id": "linear-algebra-ch06-q3",
+        "question": "Cauchy-Schwarz 不等式 \\(|\\langle x,y\\rangle|\\le\\|x\\|\\cdot\\|y\\|\\) 中等号成立的充要条件是？",
+        "options": [
+          "\\(x=y\\)",
+          "\\(x,y\\) 线性相关（即一个是另一个的标量倍）",
+          "\\(x,y\\) 正交",
+          "\\(x,y\\) 单位向量"
+        ],
+        "answer": 1,
+        "explanation": "Cauchy-Schwarz 等号 ⟺ \\(x,y\\) 线性相关（含零向量情形）。证明思路：考虑 \\(f(t)=\\|x-ty\\|^2\\ge 0\\) 是关于 \\(t\\) 的二次函数，其判别式 \\(\\le 0\\) 给出不等式，等号即判别式为 0，对应 \\(x-ty=0\\) 有解。"
+      },
+      {
+        "id": "linear-algebra-ch06-q4",
+        "question": "设 \\(\\|x\\|=3,\\ \\|y\\|=4,\\ \\langle x,y\\rangle=6\\)。求 \\(x,y\\) 之间的夹角 \\(\\theta\\)。",
+        "options": ["\\(\\theta=\\pi/6\\)", "\\(\\theta=\\pi/3\\)", "\\(\\theta=\\pi/4\\)", "\\(\\theta=\\pi/2\\)"],
+        "answer": 1,
+        "explanation": "\\(\\cos\\theta=\\dfrac{\\langle x,y\\rangle}{\\|x\\|\\,\\|y\\|}=\\dfrac{6}{3\\cdot 4}=\\dfrac{1}{2}\\)，故 \\(\\theta=\\pi/3\\) (\\(60°\\))。常见错误是忘记除以模长之积，直接把内积看作余弦。"
+      },
+      {
+        "id": "linear-algebra-ch06-q5",
+        "question": "下列向量组中哪一组在 \\(\\mathbb{R}^3\\) 中是正交集？",
+        "options": [
+          "\\(\\{(1,1,0),(1,0,1)\\}\\)",
+          "\\(\\{(1,1,0),(1,-1,0),(0,0,1)\\}\\)",
+          "\\(\\{(1,2,3),(2,1,3)\\}\\)",
+          "\\(\\{(1,0,0),(1,1,0)\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "B 中两两内积均为 0：\\(\\langle(1,1,0),(1,-1,0)\\rangle=1-1=0\\)、\\(\\langle(1,1,0),(0,0,1)\\rangle=0\\)、\\(\\langle(1,-1,0),(0,0,1)\\rangle=0\\)。其余各组至少存在一对内积非零。正交集自动线性无关，是构造标准正交基的起点。"
+      },
+      {
+        "id": "linear-algebra-ch06-q6",
+        "question": "向量 \\(v=(3,4)\\) 的单位化（归一化）结果是？",
+        "options": [
+          "\\((3/5,4/5)\\)",
+          "\\((3,4)/7\\)",
+          "\\((3/\\sqrt{7},4/\\sqrt{7})\\)",
+          "\\((1,1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|v\\|=\\sqrt{9+16}=5\\)，归一化即 \\(v/\\|v\\|=(3/5,4/5)\\)，验证 \\((3/5)^2+(4/5)^2=1\\) ✓。常见错误是用 \\(3+4=7\\) 当模长（这是 \\(\\ell_1\\) 范数，不是欧氏范数）。"
+      },
+      {
+        "id": "linear-algebra-ch06-q7",
+        "question": "三角不等式 \\(\\|x+y\\|\\le\\|x\\|+\\|y\\|\\) 的证明可由 Cauchy-Schwarz 推出。展开 \\(\\|x+y\\|^2\\) 后关键的一步是？",
+        "options": [
+          "\\(\\langle x,y\\rangle\\le\\|x\\|\\cdot\\|y\\|\\)（CS 不等式）",
+          "\\(\\langle x,y\\rangle=0\\)",
+          "\\(\\|x\\|=\\|y\\|\\)",
+          "\\(x+y=0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\|x+y\\|^2=\\|x\\|^2+2\\langle x,y\\rangle+\\|y\\|^2\\le\\|x\\|^2+2\\|x\\|\\|y\\|+\\|y\\|^2=(\\|x\\|+\\|y\\|)^2\\)。关键放缩 \\(\\langle x,y\\rangle\\le|\\langle x,y\\rangle|\\le\\|x\\|\\|y\\|\\) 即 CS 不等式。开方即得三角不等式。"
+      },
+      {
+        "id": "linear-algebra-ch06-q8",
+        "question": "对 \\(\\mathbb{R}^2\\) 中的 \\(v_1=(1,1),v_2=(1,0)\\) 施 Gram-Schmidt 正交化，得到的 \\(u_2\\)（未归一化）是？",
+        "options": [
+          "\\((1,0)\\)",
+          "\\((1/2,-1/2)\\)",
+          "\\((0,-1)\\)",
+          "\\((1,-1)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(u_1=v_1=(1,1)\\)。\\(u_2=v_2-\\dfrac{\\langle v_2,u_1\\rangle}{\\langle u_1,u_1\\rangle}u_1=(1,0)-\\dfrac{1}{2}(1,1)=(1/2,-1/2)\\)。验证正交：\\(\\langle u_1,u_2\\rangle=1/2-1/2=0\\) ✓。归一化后即得标准正交基。"
+      },
+      {
+        "id": "linear-algebra-ch06-q9",
+        "question": "Gram-Schmidt 过程的核心公式 \\(u_k=v_k-\\sum_{j<k}\\dfrac{\\langle v_k,u_j\\rangle}{\\langle u_j,u_j\\rangle}u_j\\) 中减去的项几何意义是？",
+        "options": [
+          "\\(v_k\\) 的单位化",
+          "\\(v_k\\) 在已构造的正交向量张成空间上的正交投影",
+          "\\(v_k\\) 与 \\(u_j\\) 的叉积",
+          "\\(v_k\\) 的负向量"
+        ],
+        "answer": 1,
+        "explanation": "减去的项正是 \\(v_k\\) 在 \\(\\mathrm{span}(u_1,\\dots,u_{k-1})\\) 上的正交投影。剩下的 \\(u_k\\) 即垂直于该子空间的部分。这个几何观点是理解 Gram-Schmidt 的关键，也直接对应 QR 分解中 R 的上三角结构。"
+      },
+      {
+        "id": "linear-algebra-ch06-q10",
+        "question": "设 \\(\\{e_1,e_2,e_3\\}\\) 是 \\(\\mathbb{R}^3\\) 的标准正交基。任意 \\(v\\in\\mathbb{R}^3\\) 在该基下的坐标 \\(c_i\\) 等于？",
+        "options": [
+          "\\(c_i=\\|v\\|\\cdot e_i\\)",
+          "\\(c_i=\\langle v,e_i\\rangle\\)",
+          "\\(c_i=v_i/\\|e_i\\|\\)",
+          "\\(c_i=v\\times e_i\\)"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(v=\\sum c_j e_j\\)，则 \\(\\langle v,e_i\\rangle=\\sum c_j\\langle e_j,e_i\\rangle=c_i\\)（因 \\(\\langle e_j,e_i\\rangle=\\delta_{ij}\\)）。这是标准正交基的核心便利：坐标无须解线性方程组，直接由内积给出，称为 Fourier 系数。"
+      },
+      {
+        "id": "linear-algebra-ch06-q11",
+        "question": "正交集 \\(\\{v_1,\\dots,v_k\\}\\)（非零向量）必然？",
+        "options": [
+          "线性相关",
+          "线性无关",
+          "构成基",
+          "互为标量倍"
+        ],
+        "answer": 1,
+        "explanation": "若 \\(\\sum c_i v_i=0\\)，两边与 \\(v_j\\) 取内积：\\(c_j\\langle v_j,v_j\\rangle=0\\)。因 \\(v_j\\ne 0\\) 故 \\(\\langle v_j,v_j\\rangle>0\\)，必有 \\(c_j=0\\)。所有 \\(c_j=0\\)，即线性无关。但只有维数恰好等于全空间维数时才构成基。"
+      },
+      {
+        "id": "linear-algebra-ch06-q12",
+        "question": "对 \\(v_1=(1,0,1),v_2=(1,1,0)\\) 施 Gram-Schmidt，归一化后 \\(e_1\\) 等于？",
+        "options": [
+          "\\((1,0,1)\\)",
+          "\\((1/\\sqrt{2},0,1/\\sqrt{2})\\)",
+          "\\((1/2,0,1/2)\\)",
+          "\\((1/\\sqrt{3})(1,0,1)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(u_1=v_1=(1,0,1)\\)，\\(\\|u_1\\|=\\sqrt{2}\\)，故 \\(e_1=u_1/\\|u_1\\|=(1/\\sqrt{2},0,1/\\sqrt{2})\\)。常见错误 C 是漏开方：\\(\\langle u_1,u_1\\rangle=2\\) 不是 4。"
+      },
+      {
+        "id": "linear-algebra-ch06-q13",
+        "question": "设 \\(W=\\mathrm{span}\\{(1,0,0),(0,1,0)\\}\\subset\\mathbb{R}^3\\)。其正交补 \\(W^\\perp\\) 是？",
+        "options": [
+          "\\(\\{(0,0,t):t\\in\\mathbb{R}\\}\\)",
+          "\\(\\{(t,0,0):t\\in\\mathbb{R}\\}\\)",
+          "\\(\\{(t,t,0):t\\in\\mathbb{R}\\}\\)",
+          "\\(\\mathbb{R}^3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(v=(a,b,c)\\in W^\\perp\\) 等价于 \\(\\langle v,(1,0,0)\\rangle=a=0\\) 且 \\(\\langle v,(0,1,0)\\rangle=b=0\\)。故 \\(W^\\perp=\\{(0,0,c):c\\in\\mathbb{R}\\}\\)，是 \\(z\\)-轴。维数验证：\\(\\dim W+\\dim W^\\perp=2+1=3=\\dim\\mathbb{R}^3\\) ✓。"
+      },
+      {
+        "id": "linear-algebra-ch06-q14",
+        "question": "对任意子空间 \\(W\\subset\\mathbb{R}^n\\)，下列等式成立的是？",
+        "options": [
+          "\\(W\\cap W^\\perp=W\\)",
+          "\\(\\mathbb{R}^n=W\\oplus W^\\perp\\)",
+          "\\(\\dim W=\\dim W^\\perp\\) 总成立",
+          "\\(W^\\perp=\\mathbb{R}^n\\setminus W\\)"
+        ],
+        "answer": 1,
+        "explanation": "正交分解定理：\\(\\mathbb{R}^n=W\\oplus W^\\perp\\)，每个 \\(v\\) 唯一写为 \\(v=w+w^\\perp\\)。维数和 \\(\\dim W+\\dim W^\\perp=n\\)（不必相等）。\\(W\\cap W^\\perp=\\{0\\}\\)（因 \\(\\langle v,v\\rangle=0\\Rightarrow v=0\\)）。"
+      },
+      {
+        "id": "linear-algebra-ch06-q15",
+        "question": "设 \\(W=\\mathrm{span}\\{e_1,e_2\\}\\) 是 \\(\\mathbb{R}^3\\) 中由标准正交基 \\(e_1=(1,0,0),e_2=(0,1,0)\\) 张成的子空间。\\(v=(2,3,5)\\) 在 \\(W\\) 上的正交投影是？",
+        "options": ["\\((2,3,0)\\)", "\\((0,0,5)\\)", "\\((2,3,5)\\)", "\\((1,1,0)\\)"],
+        "answer": 0,
+        "explanation": "对标准正交基：\\(P_W v=\\sum\\langle v,e_i\\rangle e_i=2 e_1+3 e_2=(2,3,0)\\)。即「丢掉 \\(W^\\perp\\) 分量」。验证：\\(v-P_W v=(0,0,5)\\in W^\\perp\\) ✓。"
+      },
+      {
+        "id": "linear-algebra-ch06-q16",
+        "question": "最小二乘问题求解 \\(Ax=b\\)（\\(b\\notin\\mathrm{Col}(A)\\)）的几何本质是？",
+        "options": [
+          "找 \\(x\\) 使 \\(Ax=b\\) 严格成立",
+          "找 \\(x\\) 使 \\(Ax\\) 等于 \\(b\\) 在 \\(\\mathrm{Col}(A)\\) 上的正交投影",
+          "找 \\(x\\) 使 \\(\\|x\\|\\) 最小",
+          "找 \\(x\\) 使 \\(b\\) 在 \\(\\mathrm{Null}(A)\\) 上"
+        ],
+        "answer": 1,
+        "explanation": "目标是最小化 \\(\\|Ax-b\\|^2\\)。几何上，\\(Ax\\) 取遍 \\(\\mathrm{Col}(A)\\)，最小距离的点正是 \\(b\\) 在 \\(\\mathrm{Col}(A)\\) 上的正交投影 \\(\\hat b\\)。代数上得到法方程 \\(A^T A x=A^T b\\)，即 \\(b-A\\hat x\\perp\\mathrm{Col}(A)\\)。"
+      },
+      {
+        "id": "linear-algebra-ch06-q17",
+        "question": "最小二乘的法方程（normal equations）形式为？",
+        "options": [
+          "\\(Ax=b\\)",
+          "\\(A^T A\\,x=A^T b\\)",
+          "\\(A A^T x=b\\)",
+          "\\(A^{-1}x=b\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(b-Ax\\perp\\mathrm{Col}(A)\\) 等价于对每个列 \\(a_j\\)：\\(a_j^T(b-Ax)=0\\)，合并即 \\(A^T(b-Ax)=0\\)，故 \\(A^T A x=A^T b\\)。当 \\(A\\) 列满秩时 \\(A^T A\\) 可逆，\\(x=(A^T A)^{-1}A^T b\\)。"
+      },
+      {
+        "id": "linear-algebra-ch06-q18",
+        "question": "在 \\(\\mathbb{R}^3\\) 中，\\(W=\\mathrm{span}\\{(1,1,0)\\}\\)。\\(v=(2,0,3)\\) 在 \\(W\\) 上的正交投影 \\(P_W v\\) 是？",
+        "options": ["\\((1,1,0)\\)", "\\((2,2,0)\\)", "\\((1/2,1/2,0)\\)", "\\((2,0,0)\\)"],
+        "answer": 0,
+        "explanation": "取 \\(w=(1,1,0)\\)，\\(P_W v=\\dfrac{\\langle v,w\\rangle}{\\langle w,w\\rangle}w=\\dfrac{2}{2}(1,1,0)=(1,1,0)\\)。验证残差 \\(v-P_W v=(1,-1,3)\\)，与 \\(w\\) 内积 \\(=1-1+0=0\\) ✓。"
+      },
+      {
+        "id": "linear-algebra-ch06-q19",
+        "question": "对 \\(A=\\begin{pmatrix}1&1\\\\1&-1\\\\1&0\\end{pmatrix},\\ b=(1,2,1)^T\\)，最小二乘解 \\(\\hat x=(A^T A)^{-1}A^T b\\) 中 \\(A^T A\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix}3&0\\\\0&2\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}3&1\\\\1&2\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}2&0\\\\0&3\\end{pmatrix}\\)",
+          "\\(I_2\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(A^T A=\\begin{pmatrix}1&1&1\\\\1&-1&0\\end{pmatrix}\\begin{pmatrix}1&1\\\\1&-1\\\\1&0\\end{pmatrix}=\\begin{pmatrix}3&0\\\\0&2\\end{pmatrix}\\)。对角说明 \\(A\\) 的两列正交，最小二乘解可独立求每个分量。"
+      },
+      {
+        "id": "linear-algebra-ch06-q20",
+        "question": "实对称矩阵 \\(A=A^T\\) 的所有特征值必？",
+        "options": ["全为零", "全为实数", "全为正", "全为有理数"],
+        "answer": 1,
+        "explanation": "谱定理（实对称矩阵）：所有特征值实。证明：设 \\(Av=\\lambda v\\)，取共轭转置 \\(v^* A=\\bar\\lambda v^*\\)（用 \\(A=A^T\\) 实矩阵且自共轭）。计算 \\(v^* A v\\) 两种方式得 \\(\\lambda \\|v\\|^2=\\bar\\lambda\\|v\\|^2\\)，由 \\(v\\ne 0\\) 即 \\(\\lambda=\\bar\\lambda\\) 即 \\(\\lambda\\in\\mathbb{R}\\)。但不必正（如 \\(-I\\)）或有理。"
+      },
+      {
+        "id": "linear-algebra-ch06-q21",
+        "question": "实对称矩阵的不同特征值对应的特征向量必？",
+        "options": ["相等", "正交", "线性相关", "同向"],
+        "answer": 1,
+        "explanation": "设 \\(Av_1=\\lambda_1 v_1,\\ Av_2=\\lambda_2 v_2,\\ \\lambda_1\\ne\\lambda_2\\)。则 \\(\\lambda_1\\langle v_1,v_2\\rangle=\\langle Av_1,v_2\\rangle=\\langle v_1,A^T v_2\\rangle=\\langle v_1,Av_2\\rangle=\\lambda_2\\langle v_1,v_2\\rangle\\)，即 \\((\\lambda_1-\\lambda_2)\\langle v_1,v_2\\rangle=0\\)，故 \\(\\langle v_1,v_2\\rangle=0\\)。这是谱定理可用正交矩阵对角化的关键。"
+      },
+      {
+        "id": "linear-algebra-ch06-q22",
+        "question": "谱定理保证：实对称矩阵 \\(A\\) 存在正交矩阵 \\(Q\\) 使 \\(Q^T A Q=D\\)（对角）。「正交矩阵」的定义是？",
+        "options": [
+          "\\(Q^{-1}=Q\\)",
+          "\\(Q^T Q=I\\)（即列构成标准正交基）",
+          "\\(\\det Q=0\\)",
+          "\\(Q\\) 是上三角"
+        ],
+        "answer": 1,
+        "explanation": "正交矩阵满足 \\(Q^T Q=I\\)，即 \\(Q\\) 的列向量构成 \\(\\mathbb{R}^n\\) 的标准正交基。等价地 \\(Q^{-1}=Q^T\\)。\\(\\det Q=\\pm 1\\)。注意 \\(Q^{-1}=Q\\) 是对合（如 \\(I\\) 或反射），不是正交的定义。"
+      },
+      {
+        "id": "linear-algebra-ch06-q23",
+        "question": "对二次型 \\(q(x)=x^T A x\\)（\\(A\\) 实对称），通过正交变换 \\(x=Qy\\) 化为标准形 \\(q=\\sum\\lambda_i y_i^2\\)。其中 \\(\\lambda_i\\) 是？",
+        "options": [
+          "\\(A\\) 的对角元素",
+          "\\(A\\) 的特征值",
+          "任意正数",
+          "\\(Q\\) 的元素"
+        ],
+        "answer": 1,
+        "explanation": "由谱定理 \\(Q^T A Q=\\mathrm{diag}(\\lambda_1,\\dots,\\lambda_n)\\)，故 \\(q(x)=x^T A x=y^T Q^T A Q y=\\sum\\lambda_i y_i^2\\)，系数即特征值。这就是二次型的「主轴定理」，几何上对应椭球/双曲面的主轴方向。"
+      },
+      {
+        "id": "linear-algebra-ch06-q24",
+        "question": "实对称矩阵 \\(A\\) 称为正定（\\(A\\succ 0\\)）当且仅当？",
+        "options": [
+          "所有元素 \\(>0\\)",
+          "所有特征值 \\(>0\\)",
+          "\\(\\det A>0\\)",
+          "\\(\\mathrm{tr}(A)>0\\)"
+        ],
+        "answer": 1,
+        "explanation": "正定 \\(\\Leftrightarrow\\) 对所有 \\(x\\ne 0,\\ x^T A x>0\\) \\(\\Leftrightarrow\\) 所有特征值 \\(>0\\)（由谱定理化为 \\(\\sum\\lambda_i y_i^2\\)，正定即每 \\(\\lambda_i>0\\)）。\\(\\det>0\\) 仅必要不充分（如 \\(\\mathrm{diag}(-1,-1)\\) 有 \\(\\det=1>0\\) 却负定）。"
+      },
+      {
+        "id": "linear-algebra-ch06-q25",
+        "question": "设实对称 \\(A=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}\\)。其特征值与对应（归一化）特征向量为？",
+        "options": [
+          "\\(\\lambda=1,3;\\ v_1=(1,-1)/\\sqrt{2},v_2=(1,1)/\\sqrt{2}\\)",
+          "\\(\\lambda=2,2;\\ v_1=(1,0),v_2=(0,1)\\)",
+          "\\(\\lambda=0,4;\\ v_1=(1,-1),v_2=(1,1)\\)",
+          "\\(\\lambda=1,3;\\ v_1=(1,1),v_2=(1,-1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "特征多项式 \\(\\det(A-\\lambda I)=(2-\\lambda)^2-1=\\lambda^2-4\\lambda+3=(\\lambda-1)(\\lambda-3)\\)，故 \\(\\lambda=1,3\\)。\\(\\lambda=1:(A-I)v=0\\) 给 \\(v_1\\propto(1,-1)\\)；\\(\\lambda=3:v_2\\propto(1,1)\\)。两者正交（\\(\\langle v_1,v_2\\rangle=1-1=0\\) ✓），归一化即得标准正交基。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="linear-algebra"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../linear-algebra.html" class="module-name">线性代数 Algèbre linéaire</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 内积、范数与 Cauchy-Schwarz 不等式</a></li>
+      <li><a href="#kp2">02 · Gram-Schmidt 正交化</a></li>
+      <li><a href="#kp3">03 · 正交补、正交投影与最小二乘</a></li>
+      <li><a href="#kp4">04 · 对称矩阵的谱定理</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>内积空间与正交性</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>内积、范数与 Cauchy-Schwarz 不等式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>到目前为止，我们对向量空间研究的核心是「线性结构」——加法、数乘、子空间、线性变换。但几何中两个最直观的概念——「长度」与「角度」——还没有进入线性代数的舞台。一个向量有多长？两个向量是否垂直？两个方向的夹角是多少？这些问题都不能由纯线性结构回答，因为线性结构本身没有度量信息。</p>
+            <ul>
+              <li><strong>欧氏几何的还原</strong>：中学的勾股定理、余弦定理本质上是关于内积的恒等式；将它们抽象到 \(\mathbb{R}^n\) 乃至更一般的空间，是把「几何直觉」嫁接到任意维数的桥梁。</li>
+              <li><strong>正交性是简化的关键</strong>：两个向量正交 ⟺ 内积为零，这一判据让坐标分解、投影计算、级数展开变得空前简洁；Fourier 级数、最小二乘法、主成分分析都依赖它。</li>
+              <li><strong>不等式控制误差</strong>：Cauchy-Schwarz 不等式 \(|\langle x,y\rangle|\le\|x\|\|y\|\) 是分析与概率中最常用的「比较武器」，它保证了相关系数有界、内积可控、级数可比较。</li>
+            </ul>
+            <p>引入内积，相当于把「线性空间」升级为「带度量的几何空间」，这是线性代数走向 Hilbert 空间、量子力学、信号处理的必经之路。本节先在 \(\mathbb{R}^n\) 中把内积、范数与 CS 不等式建立起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>实内积空间的公理</h4>
+            <p>实向量空间 \(V\) 上的内积是映射 \(\langle\cdot,\cdot\rangle:V\times V\to\mathbb{R}\)，满足：</p>
+            <ul>
+              <li>(IP1) <strong>对称性</strong>：\(\langle x,y\rangle=\langle y,x\rangle\)；</li>
+              <li>(IP2) <strong>双线性</strong>：\(\langle\alpha x+\beta y,z\rangle=\alpha\langle x,z\rangle+\beta\langle y,z\rangle\)；</li>
+              <li>(IP3) <strong>正定</strong>：\(\langle x,x\rangle\ge 0\)，且 \(\langle x,x\rangle=0\Leftrightarrow x=0\)。</li>
+            </ul>
+            <p>满足这三条的 \((V,\langle\cdot,\cdot\rangle)\) 称为内积空间。</p>
+
+            <h4>\(\mathbb{R}^n\) 上的标准内积</h4>
+            <p>\[\langle x,y\rangle=\sum_{i=1}^n x_i y_i=x^T y.\]</p>
+            <p>易验三条公理。这是中学解析几何中「点积」概念的精确化。其它内积也可定义（如带权 \(\langle x,y\rangle_W=x^T W y\)，\(W\) 正定），但本章主要使用标准内积。</p>
+
+            <h4>由内积诱导的范数</h4>
+            <p>定义 \(\|x\|=\sqrt{\langle x,x\rangle}\)。在 \(\mathbb{R}^n\) 上即欧氏范数 \(\|x\|=\sqrt{\sum x_i^2}\)，其几何意义为向量的长度。范数满足：(N1) \(\|x\|\ge 0\)，等号 ⟺ \(x=0\)；(N2) \(\|\alpha x\|=|\alpha|\|x\|\)；(N3) \(\|x+y\|\le\|x\|+\|y\|\)（三角不等式，下面证）。</p>
+
+            <h4>Cauchy-Schwarz 不等式</h4>
+            <p>对任意 \(x,y\in V\)：</p>
+            \[|\langle x,y\rangle|\le\|x\|\cdot\|y\|,\]
+            <p>等号成立当且仅当 \(x,y\) 线性相关。证明：若 \(y=0\) 平凡。否则考虑实变量 \(t\) 的二次函数</p>
+            \[f(t)=\|x-ty\|^2=\|x\|^2-2t\langle x,y\rangle+t^2\|y\|^2\ge 0.\]
+            <p>判别式 \(\le 0\)：\((2\langle x,y\rangle)^2-4\|y\|^2\|x\|^2\le 0\)，整理即得不等式。等号 ⟺ \(f\) 有实根 ⟺ \(x=t y\)，即线性相关。</p>
+
+            <h4>三角不等式与夹角</h4>
+            <p>由 CS：\(\|x+y\|^2=\|x\|^2+2\langle x,y\rangle+\|y\|^2\le\|x\|^2+2\|x\|\|y\|+\|y\|^2=(\|x\|+\|y\|)^2\)。开方即得三角不等式。</p>
+            <p>对非零 \(x,y\)，由 CS 知 \(\dfrac{\langle x,y\rangle}{\|x\|\|y\|}\in[-1,1]\)，故可定义夹角：</p>
+            \[\cos\theta=\dfrac{\langle x,y\rangle}{\|x\|\cdot\|y\|},\quad \theta\in[0,\pi].\]
+            <p>当 \(\theta=\pi/2\) 时 \(\langle x,y\rangle=0\)，称 \(x,y\) <strong>正交</strong>，记 \(x\perp y\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：在 \(\mathbb{R}^3\) 中计算 \(x=(1,2,2),\ y=(3,0,4)\) 的内积、各自范数与夹角余弦。</p>
+            <p><em>解答</em>：\(\langle x,y\rangle=1\cdot 3+2\cdot 0+2\cdot 4=11\)。\(\|x\|=\sqrt{1+4+4}=3\)，\(\|y\|=\sqrt{9+0+16}=5\)。\(\cos\theta=11/15\approx 0.733\)，\(\theta\approx 42.8°\)。由 \(11<3\cdot 5=15\)，CS 不等式严格成立，说明 \(x,y\) 不共线。</p>
+            <p><strong>例题 2</strong>：证明 \(\mathbb{R}^n\) 上的「平行四边形等式」 \(\|x+y\|^2+\|x-y\|^2=2(\|x\|^2+\|y\|^2)\)。</p>
+            <p><em>解答</em>：展开 \(\|x\pm y\|^2=\|x\|^2\pm 2\langle x,y\rangle+\|y\|^2\)，相加内积项相消，即得。该等式刻画了「内积诱导范数」的特征——一般范数（如 \(\ell_1,\ell_\infty\)）不满足。</p>
+            <p><strong>例题 3</strong>：用 CS 证明数列不等式 \(\Big(\sum_{i=1}^n a_i b_i\Big)^2\le\Big(\sum a_i^2\Big)\Big(\sum b_i^2\Big)\)。</p>
+            <p><em>解答</em>：设 \(x=(a_i),y=(b_i)\in\mathbb{R}^n\)，CS 即 \(\langle x,y\rangle^2\le\|x\|^2\|y\|^2\)。这正是分析中常用的离散 CS。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把内积与叉积混淆</strong>：内积返回标量；叉积仅在 \(\mathbb{R}^3\) 定义且返回向量。</li>
+              <li><strong>遗忘 CS 等号条件</strong>：等号 ⟺ 线性相关，而不是 \(x=y\) 或同向；反向相关（\(y=-x\)）也使等号成立。</li>
+              <li><strong>用 \(\sum|x_i|\)（\(\ell_1\) 范数）代替欧氏范数</strong>：欧氏范数是 \(\sqrt{\sum x_i^2}\)，否则勾股定理与 CS 都不成立。</li>
+              <li><strong>夹角公式忘除以模长</strong>：\(\cos\theta\) 必须归一化分母，否则 \(|\cos\theta|>1\) 失去意义。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">在 \(\mathbb{R}^3\) 中 \(x=(1,2,2)\) 的范数 \(\|x\|\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '范数为 \\(\\sqrt{1+4+4}=3\\)，不是分量之和。')">A. 5（分量之和）</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(\\|x\\|=\\sqrt{1+4+4}=3\\)。')">B. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。范数要先平方求和再开方。')">C. 9</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。范数为 \\(\\sqrt{1+4+4}=3\\)。')">D. \(\sqrt{5}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Gram-Schmidt 正交化</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了内积和正交概念后，自然要问：能否从任意一组线性无关的向量出发，构造出张成同一空间的「标准正交基」？为什么标准正交基如此重要？因为它把许多原本要解线性方程组才能完成的工作降为「直接计算内积」。</p>
+            <ul>
+              <li><strong>坐标即 Fourier 系数</strong>：在标准正交基 \(\{e_i\}\) 下，向量 \(v\) 的第 \(i\) 个坐标就是 \(\langle v,e_i\rangle\)，无须解线性方程组。</li>
+              <li><strong>距离与内积保持</strong>：标准正交基下，欧氏距离与内积的形式与「\(\mathbb{R}^n\) 下的标准坐标」一模一样，几何变得透明。</li>
+              <li><strong>QR 分解的根</strong>：对矩阵 \(A=[v_1|\cdots|v_n]\) 施 Gram-Schmidt，正是把 \(A\) 拆为 \(QR\)，其中 \(Q\) 列正交、\(R\) 上三角，是数值线性代数中求解最小二乘和特征值问题的核心工具。</li>
+            </ul>
+            <p>Gram-Schmidt 过程 19 世纪由 Gram 与 Schmidt 系统化（思想可追溯到 Laplace 与 Cauchy），是把「任意基」变为「正交基」的标准算法。它既是理论结果（标准正交基存在性的构造证明），也是实际算法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>正交集与正交基</h4>
+            <p>向量集 \(\{v_1,\dots,v_k\}\) 称为<strong>正交集</strong>，若 \(\langle v_i,v_j\rangle=0\) 对所有 \(i\ne j\) 成立。若额外 \(\|v_i\|=1\)，称为<strong>标准正交集</strong>。当正交集张成整个空间时，称为正交基（资标准正交基）。</p>
+
+            <h4>正交集自动线性无关</h4>
+            <p>设非零正交集 \(\{v_1,\dots,v_k\}\)，假设 \(\sum c_i v_i=0\)。两边与 \(v_j\) 取内积：</p>
+            \[0=\Big\langle\sum_i c_i v_i,v_j\Big\rangle=\sum_i c_i\langle v_i,v_j\rangle=c_j\|v_j\|^2.\]
+            <p>因 \(v_j\ne 0\)，\(\|v_j\|^2>0\)，故 \(c_j=0\)。所有 \(c_j=0\)，即线性无关。这一性质让正交集成为天然「无冗余」的向量组。</p>
+
+            <h4>标准正交基下的坐标公式</h4>
+            <p>设 \(\{e_1,\dots,e_n\}\) 是标准正交基，\(v\in V\)。则</p>
+            \[v=\sum_{i=1}^n\langle v,e_i\rangle\,e_i,\qquad \|v\|^2=\sum_{i=1}^n\langle v,e_i\rangle^2\ \text{(Parseval 等式)}.\]
+            <p>系数 \(\langle v,e_i\rangle\) 称为 \(v\) 关于 \(e_i\) 的 Fourier 系数。这是 Fourier 级数理论在有限维内积空间的雏形。</p>
+
+            <h4>Gram-Schmidt 算法</h4>
+            <p>输入：线性无关组 \(\{v_1,\dots,v_n\}\)。输出：标准正交基 \(\{e_1,\dots,e_n\}\)，满足 \(\mathrm{span}(e_1,\dots,e_k)=\mathrm{span}(v_1,\dots,v_k)\) 对每个 \(k\) 成立。</p>
+            <p>第 1 步：\(u_1=v_1,\ e_1=u_1/\|u_1\|\)。</p>
+            <p>第 \(k\) 步（\(k\ge 2\)）：</p>
+            \[u_k=v_k-\sum_{j=1}^{k-1}\dfrac{\langle v_k,u_j\rangle}{\langle u_j,u_j\rangle}\,u_j,\qquad e_k=\dfrac{u_k}{\|u_k\|}.\]
+            <p>几何上，减去的项正是 \(v_k\) 在已构造空间 \(\mathrm{span}(u_1,\dots,u_{k-1})\) 上的正交投影；剩下的 \(u_k\) 即「垂直分量」，自动与所有 \(u_j\)（\(j<k\)）正交。</p>
+
+            <h4>正确性的简要论证</h4>
+            <p>归纳证 \(\langle u_k,u_j\rangle=0\) 对 \(j<k\)：由构造 \(\langle u_k,u_j\rangle=\langle v_k,u_j\rangle-\dfrac{\langle v_k,u_j\rangle}{\langle u_j,u_j\rangle}\langle u_j,u_j\rangle=0\)。又 \(u_k\ne 0\)（否则 \(v_k\) 是 \(v_1,\dots,v_{k-1}\) 的线性组合，与无关性矛盾），故除以 \(\|u_k\|\) 良定义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：对 \(\mathbb{R}^3\) 中 \(v_1=(1,1,0),v_2=(1,0,1),v_3=(0,1,1)\) 施 Gram-Schmidt 求标准正交基。</p>
+            <p><em>解答</em>：\(u_1=(1,1,0)\)，\(\|u_1\|=\sqrt{2}\)，\(e_1=(1,1,0)/\sqrt{2}\)。</p>
+            <p>\(\langle v_2,u_1\rangle=1\)，\(\langle u_1,u_1\rangle=2\)。\(u_2=(1,0,1)-\dfrac{1}{2}(1,1,0)=(1/2,-1/2,1)\)，\(\|u_2\|=\sqrt{1/4+1/4+1}=\sqrt{3/2}\)。\(e_2=(1/2,-1/2,1)\cdot\sqrt{2/3}\)。</p>
+            <p>\(\langle v_3,u_1\rangle=1,\langle v_3,u_2\rangle=-1/2+1=1/2,\langle u_2,u_2\rangle=3/2\)。\(u_3=(0,1,1)-\dfrac{1}{2}(1,1,0)-\dfrac{1/2}{3/2}(1/2,-1/2,1)=(0,1,1)-(1/2,1/2,0)-(1/6,-1/6,1/3)=(-2/3,2/3,2/3)\)。\(\|u_3\|=\sqrt{4/9+4/9+4/9}=2/\sqrt{3}\)，\(e_3=(-1,1,1)/\sqrt{3}\)。验证 \(\{e_1,e_2,e_3\}\) 两两正交、各单位长。</p>
+            <p><strong>例题 2</strong>：将 \(v=(2,1,3)\) 在标准正交基 \(\{(1,0,0),(0,1,0),(0,0,1)\}\) 下展开。</p>
+            <p><em>解答</em>：坐标即 Fourier 系数 \(\langle v,e_i\rangle\)：分别为 2、1、3。\(v=2 e_1+1 e_2+3 e_3\)。这就是「标准坐标」与「内积投影」一致的简单实例。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>除以 \(\|u_j\|\) 还是 \(\|u_j\|^2\)？</strong> 投影系数公式中分母是 \(\langle u_j,u_j\rangle=\|u_j\|^2\)，不是 \(\|u_j\|\)。</li>
+              <li><strong>对 \(v_j\) 投影还是对 \(u_j\) 投影？</strong> 必须用已正交化的 \(u_j\)，否则减去的不是真正的正交投影。</li>
+              <li><strong>顺序敏感</strong>：Gram-Schmidt 结果依赖于 \(v_i\) 的输入顺序；不同顺序给出不同的基（但张成同一空间）。</li>
+              <li><strong>数值不稳定性</strong>：朴素 Gram-Schmidt 在浮点下可能丢失正交性，实际算法常用「修改 Gram-Schmidt（MGS）」或 Householder 反射，但理论形式即上述公式。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">对 \(v_1=(1,1),v_2=(2,0)\) 施 Gram-Schmidt，未归一化的 \(u_2\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '\\(u_2=v_2-\\dfrac{\\langle v_2,u_1\\rangle}{\\langle u_1,u_1\\rangle}u_1=(2,0)-1\\cdot(1,1)=(1,-1)\\)。')">A. \((2,0)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(u_2=(2,0)-(1,1)=(1,-1)\\)，与 \\(u_1\\) 正交。')">B. \((1,-1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。投影系数 \\(\\langle v_2,u_1\\rangle/\\|u_1\\|^2=2/2=1\\)。')">C. \((0,-2)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。结果应与 \\(u_1=(1,1)\\) 内积为零。')">D. \((1,1)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>正交补、正交投影与最小二乘</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>给定一个子空间 \(W\subset\mathbb{R}^n\)，「与 \(W\) 中所有向量都正交」的向量构成什么？任一向量 \(v\) 能否唯一分解为「\(W\) 内分量」与「\(W\) 外正交分量」之和？这两个问题的答案是<strong>正交补</strong>与<strong>正交分解定理</strong>，也是<strong>最小二乘法</strong>的几何根源。</p>
+            <ul>
+              <li><strong>近似与拟合</strong>：实际数据的方程 \(Ax=b\) 通常无解（观测含噪声），最小二乘退而求次，找使误差范数最小的 \(\hat x\)；几何上，\(A\hat x\) 是 \(b\) 在 \(\mathrm{Col}(A)\) 上的正交投影。</li>
+              <li><strong>降维与信号</strong>：图像压缩、PCA、信号去噪都可视为「保留信号在某子空间上的投影分量，剔除正交补上的噪声」。</li>
+              <li><strong>Hilbert 空间结构</strong>：正交分解 \(\mathbb{R}^n=W\oplus W^\perp\) 是 Hilbert 空间投影定理的有限维原型，是泛函分析、量子力学（投影测量）的基础。</li>
+            </ul>
+            <p>本节把「向量到子空间的最近点」问题化为内积计算，并应用于线性回归。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>正交补的定义</h4>
+            <p>设 \(W\subset\mathbb{R}^n\) 是子空间。其<strong>正交补</strong>为</p>
+            \[W^\perp=\{v\in\mathbb{R}^n:\langle v,w\rangle=0,\ \forall w\in W\}.\]
+            <p>等价表述：只需对 \(W\) 的一组基逐一验证内积为零。\(W^\perp\) 本身也是 \(\mathbb{R}^n\) 的子空间（线性条件之交）。</p>
+
+            <h4>正交分解定理</h4>
+            <p>对任意子空间 \(W\subset\mathbb{R}^n\)：</p>
+            \[\mathbb{R}^n=W\oplus W^\perp,\qquad \dim W+\dim W^\perp=n,\qquad (W^\perp)^\perp=W.\]
+            <p>每个 \(v\in\mathbb{R}^n\) 唯一分解为 \(v=w+w^\perp\)，\(w\in W,w^\perp\in W^\perp\)。</p>
+            <p>简要论证：取 \(W\) 的标准正交基 \(\{e_1,\dots,e_k\}\)（由 Gram-Schmidt），定义 \(w=\sum_{i=1}^k\langle v,e_i\rangle e_i\)，验证 \(v-w\) 与每个 \(e_i\) 正交，故 \(v-w\in W^\perp\)。唯一性由 \(W\cap W^\perp=\{0\}\)（\(\langle v,v\rangle=0\Rightarrow v=0\)）。</p>
+
+            <h4>正交投影公式</h4>
+            <p>正交投影算子 \(P_W:\mathbb{R}^n\to W\) 把 \(v\) 映为其 \(W\)-分量。在 \(W\) 的标准正交基 \(\{e_1,\dots,e_k\}\) 下：</p>
+            \[P_W v=\sum_{i=1}^k\langle v,e_i\rangle\,e_i.\]
+            <p>性质：(i) \(P_W^2=P_W\)（幂等）；(ii) \(P_W\) 自伴 \(\langle P_W v,u\rangle=\langle v,P_W u\rangle\)；(iii) \(\|v-P_W v\|\le\|v-w\|\) 对所有 \(w\in W\) 成立——\(P_W v\) 是 \(W\) 中距 \(v\) <strong>最近</strong>的点。</p>
+
+            <h4>矩阵形式</h4>
+            <p>设 \(W=\mathrm{Col}(A)\)（\(A\) 列满秩）。则正交投影矩阵为</p>
+            \[P=A(A^T A)^{-1}A^T.\]
+            <p>可验 \(P^2=P\)、\(P^T=P\)、\(\mathrm{Im}(P)=\mathrm{Col}(A)\)。当 \(A\) 列正交（\(A^T A=I\)）时简化为 \(P=AA^T\)。</p>
+
+            <h4>最小二乘法</h4>
+            <p>方程 \(Ax=b\)（\(b\notin\mathrm{Col}(A)\)）无解时，求 \(\hat x\) 使 \(\|A\hat x-b\|\) 最小。几何上，\(A\hat x\) 应等于 \(b\) 在 \(\mathrm{Col}(A)\) 上的正交投影 \(\hat b\)，即 \(b-A\hat x\perp\mathrm{Col}(A)\)：</p>
+            \[A^T(b-A\hat x)=0\ \Longleftrightarrow\ \boxed{A^T A\,\hat x=A^T b}\ \text{(法方程, normal equations)}.\]
+            <p>当 \(A\) 列满秩时 \(A^T A\) 可逆，\(\hat x=(A^T A)^{-1}A^T b\)；伪逆 \(A^+=(A^T A)^{-1}A^T\) 即从这里来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(W=\mathrm{span}\{(1,1,0),(0,1,1)\}\subset\mathbb{R}^3\) 的正交补。</p>
+            <p><em>解答</em>：\(v=(a,b,c)\in W^\perp\) 要满足 \(a+b=0\) 且 \(b+c=0\)，即 \(a=-b,c=-b\)。\(W^\perp=\{(-b,b,-b):b\in\mathbb{R}\}=\mathrm{span}\{(-1,1,-1)\}\)。维数 \(2+1=3\) ✓。</p>
+            <p><strong>例题 2</strong>：把 \(v=(1,2,3)\) 投影到 \(W=\mathrm{span}\{(1,0,0)\}\) 上。</p>
+            <p><em>解答</em>：\(W\) 的标准正交基为 \(e_1=(1,0,0)\)。\(P_W v=\langle v,e_1\rangle e_1=1\cdot(1,0,0)=(1,0,0)\)。残差 \((0,2,3)\) 与 \(e_1\) 正交 ✓。</p>
+            <p><strong>例题 3（最小二乘）</strong>：用最小二乘拟合直线 \(y=ax+b\) 通过点 \((0,1),(1,2),(2,2)\)。</p>
+            <p><em>解答</em>：\(A=\begin{pmatrix}0&1\\1&1\\2&1\end{pmatrix},\ b=\begin{pmatrix}1\\2\\2\end{pmatrix}\)。\(A^T A=\begin{pmatrix}5&3\\3&3\end{pmatrix}\)，\(A^T b=\begin{pmatrix}6\\5\end{pmatrix}\)。解 \(\hat x=(A^T A)^{-1}A^T b\)：行列式 \(=15-9=6\)，\((A^T A)^{-1}=\dfrac{1}{6}\begin{pmatrix}3&-3\\-3&5\end{pmatrix}\)。\(\hat x=\dfrac{1}{6}\begin{pmatrix}3\\7\end{pmatrix}\)，即 \(a=1/2,b=7/6\)。最佳拟合线 \(y=x/2+7/6\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>用非正交基误用 Fourier 公式</strong>：\(P_W v=\sum\langle v,e_i\rangle e_i\) 仅对<em>标准正交</em>基成立。一般基要解线性方程组或用 \(P=A(A^T A)^{-1}A^T\)。</li>
+              <li><strong>残差应与 \(W\) 而非 \(W^\perp\) 正交</strong>：检验投影正确，看 \(v-P_W v\) 是否与 \(W\) 的基正交。</li>
+              <li><strong>法方程方向搞反</strong>：是 \(A^T A\hat x=A^T b\)，不是 \(A A^T\hat x=A b\)（后者在欠定系统中用，不是最小二乘）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">最小二乘问题 \(\min\|Ax-b\|\) 的法方程是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '正确法方程为 \\(A^T A x=A^T b\\)，由残差 \\(b-Ax\\perp\\mathrm{Col}(A)\\) 推得。')">A. \(Ax=b\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！法方程 \\(A^T A x=A^T b\\) 由「残差与 Col(A) 正交」推得。')">B. \(A^T A x=A^T b\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(A A^T\\) 出现在欠定系统的最小范数解中。')">C. \(A A^T x=b\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(A\\) 一般非方阵，\\(A^{-1}\\) 不存在。')">D. \(A^{-1}x=b\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>对称矩阵的谱定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>第 5 章中我们看到，一般方阵的对角化要用相似矩阵 \(A=PDP^{-1}\)，但 \(P\) 不一定是正交矩阵——这意味着新坐标系一般是「歪斜」的，长度与角度都被扭曲。理想情形是：能否选到一组「不变形」的新坐标系（即正交基），使矩阵在其中表现为对角？答案对实<strong>对称</strong>矩阵 \(A=A^T\) 是肯定的，这就是<strong>谱定理</strong>。</p>
+            <ul>
+              <li><strong>对称矩阵是物理与统计中的常客</strong>：协方差矩阵、Hessian 矩阵、惯性张量、刚度矩阵、相关矩阵、二次型矩阵——都是对称矩阵。</li>
+              <li><strong>主成分分析（PCA）</strong>：协方差矩阵的特征值分解就是 PCA，主成分方向即正交特征向量，方差贡献即特征值。</li>
+              <li><strong>二次型的几何分类</strong>：椭圆、双曲线、抛物面等二次曲面的标准化，本质是对称矩阵的对角化——主轴定理。</li>
+            </ul>
+            <p>谱定理是有限维线性代数中最优美的定理之一，它把「内积、正交、特征值」三大概念汇聚到一个简洁的等式 \(Q^T A Q=D\) 里。它也是泛函分析中紧自伴算子谱定理（Hilbert 空间）的有限维原型。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>正交矩阵</h4>
+            <p>方阵 \(Q\in\mathbb{R}^{n\times n}\) 称为<strong>正交矩阵</strong>，若</p>
+            \[Q^T Q=I_n\quad\text{(等价地 } Q^{-1}=Q^T\text{)}.\]
+            <p>列向量构成 \(\mathbb{R}^n\) 的标准正交基。性质：(i) \(\det Q=\pm 1\)；(ii) 保内积 \(\langle Qx,Qy\rangle=\langle x,y\rangle\)；(iii) 保范数 \(\|Qx\|=\|x\|\)。几何上是「等距变换」（旋转 + 反射）。</p>
+
+            <h4>实对称矩阵：特征值全实</h4>
+            <p>设 \(A=A^T\in\mathbb{R}^{n\times n}\)，\(Av=\lambda v\)（\(v\) 可在复域取）。证明 \(\lambda\in\mathbb{R}\)：</p>
+            <p>取共轭转置：\(\bar v^T A^T=\bar\lambda \bar v^T\)，由 \(A^T=A\) 即 \(\bar v^T A=\bar\lambda \bar v^T\)。</p>
+            <p>计算 \(\bar v^T A v\) 两种方式：</p>
+            \[\bar v^T(Av)=\lambda\bar v^T v=\lambda\|v\|^2;\qquad (\bar v^T A)v=\bar\lambda\bar v^T v=\bar\lambda\|v\|^2.\]
+            <p>故 \(\lambda\|v\|^2=\bar\lambda\|v\|^2\)，由 \(v\ne 0\) 即 \(\|v\|^2>0\)，得 \(\lambda=\bar\lambda\)，即 \(\lambda\in\mathbb{R}\)。</p>
+
+            <h4>不同特征值的特征向量正交</h4>
+            <p>设 \(Av_1=\lambda_1 v_1,\ Av_2=\lambda_2 v_2,\ \lambda_1\ne\lambda_2\)。</p>
+            \[\lambda_1\langle v_1,v_2\rangle=\langle\lambda_1 v_1,v_2\rangle=\langle Av_1,v_2\rangle=\langle v_1,A^T v_2\rangle=\langle v_1,Av_2\rangle=\lambda_2\langle v_1,v_2\rangle.\]
+            <p>故 \((\lambda_1-\lambda_2)\langle v_1,v_2\rangle=0\)，即 \(\langle v_1,v_2\rangle=0\)。同一特征值的特征子空间内可用 Gram-Schmidt 进一步正交化。</p>
+
+            <h4>谱定理（实对称版本）</h4>
+            <p>设 \(A\in\mathbb{R}^{n\times n}\) 实对称。则存在正交矩阵 \(Q\) 与对角矩阵 \(D=\mathrm{diag}(\lambda_1,\dots,\lambda_n)\)（\(\lambda_i\) 为特征值，含重数）使</p>
+            \[A=QDQ^T,\qquad Q^T A Q=D.\]
+            <p>等价地，\(\mathbb{R}^n\) 存在由 \(A\) 的特征向量构成的<strong>标准正交基</strong>。证明思路（不展开）：归纳——任取一个实特征向量 \(v_1\)（归一化），考虑 \(v_1^\perp\) 是 \(A\)-不变子空间，\(A\) 限制在其上仍对称，归纳假设给出该 \((n-1)\)-维空间的正交特征基。</p>
+
+            <h4>二次型的主轴定理</h4>
+            <p>二次型 \(q(x)=x^T A x\)（\(A\) 实对称）通过正交变换 \(x=Qy\) 化为</p>
+            \[q(x)=y^T(Q^T A Q)y=\sum_{i=1}^n \lambda_i y_i^2.\]
+            <p>几何上，\(\{x:q(x)=1\}\) 是椭球（当 \(\lambda_i>0\)）或双曲面，主轴方向即 \(Q\) 的列（特征向量）。</p>
+
+            <h4>正定与半正定</h4>
+            <p>实对称 \(A\) 称为：</p>
+            <ul>
+              <li>正定（\(A\succ 0\)）⟺ \(\forall x\ne 0,\ x^T A x>0\) ⟺ 所有特征值 \(>0\)；</li>
+              <li>半正定（\(A\succeq 0\)）⟺ \(\forall x,\ x^T A x\ge 0\) ⟺ 所有特征值 \(\ge 0\)；</li>
+              <li>负定 / 半负定 / 不定类似定义。</li>
+            </ul>
+            <p>判定正定的实用工具：所有顺序主子式 \(>0\)（Sylvester 准则）；或所有特征值 \(>0\)。在优化中，Hessian 矩阵正定保证局部极小。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：对 \(A=\begin{pmatrix}3&1\\1&3\end{pmatrix}\) 求正交对角化 \(A=QDQ^T\)。</p>
+            <p><em>解答</em>：特征多项式 \((3-\lambda)^2-1=\lambda^2-6\lambda+8=(\lambda-2)(\lambda-4)\)，故 \(\lambda=2,4\)。</p>
+            <p>\(\lambda=2\)：\((A-2I)v=0\) 给 \(v=(1,-1)\)；归一化 \(q_1=(1,-1)/\sqrt{2}\)。</p>
+            <p>\(\lambda=4\)：同理得 \(q_2=(1,1)/\sqrt{2}\)。验证 \(\langle q_1,q_2\rangle=0\) ✓（两特征值不同自动正交）。</p>
+            <p>\(Q=\dfrac{1}{\sqrt{2}}\begin{pmatrix}1&1\\-1&1\end{pmatrix},\ D=\begin{pmatrix}2&0\\0&4\end{pmatrix},\ A=QDQ^T\)。</p>
+            <p><strong>例题 2</strong>：判断 \(A=\begin{pmatrix}2&-1\\-1&2\end{pmatrix}\) 是否正定。</p>
+            <p><em>解答</em>：方法一：特征值。\(\det(A-\lambda I)=(2-\lambda)^2-1=(\lambda-1)(\lambda-3)\)，\(\lambda=1,3\)，皆 \(>0\)，正定。方法二：Sylvester。一阶主子式 \(=2>0\)，二阶 \(\det=3>0\)，正定。两法一致。</p>
+            <p><strong>例题 3</strong>：把二次型 \(q(x,y)=x^2+xy+y^2\) 化为标准形。</p>
+            <p><em>解答</em>：矩阵 \(A=\begin{pmatrix}1&1/2\\1/2&1\end{pmatrix}\)（注意 \(xy\) 系数 \(=2\cdot 1/2\)）。特征值 \(\lambda=1\pm 1/2=1/2,3/2\)。新坐标下 \(q=\dfrac{1}{2}u^2+\dfrac{3}{2}v^2\)。两特征值都 \(>0\)，故 \(q\) 是椭圆型（正定）。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>对一般方阵套用谱定理</strong>：只有实对称矩阵才一定有正交对角化。一般可对角化矩阵只能用相似变换 \(P^{-1}AP\)，\(P\) 未必正交。</li>
+              <li><strong>同一特征值的特征向量未正交化</strong>：不同特征值自动正交，但同一特征值的特征子空间需要 Gram-Schmidt。</li>
+              <li><strong>把 \(Q^{-1}\) 写为 \(Q^T\) 时忘了验证 \(Q\) 正交</strong>：若特征向量未归一化，\(P^{-1}\ne P^T\)，必须先归一化。</li>
+              <li><strong>二次型矩阵中漏掉「除以 2」</strong>：\(xy\) 项系数 \(c\) 在矩阵中分配为 \(c/2\) 给 \(A_{12}\) 与 \(A_{21}\)，保证 \(A\) 对称。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列关于实对称矩阵的说法哪个错误？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '正确陈述：实对称矩阵特征值全实。')">A. 特征值全为实数</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '正确陈述：不同特征值的特征向量正交。')">B. 不同特征值对应的特征向量正交</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '正确陈述：可正交对角化 \\(A=QDQ^T\\)。')">C. 可被正交矩阵对角化</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确（这正是错误项）！特征值未必为正——\\(-I\\) 是实对称但负定。')">D. 特征值必为正数</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5 特征值与对角化</a>
+      <a href="../linear-algebra.html" class="nav-overview">📋 概览</a>
+      <a href="../linear-algebra.html" class="nav-next">回到模块概览 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "linear-algebra-ch06";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 特征值与对角化 — 线性代数 Algèbre linéaire — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-algebra-ch05-q1",
+        "question": "设 \\(A = \\begin{pmatrix} 3 & 0 \\\\ 0 & -2 \\end{pmatrix}\\)。\\(A\\) 的特征值是？",
+        "options": ["\\(0\\) 和 \\(1\\)", "\\(3\\) 和 \\(-2\\)", "\\(3\\) 和 \\(2\\)", "\\(-3\\) 和 \\(2\\)"],
+        "answer": 1,
+        "explanation": "对角矩阵的特征值即对角元，故为 \\(3\\) 与 \\(-2\\)。验证：\\(\\det(\\lambda I - A) = (\\lambda-3)(\\lambda+2) = 0\\)。易错：把符号搞反或忽略对角矩阵这一便利性质。"
+      },
+      {
+        "id": "linear-algebra-ch05-q2",
+        "question": "\\(v\\) 是 \\(A\\) 关于特征值 \\(\\lambda\\) 的特征向量的定义是？",
+        "options": ["\\(Av = 0\\)", "\\(Av = \\lambda v\\) 且 \\(v \\neq 0\\)", "\\(Av = \\lambda v\\)（允许 \\(v = 0\\)）", "\\(\\det(A - \\lambda I) = 0\\)"],
+        "answer": 1,
+        "explanation": "特征向量必须非零，否则 \\(A \\cdot 0 = \\lambda \\cdot 0\\) 对任何 \\(\\lambda\\) 平凡成立，无意义。C 漏掉非零条件，D 是特征值的判据而非特征向量定义。"
+      },
+      {
+        "id": "linear-algebra-ch05-q3",
+        "question": "矩阵 \\(A\\) 的特征多项式 \\(p_A(\\lambda)\\) 定义为？",
+        "options": ["\\(\\det(A)\\)", "\\(\\det(\\lambda I - A)\\)", "\\(\\mathrm{tr}(A - \\lambda I)\\)", "\\(\\det(A - I)\\)"],
+        "answer": 1,
+        "explanation": "标准定义为 \\(p_A(\\lambda) = \\det(\\lambda I - A)\\)，是关于 \\(\\lambda\\) 的 \\(n\\) 次首一多项式。其根恰为 \\(A\\) 的全部特征值。也有作者定义 \\(\\det(A - \\lambda I)\\)，差一个 \\((-1)^n\\) 因子。"
+      },
+      {
+        "id": "linear-algebra-ch05-q4",
+        "question": "\\(n \\times n\\) 矩阵的特征多项式的次数等于？",
+        "options": ["\\(1\\)", "\\(n-1\\)", "\\(n\\)", "\\(n^2\\)"],
+        "answer": 2,
+        "explanation": "\\(p_A(\\lambda) = \\det(\\lambda I - A)\\) 展开得首项为 \\(\\lambda^n\\)，故为 \\(n\\) 次多项式。这意味着 \\(A\\) 在 \\(\\mathbb{C}\\) 上恰有 \\(n\\) 个特征值（计代数重数）。"
+      },
+      {
+        "id": "linear-algebra-ch05-q5",
+        "question": "若 \\(A = PDP^{-1}\\) 且 \\(D\\) 为对角矩阵，则称 \\(A\\) 是？",
+        "options": ["可逆的", "可对角化的", "正交的", "幂零的"],
+        "answer": 1,
+        "explanation": "这正是可对角化的定义：存在可逆 \\(P\\) 使 \\(A\\) 相似于一个对角矩阵 \\(D\\)。\\(P\\) 的列是 \\(A\\) 的特征向量，\\(D\\) 的对角元是对应特征值。可对角化与可逆是两个独立概念。"
+      },
+      {
+        "id": "linear-algebra-ch05-q6",
+        "question": "矩阵 \\(\\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}\\)（\\(90°\\) 旋转）在 \\(\\mathbb{R}\\) 上的实特征值有几个？",
+        "options": ["\\(0\\) 个", "\\(1\\) 个", "\\(2\\) 个", "无穷多个"],
+        "answer": 0,
+        "explanation": "特征多项式为 \\(\\lambda^2 + 1\\)，无实根（根为 \\(\\pm i\\)）。几何上 \\(90°\\) 旋转不保留任何实方向不变，故无实特征向量。这表明实矩阵的特征值未必都是实数。"
+      },
+      {
+        "id": "linear-algebra-ch05-q7",
+        "question": "可对角化矩阵 \\(A = PDP^{-1}\\) 的 \\(k\\) 次幂等于？",
+        "options": ["\\(P D P^{-k}\\)", "\\(P D^k P^{-1}\\)", "\\(P^k D^k P^{-k}\\)", "\\(D^k\\)"],
+        "answer": 1,
+        "explanation": "\\(A^k = (PDP^{-1})^k = P D^k P^{-1}\\)，中间的 \\(P^{-1} P\\) 反复抵消。\\(D^k\\) 只需对角元各自取 \\(k\\) 次方，远比直接相乘 \\(A\\) \\(k\\) 次高效。这是对角化的核心威力。"
+      },
+      {
+        "id": "linear-algebra-ch05-q8",
+        "question": "求 \\(A = \\begin{pmatrix} 4 & 1 \\\\ 2 & 3 \\end{pmatrix}\\) 的特征值。",
+        "options": ["\\(1, 6\\)", "\\(2, 5\\)", "\\(3, 4\\)", "\\(0, 7\\)"],
+        "answer": 1,
+        "explanation": "\\(p_A(\\lambda) = (\\lambda-4)(\\lambda-3) - 2 = \\lambda^2 - 7\\lambda + 10 = (\\lambda-2)(\\lambda-5)\\)。故特征值为 \\(2\\) 与 \\(5\\)。验证：\\(\\mathrm{tr}(A) = 7 = 2 + 5\\)，\\(\\det(A) = 10 = 2 \\times 5\\)。"
+      },
+      {
+        "id": "linear-algebra-ch05-q9",
+        "question": "上题中 \\(A\\) 关于 \\(\\lambda = 2\\) 的特征向量为？",
+        "options": ["\\((1,2)^T\\)", "\\((1,-2)^T\\)", "\\((2,1)^T\\)", "\\((-1,1)^T\\)"],
+        "answer": 1,
+        "explanation": "解 \\((A - 2I)v = 0\\)：\\(\\begin{pmatrix} 2 & 1 \\\\ 2 & 1 \\end{pmatrix} v = 0\\)，得 \\(2x + y = 0\\)，即 \\(v = (1, -2)^T\\) 的非零倍数。"
+      },
+      {
+        "id": "linear-algebra-ch05-q10",
+        "question": "\\(\\lambda\\) 的代数重数定义为？",
+        "options": ["特征子空间 \\(E_\\lambda\\) 的维数", "\\(\\lambda\\) 在 \\(p_A\\) 中的重根次数", "对应特征向量个数", "矩阵的迹"],
+        "answer": 1,
+        "explanation": "代数重数 \\(m_a(\\lambda)\\) 是 \\(\\lambda\\) 作为 \\(p_A(\\lambda)\\) 根的重数。几何重数 \\(m_g(\\lambda) = \\dim E_\\lambda\\)。两者关系 \\(1 \\le m_g \\le m_a\\)，区别决定可对角化性。"
+      },
+      {
+        "id": "linear-algebra-ch05-q11",
+        "question": "若 \\(A\\) 为 \\(n \\times n\\) 矩阵，\\(A\\) 可对角化的等价条件是？",
+        "options": ["\\(\\det(A) \\neq 0\\)", "\\(A\\) 有 \\(n\\) 个线性无关的特征向量", "\\(A\\) 对称", "\\(A\\) 的特征值互异"],
+        "answer": 1,
+        "explanation": "可对角化 ⟺ 几何重数和等于 \\(n\\) ⟺ 存在 \\(n\\) 个线性无关特征向量构成 \\(P\\) 的列。D 是充分非必要：互异特征值⇒可对角化，但反之未必（如 \\(I_n\\) 重特征值仍可对角化）。"
+      },
+      {
+        "id": "linear-algebra-ch05-q12",
+        "question": "矩阵 \\(B = \\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\end{pmatrix}\\)（Jordan 块）是否可对角化？",
+        "options": ["可，因为可逆", "可，特征值唯一", "不可，几何重数 \\(<\\) 代数重数", "不可，因为不对称"],
+        "answer": 2,
+        "explanation": "\\(p_B(\\lambda) = (\\lambda-1)^2\\)，代数重数 \\(2\\)。但 \\((B-I)v = 0\\) 给出 \\(y = 0\\)，特征子空间一维，几何重数 \\(1\\)。\\(1 = m_g < m_a = 2\\)，故不可对角化。这是不可对角化的标准反例。"
+      },
+      {
+        "id": "linear-algebra-ch05-q13",
+        "question": "Cayley-Hamilton 定理断言：每个方阵 \\(A\\) 满足？",
+        "options": ["\\(A^n = I\\)", "\\(p_A(A) = 0\\)", "\\(\\det(A) = \\mathrm{tr}(A)\\)", "\\(A^2 = A\\)"],
+        "answer": 1,
+        "explanation": "Cayley-Hamilton：\\(A\\) 代入自己的特征多项式得零矩阵，\\(p_A(A) = O\\)。这给出 \\(A\\) 满足的次数最低不超过 \\(n\\) 的多项式关系，是计算 \\(A^k\\)、\\(A^{-1}\\) 与最小多项式的强力工具。"
+      },
+      {
+        "id": "linear-algebra-ch05-q14",
+        "question": "对 \\(2 \\times 2\\) 矩阵 \\(A\\)，特征多项式可表示为？",
+        "options": ["\\(\\lambda^2 - \\det(A) \\lambda + \\mathrm{tr}(A)\\)", "\\(\\lambda^2 - \\mathrm{tr}(A) \\lambda + \\det(A)\\)", "\\(\\lambda^2 + \\mathrm{tr}(A) \\lambda + \\det(A)\\)", "\\(\\lambda^2 + \\det(A) \\lambda - \\mathrm{tr}(A)\\)"],
+        "answer": 1,
+        "explanation": "\\(p_A(\\lambda) = \\lambda^2 - \\mathrm{tr}(A)\\,\\lambda + \\det(A)\\)。一般 \\(n \\times n\\) 情形：\\(p_A(\\lambda) = \\lambda^n - \\mathrm{tr}(A)\\lambda^{n-1} + \\cdots + (-1)^n \\det(A)\\)。这是迹与行列式作为特征值对称函数的体现。"
+      },
+      {
+        "id": "linear-algebra-ch05-q15",
+        "question": "若 \\(A\\) 的特征值为 \\(\\lambda_1, \\ldots, \\lambda_n\\)，则 \\(\\det(A)\\) 与 \\(\\mathrm{tr}(A)\\) 分别等于？",
+        "options": ["\\(\\sum \\lambda_i\\) 和 \\(\\prod \\lambda_i\\)", "\\(\\prod \\lambda_i\\) 和 \\(\\sum \\lambda_i\\)", "都等于 \\(\\sum \\lambda_i\\)", "都等于 \\(\\prod \\lambda_i\\)"],
+        "answer": 1,
+        "explanation": "由 \\(p_A(\\lambda) = \\prod (\\lambda - \\lambda_i)\\) 展开：常数项为 \\((-1)^n \\prod \\lambda_i\\)（对应 \\(\\det\\)），\\(\\lambda^{n-1}\\) 系数为 \\(-\\sum \\lambda_i\\)（对应 \\(\\mathrm{tr}\\)）。这给出快速验算工具。"
+      },
+      {
+        "id": "linear-algebra-ch05-q16",
+        "question": "若 \\(A\\) 关于不同特征值 \\(\\lambda_1 \\neq \\lambda_2\\) 各有一个特征向量 \\(v_1, v_2\\)，则 \\(\\{v_1, v_2\\}\\)？",
+        "options": ["必线性相关", "必线性无关", "可能相关也可能无关", "依赖于 \\(A\\) 是否对称"],
+        "answer": 1,
+        "explanation": "定理：不同特征值对应的特征向量必线性无关。证明：设 \\(c_1 v_1 + c_2 v_2 = 0\\)，左乘 \\(A\\) 得 \\(c_1 \\lambda_1 v_1 + c_2 \\lambda_2 v_2 = 0\\)，组合两式消去 \\(v_2\\) 得 \\(c_1 (\\lambda_1 - \\lambda_2) v_1 = 0\\)，由 \\(\\lambda_1 \\neq \\lambda_2\\) 与 \\(v_1 \\neq 0\\) 得 \\(c_1 = 0\\)。"
+      },
+      {
+        "id": "linear-algebra-ch05-q17",
+        "question": "下列矩阵中哪个一定可对角化（在 \\(\\mathbb{R}\\) 上）？",
+        "options": ["\\(\\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\end{pmatrix}\\)", "\\(\\begin{pmatrix} 0 & -1 \\\\ 1 & 0 \\end{pmatrix}\\)", "\\(\\begin{pmatrix} 2 & 0 \\\\ 0 & 5 \\end{pmatrix}\\)", "\\(\\begin{pmatrix} 1 & 1 \\\\ 0 & 0 \\end{pmatrix}\\) 与下列任意"],
+        "answer": 2,
+        "explanation": "C 已是对角矩阵，本身可对角化（\\(P=I\\)）。A 是 Jordan 块不可对角化；B 在 \\(\\mathbb{R}\\) 上无实特征值，故在 \\(\\mathbb{R}\\) 上不可对角化（在 \\(\\mathbb{C}\\) 上则可）。注意「可对角化」依赖所工作的域。"
+      },
+      {
+        "id": "linear-algebra-ch05-q18",
+        "question": "已知 \\(A = \\begin{pmatrix} 2 & 1 \\\\ 0 & 3 \\end{pmatrix}\\) 可对角化为 \\(D = \\mathrm{diag}(2, 3)\\)。计算 \\(A^{10}\\) 的对角元 \\((1,1)\\) 与 \\((2,2)\\)。",
+        "options": ["\\(2^{10}, 3^{10}\\)", "\\(2 \\cdot 10, 3 \\cdot 10\\)", "\\(2^{10}+1, 3^{10}\\)", "\\(2, 3\\)"],
+        "answer": 0,
+        "explanation": "由 \\(A = PDP^{-1}\\)，\\(A^{10} = P D^{10} P^{-1}\\) 与 \\(D^{10} = \\mathrm{diag}(2^{10}, 3^{10})\\) 相似，主对角元（即特征值的 10 次幂）由相似变换在同一对角顺序下保持位置——因为 \\(A\\) 的上三角形且 \\((1,1)=2, (2,2)=3\\)，故 \\(A^{10}\\) 的对角元为 \\(2^{10} = 1024\\) 与 \\(3^{10} = 59049\\)。"
+      },
+      {
+        "id": "linear-algebra-ch05-q19",
+        "question": "Fibonacci 递推 \\(F_{n+1} = F_n + F_{n-1}\\) 可写为矩阵幂 \\(\\begin{pmatrix} F_{n+1} \\\\ F_n \\end{pmatrix} = M^n \\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}\\)。\\(M\\) 应取？",
+        "options": ["\\(\\begin{pmatrix} 0 & 1 \\\\ 1 & 0 \\end{pmatrix}\\)", "\\(\\begin{pmatrix} 1 & 1 \\\\ 1 & 0 \\end{pmatrix}\\)", "\\(\\begin{pmatrix} 1 & 0 \\\\ 1 & 1 \\end{pmatrix}\\)", "\\(\\begin{pmatrix} 1 & 1 \\\\ 0 & 1 \\end{pmatrix}\\)"],
+        "answer": 1,
+        "explanation": "\\(M = \\begin{pmatrix} 1 & 1 \\\\ 1 & 0 \\end{pmatrix}\\) 验证：\\(M \\begin{pmatrix} F_n \\\\ F_{n-1} \\end{pmatrix} = \\begin{pmatrix} F_n + F_{n-1} \\\\ F_n \\end{pmatrix} = \\begin{pmatrix} F_{n+1} \\\\ F_n \\end{pmatrix}\\)。\\(M\\) 的特征值为黄金比 \\(\\varphi\\) 与 \\(1-\\varphi\\)，对角化即得 Binet 公式 \\(F_n = (\\varphi^n - (1-\\varphi)^n)/\\sqrt{5}\\)。"
+      },
+      {
+        "id": "linear-algebra-ch05-q20",
+        "question": "马氏链转移矩阵 \\(P\\)（列随机：每列和为 1）的稳态分布对应 \\(P\\) 的哪个特征值的特征向量？",
+        "options": ["\\(\\lambda = 0\\)", "\\(\\lambda = 1\\)", "\\(\\lambda = -1\\)", "\\(\\lambda\\) 任意"],
+        "answer": 1,
+        "explanation": "稳态 \\(\\pi\\) 满足 \\(P\\pi = \\pi\\)，即 \\(\\pi\\) 是特征值 \\(1\\) 的特征向量（再归一化使分量和为 1）。Perron-Frobenius 保证 \\(1\\) 是 \\(P\\) 的最大特征值，且对正则链稳态唯一。Google PageRank 即此原理的大型应用。"
+      },
+      {
+        "id": "linear-algebra-ch05-q21",
+        "question": "若 \\(A\\) 可对角化为 \\(D\\)，且 \\(A\\) 可逆，则 \\(A^{-1}\\) 是否也可对角化？特征值是？",
+        "options": ["不可对角化", "可，特征值不变", "可，特征值取倒数 \\(1/\\lambda_i\\)", "可，特征值取相反数"],
+        "answer": 2,
+        "explanation": "\\(A = PDP^{-1}\\) 可逆要求 \\(D\\) 可逆即所有 \\(\\lambda_i \\neq 0\\)。则 \\(A^{-1} = P D^{-1} P^{-1}\\)，同 \\(P\\) 对角化，特征值为 \\(1/\\lambda_i\\)。特征向量保持不变。"
+      },
+      {
+        "id": "linear-algebra-ch05-q22",
+        "question": "对 \\(3 \\times 3\\) 矩阵 \\(A\\) 的特征多项式 \\(p_A(\\lambda) = \\lambda^3 - 5\\lambda^2 + 6\\lambda\\)，由 Cayley-Hamilton 可知 \\(A^3\\) 等于？",
+        "options": ["\\(5A^2 - 6A\\)", "\\(5A^2 + 6A\\)", "\\(-5A^2 + 6A\\)", "\\(5A - 6A^2\\)"],
+        "answer": 0,
+        "explanation": "\\(p_A(A) = A^3 - 5A^2 + 6A = O\\)，故 \\(A^3 = 5A^2 - 6A\\)。这把 \\(A\\) 的所有更高次幂都用 \\(A^0, A^1, A^2\\) 的线性组合表示，是降幂法的核心。"
+      },
+      {
+        "id": "linear-algebra-ch05-q23",
+        "question": "线性递推 \\(x_{n+1} = A x_n\\) 当 \\(n \\to \\infty\\) 时趋于零向量，等价于？",
+        "options": ["\\(\\det(A) < 1\\)", "\\(\\mathrm{tr}(A) < 0\\)", "所有特征值绝对值 \\(<1\\)（谱半径 \\(<1\\)）", "\\(A\\) 对称"],
+        "answer": 2,
+        "explanation": "若 \\(A\\) 可对角化 \\(A = PDP^{-1}\\)，则 \\(A^n = PD^n P^{-1}\\)，\\(D^n\\) 的对角元为 \\(\\lambda_i^n\\)，全部趋于 \\(0\\) ⟺ \\(|\\lambda_i| < 1\\) 对所有 \\(i\\)。一般情形下结论仍由谱半径 \\(\\rho(A) < 1\\) 给出。"
+      },
+      {
+        "id": "linear-algebra-ch05-q24",
+        "question": "\\(A = \\begin{pmatrix} 0.7 & 0.4 \\\\ 0.3 & 0.6 \\end{pmatrix}\\) 是列随机矩阵。其稳态分布（特征值 \\(1\\) 的归一化特征向量）为？",
+        "options": ["\\((0.5, 0.5)^T\\)", "\\((4/7, 3/7)^T\\)", "\\((0.7, 0.3)^T\\)", "\\((0.6, 0.4)^T\\)"],
+        "answer": 1,
+        "explanation": "解 \\((A-I)\\pi = 0\\)：\\(-0.3\\pi_1 + 0.4\\pi_2 = 0\\) 即 \\(3\\pi_1 = 4\\pi_2\\)，归一化得 \\(\\pi = (4/7, 3/7)^T\\)。验证：\\(0.7 \\cdot 4/7 + 0.4 \\cdot 3/7 = (2.8+1.2)/7 = 4/7\\) ✓。"
+      },
+      {
+        "id": "linear-algebra-ch05-q25",
+        "question": "设 \\(A\\) 为 \\(3 \\times 3\\) 矩阵，特征值为 \\(2, 2, 5\\)。\\(A\\) 必然可对角化吗？",
+        "options": ["必然可", "必然不可", "可对角化 ⟺ \\(\\dim E_2 = 2\\)", "需要 \\(A\\) 对称"],
+        "answer": 2,
+        "explanation": "\\(\\lambda = 2\\) 代数重数 \\(2\\)，几何重数 \\(\\dim E_2 \\in \\{1, 2\\}\\)。可对角化 ⟺ 几何 = 代数 ⟺ \\(\\dim E_2 = 2\\)。例如 \\(\\mathrm{diag}(2,2,5)\\) 可，但 \\(\\begin{pmatrix} 2 & 1 & 0 \\\\ 0 & 2 & 0 \\\\ 0 & 0 & 5 \\end{pmatrix}\\) 不可（\\(\\lambda=2\\) 处只有一维特征空间）。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="linear-algebra"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../linear-algebra.html" class="module-name">线性代数 Algèbre linéaire</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 特征值与特征向量</a></li>
+      <li><a href="#kp2">02 · 特征多项式与 Cayley-Hamilton</a></li>
+      <li><a href="#kp3">03 · 可对角化的判定</a></li>
+      <li><a href="#kp4">04 · 应用：矩阵幂、马氏链与递推</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>特征值与对角化</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>特征值与特征向量</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性变换 \(T: \mathbb{R}^n \to \mathbb{R}^n\) 通常会把每个向量都拉伸、旋转或剪切到完全不同的方向。但在所有方向中，可能存在一些「特殊方向」——沿着它们的向量经过变换后只是被简单缩放，方向不改变。这些方向就像变换的「自然坐标轴」，刻画了变换最本质的几何特征。</p>
+            <ul>
+              <li><strong>主轴分析</strong>：把椭圆 \(x^T A x = 1\) 写成主轴坐标系下的标准形 \(\lambda_1 u^2 + \lambda_2 v^2 = 1\)，主轴方向就是 \(A\) 的特征向量。</li>
+              <li><strong>稳定性判定</strong>：常微分方程 \(\dot x = Ax\) 的解形如 \(\sum c_i e^{\lambda_i t} v_i\)，\(A\) 的特征值实部决定解是衰减、振荡还是发散。</li>
+              <li><strong>主成分分析（PCA）</strong>：高维数据的协方差矩阵的最大特征值方向，是数据方差最大的方向，正是降维的最优投影轴。</li>
+            </ul>
+            <p>识别这些「不变方向」与对应的「缩放因子」是理解任何线性系统行为的第一步。一旦找到全部特征向量构成基底，线性变换就退化为各方向独立的标量缩放——复杂性骤降。这就是本章核心问题的动机：寻找 \(Av = \lambda v\) 的非零解。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特征值理论的抽象起点是把「方向不变」翻译为代数方程 \(Av = \lambda v\)（\(v \neq 0\)）。这个看似简单的方程同时涉及一个未知向量 \(v\) 和一个未知标量 \(\lambda\)，是非线性问题——但通过「先固定 \(\lambda\) 求 \(v\)」的策略可化为齐次线性系统 \((A - \lambda I) v = 0\)。</p>
+            <p>关键洞察：要使该系统有非零解，矩阵 \(A - \lambda I\) 必须奇异，即 \(\det(A - \lambda I) = 0\)。这把寻找 \(\lambda\) 的问题化归为求解一元 \(n\) 次多项式方程的根，从而打通了线性代数与多项式理论的桥梁。这个化归思路——「把矢量方程转为标量方程的可解性条件」——是抽象代数中常见的范式。</p>
+            <p>每个特征值 \(\lambda\) 对应一个特征子空间 \(E_\lambda = N(A - \lambda I)\)，即 \((A-\lambda I)\) 的零空间。\(E_\lambda\) 是 \(\mathbb{R}^n\)（或 \(\mathbb{C}^n\)）的子空间，包含 \(\lambda\) 对应的所有特征向量与零向量。把矩阵的研究从「单个向量的行为」上升到「整个子空间的几何结构」，是从初等到高等线性代数的重要思维跃迁。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>定义：特征值与特征向量</h4>
+            <p>设 \(A \in M_n(K)\)（\(K = \mathbb{R}\) 或 \(\mathbb{C}\)）。若存在标量 \(\lambda \in K\) 与<strong>非零</strong>向量 \(v \in K^n\) 满足</p>
+            \[A v = \lambda v\]
+            <p>则称 \(\lambda\) 为 \(A\) 的<strong>特征值</strong>（valeur propre），\(v\) 为对应的<strong>特征向量</strong>（vecteur propre）。零向量被排除——否则任何 \(\lambda\) 都会平凡满足等式，丧失意义。</p>
+
+            <h4>特征值的等价判据</h4>
+            <p>等式 \(Av = \lambda v\) 改写为 \((A - \lambda I) v = 0\)，要求齐次系统有非零解，等价于 \(A - \lambda I\) 不可逆，即</p>
+            \[\det(A - \lambda I) = 0\]
+            <p>这个标量方程把特征值的搜索化为一元多项式求根问题，是计算特征值的标准入口。</p>
+
+            <h4>特征子空间</h4>
+            <p>对每个特征值 \(\lambda\)，集合</p>
+            \[E_\lambda = \{v \in K^n : A v = \lambda v\} = N(A - \lambda I)\]
+            <p>称为 \(\lambda\) 的<strong>特征子空间</strong>。\(E_\lambda\) 是 \(K^n\) 的子空间，其维数 \(\dim E_\lambda\) 称为 \(\lambda\) 的<strong>几何重数</strong>。\(E_\lambda \setminus \{0\}\) 即特征向量的全集。</p>
+
+            <h4>计算示例：\(2 \times 2\) 情形</h4>
+            <p>对 \(A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}\)：</p>
+            \[\det(A - \lambda I) = (4-\lambda)(3-\lambda) - 2 = \lambda^2 - 7\lambda + 10 = (\lambda-2)(\lambda-5)\]
+            <p>故 \(\lambda_1 = 2\)，\(\lambda_2 = 5\)。求 \(\lambda = 2\) 的特征向量：解 \((A - 2I)v = \begin{pmatrix} 2 & 1 \\ 2 & 1 \end{pmatrix} v = 0\)，得 \(v_1 = (1, -2)^T\)。同理 \(\lambda = 5\) 给出 \(v_2 = (1, 1)^T\)。</p>
+
+            <h4>无实特征值的情形</h4>
+            <p>\(2 \times 2\) 旋转矩阵 \(R = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}\) 的特征多项式为 \(\lambda^2 + 1\)，在 \(\mathbb{R}\) 中无根。几何上 \(90°\) 旋转不保留任何实方向不变，故无实特征向量。但在 \(\mathbb{C}\) 中特征值为 \(\pm i\)，存在复特征向量。这警示我们：实矩阵的特征理论需在 \(\mathbb{C}\) 上才完整。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>结构工程</strong>：建筑物或桥梁的振动模式由质量矩阵和刚度矩阵的广义特征问题 \(K v = \lambda M v\) 决定，特征值给出固有频率，特征向量给出对应模态。共振灾难（如塔科马大桥）正是外力频率与某固有频率匹配时发生。</p>
+            <p><strong>量子力学</strong>：可观测量对应自伴算子，测量结果只能取算子的特征值，对应的特征向量是测量后的本征态。氢原子能级正是 Hamilton 算符的特征值。</p>
+            <p><strong>图像压缩</strong>：奇异值分解（SVD）本质上是 \(A^T A\) 与 \(A A^T\) 的特征值分解，最大几个奇异值对应的方向保留了图像的大部分信息，丢弃小奇异值即可实现高压缩比。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(A = \begin{pmatrix} 5 & 4 \\ 1 & 2 \end{pmatrix}\) 的特征值与特征向量。</p>
+            <p><em>解答</em>：\(\det(A - \lambda I) = (5-\lambda)(2-\lambda) - 4 = \lambda^2 - 7\lambda + 6 = (\lambda - 1)(\lambda - 6)\)。故 \(\lambda_1 = 1\), \(\lambda_2 = 6\)。\(\lambda=1\)：\((A-I)v = \begin{pmatrix} 4 & 4 \\ 1 & 1 \end{pmatrix}v = 0 \Rightarrow v_1 = (1, -1)^T\)。\(\lambda=6\)：\(\begin{pmatrix} -1 & 4 \\ 1 & -4 \end{pmatrix}v = 0 \Rightarrow v_2 = (4, 1)^T\)。</p>
+            <p><strong>例题 2</strong>：验证三角矩阵 \(T = \begin{pmatrix} 2 & 7 & 1 \\ 0 & 3 & 5 \\ 0 & 0 & -1 \end{pmatrix}\) 的特征值即对角元。</p>
+            <p><em>解答</em>：\(\det(T - \lambda I) = (2-\lambda)(3-\lambda)(-1-\lambda)\)（三角矩阵行列式为对角元乘积）。故特征值为 \(2, 3, -1\)，与对角元一致。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把零向量当作特征向量</strong>：定义中 \(v \neq 0\) 是必要条件，否则任何 \(\lambda\) 都「满足」等式。</li>
+              <li><strong>混淆 \(\det(A - \lambda I) = 0\) 与 \(Av = 0\)</strong>：前者解出 \(\lambda\)，后者求出零空间（特征值 0 对应的特征向量）。</li>
+              <li><strong>实矩阵假设特征值都是实数</strong>：旋转矩阵反例。在工程问题里这往往导致漏掉振荡模态。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="linear-algebra-ch05-kp1">
+        <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:12px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.line{stroke:#334155;fill:none;stroke-width:1.5}.ev1{stroke:#6366f1;stroke-width:2.2}.ev2{stroke:#ef4444;stroke-width:2.2}</style>
+          <defs>
+            <marker id="ah-la5k1" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#334155"/></marker>
+            <marker id="ah-la5k1-i" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#6366f1"/></marker>
+            <marker id="ah-la5k1-r" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#ef4444"/></marker>
+          </defs>
+          <line x1="40" y1="130" x2="380" y2="130" stroke="#cbd5e1" stroke-width="1"/>
+          <line x1="210" y1="20" x2="210" y2="240" stroke="#cbd5e1" stroke-width="1"/>
+          <line x1="210" y1="130" x2="280" y2="60" class="line ev1" marker-end="url(#ah-la5k1-i)"/>
+          <text x="285" y="55" class="fg" fill="#6366f1">v₁ (λ=2)</text>
+          <line x1="210" y1="130" x2="320" y2="20" class="line ev1" stroke-dasharray="4,3" marker-end="url(#ah-la5k1-i)"/>
+          <text x="325" y="20" class="fg2" fill="#6366f1">Av₁ = 2v₁</text>
+          <line x1="210" y1="130" x2="290" y2="180" class="line ev2" marker-end="url(#ah-la5k1-r)"/>
+          <text x="295" y="195" class="fg" fill="#ef4444">v₂ (λ=5)</text>
+          <line x1="210" y1="130" x2="380" y2="240" class="line ev2" stroke-dasharray="4,3" marker-end="url(#ah-la5k1-r)"/>
+          <text x="320" y="250" class="fg2" fill="#ef4444">Av₂ = 5v₂</text>
+          <text x="20" y="135" class="fg2">x</text>
+          <text x="215" y="18" class="fg2">y</text>
+          <text x="100" y="115" class="fg2">沿特征方向：</text>
+          <text x="100" y="130" class="fg2">仅缩放，方向不变</text>
+        </svg>
+        <figcaption>Fig: 特征向量沿固定方向被缩放，缩放因子为对应特征值</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">向量 \(v = (1, 1)^T\) 是 \(A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}\) 关于哪个特征值的特征向量？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再算一次。\\(Av = (3, 3)^T = 3v\\)，故 \\(\\lambda = 3\\)。')">A. \(\lambda = 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再算一次。\\(Av = (3, 3)^T = 3v\\)，故 \\(\\lambda = 3\\)。')">B. \(\lambda = 2\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(Av = (3, 3)^T = 3v\\)，故 \\(\\lambda = 3\\)。')">C. \(\lambda = 3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再算一次。\\(Av = (3, 3)^T = 3v\\)，故 \\(\\lambda = 3\\)。')">D. 不是特征向量</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>特征多项式与 Cayley-Hamilton 定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了 \(\det(A - \lambda I) = 0\) 这个判据后，自然要把它的左端视为关于 \(\lambda\) 的多项式来研究。这个多项式不仅承载了 \(A\) 的全部特征值信息，还隐藏着更深的结构——比如它的系数恰是矩阵迹、行列式等的对称函数；它的根的重数与对应特征子空间维数的差别，决定了矩阵能否对角化。</p>
+            <ul>
+              <li><strong>统一计算框架</strong>：把求特征值的几何问题转化为求多项式根的代数问题，计算更系统化。</li>
+              <li><strong>不变量提取</strong>：迹、行列式作为特征多项式的系数，是相似变换下的不变量，能跨表示判别矩阵的本质属性。</li>
+              <li><strong>降幂技巧</strong>：Cayley-Hamilton 定理使任何 \(A^k\)（\(k \ge n\)）可表示为 \(I, A, \ldots, A^{n-1}\) 的线性组合，化无穷为有限。</li>
+            </ul>
+            <p>本节的两大支柱——特征多项式和 Cayley-Hamilton 定理——把矩阵分析中「无穷多次幂运算」压缩为「有限维子空间内的线性组合」，是从纯计算工具升级为结构理论的关键一步。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>特征多项式的抽象本质是把「行列式视为变量 \(\lambda\) 的函数」。\(p_A(\lambda) = \det(\lambda I - A)\) 是关于 \(\lambda\) 的 \(n\) 次首一多项式，把矩阵 \(A\) 的所有特征信息编码为一个一元多项式。这种「对象 → 多项式」的映射在数学中处处可见——从极小多项式到母函数，本质上都是用多项式压缩信息。</p>
+            <p>更深的抽象是 Cayley-Hamilton 定理：把矩阵自身代入它的特征多项式得到零矩阵 \(p_A(A) = O\)。这个等式在外行人眼中近乎魔法——多项式系数本来用于标量 \(\lambda\)，怎么能换成矩阵 \(A\) 而保持等式？关键在于 \(M_n(K)\) 是结合代数，矩阵相乘满足分配律和结合律，因此「多项式求值」对矩阵自变量同样有意义。</p>
+            <p>这个定理告诉我们：每个 \(n \times n\) 矩阵都满足某个次数 \(\le n\) 的多项式方程。这把矩阵理论与多项式代数紧密联系起来——最小多项式、不变因子、初等因子、Frobenius 标准形等概念都建立在这个观察之上（属于线性代数进阶内容，本节仅介绍 Cayley-Hamilton 本身）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>特征多项式的定义</h4>
+            <p>对 \(A \in M_n(K)\)，定义</p>
+            \[p_A(\lambda) = \det(\lambda I - A)\]
+            <p>这是关于 \(\lambda\) 的 \(n\) 次首一多项式。其根（在 \(K\) 或扩域中）恰为 \(A\) 的全部特征值。</p>
+
+            <h4>系数的对称函数解释</h4>
+            <p>设 \(p_A(\lambda) = \prod_{i=1}^n (\lambda - \lambda_i)\)，按 Vieta 公式展开：</p>
+            \[p_A(\lambda) = \lambda^n - \Big(\sum \lambda_i\Big) \lambda^{n-1} + \cdots + (-1)^n \prod \lambda_i\]
+            <p>对照 \(\det(\lambda I - A)\) 的代数展开可得：</p>
+            \[\sum \lambda_i = \mathrm{tr}(A), \qquad \prod \lambda_i = \det(A)\]
+            <p>这是迹与行列式作为「特征值的对称函数」的精确陈述，也提供了快速验算特征值是否正确的工具。</p>
+
+            <h4>\(2 \times 2\) 情形的简洁公式</h4>
+            \[p_A(\lambda) = \lambda^2 - \mathrm{tr}(A)\,\lambda + \det(A)\]
+            <p>例：\(A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}\)，\(\mathrm{tr}(A) = 7\)，\(\det(A) = 10\)，故 \(p_A(\lambda) = \lambda^2 - 7\lambda + 10\)。</p>
+
+            <h4>代数重数与几何重数</h4>
+            <p>设 \(\lambda_0\) 为 \(p_A\) 的根，<strong>代数重数</strong> \(m_a(\lambda_0)\) 是 \(\lambda_0\) 作为多项式根的重数。<strong>几何重数</strong> \(m_g(\lambda_0) = \dim E_{\lambda_0}\)。一般有：</p>
+            \[1 \le m_g(\lambda_0) \le m_a(\lambda_0)\]
+            <p>当严格不等时（\(m_g < m_a\)），\(A\) 不可对角化，称该特征值「亏损」。</p>
+
+            <h4>Cayley-Hamilton 定理（陈述）</h4>
+            <p><strong>定理</strong>：每个方阵 \(A\) 满足自身的特征多项式：</p>
+            \[p_A(A) = O\]
+            <p>（本课程只陈述并使用，不展开证明——严格证明涉及伴随矩阵恒等式或代数闭包技巧，属进阶内容。）</p>
+
+            <h4>Cayley-Hamilton 的应用：降幂与求逆</h4>
+            <p>例：\(p_A(\lambda) = \lambda^3 - 5\lambda^2 + 6\lambda\)（即 \(\det(A) = 0\) 时），由 \(A^3 = 5A^2 - 6A\)，可把任意高次幂用 \(A, A^2\) 表示。若 \(\det(A) \neq 0\)，把 \(p_A(A) = 0\) 移项得 \(A \cdot q(A) = c \cdot I\)，可解出 \(A^{-1}\) 为 \(A\) 的多项式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>控制理论</strong>：线性控制系统 \(\dot x = Ax + Bu\) 的可控性、可观性判据涉及矩阵 \([B, AB, A^2 B, \ldots, A^{n-1} B]\) 的秩——上限恰为 \(n-1\)，正由 Cayley-Hamilton 保证更高次的 \(A^k B\) 是已有列的线性组合。</p>
+            <p><strong>计算线性代数</strong>：高效计算大型矩阵高次幂时，先求 \(p_A\) 并用 \(A^k\) 模 \(p_A(A)\) 降幂，可显著减少乘法次数。这是 Krylov 子空间方法的理论支柱。</p>
+            <p><strong>动力系统</strong>：研究 \(x_{n+1} = A x_n\) 长期行为时，由 Cayley-Hamilton 知 \(\{A^k x_0\}_{k \ge 0}\) 实际上落在最多 \(n\) 维子空间内，使得渐近分析可化归为有限维线性组合的研究。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(A = \begin{pmatrix} 3 & 2 \\ 1 & 4 \end{pmatrix}\) 的特征多项式与特征值。</p>
+            <p><em>解答</em>：\(p_A(\lambda) = \lambda^2 - \mathrm{tr}(A)\lambda + \det(A) = \lambda^2 - 7\lambda + 10 = (\lambda - 2)(\lambda - 5)\)。特征值 \(\lambda_1 = 2\), \(\lambda_2 = 5\)。验算：\(2 + 5 = 7 = \mathrm{tr}(A)\) ✓，\(2 \times 5 = 10 = \det(A)\) ✓。</p>
+            <p><strong>例题 2</strong>：用 Cayley-Hamilton 计算 \(A^{-1}\)，其中 \(A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}\)。</p>
+            <p><em>解答</em>：\(p_A(\lambda) = \lambda^2 - 5\lambda - 2\)。代入：\(A^2 - 5A - 2I = O \Rightarrow A^2 - 5A = 2I \Rightarrow A(A - 5I) = 2I\)。故 \(A^{-1} = \frac{1}{2}(A - 5I) = \frac{1}{2}\begin{pmatrix} -4 & 2 \\ 3 & -1 \end{pmatrix} = \begin{pmatrix} -2 & 1 \\ 1.5 & -0.5 \end{pmatrix}\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>定义符号差异</strong>：\(\det(\lambda I - A)\) 与 \(\det(A - \lambda I)\) 差因子 \((-1)^n\)，根相同但首项符号不同。本课统一用前者保证首一。</li>
+              <li><strong>代入 Cayley-Hamilton 时混淆 \(c\) 与 \(cI\)</strong>：\(p_A(A)\) 中的常数项 \(c\) 必须替换为 \(c \cdot I\)（矩阵），否则维数不匹配。</li>
+              <li><strong>把代数重数与几何重数混为一谈</strong>：代数重数读自多项式，几何重数读自零空间维数。前者总 \(\ge\) 后者。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">设 \(A\) 为 \(2 \times 2\) 矩阵，\(\mathrm{tr}(A) = 5\)，\(\det(A) = 6\)。\(A\) 的特征值是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p_A(\\lambda) = \\lambda^2 - 5\\lambda + 6 = (\\lambda-2)(\\lambda-3)\\)。')">A. \(1, 6\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(p_A(\\lambda) = \\lambda^2 - 5\\lambda + 6 = (\\lambda-2)(\\lambda-3)\\)。')">B. \(2, 3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p_A(\\lambda) = \\lambda^2 - 5\\lambda + 6 = (\\lambda-2)(\\lambda-3)\\)。')">C. \(-2, -3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(p_A(\\lambda) = \\lambda^2 - 5\\lambda + 6 = (\\lambda-2)(\\lambda-3)\\)。')">D. \(0, 5\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>可对角化的判定条件</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>对角矩阵几乎是所有矩阵中最容易处理的：求逆只需对角元取倒数、求幂只需对角元取幂、求行列式只需对角元相乘。如果一个一般矩阵 \(A\) 能通过相似变换 \(A = PDP^{-1}\) 化为对角矩阵 \(D\)，那么大部分原本繁琐的计算都可以转移到 \(D\) 上完成，再用 \(P\) 翻译回来。</p>
+            <ul>
+              <li><strong>计算复杂度的革命</strong>：直接计算 \(A^{100}\) 需 99 次矩阵乘法，而对角化后只需 \(D^{100}\)（对角元 100 次方）加两次矩阵乘法。</li>
+              <li><strong>解耦 ODE 系统</strong>：\(\dot x = Ax\) 在新坐标 \(y = P^{-1} x\) 下变为 \(\dot y = D y\)，每个分量独立指数演化，化耦合系统为一组独立标量 ODE。</li>
+              <li><strong>结构分类基础</strong>：判别哪些矩阵可对角化、哪些只能化为 Jordan 形（属于线性代数进阶内容），是矩阵相似分类的入口。</li>
+            </ul>
+            <p>但并非所有矩阵都可对角化——本节核心问题正是给出可对角化的精确判据，并解释为什么有些矩阵（如 Jordan 块）会「亏损」掉部分特征向量。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>对角化的抽象本质是「找一组基使变换的矩阵形式最简单」。在标准基下 \(A\) 表现为复杂的耦合关系；但若以 \(A\) 的特征向量为基，每个基向量被 \(A\) 简单地缩放——矩阵自然变为对角形。这正是「换基化简」思想在线性代数中最完美的实现。</p>
+            <p>关键洞察：对角化等价于「\(K^n\) 可分解为各特征子空间 \(E_{\lambda_i}\) 的直和」。直和保证基底相容（互不重叠），加上「全部覆盖」就给出了 \(n\) 个线性无关的特征向量。所以可对角化的几何本质是：变换的不变方向「足够多」、「能撑满整个空间」。</p>
+            <p>不可对角化的矩阵则缺少足够的特征方向。剩余的「方向」需用更复杂的结构（广义特征向量、Jordan 块）填补。本课只识别这一现象，完整的 Jordan 标准形理论留待线性代数进阶（linear-adv）章节展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>可对角化的定义</h4>
+            <p>矩阵 \(A \in M_n(K)\) <strong>可对角化</strong>是指：存在可逆矩阵 \(P \in GL_n(K)\) 与对角矩阵 \(D\)，使得</p>
+            \[A = P D P^{-1}\]
+            <p>等价说法：\(A\) 与某对角矩阵相似。</p>
+
+            <h4>主判定定理（等价表述）</h4>
+            <p>下列条件互相等价：</p>
+            <p>(1) \(A\) 可对角化；</p>
+            <p>(2) 存在 \(K^n\) 的一组基由 \(A\) 的特征向量组成（即 \(A\) 有 \(n\) 个线性无关的特征向量）；</p>
+            <p>(3) 各特征子空间维数之和 \(\sum_i \dim E_{\lambda_i} = n\)；</p>
+            <p>(4) 对每个特征值 \(\lambda_i\)，几何重数等于代数重数：\(m_g(\lambda_i) = m_a(\lambda_i)\)。</p>
+
+            <h4>对角化的具体构造</h4>
+            <p>若 \(A\) 可对角化，把全部特征向量按对应特征值分组，按列排成矩阵 \(P = [v_1 \,|\, v_2 \,|\, \cdots \,|\, v_n]\)，对角矩阵</p>
+            \[D = \mathrm{diag}(\lambda_1, \lambda_2, \ldots, \lambda_n)\]
+            <p>对角元顺序与 \(P\) 列向量的顺序对应。则 \(A P = P D\)，即 \(A = P D P^{-1}\)。</p>
+
+            <h4>充分（非必要）条件</h4>
+            <p>若 \(n \times n\) 矩阵 \(A\) 在 \(K\) 中有 \(n\) 个互异特征值，则 \(A\) 必可对角化。理由：不同特征值的特征向量必线性无关，凑足 \(n\) 个即得基。</p>
+            <p><strong>反向不成立</strong>：单位阵 \(I_n\) 只有特征值 1（重数 \(n\)），但本身就是对角矩阵，自然可对角化。</p>
+
+            <h4>不可对角化的标准反例</h4>
+            <p>考虑 Jordan 块 \(J = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}\)：</p>
+            <p>\(p_J(\lambda) = (\lambda - 1)^2\)，故 \(\lambda = 1\) 代数重数 \(2\)。求几何重数：</p>
+            \[(J - I) v = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} v = 0 \implies v = (x, 0)^T\]
+            <p>故 \(E_1 = \mathrm{span}\{(1, 0)^T\}\)，\(\dim E_1 = 1 < 2 = m_a\)。\(J\) 缺一个线性无关特征向量，不可对角化。</p>
+
+            <h4>对称矩阵的特殊性（前瞻）</h4>
+            <p>实对称矩阵在 \(\mathbb{R}\) 上必可对角化，且可选正交矩阵 \(P\)（即 \(P^T = P^{-1}\)）。这是谱定理（spectral theorem）的内容，将在 Ch.6 内积空间与正交性中展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>常微分方程组</strong>：耦合线性 ODE \(\dot x = A x\) 在 \(A\) 可对角化时分解为 \(n\) 个独立标量方程 \(\dot y_i = \lambda_i y_i\)，解为 \(y_i = c_i e^{\lambda_i t}\)。回代得 \(x(t) = P y(t) = \sum c_i e^{\lambda_i t} v_i\)，结构清晰。</p>
+            <p><strong>主成分分析</strong>：协方差矩阵 \(C\) 对称半正定，必可正交对角化 \(C = U \Lambda U^T\)。\(U\) 的列为主成分方向，\(\Lambda\) 的对角元为各方向上的方差，按降序排列即得最佳低维投影。</p>
+            <p><strong>量子态演化</strong>：在能量本征基下，Hamilton 算符 \(H\) 是对角矩阵，时间演化算符 \(e^{-i H t/\hbar}\) 退化为各分量独立的相位旋转，使得复杂的 Schrödinger 方程求解大大简化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}\) 是否可对角化，若可，给出 \(P\) 与 \(D\)。</p>
+            <p><em>解答</em>：由 KP1 例题，特征值 \(\lambda_1 = 2\)（特征向量 \(v_1 = (1, -2)^T\)）与 \(\lambda_2 = 5\)（\(v_2 = (1, 1)^T\)）。两特征值互异 ⇒ 可对角化。\(P = \begin{pmatrix} 1 & 1 \\ -2 & 1 \end{pmatrix}\)，\(D = \begin{pmatrix} 2 & 0 \\ 0 & 5 \end{pmatrix}\)。验证：\(\det P = 3 \neq 0\) ✓。</p>
+            <p><strong>例题 2</strong>：判断 \(B = \begin{pmatrix} 3 & 1 & 0 \\ 0 & 3 & 0 \\ 0 & 0 & 5 \end{pmatrix}\) 是否可对角化。</p>
+            <p><em>解答</em>：\(p_B(\lambda) = (\lambda-3)^2(\lambda-5)\)，特征值 \(3\)（\(m_a = 2\)）与 \(5\)（\(m_a = 1\)）。求 \(E_3\)：\((B - 3I)v = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 2 \end{pmatrix} v = 0 \Rightarrow v_2 = 0, v_3 = 0\)，故 \(E_3 = \mathrm{span}\{(1,0,0)^T\}\)，\(m_g = 1 < 2 = m_a\)。\(B\) <strong>不可</strong>对角化。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>误以为「特征值互异」是必要条件</strong>：单位阵 \(I_n\) 反例。互异是充分但非必要条件。</li>
+              <li><strong>\(P\) 列与 \(D\) 对角元顺序不一致</strong>：\(D\) 第 \(i\) 个对角元必须是 \(P\) 第 \(i\) 列向量对应的特征值，否则 \(A = PDP^{-1}\) 不成立。</li>
+              <li><strong>忽略所工作域</strong>：旋转矩阵在 \(\mathbb{R}\) 上不可对角化，但在 \(\mathbb{C}\) 上可。判断时务必声明域。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="linear-algebra-ch05-kp3">
+        <svg viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:12px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.box{fill:#f1f5f9;stroke:#94a3b8;stroke-width:1}.box-ok{fill:#dbeafe;stroke:#3b82f6;stroke-width:1.5}.box-no{fill:#fee2e2;stroke:#ef4444;stroke-width:1.5}.arrow{stroke:#475569;fill:none;stroke-width:1.5}</style>
+          <defs><marker id="ah-la5k3" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#475569"/></marker></defs>
+          <rect x="20" y="80" width="120" height="60" class="box"/>
+          <text x="80" y="105" text-anchor="middle" class="fg" font-weight="600">矩阵 A</text>
+          <text x="80" y="125" text-anchor="middle" class="fg2">求 p_A(λ), 特征值</text>
+          <line x1="140" y1="110" x2="180" y2="110" class="arrow" marker-end="url(#ah-la5k3)"/>
+          <rect x="180" y="20" width="130" height="60" class="box"/>
+          <text x="245" y="45" text-anchor="middle" class="fg" font-weight="600">检查每个 λ</text>
+          <text x="245" y="65" text-anchor="middle" class="fg2">m_g(λ) = m_a(λ)?</text>
+          <line x1="310" y1="40" x2="350" y2="40" class="arrow" marker-end="url(#ah-la5k3)"/>
+          <rect x="350" y="10" width="100" height="60" class="box-ok"/>
+          <text x="400" y="35" text-anchor="middle" class="fg" fill="#1d4ed8" font-weight="600">可对角化</text>
+          <text x="400" y="55" text-anchor="middle" class="fg2">A = PDP⁻¹</text>
+          <line x1="310" y1="60" x2="350" y2="120" class="arrow" marker-end="url(#ah-la5k3)"/>
+          <rect x="350" y="100" width="100" height="60" class="box-no"/>
+          <text x="400" y="125" text-anchor="middle" class="fg" fill="#b91c1c" font-weight="600">不可对角化</text>
+          <text x="400" y="145" text-anchor="middle" class="fg2">需 Jordan 形</text>
+          <text x="245" y="105" text-anchor="middle" class="fg2">是 ↗</text>
+          <text x="245" y="125" text-anchor="middle" class="fg2">否 ↘</text>
+          <text x="230" y="190" text-anchor="middle" class="fg2">判定流程：检查所有特征值的几何重数是否等于代数重数</text>
+        </svg>
+        <figcaption>Fig: 可对角化判定流程图</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(3 \times 3\) 矩阵 \(A\) 有 3 个互异实特征值。\(A\) 是否可对角化？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！互异特征值⇒特征向量线性无关，凑足 \\(n\\) 个即对角化。')">A. 必可对角化</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。互异特征值⇒特征向量线性无关，凑足 \\(n\\) 个即对角化。')">B. 不可对角化</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。互异特征值⇒特征向量线性无关，凑足 \\(n\\) 个即对角化。')">C. 仅当 \(A\) 对称才可</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。互异特征值⇒特征向量线性无关，凑足 \\(n\\) 个即对角化。')">D. 需检查几何重数才能判断</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>应用：矩阵幂、马氏链与递推关系</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>对角化不仅是理论工具，更是解决实际问题的引擎。任何涉及「同一线性变换重复施加」的问题——递推数列、马氏链长期分布、离散动力系统的稳定性——都可以化归为矩阵高次幂的计算。如果矩阵可对角化，这些原本不可能直接展开的运算就被化为对角元素的简单幂运算。</p>
+            <ul>
+              <li><strong>递推数列的封闭式</strong>：Fibonacci 数列 \(F_{n+1} = F_n + F_{n-1}\) 通过对角化矩阵 \(\begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}\) 立即给出 Binet 公式。</li>
+              <li><strong>网页排名 PageRank</strong>：Google 早期算法把网页跳转建模为巨大马氏链，稳态分布即网页重要性的客观度量，本质上就是求最大特征值的特征向量。</li>
+              <li><strong>种群生态</strong>：Leslie 模型把分年龄段的种群演化写为线性递推 \(x_{n+1} = L x_n\)，主特征值决定种群是增长、稳定还是衰减。</li>
+            </ul>
+            <p>本节通过三个典型应用——矩阵幂的计算、马氏链稳态、线性递推求解——展示对角化如何把抽象的代数构造变为强大的计算与建模工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心抽象是「线性递推 ⟺ 矩阵迭代」。任何满足 \(x_{n+k} = a_{k-1} x_{n+k-1} + \cdots + a_0 x_n\) 的递推数列都可写为向量形式 \(\mathbf{x}_{n+1} = A \mathbf{x}_n\)，其中 \(A\) 是「伴随矩阵」（companion matrix）。这把单一标量序列的演化转换为向量序列的简单线性迭代——\(\mathbf{x}_n = A^n \mathbf{x}_0\)。</p>
+            <p>在对角化框架下，进一步把 \(\mathbf{x}_0\) 在特征向量基下展开 \(\mathbf{x}_0 = \sum c_i v_i\)，则</p>
+            \[\mathbf{x}_n = A^n \mathbf{x}_0 = \sum c_i \lambda_i^n v_i\]
+            <p>整个动力学退化为各「模态」 \(c_i \lambda_i^n v_i\) 的独立叠加。当 \(n \to \infty\)，最大 \(|\lambda_i|\)（即谱半径）对应的模态主导，其余模态被指数压制。这是动力系统渐近行为分析的统一范式。</p>
+            <p>马氏链的特殊性在于转移矩阵的最大特征值恰为 1（保证概率守恒），对应特征向量即稳态分布。Perron-Frobenius 定理保证了这一性质对于不可约非周期马氏链的稳态唯一性，是离散概率论的奠基石之一（深入证明属概率论范围）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>对角化下的矩阵幂</h4>
+            <p>若 \(A = PDP^{-1}\)，\(D = \mathrm{diag}(\lambda_1, \ldots, \lambda_n)\)，则</p>
+            \[A^k = P D^k P^{-1}, \qquad D^k = \mathrm{diag}(\lambda_1^k, \ldots, \lambda_n^k)\]
+            <p>计算复杂度从 \(O(k \cdot n^3)\) 降到 \(O(n^3 + n \log k)\)（标量幂可用快速幂），是巨大的加速。</p>
+
+            <h4>线性递推的矩阵化</h4>
+            <p>Fibonacci：\(F_{n+1} = F_n + F_{n-1}\)。令 \(\mathbf{x}_n = (F_{n+1}, F_n)^T\)，则</p>
+            \[\mathbf{x}_n = M \mathbf{x}_{n-1}, \qquad M = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}, \qquad \mathbf{x}_0 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}\]
+            <p>\(p_M(\lambda) = \lambda^2 - \lambda - 1\)，特征值 \(\varphi = (1+\sqrt 5)/2\)（黄金比）与 \(\psi = (1-\sqrt 5)/2\)。对角化后：</p>
+            \[F_n = \frac{\varphi^n - \psi^n}{\sqrt 5}\]
+            <p>这正是 <strong>Binet 公式</strong>。\(|\psi| < 1\)，故 \(F_n \approx \varphi^n / \sqrt 5\)，增长率为黄金比。</p>
+
+            <h4>马氏链与稳态</h4>
+            <p>设 \(P\) 为 <strong>列随机矩阵</strong>（每列和为 1，所有元素 \(\ge 0\)）。状态分布演化：\(\pi_{n+1} = P \pi_n\)。<strong>稳态</strong> \(\pi^*\) 满足 \(P \pi^* = \pi^*\)，即 \(\pi^*\) 是 \(P\) 关于特征值 1 的特征向量（再归一化使分量和为 1）。</p>
+            <p>例：\(P = \begin{pmatrix} 0.7 & 0.4 \\ 0.3 & 0.6 \end{pmatrix}\)。解 \((P - I)\pi^* = 0\)：\(-0.3\pi_1 + 0.4 \pi_2 = 0 \Rightarrow 3\pi_1 = 4\pi_2\)，归一化得 \(\pi^* = (4/7, 3/7)^T\)。</p>
+
+            <h4>离散动力系统的渐近行为</h4>
+            <p>对系统 \(x_{n+1} = A x_n\)，长期行为由<strong>谱半径</strong> \(\rho(A) = \max_i |\lambda_i|\) 决定：</p>
+            <p>(a) \(\rho(A) < 1\) ⟹ \(x_n \to 0\)（所有模态衰减）；</p>
+            <p>(b) \(\rho(A) > 1\) ⟹ \(\|x_n\| \to \infty\)（至少一个模态发散）；</p>
+            <p>(c) \(\rho(A) = 1\) ⟹ 临界情形，行为依赖于 \(\lambda = 1\) 特征向量与初始条件 \(x_0\) 的对齐情况。</p>
+            <p>这是离散稳定性理论的基本结论，物理上对应于线性化系统在不动点附近的稳定性判据。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>Google PageRank</strong>：把万维网建模为巨大有向图，转移矩阵描述随机浏览者点击链接的概率。稳态分布给出每个网页的「重要性分数」。原始 PageRank 即求转移矩阵主特征向量，规模达数十亿维，使用幂迭代法高效逼近。</p>
+            <p><strong>种群生态学</strong>：Leslie 矩阵 \(L\) 描述按年龄段划分的种群，\(L\) 的最大特征值（Perron 根）\(\lambda^*\) 为种群长期增长率：\(\lambda^* > 1\) 增长，\(\lambda^* < 1\) 灭绝，对应特征向量为稳态年龄分布。</p>
+            <p><strong>经济投入产出模型</strong>：Leontief 模型 \(x = Ax + d\) 中，\((I - A)^{-1}\) 的存在性依赖 \(A\) 的谱半径 \(< 1\)。通过求 \(A\) 的特征值可判断经济系统是否能稳定生产以满足外部需求。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用对角化计算 \(A^{20}\)，其中 \(A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}\)。</p>
+            <p><em>解答</em>：由 KP3 例题 1，\(A = PDP^{-1}\)，\(P = \begin{pmatrix} 1 & 1 \\ -2 & 1 \end{pmatrix}\)，\(D = \mathrm{diag}(2, 5)\)。则 \(A^{20} = P D^{20} P^{-1} = P \mathrm{diag}(2^{20}, 5^{20}) P^{-1}\)。\(P^{-1} = \frac{1}{3}\begin{pmatrix} 1 & -1 \\ 2 & 1 \end{pmatrix}\)。直接乘出对应数值即可——核心威力是把 20 次矩阵乘法降为 2 次。</p>
+            <p><strong>例题 2</strong>：天气模型：晴 → 晴概率 0.8，晴 → 雨 0.2；雨 → 晴 0.5，雨 → 雨 0.5。求长期晴天比例。</p>
+            <p><em>解答</em>：转移矩阵（列为「今天状态」，行为「明天状态」）\(P = \begin{pmatrix} 0.8 & 0.5 \\ 0.2 & 0.5 \end{pmatrix}\)。求稳态：\((P-I)\pi = 0\)：\(-0.2\pi_S + 0.5\pi_R = 0 \Rightarrow \pi_S = 2.5\pi_R\)。归一化 \(\pi_S + \pi_R = 1\) 得 \(\pi_S = 5/7\), \(\pi_R = 2/7\)。长期晴天比例约 \(71.4\%\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>列随机 vs 行随机</strong>：转移矩阵约定不同，公式 \(\pi_{n+1} = P \pi_n\) 与 \(\pi_{n+1} = \pi_n P\) 互为转置。混淆会导致解错稳态方向。</li>
+              <li><strong>稳态不归一化</strong>：求得的特征向量须乘适当常数使分量和为 1，否则不是合法概率分布。</li>
+              <li><strong>不可对角化时滥用 \(A^k = PD^k P^{-1}\)</strong>：该公式仅对可对角化矩阵成立。Jordan 块情形需用矩阵指数或广义特征向量公式。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="linear-algebra-ch05-kp4">
+        <svg viewBox="0 0 460 230" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:12px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.node{fill:#dbeafe;stroke:#3b82f6;stroke-width:1.5}.arc{stroke:#475569;fill:none;stroke-width:1.4}</style>
+          <defs><marker id="ah-la5k4" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 Z" fill="#475569"/></marker></defs>
+          <circle cx="130" cy="100" r="42" class="node"/>
+          <text x="130" y="98" text-anchor="middle" class="fg" font-weight="600">晴 ☀</text>
+          <text x="130" y="115" text-anchor="middle" class="fg2">π_S = 5/7</text>
+          <circle cx="330" cy="100" r="42" class="node"/>
+          <text x="330" y="98" text-anchor="middle" class="fg" font-weight="600">雨 ☂</text>
+          <text x="330" y="115" text-anchor="middle" class="fg2">π_R = 2/7</text>
+          <path d="M170,90 Q230,50 290,90" class="arc" marker-end="url(#ah-la5k4)"/>
+          <text x="230" y="55" text-anchor="middle" class="fg2">0.2</text>
+          <path d="M290,115 Q230,155 170,115" class="arc" marker-end="url(#ah-la5k4)"/>
+          <text x="230" y="160" text-anchor="middle" class="fg2">0.5</text>
+          <path d="M115,65 A22,22 0 1,1 95,95" class="arc" marker-end="url(#ah-la5k4)"/>
+          <text x="78" y="60" class="fg2">0.8</text>
+          <path d="M345,65 A22,22 0 1,0 365,95" class="arc" marker-end="url(#ah-la5k4)"/>
+          <text x="370" y="60" class="fg2">0.5</text>
+          <text x="230" y="200" text-anchor="middle" class="fg">马氏链：稳态 = 转移矩阵关于 λ=1 的特征向量</text>
+          <text x="230" y="218" text-anchor="middle" class="fg2">长期晴天比例约 71.4%</text>
+        </svg>
+        <figcaption>Fig: 两态马氏链与稳态分布</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">离散动力系统 \(x_{n+1} = A x_n\) 当 \(n \to \infty\) 趋于零的充要条件（\(A\) 可对角化）是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。所有特征值绝对值 \\(<1\\)（谱半径 \\(<1\\)）。')">A. \(\det(A) < 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。所有特征值绝对值 \\(<1\\)（谱半径 \\(<1\\)）。')">B. \(\mathrm{tr}(A) < 0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！所有特征值绝对值 \\(<1\\)（谱半径 \\(<1\\)）。')">C. \(\rho(A) = \max |\lambda_i| < 1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。所有特征值绝对值 \\(<1\\)（谱半径 \\(<1\\)）。')">D. \(A\) 对称且正定</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4 线性方程组</a>
+      <a href="../linear-algebra.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 内积空间与正交性 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "linear-algebra-ch05";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>

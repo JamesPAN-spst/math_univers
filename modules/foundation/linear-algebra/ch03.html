@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 行列式 — 线性代数 Algèbre linéaire — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-algebra-ch03-q1",
+        "question": "计算 \\(\\det\\begin{pmatrix} 3 & 2 \\\\ 1 & 4 \\end{pmatrix}\\)。",
+        "options": [
+          "\\(10\\)",
+        "\\(14\\)",
+        "\\(-10\\)",
+        "\\(2\\)"
+        ],
+        "answer": 0,
+        "explanation": "二阶行列式公式 \\(\\det\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} = ad - bc\\)。代入：\\(3 \\times 4 - 2 \\times 1 = 12 - 2 = 10\\)。常见错误：忘记减法或将公式写成 \\(ad+bc\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q2",
+        "question": "\\(n\\) 阶单位矩阵 \\(I_n\\) 的行列式 \\(\\det(I_n)\\) 等于多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(n\\)",
+        "\\(n!\\)"
+        ],
+        "answer": 1,
+        "explanation": "行列式公理之一即「\\(\\det(I_n)=1\\)」（归一化条件）。亦可用对角线乘积验证：上三角矩阵的行列式等于对角元素之积，\\(I_n\\) 的对角元全为 \\(1\\)，乘积为 \\(1\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q3",
+        "question": "计算上三角矩阵 \\(\\det\\begin{pmatrix} 2 & 5 \\\\ 0 & 3 \\end{pmatrix}\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(6\\)",
+        "\\(11\\)",
+        "\\(-15\\)"
+        ],
+        "answer": 1,
+        "explanation": "三角矩阵（上或下）的行列式等于对角元素之积：\\(2 \\times 3 = 6\\)。也可用二阶公式：\\(2 \\times 3 - 5 \\times 0 = 6\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q4",
+        "question": "若矩阵 \\(A\\) 的某一行（或某一列）全为零，则 \\(\\det(A)\\) 等于多少？",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "依赖其它元素",
+        "无定义"
+        ],
+        "answer": 0,
+        "explanation": "由多重线性，对零行因子提取标量 \\(0\\)：\\(\\det(\\ldots, 0\\cdot v, \\ldots) = 0 \\cdot \\det(\\ldots, v, \\ldots) = 0\\)。直观上，零行使得对应方向的「体积」塌缩为零。"
+      },
+      {
+        "id": "linear-algebra-ch03-q5",
+        "question": "已知 \\(\\det(A)=7\\)，将 \\(A\\) 的两行互换得到矩阵 \\(B\\)，则 \\(\\det(B)\\) 等于？",
+        "options": [
+          "\\(7\\)",
+        "\\(-7\\)",
+        "\\(0\\)",
+        "\\(49\\)"
+        ],
+        "answer": 1,
+        "explanation": "行列式的反对称性：交换任两行（或列）使行列式变号。故 \\(\\det(B) = -\\det(A) = -7\\)。常见错误：误以为交换行不影响行列式（这一性质只对对称分量成立）。"
+      },
+      {
+        "id": "linear-algebra-ch03-q6",
+        "question": "关于 \\(\\det(A^T)\\) 与 \\(\\det(A)\\) 的关系，下列哪个正确？",
+        "options": [
+          "\\(\\det(A^T) = -\\det(A)\\)",
+        "\\(\\det(A^T) = \\det(A)\\)",
+        "\\(\\det(A^T) = 1/\\det(A)\\)",
+        "二者无确定关系"
+        ],
+        "answer": 1,
+        "explanation": "对任意方阵 \\(A\\)，\\(\\det(A^T) = \\det(A)\\)。这一对称性使得「按行」与「按列」的展开式、性质完全平行——凡可对行做的操作，对列同样适用。"
+      },
+      {
+        "id": "linear-algebra-ch03-q7",
+        "question": "用 Sarrus 法则计算 \\(\\det\\begin{pmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 4 \\\\ 5 & 6 & 0 \\end{pmatrix}\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(15\\)"
+        ],
+        "answer": 1,
+        "explanation": "按第一行展开：\\(1 \\cdot \\det\\begin{pmatrix}1&4\\\\6&0\\end{pmatrix} - 2 \\cdot \\det\\begin{pmatrix}0&4\\\\5&0\\end{pmatrix} + 3 \\cdot \\det\\begin{pmatrix}0&1\\\\5&6\\end{pmatrix} = 1\\cdot(0-24) - 2\\cdot(0-20) + 3\\cdot(0-5) = -24+40-15 = 1\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q8",
+        "question": "设 \\(A, B \\in M_3(\\mathbb{R})\\)，\\(\\det(A) = 2,\\; \\det(B) = 5\\)。则 \\(\\det(AB) = ?\\)",
+        "options": [
+          "\\(7\\)",
+        "\\(10\\)",
+        "\\(25\\)",
+        "\\(-10\\)"
+        ],
+        "answer": 1,
+        "explanation": "行列式的乘积公式：\\(\\det(AB) = \\det(A)\\det(B) = 2 \\times 5 = 10\\)。注意 \\(\\det(A+B)\\) 不等于 \\(\\det(A)+\\det(B)\\)，行列式对加法不保线性，仅对每行/列单独保多重线性。"
+      },
+      {
+        "id": "linear-algebra-ch03-q9",
+        "question": "设 \\(A \\in M_3(\\mathbb{R})\\)，\\(\\det(A) = 4\\)。则 \\(\\det(2A)\\) 等于？",
+        "options": [
+          "\\(8\\)",
+        "\\(16\\)",
+        "\\(32\\)",
+        "\\(64\\)"
+        ],
+        "answer": 2,
+        "explanation": "对 \\(n\\) 阶矩阵 \\(A\\)，\\(\\det(kA) = k^n \\det(A)\\)，因为对每行各提取一个因子 \\(k\\)。代入 \\(n=3, k=2\\)：\\(\\det(2A) = 2^3 \\cdot 4 = 32\\)。常见错误：误以为 \\(\\det(2A) = 2\\det(A) = 8\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q10",
+        "question": "按第一行展开计算 \\(\\det\\begin{pmatrix} 1 & 0 & 2 \\\\ 3 & 1 & 0 \\\\ 0 & 4 & 1 \\end{pmatrix}\\)。",
+        "options": [
+          "\\(13\\)",
+        "\\(25\\)",
+        "\\(-25\\)",
+        "\\(-13\\)"
+        ],
+        "answer": 1,
+        "explanation": "Laplace 展开：\\(1 \\cdot \\det\\begin{pmatrix}1&0\\\\4&1\\end{pmatrix} - 0 \\cdot \\det\\begin{pmatrix}3&0\\\\0&1\\end{pmatrix} + 2 \\cdot \\det\\begin{pmatrix}3&1\\\\0&4\\end{pmatrix} = 1\\cdot(1-0) + 2\\cdot(12-0) = 1+24 = 25\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q11",
+        "question": "对矩阵 \\(A\\) 实施初等变换：将第二行整体乘以常数 \\(k\\) 得 \\(B\\)。则 \\(\\det(B)\\) 与 \\(\\det(A)\\) 的关系？",
+        "options": [
+          "\\(\\det(B) = \\det(A)\\)",
+        "\\(\\det(B) = k \\det(A)\\)",
+        "\\(\\det(B) = k^2 \\det(A)\\)",
+        "\\(\\det(B) = -\\det(A)\\)"
+        ],
+        "answer": 1,
+        "explanation": "由多重线性，将某一行乘以 \\(k\\)，行列式整体放大 \\(k\\) 倍：\\(\\det(B) = k \\det(A)\\)。三类初等变换效应：①交换两行变号；②某行乘 \\(k\\) 倍；③某行加另一行的倍数，行列式不变。"
+      },
+      {
+        "id": "linear-algebra-ch03-q12",
+        "question": "用 Cramer 法则求方程组 \\(\\begin{cases} 2x + y = 5 \\\\ x + 3y = 10 \\end{cases}\\) 的解 \\(x\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)"
+        ],
+        "answer": 1,
+        "explanation": "系数矩阵 \\(A=\\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}\\)，\\(\\det A = 6-1 = 5\\)。\\(A_x = \\begin{pmatrix}5&1\\\\10&3\\end{pmatrix}\\)，\\(\\det A_x = 15-10 = 5\\)。故 \\(x = \\det A_x / \\det A = 5/5 = 1\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q13",
+        "question": "矩阵 \\(A = \\begin{pmatrix} 2 & 1 \\\\ 3 & 4 \\end{pmatrix}\\) 的伴随矩阵 \\(\\mathrm{adj}(A)\\) 等于？",
+        "options": [
+          "\\(\\begin{pmatrix} 4 & -1 \\\\ -3 & 2 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 4 & -3 \\\\ -1 & 2 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 2 & 3 \\\\ 1 & 4 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} -4 & 1 \\\\ 3 & -2 \\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(2\\times 2\\) 伴随矩阵公式：\\(\\mathrm{adj}\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix} = \\begin{pmatrix}d&-b\\\\-c&a\\end{pmatrix}\\)。代入得 \\(\\begin{pmatrix}4&-1\\\\-3&2\\end{pmatrix}\\)。验证 \\(A\\cdot\\mathrm{adj}(A) = \\det(A)\\cdot I = 5I\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q14",
+        "question": "用伴随矩阵法求 \\(A = \\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix}\\) 的逆矩阵 \\(A^{-1}\\)。",
+        "options": [
+          "\\(\\begin{pmatrix} -2 & 1 \\\\ 3/2 & -1/2 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 2 & -1 \\\\ -3/2 & 1/2 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 4 & -2 \\\\ -3 & 1 \\end{pmatrix}\\)",
+        "\\(\\begin{pmatrix} 1 & -2 \\\\ -3 & 4 \\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\det A = 4 - 6 = -2\\)，\\(\\mathrm{adj}(A) = \\begin{pmatrix}4&-2\\\\-3&1\\end{pmatrix}\\)。\\(A^{-1} = \\mathrm{adj}(A)/\\det(A) = \\frac{1}{-2}\\begin{pmatrix}4&-2\\\\-3&1\\end{pmatrix} = \\begin{pmatrix}-2&1\\\\3/2&-1/2\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q15",
+        "question": "若 \\(A\\) 可逆且 \\(\\det(A) = 4\\)，则 \\(\\det(A^{-1}) = ?\\)",
+        "options": [
+          "\\(4\\)",
+        "\\(-4\\)",
+        "\\(1/4\\)",
+        "\\(0\\)"
+        ],
+        "answer": 2,
+        "explanation": "由 \\(\\det(AA^{-1}) = \\det(I) = 1\\) 与乘积公式 \\(\\det(A)\\det(A^{-1}) = 1\\)，故 \\(\\det(A^{-1}) = 1/\\det(A) = 1/4\\)。\\(A\\) 可逆等价于 \\(\\det(A) \\ne 0\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q16",
+        "question": "用初等变换法计算 \\(\\det\\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 5 & 8 \\\\ 1 & 3 & 5 \\end{pmatrix}\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(5\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(R_2 \\leftarrow R_2 - 2R_1\\)，\\(R_3 \\leftarrow R_3 - R_1\\) 不改变行列式：\\(\\begin{pmatrix}1&2&3\\\\0&1&2\\\\0&1&2\\end{pmatrix}\\)。第二、三行相同，故行列式为 \\(0\\)。等价地，原矩阵秩 \\(<3\\)，奇异。"
+      },
+      {
+        "id": "linear-algebra-ch03-q17",
+        "question": "由向量 \\(\\vec u = (1,2,0),\\;\\vec v = (0,1,3),\\;\\vec w = (2,0,1)\\) 张成的平行六面体的体积为？",
+        "options": [
+          "\\(7\\)",
+        "\\(11\\)",
+        "\\(13\\)",
+        "\\(15\\)"
+        ],
+        "answer": 2,
+        "explanation": "体积 \\(= \\left|\\det\\begin{pmatrix} 1 & 0 & 2 \\\\ 2 & 1 & 0 \\\\ 0 & 3 & 1 \\end{pmatrix}\\right|\\)（按列放向量）。按第一行展开：\\(1(1-0) - 0 + 2(6-0) = 1 + 12 = 13\\)，故体积为 \\(13\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q18",
+        "question": "用 Cramer 法则求方程组 \\(\\begin{cases} x+y+z = 2 \\\\ x-y+z = 0 \\\\ x+y-z = 0 \\end{cases}\\) 的 \\(z\\)。",
+        "options": [
+          "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(-1\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\det A = \\det\\begin{pmatrix}1&1&1\\\\1&-1&1\\\\1&1&-1\\end{pmatrix} = 1(1-1) - 1(-1-1) + 1(1+1) = 0+2+2 = 4\\)。替换第三列：\\(\\det A_z = \\det\\begin{pmatrix}1&1&2\\\\1&-1&0\\\\1&1&0\\end{pmatrix}\\)。按第三列展开：\\(2 \\cdot \\det\\begin{pmatrix}1&-1\\\\1&1\\end{pmatrix} = 2 \\cdot 2 = 4\\)。故 \\(z = 4/4 = 1\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q19",
+        "question": "设分块矩阵 \\(M = \\begin{pmatrix} A & B \\\\ 0 & C \\end{pmatrix}\\)，其中 \\(A = \\begin{pmatrix}2&1\\\\0&3\\end{pmatrix},\\;C = \\begin{pmatrix}1&2\\\\3&4\\end{pmatrix},\\;B\\) 任意 \\(2\\times2\\)。则 \\(\\det(M) = ?\\)",
+        "options": [
+          "\\(0\\)",
+        "\\(-12\\)",
+        "\\(12\\)",
+        "依赖于 \\(B\\)"
+        ],
+        "answer": 1,
+        "explanation": "对块上三角矩阵 \\(\\det\\begin{pmatrix}A&B\\\\0&C\\end{pmatrix} = \\det(A)\\cdot\\det(C)\\)，与 \\(B\\) 无关。\\(\\det A = 2\\times3 - 1\\times 0 = 6\\)，\\(\\det C = 4-6 = -2\\)，故 \\(\\det M = 6 \\times (-2) = -12\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q20",
+        "question": "线性变换 \\(T:\\mathbb{R}^2 \\to \\mathbb{R}^2\\) 由矩阵 \\(\\begin{pmatrix}3&-1\\\\2&\\;1\\end{pmatrix}\\) 给出。关于 \\(T\\) 对面积与定向的作用，下列哪个描述正确？",
+        "options": [
+          "面积放大 \\(5\\) 倍，保持定向",
+        "面积放大 \\(5\\) 倍，反转定向",
+        "面积缩小为 \\(1/5\\)，保持定向",
+        "面积不变，反转定向"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\det T = 3\\cdot 1 - (-1)\\cdot 2 = 3 + 2 = 5\\)。\\(|\\det T| = 5\\) 即面积放大倍数；\\(\\det T > 0\\) 即保持定向（顺时针仍为顺时针）。若 \\(\\det T < 0\\) 则反转定向（如反射）。"
+      },
+      {
+        "id": "linear-algebra-ch03-q21",
+        "question": "Vandermonde 行列式 \\(V(x_1,x_2,x_3) = \\det\\begin{pmatrix}1&x_1&x_1^2\\\\1&x_2&x_2^2\\\\1&x_3&x_3^2\\end{pmatrix}\\)。代入 \\(x_1=1,\\;x_2=2,\\;x_3=3\\)，结果为？",
+        "options": [
+          "\\(0\\)",
+        "\\(2\\)",
+        "\\(6\\)",
+        "\\(-2\\)"
+        ],
+        "answer": 1,
+        "explanation": "Vandermonde 公式：\\(V = \\prod_{i<j}(x_j - x_i) = (x_2-x_1)(x_3-x_1)(x_3-x_2) = 1 \\cdot 2 \\cdot 1 = 2\\)。直接计算亦可得 \\(2\\)。Vandermonde 在多项式插值与离散傅里叶变换中是核心结构。"
+      },
+      {
+        "id": "linear-algebra-ch03-q22",
+        "question": "设 \\(A \\in M_3(\\mathbb{R})\\)，\\(\\det(A) = 2\\)。则 \\(\\det(A^5) = ?\\)",
+        "options": [
+          "\\(10\\)",
+        "\\(25\\)",
+        "\\(32\\)",
+        "\\(243\\)"
+        ],
+        "answer": 2,
+        "explanation": "由乘积公式归纳得 \\(\\det(A^k) = (\\det A)^k\\)。代入：\\(\\det(A^5) = 2^5 = 32\\)。常见错误：把指数与维数搞混，误算 \\(2^3 = 8\\) 或 \\(2 \\times 5 = 10\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q23",
+        "question": "下列 \\(\\mathbb{R}^3\\) 上的线性变换，哪一个会反转定向（即把右手系变为左手系）？",
+        "options": [
+          "绕 \\(z\\) 轴旋转 \\(90°\\)",
+        "对 \\(xy\\) 平面的反射 \\((x,y,z)\\mapsto(x,y,-z)\\)",
+        "整体伸缩 \\((x,y,z)\\mapsto(2x,2y,2z)\\)",
+        "剪切 \\((x,y,z)\\mapsto(x+z,y,z)\\)"
+        ],
+        "answer": 1,
+        "explanation": "定向由行列式符号判定：旋转 \\(\\det = 1\\)，反射 \\(\\det\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&-1\\end{pmatrix} = -1\\)（反转），数乘 \\(\\det = 2^3 = 8 > 0\\)，剪切 \\(\\det = 1\\)。故只有 B 反转定向。"
+      },
+      {
+        "id": "linear-algebra-ch03-q24",
+        "question": "下列关于矩阵 \\(A = \\begin{pmatrix}1&2&3\\\\2&4&6\\\\1&0&1\\end{pmatrix}\\) 的判断哪一项正确？",
+        "options": [
+          "\\(A\\) 可逆且 \\(\\det A > 0\\)",
+        "\\(A\\) 可逆且 \\(\\det A < 0\\)",
+        "\\(A\\) 不可逆，\\(\\det A = 0\\)",
+        "\\(A\\) 是正交矩阵"
+        ],
+        "answer": 2,
+        "explanation": "观察第二行 \\(=2\\times\\) 第一行，两行线性相关，故 \\(\\det A = 0\\)。\\(A\\) 奇异，不可逆，且伴随矩阵法给出的 \\(A^{-1} = \\mathrm{adj}(A)/\\det(A)\\) 在此分母为零，无定义。等价表述：\\(\\mathrm{rank}(A) < 3\\)。"
+      },
+      {
+        "id": "linear-algebra-ch03-q25",
+        "question": "对于 \\(n\\times n\\) 实矩阵 \\(A\\)，下列等价命题中哪一组全部成立？",
+        "options": [
+          "\\(A\\) 可逆 ⇔ \\(\\det A \\ne 0\\) ⇔ \\(\\mathrm{rank}(A)=n\\)",
+        "\\(A\\) 可逆 ⇔ \\(\\det A = 0\\) ⇔ \\(\\mathrm{rank}(A)=n\\)",
+        "\\(A\\) 可逆 ⇔ \\(\\det A > 0\\) ⇔ 列向量正交",
+        "\\(A\\) 可逆 ⇔ \\(A\\) 对称 ⇔ \\(\\det A \\ne 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(n\\times n\\) 方阵的可逆性是若干等价命题的核心：\\(A\\) 可逆 ⇔ \\(\\det A \\ne 0\\) ⇔ 列（行）向量线性无关 ⇔ \\(\\mathrm{rank}(A)=n\\) ⇔ \\(Ax=0\\) 仅有零解 ⇔ \\(Ax=b\\) 对任意 \\(b\\) 有唯一解。这些将在 Ch.4 中系统证明。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="linear-algebra"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../../../modules/foundation/linear-algebra.html" class="module-name">线性代数 Algèbre linéaire</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 行列式的公理化定义</a></li>
+      <li><a href="#kp2">02 · 行列式的性质与计算</a></li>
+      <li><a href="#kp3">03 · Cramer 法则与伴随矩阵</a></li>
+      <li><a href="#kp4">04 · 行列式的几何意义</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>行列式</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>行列式的公理化定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>行列式最早出现在 17 世纪求解线性方程组的工作中（关孝和、Leibniz 几乎同时独立发现），后由 Cramer、Cauchy 等系统化。在线性代数的全景中，行列式同时承担多重角色：判定方阵是否可逆（\(\det A \ne 0\)），度量线性变换对体积的伸缩比，给出方程组解的显式公式（Cramer 法则），并是特征多项式的基础。</p>
+            <ul>
+              <li><strong>方程组求解</strong>：二元一次方程组 \(\begin{cases}ax+by=e\\cx+dy=f\end{cases}\) 解的存在唯一性恰好由 \(ad-bc \ne 0\) 决定——这是「行列式」一词在历史上的本意。</li>
+              <li><strong>几何度量</strong>：平面上两个向量张成的平行四边形面积、空间中三个向量张成的平行六面体体积，都可由对应矩阵的行列式（取绝对值）给出。</li>
+              <li><strong>判别奇异性</strong>：判断一个方阵是否退化（列向量是否线性相关、是否存在非零核向量）只需检查一个标量 \(\det A\) 是否为零。</li>
+            </ul>
+            <p>但「行列式」究竟是什么？早期定义五花八门——按位置展开、用置换求和、几何体积——都是同一对象的不同侧面。现代的处理方式是公理化：寻找最少几条性质，使得这几条公理已经唯一决定了行列式函数。这种自顶向下的方法既揭示了行列式的本质，又使各种计算技巧自然地从公理推出。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>公理化的核心思路是把 \(\det\) 看作把「方阵」映到「数」的函数，并要求它对每一行（或列）独立保持线性、对换两行（列）变号、单位阵的值为 \(1\)。这三条简单条件就把无穷多条「计算性质」统统压缩进一个紧致的定义。</p>
+            <p>多重线性的妙处是把「\(n\) 行的整个矩阵」拆成「关于第 \(i\) 行单独看的线性函数」。固定其他行，行列式就是某行向量的线性映射。反对称性进一步说：交换任何两行使输出变号——这等价于「相同两行使行列式为零」（设 \(A\) 中第 \(i\) 行 = 第 \(j\) 行，交换它们 \(A\) 不变但 \(\det\) 变号，故 \(\det A=0\)）。</p>
+            <p>这种公理化的回报是：可以证明满足三条公理的函数<em>唯一</em>存在。多重线性 + 反对称的所有 \(n\) 元函数构成一维空间，归一化条件 \(\det I = 1\) 选出该空间中的特定元素。这类「以性质定对象」的思路是现代代数的标准方法。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>三条公理</h4>
+            <p>把 \(n\times n\) 矩阵 \(A\) 视为 \(n\) 个行向量 \(A_1,\ldots,A_n \in \mathbb{R}^n\) 的有序排列。函数 \(\det:M_n(\mathbb{R})\to\mathbb{R}\) 称为<strong>行列式</strong>，若它满足：</p>
+            <p>(D1) <strong>多重线性</strong>：对每一行独立线性。即固定其它行，</p>
+            \[\det(\ldots,\,\alpha v + \beta w,\,\ldots) = \alpha\det(\ldots,v,\ldots) + \beta\det(\ldots,w,\ldots)\]
+            <p>(D2) <strong>反对称</strong>：交换任意两行使行列式变号，</p>
+            \[\det(\ldots,A_i,\ldots,A_j,\ldots) = -\det(\ldots,A_j,\ldots,A_i,\ldots)\]
+            <p>(D3) <strong>归一化</strong>：\(\det(I_n) = 1\)。</p>
+            <p>定理：满足 (D1)(D2)(D3) 的函数<strong>唯一</strong>存在。</p>
+
+            <h4>置换求和公式</h4>
+            <p>由公理可推出显式表达式（Leibniz 公式）：</p>
+            \[\det A = \sum_{\sigma\in S_n} \mathrm{sgn}(\sigma) \prod_{i=1}^{n} a_{i,\sigma(i)}\]
+            <p>其中 \(S_n\) 是 \(n\) 元置换群、\(\mathrm{sgn}(\sigma)\in\{+1,-1\}\) 是置换的符号（对换分解的奇偶性）。该公式说明行列式是 \(n!\) 项带符号乘积之和，每项从矩阵的不同行、不同列各取一个元素。</p>
+
+            <h4>低阶公式</h4>
+            <p>对 \(2\times 2\) 矩阵：</p>
+            \[\det\begin{pmatrix}a & b\\c & d\end{pmatrix} = ad - bc\]
+            <p>对 \(3\times 3\) 矩阵（Sarrus 法则）：</p>
+            \[\det\begin{pmatrix}a&b&c\\d&e&f\\g&h&i\end{pmatrix} = aei + bfg + cdh - ceg - bdi - afh\]
+            <p>三阶以上不再有 Sarrus 类的对角线公式，只能用 Laplace 展开或行简化。</p>
+
+            <h4>立即推论</h4>
+            <p>(i) 某行全为零 \(\Rightarrow \det A = 0\)：由多重线性提取因子 \(0\)。</p>
+            <p>(ii) 两行相同 \(\Rightarrow \det A = 0\)：交换两行使 \(\det A = -\det A\)，故 \(\det A = 0\)。</p>
+            <p>(iii) 某行加另一行的标量倍 \(\Rightarrow \det A\) 不变：由多重线性 + 推论 (ii)。</p>
+            <p>(iv) \(\det(A^T) = \det(A)\)：由 Leibniz 公式对换 \(\sigma \mapsto \sigma^{-1}\) 可得，行的性质对列同样成立。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>方程组求解</strong>：判断线性方程组 \(Ax=b\) 是否有唯一解只需计算一个数 \(\det A\)。这是初等数值线性代数中最基础的判别工具。</p>
+            <p><strong>计算机图形学</strong>：渲染三角形时，要判定空间中四点是否共面、判定一点在三角形内外、计算多面体的有向体积——所有这些都归结为一个 \(3\times 3\) 或 \(4\times 4\) 行列式的符号。</p>
+            <p><strong>微分方程理论</strong>：Wronski 行列式 \(W(y_1,\ldots,y_n)\) 由解函数及其导数构成，其非零性等价于解的线性无关性，是常微分方程线性独立性判定的标准工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用公理验证 \(\det\begin{pmatrix}a&b\\c&d\end{pmatrix} = ad - bc\)。</p>
+            <p><em>解答</em>：将 \(\binom{a}{c} = a\binom{1}{0} + c\binom{0}{1}\)，\(\binom{b}{d} = b\binom{1}{0} + d\binom{0}{1}\)。由多重线性 \(\det = ab\det\begin{pmatrix}1&1\\0&0\end{pmatrix} + ad\det\begin{pmatrix}1&0\\0&1\end{pmatrix} + cb\det\begin{pmatrix}0&1\\1&0\end{pmatrix} + cd\det\begin{pmatrix}0&0\\1&1\end{pmatrix}\)。其中第一、四项含相同列为 \(0\)；归一化给出 \(\det I = 1\)；反对称给出 \(\det\begin{pmatrix}0&1\\1&0\end{pmatrix} = -1\)。合计 \(ad - bc\)。</p>
+            <p><strong>例题 2</strong>：判断 \(f(A) = a_{11}a_{22} + a_{12}a_{21}\) 是否能作为 \(2\times 2\) 行列式。</p>
+            <p><em>解答</em>：检验反对称性。交换两行得 \(B = \begin{pmatrix}a_{21}&a_{22}\\a_{11}&a_{12}\end{pmatrix}\)，\(f(B) = a_{21}a_{12} + a_{22}a_{11}\)。\(f(B) = f(A) \ne -f(A)\)（除非 \(f=0\)）。反对称性失败，故 \(f\) 不是行列式。正确公式必须是 \(a_{11}a_{22} - a_{12}a_{21}\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把 \(\det\) 当作可加函数</strong>：\(\det(A+B) \ne \det(A) + \det(B)\)。多重线性只对每一行<em>单独</em>线性，对整个矩阵的相加不成立。例：\(A=B=I_2\)，\(\det(A+B) = \det(2I) = 4\)，\(\det A + \det B = 2\)。</li>
+              <li><strong>误用 \(\det(kA) = k\det(A)\)</strong>：正确公式是 \(\det(kA) = k^n\det(A)\)，因为 \(n\) 行各贡献一个因子 \(k\)。</li>
+              <li><strong>忽视行/列的对称地位</strong>：由 \(\det A^T = \det A\)，「按行的性质」与「按列的性质」可互相转换。例题中若提及「列变换」与「行变换」效果相同，无需另证。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="linear-algebra-ch03-kp1">
+        <svg viewBox="0 0 420 240" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:13px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.box{fill:#f8fafc;stroke:#94a3b8;stroke-width:1}.acc{fill:#6366f1;opacity:0.12;stroke:#6366f1;stroke-width:1.5}</style>
+          <rect x="20" y="40" width="120" height="160" class="box"/>
+          <text x="80" y="32" text-anchor="middle" class="fg" font-weight="600">公理 (D1)(D2)(D3)</text>
+          <text x="80" y="80" text-anchor="middle" class="fg2">多重线性</text>
+          <text x="80" y="100" text-anchor="middle" class="fg2">反对称</text>
+          <text x="80" y="120" text-anchor="middle" class="fg2">det(I)=1</text>
+          <text x="80" y="160" text-anchor="middle" class="fg2">最少三条</text>
+          <text x="80" y="180" text-anchor="middle" class="fg2">即唯一确定</text>
+          <path d="M150,120 L200,120" stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#arr-k1)"/>
+          <defs><marker id="arr-k1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#6366f1"/></marker></defs>
+          <rect x="210" y="40" width="190" height="160" class="acc"/>
+          <text x="305" y="32" text-anchor="middle" class="fg" font-weight="600">det 函数（唯一存在）</text>
+          <text x="305" y="80" text-anchor="middle" class="fg2">Leibniz 公式</text>
+          <text x="305" y="100" text-anchor="middle" class="fg2">∑_σ sgn(σ) ∏ a_{i,σ(i)}</text>
+          <text x="305" y="140" text-anchor="middle" class="fg2">2×2: ad − bc</text>
+          <text x="305" y="160" text-anchor="middle" class="fg2">3×3: Sarrus</text>
+          <text x="305" y="185" text-anchor="middle" class="fg2">高阶: Laplace 展开</text>
+          <text x="210" y="225" class="fg2">公理化推出所有计算公式</text>
+        </svg>
+        <figcaption>Fig: 行列式的公理化定义与显式公式的导出关系</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪一条<em>不是</em>行列式公理化定义中的必要条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。多重线性是行列式的核心条件。')">A. 对每一行（列）保持线性</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。反对称性确保了交换两行变号。')">B. 交换两行使行列式变号</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！行列式对乘法保持 \\(\\det(AB)=\\det A\\det B\\) 是定理而非公理，可由三条公理推出。')">C. \(\det(AB) = \det(A)\det(B)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。归一化条件 \\(\\det I = 1\\) 用以选定具体函数。')">D. \(\det(I_n) = 1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>行列式的性质与计算</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了公理化定义，下一步要解决的是：如何<em>实际计算</em>行列式。Leibniz 公式 \(\sum_\sigma \mathrm{sgn}(\sigma)\prod a_{i,\sigma(i)}\) 在理论上完美，但 \(n!\) 项之和当 \(n=10\) 已是 \(3628800\) 项，几乎无法手工或低效计算机直接展开。</p>
+            <ul>
+              <li><strong>大型矩阵</strong>：工程中线性方程组动辄 \(n=10^3\) 或更大，必须用「按行/列展开」或「初等变换法」把复杂问题降阶。</li>
+              <li><strong>结构化矩阵</strong>：稀疏矩阵、三角矩阵、分块矩阵都有专门的计算技巧（三角矩阵的行列式直接是对角线之积），充分利用结构能把计算复杂度从 \(O(n!)\) 降到 \(O(n^3)\) 甚至更低。</li>
+              <li><strong>理论推导</strong>：证明同伴定理（如行列式的乘积公式 \(\det(AB)=\det A\det B\)）需要熟练运用基本性质——某行倍加不变、对角线之积、转置不变等。</li>
+            </ul>
+            <p>本节系统整理行列式的所有运算性质，并给出两条主线计算路径：Laplace 按行/列展开（递归降阶），和初等变换法（化为三角形）。这两条思路是手工计算与机器计算的标准选择。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>行列式的性质几乎全部源自三条公理的<em>组合</em>。我们将公理与定理分层：</p>
+            <p>第一层（公理直接陈述）：多重线性、反对称、归一化。</p>
+            <p>第二层（公理直接推出）：某行为零 ⇒ \(\det = 0\)；两行相同 ⇒ \(\det = 0\)；某行加另一行倍数不变；某行乘 \(k\) 倍 ⇒ \(\det\) 乘 \(k\)。</p>
+            <p>第三层（更深的定理）：\(\det(AB) = \det(A)\det(B)\)（乘积公式）；\(\det(A^T) = \det(A)\)（转置不变）；按任何行/列的 Laplace 展开公式。</p>
+            <p>抽象上，前两层让我们能把任何矩阵通过「初等变换」化为三角形，并精确追踪 \(\det\) 的变化（每次交换变号、每次倍加不变、每次数乘按倍数缩放）。第三层提供另一种递归思路：按某行展开把 \(n\times n\) 行列式拆为 \(n\) 个 \((n-1)\times(n-1)\) 子行列式。两条路径殊途同归。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>性质一览</h4>
+            <p>(P1) <strong>转置不变</strong>：\(\det(A^T) = \det(A)\)。所有「按行」性质对列同样成立。</p>
+            <p>(P2) <strong>乘积公式</strong>：\(\det(AB) = \det(A)\cdot\det(B)\)。证明思路：固定 \(B\)，\(A \mapsto \det(AB)\) 是 \(A\) 的多重线性反对称函数，且当 \(A=I\) 时取值 \(\det(B)\)；由唯一性，必为 \(\det(A)\det(B)\)。</p>
+            <p>(P3) <strong>对角线之积</strong>：上（或下）三角矩阵的行列式等于对角线元素之积。</p>
+            \[\det\begin{pmatrix}a_{11}&\ast&\cdots&\ast\\0&a_{22}&\cdots&\ast\\\vdots&&\ddots&\vdots\\0&0&\cdots&a_{nn}\end{pmatrix} = a_{11}a_{22}\cdots a_{nn}\]
+            <p>(P4) <strong>初等变换效应</strong>：</p>
+            <ul>
+              <li>交换两行（列）：\(\det\) 变号 \((-1)\)。</li>
+              <li>某行（列）乘 \(k\)：\(\det\) 乘 \(k\)。</li>
+              <li>某行（列）加另一行（列）的 \(k\) 倍：\(\det\) 不变。</li>
+            </ul>
+
+            <h4>Laplace 展开公式</h4>
+            <p>设 \(M_{ij}\) 为去掉第 \(i\) 行、第 \(j\) 列后的 \((n-1)\)-阶子行列式（称为<strong>余子式</strong>），定义代数余子式 \(C_{ij} = (-1)^{i+j} M_{ij}\)。则按第 \(i\) 行展开：</p>
+            \[\det A = \sum_{j=1}^{n} a_{ij}\, C_{ij} = \sum_{j=1}^{n} (-1)^{i+j} a_{ij}\, M_{ij}\]
+            <p>按第 \(j\) 列展开类似。技巧：选含「零较多」的行/列展开可大幅减少计算量。</p>
+
+            <h4>初等变换法（化三角形）</h4>
+            <p>第三类初等变换（某行加另一行倍数）不改变 \(\det\)，可反复使用将矩阵化为上三角，再读出对角线之积即得行列式。手工计算的标准流程：</p>
+            <p>① 用第一行第一列元素消去下方所有元素（若主元为 \(0\)，先做行交换并记下变号）；</p>
+            <p>② 转入子矩阵，重复 ①；</p>
+            <p>③ 化完后 \(\det = (-1)^{交换次数}\times\) 对角线之积。</p>
+
+            <h4>具体计算示例</h4>
+            <p>\(\det\begin{pmatrix}2&1&3\\4&3&8\\6&5&15\end{pmatrix}\)：\(R_2 \leftarrow R_2 - 2R_1\)、\(R_3 \leftarrow R_3 - 3R_1\) 得 \(\begin{pmatrix}2&1&3\\0&1&2\\0&2&6\end{pmatrix}\)；再 \(R_3 \leftarrow R_3 - 2R_2\) 得 \(\begin{pmatrix}2&1&3\\0&1&2\\0&0&2\end{pmatrix}\)。\(\det = 2 \cdot 1 \cdot 2 = 4\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>数值计算</strong>：LU 分解的对角线乘积直接给出行列式，是科学计算库（LAPACK 等）的标准实现。\(O(n^3)\) 复杂度远优于 \(O(n!)\)。</p>
+            <p><strong>线性回归</strong>：最小二乘法的「正规方程」 \(X^T X \beta = X^T y\) 解的存在性需要 \(\det(X^T X) \ne 0\)，即设计矩阵列满秩。</p>
+            <p><strong>电路分析</strong>：基尔霍夫定律导出的网络方程组的可解性（独立回路个数）由相应矩阵的行列式判定，影响线性电路的拓扑分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：按第一列展开计算 \(\det\begin{pmatrix}1&2&3\\0&4&5\\0&0&6\end{pmatrix}\)。</p>
+            <p><em>解答</em>：第一列只有 \(a_{11}=1\) 非零，其余项贡献为零。\(\det = 1\cdot(-1)^{1+1}\det\begin{pmatrix}4&5\\0&6\end{pmatrix} = 1\cdot 24 = 24\)。验证：上三角对角线之积 \(1\cdot 4\cdot 6 = 24\)。✓</p>
+            <p><strong>例题 2</strong>：用初等变换计算 \(\det\begin{pmatrix}1&-2&3\\2&1&-1\\3&1&2\end{pmatrix}\)。</p>
+            <p><em>解答</em>：\(R_2 \leftarrow R_2 - 2R_1\) 得 \((0,5,-7)\)；\(R_3 \leftarrow R_3 - 3R_1\) 得 \((0,7,-7)\)。\(R_3 \leftarrow R_3 - \tfrac{7}{5}R_2\) 得 \((0,0,-7+\tfrac{49}{5}) = (0,0,\tfrac{14}{5})\)。\(\det = 1\cdot 5 \cdot \tfrac{14}{5} = 14\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>初等变换中漏记符号变化</strong>：行交换使 \(\det\) 变号，必须显式记录每次交换次数。倍加不变，但乘标量需把因子还原。</li>
+              <li><strong>Laplace 展开符号错误</strong>：代数余子式因子是 \((-1)^{i+j}\)，按第二行展开时第一项符号为 \((-1)^{2+1} = -1\)，而非 \(+1\)。</li>
+              <li><strong>把 \(\det(kA) = k\det(A)\) 用错</strong>：正确为 \(\det(kA) = k^n\det(A)\)。例：\(\det(2I_3) = 2^3 = 8\)，不是 \(2\)。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">关于 \(\det(2A)\)（其中 \(A\) 为 \(4\times 4\) 实矩阵）的正确表达？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。每行各提取因子 \\(2\\)，共 \\(2^4=16\\) 倍。')">A. \(\det(2A) = 2\det(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。每行各提取因子 \\(2\\)，共 \\(2^4=16\\) 倍。')">B. \(\det(2A) = 4\det(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。每行各提取因子 \\(2\\)，共 \\(2^4=16\\) 倍。')">C. \(\det(2A) = 8\det(A)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\det(kA)=k^n\\det(A)\\)，\\(n=4\\) 时为 \\(2^4=16\\)。')">D. \(\det(2A) = 16\det(A)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>Cramer 法则与伴随矩阵</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>线性方程组 \(Ax = b\) 是线性代数最基本的问题。当 \(A\) 是可逆方阵（\(\det A \ne 0\)）时，解存在且唯一：\(x = A^{-1} b\)。但 \(A^{-1}\) 怎么写出来？解 \(x_i\) 又有什么显式公式？这就是 Cramer 法则与伴随矩阵的核心问题。</p>
+            <ul>
+              <li><strong>显式解析解</strong>：Cramer 法则给出每个未知量的显式公式 \(x_i = \det(A_i)/\det(A)\)，其中 \(A_i\) 是把 \(A\) 的第 \(i\) 列替换为 \(b\) 后得到的矩阵。这种闭形式解在符号计算和理论推导中极为珍贵。</li>
+              <li><strong>逆矩阵公式</strong>：伴随矩阵 \(\mathrm{adj}(A)\) 满足 \(A\cdot\mathrm{adj}(A) = \det(A)\cdot I\)，由此 \(A^{-1} = \mathrm{adj}(A)/\det(A)\)。这一公式在小规模问题（\(2\times 2\)、\(3\times 3\)）和理论分析（如证明 \(A^{-1}\) 元素的有理性、可微性）中是首选工具。</li>
+              <li><strong>统一框架</strong>：Cramer 法则与伴随矩阵公式都来自代数余子式 \(C_{ij}\)，它们提供了「行列式 ↔ 求逆 ↔ 解方程」的桥梁。</li>
+            </ul>
+            <p>需要注意：Cramer 法则的计算复杂度高（每个 \(x_i\) 都要计算一个 \(n\)-阶行列式），实践中只在 \(n \le 3\) 或符号求解时使用。但作为理论工具，它的洞察价值是无可替代的。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>核心思路是利用行列式的多重线性，把方程组的解「直接读出」。考虑 \(Ax = b\)，写为 \(x_1 A_{(1)} + x_2 A_{(2)} + \cdots + x_n A_{(n)} = b\)（\(A_{(j)}\) 表 \(A\) 的第 \(j\) 列）。把 \(b\) 替换 \(A\) 的第 \(i\) 列得到的矩阵 \(A_i\)，其行列式由多重线性展开就<em>恰好</em>等于 \(x_i\det(A)\)。</p>
+            <p>伴随矩阵则采用「以余子式编码」的策略。\(\mathrm{adj}(A)_{ji} = C_{ij}\)（注意行列下标互换）的设计，使得 \(A\cdot\mathrm{adj}(A)\) 的对角项是<em>按某行展开的行列式</em>（值为 \(\det A\)），非对角项是<em>错位展开</em>（值为 \(0\)，因为相当于某行重复）。</p>
+            <p>这两条公式都展示了行列式的一个深层角色：它不仅是「判断可逆」的标量，更是「编码逆矩阵的代数信息」的载体。当 \(\det A = 0\) 时方程组要么无解、要么有无穷多解，需借助秩理论（Ch.4 重点）来分析。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>代数余子式与伴随矩阵</h4>
+            <p>设 \(A \in M_n(K)\)，\(M_{ij}\) 为去掉第 \(i\) 行第 \(j\) 列的 \((n-1)\)-阶子行列式，<strong>代数余子式</strong>为：</p>
+            \[C_{ij} = (-1)^{i+j} M_{ij}\]
+            <p><strong>伴随矩阵</strong>定义为代数余子式矩阵的转置：</p>
+            \[\mathrm{adj}(A)_{ji} = C_{ij} = (-1)^{i+j} M_{ij}\]
+            <p>注意下标顺序：第 \((j,i)\) 位置存放 \((i,j)\) 的代数余子式（即转置关系）。</p>
+
+            <h4>核心恒等式</h4>
+            <p>对任意方阵 \(A \in M_n(K)\)：</p>
+            \[A\cdot\mathrm{adj}(A) = \mathrm{adj}(A)\cdot A = \det(A)\cdot I_n\]
+            <p>证明：\((A\cdot\mathrm{adj}(A))_{ik} = \sum_{j} a_{ij}\,\mathrm{adj}(A)_{jk} = \sum_{j} a_{ij}\,C_{kj}\)。\(i = k\) 时为按第 \(i\) 行展开 \(\det A\)；\(i \ne k\) 时为「把 \(A\) 第 \(k\) 行替换成第 \(i\) 行」后的矩阵的展开，该矩阵两行相同故行列式为 \(0\)。</p>
+
+            <h4>逆矩阵公式</h4>
+            <p>由上式立即得到：当 \(\det(A) \ne 0\) 时，</p>
+            \[A^{-1} = \frac{1}{\det(A)}\,\mathrm{adj}(A)\]
+            <p>反之 \(\det(A) = 0\) 时 \(A\) 不可逆。</p>
+
+            <h4>Cramer 法则</h4>
+            <p>设 \(Ax = b\) 中 \(\det(A) \ne 0\)。令 \(A_i\) 为把 \(A\) 的第 \(i\) 列替换为 \(b\) 后得到的矩阵。则：</p>
+            \[x_i = \frac{\det(A_i)}{\det(A)},\quad i = 1, 2, \ldots, n\]
+            <p>证明：从 \(x = A^{-1} b = \mathrm{adj}(A)b/\det(A)\) 出发，\(x_i = \frac{1}{\det A}\sum_j C_{ji} b_j\)。而 \(\sum_j C_{ji} b_j\) 正是按第 \(i\) 列展开 \(\det(A_i)\)。</p>
+
+            <h4>\(2\times 2\) 显式公式</h4>
+            <p>\(A = \begin{pmatrix}a&b\\c&d\end{pmatrix}\)，\(\mathrm{adj}(A) = \begin{pmatrix}d&-b\\-c&a\end{pmatrix}\)。当 \(ad - bc \ne 0\)：</p>
+            \[A^{-1} = \frac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}\]
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>符号计算系统</strong>：Mathematica、Maple、SymPy 等系统在小规模问题上常用 Cramer 法则，因为它给出有理函数形式的解，便于后续符号化简和代数变换。</p>
+            <p><strong>电路网络</strong>：解 RLC 电路的节点电压方程时，若节点数较少（通常 \(\le 3\)），用 Cramer 法则可直接得到电压、电流的代数表达式，便于研究参数变化的影响。</p>
+            <p><strong>静力学与刚体平衡</strong>：固定支架受力分析中，未知力 \(F_1, F_2, F_3\) 由 \(3\) 个平衡方程决定。Cramer 法则给出 \(F_i\) 关于外力的解析表达式，方便工程优化。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用 Cramer 法则求解 \(\begin{cases}x + 2y = 5 \\ 3x + 4y = 11\end{cases}\)。</p>
+            <p><em>解答</em>：\(\det A = \det\begin{pmatrix}1&2\\3&4\end{pmatrix} = 4 - 6 = -2\)。\(\det A_x = \det\begin{pmatrix}5&2\\11&4\end{pmatrix} = 20-22 = -2\)；\(\det A_y = \det\begin{pmatrix}1&5\\3&11\end{pmatrix} = 11-15 = -4\)。\(x = -2/-2 = 1\)，\(y = -4/-2 = 2\)。验证：\(1 + 4 = 5\) ✓，\(3 + 8 = 11\) ✓。</p>
+            <p><strong>例题 2</strong>：用伴随矩阵法求 \(A = \begin{pmatrix}2&1\\5&3\end{pmatrix}\) 的逆。</p>
+            <p><em>解答</em>：\(\det A = 6-5 = 1\)；\(\mathrm{adj}(A) = \begin{pmatrix}3&-1\\-5&2\end{pmatrix}\)。故 \(A^{-1} = \mathrm{adj}(A)/\det(A) = \begin{pmatrix}3&-1\\-5&2\end{pmatrix}\)。验证 \(A\cdot A^{-1} = \begin{pmatrix}2\cdot3+1\cdot(-5)&2\cdot(-1)+1\cdot 2\\5\cdot3+3\cdot(-5)&5\cdot(-1)+3\cdot 2\end{pmatrix} = \begin{pmatrix}1&0\\0&1\end{pmatrix}\)。✓</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>替换列搞错位置</strong>：求 \(x_2\) 时要用 \(b\) 替换 \(A\) 的第 \(2\) 列得到 \(A_2\)，不是替换第 \(1\) 列。下标对应必须严格。</li>
+              <li><strong>伴随矩阵忘记转置</strong>：\(\mathrm{adj}(A)_{ji} = C_{ij}\)（行列下标互换），不是 \((C_{ij})\) 直接。\(2\times 2\) 时手工写出 \(\begin{pmatrix}d&-b\\-c&a\end{pmatrix}\) 是 \(\mathrm{adj}\)，不是把代数余子式直接排列。</li>
+              <li><strong>\(\det A = 0\) 时仍套用公式</strong>：当 \(\det A = 0\)，\(A\) 不可逆，\(\mathrm{adj}(A)/\det(A)\) 无定义，方程组要么无解要么有无穷多解（需 Ch.4 秩判别）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">求 \(A = \begin{pmatrix}2&1\\5&3\end{pmatrix}\) 的逆矩阵 \(A^{-1}\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\det A=1,\\;\\mathrm{adj}(A)=\\begin{pmatrix}3&-1\\\\-5&2\\end{pmatrix}\\)。')">A. \(\begin{pmatrix}3&-1\\-5&2\end{pmatrix}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这是 \\(\\mathrm{adj}\\) 的错误填法（位置和符号不对）。')">B. \(\begin{pmatrix}3&-5\\-1&2\end{pmatrix}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\mathrm{adj}\\) 公式是 \\(\\begin{pmatrix}d&-b\\\\-c&a\\end{pmatrix}\\)。')">C. \(\begin{pmatrix}-3&1\\5&-2\end{pmatrix}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。这是原矩阵的转置，不是逆。')">D. \(\begin{pmatrix}2&5\\1&3\end{pmatrix}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>行列式的几何意义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>前三节我们把行列式视为「代数公式 + 计算技巧」。但行列式还有一个完全等价、却更具洞察力的几何身份：它度量了线性变换对体积的伸缩比，并通过符号编码<em>定向</em>（朝向）的保持或反转。这个几何视角是连接线性代数与微积分（如换元法的 Jacobi 行列式）、几何拓扑（曲面定向）、物理学（叉乘、流形上的体积形式）的桥梁。</p>
+            <ul>
+              <li><strong>面积与体积</strong>：\(2\) 维平行四边形的面积是 \(|\det|\)；\(3\) 维平行六面体的体积是 \(|\det|\)；\(n\) 维超平行多面体的体积也由 \(n\) 阶行列式给出。</li>
+              <li><strong>定向</strong>：\(\det > 0\) 表示线性变换保持「右手系/逆时针」定向；\(\det < 0\) 表示反转（如反射）。</li>
+              <li><strong>退化判别</strong>：\(\det = 0\) 几何上意味着变换将整个空间「压扁」到低维子空间（体积塌缩为零）。</li>
+            </ul>
+            <p>掌握几何意义后，许多代数性质变得直观：\(\det(AB) = \det A\det B\) 不过是「两个连续变换的体积伸缩比相乘」；\(\det(I) = 1\) 是「不变换不改变体积」；某行全零 \(\Rightarrow \det = 0\) 是「该方向被压扁」。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>从「面积/体积」到「行列式」的抽象之路：要让一个把 \(n\) 个向量映到一个数的函数 \(V(v_1,\ldots,v_n)\) 合理地承载「\(n\)-维体积」的角色，自然要求：</p>
+            <p>(i) 线性扩张：把某个向量放大 \(k\) 倍，体积放大 \(k\) 倍 ⇒ 多重线性。</p>
+            <p>(ii) 退化为零：两个向量平行时，平行多面体压扁为低维 ⇒ 反对称（两行相同 ⇒ \(V=0\)）。</p>
+            <p>(iii) 单位多面体的体积为 \(1\) ⇒ \(V(e_1,\ldots,e_n) = 1\)。</p>
+            <p>这三条条件正是行列式的三条公理！由唯一性，<strong>带号体积函数 \(V\) 必等于 \(\det\)</strong>。「带号」指 \(V\) 可以为负——这就是定向：\(V > 0\) 时 \((v_1,\ldots,v_n)\) 形成「正定向」基，\(V < 0\) 时为「反定向」。</p>
+            <p>这种「公理与几何同源」的事实是数学中典型的「恰当抽象」：满足合理几何要求的数学对象，自动承载所有代数性质。后续微积分中曲面积分、Jacobi 换元法的所有「带号体积」概念都源于这一观点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>2 维：平行四边形面积</h4>
+            <p>给定 \(\mathbb{R}^2\) 中两个向量 \(\vec u = (a,c),\;\vec v = (b,d)\)，它们张成的平行四边形的<strong>有向面积</strong>为：</p>
+            \[\mathrm{Area}_\text{有向}(\vec u,\vec v) = \det\begin{pmatrix}a & b\\c & d\end{pmatrix} = ad - bc\]
+            <p>\(\det > 0\) 表示从 \(\vec u\) 到 \(\vec v\) 是逆时针（正定向）；\(\det < 0\) 表示顺时针。绝对值 \(|ad-bc|\) 才是几何上的面积。</p>
+
+            <h4>3 维：平行六面体体积</h4>
+            <p>\(\mathbb{R}^3\) 中三个向量 \(\vec u,\vec v,\vec w\) 张成的平行六面体的有向体积为：</p>
+            \[\mathrm{Vol}_\text{有向}(\vec u,\vec v,\vec w) = \det[\vec u\;\vec v\;\vec w]\]
+            <p>（按列摆成 \(3\times 3\) 矩阵）。\(\det > 0\) 即 \((\vec u,\vec v,\vec w)\) 是右手系；\(\det < 0\) 是左手系。等价地，混合积 \(\vec u\cdot(\vec v\times\vec w) = \det[\vec u\;\vec v\;\vec w]\)。</p>
+
+            <h4>线性变换的体积伸缩比</h4>
+            <p>设 \(T:\mathbb{R}^n \to \mathbb{R}^n\) 是线性变换，矩阵为 \(A\)。则对任意区域 \(\Omega \subset \mathbb{R}^n\)，</p>
+            \[\mathrm{Vol}(T(\Omega)) = |\det A|\cdot\mathrm{Vol}(\Omega)\]
+            <p>证明思路：单位立方体 \([0,1]^n\) 在 \(T\) 下变为列向量 \(A_{(1)},\ldots,A_{(n)}\) 张成的平行多面体，体积为 \(|\det A|\)；一般区域用单位立方体逼近（积分换元）。</p>
+
+            <h4>定向的精确含义</h4>
+            <p>有序基 \((v_1,\ldots,v_n)\) 与标准基 \((e_1,\ldots,e_n)\) <strong>同向</strong>当且仅当变换矩阵 \([v_1\;\cdots\;v_n]\) 的行列式为正。\(\mathrm{GL}_n(\mathbb{R})\) 由此分裂为两个连通分支：</p>
+            \[\mathrm{GL}_n^+(\mathbb{R}) = \{A:\det A>0\},\quad\mathrm{GL}_n^-(\mathbb{R}) = \{A:\det A<0\}\]
+            <p>前者是正定向变换（旋转、伸缩等），后者含反射。两个分支无法通过连续变形互相转化——这就是定向不变量的拓扑本质。</p>
+
+            <h4>退化情形</h4>
+            <p>\(\det A = 0\) 当且仅当列向量线性相关，几何上意味着 \(T\) 把 \(\mathbb{R}^n\) 压到维数 \(< n\) 的子空间，体积塌缩为 \(0\)。这与「\(A\) 不可逆」的代数判据完全等价。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>多元微积分换元</strong>：积分换元公式 \(\int_{T(\Omega)} f\,dV = \int_\Omega f(T(u)) \,|\det J_T|\,du\) 中的 Jacobi 行列式 \(\det J_T\) 即为局部线性近似的体积伸缩比。极坐标、球坐标的体积元 \(r\,dr\,d\theta\)、\(r^2\sin\varphi\,dr\,d\theta\,d\varphi\) 都来自相应 Jacobi 行列式。</p>
+            <p><strong>计算机图形学定向</strong>：判定三角形面元的法向量朝向（用以背面剔除、光照计算）通过三个顶点构成的 \(2\times 2\) 行列式符号决定，是 GPU 渲染管线的标准操作。</p>
+            <p><strong>物理与流形</strong>：经典力学中的相空间体积守恒（Liouville 定理）等价于哈密顿流的 Jacobi 行列式恒为 \(1\)。微分几何中曲面、流形上的「体积形式」即推广的行列式概念。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求向量 \(\vec u = (2,1),\;\vec v = (-1,3)\) 张成的平行四边形面积，并判断从 \(\vec u\) 到 \(\vec v\) 的方向（顺/逆时针）。</p>
+            <p><em>解答</em>：有向面积 \(= \det\begin{pmatrix}2 & -1\\1 & 3\end{pmatrix} = 6 - (-1) = 7 > 0\)。故从 \(\vec u\) 到 \(\vec v\) 是逆时针方向，几何面积为 \(7\)。</p>
+            <p><strong>例题 2</strong>：线性变换 \(T(x,y,z) = (x+2y,\;3y+z,\;y+2z)\) 把单位立方体 \([0,1]^3\) 变为体积多大的平行六面体？是否保持定向？</p>
+            <p><em>解答</em>：变换矩阵 \(A = \begin{pmatrix}1&2&0\\0&3&1\\0&1&2\end{pmatrix}\)。按第一列展开：\(\det A = 1\cdot(3\cdot 2 - 1\cdot 1) = 1\cdot 5 = 5\)。\(|\det A| = 5\) 即体积；\(\det A > 0\) 表保持右手系（保持定向）。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把行列式直接当作（无符号）面积</strong>：行列式可为负，<em>带号</em>的才是「有向面积/体积」。几何面积是 \(|\det|\)。但在写「Cramer」「换元法」公式时，必须保留符号。</li>
+              <li><strong>将向量按行而非按列摆放</strong>：由于 \(\det A^T = \det A\)，按行或按列结果相同。但在记号上，标准约定是把<em>列向量</em>摆成矩阵，与线性变换的「列向量像」一致。</li>
+              <li><strong>误以为 \(\det = 0\) 表示面积「无意义」</strong>：\(\det = 0\) 几何上指向量共线（\(2\)D）或共面（\(3\)D），平行多面体退化为低维对象，体积确为 \(0\)，是有意义的极限情形。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="linear-algebra-ch03-kp4">
+        <svg viewBox="0 0 420 240" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:13px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.line{stroke:#334155;fill:none;stroke-width:1.5}.fill-pos{fill:#6366f1;opacity:0.18;stroke:#6366f1;stroke-width:1.5}.fill-neg{fill:#ef4444;opacity:0.15;stroke:#ef4444;stroke-width:1.5}</style>
+          <defs><marker id="arr-k4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#334155"/></marker></defs>
+          <line x1="30" y1="200" x2="200" y2="200" class="line" marker-end="url(#arr-k4)"/>
+          <line x1="30" y1="200" x2="30" y2="40" class="line" marker-end="url(#arr-k4)"/>
+          <polygon points="30,200 130,200 170,120 70,120" class="fill-pos"/>
+          <line x1="30" y1="200" x2="130" y2="200" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-k4)"/>
+          <line x1="30" y1="200" x2="70" y2="120" stroke="#6366f1" stroke-width="2" marker-end="url(#arr-k4)"/>
+          <text x="135" y="218" class="fg" fill="#6366f1">u</text>
+          <text x="50" y="118" class="fg" fill="#6366f1">v</text>
+          <text x="100" y="170" text-anchor="middle" class="fg2">det &gt; 0：保持定向（逆时针）</text>
+          <line x1="240" y1="200" x2="410" y2="200" class="line" marker-end="url(#arr-k4)"/>
+          <line x1="240" y1="200" x2="240" y2="40" class="line" marker-end="url(#arr-k4)"/>
+          <polygon points="240,200 340,200 300,120 200,120" class="fill-neg"/>
+          <line x1="240" y1="200" x2="340" y2="200" stroke="#ef4444" stroke-width="2" marker-end="url(#arr-k4)"/>
+          <line x1="240" y1="200" x2="200" y2="120" stroke="#ef4444" stroke-width="2" marker-end="url(#arr-k4)"/>
+          <text x="345" y="218" class="fg" fill="#ef4444">u</text>
+          <text x="180" y="118" class="fg" fill="#ef4444">v</text>
+          <text x="285" y="170" text-anchor="middle" class="fg2">det &lt; 0：反转定向（顺时针）</text>
+          <text x="210" y="30" text-anchor="middle" class="fg" font-weight="600">|det| = 平行四边形面积，符号 = 定向</text>
+        </svg>
+        <figcaption>Fig: 行列式的几何意义——|det| 度量面积，符号编码定向</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">线性变换 \(T:\mathbb{R}^2\to\mathbb{R}^2\) 矩阵为 \(\begin{pmatrix}1&2\\3&4\end{pmatrix}\)。它对单位正方形面积的作用？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\det = -2\\)，面积放大 \\(2\\) 倍，符号为负即反转定向。')">A. 面积保持，定向不变</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\det = -2\\)，面积放大 \\(2\\) 倍，符号为负即反转定向。')">B. 面积放大 \(2\) 倍，保持定向</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\det = 1\\cdot 4 - 2\\cdot 3 = -2\\)，\\(|\\det|=2\\) 即面积放大 \\(2\\) 倍，\\(\\det<0\\) 即反转定向。')">C. 面积放大 \(2\) 倍，反转定向</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\det = -2\\)，面积放大 \\(2\\) 倍，符号为负即反转定向。')">D. 面积塌缩为零</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2</a>
+      <a href="../../../modules/foundation/linear-algebra.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+</body>
+</html>

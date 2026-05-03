@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.6 数项级数与函数项级数 — 微积分 Calculus — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "calculus-ch06-q1",
+        "question": "级数 \\(\\sum_{n=1}^\\infty a_n\\) 的部分和定义为？",
+        "options": [
+          "\\(S_n = a_n\\)",
+          "\\(S_n = \\sum_{k=1}^n a_k\\)",
+          "\\(S_n = \\prod_{k=1}^n a_k\\)",
+          "\\(S_n = a_1 \\cdot a_n\\)"
+        ],
+        "answer": 1,
+        "explanation": "部分和定义为前 \\(n\\) 项的和 \\(S_n = a_1 + a_2 + \\cdots + a_n = \\sum_{k=1}^n a_k\\)。级数收敛当且仅当 \\(\\{S_n\\}\\) 有有限极限。"
+      },
+      {
+        "id": "calculus-ch06-q2",
+        "question": "下列哪个是级数 \\(\\sum a_n\\) 收敛的必要条件？",
+        "options": [
+          "\\(a_n \\to 0\\)",
+          "\\(a_n > 0\\)",
+          "\\(\\{a_n\\}\\) 单调",
+          "\\(a_n\\) 为有理数"
+        ],
+        "answer": 0,
+        "explanation": "若 \\(\\sum a_n\\) 收敛于 \\(S\\)，则 \\(a_n = S_n - S_{n-1} \\to S - S = 0\\)。注意这只是必要条件而非充分，反例：\\(\\sum 1/n\\) 满足 \\(1/n \\to 0\\) 却发散。"
+      },
+      {
+        "id": "calculus-ch06-q3",
+        "question": "几何级数 \\(\\sum_{n=0}^\\infty r^n\\) 收敛的充要条件是？",
+        "options": [
+          "\\(|r| < 1\\)",
+          "\\(|r| \\le 1\\)",
+          "\\(r > 0\\)",
+          "\\(r \\ne 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(|r|<1\\) 时 \\(S_n = (1-r^{n+1})/(1-r) \\to 1/(1-r)\\)；\\(|r|\\ge 1\\) 时 \\(r^n\\not\\to 0\\) 故发散。端点 \\(r=\\pm 1\\) 也发散。"
+      },
+      {
+        "id": "calculus-ch06-q4",
+        "question": "调和级数 \\(\\sum_{n=1}^\\infty \\frac{1}{n}\\) 是否收敛？",
+        "options": [
+          "收敛于 \\(1\\)",
+          "收敛于 \\(\\ln 2\\)",
+          "发散到 \\(+\\infty\\)",
+          "条件收敛"
+        ],
+        "answer": 2,
+        "explanation": "调和级数发散：\\(S_{2^k} \\ge 1 + k/2\\)，故 \\(S_n\\to+\\infty\\)。这是「\\(a_n\\to 0\\) 不蕴含级数收敛」的经典反例。"
+      },
+      {
+        "id": "calculus-ch06-q5",
+        "question": "\\(p\\)-级数 \\(\\sum_{n=1}^\\infty 1/n^p\\) 收敛的充要条件是？",
+        "options": [
+          "\\(p > 0\\)",
+          "\\(p \\ge 1\\)",
+          "\\(p > 1\\)",
+          "\\(p < 1\\)"
+        ],
+        "answer": 2,
+        "explanation": "由积分判别法，\\(\\int_1^\\infty x^{-p}\\,dx\\) 当 \\(p>1\\) 时收敛、\\(p\\le 1\\) 时发散，故 \\(p\\)-级数同此结论。\\(p=1\\) 即调和级数发散。"
+      },
+      {
+        "id": "calculus-ch06-q6",
+        "question": "比较判别：若 \\(0\\le a_n \\le b_n\\) 且 \\(\\sum b_n\\) 收敛，则？",
+        "options": [
+          "\\(\\sum a_n\\) 必收敛",
+          "\\(\\sum a_n\\) 必发散",
+          "无法判断",
+          "\\(\\sum a_n\\) 条件收敛"
+        ],
+        "answer": 0,
+        "explanation": "正项级数的部分和单调递增。若 \\(S_n^{(a)} \\le S_n^{(b)} \\le \\sum b_n < +\\infty\\)，则 \\(\\{S_n^{(a)}\\}\\) 单调有界，必收敛。"
+      },
+      {
+        "id": "calculus-ch06-q7",
+        "question": "比值判别（D'Alembert）：若 \\(\\lim_{n\\to\\infty} a_{n+1}/a_n = L\\) 且 \\(L<1\\)，则正项级数 \\(\\sum a_n\\)？",
+        "options": [
+          "收敛",
+          "发散",
+          "条件收敛",
+          "需进一步检验"
+        ],
+        "answer": 0,
+        "explanation": "\\(L<1\\) 时存在 \\(r\\in(L,1)\\) 与 \\(N\\) 使 \\(n\\ge N\\) 时 \\(a_{n+1}\\le r a_n\\)，故 \\(a_n\\le C r^{n-N}\\)，由几何级数比较得收敛。\\(L>1\\) 发散；\\(L=1\\) 失效。"
+      },
+      {
+        "id": "calculus-ch06-q8",
+        "question": "判断级数 \\(\\sum_{n=1}^\\infty \\frac{n!}{n^n}\\) 的敛散性，最适合用？",
+        "options": [
+          "积分判别",
+          "比值判别",
+          "Leibniz 判别",
+          "无法判断"
+        ],
+        "answer": 1,
+        "explanation": "\\(a_{n+1}/a_n = (n+1)!/(n+1)^{n+1} \\cdot n^n/n! = n^n/(n+1)^n = 1/(1+1/n)^n \\to 1/e <1\\)，由比值判别收敛。"
+      },
+      {
+        "id": "calculus-ch06-q9",
+        "question": "判断 \\(\\sum_{n=1}^\\infty \\frac{1}{n^2+1}\\) 的敛散性。",
+        "options": [
+          "收敛",
+          "发散",
+          "条件收敛",
+          "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(0<1/(n^2+1)<1/n^2\\)，而 \\(\\sum 1/n^2\\) 收敛（\\(p=2>1\\)），由比较判别得 \\(\\sum 1/(n^2+1)\\) 收敛。"
+      },
+      {
+        "id": "calculus-ch06-q10",
+        "question": "积分判别法：设 \\(f\\) 在 \\([1,+\\infty)\\) 单减正且 \\(a_n=f(n)\\)，则 \\(\\sum a_n\\) 与 \\(\\int_1^\\infty f(x)\\,dx\\) 的敛散关系？",
+        "options": [
+          "同敛同散",
+          "总相反",
+          "无关",
+          "需另判"
+        ],
+        "answer": 0,
+        "explanation": "由积分与求和的夹挤 \\(\\int_1^{n+1}f \\le S_n \\le f(1)+\\int_1^n f\\)，两者同敛散。这是处理 \\(p\\)-级数和 \\(\\sum 1/(n\\ln n)\\) 等的标准方法。"
+      },
+      {
+        "id": "calculus-ch06-q11",
+        "question": "级数 \\(\\sum_{n=2}^\\infty \\frac{1}{n\\ln n}\\) 是否收敛？",
+        "options": [
+          "收敛",
+          "发散",
+          "条件收敛",
+          "无法判断"
+        ],
+        "answer": 1,
+        "explanation": "由积分判别 \\(\\int_2^\\infty \\frac{dx}{x\\ln x}=[\\ln\\ln x]_2^\\infty=+\\infty\\)，故级数发散。比值判别此时 \\(L=1\\) 失效，必须用积分判别。"
+      },
+      {
+        "id": "calculus-ch06-q12",
+        "question": "根值判别（Cauchy）：若 \\(\\lim_{n\\to\\infty} \\sqrt[n]{a_n}=L<1\\)（\\(a_n\\ge 0\\)），则 \\(\\sum a_n\\)？",
+        "options": [
+          "收敛",
+          "发散",
+          "条件收敛",
+          "无法判断"
+        ],
+        "answer": 0,
+        "explanation": "\\(L<1\\) 时取 \\(r\\in(L,1)\\)，存在 \\(N\\) 使 \\(n\\ge N\\) 时 \\(\\sqrt[n]{a_n}\\le r\\)，即 \\(a_n\\le r^n\\)，由几何级数比较得收敛。\\(L>1\\) 发散；\\(L=1\\) 失效。"
+      },
+      {
+        "id": "calculus-ch06-q13",
+        "question": "下列级数中条件收敛的是？",
+        "options": [
+          "\\(\\sum (-1)^n/n^2\\)",
+          "\\(\\sum (-1)^n/n\\)",
+          "\\(\\sum 1/n^2\\)",
+          "\\(\\sum 1/n\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sum(-1)^n/n\\)：原级数由 Leibniz 判别收敛，但 \\(\\sum 1/n\\) 调和级数发散，故为条件收敛。A 是绝对收敛；C 绝对收敛；D 发散。"
+      },
+      {
+        "id": "calculus-ch06-q14",
+        "question": "Leibniz 交错级数判别：若 \\(\\{a_n\\}\\) 单调减少趋于 \\(0\\)，则 \\(\\sum (-1)^n a_n\\)？",
+        "options": [
+          "发散",
+          "收敛",
+          "绝对收敛",
+          "等于 \\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "Leibniz 定理：单调减且趋于 \\(0\\) 时交错级数收敛，且余项 \\(|R_n|\\le a_{n+1}\\)。这是判断条件收敛级数最常用的工具。"
+      },
+      {
+        "id": "calculus-ch06-q15",
+        "question": "「绝对收敛」的精确定义？",
+        "options": [
+          "\\(\\sum a_n\\) 收敛",
+          "\\(\\sum |a_n|\\) 收敛",
+          "\\(a_n \\to 0\\)",
+          "\\(\\sum a_n^2\\) 收敛"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sum a_n\\) 绝对收敛指 \\(\\sum |a_n|\\) 收敛。绝对收敛蕴含原级数收敛（反之不然），且重排不改变和。"
+      },
+      {
+        "id": "calculus-ch06-q16",
+        "question": "幂级数 \\(\\sum a_n x^n\\) 的收敛半径公式（Cauchy-Hadamard）为？",
+        "options": [
+          "\\(R = \\limsup \\sqrt[n]{|a_n|}\\)",
+          "\\(R = 1/\\limsup \\sqrt[n]{|a_n|}\\)",
+          "\\(R = \\lim a_n\\)",
+          "\\(R = \\sum a_n\\)"
+        ],
+        "answer": 1,
+        "explanation": "Cauchy-Hadamard：\\(1/R = \\limsup_{n\\to\\infty} \\sqrt[n]{|a_n|}\\)。\\(|x|<R\\) 时绝对收敛，\\(|x|>R\\) 时发散；端点 \\(|x|=R\\) 需单独讨论。"
+      },
+      {
+        "id": "calculus-ch06-q17",
+        "question": "求幂级数 \\(\\sum_{n=1}^\\infty \\frac{x^n}{n}\\) 的收敛半径 \\(R\\)。",
+        "options": [
+          "\\(R=0\\)",
+          "\\(R=1\\)",
+          "\\(R=e\\)",
+          "\\(R=+\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "用比值法：\\(|a_{n+1}/a_n|=n/(n+1)\\to 1\\)，故 \\(R=1\\)。端点 \\(x=1\\)（调和级数）发散，\\(x=-1\\)（交错调和）条件收敛。"
+      },
+      {
+        "id": "calculus-ch06-q18",
+        "question": "幂级数 \\(\\sum_{n=0}^\\infty \\frac{x^n}{n!}\\) 的收敛半径？",
+        "options": [
+          "\\(R=0\\)",
+          "\\(R=1\\)",
+          "\\(R=e\\)",
+          "\\(R=+\\infty\\)"
+        ],
+        "answer": 3,
+        "explanation": "\\(|a_{n+1}/a_n| = 1/(n+1) \\to 0\\)，故 \\(1/R=0\\) 即 \\(R=+\\infty\\)。该级数对所有实数收敛，和为 \\(e^x\\)。"
+      },
+      {
+        "id": "calculus-ch06-q19",
+        "question": "\\(\\sum_{n=1}^\\infty \\frac{x^n}{n^2}\\) 在 \\(x=1\\) 处？",
+        "options": [
+          "发散",
+          "条件收敛",
+          "绝对收敛",
+          "无定义"
+        ],
+        "answer": 2,
+        "explanation": "\\(R=1\\)。在 \\(x=1\\) 处级数变为 \\(\\sum 1/n^2\\)（\\(p=2>1\\)），绝对收敛。\\(x=-1\\) 处也绝对收敛（同样 \\(\\sum 1/n^2\\)）。"
+      },
+      {
+        "id": "calculus-ch06-q20",
+        "question": "函数 \\(f(x)=e^x\\) 在 \\(x=0\\) 处的 Taylor 级数为？",
+        "options": [
+          "\\(\\sum x^n\\)",
+          "\\(\\sum x^n/n\\)",
+          "\\(\\sum x^n/n!\\)",
+          "\\(\\sum (-1)^n x^n/n!\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(f^{(n)}(0)=1\\) 对所有 \\(n\\)，故 Maclaurin 级数为 \\(\\sum_{n=0}^\\infty x^n/n!\\)，对所有 \\(x\\in\\mathbb{R}\\) 收敛于 \\(e^x\\)。"
+      },
+      {
+        "id": "calculus-ch06-q21",
+        "question": "\\(\\sin x\\) 的 Maclaurin 展开为？",
+        "options": [
+          "\\(\\sum (-1)^n x^{2n}/(2n)!\\)",
+          "\\(\\sum (-1)^n x^{2n+1}/(2n+1)!\\)",
+          "\\(\\sum x^n/n!\\)",
+          "\\(\\sum x^{2n+1}/(2n+1)!\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sin x = x - x^3/3! + x^5/5! - \\cdots = \\sum_{n=0}^\\infty (-1)^n x^{2n+1}/(2n+1)!\\)。\\(\\sin\\) 是奇函数，故只含奇数次幂。\\(R=+\\infty\\)。"
+      },
+      {
+        "id": "calculus-ch06-q22",
+        "question": "\\(\\ln(1+x)\\) 在 \\(x=0\\) 处展开后，收敛区间为？",
+        "options": [
+          "\\((-1, 1)\\)",
+          "\\((-1, 1]\\)",
+          "\\([-1, 1]\\)",
+          "\\(\\mathbb{R}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\ln(1+x)=\\sum_{n=1}^\\infty (-1)^{n-1}x^n/n\\)，\\(R=1\\)。端点：\\(x=1\\) 是交错调和级数（条件收敛），\\(x=-1\\) 是 \\(-\\sum 1/n\\) 发散。故收敛域 \\((-1,1]\\)。"
+      },
+      {
+        "id": "calculus-ch06-q23",
+        "question": "二项级数 \\((1+x)^\\alpha\\)（\\(\\alpha\\notin\\mathbb{N}\\)）的展开 \\(\\sum_{n=0}^\\infty \\binom{\\alpha}{n}x^n\\) 的收敛半径？",
+        "options": [
+          "\\(R=0\\)",
+          "\\(R=1\\)",
+          "\\(R=|\\alpha|\\)",
+          "\\(R=+\\infty\\)"
+        ],
+        "answer": 1,
+        "explanation": "比值 \\(|a_{n+1}/a_n|=|\\alpha-n|/(n+1)\\to 1\\)，故 \\(R=1\\)。端点 \\(\\pm 1\\) 处的敛散性与 \\(\\alpha\\) 有关，但收敛半径恒为 \\(1\\)。"
+      },
+      {
+        "id": "calculus-ch06-q24",
+        "question": "Fourier 级数 \\(\\frac{a_0}{2}+\\sum_{n=1}^\\infty (a_n\\cos nx + b_n\\sin nx)\\) 中 \\(a_n\\)（\\(n\\ge 1\\)）的计算公式（在 \\([-\\pi,\\pi]\\) 上）？",
+        "options": [
+          "\\(a_n=\\frac{1}{\\pi}\\int_{-\\pi}^\\pi f(x)\\cos nx\\,dx\\)",
+          "\\(a_n=\\frac{1}{2\\pi}\\int_{-\\pi}^\\pi f(x)\\sin nx\\,dx\\)",
+          "\\(a_n=f(n)\\)",
+          "\\(a_n=\\frac{1}{n}\\int_{-\\pi}^\\pi f(x)\\,dx\\)"
+        ],
+        "answer": 0,
+        "explanation": "由 \\(\\{1,\\cos nx,\\sin nx\\}\\) 在 \\([-\\pi,\\pi]\\) 上的正交性，\\(a_n=\\frac{1}{\\pi}\\int_{-\\pi}^\\pi f(x)\\cos nx\\,dx\\)，\\(b_n\\) 类似。\\(a_0\\) 因常函数 \\(\\|1\\|^2=2\\pi\\) 而带因子 \\(1/2\\)。"
+      },
+      {
+        "id": "calculus-ch06-q25",
+        "question": "下列关于幂级数与 Fourier 级数的对比，哪一条正确？",
+        "options": [
+          "幂级数按 \\(\\{x^n\\}\\) 展开，Fourier 级数按 \\(\\{\\cos nx,\\sin nx\\}\\) 展开",
+          "二者均要求函数解析",
+          "Fourier 级数的收敛半径恒为 \\(1\\)",
+          "幂级数仅适用于周期函数"
+        ],
+        "answer": 0,
+        "explanation": "幂级数以幂函数为基底，要求函数在某点附近解析；Fourier 级数以三角函数为基底，主要用于周期（或区间上）函数。B、C、D 描述均不准确。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="calculus"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../calculus.html" class="module-name">微积分 Calculus</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.6 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 数项级数收敛与基本性质</a></li>
+      <li><a href="#kp2">02 · 正项级数判别法</a></li>
+      <li><a href="#kp3">03 · 任意项级数与幂级数</a></li>
+      <li><a href="#kp4">04 · Taylor 级数与 Fourier 级数初步</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 6</p>
+      <h1>数项级数与函数项级数</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>数项级数收敛与基本性质</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有限项的加法是中学最熟悉的运算，但科学和工程中频繁出现「无穷个数相加」的需求：把圆面积逼近为越来越细的扇形之和、把衰减信号的总能量分解为各时刻贡献之和、把利率累计为按月或按日复利的极限。这些场景共同提出了一个根本问题——「无穷和」到底该如何赋以严格数学含义？</p>
+            <ul>
+              <li><strong>古希腊悖论</strong>：Zeno 关于阿基里斯追龟的悖论暗示 \(1/2+1/4+1/8+\cdots\) 应当等于 \(1\)，但古希腊人无法严格处理无穷求和。</li>
+              <li><strong>分析学的奠基</strong>：18 世纪 Euler 用形式幂级数得出大量精彩公式（如 \(\sum 1/n^2=\pi^2/6\)），但也写出了 \(1-1+1-\cdots=1/2\) 这样的可疑等式，暴露出无穷和缺乏严格定义的危险。</li>
+              <li><strong>现代分析</strong>：Cauchy 和 Weierstrass 用「部分和的极限」给出严格定义，从此级数收敛、和函数、逐项微分与积分等问题才有了统一的语言。</li>
+            </ul>
+            <p>本节的任务是从极限的角度回答「无穷和」的存在性问题，建立级数收敛的精确定义、必要条件和最基本的运算性质，为后续判别法和函数项级数打好基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>数项级数的核心抽象是把「无穷和」化归为「数列的极限」。给定数列 \(\{a_n\}\)，构造部分和数列 \(S_n=a_1+a_2+\cdots+a_n\)，再追问 \(\{S_n\}\) 是否收敛。这一步把一个看似新鲜的对象（无穷求和）完全归约到已经掌握的对象（数列极限）上，使得所有数列收敛的工具——单调有界定理、Cauchy 准则、夹挤定理——立刻可以转用于级数。</p>
+            <p>这种归约思维带来三层好处：第一，定义本身没有歧义，避免了 Euler 时代「\(1-1+1-\cdots\)」这类形式操作的陷阱；第二，可以系统区分「收敛」与「发散」，并对发散的级数细化为「发散到 \(\infty\)」与「无极限」两类；第三，可以用 Cauchy 准则导出与具体数列收敛行为完全独立的判别法（仅依赖 \(\{a_n\}\) 的尾部）。</p>
+            <p>抽象化的另一条线索是把级数视作一个「线性结构」：收敛级数全体在加法和数乘下封闭，加括号后仍收敛于同一和。但需要警惕，重排（改变求和次序）一般不保持收敛与和——这一点在条件收敛的研究中将成为关键现象。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>级数与部分和</h4>
+            <p>给定数列 \(\{a_n\}_{n\ge 1}\)，形式表达式 \(\sum_{n=1}^\infty a_n\) 称为数项级数。其第 \(n\) 个部分和为 \(S_n=\sum_{k=1}^n a_k\)。</p>
+            <p>若 \(\{S_n\}\) 在 \(n\to\infty\) 时有有限极限 \(S\)，则称级数收敛，并记 \(\sum_{n=1}^\infty a_n=S\)；否则称发散。</p>
+
+            <h4>必要条件 \(a_n\to 0\)</h4>
+            <p>若 \(\sum a_n=S\) 收敛，则 \(a_n=S_n-S_{n-1}\to S-S=0\)。其逆命题不成立，最有名的反例是调和级数：\(1/n\to 0\) 但 \(\sum 1/n=+\infty\)。这条必要条件常被误用——切忌只验证 \(a_n\to 0\) 就断言级数收敛。</p>
+
+            <h4>Cauchy 收敛准则</h4>
+            <p>\(\sum a_n\) 收敛当且仅当：对任意 \(\varepsilon>0\)，存在 \(N\) 使得对所有 \(n>m\ge N\)，</p>
+            \[\left|\sum_{k=m+1}^n a_k\right|=|S_n-S_m|<\varepsilon.\]
+            <p>这是数列 Cauchy 准则在级数语境下的直接翻译，特点是只涉及尾部求和而不依赖具体的极限值。</p>
+
+            <h4>线性性</h4>
+            <p>若 \(\sum a_n=A\)、\(\sum b_n=B\) 均收敛，\(\lambda,\mu\in\mathbb{R}\)，则 \(\sum(\lambda a_n+\mu b_n)=\lambda A+\mu B\)。证明只需对部分和取极限。</p>
+
+            <h4>加括号性</h4>
+            <p>对收敛级数，按任意方式给项加括号——即把若干相邻项合并——所得新级数仍收敛于原和。但反之不成立：从加括号后的级数收敛不能推出原级数收敛（如 \((1-1)+(1-1)+\cdots=0\) 收敛，而 \(1-1+1-1+\cdots\) 发散）。</p>
+
+            <h4>几何级数</h4>
+            <p>\(\sum_{n=0}^\infty r^n\) 当且仅当 \(|r|<1\) 时收敛，且和为 \(1/(1-r)\)。证明：部分和 \(S_n=(1-r^{n+1})/(1-r)\)，\(|r|<1\) 时 \(r^{n+1}\to 0\)；\(|r|\ge 1\) 时 \(a_n=r^n\not\to 0\)，由必要条件发散。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>金融数学</strong>：永续年金的现值即为几何级数 \(\sum_{n=1}^\infty C/(1+r)^n=C/r\)，其中 \(C\) 为每期支付、\(r\) 为贴现率。该公式同时是几何级数收敛性（\(0<1/(1+r)<1\)）的直接结果。</p>
+            <p><strong>信号能量</strong>：离散时间信号 \(\{x[n]\}\) 的总能量定义为 \(E=\sum |x[n]|^2\)。收敛意味着信号能量有限，是离散傅里叶分析、能量谱估计的前提。</p>
+            <p><strong>概率论</strong>：离散随机变量取所有可能值的概率之和恒等于 \(1\)，本身就是一个收敛级数；几何分布、泊松分布的期望和方差都通过求和级数给出闭式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(\sum_{n=1}^\infty \frac{1}{n(n+1)}\) 的敛散性，若收敛求其和。</p>
+            <p><em>解答</em>：用部分分式 \(\frac{1}{n(n+1)}=\frac{1}{n}-\frac{1}{n+1}\)。部分和 \(S_n=\sum_{k=1}^n(1/k-1/(k+1))=1-1/(n+1)\to 1\)。这是「裂项相消」的典型，级数收敛于 \(1\)。</p>
+            <p><strong>例题 2</strong>：用必要条件证明 \(\sum_{n=1}^\infty \frac{n}{n+1}\) 发散。</p>
+            <p><em>解答</em>：\(a_n=n/(n+1)=1-1/(n+1)\to 1\ne 0\)，由必要条件 \(a_n\to 0\) 的逆否命题，级数发散。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把必要条件当充分条件</strong>：见到 \(a_n\to 0\) 就断言级数收敛是最常见的错误，反例是调和级数 \(\sum 1/n\)。\(a_n\to 0\) 仅排除一些发散级数。</li>
+              <li><strong>滥用结合律</strong>：对发散级数随意加括号可能得到「收敛」的虚假结论。例如 \(1-1+1-1+\cdots\) 加括号成 \((1-1)+(1-1)+\cdots=0\) 是错误推理。结合律仅对已经收敛的级数成立。</li>
+              <li><strong>混淆「级数」与「数列」</strong>：\(\{a_n\}\) 收敛于 \(0\) 不等于 \(\sum a_n\) 收敛。判断级数敛散的对象是部分和数列 \(\{S_n\}\) 而非通项 \(\{a_n\}\)。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个级数收敛？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(\\sum 1/n\\) 是调和级数，发散。')">A. \(\sum_{n=1}^\infty 1/n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！几何级数 \\(\\sum (1/2)^n\\) 公比小于 1，收敛于 1。')">B. \(\sum_{n=1}^\infty (1/2)^n\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(a_n=n/(n+1)\\to 1\\ne 0\\)，发散。')">C. \(\sum_{n=1}^\infty n/(n+1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(a_n=(-1)^n\\) 不趋于 0，发散。')">D. \(\sum_{n=1}^\infty (-1)^n\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>正项级数判别法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>判断一个一般级数是否收敛往往困难重重，但若所有项 \(a_n\ge 0\)，问题立刻简化：部分和 \(\{S_n\}\) 单调递增，由单调有界定理只需判断它是否有界。换言之，正项级数的敛散性只剩一个「上界存在性」的问题。这种简化使得正项级数成为构造判别法的天然舞台，几乎所有经典判别工具都首先在正项情形被发现。</p>
+            <ul>
+              <li><strong>比较思想</strong>：找到一个已知敛散性的「参照级数」，通过逐项不等式把未知问题转化为已知问题，是分析学最朴素也最强力的方法之一。</li>
+              <li><strong>渐近分析</strong>：判别法的核心几乎都是研究通项 \(a_n\) 在 \(n\to\infty\) 时的衰减速度——是几何衰减、多项式衰减还是更慢？</li>
+              <li><strong>积分桥梁</strong>：连续函数的积分与离散和之间存在天然联系，把级数问题化归为反常积分问题往往一举解决困难情形（如 \(\sum 1/(n\ln n)\)）。</li>
+            </ul>
+            <p>本节系统呈现四类正项级数判别法——比较、比值、根值、积分——它们覆盖绝大多数常见情形，是研究任意级数（取绝对值后正项化）的根本工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>正项级数判别法的统一思想是「与几何级数比较」。几何级数 \(\sum r^n\) 在 \(|r|<1\) 时收敛、\(|r|\ge 1\) 时发散，是分析无穷和最简单也最完美的标尺。比值判别法直接比较 \(a_{n+1}/a_n\) 与 \(1\) 的大小，相当于检测 \(a_n\) 是否「最终像几何级数那样按固定比例衰减」；根值判别法比较 \(\sqrt[n]{a_n}\) 与 \(1\)，相当于检测 \(a_n\) 是否「整体上按几何速率衰减」。两者本质上都是把通项与几何级数挂钩。</p>
+            <p>积分判别法走的是另一条思路——把求和换成积分，借助微积分基本定理把「数列的和」问题转化为「函数的反常积分」问题。这条路径特别适合处理通项含 \(\ln n\)、\(\ln\ln n\) 等使比值法和根值法都失效（极限等于 \(1\)）的情形。</p>
+            <p>抽象化层面值得记住：所有判别法都只依赖通项的「尾部行为」（即 \(n\) 充分大时的渐近性质），改动有限项不影响敛散性结论。这种「尾部不变性」是 Cauchy 准则的直接体现。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>比较判别法（基本形式）</h4>
+            <p>设 \(0\le a_n\le b_n\) 对所有 \(n\ge N\) 成立。则：</p>
+            <p>(i) \(\sum b_n\) 收敛 \(\Rightarrow\) \(\sum a_n\) 收敛；</p>
+            <p>(ii) \(\sum a_n\) 发散 \(\Rightarrow\) \(\sum b_n\) 发散。</p>
+            <p>证明：正项级数部分和单调递增。\(\sum b_n\) 收敛即 \(\{S_n^{(b)}\}\) 有上界 \(M\)，则 \(S_n^{(a)}\le S_n^{(b)}\le M\)，单调有界故收敛。</p>
+
+            <h4>极限比较判别法</h4>
+            <p>若 \(a_n,b_n>0\) 且 \(\lim a_n/b_n=L\in(0,+\infty)\)，则 \(\sum a_n\) 与 \(\sum b_n\) 同敛同散。这是渐近等价时最常用的简化版本。</p>
+
+            <h4>比值判别法（D'Alembert）</h4>
+            <p>设 \(a_n>0\)，\(\lim_{n\to\infty} a_{n+1}/a_n=L\)。则：</p>
+            \[L<1 \Rightarrow \sum a_n \text{ 收敛};\quad L>1 \Rightarrow \sum a_n \text{ 发散};\quad L=1 \Rightarrow \text{失效}.\]
+            <p>核心思想：\(L<1\) 时取 \(r\in(L,1)\)，存在 \(N\) 使 \(n\ge N\) 时 \(a_{n+1}\le r a_n\)，因此 \(a_n\le a_N r^{n-N}\)。由 \(\sum r^n\) 收敛和比较判别即得。</p>
+
+            <h4>根值判别法（Cauchy）</h4>
+            <p>设 \(a_n\ge 0\)，\(\lim_{n\to\infty}\sqrt[n]{a_n}=L\)。结论同比值判别。证明思路一致：\(L<1\) 时 \(a_n\le r^n\)。根值判别法严格强于比值判别（即比值给出 \(L\) 时根值给出的极限相同；但根值能处理一些比值失效的情形）。</p>
+
+            <h4>积分判别法</h4>
+            <p>设 \(f:[1,+\infty)\to[0,+\infty)\) 单调递减，\(a_n=f(n)\)。则 \(\sum_{n=1}^\infty a_n\) 与 \(\int_1^\infty f(x)\,dx\) 同敛散。</p>
+            <p>夹挤估计 \(\int_1^{n+1}f\le S_n=\sum_{k=1}^n f(k)\le f(1)+\int_1^n f\) 直接给出结论。该法立刻给出 \(p\)-级数的判定：\(\sum 1/n^p\) 收敛 \(\iff p>1\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>算法复杂度</strong>：比较判别法常用于分析递归算法的总开销。例如归并排序的递归式 \(T(n)=2T(n/2)+O(n)\)，求和后总复杂度由级数 \(\sum_k n=O(n\log n)\) 给出，关键就是判断主项的衰减速度。</p>
+            <p><strong>反常积分等价</strong>：积分判别法在物理学中沟通离散粒子求和与连续场积分。例如统计力学中态密度的离散求和与对应反常积分同敛散，决定了无穷自由度系统是否可被有限能量描述。</p>
+            <p><strong>数论估计</strong>：素数定理的研究中常出现 \(\sum 1/(p\ln p)\) 之类的级数（\(p\) 取素数），用类似积分判别的渐近思想可估计其敛散，进而控制素数的密度。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用比值判别法判断 \(\sum_{n=1}^\infty \frac{2^n n!}{n^n}\) 的敛散性。</p>
+            <p><em>解答</em>：\(\frac{a_{n+1}}{a_n}=\frac{2^{n+1}(n+1)!}{(n+1)^{n+1}}\cdot\frac{n^n}{2^n n!}=2\cdot\frac{n^n}{(n+1)^n}=\frac{2}{(1+1/n)^n}\to\frac{2}{e}\approx 0.736<1\)，故级数收敛。</p>
+            <p><strong>例题 2</strong>：用积分判别法证明 \(\sum_{n=2}^\infty 1/(n\ln n)\) 发散。</p>
+            <p><em>解答</em>：\(f(x)=1/(x\ln x)\) 在 \([2,\infty)\) 单减正。\(\int_2^\infty \frac{dx}{x\ln x}=[\ln(\ln x)]_2^\infty=+\infty\)。故 \(\sum 1/(n\ln n)\) 发散。注意比值与根值在此都给出 \(L=1\)，无法用。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>比值判别 \(L=1\) 时强行下结论</strong>：\(L=1\) 完全无信息，必须换其他判别法。例如 \(\sum 1/n\) 与 \(\sum 1/n^2\) 都给出比值极限 \(1\)，但前者发散后者收敛。</li>
+              <li><strong>对非正项级数直接用正项判别法</strong>：上述判别法的前提是 \(a_n\ge 0\)。若级数有正负，必须先取绝对值化为正项级数（判断绝对收敛），或使用 Leibniz、Abel、Dirichlet 等专用判别法。</li>
+              <li><strong>积分判别法忽略「单减」前提</strong>：若 \(f\) 不单调，积分与求和的夹挤不等式不成立。例如 \(a_n=\sin^2 n\) 通项不单调，不能直接用积分判别。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">用比值判别 \(\sum n!/n^n\)，极限 \(\lim a_{n+1}/a_n\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。极限为 \\(1/e\\)，级数收敛。')">A. \(1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(\\lim n^n/(n+1)^n=1/e<1\\)，故收敛。')">B. \(1/e\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。比值极限是 \\(1/e\\) 而非 \\(e\\)。')">C. \(e\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。比值极限有限且小于 1，是 \\(1/e\\)。')">D. \(0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>任意项级数与幂级数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>正项级数的敛散判别已有完整工具，但实际遇到的级数常含正负相间的项，例如交错的电流、振荡的物理量、Fourier 分析中的余弦正弦展开。这类「任意项级数」的收敛行为远比正项情形微妙：原级数可能收敛而 \(\sum |a_n|\) 发散，求和顺序甚至会影响最终的和。</p>
+            <ul>
+              <li><strong>交错调和</strong>：\(1-1/2+1/3-\cdots=\ln 2\) 收敛，但绝对值化为发散的调和级数。Riemann 重排定理表明：通过适当重排，该级数的和可以是任意实数甚至 \(\pm\infty\)！</li>
+              <li><strong>函数项级数</strong>：把通项视为 \(x\) 的函数（如 \(a_n x^n\)），就引入了「在哪些 \(x\) 处收敛」的新问题，对应幂级数的收敛半径概念。</li>
+              <li><strong>解析延拓的预备</strong>：幂级数定义的函数是「最规则」的——可以逐项微分积分、可以唯一延拓。掌握收敛半径是迈向解析函数论的第一步。</li>
+            </ul>
+            <p>本节区分绝对收敛与条件收敛，介绍 Leibniz 判别和 Cauchy-Hadamard 公式，把级数理论从数推广到函数。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>处理任意项级数最自然的策略是「先取绝对值再用正项工具」。若 \(\sum |a_n|\) 收敛，则原级数必然收敛——这就是绝对收敛的概念，并把任意项问题归约为正项问题。但绝对收敛比原级数收敛严格更强，许多重要级数（如交错调和）只是条件收敛，需要专门的工具。</p>
+            <p>Leibniz 判别专门处理交错级数，凭借「单减趋零」这一温和条件就能保证收敛——其几何意义是部分和在两个相邻位置之间「来回拍打」并不断收紧。这把分析的几何直观提到了显著位置。</p>
+            <p>幂级数 \(\sum a_n x^n\) 引入了「函数化」的视角：每个 \(x\) 对应一个数项级数，敛散性变成了 \(x\) 的函数。Cauchy-Hadamard 公式把多年研究的收敛半径浓缩为单个上极限表达式，揭示出幂级数的收敛区域必为以原点为中心的对称区间（或单点 / 全实轴）——这种对称性是幂级数最深刻的结构性特征。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>绝对收敛与条件收敛</h4>
+            <p>若 \(\sum |a_n|\) 收敛，称 \(\sum a_n\) 绝对收敛；若 \(\sum a_n\) 收敛但 \(\sum|a_n|\) 发散，称条件收敛。</p>
+            <p>定理：绝对收敛蕴含原级数收敛。证明用 Cauchy 准则：\(|\sum_{k=m+1}^n a_k|\le \sum_{k=m+1}^n |a_k|\)，右端任意小蕴含左端任意小。绝对收敛的级数还有重排不变性：任意改变求和次序都不改变和。</p>
+
+            <h4>Leibniz 交错级数判别</h4>
+            <p>设 \(\{a_n\}\) 满足 \(a_n>0\)、单调减少且 \(a_n\to 0\)。则 \(\sum_{n=1}^\infty (-1)^{n-1} a_n\) 收敛，且余项满足 \(|R_n|=|S-S_n|\le a_{n+1}\)。</p>
+            <p>证明：考察奇偶部分和 \(S_{2k}=a_1-a_2+\cdots-a_{2k}\) 单调递增有上界 \(a_1\)，\(S_{2k+1}\) 单调递减有下界 \(0\)，且 \(S_{2k+1}-S_{2k}=a_{2k+1}\to 0\)，两者收敛于同一极限。</p>
+
+            <h4>条件收敛的脆弱性</h4>
+            <p>Riemann 重排定理（仅作概念性陈述，不证明）：若 \(\sum a_n\) 条件收敛，则对任意 \(s\in\mathbb{R}\cup\{\pm\infty\}\)，存在 \(\{a_n\}\) 的重排使重排后级数收敛于 \(s\)。这突显了条件收敛级数的非交换性质——它的「和」依赖求和顺序，是绝对收敛与条件收敛最深刻的差别。</p>
+
+            <h4>幂级数与收敛半径</h4>
+            <p>形式表达式 \(\sum_{n=0}^\infty a_n (x-x_0)^n\) 称为以 \(x_0\) 为中心的幂级数。Cauchy-Hadamard 公式：</p>
+            \[\frac{1}{R}=\limsup_{n\to\infty}\sqrt[n]{|a_n|},\quad \text{约定 } 1/0=+\infty,\; 1/(+\infty)=0.\]
+            <p>则当 \(|x-x_0|<R\) 时级数绝对收敛，\(|x-x_0|>R\) 时发散。\(R\) 称为收敛半径，区间 \((x_0-R,x_0+R)\) 为收敛区间。端点 \(|x-x_0|=R\) 处的敛散性需逐个单独讨论，可能出现绝对收敛、条件收敛、发散三种情况。</p>
+
+            <h4>幂级数的和函数</h4>
+            <p>在收敛区间内部，幂级数定义的和函数可逐项求导和逐项积分，且求导和积分后的级数收敛半径不变。具体证明属于函数项级数一致收敛理论，本章不展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>数值计算</strong>：\(\ln 2=\sum (-1)^{n-1}/n\) 是经典展示但收敛极慢；用 \(\ln 2=\sum 1/(n\cdot 2^n)\)（绝对收敛，几何级数式衰减）可在数十项内得到高精度。条件收敛与绝对收敛的差别直接决定计算效率。</p>
+            <p><strong>物理学</strong>：电荷或质量分布的 multipole 展开本质是幂级数；收敛半径决定了展开在多远距离内有效，超出半径必须改用其他展开（如球谐函数展开）。</p>
+            <p><strong>生成函数</strong>：组合数学中用形式幂级数 \(\sum a_n x^n\) 编码组合序列 \(\{a_n\}\)，通过对幂级数的代数操作快速求出闭式与递推关系，斐波那契数列、卡塔兰数等都可用此方法处理。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(\sum_{n=1}^\infty (-1)^{n-1}/\sqrt{n}\) 的敛散性，并指出绝对/条件收敛。</p>
+            <p><em>解答</em>：\(a_n=1/\sqrt n\) 正、单减、趋于 \(0\)，由 Leibniz 判别原级数收敛。但 \(\sum 1/\sqrt n\) 是 \(p=1/2\le 1\) 的 \(p\)-级数，发散。因此原级数条件收敛。</p>
+            <p><strong>例题 2</strong>：求幂级数 \(\sum_{n=1}^\infty \frac{x^n}{n\cdot 3^n}\) 的收敛域。</p>
+            <p><em>解答</em>：\(\sqrt[n]{|a_n|}=1/(3 n^{1/n})\to 1/3\)，故 \(R=3\)。端点 \(x=3\)：变为 \(\sum 1/n\) 发散；\(x=-3\)：变为 \(\sum (-1)^n/n\) 由 Leibniz 收敛。收敛域为 \([-3,3)\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把「绝对收敛」误为「\(a_n\) 全为正」</strong>：绝对收敛指 \(\sum|a_n|\) 收敛，而非 \(a_n\ge 0\)。例如 \(\sum (-1)^n/n^2\) 含正负项但绝对收敛。</li>
+              <li><strong>幂级数端点直接套用 \(R\) 结论</strong>：\(|x|=R\) 处必须独立判断。例如 \(\sum x^n/n\) 在 \(x=1\) 发散、\(x=-1\) 条件收敛——结论不对称。</li>
+              <li><strong>对条件收敛级数随意重排</strong>：Riemann 重排定理表明条件收敛级数的和依赖顺序，正负项重新组合可能产生完全不同的「和」，甚至变为发散。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">幂级数 \(\sum_{n=1}^\infty x^n/n\) 的收敛域是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(x=-1\\) 处由 Leibniz 收敛，应包含。')">A. \((-1, 1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(R=1\\)，\\(x=-1\\) 条件收敛、\\(x=1\\) 发散。')">B. \([-1, 1)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(x=1\\) 处变为调和级数，发散。')">C. \((-1, 1]\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(x=\\pm 1\\) 端点行为不同，需逐个判断。')">D. \([-1, 1]\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>Taylor 级数与 Fourier 级数初步</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了幂级数和函数项级数的工具，下一个核心问题是「能否用幂级数表示已知函数」。Taylor 级数把这个问题给出了肯定答案：足够光滑的函数可在某点附近用其各阶导数构造的幂级数逼近。这一结果不仅给出 \(e^x\)、\(\sin x\)、\(\ln(1+x)\) 等的解析展开，也是数值计算、物理近似、解析延拓的共同语言。</p>
+            <ul>
+              <li><strong>多项式逼近</strong>：计算器内部计算 \(\sin\)、\(\cos\)、\(\exp\) 不可能用「调用真值」实现，而是依赖 Taylor 级数的截断求和加误差控制。</li>
+              <li><strong>Fourier 视角</strong>：周期现象（声波、电流、热传导）天然适合用三角函数展开。Fourier 级数把周期函数分解为不同频率的正弦余弦之和，是信号处理与偏微分方程的奠基工具。</li>
+              <li><strong>两种基底的对偶</strong>：幂级数以局部行为（导数）为基础，Fourier 级数以整体振荡（频率）为基础。这两种「函数空间的坐标系」共同构成现代分析的基本词汇。</li>
+            </ul>
+            <p>本节给出 Taylor 级数与 Fourier 级数的定义和最常用展开式，为后续函数空间理论与偏微分方程做准备。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-abstraction">
+          <div class="step-label">🔍 抽象化方法</div>
+          <div class="step-body">
+            <p>Taylor 级数的抽象本质是「用导数信息编码函数」。给定 \(f\) 在 \(a\) 处任意阶可导，可用唯一的幂级数 \(\sum f^{(n)}(a)(x-a)^n/n!\) 来表示它。但要小心：「Taylor 级数存在」不等于「Taylor 级数收敛于 \(f\)」。著名反例 \(f(x)=e^{-1/x^2}\)（\(x\ne 0\)，\(f(0)=0\)）在 \(0\) 处所有阶导数为零，故 Taylor 级数恒等于零，与 \(f\) 不重合。这促使我们引入解析函数的概念——在某点附近 Taylor 级数确实等于函数本身。</p>
+            <p>Fourier 级数则采用「正交基底展开」的思想：在 \([-\pi,\pi]\) 上，\(\{1,\cos nx,\sin nx\}\) 构成内积空间的正交系，函数 \(f\) 可分解为它们的线性组合，系数由内积公式给出。这与有限维线性代数中「向量按正交基展开」的几何图景完全一致——Fourier 系数即「沿基向量方向的投影」。</p>
+            <p>两种级数代表了分析学的两条主线：Taylor 强调局部光滑性与解析延拓，Fourier 强调全局周期性与频谱分解。它们共同的精神是「无穷维线性代数」——把函数视为向量、把展开视为坐标表示。Carleson 定理（Fourier 级数对 \(L^2\) 函数几乎处处收敛）等深刻收敛性结果属于现代分析范畴，本章不展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>Taylor 级数的定义</h4>
+            <p>设 \(f\) 在 \(a\) 的某邻域内任意阶可导。则 \(f\) 在 \(a\) 处的 Taylor 级数定义为：</p>
+            \[T_a f(x)=\sum_{n=0}^\infty \frac{f^{(n)}(a)}{n!}(x-a)^n.\]
+            <p>当 \(a=0\) 时也称 Maclaurin 级数。Taylor 级数是否在 \(x\) 处收敛、是否等于 \(f(x)\) 是两个独立问题。</p>
+
+            <h4>常见函数的 Maclaurin 展开</h4>
+            <p>下列展开式在各自收敛域内成立：</p>
+            \[e^x=\sum_{n=0}^\infty \frac{x^n}{n!},\quad R=+\infty.\]
+            \[\sin x=\sum_{n=0}^\infty \frac{(-1)^n x^{2n+1}}{(2n+1)!},\quad R=+\infty.\]
+            \[\cos x=\sum_{n=0}^\infty \frac{(-1)^n x^{2n}}{(2n)!},\quad R=+\infty.\]
+            \[\ln(1+x)=\sum_{n=1}^\infty \frac{(-1)^{n-1} x^n}{n},\quad x\in(-1,1].\]
+            \[(1+x)^\alpha=\sum_{n=0}^\infty \binom{\alpha}{n} x^n,\quad |x|<1\text{（二项级数）}.\]
+            <p>这些公式可由各阶导数代入定义直接推得，是数值近似与积分变换的常用工具。</p>
+
+            <h4>Taylor 余项与解析性</h4>
+            <p>设 \(f\in C^{n+1}\)。Taylor 公式带 Lagrange 余项 \(R_n(x)=f^{(n+1)}(\xi)(x-a)^{n+1}/(n+1)!\)，其中 \(\xi\) 在 \(a,x\) 之间。\(f\) 在 \(a\) 解析当且仅当存在邻域使 \(R_n(x)\to 0\)，此时 Taylor 级数等于 \(f\)。</p>
+
+            <h4>Fourier 级数的定义</h4>
+            <p>设 \(f\) 是周期 \(2\pi\) 的函数（或定义在 \([-\pi,\pi]\) 上）。\(f\) 的 Fourier 级数为：</p>
+            \[\frac{a_0}{2}+\sum_{n=1}^\infty \big(a_n\cos nx + b_n\sin nx\big),\]
+            <p>系数（Euler-Fourier 公式）为：</p>
+            \[a_n=\frac{1}{\pi}\int_{-\pi}^\pi f(x)\cos nx\,dx,\quad b_n=\frac{1}{\pi}\int_{-\pi}^\pi f(x)\sin nx\,dx.\]
+            <p>系数的来源是利用三角函数族 \(\{1,\cos nx,\sin nx\}\) 在 \([-\pi,\pi]\) 上的正交性：异频项内积为 \(0\)，同频项内积为 \(\pi\)（\(1\) 项内积为 \(2\pi\)，故 \(a_0\) 带因子 \(1/2\)）。</p>
+
+            <h4>收敛性的基本陈述</h4>
+            <p>若 \(f\) 在 \([-\pi,\pi]\) 分段连续可微，则其 Fourier 级数在每点 \(x\) 处收敛于 \([f(x^+)+f(x^-)]/2\)（连续点等于 \(f(x)\)）。本章仅作概念性介绍，证明（Dirichlet 定理及更深的 Carleson 定理）属于实分析与调和分析范畴，不展开。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>科学计算</strong>：浮点库（如 IEEE 754 实现）依赖 Taylor 级数的高阶截断加余项控制实现 \(\sin\)、\(\cos\)、\(\exp\)、\(\ln\) 的高效计算；编译器内嵌函数往往结合 Taylor 系数表与 Horner 嵌套求和把误差降到机器精度。</p>
+            <p><strong>信号与图像处理</strong>：Fourier 级数把周期信号分解为基频与谐波，是音频压缩（MP3）、语音识别、图像 JPEG（DCT 即离散余弦变换）的数学基础。</p>
+            <p><strong>偏微分方程</strong>：热方程、波方程的边界值问题在矩形区域上由 Fourier 级数法求解——把初值按本征模展开，再按时间因子线性叠加。Fourier 的原始论文正是为研究热传导而引入这一工具。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(f(x)=\frac{1}{1-x}\) 在 \(0\) 处的 Maclaurin 展开及收敛半径。</p>
+            <p><em>解答</em>：直接用几何级数 \(\frac{1}{1-x}=\sum_{n=0}^\infty x^n\)（\(|x|<1\)）。也可由 \(f^{(n)}(0)=n!\) 代入定义验证。\(R=1\)。注意端点 \(x=\pm 1\) 处级数发散。</p>
+            <p><strong>例题 2</strong>：求方波 \(f(x)=\mathrm{sgn}(x)\)（\(x\in[-\pi,\pi]\)）的 Fourier 级数。</p>
+            <p><em>解答</em>：\(f\) 是奇函数，故 \(a_n=0\)。\(b_n=\frac{1}{\pi}\int_{-\pi}^\pi \mathrm{sgn}(x)\sin nx\,dx=\frac{2}{\pi}\int_0^\pi \sin nx\,dx=\frac{2}{n\pi}(1-\cos n\pi)\)。即 \(b_n=4/(n\pi)\)（\(n\) 奇）、\(0\)（\(n\) 偶）。Fourier 级数为 \(\frac{4}{\pi}\sum_{k=0}^\infty \frac{\sin(2k+1)x}{2k+1}\)，在间断点 \(x=0\) 处级数收敛于 \(0\)（即 \([f(0^+)+f(0^-)]/2\)）。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>「\(C^\infty\) 蕴含解析」</strong>：反例 \(e^{-1/x^2}\)（在 \(0\) 处补 \(0\)）任意阶可导但 Taylor 级数恒为 \(0\) 不等于函数。光滑性是必要而非充分条件。</li>
+              <li><strong>Taylor 余项忽略 \(\xi\) 依赖</strong>：Lagrange 余项中 \(\xi\) 是 \(a\) 与 \(x\) 之间未知点，估计 \(R_n\) 时必须取 \(f^{(n+1)}\) 在该区间上的最大值，而非任意点的值。</li>
+              <li><strong>Fourier 系数公式记错系数</strong>：常见错误是 \(a_0\) 不带 \(1/2\) 或 \(b_n\) 用 \(\cos\)。正确记法：\(a_n\) 配 \(\cos nx\)，\(b_n\) 配 \(\sin nx\)，系数 \(1/\pi\)；\(a_0\) 在级数前带因子 \(1/2\) 以保持公式的对称性。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\cos x\) 在 \(x=0\) 处的 Maclaurin 级数是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。\\(\\cos\\) 是偶函数，只含偶数次幂。')">A. \(\sum (-1)^n x^{2n+1}/(2n+1)!\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(\\cos x=1-x^2/2!+x^4/4!-\\cdots\\)')">B. \(\sum (-1)^n x^{2n}/(2n)!\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是 \\(e^x\\) 的展开。')">C. \(\sum x^n/n!\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。这是几何级数，不是 \\(\\cos\\)。')">D. \(\sum x^n\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch05.html" class="nav-prev">← Ch.5 积分应用与反常积分</a>
+      <a href="../calculus.html" class="nav-overview">📋 概览</a>
+      <a href="../calculus.html" class="nav-next">回到模块概览 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "calculus-ch06";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>

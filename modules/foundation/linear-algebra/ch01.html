@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.1 向量空间与线性映射 — 线性代数 Algèbre linéaire — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "linear-algebra-ch01-q1",
+        "question": "下列集合配上指定的运算，哪一个不构成 \\(\\mathbb{R}\\) 上的向量空间？",
+        "options": [
+          "\\(\\mathbb{R}^3\\) 配通常加法与标量乘法",
+          "\\(P_2(\\mathbb{R})\\)（次数 \\(\\le 2\\) 的实多项式）配多项式加法与数乘",
+          "\\(\\mathbb{N}\\)（自然数集）配通常加法与实数标量乘法",
+          "\\(M_{2\\times 2}(\\mathbb{R})\\)（实 \\(2\\times 2\\) 矩阵）配矩阵加法与数乘"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\mathbb{N}\\) 不在标量乘法下封闭：取标量 \\(c=-1\\)，\\(c\\cdot 1=-1\\notin\\mathbb{N}\\)；同时也无加法逆元。A、B、D 均满足 8 条向量空间公理。易错：把 \\(\\mathbb{N}\\) 当成 \\(\\mathbb{Z}\\) 的子集就误以为是子空间，但向量空间必须对域 \\(\\mathbb{R}\\) 的全部标量封闭。"
+      },
+      {
+        "id": "linear-algebra-ch01-q2",
+        "question": "在向量空间 \\(\\mathbb{R}^2\\) 中，下列哪个向量是零向量？",
+        "options": [
+          "\\((1,0)\\)",
+          "\\((0,1)\\)",
+          "\\((0,0)\\)",
+          "\\((1,1)\\)"
+        ],
+        "answer": 2,
+        "explanation": "零向量 \\(\\mathbf{0}\\) 是加法单位元：\\(v+\\mathbf{0}=v\\) 对所有 \\(v\\) 成立。在 \\(\\mathbb{R}^2\\) 中 \\(\\mathbf{0}=(0,0)\\)。注意零向量的唯一性由公理保证。常见错误：把任意短向量当作零，但只有所有分量都为 \\(0\\) 的向量才是零向量。"
+      },
+      {
+        "id": "linear-algebra-ch01-q3",
+        "question": "下列集合中，哪一个是 \\(\\mathbb{R}^2\\) 的子空间？",
+        "options": [
+          "\\(\\{(x,y): x+y=1\\}\\)",
+          "\\(\\{(x,y): x\\ge 0,\\ y\\ge 0\\}\\)",
+          "\\(\\{(x,y): x=2y\\}\\)",
+          "\\(\\{(x,y): x^2+y^2\\le 1\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\{(x,y):x=2y\\}\\) 通过原点（含 \\((0,0)\\)），且对加法和数乘封闭——这是过原点的直线，是 \\(\\mathbb{R}^2\\) 的 1 维子空间。A 不含 \\((0,0)\\)；B 第一象限对 \\(c=-1\\) 不封闭；D 单位圆盘对加法不封闭（如 \\((1,0)+(1,0)=(2,0)\\) 出界）。"
+      },
+      {
+        "id": "linear-algebra-ch01-q4",
+        "question": "向量 \\(v_1=(1,2)\\) 与 \\(v_2=(3,4)\\) 的线性组合 \\(2v_1+v_2\\) 等于？",
+        "options": [
+          "\\((5,8)\\)",
+          "\\((4,6)\\)",
+          "\\((6,10)\\)",
+          "\\((7,10)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(2v_1+v_2=2(1,2)+(3,4)=(2,4)+(3,4)=(5,8)\\)。线性组合按分量逐个进行：第一分量 \\(2\\cdot1+3=5\\)，第二分量 \\(2\\cdot2+4=8\\)。常见错误：把数乘和加法顺序搞乱，或漏乘标量。"
+      },
+      {
+        "id": "linear-algebra-ch01-q5",
+        "question": "\\(\\mathbb{R}^3\\) 中由 \\((1,0,0)\\) 与 \\((0,1,0)\\) 张成的子空间 \\(\\mathrm{span}\\{(1,0,0),(0,1,0)\\}\\) 是？",
+        "options": [
+          "整个 \\(\\mathbb{R}^3\\)",
+          "\\(xy\\) 平面 \\(\\{(x,y,0):x,y\\in\\mathbb{R}\\}\\)",
+          "\\(x\\) 轴",
+          "原点 \\(\\{(0,0,0)\\}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{span}\\{e_1,e_2\\}=\\{ae_1+be_2:a,b\\in\\mathbb{R}\\}=\\{(a,b,0)\\}\\)，即所有第三分量为 \\(0\\) 的向量集合，正是 \\(xy\\) 平面，构成 \\(\\mathbb{R}^3\\) 的 2 维子空间。要张成整个 \\(\\mathbb{R}^3\\) 还需第三个线性无关向量，如 \\(e_3=(0,0,1)\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q6",
+        "question": "向量 \\(v_1=(1,0)\\) 与 \\(v_2=(0,1)\\) 在 \\(\\mathbb{R}^2\\) 中是否线性无关？",
+        "options": [
+          "无关，因为 \\(c_1 v_1+c_2 v_2=0\\) 仅当 \\(c_1=c_2=0\\)",
+          "相关，因为它们都是单位向量",
+          "无关，仅当 \\(v_1\\ne v_2\\)",
+          "相关，因为 \\(v_1+v_2=(1,1)\\ne 0\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(c_1(1,0)+c_2(0,1)=(c_1,c_2)=(0,0)\\) 强制 \\(c_1=c_2=0\\)，符合线性无关定义。线性无关的判据是「零向量的表示唯一」，与向量长度、是否相等无关。\\(\\{e_1,e_2\\}\\) 是 \\(\\mathbb{R}^2\\) 的标准基。"
+      },
+      {
+        "id": "linear-algebra-ch01-q7",
+        "question": "向量空间 \\(\\mathbb{R}^n\\) 的维数 \\(\\dim\\mathbb{R}^n\\) 等于多少？",
+        "options": [
+          "\\(1\\)",
+          "\\(n-1\\)",
+          "\\(n\\)",
+          "\\(2n\\)"
+        ],
+        "answer": 2,
+        "explanation": "标准基 \\(\\{e_1,e_2,\\ldots,e_n\\}\\)（其中 \\(e_i\\) 第 \\(i\\) 分量为 \\(1\\)，其余为 \\(0\\)）线性无关且张成整个 \\(\\mathbb{R}^n\\)，共 \\(n\\) 个向量，故 \\(\\dim\\mathbb{R}^n=n\\)。维数定理保证基的元素个数与基的选取无关。"
+      },
+      {
+        "id": "linear-algebra-ch01-q8",
+        "question": "下列映射 \\(T:\\mathbb{R}^2\\to\\mathbb{R}^2\\) 中，哪一个是线性映射？",
+        "options": [
+          "\\(T(x,y)=(x+1,y)\\)",
+          "\\(T(x,y)=(x^2,y)\\)",
+          "\\(T(x,y)=(2x+3y,\\;x-y)\\)",
+          "\\(T(x,y)=(|x|,y)\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(T(x,y)=(2x+3y,x-y)\\) 满足 \\(T(au+bv)=aT(u)+bT(v)\\)，是线性映射。A 平移 \\(T(0)=(1,0)\\ne 0\\) 违反线性；B 含 \\(x^2\\) 不满足齐次性 \\(T(2x,y)=(4x^2,y)\\ne 2T(x,y)\\)；D 绝对值非线性 \\(|-x|=|x|\\) 但 \\(-T(x,y)\\ne T(-x,y)\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q9",
+        "question": "若 \\(T:V\\to W\\) 是线性映射，则 \\(T(\\mathbf{0}_V)\\) 必等于？",
+        "options": [
+          "\\(\\mathbf{0}_W\\)",
+          "任意元素",
+          "\\(T\\) 自身",
+          "无法确定"
+        ],
+        "answer": 0,
+        "explanation": "由齐次性 \\(T(0\\cdot v)=0\\cdot T(v)=\\mathbf{0}_W\\)，又 \\(0\\cdot v=\\mathbf{0}_V\\)，故 \\(T(\\mathbf{0}_V)=\\mathbf{0}_W\\)。这是判断映射是否线性的快速必要条件：若 \\(T(\\mathbf{0})\\ne\\mathbf{0}\\)，则 \\(T\\) 一定不是线性映射，例如平移 \\(T(v)=v+v_0\\)（\\(v_0\\ne 0\\)）就不是线性的。"
+      },
+      {
+        "id": "linear-algebra-ch01-q10",
+        "question": "在 \\(\\mathbb{R}^3\\) 中，\\(v_1=(1,2,3)\\)，\\(v_2=(2,4,6)\\)，\\(v_3=(0,1,0)\\)。集合 \\(\\{v_1,v_2,v_3\\}\\) 是否线性无关？",
+        "options": [
+          "无关",
+          "相关，因为 \\(v_2=2v_1\\)",
+          "无关，因为有 3 个向量",
+          "相关，因为 \\(v_1+v_2+v_3\\ne 0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(v_2=2v_1\\)，故 \\(2v_1+(-1)v_2+0\\cdot v_3=\\mathbf{0}\\) 给出非零系数表示零向量，违反线性无关。线性相关的核心标志是「某一向量可写成其它向量的线性组合」。3 个 \\(\\mathbb{R}^3\\) 向量未必无关；线性无关与 \\(v_1+v_2+v_3\\) 是否为 \\(0\\) 无直接关系。"
+      },
+      {
+        "id": "linear-algebra-ch01-q11",
+        "question": "多项式空间 \\(P_2(\\mathbb{R})=\\{a_0+a_1 x+a_2 x^2: a_i\\in\\mathbb{R}\\}\\) 的一组基是？",
+        "options": [
+          "\\(\\{1\\}\\)",
+          "\\(\\{1,x\\}\\)",
+          "\\(\\{1,x,x^2\\}\\)",
+          "\\(\\{x,x^2,x^3\\}\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(\\{1,x,x^2\\}\\) 张成 \\(P_2\\) 中所有多项式（\\(p=a_0\\cdot 1+a_1\\cdot x+a_2\\cdot x^2\\)）且线性无关（\\(a_0+a_1 x+a_2 x^2\\equiv 0\\) 强制 \\(a_i=0\\)），故 \\(\\dim P_2=3\\)。D 含 \\(x^3\\notin P_2\\) 不属于该空间；A、B 不能张成全部。"
+      },
+      {
+        "id": "linear-algebra-ch01-q12",
+        "question": "矩阵空间 \\(M_{2\\times 2}(\\mathbb{R})\\) 的维数为多少？",
+        "options": [
+          "\\(2\\)",
+          "\\(3\\)",
+          "\\(4\\)",
+          "\\(8\\)"
+        ],
+        "answer": 2,
+        "explanation": "\\(M_{2\\times 2}\\) 的标准基是 4 个矩阵 \\(E_{ij}\\)（\\((i,j)\\) 处为 \\(1\\)，其余为 \\(0\\)），即 \\(\\{E_{11},E_{12},E_{21},E_{22}\\}\\)。任何 \\(2\\times 2\\) 矩阵 \\(\\begin{pmatrix} a&b\\\\ c&d\\end{pmatrix}=aE_{11}+bE_{12}+cE_{21}+dE_{22}\\)。一般地 \\(\\dim M_{m\\times n}=mn\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q13",
+        "question": "线性映射 \\(T:\\mathbb{R}^2\\to\\mathbb{R}^2\\)，\\(T(x,y)=(x+y,\\;x-y)\\)。在标准基 \\(\\{e_1,e_2\\}\\) 下 \\(T\\) 的矩阵为？",
+        "options": [
+          "\\(\\begin{pmatrix} 1&1\\\\1&-1\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix} 1&0\\\\0&1\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix} 1&-1\\\\1&1\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix} 0&1\\\\1&0\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "矩阵的第 \\(i\\) 列是 \\(T(e_i)\\) 的坐标。\\(T(e_1)=T(1,0)=(1,1)\\) 作为第 1 列；\\(T(e_2)=T(0,1)=(1,-1)\\) 作为第 2 列。因此矩阵为 \\(\\begin{pmatrix}1&1\\\\1&-1\\end{pmatrix}\\)。常见错误：行列搞反，把 \\(T(e_i)\\) 写成第 \\(i\\) 行。"
+      },
+      {
+        "id": "linear-algebra-ch01-q14",
+        "question": "向量 \\(v=(3,4)\\in\\mathbb{R}^2\\) 在标准基 \\(\\beta=\\{e_1,e_2\\}\\) 下的坐标向量 \\([v]_\\beta\\) 为？",
+        "options": [
+          "\\(\\begin{pmatrix}3\\\\4\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}4\\\\3\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}1\\\\1\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}7\\\\0\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(v=3e_1+4e_2\\)，故坐标为 \\((3,4)^T\\)。在标准基下，向量分量与坐标重合，这是为什么标准基如此方便。在其他基下坐标会不同——例如基 \\(\\{(1,1),(1,-1)\\}\\) 下 \\(v\\) 的坐标为 \\((7/2,-1/2)^T\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q15",
+        "question": "在 \\(\\mathbb{R}^3\\) 中，4 个向量 \\(v_1,v_2,v_3,v_4\\) 必然？",
+        "options": [
+          "线性无关",
+          "线性相关",
+          "构成一组基",
+          "张成整个 \\(\\mathbb{R}^3\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\dim\\mathbb{R}^3=3\\)，任何线性无关集至多含 3 个向量，故 4 个向量必线性相关。但它们未必张成整个 \\(\\mathbb{R}^3\\)（例如全在一个平面内）。基的判据是「线性无关 + 张成」，需要恰好 \\(\\dim V\\) 个向量。"
+      },
+      {
+        "id": "linear-algebra-ch01-q16",
+        "question": "\\(\\mathbb{R}^3\\) 中过原点的平面 \\(W=\\{(x,y,z):x+y+z=0\\}\\) 的维数 \\(\\dim W\\) 为？",
+        "options": [
+          "\\(1\\)",
+          "\\(2\\)",
+          "\\(3\\)",
+          "\\(0\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(W\\) 由 1 个独立方程切割 \\(\\mathbb{R}^3\\)，故 \\(\\dim W=3-1=2\\)。一组基如 \\(\\{(1,-1,0),(1,0,-1)\\}\\)：两者满足 \\(x+y+z=0\\)，且线性无关。任意 \\((x,y,z)\\in W\\) 可表示为 \\(x(1,-1,0)+(-z)(1,0,-1)\\)（结合 \\(y=-x-z\\) 验证）。"
+      },
+      {
+        "id": "linear-algebra-ch01-q17",
+        "question": "向量 \\(v=(2,3)\\) 是否属于 \\(\\mathrm{span}\\{(1,1),(1,-1)\\}\\)？",
+        "options": [
+          "属于，且唯一表示为 \\(\\dfrac{5}{2}(1,1)+(-\\dfrac{1}{2})(1,-1)\\)",
+          "属于，但表示不唯一",
+          "不属于",
+          "属于，且唯一表示为 \\(2(1,1)+3(1,-1)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\{(1,1),(1,-1)\\}\\) 线性无关且共 2 个向量，构成 \\(\\mathbb{R}^2\\) 的基，故张成整个 \\(\\mathbb{R}^2\\) 且每个向量表示唯一。解方程 \\(a(1,1)+b(1-1)=(2,3)\\)：\\(a+b=2,\\ a-b=3\\)，得 \\(a=5/2,\\ b=-1/2\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q18",
+        "question": "线性映射 \\(T:\\mathbb{R}^3\\to\\mathbb{R}^2\\) 在标准基下表示为矩阵 \\(A=\\begin{pmatrix}1&2&3\\\\4&5&6\\end{pmatrix}\\)。则 \\(T(1,1,1)\\) 等于？",
+        "options": [
+          "\\((6,15)\\)",
+          "\\((5,14)\\)",
+          "\\((6,16)\\)",
+          "\\((9,21)\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(v)=Av\\)：\\(\\begin{pmatrix}1&2&3\\\\4&5&6\\end{pmatrix}\\begin{pmatrix}1\\\\1\\\\1\\end{pmatrix}=\\begin{pmatrix}1+2+3\\\\4+5+6\\end{pmatrix}=\\begin{pmatrix}6\\\\15\\end{pmatrix}\\)。矩阵作用在向量上即按行作内积。"
+      },
+      {
+        "id": "linear-algebra-ch01-q19",
+        "question": "下列关于子空间的命题哪个正确？",
+        "options": [
+          "两个子空间的并 \\(U\\cup W\\) 总是子空间",
+          "两个子空间的交 \\(U\\cap W\\) 总是子空间",
+          "子空间无需包含零向量",
+          "子空间在加法下不必封闭"
+        ],
+        "answer": 1,
+        "explanation": "\\(U\\cap W\\) 总是子空间：含 \\(\\mathbf{0}\\)（两者均含），加法封闭（\\(u_1,u_2\\in U\\cap W\\Rightarrow u_1+u_2\\in U\\) 且 \\(\\in W\\)），数乘封闭。A 错：例如 \\(U=x\\) 轴，\\(W=y\\) 轴，则 \\(e_1+e_2=(1,1)\\notin U\\cup W\\)。C、D 违反子空间定义。"
+      },
+      {
+        "id": "linear-algebra-ch01-q20",
+        "question": "线性映射 \\(T:P_2(\\mathbb{R})\\to P_1(\\mathbb{R})\\)，\\(T(p)=p'\\)（求导）。在基 \\(\\{1,x,x^2\\}\\)（定义域）和 \\(\\{1,x\\}\\)（值域）下 \\(T\\) 的矩阵为？",
+        "options": [
+          "\\(\\begin{pmatrix}0&1&0\\\\0&0&2\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}1&0&0\\\\0&1&0\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}0&0&0\\\\1&2&0\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}0&1\\\\0&0\\\\0&2\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "求每个基向量的像：\\(T(1)=0=0\\cdot 1+0\\cdot x\\)，坐标 \\((0,0)^T\\)；\\(T(x)=1=1\\cdot 1+0\\cdot x\\)，坐标 \\((1,0)^T\\)；\\(T(x^2)=2x=0\\cdot 1+2\\cdot x\\)，坐标 \\((0,2)^T\\)。把这三列依次排成矩阵得 \\(\\begin{pmatrix}0&1&0\\\\0&0&2\\end{pmatrix}\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q21",
+        "question": "在 \\(\\mathbb{R}^2\\) 中，集合 \\(\\{(1,2),(3,6),(0,0)\\}\\) 是否线性相关？",
+        "options": [
+          "无关",
+          "相关，因为含零向量",
+          "无关，因为含两个非零向量",
+          "无关，因为只有 3 个向量"
+        ],
+        "answer": 1,
+        "explanation": "任何含零向量的集合都线性相关：取 \\(c\\cdot\\mathbf{0}=\\mathbf{0}\\)，\\(c\\) 可任意非零（其余系数为 \\(0\\)），即给出了零向量的非平凡表示。同时 \\((3,6)=3(1,2)\\) 也已使前两个向量相关。判断线性无关的第一步往往是检查是否含 \\(\\mathbf{0}\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q22",
+        "question": "向量空间 \\(V\\) 上的恒等映射 \\(I:V\\to V,\\ I(v)=v\\) 在任意基 \\(\\beta\\) 下的矩阵 \\([I]_\\beta\\) 为？",
+        "options": [
+          "零矩阵 \\(\\mathbf{0}\\)",
+          "单位矩阵 \\(I_n\\)（\\(n=\\dim V\\)）",
+          "对角元为基向量长度",
+          "依赖于基的选择"
+        ],
+        "answer": 1,
+        "explanation": "\\(I(b_i)=b_i\\)，其在基 \\(\\beta\\) 下的坐标为 \\(e_i=(0,\\ldots,1,\\ldots,0)^T\\)（第 \\(i\\) 位为 \\(1\\)）。各列拼起来即单位矩阵 \\(I_n\\)。注意：恒等映射在同一基下的矩阵恒为 \\(I_n\\)，但若定义域和值域用不同基，则得到的是基变换矩阵（一般非单位阵）。"
+      },
+      {
+        "id": "linear-algebra-ch01-q23",
+        "question": "\\(\\mathbb{R}^3\\) 中向量 \\(v_1=(1,1,0)\\)，\\(v_2=(1,0,1)\\)，\\(v_3=(0,1,1)\\)。它们是否构成一组基？",
+        "options": [
+          "构成基",
+          "不构成基，因为只有 3 个向量",
+          "不构成基，因为线性相关",
+          "不构成基，因为不张成整个空间"
+        ],
+        "answer": 0,
+        "explanation": "3 个 \\(\\mathbb{R}^3\\) 向量构成基 \\(\\Leftrightarrow\\) 线性无关 \\(\\Leftrightarrow\\) 行列式非零。计算 \\(\\det\\begin{pmatrix}1&1&0\\\\1&0&1\\\\0&1&1\\end{pmatrix}=1(0-1)-1(1-0)+0=-2\\ne 0\\)，故线性无关，构成一组基。维数定理保证：\\(\\dim V\\) 个线性无关向量自动张成 \\(V\\)。"
+      },
+      {
+        "id": "linear-algebra-ch01-q24",
+        "question": "设 \\(T:\\mathbb{R}^2\\to\\mathbb{R}^2\\)，\\(T(x,y)=(x+y,2x-y)\\)。考察基 \\(\\beta=\\{(1,1),(1,-1)\\}\\)。求 \\(T\\) 在基 \\(\\beta\\)（同时作为定义域和值域基）下的矩阵 \\([T]_\\beta\\)。",
+        "options": [
+          "\\(\\begin{pmatrix}3/2&-1/2\\\\1/2&3/2\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}1&1\\\\2&-1\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}2&0\\\\1&-1\\end{pmatrix}\\)",
+          "\\(\\begin{pmatrix}1&0\\\\0&-1\\end{pmatrix}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(T(1,1)=(2,1)\\)，需把它写成 \\(a(1,1)+b(1,-1)\\)：\\(a+b=2,\\ a-b=1\\Rightarrow a=3/2,\\ b=1/2\\)。\\(T(1,-1)=(0,3)\\)，类似 \\(c+d=0,\\ c-d=3\\Rightarrow c=3/2,\\ d=-3/2\\)。两列拼成 \\(\\begin{pmatrix}3/2&3/2\\\\1/2&-3/2\\end{pmatrix}\\)。重新核对：\\(b=1/2,\\ d=-3/2\\)，故 \\([T]_\\beta=\\begin{pmatrix}3/2&3/2\\\\1/2&-3/2\\end{pmatrix}\\)。本题考察基变换公式 \\([T]_\\beta=P^{-1}[T]_{\\text{std}}P\\) 的实操。"
+      },
+      {
+        "id": "linear-algebra-ch01-q25",
+        "question": "连续函数空间 \\(C[0,1]\\)（定义在 \\([0,1]\\) 上的实连续函数全体）作为 \\(\\mathbb{R}\\) 上向量空间，其维数为？",
+        "options": [
+          "\\(1\\)",
+          "\\(2\\)",
+          "\\(\\dim=\\infty\\)（无限维）",
+          "\\(\\dim=|[0,1]|\\) 的连续基数"
+        ],
+        "answer": 2,
+        "explanation": "\\(C[0,1]\\) 包含 \\(\\{1,x,x^2,x^3,\\ldots\\}\\) 这一无穷线性无关族（多项式的不同次幂线性无关——若有限和 \\(\\sum a_i x^i\\equiv 0\\) 则全部系数为 \\(0\\)）。因此 \\(C[0,1]\\) 不能由有限多个函数张成，维数为 \\(\\infty\\)。函数空间通常为无穷维，这正是泛函分析的研究对象。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="linear-algebra"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../linear-algebra.html" class="module-name">线性代数 Algèbre linéaire</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.1 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 向量空间公理与典型例子</a></li>
+      <li><a href="#kp2">02 · 子空间、线性组合与张成</a></li>
+      <li><a href="#kp3">03 · 线性无关、基与维数</a></li>
+      <li><a href="#kp4">04 · 线性映射与坐标表示</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 1</p>
+      <h1>向量空间与线性映射</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>向量空间公理与典型例子</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>数学和物理中处处出现可加且可缩放的对象：平面上的位移、力的合成、信号的叠加、多项式的相加、矩阵的累加、连续函数的线性组合。这些对象的运算遵循惊人相似的规则——加法可交换可结合，且总能用一个标量去「拉伸」它们。19 世纪后期，数学家逐渐意识到：与其针对每种具体对象重新发展一套理论，不如把这些公共法则提炼出来，得到一个统一的抽象框架。</p>
+            <ul>
+              <li><strong>几何力学</strong>：位移、速度、加速度都是「向量」，可以相加（合成）也可以乘以实数（缩放），平行四边形法则给出加法。</li>
+              <li><strong>信号与函数</strong>：声波、图像、电压随时间的变化可以相加（叠加原理）和缩放（音量），它们生成的空间是函数空间。</li>
+              <li><strong>方程组与多项式</strong>：线性方程组的解集（齐次情形）、特定次数以下的多项式集合，都满足加法和数乘封闭。</li>
+            </ul>
+            <p>「向量空间」就是把这些性质抽象出来的代数结构：一个集合 \(V\) 配上加法和标量乘法，并满足 8 条公理。一旦确认某个对象集合是向量空间，关于线性结构的所有定理（基、维数、线性映射、矩阵表示）就自动适用。这种统一性是线性代数威力的源头，也使它成为现代数学和工程的通用语言。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>向量空间的 8 条公理</h4>
+            <p>设 \(K\) 为一个域（通常取 \(\mathbb{R}\) 或 \(\mathbb{C}\)）。一个 \(K\)-向量空间是一个集合 \(V\)，配上两种运算：</p>
+            <p>· 加法 \(+: V\times V\to V\)，\((u,v)\mapsto u+v\)；</p>
+            <p>· 标量乘法 \(\cdot: K\times V\to V\)，\((c,v)\mapsto cv\)。</p>
+            <p>且满足以下 8 条公理（\(\forall u,v,w\in V,\ a,b\in K\)）：</p>
+            <p>(V1) 加法结合律：\((u+v)+w=u+(v+w)\)；</p>
+            <p>(V2) 加法交换律：\(u+v=v+u\)；</p>
+            <p>(V3) 加法单位元：存在 \(\mathbf{0}\in V\) 使 \(v+\mathbf{0}=v\)；</p>
+            <p>(V4) 加法逆元：每个 \(v\in V\) 存在 \(-v\in V\) 使 \(v+(-v)=\mathbf{0}\)；</p>
+            <p>(V5) 数乘单位律：\(1\cdot v=v\)；</p>
+            <p>(V6) 数乘相容性：\(a(bv)=(ab)v\)；</p>
+            <p>(V7) 标量分配律：\(a(u+v)=au+av\)；</p>
+            <p>(V8) 向量分配律：\((a+b)v=av+bv\)。</p>
+            <p>(V1)–(V4) 表明 \((V,+)\) 是阿贝尔群，(V5)–(V8) 描述标量乘法与加法的相容性。</p>
+
+            <h4>典型例子</h4>
+            <p>· \(\mathbb{R}^n=\{(x_1,\ldots,x_n):x_i\in\mathbb{R}\}\)：分量加法 \((x_i)+(y_i)=(x_i+y_i)\) 与数乘 \(c(x_i)=(cx_i)\)。这是最经典的有限维实向量空间。</p>
+            <p>· \(\mathbb{C}^n\)：与上同理，但标量取自 \(\mathbb{C}\)，可视为 \(\mathbb{C}\)-向量空间或 \(\mathbb{R}\)-向量空间（维数会变）。</p>
+            <p>· 多项式空间 \(P_n(\mathbb{R})=\{a_0+a_1 x+\cdots+a_n x^n:a_i\in\mathbb{R}\}\)：多项式按系数加，按系数数乘。</p>
+            <p>· 矩阵空间 \(M_{m\times n}(\mathbb{R})\)：矩阵元素逐项加和数乘。</p>
+            <p>· 连续函数空间 \(C[a,b]\)：函数加 \((f+g)(x)=f(x)+g(x)\) 与数乘 \((cf)(x)=cf(x)\)，连续函数的和与数乘仍连续。</p>
+
+            <h4>由公理推出的基本性质</h4>
+            <p>(a) 零向量唯一；(b) 加法逆元唯一；(c) \(0\cdot v=\mathbf{0}\)（用 \(0\cdot v=(0+0)v=0\cdot v+0\cdot v\) 加上加法消去）；(d) \(c\cdot\mathbf{0}=\mathbf{0}\)；(e) \((-1)\cdot v=-v\)。这些「显然」的性质实际上都是公理的逻辑推论，不是额外假设。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(V=\{(x,y)\in\mathbb{R}^2:y=2x\}\)（过原点的直线）是否构成 \(\mathbb{R}\)-向量空间。</p>
+            <p><em>解答</em>：取 \(u=(x_1,2x_1),\ v=(x_2,2x_2)\in V\)。加法：\(u+v=(x_1+x_2,2(x_1+x_2))\in V\)（封闭）。数乘：\(c\cdot u=(cx_1,2cx_1)\in V\)（封闭）。零向量 \((0,0)\in V\)（取 \(x=0\)）。逆元：\(-u=(-x_1,-2x_1)\in V\)。8 条公理均继承自 \(\mathbb{R}^2\)。故 \(V\) 是 \(\mathbb{R}^2\) 的子空间，本身也是向量空间。</p>
+            <p><strong>例题 2</strong>：判断 \(W=\{(x,y)\in\mathbb{R}^2:x+y=1\}\) 是否为向量空间。</p>
+            <p><em>解答</em>：注意 \((0,0)\notin W\)（\(0+0=0\ne 1\)），故 \(W\) 不含加法单位元，不是向量空间。亦可用反例：\((1,0),(0,1)\in W\) 但 \((1,0)+(0,1)=(1,1)\notin W\)，加法不封闭。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>忽略加法封闭性的全集验证</strong>：仅找几对相加在集合中就断言封闭，正确做法是抽象证明 \(u+v\) 仍满足定义条件。</li>
+              <li><strong>把「过原点」与「可缩放」混为一谈</strong>：过原点是必要条件（含 \(\mathbf{0}\)），但不充分；还需要加法和数乘封闭。例如圆周 \(x^2+y^2=0\) 只有原点是平凡子空间，但 \(x^2+y^2\le 1\) 含原点却不是子空间。</li>
+              <li><strong>数乘标量域的混淆</strong>：\(\mathbb{C}\) 视为 \(\mathbb{R}\)-向量空间维数为 \(2\)，视为 \(\mathbb{C}\)-向量空间维数为 \(1\)，明确域是判断向量空间的前提。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">向量空间的定义中包含几条公理？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(V\\) 是向量空间需满足 8 条公理：4 条加法群公理 + 4 条数乘相容公理。')">A. 4 条</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(V\\) 是向量空间需满足 8 条公理：4 条加法群公理 + 4 条数乘相容公理。')">B. 6 条</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\(V\\) 是向量空间需满足 8 条公理：4 条加法群公理 + 4 条数乘相容公理。')">C. 8 条</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(V\\) 是向量空间需满足 8 条公理：4 条加法群公理 + 4 条数乘相容公理。')">D. 10 条</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>子空间、线性组合与张成</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>确认了向量空间的存在后，下一个核心问题是：在一个大向量空间中，哪些子集本身保留了线性结构？又如何用少数几个向量「生成」更大的子结构？这两个问题分别引出子空间和张成的概念，它们是后续基与维数理论的直接铺垫。</p>
+            <ul>
+              <li><strong>线性方程组的解集</strong>：齐次线性方程组 \(A\mathbf{x}=\mathbf{0}\) 的解集是 \(\mathbb{R}^n\) 的子空间，称为 \(A\) 的零空间（核）。</li>
+              <li><strong>列空间</strong>：矩阵 \(A\) 的列向量张成的子空间叫列空间，揭示 \(A\mathbf{x}=\mathbf{b}\) 何时有解（\(\mathbf{b}\) 必须在列空间中）。</li>
+              <li><strong>有限生成性</strong>：在数据科学与工程中，我们希望用少量「典型方向」描述大量数据点——主成分分析的实质就是寻找一个低维子空间近似张成所有数据。</li>
+            </ul>
+            <p>子空间是「向量空间的最小可识别构件」，张成则告诉我们「从有限信息能推出多大的结构」。这两者结合，使我们能从一组生成元出发研究无穷多向量的整体行为，进而通向基与维数的精确数量刻画。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>子空间的定义与判定</h4>
+            <p>设 \(V\) 是 \(K\)-向量空间，\(W\subseteq V\)。\(W\) 称为 \(V\) 的子空间，若它本身是 \(K\)-向量空间（运算从 \(V\) 继承）。</p>
+            <p><strong>子空间判定定理（三条件）</strong>：\(W\subseteq V\) 是子空间当且仅当：</p>
+            <p>(S1) \(\mathbf{0}_V\in W\)（含零向量）；</p>
+            <p>(S2) \(\forall u,v\in W,\ u+v\in W\)（加法封闭）；</p>
+            <p>(S3) \(\forall c\in K,\ v\in W,\ cv\in W\)（数乘封闭）。</p>
+            <p>这三条等价于一条紧凑形式：\(\forall a,b\in K,\ u,v\in W,\ au+bv\in W\)。证明思路：8 条公理大多从 \(V\) 自动继承，只需保证运算不跑出 \(W\) 即可。</p>
+
+            <h4>线性组合</h4>
+            <p>给定向量 \(v_1,v_2,\ldots,v_k\in V\) 和标量 \(c_1,\ldots,c_k\in K\)，表达式</p>
+            \[c_1 v_1+c_2 v_2+\cdots+c_k v_k\]
+            <p>称为 \(\{v_i\}\) 的一个线性组合。当所有 \(c_i=0\) 时得到 \(\mathbf{0}\)，称为平凡组合。线性组合是从「积木」\(\{v_i\}\) 出发，通过加法和数乘构造的所有可能向量。</p>
+
+            <h4>张成空间</h4>
+            <p>子集 \(S=\{v_1,\ldots,v_k\}\subseteq V\) 的张成定义为：</p>
+            \[\mathrm{span}(S)=\{c_1 v_1+\cdots+c_k v_k:c_i\in K\}\]
+            <p>关键性质：\(\mathrm{span}(S)\) 是 \(V\) 中包含 \(S\) 的最小子空间。</p>
+            <p>证明分两步：(a) \(\mathrm{span}(S)\) 是子空间——\(\mathbf{0}=0\cdot v_1+\cdots+0\cdot v_k\)；任意两线性组合相加仍是线性组合；标量乘以线性组合仍是线性组合。(b) 任何包含 \(S\) 的子空间 \(W\) 必含所有线性组合（由加法和数乘封闭），故 \(\mathrm{span}(S)\subseteq W\)。两点合起来证明 \(\mathrm{span}(S)\) 是包含 \(S\) 的最小子空间。</p>
+
+            <h4>张成的几何直观</h4>
+            <p>· 单个非零向量 \(v\) 的张成 \(\mathrm{span}\{v\}=\{cv:c\in\mathbb{R}\}\) 是过原点的直线；</p>
+            <p>· 两个线性无关向量的张成是过原点的平面；</p>
+            <p>· 在 \(\mathbb{R}^3\) 中三个线性无关向量的张成即整个空间；</p>
+            <p>· 当向量线性相关时，张成的「真实维数」会比向量个数低。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(W=\{(x,y,z)\in\mathbb{R}^3:x+y+z=0\}\) 是否为 \(\mathbb{R}^3\) 的子空间。</p>
+            <p><em>解答</em>：(S1) \(\mathbf{0}=(0,0,0)\) 满足 \(0+0+0=0\)，含零；(S2) 若 \((x_1,y_1,z_1),(x_2,y_2,z_2)\in W\)，则 \((x_1+x_2)+(y_1+y_2)+(z_1+z_2)=0+0=0\)，加法封闭；(S3) 若 \((x,y,z)\in W\)，则 \(cx+cy+cz=c(x+y+z)=0\)，数乘封闭。三条件全满足，\(W\) 是子空间，几何上是过原点的平面。</p>
+            <p><strong>例题 2</strong>：判断 \((4,5,6)\) 是否属于 \(\mathrm{span}\{(1,1,1),(1,2,3)\}\)？</p>
+            <p><em>解答</em>：设 \(a(1,1,1)+b(1,2,3)=(4,5,6)\)。得方程组 \(a+b=4,\ a+2b=5,\ a+3b=6\)。前两式相减 \(b=1\)，代回 \(a=3\)；验证第三式 \(3+3\cdot 1=6\) ✓。故 \((4,5,6)=3(1,1,1)+1\cdot(1,2,3)\)，属于该张成。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>忘记验证含零向量</strong>：判定子空间时第一步应检查 \(\mathbf{0}\in W\)；若不含零则立即否定，无需检验另两条。例如 \(\{(x,y):y=x+1\}\) 不含原点，立即排除。</li>
+              <li><strong>把「线性组合」与「线性无关」混淆</strong>：线性组合是构造方式（任何向量集都可作组合），线性无关是关系结构。属于张成 \(\Leftrightarrow\) 可写成线性组合，与无关性无关。</li>
+              <li><strong>子集与子空间混淆</strong>：\(\{(1,0)\}\) 是 \(\mathbb{R}^2\) 的子集但不是子空间（不含零，不在加法下封闭）。子空间必须自身构成向量空间。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="linear-algebra-ch01-kp2">
+        <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:13px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.line{stroke:#334155;fill:none;stroke-width:1.5}.span{stroke:#6366f1;fill:none;stroke-width:1.2;opacity:0.5}</style>
+          <defs><marker id="ah-la1k2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#334155"/></marker></defs>
+          <line x1="40" y1="220" x2="380" y2="220" class="line"/>
+          <line x1="60" y1="240" x2="60" y2="40" class="line"/>
+          <text x="385" y="225" class="fg2">x</text><text x="55" y="35" class="fg2">y</text>
+          <line x1="60" y1="220" x2="380" y2="60" class="span" stroke-dasharray="4,3"/>
+          <text x="320" y="100" class="fg2" fill="#6366f1">span{v} = 直线</text>
+          <line x1="60" y1="220" x2="200" y2="150" stroke="#6366f1" stroke-width="2.2" marker-end="url(#ah-la1k2)"/>
+          <text x="145" y="165" class="fg" fill="#6366f1">v=(2,1)</text>
+          <line x1="60" y1="220" x2="280" y2="110" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ah-la1k2)" stroke-dasharray="3,2"/>
+          <text x="240" y="130" class="fg2" fill="#8b5cf6">2v</text>
+          <line x1="60" y1="220" x2="130" y2="185" stroke="#a78bfa" stroke-width="2" marker-end="url(#ah-la1k2)" stroke-dasharray="3,2"/>
+          <text x="100" y="200" class="fg2" fill="#a78bfa">0.5v</text>
+          <text x="200" y="252" text-anchor="middle" class="fg">span{v} = {cv : c∈ℝ} 是过原点的直线</text>
+        </svg>
+        <figcaption>Fig: 单个向量 v 的张成构成过原点的一维子空间（直线）</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个集合是 \(\mathbb{R}^2\) 的子空间？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。子空间必含 \\(\\mathbf{0}\\) 且对加法、数乘封闭，过原点的直线满足。')">A. \(\{(x,y):y=x+1\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！子空间必含 \\(\\mathbf{0}\\) 且对加法、数乘封闭，过原点的直线满足。')">B. \(\{(x,y):y=3x\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。子空间必含 \\(\\mathbf{0}\\) 且对加法、数乘封闭，过原点的直线满足。')">C. \(\{(x,y):x\ge 0\}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。子空间必含 \\(\\mathbf{0}\\) 且对加法、数乘封闭，过原点的直线满足。')">D. \(\{(x,y):xy=0\}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>线性无关、基与维数</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>张成回答了「能生成多大的子空间」，但生成元的数量并不一定等于子空间的真实「自由度」。同一个子空间可能由 3 个、5 个甚至更多向量张成，但其中可能有冗余。我们需要一种最经济、最不可约的描述方式：恰好用最少的向量、彼此独立、又能完整表达整个空间——这就是「基」的诉求。</p>
+            <ul>
+              <li><strong>坐标系的本质</strong>：在 \(\mathbb{R}^3\) 中我们用 \((x,y,z)\) 描述点，背后正是选定了基 \(\{e_1,e_2,e_3\}\)。换基相当于换坐标系。</li>
+              <li><strong>压缩与降维</strong>：图像、信号常用少数主成分（特征向量）描述，本质是寻找张成数据空间的高质量基。</li>
+              <li><strong>方程组的解空间</strong>：\(A\mathbf{x}=\mathbf{0}\) 的解集（零空间）的基给出所有解的「自由参数」，其个数即解空间维数。</li>
+            </ul>
+            <p>「线性无关」消除冗余，「基」给出最简描述，「维数」是基大小的不变量。这三个概念合起来，使我们能精确、定量地刻画向量空间——这是后续秩-零度定理、谱定理、表示论等高级结果的共同基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>线性无关与线性相关</h4>
+            <p>设 \(v_1,v_2,\ldots,v_k\in V\)。称这组向量<strong>线性无关</strong>，若</p>
+            \[c_1 v_1+c_2 v_2+\cdots+c_k v_k=\mathbf{0}\quad\Longrightarrow\quad c_1=c_2=\cdots=c_k=0\]
+            <p>即零向量只有平凡的线性组合表示。否则称为<strong>线性相关</strong>，此时存在不全为零的 \(c_i\) 使上述等式成立。</p>
+            <p><strong>等价判据</strong>：线性相关 \(\Leftrightarrow\) 某个 \(v_i\) 可写成其他向量的线性组合。证明：若 \(c_i\ne 0\) 则 \(v_i=-\frac{1}{c_i}\sum_{j\ne i}c_j v_j\)；反之亦然。直觉上，线性相关意味着「有冗余」——能去掉一个仍能表达原有的张成。</p>
+
+            <h4>基的定义</h4>
+            <p>子集 \(\beta=\{v_1,\ldots,v_n\}\subseteq V\) 称为 \(V\) 的一组<strong>基</strong>（base），若同时满足：</p>
+            <p>(B1) \(\beta\) 线性无关；</p>
+            <p>(B2) \(\beta\) 张成 \(V\)，即 \(\mathrm{span}(\beta)=V\)。</p>
+            <p>等价地，\(\beta\) 是基 \(\Leftrightarrow\) 每个 \(v\in V\) 可<strong>唯一</strong>表示为基向量的线性组合 \(v=c_1 v_1+\cdots+c_n v_n\)。表示的存在性来自 (B2)，唯一性来自 (B1)（若有两种表示，相减得 \(\sum(c_i-c_i')v_i=\mathbf{0}\)，由无关性强制系数全等）。</p>
+
+            <h4>维数的良定义</h4>
+            <p><strong>维数定理</strong>：若 \(V\) 有限维（即存在有限张成集），则 \(V\) 的任意两组基有相同的元素个数。这个公共数称为 \(V\) 的维数 \(\dim V\)。</p>
+            <p>证明思路（替换引理 / Steinitz exchange lemma）：设 \(\{v_1,\ldots,v_m\}\) 张成 \(V\)，\(\{w_1,\ldots,w_n\}\) 线性无关，则 \(n\le m\)。逐个用 \(w_i\) 替换 \(\{v_j\}\) 中的某个，保持张成性不变。把这个引理对调两组基使用，即得 \(m=n\)。</p>
+
+            <h4>典型空间的维数</h4>
+            <p>· \(\dim\mathbb{R}^n=n\)，标准基为 \(\{e_1,\ldots,e_n\}\)，其中 \(e_i\) 第 \(i\) 位为 \(1\)、其余为 \(0\)；</p>
+            <p>· \(\dim P_n(\mathbb{R})=n+1\)，一组基为 \(\{1,x,x^2,\ldots,x^n\}\)；</p>
+            <p>· \(\dim M_{m\times n}(\mathbb{R})=mn\)，一组基为 \(\{E_{ij}\}_{1\le i\le m,1\le j\le n}\)；</p>
+            <p>· \(\dim C[a,b]=\infty\)（包含线性无关族 \(\{1,x,x^2,\ldots\}\)）。</p>
+
+            <h4>有用的基本结论</h4>
+            <p>(a) 在 \(n\) 维空间中，任意 \(n+1\) 个向量必线性相关；(b) \(n\) 个线性无关的向量自动构成基；(c) \(n\) 个张成 \(V\) 的向量自动构成基。这些结论极大简化了基的检验工作。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(\{(1,2),(3,6)\}\) 在 \(\mathbb{R}^2\) 中是否线性无关。</p>
+            <p><em>解答</em>：设 \(c_1(1,2)+c_2(3,6)=(0,0)\)，得 \(c_1+3c_2=0\) 与 \(2c_1+6c_2=0\)，两式等价。取 \(c_1=3,c_2=-1\) 即 \(3(1,2)-1(3,6)=(0,0)\)，存在非平凡组合，故线性相关。本质上 \((3,6)=3(1,2)\)，第二个向量是冗余。</p>
+            <p><strong>例题 2</strong>：求 \(\mathbb{R}^3\) 中子空间 \(W=\{(x,y,z):x-y=0,\ y-z=0\}\) 的一组基与维数。</p>
+            <p><em>解答</em>：条件给出 \(x=y=z\)，故 \(W=\{(t,t,t):t\in\mathbb{R}\}=\mathrm{span}\{(1,1,1)\}\)。\(\{(1,1,1)\}\) 线性无关（单个非零向量）且张成 \(W\)，故为一组基，\(\dim W=1\)。两个独立方程把 \(\mathbb{R}^3\) 切成 1 维直线。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>忘记基必须同时满足两条件</strong>：仅线性无关不够（可能不张成全空间）；仅张成不够（可能有冗余）。例如 \(\{(1,0),(0,1),(1,1)\}\) 张成 \(\mathbb{R}^2\) 但不是基（线性相关）。</li>
+              <li><strong>「向量个数 = 维数」当作判定基的充分条件</strong>：在 \(n\) 维空间中，\(n\) 个向量构成基要么必须线性无关，要么必须张成。例如 \(\{(1,1),(2,2)\}\) 有 2 个向量但不是 \(\mathbb{R}^2\) 的基。</li>
+              <li><strong>把方程组写错或行简化错</strong>：判断线性无关常归结为齐次方程组的解唯一性。系数错位会导致结论翻转，建议总用矩阵化简交叉验证。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\mathbb{R}^3\) 中线性无关向量的最大个数为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dim\\mathbb{R}^3=3\\)，故线性无关向量最多 3 个。')">A. 1</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dim\\mathbb{R}^3=3\\)，故线性无关向量最多 3 个。')">B. 2</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(\\dim\\mathbb{R}^3=3\\)，故线性无关向量最多 3 个。')">C. 3</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。\\(\\dim\\mathbb{R}^3=3\\)，故线性无关向量最多 3 个。')">D. 任意多</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>线性映射与坐标表示</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>研究向量空间本身只是第一步——更深刻的问题是：在不同向量空间之间，哪些映射保留了线性结构？这类「保结构」的映射称为线性映射，它们是线性代数最核心的对象。一旦选定了基，每个有限维空间间的线性映射都可写成矩阵——理论与计算就此打通。</p>
+            <ul>
+              <li><strong>几何变换</strong>：旋转、反射、缩放、剪切、投影都是线性映射，可用矩阵表示，便于计算机图形学批量处理。</li>
+              <li><strong>微分算子</strong>：求导 \(D:P_n\to P_{n-1},\ p\mapsto p'\) 是线性映射，可写成矩阵后用矩阵理论分析微分方程。</li>
+              <li><strong>傅里叶变换</strong>：从时域到频域的变换是无穷维线性映射，离散版本即著名的 DFT 矩阵。</li>
+            </ul>
+            <p>线性映射 + 矩阵表示 = 把抽象代数对象转化为可计算的数表，这是线性代数应用最广的工程范式。无论是机器学习的权重矩阵、量子力学的算符还是工程结构分析的刚度矩阵，背后都是同一套理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>线性映射的定义</h4>
+            <p>设 \(V,W\) 是同一个域 \(K\) 上的向量空间。映射 \(T:V\to W\) 称为<strong>线性映射</strong>（或线性变换），若对任意 \(u,v\in V\) 与 \(a,b\in K\)：</p>
+            \[T(au+bv)=aT(u)+bT(v)\]
+            <p>等价的拆分条件：(L1) \(T(u+v)=T(u)+T(v)\)（加性）；(L2) \(T(cv)=cT(v)\)（齐次性）。两条等价于上面的合并形式。</p>
+            <p><strong>立刻推出的性质</strong>：\(T(\mathbf{0}_V)=\mathbf{0}_W\)（取 \(c=0\)）；\(T(-v)=-T(v)\)。这两条是判断 \(T\) 是否线性的快速否定标准。</p>
+
+            <h4>线性映射的核与像</h4>
+            <p>· 核（kernel）：\(\ker T=\{v\in V:T(v)=\mathbf{0}_W\}\)，是 \(V\) 的子空间；</p>
+            <p>· 像（image）：\(\mathrm{Im}\,T=\{T(v):v\in V\}\)，是 \(W\) 的子空间。</p>
+            <p>核衡量「映射压缩了多少信息」（核越大，映射越不单射），像衡量「映射的输出范围有多大」。后续的秩-零度定理给出 \(\dim\ker T+\dim\mathrm{Im}\,T=\dim V\)。</p>
+
+            <h4>坐标向量</h4>
+            <p>设 \(\beta=\{b_1,\ldots,b_n\}\) 是 \(V\) 的一组基。任意 \(v\in V\) 唯一表示为 \(v=c_1 b_1+\cdots+c_n b_n\)，定义 \(v\) 在基 \(\beta\) 下的坐标向量为</p>
+            \[[v]_\beta=\begin{pmatrix}c_1\\ c_2\\ \vdots\\ c_n\end{pmatrix}\in K^n\]
+            <p>映射 \(v\mapsto [v]_\beta\) 是 \(V\) 与 \(K^n\) 之间的同构，把抽象向量翻译成具体数列。</p>
+
+            <h4>线性映射的矩阵表示</h4>
+            <p>设 \(\alpha=\{a_1,\ldots,a_m\}\) 是 \(V\) 的基（定义域），\(\beta=\{b_1,\ldots,b_p\}\) 是 \(W\) 的基（值域）。线性映射 \(T:V\to W\) 在两组基下的矩阵 \([T]_\alpha^\beta\) 是 \(p\times m\) 矩阵，其第 \(j\) 列是 \([T(a_j)]_\beta\)：</p>
+            \[[T]_\alpha^\beta=\big(\,[T(a_1)]_\beta\ \big|\ [T(a_2)]_\beta\ \big|\ \cdots\ \big|\ [T(a_m)]_\beta\,\big)\]
+            <p>核心公式：</p>
+            \[[T(v)]_\beta=[T]_\alpha^\beta\cdot[v]_\alpha\]
+            <p>这把抽象的「映射作用在向量上」翻译为「矩阵乘以列向量」，是矩阵代数得以服务于线性映射理论的根本桥梁。当 \(V=W\) 且 \(\alpha=\beta\) 时简记为 \([T]_\beta\)。</p>
+
+            <h4>例：\(\mathbb{R}^2\) 上的旋转</h4>
+            <p>逆时针旋转 \(\theta\) 角的线性映射 \(R_\theta\)，在标准基下的矩阵为</p>
+            \[[R_\theta]=\begin{pmatrix}\cos\theta&-\sin\theta\\ \sin\theta&\cos\theta\end{pmatrix}\]
+            <p>验证：\(R_\theta(e_1)=(\cos\theta,\sin\theta)\) 作为第 1 列；\(R_\theta(e_2)=(-\sin\theta,\cos\theta)\) 作为第 2 列。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：判断 \(T:\mathbb{R}^2\to\mathbb{R}^2,\ T(x,y)=(2x-y,\ x+3y)\) 是否线性，并求其在标准基下的矩阵。</p>
+            <p><em>解答</em>：验证线性：\(T(au+bv)=T(au_1+bv_1,au_2+bv_2)=(2(au_1+bv_1)-(au_2+bv_2),\ (au_1+bv_1)+3(au_2+bv_2))=a(2u_1-u_2,u_1+3u_2)+b(2v_1-v_2,v_1+3v_2)=aT(u)+bT(v)\) ✓。\(T(e_1)=T(1,0)=(2,1)\) 作为第 1 列；\(T(e_2)=T(0,1)=(-1,3)\) 作为第 2 列。故 \([T]=\begin{pmatrix}2&-1\\1&3\end{pmatrix}\)。</p>
+            <p><strong>例题 2</strong>：考察 \(D:P_2\to P_2,\ D(p)=p'\)。在基 \(\beta=\{1,x,x^2\}\) 下求 \([D]_\beta\)。</p>
+            <p><em>解答</em>：\(D(1)=0=0\cdot 1+0\cdot x+0\cdot x^2\)，坐标 \((0,0,0)^T\)；\(D(x)=1=1\cdot 1+0\cdot x+0\cdot x^2\)，坐标 \((1,0,0)^T\)；\(D(x^2)=2x=0\cdot 1+2\cdot x+0\cdot x^2\)，坐标 \((0,2,0)^T\)。故 \([D]_\beta=\begin{pmatrix}0&1&0\\0&0&2\\0&0&0\end{pmatrix}\)。注意 \(D\) 不是单射（\(\ker D=\) 常数多项式），\(\dim\ker D=1\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>忘记验证 \(T(\mathbf{0})=\mathbf{0}\)</strong>：平移 \(T(v)=v+v_0\)（\(v_0\ne 0\)）满足加性 \(T(u+v)=u+v+v_0\ne T(u)+T(v)\)，且 \(T(\mathbf{0})=v_0\ne\mathbf{0}\)，立即排除线性。</li>
+              <li><strong>矩阵的列与行混淆</strong>：第 \(j\) 列是 \(T(a_j)\) 的坐标，不是「坐标的第 \(j\) 行」。把 \(T(e_i)\) 写成行会得到正确矩阵的转置。</li>
+              <li><strong>不同基下矩阵的混用</strong>：\([T]_\beta\) 依赖于基的选择。换基公式 \([T]_{\beta'}=P^{-1}[T]_\beta P\)（其中 \(P\) 是 \(\beta'\to\beta\) 的过渡矩阵）将在后续章节展开，这里需明确：写 \([T]\) 时务必标明基。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列映射 \(T:\mathbb{R}^2\to\mathbb{R}^2\) 中哪个是线性的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。线性需 \\(T(\\mathbf{0})=\\mathbf{0}\\) 且对加法和数乘都齐次保持。')">A. \(T(x,y)=(x+1,y)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。线性需 \\(T(\\mathbf{0})=\\mathbf{0}\\) 且对加法和数乘都齐次保持。')">B. \(T(x,y)=(x^2,y)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！线性需 \\(T(\\mathbf{0})=\\mathbf{0}\\) 且对加法和数乘都齐次保持。')">C. \(T(x,y)=(3x-y,\ 2x+y)\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。线性需 \\(T(\\mathbf{0})=\\mathbf{0}\\) 且对加法和数乘都齐次保持。')">D. \(T(x,y)=(|x|,y)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="../linear-algebra.html" class="nav-prev">← 返回模块概览</a>
+      <a href="../linear-algebra.html" class="nav-overview">📋 概览</a>
+      <a href="ch02.html" class="nav-next">Ch.2 矩阵运算与初等变换 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "linear-algebra-ch01";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>

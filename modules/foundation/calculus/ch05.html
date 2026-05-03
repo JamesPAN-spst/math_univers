@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.5 积分应用与反常积分 — 微积分 Calculus — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "calculus-ch05-q1",
+        "question": "由曲线 \\(y=x^2\\) 与直线 \\(y=2x\\) 所围平面图形的面积为？",
+        "options": ["\\(\\dfrac{4}{3}\\)", "\\(\\dfrac{2}{3}\\)", "\\(\\dfrac{8}{3}\\)", "\\(2\\)"],
+        "answer": 0,
+        "explanation": "交点：\\(x^2=2x\\) 解得 \\(x=0,2\\)。在 \\([0,2]\\) 上 \\(2x\\ge x^2\\)。\\(A=\\int_0^2 (2x-x^2)\\,dx = [x^2 - x^3/3]_0^2 = 4 - 8/3 = 4/3\\)。易错：颠倒上下限或误用 \\(x^2-2x\\)。"
+      },
+      {
+        "id": "calculus-ch05-q2",
+        "question": "用圆盘法求 \\(y=\\sqrt{x},\\ y=0,\\ x=4\\) 围成的图形绕 \\(x\\) 轴旋转所成体积。",
+        "options": ["\\(4\\pi\\)", "\\(8\\pi\\)", "\\(16\\pi\\)", "\\(\\dfrac{16\\pi}{3}\\)"],
+        "answer": 1,
+        "explanation": "\\(V=\\pi\\int_0^4 y^2\\,dx = \\pi\\int_0^4 x\\,dx = \\pi\\cdot[x^2/2]_0^4 = 8\\pi\\)。圆盘法体积元 \\(dV=\\pi y^2\\,dx\\)。常见错误：忘记 \\(\\pi\\) 系数或对 \\(y\\) 而非 \\(y^2\\) 积分。"
+      },
+      {
+        "id": "calculus-ch05-q3",
+        "question": "曲线 \\(y=\\dfrac{2}{3}x^{3/2}\\) 在 \\([0,3]\\) 上的弧长为？",
+        "options": ["\\(\\dfrac{14}{3}\\)", "\\(\\dfrac{16}{3}\\)", "\\(\\dfrac{2\\sqrt{3}}{3}\\)", "\\(2\\)"],
+        "answer": 0,
+        "explanation": "\\(y'=x^{1/2}\\)，\\(1+(y')^2=1+x\\)。\\(L=\\int_0^3 \\sqrt{1+x}\\,dx = [\\frac{2}{3}(1+x)^{3/2}]_0^3 = \\frac{2}{3}(8-1) = 14/3\\)。弧长公式 \\(L=\\int\\sqrt{1+y'^2}\\,dx\\)。"
+      },
+      {
+        "id": "calculus-ch05-q4",
+        "question": "下列反常积分中收敛的是？",
+        "options": ["\\(\\int_1^{\\infty} \\dfrac{1}{x}\\,dx\\)", "\\(\\int_1^{\\infty} \\dfrac{1}{x^2}\\,dx\\)", "\\(\\int_1^{\\infty} \\dfrac{1}{\\sqrt{x}}\\,dx\\)", "\\(\\int_1^{\\infty} \\sin x\\,dx\\)"],
+        "answer": 1,
+        "explanation": "p-积分判据：\\(\\int_1^{\\infty} 1/x^p\\,dx\\) 收敛 \\(\\Leftrightarrow p>1\\)。A 中 \\(p=1\\) 发散（对数发散），C 中 \\(p=1/2<1\\) 发散，B 中 \\(p=2>1\\) 收敛且值为 1。D 振荡发散（部分和无极限）。"
+      },
+      {
+        "id": "calculus-ch05-q5",
+        "question": "瑕积分 \\(\\int_0^1 \\dfrac{1}{x^p}\\,dx\\) 收敛的充要条件是？",
+        "options": ["\\(p>1\\)", "\\(p<1\\)", "\\(p\\ge 1\\)", "\\(p=1\\)"],
+        "answer": 1,
+        "explanation": "瑕点在 \\(0\\)。\\(\\int_{\\varepsilon}^1 x^{-p}\\,dx = \\frac{1-\\varepsilon^{1-p}}{1-p}\\)（\\(p\\ne 1\\)）。\\(\\varepsilon\\to 0^+\\) 时 \\(\\varepsilon^{1-p}\\to 0\\) \\(\\Leftrightarrow 1-p>0 \\Leftrightarrow p<1\\)。\\(p=1\\) 时为 \\(-\\ln\\varepsilon\\to\\infty\\) 发散。这与无穷区间 p-积分判据「方向相反」。"
+      },
+      {
+        "id": "calculus-ch05-q6",
+        "question": "计算 \\(\\int_0^{\\infty} e^{-x}\\,dx\\)。",
+        "options": ["\\(0\\)", "\\(1\\)", "\\(e\\)", "发散"],
+        "answer": 1,
+        "explanation": "\\(\\int_0^T e^{-x}\\,dx = 1 - e^{-T} \\to 1\\)（\\(T\\to\\infty\\)）。指数衰减积分是反常积分中最常见的「明显收敛」情形，将在概率论指数分布中再次出现。"
+      },
+      {
+        "id": "calculus-ch05-q7",
+        "question": "弹簧弹性系数 \\(k=200\\,\\text{N/m}\\)，将其从自然长度拉伸 \\(0.1\\,\\text{m}\\) 所做的功为？",
+        "options": ["\\(1\\,\\text{J}\\)", "\\(10\\,\\text{J}\\)", "\\(20\\,\\text{J}\\)", "\\(0.2\\,\\text{J}\\)"],
+        "answer": 0,
+        "explanation": "Hooke 定律 \\(F(x)=kx\\)。\\(W=\\int_0^{0.1} 200x\\,dx = 200\\cdot[x^2/2]_0^{0.1} = 100\\cdot 0.01 = 1\\,\\text{J}\\)。易错：把 \\(W=Fx\\) 用为常力公式，但弹力随位移变化必须积分。"
+      },
+      {
+        "id": "calculus-ch05-q8",
+        "question": "判断 \\(\\int_1^{\\infty} \\dfrac{\\sin x}{x^2}\\,dx\\) 的敛散性。",
+        "options": ["收敛", "发散", "振荡", "无意义"],
+        "answer": 0,
+        "explanation": "由 \\(|\\sin x/x^2|\\le 1/x^2\\) 且 \\(\\int_1^{\\infty} 1/x^2\\,dx\\) 收敛，由比较判别 \\(\\int_1^{\\infty}|\\sin x/x^2|\\,dx\\) 收敛，故绝对收敛 \\(\\Rightarrow\\) 收敛。绝对收敛蕴含收敛是反常积分判别的重要工具。"
+      },
+      {
+        "id": "calculus-ch05-q9",
+        "question": "由 \\(y=x,\\ y=x^2\\) 围成的图形绕 \\(y\\) 轴旋转，用柱壳法求体积。",
+        "options": ["\\(\\dfrac{\\pi}{6}\\)", "\\(\\dfrac{\\pi}{3}\\)", "\\(\\dfrac{\\pi}{2}\\)", "\\(\\pi\\)"],
+        "answer": 0,
+        "explanation": "交点 \\(x=0,1\\)。柱壳法 \\(V=2\\pi\\int_0^1 x(x-x^2)\\,dx = 2\\pi\\int_0^1 (x^2-x^3)\\,dx = 2\\pi(1/3-1/4) = 2\\pi/12 = \\pi/6\\)。柱壳元 \\(dV=2\\pi r h\\,dx\\)，其中 \\(r=x,\\ h=\\) 上下曲线之差。"
+      },
+      {
+        "id": "calculus-ch05-q10",
+        "question": "圆 \\(x^2+y^2=R^2\\) 的周长为？（用积分给出）",
+        "options": ["\\(\\pi R\\)", "\\(2\\pi R\\)", "\\(\\pi R^2\\)", "\\(4R\\)"],
+        "answer": 1,
+        "explanation": "用参数方程 \\(x=R\\cos t, y=R\\sin t,\\ t\\in[0,2\\pi]\\)。\\(L=\\int_0^{2\\pi}\\sqrt{(x')^2+(y')^2}\\,dt = \\int_0^{2\\pi} R\\,dt = 2\\pi R\\)。这是参数曲线弧长公式 \\(L=\\int\\sqrt{x'^2+y'^2}\\,dt\\) 的标准应用。"
+      },
+      {
+        "id": "calculus-ch05-q11",
+        "question": "判断 \\(\\int_0^{\\infty} \\dfrac{1}{1+x^2}\\,dx\\) 的值。",
+        "options": ["\\(\\dfrac{\\pi}{4}\\)", "\\(\\dfrac{\\pi}{2}\\)", "\\(\\pi\\)", "发散"],
+        "answer": 1,
+        "explanation": "\\(\\int_0^T 1/(1+x^2)\\,dx = \\arctan T - \\arctan 0 = \\arctan T\\to \\pi/2\\)（\\(T\\to\\infty\\)）。这是反常积分有限值的典型例子，与高斯积分一同构成概率密度归一化的常用工具。"
+      },
+      {
+        "id": "calculus-ch05-q12",
+        "question": "判断 \\(\\int_1^{\\infty} \\dfrac{\\ln x}{x^2}\\,dx\\) 的敛散性。",
+        "options": ["收敛", "发散", "条件收敛", "无法判断"],
+        "answer": 0,
+        "explanation": "对 \\(p=2-\\delta\\)（\\(\\delta\\) 充分小），\\(\\ln x \\le x^{\\delta}\\)（\\(x\\) 足够大），故 \\(\\ln x/x^2 \\le 1/x^{2-\\delta}\\)，由 p-积分判据 \\(2-\\delta>1\\) 收敛。亦可分部积分：\\(\\int \\ln x/x^2\\,dx = -\\ln x/x - 1/x + C\\)，\\(T\\to\\infty\\) 时极限存在。"
+      },
+      {
+        "id": "calculus-ch05-q13",
+        "question": "把长为 \\(L\\)、线密度为 \\(\\rho(x)=x\\)（\\(x\\in[0,L]\\)）的细杆，其质心 \\(\\bar{x}\\) 为？",
+        "options": ["\\(L/2\\)", "\\(L/3\\)", "\\(2L/3\\)", "\\(3L/4\\)"],
+        "answer": 2,
+        "explanation": "质心公式 \\(\\bar{x} = \\dfrac{\\int_0^L x\\rho(x)\\,dx}{\\int_0^L \\rho(x)\\,dx} = \\dfrac{\\int_0^L x^2\\,dx}{\\int_0^L x\\,dx} = \\dfrac{L^3/3}{L^2/2} = 2L/3\\)。线密度向 \\(x\\) 大端集中，故质心偏向远端，符合直觉。"
+      },
+      {
+        "id": "calculus-ch05-q14",
+        "question": "曲线 \\(y=\\sqrt{x}\\)（\\(x\\in[0,1]\\)）绕 \\(x\\) 轴旋转所得旋转面侧面积为？",
+        "options": ["\\(\\dfrac{\\pi}{6}(5\\sqrt{5}-1)\\)", "\\(\\dfrac{\\pi}{6}(5-1)\\)", "\\(\\pi(5\\sqrt{5}-1)\\)", "\\(\\dfrac{2\\pi}{3}\\)"],
+        "answer": 0,
+        "explanation": "\\(y'=\\frac{1}{2\\sqrt{x}}\\)，\\(\\sqrt{1+y'^2}=\\sqrt{1+1/(4x)} = \\sqrt{(4x+1)/(4x)}\\)。\\(S=2\\pi\\int_0^1 \\sqrt{x}\\cdot\\sqrt{(4x+1)/(4x)}\\,dx = \\pi\\int_0^1 \\sqrt{4x+1}\\,dx = \\pi\\cdot[\\frac{(4x+1)^{3/2}}{6}]_0^1 = \\pi(5\\sqrt{5}-1)/6\\)。"
+      },
+      {
+        "id": "calculus-ch05-q15",
+        "question": "下列积分中，属于「混合型」反常积分的是？",
+        "options": ["\\(\\int_0^{\\infty} e^{-x}\\,dx\\)", "\\(\\int_0^1 \\dfrac{1}{\\sqrt{x}}\\,dx\\)", "\\(\\int_0^{\\infty} \\dfrac{1}{\\sqrt{x}(1+x)}\\,dx\\)", "\\(\\int_1^2 \\dfrac{1}{x}\\,dx\\)"],
+        "answer": 2,
+        "explanation": "C 同时具有瑕点 \\(x=0\\)（\\(1/\\sqrt{x}\\to\\infty\\)）与无穷上限。处理时通常分为 \\(\\int_0^1+\\int_1^{\\infty}\\) 两段，分别讨论敛散性，两段都收敛才整体收敛。A 仅无穷区间，B 仅瑕积分，D 是常规定积分。"
+      },
+      {
+        "id": "calculus-ch05-q16",
+        "question": "用 Newton-Leibniz 计算 \\(\\int_0^{\\infty} \\dfrac{1}{(1+x)^3}\\,dx\\)。",
+        "options": ["\\(0\\)", "\\(\\dfrac{1}{2}\\)", "\\(1\\)", "\\(\\dfrac{1}{3}\\)"],
+        "answer": 1,
+        "explanation": "原函数 \\(F(x)=-\\dfrac{1}{2(1+x)^2}\\)。\\(\\int_0^T = F(T)-F(0) = -\\dfrac{1}{2(1+T)^2} + \\dfrac{1}{2}\\to \\dfrac{1}{2}\\)（\\(T\\to\\infty\\)）。注意：把上限换为符号 \\(T\\) 取极限是处理无穷区间反常积分的标准做法。"
+      },
+      {
+        "id": "calculus-ch05-q17",
+        "question": "高 \\(h\\)、底面积 \\(A\\) 的水池，水面到底部深度为 \\(h\\)，水的密度为 \\(\\rho\\)。把水全部抽到水面所做的功为？（取重力加速度 \\(g\\)）",
+        "options": ["\\(\\rho g A h\\)", "\\(\\dfrac{1}{2}\\rho g A h^2\\)", "\\(\\rho g A h^2\\)", "\\(2\\rho g A h^2\\)"],
+        "answer": 1,
+        "explanation": "在深度 \\(y\\)（从水面计）处取厚度 \\(dy\\) 的水层，质量 \\(\\rho A\\,dy\\)，提升高度 \\(y\\)，做功元 \\(dW=\\rho g y A\\,dy\\)。\\(W=\\int_0^h \\rho g A y\\,dy = \\rho g A h^2/2\\)。变力—变位—变质量结合的典型积分应用。"
+      },
+      {
+        "id": "calculus-ch05-q18",
+        "question": "判断 \\(\\int_0^1 \\dfrac{\\ln x}{\\sqrt{x}}\\,dx\\) 的敛散性。",
+        "options": ["收敛", "发散", "振荡", "无意义"],
+        "answer": 0,
+        "explanation": "瑕点在 \\(0\\)。比较：\\(|\\ln x|\\) 增长慢于任何 \\(x^{-\\delta}\\)（\\(\\delta>0\\)）。取 \\(\\delta=1/4\\)，则 \\(|\\ln x/\\sqrt{x}| \\le C/x^{1/2+\\delta}=C/x^{3/4}\\)（\\(x\\) 接近 \\(0\\)），由瑕积分判据 \\(p=3/4<1\\) 收敛。亦可分部积分直接算出值 \\(-4\\)。"
+      },
+      {
+        "id": "calculus-ch05-q19",
+        "question": "矩形闸门垂直浸入水中，宽 \\(2\\,\\text{m}\\)、高 \\(3\\,\\text{m}\\)，上沿与水面平齐。水的密度 \\(\\rho=1000\\,\\text{kg/m}^3\\)，\\(g=9.8\\,\\text{m/s}^2\\)。闸门所受总压力为？",
+        "options": ["\\(\\rho g\\cdot 6\\cdot 1.5\\,\\text{N}\\)", "\\(\\rho g\\cdot 6\\cdot 3\\,\\text{N}\\)", "\\(\\rho g\\cdot 9\\,\\text{N}\\)", "\\(\\rho g\\cdot 18\\,\\text{N}\\)"],
+        "answer": 0,
+        "explanation": "深度 \\(h\\) 处压强 \\(p=\\rho g h\\)，水平条带宽 \\(b(h)=2\\)，元压力 \\(dF=\\rho g h\\cdot 2\\,dh\\)。\\(F=\\int_0^3 2\\rho g h\\,dh = \\rho g\\cdot[h^2]_0^3 = 9\\rho g\\,\\text{N}\\)。等价于「平均压强 \\(\\rho g\\cdot 1.5\\) × 面积 \\(6\\)」即 A。"
+      },
+      {
+        "id": "calculus-ch05-q20",
+        "question": "判断 \\(\\int_1^{\\infty} \\dfrac{\\sin x}{x}\\,dx\\) 的敛散性。",
+        "options": ["绝对收敛", "条件收敛", "发散", "无意义"],
+        "answer": 1,
+        "explanation": "Dirichlet 判别：\\(\\int_1^T \\sin x\\,dx = \\cos 1 - \\cos T\\) 有界，\\(1/x\\) 单调趋零，故 \\(\\int_1^{\\infty}\\sin x/x\\,dx\\) 收敛。但 \\(\\int_1^{\\infty}|\\sin x|/x\\,dx\\) 发散（按周期分段 \\(\\ge \\sum 2/(n\\pi)\\)）。所以条件收敛，与级数中的「条件收敛」概念呼应。"
+      },
+      {
+        "id": "calculus-ch05-q21",
+        "question": "下列积分中发散的是？",
+        "options": ["\\(\\int_0^{\\infty} \\dfrac{1}{1+x^4}\\,dx\\)", "\\(\\int_0^1 \\ln x\\,dx\\)", "\\(\\int_2^{\\infty} \\dfrac{1}{x\\ln x}\\,dx\\)", "\\(\\int_1^{\\infty} \\dfrac{1}{x^{1.01}}\\,dx\\)"],
+        "answer": 2,
+        "explanation": "\\(\\int_2^T 1/(x\\ln x)\\,dx = \\ln\\ln T - \\ln\\ln 2 \\to\\infty\\)，发散（与级数 \\(\\sum 1/(n\\ln n)\\) 类比）。A 由 \\(1/(1+x^4)\\le 1/x^4\\)（\\(x\\ge 1\\)）+ \\([0,1]\\) 上有界 \\(\\Rightarrow\\) 收敛；B 分部 \\(\\int\\ln x\\,dx=x\\ln x-x\\)，瑕点 \\(0\\) 处 \\(x\\ln x\\to 0\\)，收敛于 \\(-1\\)；D \\(p>1\\) 收敛。"
+      },
+      {
+        "id": "calculus-ch05-q22",
+        "question": "求由 \\(y=\\sin x\\)（\\(x\\in[0,\\pi]\\)）与 \\(x\\) 轴围成图形绕 \\(x\\) 轴旋转的体积。",
+        "options": ["\\(\\dfrac{\\pi^2}{2}\\)", "\\(\\dfrac{\\pi}{2}\\)", "\\(\\pi^2\\)", "\\(2\\pi\\)"],
+        "answer": 0,
+        "explanation": "\\(V=\\pi\\int_0^{\\pi} \\sin^2 x\\,dx = \\pi\\int_0^{\\pi} \\dfrac{1-\\cos 2x}{2}\\,dx = \\pi\\cdot \\dfrac{\\pi}{2} = \\pi^2/2\\)。利用降幂公式 \\(\\sin^2 x = (1-\\cos 2x)/2\\) 积分。常见错误：忘记 \\(\\pi\\) 系数或漏写 \\(\\sin^2\\)。"
+      },
+      {
+        "id": "calculus-ch05-q23",
+        "question": "用比较判别法判定 \\(\\int_1^{\\infty} \\dfrac{1}{x+x^3}\\,dx\\) 的敛散性。",
+        "options": ["收敛", "发散", "条件收敛", "无法判断"],
+        "answer": 0,
+        "explanation": "对 \\(x\\ge 1\\)，\\(1/(x+x^3) \\le 1/x^3\\)，\\(\\int_1^{\\infty} 1/x^3\\,dx\\) 收敛（\\(p=3>1\\)），由比较判别法收敛。或用极限形式：\\(\\lim_{x\\to\\infty}\\dfrac{1/(x+x^3)}{1/x^3} = 1\\)，由极限比较判别法与 \\(\\int 1/x^3\\) 同敛散。"
+      },
+      {
+        "id": "calculus-ch05-q24",
+        "question": "细圆环半径 \\(R\\)、线密度 \\(\\rho\\)（常数），关于圆心垂直于环面的轴的转动惯量为？",
+        "options": ["\\(\\rho R^2\\)", "\\(2\\pi\\rho R^3\\)", "\\(\\pi\\rho R^3\\)", "\\(\\dfrac{1}{2}\\pi\\rho R^3\\)"],
+        "answer": 1,
+        "explanation": "环上每个质量元 \\(dm=\\rho\\,ds\\) 距轴 \\(R\\)。\\(I=\\int r^2\\,dm = R^2\\int_0^{2\\pi R}\\rho\\,ds = R^2\\cdot \\rho\\cdot 2\\pi R = 2\\pi\\rho R^3\\)。等价地用总质量 \\(M=2\\pi R\\rho\\) 表示为 \\(I=MR^2\\)，符合质量集中在半径 \\(R\\) 处的物理直觉。"
+      },
+      {
+        "id": "calculus-ch05-q25",
+        "question": "下列关于反常积分的说法，正确的是？",
+        "options": [
+          "若 \\(\\int_a^{\\infty}|f|\\,dx\\) 收敛，则 \\(\\int_a^{\\infty} f\\,dx\\) 必收敛",
+          "若 \\(\\int_a^{\\infty} f\\,dx\\) 收敛，则 \\(\\int_a^{\\infty}|f|\\,dx\\) 必收敛",
+          "若 \\(\\int_a^{\\infty} f\\,dx\\) 收敛，则 \\(\\lim_{x\\to\\infty}f(x)=0\\)",
+          "无穷区间反常积分必为有限值"
+        ],
+        "answer": 0,
+        "explanation": "A 是「绝对收敛 \\(\\Rightarrow\\) 收敛」标准结论。B 不对：\\(\\int_1^{\\infty}\\sin x/x\\,dx\\) 条件收敛但不绝对收敛。C 不对：可构造尖峰函数使积分收敛但 \\(f\\) 不趋于 \\(0\\)（与级数 \\(a_n\\to 0\\) 必要条件不同）。D 不对：发散积分极限不存在。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="calculus"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../calculus.html" class="module-name">微积分 Calculus</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.5 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 几何应用：面积、体积、弧长</a></li>
+      <li><a href="#kp2">02 · 物理与工程应用</a></li>
+      <li><a href="#kp3">03 · 反常积分的定义</a></li>
+      <li><a href="#kp4">04 · 反常积分的收敛判别</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 5</p>
+      <h1>积分应用与反常积分</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>几何应用：面积、体积、弧长</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>定积分诞生于「求面积」的古老问题：阿基米德用穷竭法计算抛物线弓形面积，开普勒用「无穷小薄片」估算酒桶体积。微积分基本定理把这种「无穷分割—求和—取极限」的繁复操作化归为「求原函数—代值相减」的可机械执行的算法，从此几何度量问题被彻底解放。</p>
+            <ul>
+              <li><strong>平面图形面积</strong>：两条曲线之间所夹区域的面积可用上下两曲线之差的积分一举求出，无需逐点累加。</li>
+              <li><strong>旋转体体积</strong>：将平面区域绕轴旋转得到三维体，圆盘法把体积分解为厚度 \(dx\) 的圆盘片之和；柱壳法则把体积按半径分层为薄圆筒。</li>
+              <li><strong>曲线弧长</strong>：用「弧微分」\(ds=\sqrt{1+y'^2}\,dx\) 把折线长度推广到曲线，是测量绳索、跑道、卫星轨迹长度的基础公式。</li>
+              <li><strong>旋转面侧面积</strong>：把弧元素绕轴扫出的圆环面积积起来，用于工程中曲面的喷漆量、传热面积估算。</li>
+            </ul>
+            <p>这些公式背后有一个统一思想——「分割—近似—求和—取极限」——它把几何度量统统化为单变量函数的定积分。掌握这些公式不仅是计算技能，更是理解「微元法」物理建模思维的入口。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>平面图形面积</h4>
+            <p>设 \(f,g\) 在 \([a,b]\) 上连续且 \(f(x)\ge g(x)\)。由曲线 \(y=f(x), y=g(x)\) 与直线 \(x=a, x=b\) 围成的图形面积：</p>
+            \[A=\int_a^b [f(x)-g(x)]\,dx.\]
+            <p>推导：把 \([a,b]\) 分割为 \(n\) 段，每段宽 \(\Delta x\)，对应一个高 \(f(\xi_i)-g(\xi_i)\) 的窄长方形；取极限得积分。若曲线相交，需先找交点再分段处理符号。极坐标下的扇形面积公式为 \(A=\frac{1}{2}\int_{\alpha}^{\beta} r^2(\theta)\,d\theta\)。</p>
+
+            <h4>旋转体体积——圆盘法与柱壳法</h4>
+            <p><strong>圆盘法</strong>：将 \(y=f(x)\)（\(\ge 0\)）与 \(x\) 轴围成的图形绕 \(x\) 轴旋转，体积元 \(dV=\pi y^2\,dx\)，</p>
+            \[V_x = \pi\int_a^b [f(x)]^2\,dx.\]
+            <p>当区域内有「洞」（两曲线之间），需用「圆环法」\(dV=\pi(y_{\text{外}}^2 - y_{\text{内}}^2)\,dx\)。</p>
+            <p><strong>柱壳法</strong>（绕 \(y\) 轴旋转）：体积元为厚度 \(dx\) 的薄圆筒，半径 \(x\)，高 \(f(x)\)：</p>
+            \[V_y = 2\pi\int_a^b x f(x)\,dx.\]
+            <p>圆盘法对自变量「沿轴」分割，柱壳法「按半径」分层；两者互补，依据图形形状选择。</p>
+
+            <h4>弧长公式</h4>
+            <p>把曲线 \(y=f(x)\) 在 \([a,b]\) 分为 \(n\) 段，每段折线长度 \(\sqrt{(\Delta x)^2+(\Delta y)^2}\approx \sqrt{1+y'^2}\,\Delta x\)。取极限：</p>
+            \[L = \int_a^b \sqrt{1+[f'(x)]^2}\,dx.\]
+            <p>对参数曲线 \(x=x(t),y=y(t)\)，弧长公式为 \(L=\int_{\alpha}^{\beta}\sqrt{x'^2+y'^2}\,dt\)；对极坐标 \(r=r(\theta)\) 为 \(L=\int\sqrt{r^2+r'^2}\,d\theta\)。</p>
+
+            <h4>旋转面侧面积</h4>
+            <p>把弧元 \(ds\) 绕 \(x\) 轴旋转扫出半径 \(y\)、宽 \(ds\) 的圆环，面积元 \(dS=2\pi y\,ds\)：</p>
+            \[S = 2\pi\int_a^b f(x)\sqrt{1+[f'(x)]^2}\,dx.\]
+            <p>注意公式中的 \(\sqrt{1+y'^2}\) 来自弧长元素，不能用 \(dx\) 替代——这是初学者最常忽视的一点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1（面积）</strong>：求由 \(y=x^2\) 与 \(y=x+2\) 围成的图形面积。</p>
+            <p><em>解答</em>：解 \(x^2=x+2\) 得 \(x=-1,2\)。在 \([-1,2]\) 上 \(x+2\ge x^2\)。\(A=\int_{-1}^2 (x+2-x^2)\,dx = [x^2/2 + 2x - x^3/3]_{-1}^2 = (2+4-8/3) - (1/2-2+1/3) = 10/3 - (-7/6) = 9/2\)。</p>
+            <p><strong>例题 2（体积）</strong>：求 \(y=x^2,\ y=0,\ x=2\) 围成的图形绕 \(y\) 轴旋转的体积，分别用圆盘法（变量 \(y\)）与柱壳法（变量 \(x\)）。</p>
+            <p><em>圆盘法</em>：体积 = 大圆柱 \(\pi\cdot 2^2\cdot 4\) 减去内部洞 \(\pi\int_0^4 (\sqrt{y})^2\,dy = \pi\cdot 8\)，故 \(V=16\pi-8\pi=8\pi\)。<br>
+            <em>柱壳法</em>：\(V=2\pi\int_0^2 x\cdot x^2\,dx = 2\pi\cdot[x^4/4]_0^2 = 8\pi\)。两法结果一致，柱壳法在此明显简洁。</p>
+            <p><strong>例题 3（弧长）</strong>：求 \(y=\ln(\cos x)\) 在 \([0,\pi/4]\) 上的弧长。</p>
+            <p><em>解答</em>：\(y'=-\tan x\)，\(1+y'^2=1+\tan^2 x=\sec^2 x\)。\(L=\int_0^{\pi/4}\sec x\,dx = [\ln|\sec x+\tan x|]_0^{\pi/4} = \ln(\sqrt{2}+1)\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>面积积分忘记取「上 - 下」</strong>：若颠倒得到负值，需取绝对值或重新调整次序；曲线相交时必须分段。</li>
+              <li><strong>圆盘法漏写 \(\pi\) 或对 \(y\) 而非 \(y^2\) 积分</strong>：体积元是 \(\pi y^2\,dx\)，平方与系数缺一不可。</li>
+              <li><strong>弧长用 \(\sqrt{1+y}\) 而非 \(\sqrt{1+y'^2}\)</strong>：必须对导数平方加 1 再开方，纯函数值的开方是错误的。</li>
+              <li><strong>旋转面积漏掉弧长因子</strong>：误用 \(2\pi y\,dx\)（这是侧面积近似为圆筒侧面，仅对水平直线成立）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">由 \(y=x^2\) 与 \(y=2x\) 围成的图形面积为？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！交点 \\(x=0,2\\)，\\(A=\\int_0^2(2x-x^2)dx=4/3\\)。')">A. \(4/3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A=\\int_0^2(2x-x^2)dx=4/3\\)。')">B. \(2/3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A=\\int_0^2(2x-x^2)dx=4/3\\)。')">C. \(8/3\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\(A=\\int_0^2(2x-x^2)dx=4/3\\)。')">D. \(2\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>物理与工程应用</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>物理量大多是「累积量」：功是力沿位移的累积，液体压力是压强沿深度的累积，质量是密度对体积的累积，转动惯量是质量按距离平方的累积。当这些被累积的量在空间上变化时——力随位移变、压强随深度变、密度随位置变——常量乘积的初等公式失效，必须用积分把变化吸收进来。</p>
+            <ul>
+              <li><strong>变力做功</strong>：弹簧拉伸时弹力随伸长成正比，把水从井中提上地面时绳子上方的载重随高度递减，这些都需要 \(W=\int F(x)\,dx\) 来精确描述。</li>
+              <li><strong>液体侧压力</strong>：闸门、堤坝、潜艇舷壁等水平宽度可变的浸没物体，受到的总压力是压强对深度积分的结果。</li>
+              <li><strong>质心与转动惯量</strong>：设计平衡杆、稳定结构、转动飞轮时，需要精确知道质量分布的「等效中心」与「转动惯性」，二者均通过积分定义。</li>
+            </ul>
+            <p>这些应用展示了积分作为「物理建模通用语言」的角色：先识别「微元」上的局部物理量，再积分得到全局量。这种「微元法」是工程数学与物理建模的核心思维方式。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>变力做功</h4>
+            <p>质点在 \(x\) 轴上从 \(a\) 移动到 \(b\)，沿途受力 \(F(x)\)。把位移分成 \(n\) 段 \(\Delta x\)，每段近似为常力 \(F(\xi_i)\)，做功 \(F(\xi_i)\Delta x\)。极限给出：</p>
+            \[W = \int_a^b F(x)\,dx.\]
+            <p>典型案例：弹簧（Hooke 定律 \(F=kx\)），抽水（载重随高度变化），引力（\(F=GMm/r^2\)）。建模关键是先取微元、写出元功 \(dW=F(x)\,dx\) 或 \(dW=g\cdot \Delta m\cdot h\)（按场景而定），再积分。</p>
+
+            <h4>液体侧压力</h4>
+            <p>深度 \(h\) 处液体压强 \(p=\rho g h\)（\(\rho\) 密度）。垂直浸没物体在深度 \(h\) 处的水平条带宽度为 \(b(h)\)，则元压力 \(dF=p\cdot b(h)\,dh = \rho g h\cdot b(h)\,dh\)。总压力：</p>
+            \[F = \int_a^b \rho g h\cdot b(h)\,dh.\]
+            <p>注意 \(h\) 自变量是「从液面起的深度」；若坐标系不同，需要先换元。压强随深度线性增加，水越深处单位面积承受的压力越大。</p>
+
+            <h4>质心（一维与平面）</h4>
+            <p>对线密度为 \(\rho(x)\) 的细杆 \([a,b]\)，质心横坐标：</p>
+            \[\bar{x} = \dfrac{\int_a^b x\rho(x)\,dx}{\int_a^b \rho(x)\,dx}.\]
+            <p>分子是「质量对原点的力矩」（一阶矩），分母是总质量。对面密度为 \(\sigma(x,y)\) 的平面薄片，质心坐标 \(\bar{x}=\int\!\!\int x\sigma\,dA \big/ \int\!\!\int \sigma\,dA\)，将在多元积分章节详述。</p>
+
+            <h4>转动惯量</h4>
+            <p>一个质量元 \(dm\)（线、面或体上）距固定旋转轴的距离为 \(r\)，则其对该轴的转动惯量元为 \(dI=r^2\,dm\)。总转动惯量：</p>
+            \[I = \int r^2\,dm.\]
+            <p>例如线密度为 \(\rho\) 的均匀细杆 \([0,L]\) 关于一端的转动惯量为 \(I=\int_0^L x^2\rho\,dx = \rho L^3/3 = ML^2/3\)。转动惯量在角动量、机械能与转动方程中的角色，类似于平动中质量在动量与能量中的角色。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1（弹簧做功）</strong>：弹性系数 \(k=100\,\text{N/m}\)。求把弹簧从自然长度伸长至 \(0.2\,\text{m}\) 所做的功。</p>
+            <p><em>解答</em>：\(W=\int_0^{0.2} 100x\,dx = 100\cdot[x^2/2]_0^{0.2} = 50\cdot 0.04 = 2\,\text{J}\)。<br>
+            常见错误：用 \(W=Fd=100\cdot 0.2\cdot 0.2=4\,\text{J}\)（误把弹力当常力），结果恰好是正解的 2 倍——「平均力」原则可看出 \(W=\frac{1}{2}F_{\max}d\)。</p>
+            <p><strong>例题 2（液体压力）</strong>：等腰三角形闸门顶点朝下，底边长 \(2\,\text{m}\)，高 \(3\,\text{m}\)，底边与水面平齐。求闸门所受水的总压力（取 \(\rho g=9800\,\text{N/m}^3\)）。</p>
+            <p><em>解答</em>：以水面为 \(h=0\)。深度 \(h\) 处闸门宽度由相似三角形 \(b(h)/2 = (3-h)/3\)，故 \(b(h)=\frac{2(3-h)}{3}\)。\(F=\int_0^3 \rho g h\cdot \frac{2(3-h)}{3}\,dh = \frac{2\rho g}{3}\int_0^3(3h-h^2)\,dh = \frac{2\rho g}{3}\cdot[3h^2/2-h^3/3]_0^3 = \frac{2\rho g}{3}\cdot 9/2 = 3\rho g \approx 29400\,\text{N}\)。</p>
+            <p><strong>例题 3（质心）</strong>：一根长 \(L\)、线密度 \(\rho(x)=k(L-x)\)（\(k\) 常数）的细杆。求质心 \(\bar{x}\)。</p>
+            <p><em>解答</em>：总质量 \(M=\int_0^L k(L-x)\,dx = kL^2/2\)。一阶矩 \(\int_0^L x\cdot k(L-x)\,dx = k(L\cdot L^2/2 - L^3/3) = kL^3/6\)。\(\bar{x}=kL^3/6 \div kL^2/2 = L/3\)。密度向 \(x=0\) 端集中，故质心偏向左端。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把变力当常力做功</strong>：\(W\ne F\cdot d\)，必须积分；忘记积分会少算或多算 2 倍（如本节例题 1）。</li>
+              <li><strong>压力公式误用宽度</strong>：\(b(h)\) 是「深度 \(h\) 处」的水平宽度，不是平均宽度，须按几何关系写出。</li>
+              <li><strong>质心分子分母互换</strong>：分子是力矩 \(\int x\,dm\)，分母是总质量 \(\int dm\)；颠倒会导致量纲错误。</li>
+              <li><strong>转动惯量漏写 \(r^2\)</strong>：必须按 \(r^2\,dm\) 写元素，写成 \(r\,dm\) 会把转动惯量混淆为一阶矩。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">弹簧 \(k=200\,\text{N/m}\)，伸长 \(0.1\,\text{m}\) 所做的功是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！\\(W=\\int_0^{0.1}200x\\,dx = 100\\cdot 0.01 = 1\\,\\text{J}\\)。')">A. \(1\,\text{J}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(W=\\int_0^{0.1}200x\\,dx = 1\\,\\text{J}\\)，不要把弹力当常力。')">B. \(2\,\text{J}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(W=\\int_0^{0.1}200x\\,dx = 1\\,\\text{J}\\)。')">C. \(20\,\text{J}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。\\(W=\\int_0^{0.1}200x\\,dx = 1\\,\\text{J}\\)。')">D. \(0.5\,\text{J}\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>反常积分的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>Riemann 定积分 \(\int_a^b f\,dx\) 严格要求积分区间 \([a,b]\) 有限、被积函数 \(f\) 在区间上有界。但科学和工程中频繁出现违反这两条假设的「积分」：概率密度在 \((-\infty,\infty)\) 上归一化，热源在无穷长杆上的能量积分，或函数在端点附近无界（如 \(1/\sqrt{x}\) 在 \(0\) 处）的几何面积。如果不扩展积分概念，这些自然出现的量就无法被「定义」。</p>
+            <ul>
+              <li><strong>概率论</strong>：标准正态密度 \(\frac{1}{\sqrt{2\pi}}e^{-x^2/2}\) 在 \((-\infty,\infty)\) 上的总积分必须等于 \(1\)，这是无穷区间反常积分的典型应用。</li>
+              <li><strong>物理学</strong>：电势、引力势、辐射通量等量都涉及无穷区间或瑕点处的积分。\(\Gamma\) 函数 \(\Gamma(s)=\int_0^{\infty} x^{s-1}e^{-x}\,dx\) 同时具有两类反常性。</li>
+              <li><strong>傅里叶变换</strong>：将信号从时域变到频域的核心工具 \(\hat{f}(\xi)=\int_{-\infty}^{\infty} f(x)e^{-2\pi i\xi x}\,dx\) 本质是无穷区间反常积分。</li>
+            </ul>
+            <p>反常积分的核心思路是「先把不规范的端点用变量替换为有限值或 \(\varepsilon\)，做出常规定积分，再取极限」。这种「极限—定积分」结构使我们能把 Riemann 理论自然延展到无界情形。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>无穷区间型（第一类反常积分）</h4>
+            <p>设 \(f\) 在 \([a,\infty)\) 上对每个 \(T>a\) 在 \([a,T]\) 上 Riemann 可积。定义：</p>
+            \[\int_a^{\infty} f(x)\,dx \;=\; \lim_{T\to\infty} \int_a^T f(x)\,dx.\]
+            <p>若极限存在且有限，称积分<strong>收敛</strong>，其值即为该极限；否则<strong>发散</strong>。类似地对 \(\int_{-\infty}^b\)，以及双侧：</p>
+            \[\int_{-\infty}^{\infty} f(x)\,dx = \int_{-\infty}^c f\,dx + \int_c^{\infty} f\,dx \quad (\text{两段独立收敛}).\]
+            <p>注意双侧情形必须两段分别收敛——不能用 \(\lim_{R\to\infty}\int_{-R}^R\)（这是「主值」概念，超出本课程范围），否则 \(\int_{-\infty}^{\infty} x\,dx\) 会被错误地判为 \(0\)。</p>
+
+            <h4>瑕积分型（第二类反常积分）</h4>
+            <p>设 \(f\) 在 \([a,b)\) 上有定义但在 \(b\) 附近无界（\(b\) 称为<strong>瑕点</strong>），且对每个 \(\eta\in(a,b)\)，\(f\) 在 \([a,\eta]\) 上 Riemann 可积。定义：</p>
+            \[\int_a^b f(x)\,dx \;=\; \lim_{\eta\to b^-} \int_a^{\eta} f(x)\,dx.\]
+            <p>类似地，瑕点在 \(a\) 时取右极限 \(\lim_{\varepsilon\to 0^+}\int_{a+\varepsilon}^b f\,dx\)。瑕点在中间 \(c\in(a,b)\) 时拆开为 \(\int_a^c+\int_c^b\)，两段独立讨论。</p>
+
+            <h4>混合型反常积分</h4>
+            <p>若积分同时具有无穷端点与瑕点，如 \(\int_0^{\infty} \frac{1}{\sqrt{x}(1+x)}\,dx\)：在 \(0\) 是瑕点，\(\infty\) 是无穷端点。处理方法：选一个安全分界点 \(c>0\)（如 \(c=1\)），拆分</p>
+            \[\int_0^{\infty} f\,dx = \int_0^1 f\,dx + \int_1^{\infty} f\,dx,\]
+            <p>各段分别讨论收敛性，两段都收敛才整体收敛。\(\Gamma\) 函数 \(\int_0^{\infty} x^{s-1}e^{-x}\,dx\) 当 \(0<s<1\) 时正属此类。</p>
+
+            <h4>p-积分基本判据</h4>
+            <p>两个最常用的「标尺」：无穷区间型 \(\int_1^{\infty} \frac{1}{x^p}\,dx\) 收敛 \(\Leftrightarrow p>1\)；瑕积分型 \(\int_0^1 \frac{1}{x^p}\,dx\) 收敛 \(\Leftrightarrow p<1\)。两者方向相反——这是反常积分中最重要、也最常被搞反的一对结论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1（无穷区间型）</strong>：判断并计算 \(\int_1^{\infty} \frac{1}{x^2}\,dx\)。</p>
+            <p><em>解答</em>：\(\int_1^T x^{-2}\,dx = [-x^{-1}]_1^T = 1 - 1/T \to 1\)（\(T\to\infty\)）。极限存在且有限，故收敛，值为 \(1\)。</p>
+            <p><strong>例题 2（瑕积分型）</strong>：判断并计算 \(\int_0^1 \frac{1}{\sqrt{x}}\,dx\)。</p>
+            <p><em>解答</em>：瑕点在 \(0\)。\(\int_{\varepsilon}^1 x^{-1/2}\,dx = [2\sqrt{x}]_{\varepsilon}^1 = 2 - 2\sqrt{\varepsilon} \to 2\)（\(\varepsilon\to 0^+\)）。收敛，值为 \(2\)。注意虽然被积函数在 \(0\) 附近无界，积分仍是有限值——这正是反常积分的精妙之处。</p>
+            <p><strong>例题 3（混合型）</strong>：分析 \(\int_0^{\infty} \frac{1}{\sqrt{x}(1+x)}\,dx\) 的反常性。</p>
+            <p><em>解答</em>：拆分 \(\int_0^1 + \int_1^{\infty}\)。在 \([0,1]\) 上瑕点 \(0\) 处 \(f\sim 1/\sqrt{x}\)（\(p=1/2<1\)）收敛；在 \([1,\infty)\) 上 \(f\sim 1/x^{3/2}\)（\(p=3/2>1\)）收敛。两段均收敛，故整体收敛（实际值为 \(\pi\)）。</p>
+            <p><strong>例题 4（双侧）</strong>：判断 \(\int_{-\infty}^{\infty} x\,dx\) 是否收敛。</p>
+            <p><em>解答</em>：必须两段独立讨论。\(\int_0^{\infty} x\,dx = \lim T^2/2 = \infty\) 发散，故 \(\int_{-\infty}^{\infty} x\,dx\) 发散——尽管 \(\lim_{R\to\infty}\int_{-R}^R x\,dx = 0\)。「主值」存在不等于反常积分收敛。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>无穷区间不取极限直接代「\(\infty\)」</strong>：必须把上限替换为符号 \(T\)，先做定积分，再令 \(T\to\infty\)。</li>
+              <li><strong>瑕积分忽视瑕点</strong>：直接用 \(\int_0^1 x^{-p}\,dx = [x^{1-p}/(1-p)]_0^1\) 在 \(p\ge 1\) 时给出错误的有限值；应先用 \(\varepsilon\) 替换。</li>
+              <li><strong>双侧用主值代替</strong>：\(\int_{-\infty}^{\infty}\) 必须两段分别收敛；用对称极限会把发散积分误判为收敛。</li>
+              <li><strong>混合型不分段</strong>：必须把瑕点与无穷端点用一个安全内点分开，分别处理。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <figure class="kp-figure" data-figure="calculus-ch05-kp3">
+        <svg viewBox="0 0 420 230" xmlns="http://www.w3.org/2000/svg">
+          <style>.fg{fill:#334155;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:12px}.fg2{fill:#64748b;font-family:'Raleway','Noto Sans SC',sans-serif;font-size:11px}.line{stroke:#334155;fill:none;stroke-width:1.5}.curve{stroke:#6366f1;fill:none;stroke-width:1.8}.fill-a{fill:#6366f1;opacity:0.18}</style>
+          <line x1="40" y1="180" x2="400" y2="180" class="line"/>
+          <line x1="60" y1="200" x2="60" y2="40" class="line"/>
+          <text x="395" y="200" class="fg2">x</text>
+          <text x="40" y="50" class="fg2">y</text>
+          <path d="M70,170 Q90,90 130,80 Q200,72 280,75 Q360,78 395,80" class="curve"/>
+          <path d="M70,170 Q90,90 130,80 Q200,72 280,75 Q360,78 395,80 L395,180 L70,180 Z" class="fill-a"/>
+          <line x1="395" y1="40" x2="395" y2="180" stroke="#94a3b8" stroke-dasharray="3,3"/>
+          <text x="200" y="130" class="fg" text-anchor="middle">∫_a^∞ f(x) dx = lim_{T→∞} ∫_a^T f</text>
+          <text x="60" y="218" class="fg2" text-anchor="middle">a</text>
+          <text x="395" y="218" class="fg2" text-anchor="middle">T → ∞</text>
+        </svg>
+        <figcaption>Fig: 无穷区间反常积分示意——把上限替换为 T 再取极限</figcaption>
+      </figure>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个积分是「瑕积分型」反常积分？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。瑕积分要求被积函数在端点附近无界。')">A. \(\int_1^{\infty} 1/x^2\,dx\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！\\(1/\\sqrt{x}\\) 在 \\(0\\) 附近无界，是瑕点。')">B. \(\int_0^1 1/\sqrt{x}\,dx\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。瑕积分要求被积函数在端点附近无界。')">C. \(\int_1^2 1/x\,dx\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。瑕积分要求被积函数在端点附近无界。')">D. \(\int_0^1 x^2\,dx\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>反常积分的收敛判别</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>许多反常积分无法用初等函数原函数表达——例如 \(\int_0^{\infty}e^{-x^2}\,dx\)、\(\int_1^{\infty}\frac{\sin x}{x}\,dx\) 都不能用初等函数写出原函数。但我们仍然需要判断它们是否收敛，否则任何后续计算（数值近似、级数展开、变换运算）都失去了基础。这就是收敛判别的根本动机：先判断「极限是否存在」，再决定要不要花力气求值。</p>
+            <ul>
+              <li><strong>比较判别</strong>：把陌生的被积函数与已知敛散性的「标尺」函数（如 \(1/x^p\)）比较，借助数列收敛保号性原理。</li>
+              <li><strong>极限比较</strong>：当两函数比值有非零有限极限时，二者同敛散；这种「等价比较」比逐点不等式更灵活。</li>
+              <li><strong>绝对收敛</strong>：若 \(\int|f|\) 收敛则 \(\int f\) 必收敛。这把含正负号、振荡的复杂积分化归为非负积分判定。</li>
+              <li><strong>Dirichlet/Abel</strong>：处理「振荡—衰减」型积分（如 \(\int\sin x/x\,dx\)）的高级工具。</li>
+            </ul>
+            <p>这些判别工具与级数收敛判别在精神上完全平行——这并非巧合：积分与级数都是「无限累积」，它们之间通过积分判别法相互翻译，构成分析学统一的「无穷求和」理论。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>非负函数的比较判别</h4>
+            <p>设 \(0\le f(x)\le g(x)\) 在 \([a,\infty)\) 上成立（或 \(x\) 充分大时）。则：</p>
+            <ul>
+              <li>若 \(\int_a^{\infty} g\,dx\) 收敛，则 \(\int_a^{\infty} f\,dx\) 收敛；</li>
+              <li>若 \(\int_a^{\infty} f\,dx\) 发散，则 \(\int_a^{\infty} g\,dx\) 发散。</li>
+            </ul>
+            <p>原理：非负函数的部分积分 \(F(T)=\int_a^T f\,dx\) 单调增；若有上界则必收敛（实数完备性）。瑕积分情形完全类似。</p>
+
+            <h4>极限形式的比较判别</h4>
+            <p>若 \(f,g>0\) 且 \(\lim_{x\to\infty}\dfrac{f(x)}{g(x)}=L\)：</p>
+            <ul>
+              <li>\(0<L<\infty\)：\(\int f\) 与 \(\int g\) 同敛散；</li>
+              <li>\(L=0\) 且 \(\int g\) 收敛：\(\int f\) 收敛；</li>
+              <li>\(L=\infty\) 且 \(\int g\) 发散：\(\int f\) 发散。</li>
+            </ul>
+            <p>这一形式比逐点不等式更便于应用：只需考察「主导项」的同阶关系。例如 \(f(x)=\frac{2x+1}{x^3+x}\sim 2/x^2\)（\(x\to\infty\)），与 \(\int 1/x^2\) 同收敛。</p>
+
+            <h4>p-积分（标尺）</h4>
+            <p>无穷区间型：\(\int_1^{\infty} 1/x^p\,dx\) 收敛 \(\Leftrightarrow p>1\)；瑕积分型：\(\int_0^1 1/x^p\,dx\) 收敛 \(\Leftrightarrow p<1\)。这两个结论几乎是所有比较判别的「标尺」。注意「方向相反」：无穷端要 \(p\) 大才收敛（衰减快），瑕点要 \(p\) 小才收敛（爆炸慢）。</p>
+
+            <h4>绝对收敛蕴含收敛</h4>
+            <p>若 \(\int_a^{\infty}|f|\,dx\) 收敛，则 \(\int_a^{\infty} f\,dx\) 收敛（且称为<strong>绝对收敛</strong>）。证明用 Cauchy 准则：\(|\int_S^T f|\le\int_S^T|f|\)，后者随 \(S,T\to\infty\) 趋零，故前者亦然。</p>
+            <p>逆命题不成立：\(\int_1^{\infty}\sin x/x\,dx\) 收敛但 \(\int_1^{\infty}|\sin x|/x\,dx\) 发散——这种「条件收敛」需借助下面的 Dirichlet 判别。</p>
+
+            <h4>Dirichlet/Abel 判别（简述）</h4>
+            <p><strong>Dirichlet</strong>：若 \(g(x)\) 单调趋零，且 \(F(T)=\int_a^T f\,dx\) 有界，则 \(\int_a^{\infty} f g\,dx\) 收敛。<strong>Abel</strong>：若 \(g\) 单调有界，\(\int f\) 收敛，则 \(\int fg\) 收敛。例如 \(\int_1^{\infty}\sin x/x\,dx\)：\(\int_1^T\sin x\,dx=\cos 1-\cos T\) 有界，\(g=1/x\) 单调趋零，由 Dirichlet 收敛。这两条判别处理「振荡—衰减」组合积分极为有效，本课程仅陈述结论与典型应用，证明留给后续分析课程。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1（比较）</strong>：判断 \(\int_1^{\infty}\dfrac{1}{1+x^3}\,dx\) 的敛散性。</p>
+            <p><em>解答</em>：对 \(x\ge 1\)，\(0\le \dfrac{1}{1+x^3}\le \dfrac{1}{x^3}\)。\(\int_1^{\infty} 1/x^3\,dx\) 收敛（\(p=3>1\)），故由比较判别原积分收敛。也可用极限比较：\(\lim_{x\to\infty}\dfrac{1/(1+x^3)}{1/x^3}=1\)，与 \(\int 1/x^3\) 同敛散。</p>
+            <p><strong>例题 2（瑕积分比较）</strong>：判断 \(\int_0^1\dfrac{1}{\sqrt{x(1-x^2)}}\,dx\) 的敛散性。</p>
+            <p><em>解答</em>：分别在两个瑕点附近分析：在 \(x\to 0^+\)，\(f\sim 1/\sqrt{x}\)，对应 \(p=1/2<1\) 收敛；在 \(x\to 1^-\)，\(1-x^2=(1-x)(1+x)\sim 2(1-x)\)，故 \(f\sim 1/\sqrt{2(1-x)}\)，对应「以 \(1-x\) 为变量」的 \(p=1/2<1\) 也收敛。两瑕点附近均收敛，整体收敛。</p>
+            <p><strong>例题 3（绝对收敛）</strong>：判断 \(\int_1^{\infty}\dfrac{\cos x}{x^2}\,dx\) 的敛散性。</p>
+            <p><em>解答</em>：\(|\cos x/x^2|\le 1/x^2\)，\(\int_1^{\infty} 1/x^2\,dx\) 收敛，故 \(\int_1^{\infty}|\cos x/x^2|\,dx\) 收敛，即<strong>绝对收敛</strong>，从而原积分收敛。</p>
+            <p><strong>例题 4（条件收敛）</strong>：分析 \(\int_1^{\infty}\dfrac{\sin x}{\sqrt{x}}\,dx\) 的敛散性。</p>
+            <p><em>解答</em>：用 Dirichlet 判别。\(\int_1^T\sin x\,dx=\cos 1-\cos T\) 有界；\(1/\sqrt{x}\) 单调趋零。故原积分收敛。但 \(\int_1^{\infty}|\sin x|/\sqrt{x}\,dx\) 按周期分段估计可知发散，故为条件收敛。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>p-积分方向搞反</strong>：误以为 \(\int_0^1 1/x^p\,dx\) 也是 \(p>1\) 收敛；正确是 \(p<1\) 收敛。</li>
+              <li><strong>比较时漏掉「非负」前提</strong>：比较判别针对非负函数；含正负号的积分应先取绝对值或用 Dirichlet。</li>
+              <li><strong>用「\(f\to 0\)」当收敛判据</strong>：\(\lim_{x\to\infty}f(x)=0\) 既不充分也不必要——\(\int_1^{\infty} 1/x\,dx\) 中 \(f\to 0\) 但发散；构造尖峰函数可使 \(f\not\to 0\) 但积分收敛。</li>
+              <li><strong>条件收敛与绝对收敛混淆</strong>：判定「条件收敛」必须证明「\(\int f\) 收敛」+「\(\int|f|\) 发散」两条。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\int_1^{\infty} 1/x^p\,dx\) 收敛的充要条件是？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。无穷区间 p-积分要求 \\(p>1\\) 才收敛。')">A. \(p<1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。无穷区间 p-积分要求 \\(p>1\\) 才收敛。')">B. \(p=1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！\\(p>1\\) 时衰减足够快，\\(p\\le 1\\) 时发散。')">C. \(p>1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。无穷区间 p-积分要求 \\(p>1\\) 才收敛。')">D. 任意 \(p\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch04.html" class="nav-prev">← Ch.4</a>
+      <a href="../../../modules/foundation/calculus.html" class="nav-overview">📋 概览</a>
+      <a href="ch06.html" class="nav-next">Ch.6 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+  <script src="../../../shared/search-data.js"></script>
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    if (typeof renderQuiz === 'function') { renderQuiz('quiz-zone', QUESTIONS); }
+    if (typeof markChapterVisited === 'function') { markChapterVisited('calculus-ch05'); }
+  </script>
+</body>
+</html>

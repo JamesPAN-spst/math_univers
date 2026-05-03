@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.3 微分中值定理与应用 — 微积分 Calculus — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "calculus-ch03-q1",
+        "question": "对函数 \\(f(x)=x^2-x\\) 在区间 \\([0,1]\\) 上应用 Rolle 定理，对应的 \\(\\xi\\) 等于？",
+        "options": ["\\(0\\)", "\\(\\dfrac{1}{4}\\)", "\\(\\dfrac{1}{2}\\)", "\\(1\\)"],
+        "answer": 2,
+        "explanation": "\\(f\\) 多项式在 \\([0,1]\\) 上连续可导，\\(f(0)=f(1)=0\\) 满足 Rolle 三条件。\\(f'(x)=2x-1=0 \\Rightarrow \\xi=1/2 \\in (0,1)\\)。Rolle 定理：满足条件 \\(\\Rightarrow\\) 存在 \\(\\xi\\in(a,b)\\) 使 \\(f'(\\xi)=0\\)。"
+      },
+      {
+        "id": "calculus-ch03-q2",
+        "question": "对 \\(f(x)=x^3\\) 在 \\([0,2]\\) 应用 Lagrange 中值定理，\\(\\xi\\) 满足 \\(f'(\\xi)=\\dfrac{f(2)-f(0)}{2-0}\\)，求 \\(\\xi\\)。",
+        "options": ["\\(\\xi=1\\)", "\\(\\xi=\\dfrac{2}{\\sqrt{3}}\\)", "\\(\\xi=\\sqrt{2}\\)", "\\(\\xi=\\dfrac{4}{3}\\)"],
+        "answer": 1,
+        "explanation": "\\(\\dfrac{f(2)-f(0)}{2}=\\dfrac{8}{2}=4\\)，\\(f'(x)=3x^2\\)，故 \\(3\\xi^2=4 \\Rightarrow \\xi^2=4/3 \\Rightarrow \\xi=2/\\sqrt{3}\\approx 1.155\\)，落在 \\((0,2)\\) 内。Lagrange 公式 \\(f(b)-f(a)=f'(\\xi)(b-a)\\)。"
+      },
+      {
+        "id": "calculus-ch03-q3",
+        "question": "下列哪一条件被违反时 Rolle 定理结论可能不成立？",
+        "options": [
+          "\\(f\\) 在 \\([a,b]\\) 上连续",
+          "\\(f\\) 在 \\((a,b)\\) 内可导",
+          "\\(f(a)=f(b)\\)",
+          "以上三条都必需"
+        ],
+        "answer": 3,
+        "explanation": "Rolle 定理三条件缺一不可：连续保证函数在闭区间「不漏点」；可导保证导数存在；端点等值才有「水平切线」结论。反例：\\(f(x)=|x|\\) 在 \\([-1,1]\\) 端点相等且连续，但 \\(0\\) 不可导，没有 \\(f'(\\xi)=0\\)。"
+      },
+      {
+        "id": "calculus-ch03-q4",
+        "question": "对 \\(f(x)=x^2,\\; g(x)=x^3\\) 在 \\([1,2]\\) 应用 Cauchy 中值定理 \\(\\dfrac{f(b)-f(a)}{g(b)-g(a)}=\\dfrac{f'(\\xi)}{g'(\\xi)}\\)，求 \\(\\xi\\)。",
+        "options": ["\\(\\xi=\\dfrac{14}{9}\\)", "\\(\\xi=\\dfrac{3}{2}\\)", "\\(\\xi=\\dfrac{7}{5}\\)", "\\(\\xi=\\dfrac{9}{7}\\)"],
+        "answer": 0,
+        "explanation": "左边 \\(=\\dfrac{4-1}{8-1}=\\dfrac{3}{7}\\)；右边 \\(=\\dfrac{2\\xi}{3\\xi^2}=\\dfrac{2}{3\\xi}\\)。令 \\(\\dfrac{2}{3\\xi}=\\dfrac{3}{7} \\Rightarrow \\xi=\\dfrac{14}{9}\\approx 1.556 \\in (1,2)\\)。Cauchy 是 Lagrange 的「比值」推广。"
+      },
+      {
+        "id": "calculus-ch03-q5",
+        "question": "由 Lagrange 中值定理可得 \\(|\\sin x-\\sin y|\\) 与 \\(|x-y|\\) 的关系是？",
+        "options": [
+          "\\(|\\sin x-\\sin y|\\le |x-y|\\)",
+          "\\(|\\sin x-\\sin y|\\ge |x-y|\\)",
+          "二者恒等",
+          "无法比较"
+        ],
+        "answer": 0,
+        "explanation": "由 Lagrange，\\(\\sin x-\\sin y=\\cos\\xi\\,(x-y)\\)，取绝对值并用 \\(|\\cos\\xi|\\le 1\\) 得 \\(|\\sin x-\\sin y|\\le|x-y|\\)。这表明 \\(\\sin\\) 是 Lipschitz 函数（常数为 1）；该不等式在收敛性证明中常用。"
+      },
+      {
+        "id": "calculus-ch03-q6",
+        "question": "设 \\(f\\) 在 \\([0,1]\\) 上连续、\\((0,1)\\) 内可导，且 \\(f(0)=0,\\;f(1)=1\\)。下列哪一结论成立？",
+        "options": [
+          "\\(\\exists\\xi\\in(0,1):\\;f'(\\xi)=0\\)",
+          "\\(\\exists\\xi\\in(0,1):\\;f'(\\xi)=1\\)",
+          "\\(f\\) 在 \\((0,1)\\) 上必单调",
+          "\\(f\\) 必为 \\(f(x)=x\\)"
+        ],
+        "answer": 1,
+        "explanation": "由 Lagrange 定理 \\(\\exists\\xi\\in(0,1)\\) 使 \\(f'(\\xi)=\\dfrac{f(1)-f(0)}{1-0}=1\\)。A 是 Rolle 但端点不等故不一定成立；C、D 缺少额外约束。本题是 Lagrange 的标准应用：「平均斜率必被某点切线达到」。"
+      },
+      {
+        "id": "calculus-ch03-q7",
+        "question": "\\(\\mathrm{e}^x\\) 在 \\(x=0\\) 的 Taylor 展开到 \\(x^3\\) 项为？",
+        "options": [
+          "\\(1+x+\\dfrac{x^2}{2}+\\dfrac{x^3}{6}\\)",
+          "\\(1+x+x^2+x^3\\)",
+          "\\(1+x+\\dfrac{x^2}{2!}+\\dfrac{x^3}{3!}+\\dfrac{x^4}{4!}\\)",
+          "\\(1-x+\\dfrac{x^2}{2}-\\dfrac{x^3}{6}\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\((\\mathrm{e}^x)^{(k)}|_{x=0}=1\\)，故 \\(\\mathrm{e}^x=\\sum_{k=0}^{\\infty}\\dfrac{x^k}{k!}\\)。展开到 \\(x^3\\)：\\(1+x+\\dfrac{x^2}{2}+\\dfrac{x^3}{6}\\)。选项 C 多了 \\(x^4\\) 项；D 是 \\(\\mathrm{e}^{-x}\\) 的展开。"
+      },
+      {
+        "id": "calculus-ch03-q8",
+        "question": "\\(\\sin x\\) 在 \\(x=0\\) 的 Taylor 展开到 \\(x^5\\) 为？",
+        "options": [
+          "\\(x+\\dfrac{x^3}{6}+\\dfrac{x^5}{120}\\)",
+          "\\(x-\\dfrac{x^3}{6}+\\dfrac{x^5}{120}\\)",
+          "\\(x-\\dfrac{x^2}{2}+\\dfrac{x^3}{6}\\)",
+          "\\(1-\\dfrac{x^2}{2}+\\dfrac{x^4}{24}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(\\sin x\\) 是奇函数，仅含奇次幂；导数循环 \\(\\cos,-\\sin,-\\cos,\\sin\\)。系数符号交替：\\(\\sin x=x-\\dfrac{x^3}{3!}+\\dfrac{x^5}{5!}-\\cdots\\)。选项 D 是 \\(\\cos x\\) 展开。"
+      },
+      {
+        "id": "calculus-ch03-q9",
+        "question": "\\(\\cos x\\) 在 \\(x=0\\) 的 Taylor 展开到 \\(x^4\\) 项为？",
+        "options": [
+          "\\(1-\\dfrac{x^2}{2}+\\dfrac{x^4}{24}\\)",
+          "\\(1+\\dfrac{x^2}{2}+\\dfrac{x^4}{24}\\)",
+          "\\(x-\\dfrac{x^3}{6}\\)",
+          "\\(1-x^2+x^4\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\cos x\\) 是偶函数，仅含偶次幂；\\(\\cos x=1-\\dfrac{x^2}{2!}+\\dfrac{x^4}{4!}-\\cdots\\)。注意分母是阶乘 \\(2!=2,4!=24\\)，不是 \\(2,4\\)。"
+      },
+      {
+        "id": "calculus-ch03-q10",
+        "question": "\\(\\ln(1+x)\\) 在 \\(x=0\\) 的 Taylor 展开前 3 项（不计余项）为？",
+        "options": [
+          "\\(x-\\dfrac{x^2}{2}+\\dfrac{x^3}{3}\\)",
+          "\\(x+\\dfrac{x^2}{2}+\\dfrac{x^3}{3}\\)",
+          "\\(1-x+x^2\\)",
+          "\\(x-x^2+x^3\\)"
+        ],
+        "answer": 0,
+        "explanation": "\\(\\ln(1+x)=\\sum_{k=1}^{\\infty}(-1)^{k-1}\\dfrac{x^k}{k}=x-\\dfrac{x^2}{2}+\\dfrac{x^3}{3}-\\cdots\\)。系数交替且分母为整数（非阶乘）。该展开仅在 \\(|x|<1\\) 时收敛，是估算 \\(\\ln\\) 的经典工具。"
+      },
+      {
+        "id": "calculus-ch03-q11",
+        "question": "\\((1+x)^{\\alpha}\\) 在 \\(x=0\\) 的二项展开 \\(x^2\\) 项系数为？",
+        "options": [
+          "\\(\\alpha\\)",
+          "\\(\\dfrac{\\alpha(\\alpha-1)}{2}\\)",
+          "\\(\\alpha^2\\)",
+          "\\(\\dfrac{\\alpha^2}{2}\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\((1+x)^{\\alpha}=1+\\alpha x+\\dfrac{\\alpha(\\alpha-1)}{2!}x^2+\\dfrac{\\alpha(\\alpha-1)(\\alpha-2)}{3!}x^3+\\cdots\\)。一般化的二项式系数 \\(\\binom{\\alpha}{k}=\\dfrac{\\alpha(\\alpha-1)\\cdots(\\alpha-k+1)}{k!}\\)。当 \\(\\alpha\\) 为正整数时退化为有限项展开。"
+      },
+      {
+        "id": "calculus-ch03-q12",
+        "question": "利用 Taylor 展开求 \\(\\lim_{x\\to 0}\\dfrac{\\mathrm{e}^x-1-x}{x^2}\\)。",
+        "options": ["\\(0\\)", "\\(\\dfrac{1}{2}\\)", "\\(1\\)", "\\(\\dfrac{1}{6}\\)"],
+        "answer": 1,
+        "explanation": "\\(\\mathrm{e}^x=1+x+\\dfrac{x^2}{2}+o(x^2)\\)，故分子 \\(=\\dfrac{x^2}{2}+o(x^2)\\)，分母 \\(=x^2\\)，比值趋于 \\(\\dfrac{1}{2}\\)。也可两次 L'Hôpital：\\(\\dfrac{\\mathrm{e}^x-1}{2x}\\to\\dfrac{1}{2}\\)。"
+      },
+      {
+        "id": "calculus-ch03-q13",
+        "question": "Taylor 公式中 Peano 余项 \\(R_n(x)\\) 的标准写法是？",
+        "options": [
+          "\\(R_n(x)=o((x-a)^n)\\) 当 \\(x\\to a\\)",
+          "\\(R_n(x)=o((x-a)^{n+1})\\)",
+          "\\(R_n(x)=O((x-a)^n)\\)",
+          "\\(R_n(x)=\\dfrac{f^{(n)}(\\xi)}{n!}(x-a)^n\\)"
+        ],
+        "answer": 0,
+        "explanation": "Peano 余项的定义即 \\(R_n(x)=o((x-a)^n)\\)，意味余项比 \\((x-a)^n\\) 高阶无穷小，仅给出局部的渐近精度，不给出余项的具体大小。Lagrange 余项才是 \\(\\dfrac{f^{(n+1)}(\\xi)}{(n+1)!}(x-a)^{n+1}\\)。"
+      },
+      {
+        "id": "calculus-ch03-q14",
+        "question": "用 L'Hôpital 法则计算 \\(\\lim_{x\\to 0}\\dfrac{\\sin x}{x}\\)。",
+        "options": ["\\(0\\)", "\\(1\\)", "\\(\\infty\\)", "不存在"],
+        "answer": 1,
+        "explanation": "形式为 \\(0/0\\)，分子分母分别求导：\\(\\dfrac{\\cos x}{1}\\to\\cos 0=1\\)。这是 L'Hôpital 的最简单应用，也是教科书基本极限。需先验证型式属于未定式 \\(0/0\\) 才能用法则。"
+      },
+      {
+        "id": "calculus-ch03-q15",
+        "question": "\\(\\lim_{x\\to 0}\\dfrac{1-\\cos x}{x^2}\\) 等于？",
+        "options": ["\\(0\\)", "\\(\\dfrac{1}{2}\\)", "\\(1\\)", "\\(2\\)"],
+        "answer": 1,
+        "explanation": "型式 \\(0/0\\)，L'Hôpital 一次：\\(\\dfrac{\\sin x}{2x}\\to\\dfrac{1}{2}\\)（再用基本极限或再 L'Hôpital：\\(\\dfrac{\\cos x}{2}\\to\\dfrac{1}{2}\\)）。也可用 Taylor：\\(1-\\cos x=\\dfrac{x^2}{2}+o(x^2)\\)。"
+      },
+      {
+        "id": "calculus-ch03-q16",
+        "question": "\\(\\lim_{x\\to+\\infty}\\dfrac{\\ln x}{x}\\) 等于？",
+        "options": ["\\(\\infty\\)", "\\(1\\)", "\\(0\\)", "\\(\\mathrm{e}\\)"],
+        "answer": 2,
+        "explanation": "型式 \\(\\infty/\\infty\\)，L'Hôpital：\\(\\dfrac{1/x}{1}=\\dfrac{1}{x}\\to 0\\)。直观：对数增长远慢于多项式增长。一般地 \\(\\lim_{x\\to\\infty}\\dfrac{(\\ln x)^p}{x^q}=0\\) 对任意 \\(p>0,q>0\\) 成立。"
+      },
+      {
+        "id": "calculus-ch03-q17",
+        "question": "\\(\\lim_{x\\to 0^+}x\\ln x\\) 等于？",
+        "options": ["\\(-\\infty\\)", "\\(0\\)", "\\(-1\\)", "不存在"],
+        "answer": 1,
+        "explanation": "属 \\(0\\cdot(-\\infty)\\) 未定式，转写为 \\(\\dfrac{\\ln x}{1/x}\\)（\\(\\infty/\\infty\\)），L'Hôpital：\\(\\dfrac{1/x}{-1/x^2}=-x\\to 0\\)。该极限是熵函数 \\(-x\\ln x\\) 在 0 处可连续延拓的依据。"
+      },
+      {
+        "id": "calculus-ch03-q18",
+        "question": "\\(\\lim_{x\\to 0^+}x^x\\) 等于？",
+        "options": ["\\(0\\)", "\\(1\\)", "\\(\\mathrm{e}\\)", "不存在"],
+        "answer": 1,
+        "explanation": "属 \\(0^0\\) 未定式。取对数 \\(\\ln(x^x)=x\\ln x\\to 0\\)（由上题），故 \\(x^x=\\mathrm{e}^{x\\ln x}\\to\\mathrm{e}^0=1\\)。一般幂指型 \\(f(x)^{g(x)}\\) 用「取对数」转化为乘积型再 L'Hôpital。"
+      },
+      {
+        "id": "calculus-ch03-q19",
+        "question": "\\(\\lim_{x\\to+\\infty}\\left(1+\\dfrac{1}{x}\\right)^x\\) 等于？",
+        "options": ["\\(1\\)", "\\(\\mathrm{e}\\)", "\\(\\mathrm{e}^2\\)", "\\(\\infty\\)"],
+        "answer": 1,
+        "explanation": "属 \\(1^{\\infty}\\) 未定式。取对数 \\(x\\ln(1+1/x)=\\dfrac{\\ln(1+1/x)}{1/x}\\)，令 \\(t=1/x\\to 0\\)，化为 \\(\\dfrac{\\ln(1+t)}{t}\\to 1\\)（由 L'Hôpital 或 Taylor）。故原极限 \\(=\\mathrm{e}^1=\\mathrm{e}\\)。"
+      },
+      {
+        "id": "calculus-ch03-q20",
+        "question": "\\(f(x)=x^3-3x\\) 的极小值在哪一点取得？极小值是？",
+        "options": [
+          "\\(x=-1\\)，极小值 \\(-2\\)",
+          "\\(x=1\\)，极小值 \\(-2\\)",
+          "\\(x=0\\)，极小值 \\(0\\)",
+          "\\(x=1\\)，极小值 \\(2\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f'(x)=3x^2-3=0\\Rightarrow x=\\pm 1\\)。\\(f''(x)=6x\\)：\\(f''(1)=6>0\\) 极小，\\(f''(-1)=-6<0\\) 极大。\\(f(1)=1-3=-2\\) 为极小值；\\(f(-1)=-1+3=2\\) 为极大值。"
+      },
+      {
+        "id": "calculus-ch03-q21",
+        "question": "\\(f(x)=x^2-4x+5\\) 的单调递增区间为？",
+        "options": [
+          "\\((-\\infty,2)\\)",
+          "\\((2,+\\infty)\\)",
+          "\\((-\\infty,+\\infty)\\)",
+          "\\((0,4)\\)"
+        ],
+        "answer": 1,
+        "explanation": "\\(f'(x)=2x-4>0 \\Leftrightarrow x>2\\)。\\(f\\) 在 \\((-\\infty,2)\\) 单调递减、在 \\((2,+\\infty)\\) 单调递增，最小值在 \\(x=2\\) 处取得 \\(f(2)=1\\)。这正是抛物线开口向上的对称轴 \\(x=-b/(2a)=2\\)。"
+      },
+      {
+        "id": "calculus-ch03-q22",
+        "question": "\\(f(x)=\\ln x\\) 在 \\((0,+\\infty)\\) 上的凹凸性？",
+        "options": [
+          "凸（向上凸）",
+          "凹（向下凸）",
+          "先凸后凹",
+          "无凹凸性"
+        ],
+        "answer": 1,
+        "explanation": "\\(f''(x)=-1/x^2<0\\)，故 \\(f\\) 在 \\((0,+\\infty)\\) 上为凹函数（\\(f''\\le 0\\)，图象「向下弯」）。Jensen 不等式取反向：\\(\\ln(\\dfrac{x+y}{2})\\ge\\dfrac{\\ln x+\\ln y}{2}\\)，即 AM-GM 不等式的对数形式。"
+      },
+      {
+        "id": "calculus-ch03-q23",
+        "question": "\\(f(x)=x^3\\) 的拐点在何处？",
+        "options": [
+          "\\(x=0\\)",
+          "\\(x=1\\)",
+          "\\(x=-1\\)",
+          "无拐点"
+        ],
+        "answer": 0,
+        "explanation": "\\(f''(x)=6x\\)，\\(f''(0)=0\\) 且 \\(f''\\) 在 \\(x=0\\) 两侧由负变正（凹凸性改变），故 \\(x=0\\) 是拐点。注意：\\(f''=0\\) 仅是必要条件，还要验证「二阶导变号」才是真正的拐点。"
+      },
+      {
+        "id": "calculus-ch03-q24",
+        "question": "若 \\(f'(x_0)=0\\) 且 \\(f''(x_0)>0\\)，则 \\(x_0\\) 是 \\(f\\) 的？",
+        "options": [
+          "极大值点",
+          "极小值点",
+          "拐点",
+          "鞍点（无极值）"
+        ],
+        "answer": 1,
+        "explanation": "二阶导判别法：\\(f'(x_0)=0\\) 给出驻点，\\(f''(x_0)>0\\) 表明该点附近函数「向上凸」，故 \\(x_0\\) 是局部极小值点。\\(f''(x_0)<0\\) 则为极大；\\(f''(x_0)=0\\) 时此判别法失效，需用更高阶导数或符号变化分析。"
+      },
+      {
+        "id": "calculus-ch03-q25",
+        "question": "\\(f(x)=x^4\\) 在 \\(x=0\\) 处 \\(f'(0)=0,\\;f''(0)=0\\)，则 \\(x=0\\) 是？",
+        "options": [
+          "极大值点",
+          "极小值点",
+          "拐点",
+          "无法判断"
+        ],
+        "answer": 1,
+        "explanation": "二阶导判别失效（\\(f''(0)=0\\)）时需直接观察符号：对所有 \\(x\\ne 0\\) 均有 \\(x^4>0=f(0)\\)，故 \\(x=0\\) 是严格局部极小值点。或用高阶判别：首个非零导数 \\(f^{(4)}(0)=24>0\\) 且阶数为偶 \\(\\Rightarrow\\) 极小。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="calculus"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../calculus.html" class="module-name">微积分 Calculus</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.3 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · Rolle、Lagrange、Cauchy 中值定理</a></li>
+      <li><a href="#kp2">02 · Taylor 公式与余项估计</a></li>
+      <li><a href="#kp3">03 · L'Hôpital 法则与未定式</a></li>
+      <li><a href="#kp4">04 · 单调性、极值、凸性与拐点</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 3</p>
+      <h1>微分中值定理与应用</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>Rolle、Lagrange、Cauchy 中值定理</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>导数刻画了函数在「一点」的局部变化率。但微积分中我们更关心：函数在「一段区间」上的整体变化与导数值之间的关系——例如，从 \(f(a)\) 到 \(f(b)\) 的变化是否一定能由某个「中间点」的瞬时变化率代表？这正是中值定理要回答的核心问题。</p>
+            <ul>
+              <li><strong>从局部到全局的桥梁</strong>：中值定理把「点上的导数」与「区间上的差值」连接起来，是用导数推断函数行为的最基本工具。</li>
+              <li><strong>定性结论的源泉</strong>：单调性、不等式估计、唯一性证明、Taylor 公式、L'Hôpital 法则等几乎所有微分应用都以中值定理为出发点。</li>
+              <li><strong>几何直观</strong>：Lagrange 定理的几何意义是「连接 \((a,f(a))\) 与 \((b,f(b))\) 的割线一定平行于某点的切线」。</li>
+            </ul>
+            <p>三大中值定理（Rolle、Lagrange、Cauchy）构成一条「逐级推广」的链条：Rolle 是最特殊的水平切线情形；Lagrange 把它推广到一般割线；Cauchy 又推广到两个函数的比值情形，是 L'Hôpital 法则的理论基础。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>Rolle 中值定理</h4>
+            <p>设 \(f\) 在闭区间 \([a,b]\) 上连续、在开区间 \((a,b)\) 内可导，且 \(f(a)=f(b)\)。则存在 \(\xi\in(a,b)\) 使</p>
+            \[f'(\xi)=0.\]
+            <p><em>证明思路</em>：由 Weierstrass 最值定理，\(f\) 在 \([a,b]\) 上取到最大值 \(M\) 与最小值 \(m\)。若 \(M=m\)，则 \(f\) 为常数，任意点导数为 0；若 \(M\ne m\)，则二者中至少一个在内部 \((a,b)\) 取得（因端点等值），由 Fermat 引理（内部极值点导数为 0）即得结论。</p>
+
+            <h4>Lagrange 中值定理（有限增量公式）</h4>
+            <p>设 \(f\) 在 \([a,b]\) 上连续、\((a,b)\) 内可导。则存在 \(\xi\in(a,b)\) 使</p>
+            \[f(b)-f(a)=f'(\xi)(b-a),\quad \text{即}\quad f'(\xi)=\dfrac{f(b)-f(a)}{b-a}.\]
+            <p><em>证明思路</em>：构造辅助函数 \(\varphi(x)=f(x)-\dfrac{f(b)-f(a)}{b-a}(x-a)\)，验证 \(\varphi(a)=\varphi(b)=f(a)\)，对 \(\varphi\) 应用 Rolle 即得。</p>
+
+            <h4>Cauchy 中值定理</h4>
+            <p>设 \(f,g\) 在 \([a,b]\) 上连续、\((a,b)\) 内可导，\(g'(x)\ne 0\) 于 \((a,b)\)。则存在 \(\xi\in(a,b)\) 使</p>
+            \[\dfrac{f(b)-f(a)}{g(b)-g(a)}=\dfrac{f'(\xi)}{g'(\xi)}.\]
+            <p>当 \(g(x)=x\) 时退化为 Lagrange。<em>证明思路</em>：构造辅助函数 \(\varphi(x)=f(x)-\dfrac{f(b)-f(a)}{g(b)-g(a)}(g(x)-g(a))\)，对 \(\varphi\) 用 Rolle。</p>
+
+            <h4>三定理的关系</h4>
+            <p>Rolle ⊂ Lagrange ⊂ Cauchy，每一个都是上一个的特例。三者证明都依赖 Weierstrass 最值定理（即闭区间紧致性），这是分析的核心。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用 Lagrange 证明 \(|\sin x-\sin y|\le|x-y|\) 对所有 \(x,y\in\mathbb{R}\)。</p>
+            <p><em>解答</em>：不妨 \(x>y\)。对 \(\sin\) 在 \([y,x]\) 用 Lagrange，\(\exists\xi\in(y,x)\) 使 \(\sin x-\sin y=\cos\xi\,(x-y)\)。取绝对值并用 \(|\cos\xi|\le 1\) 得结论。这表明 \(\sin\) 是 1-Lipschitz 函数。</p>
+
+            <p><strong>例题 2</strong>：证明若 \(f\) 在 \(I\) 上可导且 \(f'\equiv 0\)，则 \(f\) 在 \(I\) 上为常数。</p>
+            <p><em>解答</em>：任取 \(x_1<x_2\in I\)。对 \(f\) 在 \([x_1,x_2]\) 上用 Lagrange，\(\exists\xi\) 使 \(f(x_2)-f(x_1)=f'(\xi)(x_2-x_1)=0\)，故 \(f(x_2)=f(x_1)\)。\(I\) 任意两点函数值相等，故 \(f\) 为常数。</p>
+
+            <p><strong>例题 3</strong>：用 Lagrange 证明：若 \(f'\) 在 \(I\) 上恒正，则 \(f\) 在 \(I\) 上严格单调递增。</p>
+            <p><em>解答</em>：任取 \(x_1<x_2\)，\(\exists\xi\in(x_1,x_2)\) 使 \(f(x_2)-f(x_1)=f'(\xi)(x_2-x_1)>0\)（两正数相乘），故 \(f(x_2)>f(x_1)\)。这是「\(f'>0\Rightarrow\) 严格单调」的标准证明。</p>
+
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>忽略「连续」与「可导」的区间差别</strong>：连续要求闭区间 \([a,b]\)，可导只要求开区间 \((a,b)\)。端点处可不可导。</li>
+              <li><strong>把 Rolle 用于不满足端点等值的情形</strong>：必须验证 \(f(a)=f(b)\)，否则结论不成立。</li>
+              <li><strong>Cauchy 中值定理误以为是「两次 Lagrange 取比」</strong>：实际中两个 Lagrange 各自的 \(\xi\) 不同，必须用 Cauchy 才能保证用同一个 \(\xi\)。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪个函数在 \([-1,1]\) 上不满足 Rolle 定理的全部条件？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '需同时满足闭区间连续、开区间可导、端点等值。|x| 在 0 不可导，故不满足；其余三个均满足三条件。')">A. \(f(x)=x^2-1\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '需同时满足闭区间连续、开区间可导、端点等值。|x| 在 0 不可导，故不满足；其余三个均满足三条件。')">B. \(f(x)=|x|\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '需同时满足闭区间连续、开区间可导、端点等值。|x| 在 0 不可导，故不满足；其余三个均满足三条件。')">C. \(f(x)=\cos(\pi x)\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Taylor 公式与余项估计</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>多项式是最容易计算与分析的函数。Taylor 公式的核心思想是：用一个多项式去局部逼近复杂的光滑函数，并用「余项」精确刻画逼近误差。这一思想统一了导数、积分、微分方程数值解、误差估计等众多领域。</p>
+            <ul>
+              <li><strong>函数局部「线性化、二次化、…」</strong>：一阶 Taylor 即切线逼近；二阶 Taylor 是抛物线逼近；阶数越高，逼近越准。</li>
+              <li><strong>计算函数值</strong>：计算器/计算机内部正是用截断的 Taylor 多项式（结合区间分割）来计算 \(\mathrm{e}^x,\sin x,\ln x\) 等。</li>
+              <li><strong>极限计算的利器</strong>：把「\(0/0\) 型」未定式中函数替换为 Taylor 展开后，极限往往一眼看穿。</li>
+              <li><strong>分析与几何的桥梁</strong>：函数 \(f\) 在某点的所有阶导数刻画了它的局部几何形状（凹凸、拐点、极值）。</li>
+            </ul>
+            <p>本节聚焦 Taylor 多项式的构造和余项的两种常用形式（Peano、Lagrange），并掌握五条最常用的初等函数展开。注意：本课程不深入展开「收敛半径」「Taylor 级数」等内容，那是 Ch.6 级数论的范畴。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>Taylor 多项式</h4>
+            <p>设 \(f\) 在 \(a\) 的某邻域内 \(n\) 阶可导。\(f\) 在 \(a\) 处的 \(n\) 阶 Taylor 多项式定义为</p>
+            \[T_n(x;a)=\sum_{k=0}^{n}\dfrac{f^{(k)}(a)}{k!}(x-a)^k=f(a)+f'(a)(x-a)+\dfrac{f''(a)}{2!}(x-a)^2+\cdots+\dfrac{f^{(n)}(a)}{n!}(x-a)^n.\]
+            <p>这是唯一满足「在 \(a\) 处的前 \(n\) 阶导数与 \(f\) 完全相同」的次数 \(\le n\) 多项式。</p>
+
+            <h4>Peano 余项</h4>
+            <p>若 \(f\) 在 \(a\) 处 \(n\) 阶可导，则</p>
+            \[f(x)=T_n(x;a)+o((x-a)^n),\quad x\to a.\]
+            <p>余项 \(R_n(x)=o((x-a)^n)\) 是局部「定性」描述：余项比 \((x-a)^n\) 高阶无穷小。它不告诉你余项「具体多大」，只刻画其「衰减速率」。Peano 余项足以应付「求极限」类问题。</p>
+
+            <h4>Lagrange 余项</h4>
+            <p>若 \(f\) 在 \([a,x]\)（或 \([x,a]\)）上 \(n+1\) 阶可导，则存在 \(\xi\) 在 \(a,x\) 之间，使</p>
+            \[R_n(x)=\dfrac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}.\]
+            <p>这是「定量」估计：只要能给出 \(|f^{(n+1)}|\) 在区间上的上界 \(M\)，就能给出余项的具体大小 \(|R_n(x)|\le \dfrac{M}{(n+1)!}|x-a|^{n+1}\)。Lagrange 余项是 Lagrange 中值定理在「函数 \(f^{(n)}\) 上」的反复应用，是定理在更高阶的推广。</p>
+
+            <h4>常用 Maclaurin 展开（\(a=0\)）</h4>
+            <ul>
+              <li>\(\mathrm{e}^x=1+x+\dfrac{x^2}{2!}+\dfrac{x^3}{3!}+\cdots+\dfrac{x^n}{n!}+R_n\)</li>
+              <li>\(\sin x=x-\dfrac{x^3}{3!}+\dfrac{x^5}{5!}-\cdots\)</li>
+              <li>\(\cos x=1-\dfrac{x^2}{2!}+\dfrac{x^4}{4!}-\cdots\)</li>
+              <li>\(\ln(1+x)=x-\dfrac{x^2}{2}+\dfrac{x^3}{3}-\cdots\)（仅在 \(|x|<1\) 收敛，本节只用作展开式）</li>
+              <li>\((1+x)^\alpha=1+\alpha x+\dfrac{\alpha(\alpha-1)}{2!}x^2+\dfrac{\alpha(\alpha-1)(\alpha-2)}{3!}x^3+\cdots\)</li>
+            </ul>
+
+            <h4>余项估算的应用</h4>
+            <p>用 \(\sin x\approx x-\dfrac{x^3}{6}\) 近似 \(\sin(0.1)\)：Lagrange 余项 \(|R|\le \dfrac{|\cos\xi|\cdot|0.1|^5}{5!}\le \dfrac{(0.1)^5}{120}\approx 8.3\times 10^{-9}\)。即取前两项即可达到 8 位有效数字。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用 Taylor 公式（Peano 余项）求 \(\lim_{x\to 0}\dfrac{\sin x-x}{x^3}\)。</p>
+            <p><em>解答</em>：\(\sin x=x-\dfrac{x^3}{6}+o(x^3)\)，故分子 \(=-\dfrac{x^3}{6}+o(x^3)\)，比值趋于 \(-\dfrac{1}{6}\)。</p>
+
+            <p><strong>例题 2</strong>：用 Taylor 公式估算 \(\mathrm{e}^{0.1}\) 至 \(10^{-5}\) 精度。</p>
+            <p><em>解答</em>：\(\mathrm{e}^x\approx 1+x+\dfrac{x^2}{2}+\dfrac{x^3}{6}+\dfrac{x^4}{24}\)。Lagrange 余项 \(|R_4|=\dfrac{\mathrm{e}^\xi}{120}|0.1|^5\le\dfrac{\mathrm{e}^{0.1}}{120}\cdot 10^{-5}<10^{-7}\)。代入数值得 \(\mathrm{e}^{0.1}\approx 1.10517\)。</p>
+
+            <p><strong>例题 3</strong>：用 \(\ln(1+x)\) 展开求 \(\lim_{x\to 0}\dfrac{\ln(1+x)-x}{x^2}\)。</p>
+            <p><em>解答</em>：\(\ln(1+x)=x-\dfrac{x^2}{2}+o(x^2)\)，故分子 \(=-\dfrac{x^2}{2}+o(x^2)\)，比值趋于 \(-\dfrac{1}{2}\)。</p>
+
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把 \(o\) 与 \(O\) 混用</strong>：\(o((x-a)^n)\) 表示「严格高阶」，\(O((x-a)^n)\) 仅表示「同阶或高阶」。极限计算时只能用 \(o\)。</li>
+              <li><strong>展开阶数不够</strong>：求 \(\lim (\sin x-x)/x^3\) 时，必须展开到 \(x^3\) 项才能保留主导信息；只展到 \(x\) 项会得到 \(0/0\) 仍未定。</li>
+              <li><strong>Lagrange 余项中 \(\xi\) 的位置</strong>：\(\xi\) 在 \(a\) 与 \(x\) 之间，但具体值不确定；估计余项时只能用 \(|f^{(n+1)}|\) 的上界。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">用 Taylor 展开 \(\mathrm{e}^x=1+x+\dfrac{x^2}{2}+o(x^2)\) 求 \(\lim_{x\to 0}\dfrac{\mathrm{e}^x-1-x}{x^2}\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '分子 = x²/2 + o(x²)，分母 = x²，比值趋于 1/2。展开必须到 x² 项才能消去前两项，留下主导项。')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '分子 = x²/2 + o(x²)，分母 = x²，比值趋于 1/2。展开必须到 x² 项才能消去前两项，留下主导项。')">B. \(\dfrac{1}{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '分子 = x²/2 + o(x²)，分母 = x²，比值趋于 1/2。展开必须到 x² 项才能消去前两项，留下主导项。')">C. \(1\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>L'Hôpital 法则与未定式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>极限计算中，\(\dfrac{0}{0}\)、\(\dfrac{\infty}{\infty}\)、\(0\cdot\infty\)、\(\infty-\infty\)、\(0^0\)、\(1^\infty\)、\(\infty^0\) 等表达式称为「未定式」——直接代入既不能给出极限值，也不能判断极限是否存在。L'Hôpital 法则借助 Cauchy 中值定理，把比值的极限转化为导数的极限，是处理未定式的最常用工具。</p>
+            <ul>
+              <li><strong>统一处理多种未定式</strong>：除 \(0/0\) 与 \(\infty/\infty\) 直接套用法则外，其余未定式都能通过简单代数变形（取倒数、取对数）转化为这两类。</li>
+              <li><strong>与 Taylor 公式互补</strong>：L'Hôpital 简单直接但可能要反复求导；Taylor 一步到位但需记住展开。两者结合是分析竞赛与考试的标配。</li>
+              <li><strong>应用广泛</strong>：渐进分析、数值方法收敛速度、概率分布尾部估计等都离不开未定式的处理。</li>
+            </ul>
+            <p>本节强调「条件验证」：法则不是万能的，使用前必须确认型式正确、可导性成立、新极限存在。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>L'Hôpital 法则（\(0/0\) 型）</h4>
+            <p>设 \(f,g\) 在 \(a\) 的某去心邻域内可导，\(g'(x)\ne 0\)，且</p>
+            <ol>
+              <li>\(\lim_{x\to a}f(x)=\lim_{x\to a}g(x)=0\)；</li>
+              <li>\(\lim_{x\to a}\dfrac{f'(x)}{g'(x)}\) 存在（或为 \(\pm\infty\)）。</li>
+            </ol>
+            <p>则</p>
+            \[\lim_{x\to a}\dfrac{f(x)}{g(x)}=\lim_{x\to a}\dfrac{f'(x)}{g'(x)}.\]
+            <p><em>证明梗概</em>：补充定义 \(f(a)=g(a)=0\) 使其在 \(a\) 处连续。对 \(f,g\) 在 \([a,x]\) 用 Cauchy 中值定理，\(\exists\xi\) 在 \(a,x\) 之间使 \(\dfrac{f(x)}{g(x)}=\dfrac{f(x)-f(a)}{g(x)-g(a)}=\dfrac{f'(\xi)}{g'(\xi)}\)。当 \(x\to a\) 时 \(\xi\to a\)，由条件二得结论。</p>
+
+            <h4>\(\infty/\infty\) 型</h4>
+            <p>条件 1 改为 \(\lim_{x\to a}|f(x)|=\lim_{x\to a}|g(x)|=\infty\)，结论相同。证明较复杂，依赖更精细的中值估计，这里仅陈述结论。</p>
+
+            <h4>其他未定式的转化</h4>
+            <ul>
+              <li><strong>\(0\cdot\infty\)</strong>：\(f\cdot g=\dfrac{f}{1/g}\)（\(0/0\) 型）或 \(\dfrac{g}{1/f}\)（\(\infty/\infty\) 型）。</li>
+              <li><strong>\(\infty-\infty\)</strong>：通分或乘除技巧化为 \(0/0\)。</li>
+              <li><strong>\(0^0,\;1^\infty,\;\infty^0\)</strong>：取对数 \(\ln(f^g)=g\ln f\)，转为 \(0\cdot\infty\)，再化为 \(0/0\) 或 \(\infty/\infty\)。</li>
+            </ul>
+
+            <h4>使用注意</h4>
+            <ul>
+              <li><strong>每次用法则前必须验证型式</strong>：若 \(\lim f/g\) 不是未定式（如 \(2/0\)），强行求导会得错误结果。</li>
+              <li><strong>新极限不存在不等于原极限不存在</strong>：法则是充分非必要。例如 \(\lim_{x\to\infty}\dfrac{x+\sin x}{x}=1\)，但 \(\lim\dfrac{1+\cos x}{1}\) 不存在；此时不能反推原极限不存在，需另行分析。</li>
+              <li><strong>反复应用</strong>：若一次求导后仍是未定式，可继续用，但每次都要重新验证条件。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>（\(0/0\) 型）：\(\lim_{x\to 0}\dfrac{1-\cos x}{x^2}\)。</p>
+            <p><em>解答</em>：\(\dfrac{0}{0}\) 型，L'Hôpital 一次：\(\dfrac{\sin x}{2x}\to\dfrac{1}{2}\)（用基本极限）；或再 L'Hôpital：\(\dfrac{\cos x}{2}\to\dfrac{1}{2}\)。</p>
+
+            <p><strong>例题 2</strong>（\(\infty/\infty\) 型）：\(\lim_{x\to+\infty}\dfrac{x^n}{\mathrm{e}^x}\)（\(n\) 正整数）。</p>
+            <p><em>解答</em>：连续 \(n\) 次 L'Hôpital，分子降为 \(n!\)，分母仍为 \(\mathrm{e}^x\to\infty\)，故极限为 0。这表明指数增长压倒任意多项式增长。</p>
+
+            <p><strong>例题 3</strong>（\(0\cdot\infty\) 型）：\(\lim_{x\to 0^+}x\ln x\)。</p>
+            <p><em>解答</em>：改写 \(\dfrac{\ln x}{1/x}\)（\(\infty/\infty\) 型），L'Hôpital：\(\dfrac{1/x}{-1/x^2}=-x\to 0\)。</p>
+
+            <p><strong>例题 4</strong>（\(1^\infty\) 型）：\(\lim_{x\to+\infty}\left(1+\dfrac{1}{x}\right)^x\)。</p>
+            <p><em>解答</em>：取对数 \(\ln L=\lim x\ln(1+1/x)\)。令 \(t=1/x\to 0\)：\(\dfrac{\ln(1+t)}{t}\to 1\)（L'Hôpital 或 Taylor）。故 \(L=\mathrm{e}\)。</p>
+
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>未验证未定式型就求导</strong>：例如 \(\lim_{x\to 0}\dfrac{x+1}{x+2}=\dfrac{1}{2}\)，强行 L'Hôpital 得 \(1/1=1\)，结果错误。</li>
+              <li><strong>新极限不存在就断言原极限不存在</strong>：法则方向是单向的，需用其他方法（直接化简、Taylor、夹逼等）补救。</li>
+              <li><strong>忘记取对数处理 \(0^0,1^\infty,\infty^0\)</strong>：直接套法则会出错，必须先转化。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">\(\lim_{x\to+\infty}\dfrac{\ln x}{x^2}\) 等于？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '∞/∞ 型，L\\'Hôpital：(1/x)/(2x)=1/(2x²)→0。对数增长远慢于多项式增长，是 L\\'Hôpital 标准应用。')">A. \(0\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '∞/∞ 型，L\\'Hôpital：(1/x)/(2x)=1/(2x²)→0。对数增长远慢于多项式增长，是 L\\'Hôpital 标准应用。')">B. \(\dfrac{1}{2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '∞/∞ 型，L\\'Hôpital：(1/x)/(2x)=1/(2x²)→0。对数增长远慢于多项式增长，是 L\\'Hôpital 标准应用。')">C. \(\infty\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>单调性、极值、凸性与拐点判定</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>导数与高阶导数承载着函数的「形状信息」：一阶导数告诉你函数是上升还是下降、何处取得极值；二阶导数告诉你函数是凸是凹、何处有拐点。掌握这些判别法，就能仅凭导数信息绘制出函数的「定性图象」，进而解最优化、不等式、几何作图等众多问题。</p>
+            <ul>
+              <li><strong>最优化</strong>：找极值点是工程、经济、机器学习等领域的核心需求。一阶必要条件 \(f'=0\) 给出候选，二阶充分条件用 \(f''\) 区分极大极小。</li>
+              <li><strong>不等式证明</strong>：凸函数的 Jensen 不等式 \(f(\dfrac{x+y}{2})\le \dfrac{f(x)+f(y)}{2}\) 是 AM-GM、Cauchy-Schwarz 等经典不等式的统一框架。</li>
+              <li><strong>函数作图</strong>：单调区间、极值点、凹凸区间、拐点共同决定图象的整体形态。</li>
+            </ul>
+            <p>本节聚焦四类判别法及其严格依据（来自 Lagrange、Taylor、二阶导数判别），并掌握典型反例（如 \(x^4\) 在 0 处二阶导数失效）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>单调性判别</h4>
+            <p>设 \(f\) 在 \(I\) 上可导。则：</p>
+            <ul>
+              <li>\(f'(x)\ge 0\) 于 \(I\) \(\Leftrightarrow\) \(f\) 在 \(I\) 上单调不减；</li>
+              <li>\(f'(x)>0\) 于 \(I\)（除孤立点外）\(\Rightarrow\) \(f\) 严格单调递增；</li>
+              <li>\(f'<0\) 类似得严格单调递减。</li>
+            </ul>
+            <p><em>证明</em>：用 Lagrange 中值定理，\(f(x_2)-f(x_1)=f'(\xi)(x_2-x_1)\)。</p>
+
+            <h4>极值的必要条件（Fermat）</h4>
+            <p>若 \(f\) 在 \(x_0\) 处可导且 \(x_0\) 是 \(f\) 的极值点，则 \(f'(x_0)=0\)。逆命题不成立：\(f'=0\) 仅是必要而非充分条件，需进一步判别（如 \(f(x)=x^3\) 在 0 处 \(f'=0\) 但非极值点）。</p>
+
+            <h4>极值的充分条件 1：一阶导符号变化</h4>
+            <p>若 \(f\) 在 \(x_0\) 邻域内可导且 \(f'(x_0)=0\)：</p>
+            <ul>
+              <li>\(f'\) 在 \(x_0\) 由正变负 \(\Rightarrow\) \(x_0\) 为极大值点；</li>
+              <li>\(f'\) 在 \(x_0\) 由负变正 \(\Rightarrow\) \(x_0\) 为极小值点；</li>
+              <li>\(f'\) 不变号 \(\Rightarrow\) \(x_0\) 非极值点。</li>
+            </ul>
+
+            <h4>极值的充分条件 2：二阶导判别</h4>
+            <p>若 \(f'(x_0)=0\) 且 \(f''(x_0)\) 存在：</p>
+            <ul>
+              <li>\(f''(x_0)>0\) \(\Rightarrow\) \(x_0\) 为局部极小值点；</li>
+              <li>\(f''(x_0)<0\) \(\Rightarrow\) \(x_0\) 为局部极大值点；</li>
+              <li>\(f''(x_0)=0\) \(\Rightarrow\) 失效，需更高阶导数或回退一阶判别。</li>
+            </ul>
+            <p><em>原理</em>：由 Taylor 公式 \(f(x)=f(x_0)+\dfrac{f''(x_0)}{2}(x-x_0)^2+o((x-x_0)^2)\)，二阶项符号决定 \(x_0\) 邻域内 \(f\) 的局部高低。</p>
+
+            <h4>凸性与凹性</h4>
+            <p>函数 \(f\) 在区间 \(I\) 上称为<strong>凸函数</strong>（向上凸，convex），若对任意 \(x,y\in I,\;\lambda\in[0,1]\)：</p>
+            \[f(\lambda x+(1-\lambda)y)\le\lambda f(x)+(1-\lambda)f(y).\]
+            <p>几何含义：函数图象上任意两点连成的弦不在图象下方（图象「向下凹」即「向上凸」）。<strong>凹函数</strong>则反之。可导情形下：\(f''\ge 0 \Leftrightarrow f\) 凸；\(f''\le 0 \Leftrightarrow f\) 凹。</p>
+
+            <h4>Jensen 不等式（直觉版）</h4>
+            <p>对凸函数 \(f\)，\(f(\dfrac{x+y}{2})\le \dfrac{f(x)+f(y)}{2}\)。这是凸性定义取 \(\lambda=1/2\) 的特例，更一般可推广到 \(n\) 个点的加权平均。该不等式是概率论中 \(f(\mathbb{E}[X])\le \mathbb{E}[f(X)]\) 的源头。</p>
+
+            <h4>拐点</h4>
+            <p>\(x_0\) 称为 \(f\) 的拐点，若 \(f\) 在 \(x_0\) 处的凹凸性发生改变。<strong>必要条件</strong>：\(f''(x_0)=0\) 或 \(f''\) 在 \(x_0\) 不存在；<strong>充分条件</strong>：\(f''\) 在 \(x_0\) 两侧异号。仅有 \(f''=0\) 不一定是拐点（如 \(x^4\) 在 0 处 \(f''=0\) 但凹凸性未变）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(f(x)=x^3-3x\) 的极值点与极值。</p>
+            <p><em>解答</em>：\(f'(x)=3x^2-3=0\Rightarrow x=\pm 1\)。\(f''(x)=6x\)：\(f''(1)=6>0\)，\(x=1\) 极小，\(f(1)=-2\)；\(f''(-1)=-6<0\)，\(x=-1\) 极大，\(f(-1)=2\)。</p>
+
+            <p><strong>例题 2</strong>：判别 \(f(x)=\mathrm{e}^{-x^2}\) 的凹凸区间与拐点。</p>
+            <p><em>解答</em>：\(f'(x)=-2x\mathrm{e}^{-x^2}\)，\(f''(x)=(-2+4x^2)\mathrm{e}^{-x^2}\)。\(f''=0\Leftrightarrow x=\pm\dfrac{1}{\sqrt{2}}\)。两侧符号变化：\(x<-1/\sqrt{2}\) 凸，\(-1/\sqrt{2}<x<1/\sqrt{2}\) 凹，\(x>1/\sqrt{2}\) 凸。两个拐点 \(x=\pm 1/\sqrt{2}\)（标准正态密度的拐点位置）。</p>
+
+            <p><strong>例题 3</strong>：用凸性证明 AM-GM 不等式（两元）：\(\sqrt{xy}\le\dfrac{x+y}{2}\)，\(x,y>0\)。</p>
+            <p><em>解答</em>：\(\ln\) 在 \((0,+\infty)\) 上为凹函数（\(f''=-1/x^2<0\)）。Jensen 取 \(\lambda=1/2\)：\(\ln\dfrac{x+y}{2}\ge\dfrac{\ln x+\ln y}{2}=\ln\sqrt{xy}\)，即 \(\dfrac{x+y}{2}\ge\sqrt{xy}\)。</p>
+
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>\(f'(x_0)=0\) 即认定为极值点</strong>：必要而非充分，必须用一阶变号或二阶导补充判别。</li>
+              <li><strong>\(f''(x_0)=0\) 即认定为拐点</strong>：必要而非充分，必须验证「二阶导在两侧异号」。</li>
+              <li><strong>把「凸」与「凹」的中文表述混乱</strong>：本课程约定 \(f''\ge 0\) 为「凸（向上凸/convex）」，\(f''\le 0\) 为「凹（向下凸/concave）」。</li>
+              <li><strong>忽略二阶导判别的失效情形</strong>：当 \(f''(x_0)=0\) 时必须回退到一阶变号或更高阶导数判别（如 \(x^4\) 在 0）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">若 \(f'(x_0)=0\) 且 \(f''(x_0)>0\)，则 \(x_0\) 是 \(f\) 的？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '二阶导判别：f\\'=0 且 f\\'\\'>0 表明该点局部「向上凸」，是极小值点；若 f\\'\\'<0 才是极大。')">A. 极大值点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '二阶导判别：f\\'=0 且 f\\'\\'>0 表明该点局部「向上凸」，是极小值点；若 f\\'\\'<0 才是极大。')">B. 极小值点</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '二阶导判别：f\\'=0 且 f\\'\\'>0 表明该点局部「向上凸」，是极小值点；若 f\\'\\'<0 才是极大。')">C. 拐点</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch02.html" class="nav-prev">← Ch.2 导数与微分</a>
+      <a href="../calculus.html" class="nav-overview">📋 概览</a>
+      <a href="ch04.html" class="nav-next">Ch.4 不定积分与定积分 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "calculus-ch03";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>

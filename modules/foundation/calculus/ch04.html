@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch.4 不定积分与定积分 — 微积分 Calculus — Mathematica</title>
+  <link rel="stylesheet" href="../../../shared/theme.css">
+  <link rel="stylesheet" href="../../../shared/layout.css">
+  <link rel="stylesheet" href="../../../shared/components.css">
+  <script>
+    const QUESTIONS = [
+      {
+        "id": "calculus-ch04-q1",
+        "question": "下列哪一个是 \\(f(x)=3x^2\\) 的一个原函数？",
+        "options": ["\\(x^3\\)", "\\(x^3+5\\)", "\\(6x\\)", "以上 A、B 都对"],
+        "answer": 3,
+        "explanation": "原函数定义：\\(F'(x)=f(x)\\)。\\((x^3)'=3x^2\\)，\\((x^3+5)'=3x^2\\)，故 A、B 都是原函数；任意常数 \\(C\\) 加到一个原函数上仍是原函数。C 是导数而非原函数。这正体现「不定积分含任意常数 \\(C\\)」的本质。"
+      },
+      {
+        "id": "calculus-ch04-q2",
+        "question": "\\(\\int (2x+3)\\,dx=\\)？",
+        "options": ["\\(x^2+3x+C\\)", "\\(x^2+3x\\)", "\\(2+C\\)", "\\(2x^2+3x+C\\)"],
+        "answer": 0,
+        "explanation": "由线性性 \\(\\int(2x+3)dx=\\int 2x\\,dx+\\int 3\\,dx=x^2+3x+C\\)。B 漏掉 \\(C\\)；C 是导数；D 把 \\(\\int 2x\\,dx\\) 误算为 \\(2x^2\\)。不定积分的标准答案必须含任意常数 \\(C\\)。"
+      },
+      {
+        "id": "calculus-ch04-q3",
+        "question": "\\(\\int \\dfrac{1}{x}\\,dx=\\)？（设 \\(x\\ne 0\\)）",
+        "options": ["\\(x^{-2}+C\\)", "\\(\\ln x+C\\)", "\\(\\ln|x|+C\\)", "\\(\\dfrac{1}{2}x^2+C\\)"],
+        "answer": 2,
+        "explanation": "\\((\\ln|x|)'=1/x\\) 在 \\(x\\ne 0\\) 时成立，故 \\(\\int\\dfrac{1}{x}dx=\\ln|x|+C\\)。B 仅在 \\(x>0\\) 时正确，作为通用公式必须加绝对值；A 是 \\(\\dfrac{d}{dx}(-1/x)\\)；D 是 \\(\\int x\\,dx\\)。"
+      },
+      {
+        "id": "calculus-ch04-q4",
+        "question": "\\(\\int \\sec^2 x\\,dx=\\)？",
+        "options": ["\\(\\tan x+C\\)", "\\(-\\cot x+C\\)", "\\(\\sec x\\tan x+C\\)", "\\(\\ln|\\sec x|+C\\)"],
+        "answer": 0,
+        "explanation": "\\((\\tan x)'=\\sec^2 x\\)，故 \\(\\int\\sec^2 x\\,dx=\\tan x+C\\)。B 是 \\(\\int\\csc^2 x\\,dx\\) 的结果；C 是 \\((\\sec x)'\\) 的反演而非该题；D 是 \\(\\int\\tan x\\,dx\\)。这是基本积分公式表中必背项。"
+      },
+      {
+        "id": "calculus-ch04-q5",
+        "question": "\\(\\int \\dfrac{1}{1+x^2}\\,dx=\\)？",
+        "options": ["\\(\\arcsin x+C\\)", "\\(\\arctan x+C\\)", "\\(\\ln(1+x^2)+C\\)", "\\(\\dfrac{1}{1+x^2}+C\\)"],
+        "answer": 1,
+        "explanation": "\\((\\arctan x)'=\\dfrac{1}{1+x^2}\\)，故 \\(\\int\\dfrac{1}{1+x^2}dx=\\arctan x+C\\)。A 是 \\(\\int\\dfrac{1}{\\sqrt{1-x^2}}dx\\)；C 是 \\(\\int\\dfrac{2x}{1+x^2}dx\\)。注意分母含 \\(1+x^2\\)（无平方根）对应 \\(\\arctan\\)，含 \\(\\sqrt{1-x^2}\\) 对应 \\(\\arcsin\\)。"
+      },
+      {
+        "id": "calculus-ch04-q6",
+        "question": "\\(\\int e^{2x}\\,dx=\\)？",
+        "options": ["\\(e^{2x}+C\\)", "\\(\\dfrac{1}{2}e^{2x}+C\\)", "\\(2e^{2x}+C\\)", "\\(e^{x^2}+C\\)"],
+        "answer": 1,
+        "explanation": "凑微分：令 \\(u=2x\\)，\\(du=2dx\\)，\\(\\int e^{2x}dx=\\dfrac{1}{2}\\int e^u du=\\dfrac{1}{2}e^{2x}+C\\)。验证：\\(\\left(\\dfrac{1}{2}e^{2x}\\right)'=\\dfrac{1}{2}\\cdot 2e^{2x}=e^{2x}\\) ✓。A 是常见错误（漏除以 2）；C 是 \\((e^{2x})'\\)。"
+      },
+      {
+        "id": "calculus-ch04-q7",
+        "question": "\\(\\int 2^x\\,dx=\\)？",
+        "options": ["\\(2^x+C\\)", "\\(\\dfrac{2^x}{\\ln 2}+C\\)", "\\(x\\cdot 2^{x-1}+C\\)", "\\(2^x\\ln 2+C\\)"],
+        "answer": 1,
+        "explanation": "\\((a^x)'=a^x\\ln a\\)，故 \\(\\int a^x dx=\\dfrac{a^x}{\\ln a}+C\\)。代入 \\(a=2\\) 得 B。A 错（导数公式套反）；D 是 \\((2^x)'\\)；C 把指数函数当作幂函数处理是典型错误。"
+      },
+      {
+        "id": "calculus-ch04-q8",
+        "question": "Riemann 和 \\(\\sum_{i=1}^{n}f(\\xi_i)\\Delta x_i\\) 中，\\(\\xi_i\\) 必须是？",
+        "options": ["子区间 \\([x_{i-1},x_i]\\) 的左端点", "子区间的右端点", "子区间的中点", "子区间内任一点"],
+        "answer": 3,
+        "explanation": "Riemann 和的定义只要求 \\(\\xi_i\\in[x_{i-1},x_i]\\) 是子区间内任意取定的样本点。当 \\(|P|\\to 0\\)（最大子区间长度趋零）时，若极限与划分及 \\(\\xi_i\\) 选法都无关，则 \\(f\\) 可积。A、B、C 都只是特例（左/右/中矩形和），并非定义本身的要求。"
+      },
+      {
+        "id": "calculus-ch04-q9",
+        "question": "下列哪一类函数在闭区间 \\([a,b]\\) 上一定 Riemann 可积？",
+        "options": ["仅连续函数", "仅单调函数", "连续函数；或仅有有限个间断点的有界函数；或单调函数", "所有有界函数"],
+        "answer": 2,
+        "explanation": "Riemann 可积的充分条件：闭区间上连续 ⇒ 可积；闭区间上单调（自动有界）⇒ 可积；有界且仅有限个间断点 ⇒ 可积。三者都成立故选 C。D 错：Dirichlet 函数 \\(D(x)\\) 在 \\([0,1]\\) 上有界但不可积（上下 Darboux 和分别为 1 和 0）。"
+      },
+      {
+        "id": "calculus-ch04-q10",
+        "question": "对划分 \\(P\\)，Darboux 上和 \\(U(P,f)\\) 与下和 \\(L(P,f)\\) 的关系是？",
+        "options": ["\\(U(P,f)\\le L(P,f)\\)", "\\(U(P,f)\\ge L(P,f)\\)", "\\(U(P,f)=L(P,f)\\) 永远成立", "二者无确定大小关系"],
+        "answer": 1,
+        "explanation": "在每个子区间 \\([x_{i-1},x_i]\\) 上，\\(M_i=\\sup f\\ge m_i=\\inf f\\)，故 \\(U(P,f)=\\sum M_i\\Delta x_i\\ge\\sum m_i\\Delta x_i=L(P,f)\\)。可积当且仅当 \\(\\inf U=\\sup L\\)。C 仅在 \\(f\\) 为常数或加细到极限时成立。"
+      },
+      {
+        "id": "calculus-ch04-q11",
+        "question": "曲边梯形「由 \\(y=x^2\\)、\\(x=0\\)、\\(x=1\\)、\\(x\\) 轴围成」的面积可表为？",
+        "options": ["\\(\\int_0^1 x^2\\,dx\\)", "\\(\\int_0^1 x\\,dx\\)", "\\(\\int_0^1 2x\\,dx\\)", "\\(x^2\\big|_0^1\\)"],
+        "answer": 0,
+        "explanation": "几何意义：非负函数 \\(f(x)\\) 在 \\([a,b]\\) 上的定积分 \\(\\int_a^b f(x)dx\\) 等于曲线 \\(y=f(x)\\) 与 \\(x\\) 轴及 \\(x=a, x=b\\) 围成的曲边梯形面积。此处 \\(f(x)=x^2\\)，\\(a=0,b=1\\)，故面积 \\(=\\int_0^1 x^2 dx=\\dfrac{1}{3}\\)。"
+      },
+      {
+        "id": "calculus-ch04-q12",
+        "question": "若 \\(F(x)=\\int_a^x f(t)\\,dt\\) 且 \\(f\\) 在 \\([a,b]\\) 上连续，则 \\(F'(x)=\\)？",
+        "options": ["\\(f(a)\\)", "\\(f(x)\\)", "\\(F(x)\\)", "\\(\\int_a^x f'(t)dt\\)"],
+        "answer": 1,
+        "explanation": "微积分基本定理（第一形式）：若 \\(f\\) 在 \\([a,b]\\) 上连续，则变限积分 \\(F(x)=\\int_a^x f(t)dt\\) 在 \\([a,b]\\) 上可导，且 \\(F'(x)=f(x)\\)。这一定理把「积分」与「微分」联系成互逆运算，是连接两大微积分概念的核心桥梁。"
+      },
+      {
+        "id": "calculus-ch04-q13",
+        "question": "Newton-Leibniz 公式 \\(\\int_a^b f(x)dx=F(b)-F(a)\\) 中 \\(F\\) 必须满足？",
+        "options": ["\\(F\\) 是 \\(f\\) 的任一原函数", "\\(F=f\\)", "\\(F'=f\\) 在 \\([a,b]\\) 上", "\\(F\\) 是 \\(f\\) 的不定积分（不带 \\(C\\)）"],
+        "answer": 2,
+        "explanation": "Newton-Leibniz 公式要求 \\(F\\) 是 \\(f\\) 在 \\([a,b]\\) 上的原函数，即 \\(F'(x)=f(x)\\)。A 描述「任一原函数」即等价于 C 的条件，但选 C 表述更精确（直接给出导数关系）。原函数差一常数不影响结果：\\((F+C)(b)-(F+C)(a)=F(b)-F(a)\\)。"
+      },
+      {
+        "id": "calculus-ch04-q14",
+        "question": "\\(\\int_0^1 x^2\\,dx=\\)？",
+        "options": ["\\(\\dfrac{1}{2}\\)", "\\(\\dfrac{1}{3}\\)", "\\(\\dfrac{1}{4}\\)", "\\(1\\)"],
+        "answer": 1,
+        "explanation": "取原函数 \\(F(x)=\\dfrac{x^3}{3}\\)，由 Newton-Leibniz \\(\\int_0^1 x^2 dx=F(1)-F(0)=\\dfrac{1}{3}-0=\\dfrac{1}{3}\\)。这与 Riemann 和的极限一致，也等于该曲边梯形的面积。"
+      },
+      {
+        "id": "calculus-ch04-q15",
+        "question": "\\(\\int_0^{\\pi/2}\\cos x\\,dx=\\)？",
+        "options": ["\\(0\\)", "\\(\\dfrac{1}{2}\\)", "\\(1\\)", "\\(\\pi/2\\)"],
+        "answer": 2,
+        "explanation": "\\((\\sin x)'=\\cos x\\)，故 \\(\\int_0^{\\pi/2}\\cos x\\,dx=\\sin x\\big|_0^{\\pi/2}=\\sin(\\pi/2)-\\sin 0=1-0=1\\)。这是基本积分与 Newton-Leibniz 的标准应用。"
+      },
+      {
+        "id": "calculus-ch04-q16",
+        "question": "\\(\\dfrac{d}{dx}\\int_0^{x^2}\\sin t\\,dt=\\)？",
+        "options": ["\\(\\sin x\\)", "\\(\\sin(x^2)\\)", "\\(2x\\sin(x^2)\\)", "\\(\\cos(x^2)\\)"],
+        "answer": 2,
+        "explanation": "复合变限积分：设 \\(F(u)=\\int_0^u\\sin t\\,dt\\)，\\(u=x^2\\)。由微积分基本定理 \\(F'(u)=\\sin u\\)，再用链式法则 \\(\\dfrac{d}{dx}F(x^2)=F'(x^2)\\cdot(x^2)'=\\sin(x^2)\\cdot 2x=2x\\sin(x^2)\\)。常见错误：忘记乘 \\(2x\\)（选 B）。"
+      },
+      {
+        "id": "calculus-ch04-q17",
+        "question": "\\(\\int 2x\\cos(x^2)\\,dx=\\)？（凑微分法）",
+        "options": ["\\(\\sin(x^2)+C\\)", "\\(\\cos(x^2)+C\\)", "\\(2\\sin(x^2)+C\\)", "\\(x^2\\sin(x^2)+C\\)"],
+        "answer": 0,
+        "explanation": "令 \\(u=x^2\\)，\\(du=2x\\,dx\\)。原式 \\(=\\int\\cos u\\,du=\\sin u+C=\\sin(x^2)+C\\)。验证：\\((\\sin(x^2))'=\\cos(x^2)\\cdot 2x=2x\\cos(x^2)\\) ✓。这是「第一换元法（凑微分）」的典型形式。"
+      },
+      {
+        "id": "calculus-ch04-q18",
+        "question": "用 \\(x=\\sin t\\) 换元计算 \\(\\int\\sqrt{1-x^2}\\,dx\\)（\\(|x|\\le 1\\)）。换元后被积函数变为？",
+        "options": ["\\(\\cos t\\)", "\\(\\cos^2 t\\)", "\\(\\sin t\\cos t\\)", "\\(1-\\sin^2 t\\)"],
+        "answer": 1,
+        "explanation": "\\(x=\\sin t\\) 时 \\(\\sqrt{1-x^2}=\\sqrt{1-\\sin^2 t}=|\\cos t|=\\cos t\\)（取 \\(t\\in[-\\pi/2,\\pi/2]\\)），\\(dx=\\cos t\\,dt\\)。故 \\(\\sqrt{1-x^2}\\,dx=\\cos t\\cdot\\cos t\\,dt=\\cos^2 t\\,dt\\)。这是「第二换元法（三角代换）」的典型例子。"
+      },
+      {
+        "id": "calculus-ch04-q19",
+        "question": "\\(\\int x e^x\\,dx=\\)？（分部积分法）",
+        "options": ["\\(xe^x+C\\)", "\\(xe^x-e^x+C\\)", "\\(e^x+C\\)", "\\(\\dfrac{x^2}{2}e^x+C\\)"],
+        "answer": 1,
+        "explanation": "分部积分公式 \\(\\int u\\,dv=uv-\\int v\\,du\\)。取 \\(u=x,dv=e^x dx\\)，则 \\(du=dx,v=e^x\\)。\\(\\int xe^x dx=xe^x-\\int e^x dx=xe^x-e^x+C=(x-1)e^x+C\\)。验证：\\(((x-1)e^x)'=e^x+(x-1)e^x=xe^x\\) ✓。"
+      },
+      {
+        "id": "calculus-ch04-q20",
+        "question": "\\(\\int \\ln x\\,dx=\\)？（\\(x>0\\)）",
+        "options": ["\\(\\dfrac{1}{x}+C\\)", "\\(x\\ln x+C\\)", "\\(x\\ln x-x+C\\)", "\\(\\dfrac{(\\ln x)^2}{2}+C\\)"],
+        "answer": 2,
+        "explanation": "用分部积分：取 \\(u=\\ln x,dv=dx\\)，则 \\(du=\\dfrac{1}{x}dx,v=x\\)。\\(\\int\\ln x\\,dx=x\\ln x-\\int x\\cdot\\dfrac{1}{x}dx=x\\ln x-x+C\\)。验证：\\((x\\ln x-x)'=\\ln x+1-1=\\ln x\\) ✓。这是分部积分中「\\(dv=dx\\)」的经典技巧。"
+      },
+      {
+        "id": "calculus-ch04-q21",
+        "question": "\\(\\int_0^1 (x+1)^{10}\\,dx=\\)？",
+        "options": ["\\(\\dfrac{2^{11}-1}{11}\\)", "\\(\\dfrac{2^{10}-1}{10}\\)", "\\(\\dfrac{2^{11}}{11}\\)", "\\(2^{10}\\)"],
+        "answer": 0,
+        "explanation": "令 \\(u=x+1\\)，\\(du=dx\\)；当 \\(x:0\\to 1\\) 时 \\(u:1\\to 2\\)。\\(\\int_0^1(x+1)^{10}dx=\\int_1^2 u^{10}du=\\dfrac{u^{11}}{11}\\Big|_1^2=\\dfrac{2^{11}-1}{11}=\\dfrac{2047}{11}\\)。常见错误：换元后忘改积分上下限（仍写 0 到 1）。"
+      },
+      {
+        "id": "calculus-ch04-q22",
+        "question": "「凑微分」\\(\\int f(g(x))g'(x)\\,dx\\) 等于？",
+        "options": ["\\(\\int f(u)\\,du\\)，其中 \\(u=g(x)\\)", "\\(f(g(x))+C\\)", "\\(\\int f(u)g'(u)du\\)", "\\(g(x)\\int f(u)du\\)"],
+        "answer": 0,
+        "explanation": "第一换元法：令 \\(u=g(x)\\)，则 \\(du=g'(x)dx\\)，原式正好被「凑」成 \\(\\int f(u)\\,du\\)。这是把复合函数的导数公式「逆向」使用。验证：\\(\\dfrac{d}{dx}F(g(x))=F'(g(x))g'(x)=f(g(x))g'(x)\\)，其中 \\(F'=f\\)。"
+      },
+      {
+        "id": "calculus-ch04-q23",
+        "question": "在分部积分 \\(\\int u\\,dv=uv-\\int v\\,du\\) 中，选择 \\(u\\) 与 \\(dv\\) 的 LIATE 法则中 \\(u\\) 优先选？",
+        "options": ["指数函数", "三角函数", "对数函数 / 反三角函数 / 代数函数（按 LIATE 顺序）", "任意函数都行"],
+        "answer": 2,
+        "explanation": "LIATE 经验法则：选 \\(u\\) 的优先顺序为 Logarithm（对数）→ Inverse trig（反三角）→ Algebraic（代数/多项式）→ Trigonometric（三角）→ Exponential（指数）。例如 \\(\\int x\\ln x\\,dx\\) 取 \\(u=\\ln x\\)；\\(\\int xe^x dx\\) 取 \\(u=x\\)（多项式优先于指数）。这是分部积分选取的实用指南。"
+      },
+      {
+        "id": "calculus-ch04-q24",
+        "question": "用「循环型分部积分」求 \\(I=\\int e^x\\sin x\\,dx\\)，最终结果为？",
+        "options": ["\\(\\dfrac{e^x(\\sin x-\\cos x)}{2}+C\\)", "\\(e^x\\sin x+C\\)", "\\(e^x\\cos x+C\\)", "\\(\\dfrac{e^x(\\sin x+\\cos x)}{2}+C\\)"],
+        "answer": 0,
+        "explanation": "两次分部积分：\\(I=e^x\\sin x-\\int e^x\\cos x\\,dx=e^x\\sin x-(e^x\\cos x+\\int e^x\\sin x\\,dx)=e^x(\\sin x-\\cos x)-I\\)。解 \\(2I=e^x(\\sin x-\\cos x)\\)，得 \\(I=\\dfrac{e^x(\\sin x-\\cos x)}{2}+C\\)。这是分部积分中「方程式法」的典型应用。"
+      },
+      {
+        "id": "calculus-ch04-q25",
+        "question": "下列关于不定积分与定积分的区别，正确的是？",
+        "options": ["\\(\\int f(x)dx\\) 与 \\(\\int_a^b f(x)dx\\) 都是函数", "\\(\\int f(x)dx\\) 是函数族（含 \\(C\\)），\\(\\int_a^b f(x)dx\\) 是数", "二者都是数", "二者意义完全相同"],
+        "answer": 1,
+        "explanation": "不定积分 \\(\\int f(x)dx=F(x)+C\\) 表示原函数全体，结果是「带常数 \\(C\\) 的函数族」；定积分 \\(\\int_a^b f(x)dx\\) 是 Riemann 和的极限，结果是「确定的实数」。两者通过 Newton-Leibniz 公式联系：定积分等于任一原函数在端点的差。"
+      }
+    ];
+  </script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body class="chapter-page" data-category="foundation" data-module="calculus"
+      style="--domain-color: var(--c-foundation);">
+
+  <nav class="topbar">
+    <a href="../../../index.html" class="topbar-brand">Mathematica</a>
+    <div class="topbar-module">
+      <span class="module-domain">FONDATION</span>
+      <a href="../calculus.html" class="module-name">微积分 Calculus</a>
+    </div>
+    <div class="topbar-right">
+      <span class="chapter-indicator">Ch.4 / 6</span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon" title="切换主题">🌙</button>
+    </div>
+  </nav>
+
+  <aside class="toc-sidebar">
+    <div class="toc-header">本章目录</div>
+    <ul class="toc-list">
+      <li><a href="#kp1">01 · 不定积分与基本积分公式</a></li>
+      <li><a href="#kp2">02 · Riemann 定积分的定义</a></li>
+      <li><a href="#kp3">03 · 微积分基本定理（Newton-Leibniz）</a></li>
+      <li><a href="#kp4">04 · 换元积分法与分部积分法</a></li>
+      <li><a href="#exercises">综合练习</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <header class="chapter-hero">
+      <p class="chapter-label">Chapitre 4</p>
+      <h1>不定积分与定积分</h1>
+    </header>
+
+    <!-- ── KP1 ── -->
+    <section id="kp1" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">01</span>不定积分与基本积分公式</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>微分回答的是「已知位置如何求瞬时速度」，而它的逆问题——已知速度如何反推位置——同样普遍且重要。物理学家想从加速度恢复运动方程，工程师想从功率密度恢复总能量，经济学家想从边际收益恢复总收益。这些场景都需要一个统一的「逆微分」操作：给定 \(f(x)\)，找出所有满足 \(F'(x)=f(x)\) 的函数 \(F(x)\)，即 \(f\) 的原函数。</p>
+            <ul>
+              <li><strong>运动学反演</strong>：已知 \(v(t)\)，求位移函数 \(s(t)\) 满足 \(s'(t)=v(t)\)，初始位置 \(s(0)\) 决定了任意常数 \(C\)。</li>
+              <li><strong>常微分方程</strong>：最简单的方程 \(y'=f(x)\) 的通解就是 \(\int f(x)dx\)，含有任意常数恰对应初值条件的自由度。</li>
+              <li><strong>统一记号</strong>：把「找原函数」这一操作写作 \(\int f(x)dx\)，与后续的定积分记号统一，是微积分基本定理得以表述的前提。</li>
+            </ul>
+            <p>不定积分把「逆微分」从依赖经验的零散技巧提升为有标准记号、有公式表、有运算法则的代数对象。掌握基本公式是后续所有积分计算的基石。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>原函数与不定积分</h4>
+            <p>设 \(f\) 定义于区间 \(I\)。若存在可导函数 \(F:I\to\mathbb{R}\) 使 \(F'(x)=f(x)\) 对一切 \(x\in I\) 成立，称 \(F\) 为 \(f\) 的一个原函数。</p>
+            <p><strong>原函数族结构</strong>：若 \(F\) 是 \(f\) 的一个原函数，则 \(F\) 的全体原函数恰为 \(\{F(x)+C:C\in\mathbb{R}\}\)。证明依赖中值定理的推论：导数恒为 0 的连续函数必为常数。</p>
+            <p>不定积分定义为原函数全体的统一记号：</p>
+            \[\int f(x)\,dx=F(x)+C,\qquad F'=f.\]
+            <p>「\(C\)」称为积分常数，必须显式书写——它是「原函数族」的标识。漏写 \(C\) 是不定积分最常见的扣分点。</p>
+
+            <h4>基本积分公式表</h4>
+            <p>由微分公式逐条「翻转」即得（设 \(\alpha\ne -1\)，\(a>0,a\ne 1\)）：</p>
+            \[\int x^{\alpha}dx=\frac{x^{\alpha+1}}{\alpha+1}+C,\quad \int\frac{1}{x}dx=\ln|x|+C,\]
+            \[\int e^x dx=e^x+C,\quad \int a^x dx=\frac{a^x}{\ln a}+C,\]
+            \[\int\sin x\,dx=-\cos x+C,\quad \int\cos x\,dx=\sin x+C,\]
+            \[\int\sec^2 x\,dx=\tan x+C,\quad \int\csc^2 x\,dx=-\cot x+C,\]
+            \[\int\frac{1}{1+x^2}dx=\arctan x+C,\quad \int\frac{1}{\sqrt{1-x^2}}dx=\arcsin x+C.\]
+
+            <h4>线性性</h4>
+            <p>不定积分是线性算子：</p>
+            \[\int[\alpha f(x)+\beta g(x)]dx=\alpha\int f(x)dx+\beta\int g(x)dx.\]
+            <p>这条性质允许我们把多项式、三角多项式逐项积分，是一切复杂积分计算的起点。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>运动学</strong>：自由下落物体加速度 \(a=g\)（常数），积分一次得速度 \(v(t)=gt+v_0\)，再积分得位置 \(s(t)=\dfrac{1}{2}gt^2+v_0 t+s_0\)。两次积分各自带出一个常数，正好由两个初值（初速度、初位置）确定。</p>
+            <p><strong>电路分析</strong>：电感两端电压 \(u_L(t)=L\dfrac{di}{dt}\)，已知电压求电流就是 \(i(t)=\dfrac{1}{L}\int u_L(t)dt+i_0\)。积分常数 \(i_0\) 由初始电流给定。</p>
+            <p><strong>经济学</strong>：边际成本 \(MC(q)\) 是总成本的导数，总成本 \(C(q)=\int MC(q)dq+C_0\) 中常数 \(C_0\) 表示固定成本。不定积分的「常数」在应用中并非可有可无的形式，而是承担初始条件的物理/经济含义。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(\int(3x^2+2\sin x-\dfrac{1}{x})dx\)（\(x>0\)）。</p>
+            <p><em>解答</em>：由线性性逐项积分。\(\int 3x^2 dx=x^3\)；\(\int 2\sin x\,dx=-2\cos x\)；\(\int \dfrac{1}{x}dx=\ln x\)（\(x>0\) 时绝对值可省）。合并：原式 \(=x^3-2\cos x-\ln x+C\)。验证：求导 \(3x^2+2\sin x-\dfrac{1}{x}\) ✓。</p>
+            <p><strong>例题 2</strong>：求 \(\int\dfrac{x^2+1}{x^2}dx\)。</p>
+            <p><em>解答</em>：先化简 \(\dfrac{x^2+1}{x^2}=1+x^{-2}\)。原式 \(=\int(1+x^{-2})dx=x+\dfrac{x^{-1}}{-1}+C=x-\dfrac{1}{x}+C\)。先化简再积分是处理分式的常用策略。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>漏写 \(C\)</strong>：不定积分必须显式写出任意常数，否则视为半截答案。</li>
+              <li><strong>对 \(1/x\) 写成 \(\ln x\) 而非 \(\ln|x|\)</strong>：当 \(x<0\) 时 \(\ln x\) 没有定义，而 \(1/x\) 在 \(x<0\) 仍可定义；通用公式必须加绝对值。</li>
+              <li><strong>把 \(\int\dfrac{1}{x^2}dx\) 误算为 \(\ln|x^2|+C\)</strong>：仅 \(\int 1/x\,dx\) 出现对数，幂函数 \(x^{-2}\) 须用幂函数公式：\(\int x^{-2}dx=\dfrac{x^{-1}}{-1}+C=-\dfrac{1}{x}+C\)。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp1">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">求 \(\int(\sin x+\cos x)dx\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp1', this, true, '正确！\\((-\\cos x+\\sin x)+C\\)，逐项套基本公式即可。')">A. \(-\cos x+\sin x+C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((-\\cos x+\\sin x)+C\\)，逐项套基本公式即可。')">B. \(\cos x-\sin x+C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((-\\cos x+\\sin x)+C\\)，逐项套基本公式即可。')">C. \(\cos x+\sin x+C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp1', this, false, '再想想。\\((-\\cos x+\\sin x)+C\\)，逐项套基本公式即可。')">D. \(-\cos x-\sin x+C\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP2 ── -->
+    <section id="kp2" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">02</span>Riemann 定积分的定义</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>古希腊人用「穷竭法」逼近圆和抛物线弓形的面积——把曲边图形切成越来越细的多边形求和。牛顿、莱布尼茨之后，物理学家又用类似方法计算变力做功 \(W=\int F\,dx\)、变速运动的位移 \(s=\int v\,dt\)。这些场景都共享同一种结构：「将连续量切成无穷多个小片，每片视为常量近似，再求和取极限」。</p>
+            <ul>
+              <li><strong>面积</strong>：曲边梯形 \(\{(x,y):a\le x\le b, 0\le y\le f(x)\}\) 的面积。</li>
+              <li><strong>路程</strong>：变速运动 \(v(t)\) 在 \([a,b]\) 内走过的距离。</li>
+              <li><strong>质量</strong>：线密度为 \(\rho(x)\) 的杆 \([a,b]\) 的总质量。</li>
+            </ul>
+            <p>19 世纪 Riemann 把这一直觉提炼为严格的极限定义，使「分割—近似—求和—取极限」成为可被精确验证的数学操作。Riemann 积分不仅奠定了面积的严格定义，还给出了「函数何时可积」的充分条件，并把不定积分（原函数）与定积分（求和极限）这两条独立发展的线索通过基本定理统一起来。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>划分、Riemann 和、可积性</h4>
+            <p>设 \(f:[a,b]\to\mathbb{R}\) 有界。一个划分 \(P\) 是有限点集</p>
+            \[P:\ a=x_0<x_1<x_2<\cdots<x_n=b,\]
+            <p>定义子区间长度 \(\Delta x_i=x_i-x_{i-1}\)，划分细度 \(|P|=\max_i\Delta x_i\)。在每个 \([x_{i-1},x_i]\) 上任取样本点 \(\xi_i\)，构造 Riemann 和：</p>
+            \[\sigma(P,\{\xi_i\})=\sum_{i=1}^n f(\xi_i)\Delta x_i.\]
+            <p>若存在数 \(I\)，使得对任意 \(\varepsilon>0\)，都存在 \(\delta>0\)，只要 \(|P|<\delta\)，无论怎样选 \(\{\xi_i\}\)，都有 \(|\sigma-I|<\varepsilon\)，则称 \(f\) 在 \([a,b]\) 上 Riemann 可积，并记</p>
+            \[\int_a^b f(x)\,dx=I=\lim_{|P|\to 0}\sum_{i=1}^n f(\xi_i)\Delta x_i.\]
+
+            <h4>Darboux 上下和</h4>
+            <p>设 \(M_i=\sup_{[x_{i-1},x_i]}f\)，\(m_i=\inf_{[x_{i-1},x_i]}f\)。Darboux 上和与下和分别定义为：</p>
+            \[U(P,f)=\sum M_i\Delta x_i,\qquad L(P,f)=\sum m_i\Delta x_i.\]
+            <p>显然 \(L(P,f)\le\sigma(P,\{\xi_i\})\le U(P,f)\)。可积性的等价判据（Darboux 准则）：\(f\) 可积 \(\Leftrightarrow\) \(\inf_P U(P,f)=\sup_P L(P,f)\)，等价地：对任意 \(\varepsilon>0\)，存在划分 \(P\) 使 \(U(P,f)-L(P,f)<\varepsilon\)。</p>
+
+            <h4>可积的充分条件</h4>
+            <p>下列 \(f:[a,b]\to\mathbb{R}\) 都 Riemann 可积：</p>
+            <ul>
+              <li><strong>连续函数</strong>：由 Cantor 一致连续定理可证 \(U(P,f)-L(P,f)\) 在 \(|P|\to 0\) 时趋零。</li>
+              <li><strong>单调函数</strong>：单调有界，且每子区间上振幅可控制为 \(f(x_i)-f(x_{i-1})\)。</li>
+              <li><strong>有界且仅有有限个间断点</strong>：在间断点附近用窄子区间隔离，其它部分用连续性处理。</li>
+            </ul>
+
+            <h4>几何意义</h4>
+            <p>当 \(f(x)\ge 0\) 在 \([a,b]\) 上时，\(\int_a^b f(x)dx\) 等于曲线 \(y=f(x)\)、\(x\) 轴及直线 \(x=a,x=b\) 围成的曲边梯形面积。当 \(f\) 取负值时，定积分给出「带号面积」（\(x\) 轴下方记为负）。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>力学功</strong>：变力 \(F(x)\) 把质点沿 \(x\) 轴从 \(a\) 推到 \(b\)，所做功为 \(W=\int_a^b F(x)dx\)。胡克弹簧 \(F=kx\) 拉伸 \(L\) 所需功 \(W=\dfrac{1}{2}kL^2\) 即为定积分的直接计算。</p>
+            <p><strong>概率密度</strong>：连续随机变量 \(X\) 取值落在 \([a,b]\) 内的概率为 \(P(a\le X\le b)=\int_a^b p(x)dx\)，其中 \(p(x)\) 为概率密度函数。归一化条件 \(\int_{-\infty}^{+\infty}p(x)dx=1\)。</p>
+            <p><strong>数值积分</strong>：在工程中精确积分往往无法显式求出，但 Riemann 和的定义直接给出了「梯形法」「Simpson 法」等数值近似方案。计算机用细划分模拟 \(|P|\to 0\) 来逼近积分值，是科学计算的核心工具之一。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：用定义证明 \(\int_0^1 x\,dx=\dfrac{1}{2}\)。</p>
+            <p><em>解答</em>：取等分划分 \(x_i=i/n\)（\(\Delta x_i=1/n\)），样本取右端点 \(\xi_i=i/n\)。Riemann 和 \(\sigma=\sum_{i=1}^n\dfrac{i}{n}\cdot\dfrac{1}{n}=\dfrac{1}{n^2}\sum_{i=1}^n i=\dfrac{1}{n^2}\cdot\dfrac{n(n+1)}{2}=\dfrac{n+1}{2n}\to\dfrac{1}{2}\)（\(n\to\infty\)）。又 \(f(x)=x\) 在 \([0,1]\) 连续故可积，由极限唯一即得 \(\int_0^1 x\,dx=\dfrac{1}{2}\)。</p>
+            <p><strong>例题 2</strong>：判断 Dirichlet 函数 \(D(x)=\begin{cases}1,&x\in\mathbb{Q}\\ 0,&x\notin\mathbb{Q}\end{cases}\) 在 \([0,1]\) 上是否可积。</p>
+            <p><em>解答</em>：每个子区间内既含有理数也含无理数，故 \(M_i=1, m_i=0\)。\(U(P,D)=\sum 1\cdot\Delta x_i=1\)，\(L(P,D)=\sum 0\cdot\Delta x_i=0\)。\(\inf U=1\ne 0=\sup L\)，由 Darboux 准则 \(D\) 不 Riemann 可积。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>把可积条件「连续」当作必要</strong>：仅有有限个间断点的有界函数也可积；连续仅是充分条件。</li>
+              <li><strong>误以为「有界即可积」</strong>：Dirichlet 函数是反例。Riemann 可积要求间断点的「测度有限」（Lebesgue 准则的 Riemann 版本）。</li>
+              <li><strong>忽视 \(\xi_i\) 任取这一要求</strong>：可积性要求 Riemann 和的极限对样本点选法无关；只验证了某种特殊取法（如左端点）的极限存在还不够严格证明可积。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp2">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">下列哪一类函数在闭区间 \([a,b]\) 上一定 Riemann 可积？</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp2', this, true, '正确！连续函数在闭区间上必可积（Riemann 可积充分条件）。')">A. 连续函数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。连续函数在闭区间上必可积（Riemann 可积充分条件）。')">B. 任意有界函数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。连续函数在闭区间上必可积（Riemann 可积充分条件）。')">C. 处处不连续函数</button>
+          <button onclick="checkInlineQuiz('iq-kp2', this, false, '再想想。连续函数在闭区间上必可积（Riemann 可积充分条件）。')">D. 仅可微函数</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP3 ── -->
+    <section id="kp3" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">03</span>微积分基本定理（Newton-Leibniz）</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>到目前为止，「不定积分（求原函数）」与「定积分（求 Riemann 和的极限）」是从两条完全不同的思路发展出来的概念——前者是微分的逆运算，后者是分割求和的极限。它们分别带「\(\int\)」记号绝非偶然：17 世纪 Newton 和 Leibniz 各自独立发现了把这两件事统一起来的桥梁——微积分基本定理（Fundamental Theorem of Calculus, FTC）。</p>
+            <ul>
+              <li><strong>计算的革命</strong>：在 FTC 之前，求 \(\int_0^1 x^2 dx\) 需要切分 \([0,1]\) 计算 \(\sum_{i=1}^n (i/n)^2\cdot(1/n)\) 取极限。FTC 后只要找到一个原函数 \(F(x)=x^3/3\)，立即得 \(F(1)-F(0)=1/3\)。</li>
+              <li><strong>概念的统一</strong>：积分（求和极限）与微分（瞬时变化率）原本看似毫不相关，FTC 揭示二者互为逆运算。</li>
+              <li><strong>变限积分</strong>：FTC 第一形式 \(\dfrac{d}{dx}\int_a^x f(t)dt=f(x)\) 表明：每个连续函数都有原函数（即变限积分本身）。</li>
+            </ul>
+            <p>FTC 是整个微积分大厦的「拱顶石」。它把符号操作（求原函数）与几何/物理量（面积、功、概率）联系成同一计算，从此积分可以被高效计算并广泛应用。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>变限积分函数</h4>
+            <p>设 \(f\) 在 \([a,b]\) 上可积。定义</p>
+            \[F(x)=\int_a^x f(t)\,dt,\quad x\in[a,b].\]
+            <p>由可积性，\(F\) 良定义且在 \([a,b]\) 上连续。这一函数把「积分上限」当作变量，从而把「数」（定积分）转化为「函数」。</p>
+
+            <h4>FTC 第一形式（变限积分的导数）</h4>
+            <p><strong>定理</strong>：若 \(f\) 在 \([a,b]\) 上连续，则 \(F(x)=\int_a^x f(t)dt\) 在 \([a,b]\) 上可导，且</p>
+            \[F'(x)=f(x).\]
+            <p><em>证明思路</em>：由定义 \(F(x+h)-F(x)=\int_x^{x+h}f(t)dt\)。由连续性与积分中值定理，存在 \(\xi\in[x,x+h]\) 使该积分等于 \(f(\xi)\cdot h\)。除以 \(h\) 后令 \(h\to 0\)，由 \(\xi\to x\) 与 \(f\) 连续得 \(F'(x)=\lim_{h\to 0}\dfrac{F(x+h)-F(x)}{h}=f(x)\)。</p>
+            <p><strong>推论</strong>：每个连续函数都有原函数（即 \(F\) 本身）。这是一个非平凡的存在性结论：仅凭可积性还不够，必须连续才能保证变限积分可导。</p>
+
+            <h4>FTC 第二形式（Newton-Leibniz 公式）</h4>
+            <p><strong>定理</strong>：若 \(f\) 在 \([a,b]\) 上连续，\(F\) 是 \(f\) 的任一原函数（\(F'=f\)），则</p>
+            \[\int_a^b f(x)\,dx=F(b)-F(a),\]
+            <p>常记为 \(F(x)\big|_a^b\)。</p>
+            <p><em>证明</em>：令 \(G(x)=\int_a^x f(t)dt\)，由 FTC 第一形式 \(G'=f=F'\)，故 \(G-F\) 是常数，记为 \(C\)。代入 \(x=a\)：\(G(a)=0=F(a)+C\)，得 \(C=-F(a)\)。代入 \(x=b\)：\(G(b)=F(b)-F(a)\)，即 \(\int_a^b f dx=F(b)-F(a)\) ✓。</p>
+
+            <h4>复合变限积分（链式法则结合）</h4>
+            <p>若 \(\Phi(x)=\int_{u(x)}^{v(x)}f(t)dt\) 且 \(f\) 连续，\(u,v\) 可导，则</p>
+            \[\Phi'(x)=f(v(x))v'(x)-f(u(x))u'(x).\]
+            <p>这是 FTC 第一形式与链式法则的组合应用，处理上下限均为函数的复杂情形。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>位置-速度-加速度</strong>：已知速度 \(v(t)\)，从 \(t_1\) 到 \(t_2\) 的位移为 \(s(t_2)-s(t_1)=\int_{t_1}^{t_2}v(t)dt\)。这是 FTC 在运动学中最直接的体现：通过 \(v\) 的原函数（位置）的端点差恢复总位移。</p>
+            <p><strong>累积与瞬时的对偶</strong>：经济学中，总收益等于边际收益的累积积分；总产量等于产率的累积积分。FTC 让我们既可以从瞬时率推累积量（积分），也可以从累积量推瞬时率（求导），这种「互逆」是动态分析的核心。</p>
+            <p><strong>概率论的累积分布</strong>：连续随机变量的概率密度 \(p(x)\) 与累积分布函数 \(P(x)=\int_{-\infty}^x p(t)dt\) 满足 \(P'(x)=p(x)\)（FTC 第一形式）。这把「密度」与「分布」联系成一对互逆的描述。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1</strong>：求 \(\int_1^2 \dfrac{1}{x}dx\)。</p>
+            <p><em>解答</em>：\(F(x)=\ln|x|=\ln x\)（\(x>0\)）。由 Newton-Leibniz \(\int_1^2\dfrac{1}{x}dx=\ln 2-\ln 1=\ln 2\approx 0.693\)。这是自然对数的几何意义之一：\(\ln a\) 等于双曲线 \(y=1/x\) 在 \([1,a]\) 下方的面积。</p>
+            <p><strong>例题 2</strong>：设 \(\Phi(x)=\int_x^{x^2}\sin t\,dt\)，求 \(\Phi'(x)\)。</p>
+            <p><em>解答</em>：上下限均为 \(x\) 的函数，\(u(x)=x,v(x)=x^2\)。由复合变限积分公式：</p>
+            \[\Phi'(x)=\sin(x^2)\cdot 2x-\sin x\cdot 1=2x\sin(x^2)-\sin x.\]
+            <p>验证特殊值：\(\Phi(0)=\int_0^0\sin t\,dt=0\)，\(\Phi'(0)=0-0=0\) ✓。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>用 NL 公式时忘记验证 \(F'=f\) 在整个 \([a,b]\) 上成立</strong>：例如 \(\int_{-1}^1\dfrac{1}{x^2}dx\) 看似 \(\left(-\dfrac{1}{x}\right)\big|_{-1}^1=-2\)，实际上 \(1/x^2\) 在 \(0\) 处无界，\(F=-1/x\) 在 \([-1,1]\) 上不连续，NL 公式不适用。</li>
+              <li><strong>变限积分求导忘乘上限的导数</strong>：\(\dfrac{d}{dx}\int_a^{x^2}f(t)dt=f(x^2)\cdot 2x\)，常见错误只写 \(f(x^2)\)。</li>
+              <li><strong>把 NL 公式 \(F(b)-F(a)\) 写反成 \(F(a)-F(b)\)</strong>：约定积分从下限到上限，故是「上限值减下限值」。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp3">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">求 \(\dfrac{d}{dx}\int_0^x\sqrt{1+t^4}\,dt\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。FTC 第一形式：直接将上限 \\(x\\) 代入被积函数。')">A. \(\sqrt{1+x^2}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, true, '正确！FTC 第一形式：直接将上限 \\(x\\) 代入被积函数。')">B. \(\sqrt{1+x^4}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。FTC 第一形式：直接将上限 \\(x\\) 代入被积函数。')">C. \(\dfrac{4x^3}{2\sqrt{1+x^4}}\)</button>
+          <button onclick="checkInlineQuiz('iq-kp3', this, false, '再想想。FTC 第一形式：直接将上限 \\(x\\) 代入被积函数。')">D. \(0\)</button>
+        </div>
+      </div>
+    </section>
+
+    <hr class="kp-separator">
+
+
+    <!-- ── KP4 ── -->
+    <section id="kp4" class="kp-section">
+      <h2 class="kp-title"><span class="kp-number">04</span>换元积分法与分部积分法</h2>
+      <div class="mental-chain">
+        <div class="step-card step-motivation">
+          <div class="step-label">🎯 为什么研究这个问题</div>
+          <div class="step-body">
+            <p>有了基本积分公式表和 Newton-Leibniz 公式，理论上可以计算所有原函数已知的积分。但实际遇到的被积函数往往不是表中标准形式，例如 \(\int 2x\cos(x^2)dx\)、\(\int x e^x dx\)、\(\int\sqrt{1-x^2}dx\)，它们不属于表中任何一项。我们需要把「复杂被积函数」化归为「公式表中的标准形式」的系统方法。</p>
+            <ul>
+              <li><strong>换元法（变量代换）</strong>：链式法则的逆用。当被积函数含「函数嵌函数」结构时，引入新变量把内层「剥离」。</li>
+              <li><strong>分部积分法</strong>：乘积求导法则的逆用。当被积函数是两类不同函数（如多项式 × 指数、对数、三角）的乘积时，把求导责任在两个因子之间转移。</li>
+              <li><strong>实战工具</strong>：换元和分部是定积分计算中应用最广的两个技巧，几乎每道复杂积分题都会用到一次以上。</li>
+            </ul>
+            <p>掌握这两个方法，意味着掌握了把「未知积分」转化为「已知积分」的两大通用策略。它们与基本公式表配合，几乎涵盖了大学微积分课程中的所有积分计算。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-derivation">
+          <div class="step-label">📐 公式推导 / 模型建立</div>
+          <div class="step-body">
+            <h4>第一换元法（凑微分法）</h4>
+            <p>由链式法则 \(\dfrac{d}{dx}F(g(x))=F'(g(x))g'(x)=f(g(x))g'(x)\)，反向运用得：</p>
+            \[\int f(g(x))g'(x)\,dx=\int f(u)\,du\Big|_{u=g(x)}=F(g(x))+C.\]
+            <p>核心技巧是把被积函数中的 \(g'(x)dx\) 整体识别为 \(du\)。例如 \(\int 2x\cos(x^2)dx\)，识别 \(u=x^2,du=2x\,dx\)，原式化为 \(\int\cos u\,du=\sin u+C=\sin(x^2)+C\)。</p>
+
+            <h4>第二换元法（参变量代换）</h4>
+            <p>当被积函数含有 \(\sqrt{1-x^2}\)、\(\sqrt{1+x^2}\)、\(\sqrt{x^2-1}\) 等结构时，常引入三角函数代换：</p>
+            \[\sqrt{1-x^2}\to x=\sin t,\quad \sqrt{1+x^2}\to x=\tan t,\quad \sqrt{x^2-1}\to x=\sec t.\]
+            <p>设 \(x=\varphi(t)\) 单调可导，则 \(dx=\varphi'(t)dt\)，</p>
+            \[\int f(x)\,dx=\int f(\varphi(t))\varphi'(t)\,dt.\]
+            <p>计算后再用反代换 \(t=\varphi^{-1}(x)\) 回到原变量。定积分换元须同步改积分上下限：若 \(x:a\to b\) 对应 \(t:\alpha\to\beta\)，则 \(\int_a^b f(x)dx=\int_\alpha^\beta f(\varphi(t))\varphi'(t)dt\)。</p>
+
+            <h4>分部积分法</h4>
+            <p>由乘积求导 \((uv)'=u'v+uv'\)，两边积分得：</p>
+            \[\int u\,dv=uv-\int v\,du.\]
+            <p>使用步骤：把被积函数分成 \(u\) 与 \(dv\) 两部分；由 \(dv\) 求出 \(v\)（积分），由 \(u\) 求出 \(du\)（求导）；代入公式后，期望右边的 \(\int v\,du\) 比原积分简单。</p>
+            <p><strong>LIATE 选 \(u\) 法则</strong>：按优先级 Logarithm（对数）、Inverse trig（反三角）、Algebraic（多项式）、Trigonometric（三角）、Exponential（指数）选取 \(u\)，剩下的归入 \(dv\)。</p>
+
+            <h4>典型分部积分例</h4>
+            <p><strong>多项式 × 指数</strong>：\(\int xe^x dx\)，取 \(u=x,dv=e^x dx\)，\(du=dx,v=e^x\)。</p>
+            \[\int xe^x dx=xe^x-\int e^x dx=(x-1)e^x+C.\]
+            <p><strong>对数函数</strong>：\(\int\ln x\,dx\)，取 \(u=\ln x,dv=dx\)，\(du=\dfrac{dx}{x},v=x\)。</p>
+            \[\int\ln x\,dx=x\ln x-\int 1\,dx=x\ln x-x+C.\]
+            <p><strong>循环型</strong>：\(I=\int e^x\sin x\,dx\)，两次分部后回到 \(I\) 自身，解方程得 \(I=\dfrac{e^x(\sin x-\cos x)}{2}+C\)。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-application">
+          <div class="step-label">🌐 实际应用</div>
+          <div class="step-body">
+            <p><strong>波形傅里叶分析</strong>：傅里叶级数系数 \(a_n=\dfrac{1}{\pi}\int_{-\pi}^{\pi}f(x)\cos(nx)dx\) 在很多波形（如方波 \(\cdot\) 三角波）上都需要分部积分，特别是被积函数为多项式 × 三角函数的形式。</p>
+            <p><strong>概率分布的矩</strong>：指数分布 \(p(x)=\lambda e^{-\lambda x}\) 的均值 \(E[X]=\int_0^\infty x\lambda e^{-\lambda x}dx=1/\lambda\) 与方差均依赖分部积分计算。Gamma 分布、Beta 分布的归一化常数也需要类似技巧。</p>
+            <p><strong>数学物理方程</strong>：在求解热传导、波动方程时，常用换元 \(\xi=x-ct\) 把 PDE 化为 ODE。Laplace 变换 \(\mathcal{L}[f](s)=\int_0^\infty e^{-st}f(t)dt\) 中处理 \(f(t)=t^n,e^{at},\sin(\omega t)\) 都需要分部积分。</p>
+          </div>
+        </div>
+
+        <div class="step-card step-example">
+          <div class="step-label">✏️ 例题分析与易错点</div>
+          <div class="step-body">
+            <p><strong>例题 1（凑微分）</strong>：求 \(\int\dfrac{x}{1+x^2}dx\)。</p>
+            <p><em>解答</em>：注意到分子 \(x\,dx\) 恰为分母 \(1+x^2\) 微分的一半。令 \(u=1+x^2,du=2x\,dx\)。原式 \(=\dfrac{1}{2}\int\dfrac{du}{u}=\dfrac{1}{2}\ln|u|+C=\dfrac{1}{2}\ln(1+x^2)+C\)。</p>
+            <p><strong>例题 2（三角代换）</strong>：求 \(\int\sqrt{1-x^2}dx\)（\(|x|\le 1\)）。</p>
+            <p><em>解答</em>：令 \(x=\sin t,t\in[-\pi/2,\pi/2]\)，\(dx=\cos t\,dt\)，\(\sqrt{1-x^2}=\cos t\)。原式 \(=\int\cos^2 t\,dt=\int\dfrac{1+\cos 2t}{2}dt=\dfrac{t}{2}+\dfrac{\sin 2t}{4}+C\)。回代 \(t=\arcsin x,\sin 2t=2\sin t\cos t=2x\sqrt{1-x^2}\)：原式 \(=\dfrac{\arcsin x}{2}+\dfrac{x\sqrt{1-x^2}}{2}+C\)。</p>
+            <p><strong>例题 3（分部）</strong>：求 \(\int x^2\cos x\,dx\)。</p>
+            <p><em>解答</em>：取 \(u=x^2,dv=\cos x\,dx\)，则 \(du=2x\,dx,v=\sin x\)。原式 \(=x^2\sin x-2\int x\sin x\,dx\)。再对 \(\int x\sin x\,dx\) 分部（\(u=x,dv=\sin x\,dx\)）：\(=-x\cos x+\sin x+C_1\)。合并 \(\int x^2\cos x\,dx=x^2\sin x+2x\cos x-2\sin x+C\)。</p>
+            <p><strong>常见错误</strong>：</p>
+            <ul>
+              <li><strong>定积分换元忘改上下限</strong>：\(\int_0^1(x+1)^{10}dx\) 换 \(u=x+1\) 后，上下限须改为 \(1\to 2\)，否则结果完全错误。</li>
+              <li><strong>三角代换后忘记反代换回 \(x\)</strong>：不定积分的最终答案必须用原变量 \(x\) 表示，不能停在 \(t\) 形式。</li>
+              <li><strong>分部积分选 \(u, dv\) 不当</strong>：例如 \(\int xe^x dx\) 若取 \(u=e^x,dv=x\,dx\)，会得到 \(\dfrac{x^2 e^x}{2}-\dfrac{1}{2}\int x^2 e^x dx\)，新积分更复杂。LIATE 法则可避免此类错误。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="inline-quiz" id="iq-kp4">
+        <div class="iq-header">⚡ 快速检测</div>
+        <div class="iq-prompt">用分部积分求 \(\int xe^x dx\)。</div>
+        <div class="iq-options">
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。取 \\(u=x,dv=e^x dx\\)，得 \\((x-1)e^x+C\\)。')">A. \(xe^x+C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, true, '正确！取 \\(u=x,dv=e^x dx\\)，得 \\((x-1)e^x+C\\)。')">B. \((x-1)e^x+C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。取 \\(u=x,dv=e^x dx\\)，得 \\((x-1)e^x+C\\)。')">C. \(\dfrac{x^2}{2}e^x+C\)</button>
+          <button onclick="checkInlineQuiz('iq-kp4', this, false, '再想想。取 \\(u=x,dv=e^x dx\\)，得 \\((x-1)e^x+C\\)。')">D. \(e^x+C\)</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="exercises" class="exercises-section">
+      <h2>🧩 综合练习</h2>
+      <div id="quiz-zone"></div>
+    </section>
+
+    <nav class="chapter-nav">
+      <a href="ch03.html" class="nav-prev">← Ch.3 微分中值定理与应用</a>
+      <a href="../calculus.html" class="nav-overview">📋 概览</a>
+      <a href="ch05.html" class="nav-next">Ch.5 积分应用与反常积分 →</a>
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <span>Mathematica · 数学全景</span>
+  </footer>
+
+  <script src="../../../shared/storage.js"></script>
+  <script src="../../../shared/components.js"></script>
+  <script>
+    const MODULE_ID = "calculus-ch04";
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof renderQuiz === 'function') {
+        renderQuiz(QUESTIONS, document.getElementById('quiz-zone'));
+      }
+    });
+  </script>
+</body>
+</html>
